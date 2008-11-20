@@ -1,1 +1,0 @@
-a:2:{s:4:"time";d:1227080056.94989299774169921875;s:4:"data";a:5:{s:7:"user_id";i:1;s:9:"user_name";s:5:"admin";s:13:"user_password";s:98:"fece0df1b42f0e0::9b277eddc7643c7::7b221c37ef63b9eb780b0082541a27e75bab150068f1837d0a123d9779e95343";s:10:"user_email";N;s:15:"user_allowlogin";s:1:"0";}}
