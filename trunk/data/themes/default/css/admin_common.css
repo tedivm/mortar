@@ -1,0 +1,280 @@
+body {
+	font-family:Arial;
+	font-size:12px;
+}
+td { 
+	font-family:Arial;
+	font-size:12px; 
+}
+a:hover {
+	text-decoration:underline;
+}
+.js_link {
+	text-decoration:underline;
+	cursor:pointer;
+}
+.box {
+	position:absolute;
+	min-width:600px;
+	width:100%;
+}
+.relative_box {
+	position:relative;
+	top:0px; left:0px;
+}
+#header {
+	border: solid #000000 1px;
+	margin-bottom:10px;
+	height:70px;
+	width:100%;
+}	
+#logo {
+	margin:5px;
+}
+#ajax_loading {
+	position:absolute;
+	top:25px;
+	left:150px;
+}
+.admin_table {
+	float:left;
+	padding:0px;
+	width:100%;
+}
+.admin_table_border {
+	border: solid #bbc5d9 1px;
+	border-top-width:1px;	
+	width:20%;
+}
+.admin_table_mid {
+	width:10px;
+}
+.admin_table_border_right {
+	width:80%;
+	border: solid #bbc5d9 1px;	
+	background: url(../images/pale_blue_back.gif) repeat-y;
+}
+#menu {
+	width:100%;
+}
+#content {
+	float:left;
+	min-height:300px;
+	padding:10px;
+	width:99%
+}
+#footer {
+	float:left;
+	left:10px;
+	height:auto;
+	width:100%;
+	text-align:center;
+	border: solid #000000 1px;
+	margin-top:10px;
+	padding-top:5px;
+	padding-bottom:5px;
+}
+p {
+	padding:0px;
+	padding-left:3px;
+}
+.basic  {
+	width: 200px;
+	font-family: Arial;
+}
+.basic div {
+	background-color: #ffffff;
+	font-size: 12px;
+	padding:10px;
+	padding-top:3px;
+	padding-bottom:3px;
+}
+.basic p {
+	margin-bottom : 10px;
+	border: none;
+	text-decoration: none;
+	font-weight: bold;
+	font-size: 10px;
+	margin: 0px;
+	padding: 10px;
+}
+.basic a {
+	cursor:pointer;
+	display:block;
+	padding:5px;
+	margin-top: 0;
+	text-decoration: none;
+	font-weight: bold;
+	background: url(../images/loc_label.gif) repeat-x;
+	margin-bottom:3px;
+	border:solid #8e8e8e 0px;
+	border-bottom-width:1px;
+	border-top-width:1px;
+}
+.result_target {
+	position:absolute;
+	top:10px;
+	left:800px;
+	height:10px;
+	width:10px;	
+	z-index:10;
+}
+.result_target_frame {
+	height:10px;
+	width:10px;	
+	border:hidden;
+}
+.actions {
+	cursor:pointer;
+	padding-bottom:4px;
+}
+.mod_actions {
+	padding-top:0px;
+	padding:10px;
+}
+.mod_header{
+	cursor:pointer;
+	font-weight:bold;
+	background: url(../images/loc_label.gif) repeat-x;
+	height:20px;
+	width:200px;
+	border:solid #8e8e8e 0px;
+	border-bottom-width:1px;
+	border-top-width:1px;
+	margin-bottom:3px;
+}
+.container{
+	width:100%;
+}
+.location_box {
+	width:95%;
+	border:1px #8e8e8e solid;
+	margin-bottom:5px;	
+	float:left;
+	background: url(../images/loc_label.gif) repeat-x;
+}
+.group_title_scroll{
+	height:80px;
+	overflow-y:auto;
+	overflow-x:hidden;
+}
+.sub_locations_box {
+	padding:5px;	
+}
+.location_title{
+	position:relative;
+	font-weight:bold;
+	left:5px;
+	top:2px;
+	width:100%;
+	cursor:pointer;
+	height:16px;
+}
+.group_box {
+	width:180px;
+	height:110px;
+	margin:10px;
+	margin-top:20px;
+	margin-bottom:10px;
+	padding:5px;
+	border:1px #8e8e8e solid;
+	float:left;
+}
+.group_box_container{
+	display:none;
+}
+.hide{
+	display:none;
+}
+.drag {
+	position:relative;
+	float:left;
+	border:#C0C0C0 1px solid;
+	cursor:pointer;
+	margin:2px;
+}
+.sec_edit {
+	position:absolute;
+	top:0px;
+	right:40px;
+	z-index:2;
+}
+.field_box {
+	position:relative;
+	top:0px; left:0px;
+	width:95%;
+	margin-right:30px;
+	padding:0px;
+}
+ul.testlist { 
+	list-style-type:none;
+	margin:0;
+	padding:0;
+}
+ul.testlist input { 
+	position:relative;
+	left:-8px;
+	top:0px;
+}
+ul.testlist select { 
+	position:relative;
+	left:-8px;
+	top:0px;
+}
+ul.testlist li {
+	font:12px Verdana;
+	padding:8px;
+	cursor:move;
+}
+ul.testlist li.over {
+	background-color:#fcb;
+}
+ul.testlist li img {
+	float:left;
+	margin-right:8px;
+}
+.return {
+	clear:left;	
+}
+.js_edit {
+	cursor:pointer;	
+}
+#cf_editor_box {
+	display:none;
+	position:absolute;
+	right:10px;
+	top:10px;
+	width:280px;
+	height:450px;
+	overflow:hidden;
+	border:#000000 4px ridge;
+	background:url(../images/50gray.png) repeat;
+	padding:10px;
+	z-index:500;
+}
+#cf_editor {
+	overflow-y:auto;
+	height:400px;	
+	width:100%;
+}
+.json_edit {
+	width:200px;
+}
+.pair_box {
+	border:#C0C0C0 1px solid;
+	margin:2px;	
+	padding:4px;
+	width:100%;
+}
+.edit_field_box {
+	border:1px #C0C0C0 solid;
+	margin:0px;
+	margin-top:10px;
+	padding:0px;
+	width:250px;
+}
+.editor_title {
+	color:#000000;
+	font-weight:bold;
+	font-size:14px;
+}
