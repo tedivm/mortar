@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+
+	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+
+<link href='{# theme_path #}css/all.css' rel='stylesheet' type='text/css'/>
+<link href='{# theme_path #}css/jquery.cluetip.css' rel='stylesheet' type='text/css'/>
+
+<script type="text/javascript" src="{# javascript_path #}jquery.1.2.6.min.js"></script>
+<script type="text/javascript" src="{# javascript_path #}jquery.ui-1.6b.min.js"></script>
+<script type="text/javascript" src="{# javascript_path #}jquery.metadata.min.js"></script>
+<script type="text/javascript" src="{# javascript_path #}jquery.dimensions.min.js"></script>
+
+<script type="text/javascript" src="{# javascript_path #}jquery.form.min.js"></script>
+<script type="text/javascript" src="{# javascript_path #}jquery.validate.min.js"></script>
+
+<script type="text/javascript" src="{# javascript_path #}jquery.validate-methods.min.js"></script>
+<script type="text/javascript" src="{# javascript_path #}jquery.cluetip.min.js"></script>
+
+
+
+<script>
+
+$(function(){
+	
+	
+// left column animation	
+	$('#left-column > div > h3').click(function (event) {
+		var $target = $(event.target);
+		if( $target.is("h3") ) 
+		{
+			$navfields = $target.parent().children('ul.nav');
+			if($navfields.is(':hidden'))
+			{
+				$navfields.show("slide", {direction: "up"}, 850);
+			}else{
+				$navfields.hide("slide", {direction: "up"}, 650);
+			}
+		}
+	});
+
+	
+	$('#installation').validate({	
+		
+		
+		meta: "validation",
+	
+		errorPlacement: function(error, element) {
+			
+			label = element.prev("label");
+			errorMessage = label.attr('title') + '|' + error.text();
+			label.attr('title', errorMessage).cluetip({splitTitle: '|', showTitle: false})  ; //bt({cssClass:'applesauce'});
+		},
+			
+		highlight: function(element, errorClass) {
+			$(element.form).find("label[for=" + element.id + "]").addClass('formError');
+		},
+			
+		unhighlight: function(element, errorClass) {
+			$(element.form).find("label[for=" + element.id + "].formError").removeClass('formError').removeAttr('title').unbind(); //bt({remove: true});
+		}
+		
+	});
+});
+
+</script>
+
+</head>
+<body>
+<div id="main">
+
+	<div id="header">
+	
+		<!-- logo -->
+		<a href="index.html" class="logo"><img src="{# theme_path #}img/logo.gif" width="101" height="29" alt="" /></a>
+		
+		{# navtabs #}
+		
+		<!-- tabs -->
+    <ul id="top-navigation">
+        <li class="active">
+            <span>
+                <span>
+                    <a href="#">
+                        Installer
+                    </a>
+                </span>
+            </span>
+        </li>
+    </ul>
+
+		<!-- tabs -->
+
+	</div> <!-- #main -->
+
+	
+	<div id="middle">
+	
+    <div id="left-column">
+    
+        <div>
+            <h3>
+                Cache
+            </h3>
+            <ul class="nav">
+                <li class="last">
+                    <a href="http://localhost/Bento/index.php?engine=Admin&amp;action=CacheSettings&amp;package=BentoBase">
+                        Settings
+                    </a>
+                </li>
+            </ul>
+        </div>
+    
+        <div>
+            <h3>
+                Configuration
+            </h3>
+            <ul class="nav">
+                <li>
+                    <a href="http://localhost/Bento/index.php?engine=Admin&amp;action=DatabaseSettings&amp;package=BentoBase">
+                        Database Connections
+                    </a>
+                </li>
+                <li class="last">
+                    <a href="http://localhost/Bento/index.php?engine=Admin&amp;action=GeneralSettings&amp;package=BentoBase">
+                        System Settings
+                    </a>
+                </li>
+            </ul>
+        </div>
+    
+        <div>
+            <h3>
+                User
+            </h3>
+            <ul class="nav">
+                <li>
+                    <a href="http://localhost/Bento/index.php?engine=Admin&amp;action=LogIn&amp;package=BentoBase">
+                        Log In
+                    </a>
+                </li>
+                <li class="last">
+                    <a href="http://localhost/Bento/index.php?engine=Admin&amp;action=LogOut&amp;package=BentoBase">
+                        Log Out
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+    </div>	<!-- left-column -->
+	
+	
+		
+		
+		<div id="center-column">
+			{# content #}
+		</div>
+		
+		<!--
+		<div id="right-column">
+			<strong class="h">INFO Header</strong>
+			<div class="box">Into Text</div>
+	  </div>
+	 -->
+	  
+	</div>
+	<div id="footer"></div>
+</div>
+
+
+</body>
+</html>

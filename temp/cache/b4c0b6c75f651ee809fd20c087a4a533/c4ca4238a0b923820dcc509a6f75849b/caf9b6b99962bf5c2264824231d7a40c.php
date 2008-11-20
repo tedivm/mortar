@@ -1,0 +1,1 @@
+a:2:{s:4:"time";d:1227080056.2068328857421875;s:4:"data";a:6:{s:8:"parentId";N;s:2:"id";i:1;s:8:"resource";s:9:"directory";s:4:"name";s:4:"root";s:8:"inherits";b:1;s:6:"siteId";N;}}
