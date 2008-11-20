@@ -1,0 +1,12 @@
+Options FollowSymLinks
+RewriteEngine On
+RewriteBase /Bento/
+# If the file is real, skip this rule
+RewriteCond %{REQUEST_FILENAME} !-f  
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*) index.php?parameters=$1 [L]
+
+<Files ~ "\.sqlite$">  
+    Order allow,deny  
+    Deny from all  
+</Files>  
