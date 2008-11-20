@@ -1,6 +1,12 @@
 Options FollowSymLinks
 RewriteEngine On
-RewriteBase /Bento/
+
+# So far this is the only manual change that needs to be made:
+# RewriteBase /URL/PATH/TO/INSTALL/
+RewriteBase /BentoBase/
+
+
+
 # If the file is real, skip this rule
 RewriteCond %{REQUEST_FILENAME} !-f  
 RewriteCond %{REQUEST_FILENAME} !-d
