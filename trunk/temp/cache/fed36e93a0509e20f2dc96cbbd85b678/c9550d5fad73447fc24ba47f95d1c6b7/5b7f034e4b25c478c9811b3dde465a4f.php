@@ -1,1 +1,0 @@
-a:2:{s:4:"time";d:1227162949.2427709102630615234375;s:4:"data";a:5:{s:10:"theme_path";a:0:{}s:4:"head";a:0:{}s:7:"navtabs";a:0:{}s:6:"navbar";a:0:{}s:7:"content";a:0:{}}}

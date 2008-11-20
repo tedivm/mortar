@@ -1,1 +1,0 @@
-a:2:{s:4:"time";d:1227080051.238871097564697265625;s:4:"data";a:7:{s:4:"Name";s:6:"System";s:2:"ID";i:1;s:7:"Package";s:9:"BentoBase";s:13:"PathToPackage";s:76:"/Volumes/tedivm/ProgrammingProjects/Bento/BentoBase/trunk/modules/BentoBase/";s:10:"locationId";i:5;s:6:"siteId";N;s:8:"settings";a:1:{s:0:"";N;}}}

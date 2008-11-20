@@ -1,1 +1,0 @@
-a:2:{s:4:"time";d:1227080027.35031604766845703125;s:4:"data";a:7:{i:0;s:4:"Read";i:1;s:3:"Add";i:2;s:4:"Edit";i:3;s:6:"Delete";i:4;s:7:"Execute";i:5;s:5:"Admin";i:6;s:6:"System";}}
