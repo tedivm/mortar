@@ -1,2 +1,2 @@
-Congratulations on your installtion of BentoBase.
+Congratulations on your installation of BentoBase.
 
