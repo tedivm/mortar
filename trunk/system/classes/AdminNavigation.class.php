@@ -28,10 +28,11 @@ Class AdminNavigation
 			foreach($packages as $package => $modules)
 			{
 				
-				$packageInfo = new PackageInfo($package);
+				if(!$packageInfo[$package]  instanceof PackageInfo)
+					$packageInfo[$package] = new PackageInfo($package);
 				
-				if(is_array($packageInfo->actions))
-				foreach($packageInfo->actions as $name => $action)
+				if(is_array($packageInfo[$package]->actions))
+				foreach($packageInfo[$package]->actions as $name => $action)
 				{
 					if($action['engineSupport']['Admin']['settings']['linkLabel'] && $action['engineSupport']['Admin']['settings']['linkTab'])
 					{
@@ -49,7 +50,7 @@ Class AdminNavigation
 						
 						if($action['type'] == 'genericPackage')
 						{
-							$url->package = $packageInfo->name;
+							$url->package = $packageInfo[$package]->getName();
 						}elseif($action['type'] == 'specificModule'){
 							
 						}
