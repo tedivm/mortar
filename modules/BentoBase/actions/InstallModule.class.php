@@ -11,6 +11,7 @@ class BentoBaseActionInstallModule extends PackageAction
 									
 	protected $form;
 	protected $packageCount = array();
+	protected $packageList;
 	
 	protected function logic()
 	{
@@ -29,13 +30,10 @@ class BentoBaseActionInstallModule extends PackageAction
 			
 			$this->packageCount = $packageCount;
 			
-			'SELECT mod_package, COUNT(*) FROM `modules` GROUP BY mod_package';
-			$packages = new PackageList();
+
+			$this->packageList = new PackageList();
 			
 			
-			
-			
-			//list packages
 		}else{
 			
 			// make form
@@ -56,6 +54,35 @@ class BentoBaseActionInstallModule extends PackageAction
 	
 	public function viewAdmin()
 	{
+		$template = $this->loadTemplate('adminInstallModuleListing');
+		$packageList = $this->packageList->getPackageDetails();
+		$output .= '';
+		foreach($packageList as $packageInfo)
+		{
+			$packageHtml = new DisplayMaker();
+			$packageHtml->set_display_template($template);
+			/* description name link_to_install */
+			
+			$name = $packageInfo->getMeta('name');
+			$packageHtml->addContent('name', $name);
+			
+			$description = $packageInfo->getMeta('description');
+			$packageHtml->addContent('description', $description);
+			
+			$version = $packageInfo->getMeta('version');
+			$packageHtml->addContent('version', $version);
+			
+			
+			$url = $this->linkToSelf();
+			$url->property('id', $packageInfo->getMeta('name'));
+			$packageHtml->addContent('link_to_install', (string) $url);
+			
+			$output .= $packageHtml->make_display(true);
+		}
+		
+		
+		return $output;
+		
 		
 	}
 	

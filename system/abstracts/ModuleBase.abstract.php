@@ -45,7 +45,7 @@ abstract class ModuleBase
 			return file_get_contents($template_path);
 		
 		$template_path = $config['path']['packages'] . $this->package . '/templates/' . $name .'.template.php';
-		
+
 		if(file_exists($template_path))
 			return file_get_contents($template_path);
 				

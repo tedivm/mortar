@@ -7,7 +7,7 @@ class PackageInfo
 	public $path;
 	public $actions;
 	public $installedModules;
-	
+	protected $meta;
 	
 	public function __construct($packageName)
 	{
@@ -123,11 +123,32 @@ class PackageInfo
 			$cache->store_data($info);
 
 		}
-		
+
+		$this->path = $info['path'] . '/';
 		$this->actions = $info['actions'];
 		$this->installedModules = $info['installedModules'];
+		$this->loadMeta();
 		
-		
+	}
+	
+	public function getPath()
+	{
+		$this->path;
+	}
+	
+	public function getName()
+	{
+		return $this->name;
+	}
+	
+	public function getActions()
+	{
+		return $this->actions;
+	}
+	
+	public function getMeta($name)
+	{
+		return $this->meta[$name];
 	}
 	
 	public function checkAuth($action)
@@ -149,7 +170,21 @@ class PackageInfo
 	}
 
 	
-	
+	protected function loadMeta()
+	{
+		$metaPath = $this->path . 'meta.php';
+
+		if(is_readable($metaPath))
+		{
+			include $metaPath;
+			
+			$meta['name'] = $packageName;
+			$meta['version'] = $version;
+			$meta['description'] = $description;
+			$this->meta = $meta;
+			
+		}
+	}
 	
 	
 	
