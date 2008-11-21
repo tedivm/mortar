@@ -81,25 +81,6 @@ spl_autoload_register('autoloadLibrary');
 spl_autoload_register('autoloadMain');
 spl_autoload_register('autoloadError');
 
-function load_package_info($package, $id = 0)
-{
-	$class = $package . 'Info';
-	if(!class_exists($class, false))
-	{
-		$config = Config::getInstance();
-		if(!@include($config['path']['packages'] . $package . '/info.php'))
-			return false;
-	}
-
-	if($id != 0)
-	{
-		return new $class($id);
-	}else{
-		return new $class();
-	}
-
-}
-
 function load_helper($package, $class)
 {
 	$config = Config::getInstance();
