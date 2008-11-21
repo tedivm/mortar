@@ -5,6 +5,7 @@ abstract class Action extends ModuleBase
 	static $requiredPermission = 'Read';
 	protected $permissions;
 	protected $engineHelper;
+	protected $actionName;
 	
 	public function __construct($modId)
 	{
@@ -19,16 +20,20 @@ abstract class Action extends ModuleBase
 		
 		$pathToEngineHelper = $config['path']['engines'] . $config['engine'] . '.engineHelper.php';
 
-		$className = $config['engine'] . 'Helper';
+		$helperClassName = $config['engine'] . 'Helper';
 		
-		if(!class_exists($className, false) && file_exists($pathToEngineHelper))
+		if(!class_exists($helperClassName, false) && file_exists($pathToEngineHelper))
 			include($pathToEngineHelper);
 			
-		if(class_exists($className, false))
-			$this->engineHelper = new $className();
+		if(class_exists($helperClassName, false))
+			$this->engineHelper = new $helperClassName();
 
+		$this->actionName = array_pop(explode('Action', get_class($this)));
+			
 		if(method_exists($this, 'logic'))
-			$this->logic();		
+			$this->logic();
+			
+			
 	}
 	
 	public function check_auth()
@@ -58,7 +63,14 @@ abstract class Action extends ModuleBase
     	return $this->permissions->is_allowed($action);
     }
     
-    
+    protected function linkToSelf()
+    {
+    	
+    	$url = new Url();
+    	$url->property('module', $this->moduleId);
+    	$url->property('action', $this->actionName);
+    	return $url;
+    }
    
     
     
@@ -90,13 +102,22 @@ abstract class PackageAction extends Action
 		$this->startUp();
 	}	
 	
-    public function isAllowed($action)
-    {
-        $user = ActiveUser::get_instance();
-        $packageInfo = new PackageInfo($this->package);
-        
-        return $packageInfo->checkAuth($action);
-    }	
+    
+	public function isAllowed($action)
+	{        
+		$user = ActiveUser::get_instance();
+		$packageInfo = new PackageInfo($this->package);
+		return $packageInfo->checkAuth($action);
+	}
+
+	protected function linkToSelf()
+	{
+		$url = new Url();
+		$url->property('package', $this->package);
+    	$url->property('action', $this->actionName);
+		return $url;
+	}
+
 }
 
 ?>
