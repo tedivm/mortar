@@ -30,10 +30,8 @@ class Config implements ArrayAccess
 {
 	// $instance holds a single instance of the object
 
-	static $instance ;
+	static $instance;
 	protected $config = array();
-	protected $group_delimiter = "/";
-	protected $pair_delimiter = "-";
 	public $error = false;
 
 		

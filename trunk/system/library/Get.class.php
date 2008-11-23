@@ -96,37 +96,42 @@ class Get extends Post
 			
 			
 			// if the directory exists but the module isn't set, check to see if there is a default
-			if(!isset($moduleInfo) && isset($currentLocation) && ($currentLocation->resource == 'directory' || $currentLocation->resource == 'site') && is_numeric($currentLocation->meta('default')))
+			if(!isset($moduleInfo) && !isset($this->variables['package']) && (($currentLocation->resource == 'directory' || $currentLocation->resource == 'site') && is_numeric($currentLocation->meta('default'))))
 			{
-				$moduleInfo = new ModuleInfo($currentLocation->meta('default'));	
-			}			
-				
+				$moduleInfo = new ModuleInfo($currentLocation->meta('default'));
+			}
+			
+			
 			
 			// Map any remaining path variables to their respective name
 			if(isset($moduleInfo))
 			{
 				$this->variables['moduleId'] = $moduleInfo['ID'];
-				
-				if(count($pathVariables) > 0)
-				{
-					$template = new DisplayMaker();
-					$template->load_template('url', $moduleInfo['Package']);
-						
-					if(!$template->load_template('url', $moduleInfo['Package']))
-					{
-						$template->set_display_template('{# id #}/{# action #}/');
-					}					
-						
-					$tags = $template->tagsUsed();
-					foreach($tags as $tag)
-					{
-						$this->variables[$tag] = array_shift($pathVariables);
-					}
-				}		
-				
+				$this->variables['package'] = $moduleInfo['Package'];
+				$package = $moduleInfo['Package'];
+			}elseif($this->variables['package']){
+				$package = $this->variables['package'];
 			}
 		
 			
+			
+			
+			if(count($pathVariables) > 0)
+			{
+				$template = new DisplayMaker();
+				$template->load_template('url', $package);
+					
+				if(!$template->load_template('url', $package))
+				{
+					$template->set_display_template('{# id #}/{# action #}/');
+				}					
+					
+				$tags = $template->tagsUsed();
+				foreach($tags as $tag)
+				{
+					$this->variables[$tag] = array_shift($pathVariables);
+				}
+			}			
 			
 			
 			

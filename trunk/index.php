@@ -77,6 +77,9 @@ if($config->error && !file_exists('.blockinstall'))
 	$config['moduleId'] = $get['moduleId'];
 	$config['siteId'] = $get['siteId'];
 	
+	
+	
+	
 	$moduleInfo = new ModuleInfo($config['moduleId']);
 	$config['module'] = $moduleInfo['Name'];
 	

@@ -8,6 +8,7 @@ class InfoRegistry
 	protected $Site;
 	protected $Post;
 	protected $Get;
+	protected $Runtime;
 	
 	static $instance;
 	
@@ -48,7 +49,9 @@ class InfoRegistry
 				case 'Get':
 					$this->Get = Get::getInstance();
 					break;					
-					
+				case 'Runtime':
+					$this->Runtime = RuntimeConfig::getInstance();
+					break;						
 				default:
 					break;
 			}

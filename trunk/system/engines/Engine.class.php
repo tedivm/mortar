@@ -18,10 +18,14 @@ abstract class Engine
 	;
 	public function __construct($moduleId, $action)
 	{	
-		$this->moduleId = $moduleId;
-		$this->action = $action;
-		$this->moduleInfo = new ModuleInfo($this->moduleId);
-		$this->package = $this->moduleInfo['Package'];
+		$info = InfoRegistry::getInstance();
+		$info->Runtime['package'];
+		$this->moduleId = $info->Runtime['moduleId'];
+		$this->action = $info->Runtime['action'];
+		if(is_numeric($this->moduleId))
+			$this->moduleInfo = new ModuleInfo($this->moduleId);
+			
+		$this->package = $info->Runtime['package'];
 		
 		session_start();
 		// I know this seems silly, but I want to give people a way to have a constructor while still reserving the real constructor for future needs
@@ -58,11 +62,13 @@ abstract class Engine
 	{
 		try {
 
+			$info = InfoRegistry::getInstance();
+			
 			$config = Config::getInstance();
 			if(!$this->pathToModule)
 			{
-				$moduleInfo = new ModuleInfo($config['moduleId']);
-				$modulePath = $this->moduleInfo['PathToPackage'];
+				$packageInfo = new PackageInfo($info->Runtime['package']);
+				$modulePath = $packageInfo->getPath();
 			}else{
 				$modulePath = $this->pathToModule;
 			}
