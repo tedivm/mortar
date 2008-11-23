@@ -78,7 +78,7 @@ Class AdminNavigation
 			
 			$cache->store_data($tabs);
 		}
-		
+
 		$user = ActiveUser::getInstance();
 		$cleanTabCache = new Cache('users', $user->getId(), 'adminNav', 'sidebar');
 		
@@ -108,8 +108,7 @@ Class AdminNavigation
 			
 			$cleanTabCache->storeData($cleanTabs);
 		}
-		
-		
+
 		$this->tabs = $cleanTabs;
 	}
 	
@@ -188,6 +187,8 @@ Class AdminNavigation
 		if($tab == 'Universal')
 			$tab = 'Main';
 		
+
+			
 		$activeLayer = is_array($this->tabs[$tab]) ? $this->tabs[$tab] : array();
 		
 		if(is_array($this->tabs['Universal']) && $tab != 'Universal')
@@ -196,6 +197,8 @@ Class AdminNavigation
 			
 		$navBar = new HtmlObject('div');
 		$navBar->property('id', 'left-column');
+		
+		//var_dump($activeLayer);
 		
 		foreach($activeLayer as $name => $item)
 		{

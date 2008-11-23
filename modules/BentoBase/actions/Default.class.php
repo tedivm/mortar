@@ -4,8 +4,6 @@ class BentoBaseActionDefault extends PackageAction
 {
 	//static $requiredPermission = 'Read';
 	
-
-	
 	protected function logic()
 	{
 		
