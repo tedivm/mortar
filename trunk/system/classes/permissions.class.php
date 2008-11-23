@@ -318,7 +318,7 @@ class Location implements intlocation
 			
 
 			$stmt->prepare('SELECT location_id FROM locations WHERE location_parent = ? AND location_name = ?');
-			$stmt->bind_param_and_execute('is', $this->id, $type);
+			$stmt->bind_param_and_execute('is', $this->id, $name);
 	
 			$childLocation = $stmt->fetch_array();
 			
