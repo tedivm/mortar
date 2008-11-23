@@ -6,7 +6,7 @@ define('DEBUG', 3);	// 3, 2, 1- info, warning, error
 define('DISPATCHER', 'index.php');
 define('IGNOREPERMISSIONS', false);	//FOR TESTING ONLY!!!!
 define('BENCHMARK', true);
-define('DISABLECACHE', false);
+define('DISABLECACHE', true);
 
 if(BENCHMARK)
 {

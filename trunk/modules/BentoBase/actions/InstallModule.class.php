@@ -2,7 +2,7 @@
 
 class BentoBaseActionInstallModule extends PackageAction  
 {
-	static $requiredPermission = 'Read';
+	static $requiredPermission = 'System';
 	
 	public $AdminSettings = array('linkLabel' => 'Install',
 									'linkTab' => 'System',
