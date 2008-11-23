@@ -1,6 +1,9 @@
 if(typeof($.validator) == 'function')
 {	
 	$.validator.setDefaults({
-		meta: "validation"	
+		meta: "validation",
+
+		onsubmit: true
+
 	});
 }

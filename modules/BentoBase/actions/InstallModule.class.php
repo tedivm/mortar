@@ -12,12 +12,15 @@ class BentoBaseActionInstallModule extends PackageAction
 	protected $form;
 	protected $packageCount = array();
 	protected $packageList;
-	
+	protected $success = false;
 	protected function logic()
 	{
 		$info = InfoRegistry::getInstance();
 		
-		if(!$package)
+		
+		$installPackage = $info->Get['id'];
+		
+		if(!$installPackage)
 		{
 			
 			$db = dbConnect('default_read_only');
@@ -36,16 +39,101 @@ class BentoBaseActionInstallModule extends PackageAction
 			
 		}else{
 			
+			$PackageInfo = new PackageInfo($installPackage);
+			
+			
+			
+			$locationOptions = array();
+			
+			$rootLocation = new Location(1);
+			
+			$sites = $rootLocation->getChildren('site');
+			
+			
+			foreach($sites as $site)
+			{
+				$siteName = $site->getName();
+				$locationOptions[$site->getId()] = $siteName;
+				
+				$directories = $site->getChildren('directory');
+				
+				// one level only for now
+				
+				foreach($directories as $directory)
+				{
+					$locationOptions[$directory->getId()] = $siteName . '/' . $directory->getName();
+				}
+				
+			}
+			
+			
+			
 			// make form
 			$form = new Form('installModule');
+			$this->form = $form;
+			$form->changeSection('Main')->
+				setLegend('Basic Information')->
+				createInput('name')->
+					setLabel('Module Name')->	
+					addRule('required');
+				
+			$input = $this->form->createInput('location')->
+					setType('select')->
+					setLabel('Location');//->	
+//					addRule('required');
+					
+			foreach($sites as $site)
+			{
+				$siteName = $site->getName() . '/';
+				$input->setOptions($site->getId(), $siteName);
+				$directories = $site->getChildren('directory');
+				
+				// one level only for now
+				
+				foreach($directories as $directory)
+				{
+					$input->setOptions($directory->getId(), $siteName . $directory->getName(), array());
+				}
+							
+			}
+			
+			
+			$formExtensionPath = $PackageInfo->getPath() . 'hooks/InstallModuleForm.Internal.php';
+			$formExtentionClassname = $PackageInfo->getName() . 'InstallModuleForm';
+			
+			if(!class_exists($formExtentionClassname, false))
+			{
+				if(is_readable($formExtensionPath))
+				{
+					include $formExtensionPath;
+				}
+			}
+			
+			if(class_exists($formExtentionClassname, false))
+			{
+				$formExtention = new $formExtentionClassname();
+				$moduleForm = $formExtention->getForm();
+				$form->merge($moduleForm);
+			}
 			
 			if($form->checkSubmit())
 			{
+				$inputHandler = $form->getInputhandler();
+				if($formExtention)
+					$settings = $formExtention->getSettings($inputHandler);
+					
 				
+				$installer = new InstallModule($installPackage, $inputHandler['name'], $inputHandler['location'], $settings);
+				if($installer->installModule())
+				{
+					$this->success = true;
+				}
 			}else{
 				
 			}
 		}
+		
+		
 		
 		// display list
 		
@@ -54,36 +142,44 @@ class BentoBaseActionInstallModule extends PackageAction
 	
 	public function viewAdmin()
 	{
-		$template = $this->loadTemplate('adminInstallModuleListing');
-		$packageList = $this->packageList->getPackageDetails();
-		$output .= '';
-		foreach($packageList as $packageInfo)
+		if(isset($this->packageList))
 		{
-			$packageHtml = new DisplayMaker();
-			$packageHtml->set_display_template($template);
-			/* description name link_to_install */
+			$template = $this->loadTemplate('adminInstallModuleListing');
+			$packageList = $this->packageList->getPackageDetails();
+			$output .= '';
+			foreach($packageList as $packageInfo)
+			{
+				$packageHtml = new DisplayMaker();
+				$packageHtml->set_display_template($template);
+				/* description name link_to_install */
+				
+				$name = $packageInfo->getMeta('name');
+				$packageHtml->addContent('name', $name);
+				
+				$description = $packageInfo->getMeta('description');
+				$packageHtml->addContent('description', $description);
+				
+				$version = $packageInfo->getMeta('version');
+				$packageHtml->addContent('version', $version);
+				
+				$url = $this->linkToSelf();
+				$url->property('id', $packageInfo->getMeta('name'));
+				$url->property('engine', 'Admin');
+				$packageHtml->addContent('link_to_install', (string) $url);
+				
+				$output .= $packageHtml->make_display(true);
+			}
 			
-			$name = $packageInfo->getMeta('name');
-			$packageHtml->addContent('name', $name);
+		}elseif($this->form && !$this->success){
 			
-			$description = $packageInfo->getMeta('description');
-			$packageHtml->addContent('description', $description);
-			
-			$version = $packageInfo->getMeta('version');
-			$packageHtml->addContent('version', $version);
+			$output .= $this->form->makeDisplay();
 			
 			
-			$url = $this->linkToSelf();
-			$url->property('id', $packageInfo->getMeta('name'));
-			$packageHtml->addContent('link_to_install', (string) $url);
-			
-			$output .= $packageHtml->make_display(true);
+		}elseif($this->success){
+			$output = 'Module successfully installed.';
 		}
 		
-		
 		return $output;
-		
-		
 	}
 	
 }

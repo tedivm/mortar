@@ -350,7 +350,6 @@ class Page implements ArrayAccess
 				$this->theme = $theme;
 			}
 		}		
-
 		
 		$cache = new Cache('themes', $this->theme, $file);
 		
@@ -463,10 +462,11 @@ class Page implements ArrayAccess
 			$this->setTemplate();
 		}
 
+		$this->runtimeProcessTemplate();
 		$display = $this->display;
 		$tags = $display->tagsUsed(false);
 		
-		// This is a list of all of the 'array' items that need to be cycles through and added as a single items
+		// This is a list of all of the 'array' items that need to be cycled through and added as a single items
 		$groups = array('script', 'scriptStartup', 'meta', 'jsIncludes', 'css');
 		
 		foreach($groups as $variable)
@@ -489,7 +489,7 @@ class Page implements ArrayAccess
 			$display->addContent($name, $content);
 		}
 		
-		return $this->postProcessTemplate($display->make_display());
+		return $this->postProcessTemplate($display->make_display(false));
 	}
 
 	public function addRegion($tag, $content)
@@ -524,7 +524,23 @@ class Page implements ArrayAccess
 	// run every time page is loaded
 	protected function runtimeProcessTemplate()
 	{
+		$theme = new Theme($this->theme);
+		$js = $theme->jsUrl('defaults', 'jquery');
+		$info = InfoRegistry::getInstance();
+		$pathStart = $info->Site->getLink('javascript');
+
 		
+		$this->addJSInclude($pathStart . 'bento.defaults.js');
+		
+		if($js)
+			$this->addJSInclude($js);
+		
+		
+		
+		
+		
+		
+		$this->display;
 	}
 	
 	// doesn't do much yet
@@ -579,10 +595,7 @@ class ActivePage extends Page
 	private function __construct()
 	{	
 		$this->addJQueryInclude(array('1.2.6', 'ui-1.6b', 'metadata', 'demensions'));
-		//$this->addJQueryInclude('1.2.6');
-		//$this->addJQueryInclude('ui-1.6b');
-		//$this->addJQueryInclude('metadata');
-		//$this->addJQueryInclude('dimensions');		
+
 	}
 	
 	/**
@@ -620,88 +633,5 @@ class ActivePage extends Page
 	
 	
 }
-
-
-
-
-
-
-
-
-
-
-class ActivePageContainer
-{
-	public $template = '<div name="{# name #}" class="{# name #}">{# content #}</div>';
-	public $name = '';
-	public $class = '';
-	public $items = array();
-	
-	public function __construct($name)
-	{
-		$this->name = $name;
-	}
-	
-	public function add_item($name, $content)
-	{
-		$item = new ActivePageContainterItem($this->name . '_' . $name);
-		$item->content = $content;
-		$this->items[] = $item;
-		return $item;
-	}
-	
-	public function toString()
-	{
-		
-		
-		foreach($this->items as $item)
-		{
-			/* @var $item ActivePageContainterItem */
-			$content .= $item->toString();
-			$content .= "/n";
-		}
-		
-		$output = new DisplayMaker();
-		
-		$output->set_display_template($this->template);
-		$output->add_content('name', $this->name);
-		$output->add_content('class', $this->class);
-		$output->add_content('content', $content);
-		
-		return $output->make_display();
-	}
-	
-	
-}
-
-class ActivePageContainterItem
-{
-	public $template = '<div name="{# name #}">{# content #}</div>';
-	public $name = '';
-	public $class = '';
-	public $content = '';
-	
-	public function __construct($name)
-	{
-		$this->name = $name;
-	}
-	
-	public function toString()
-	{
-		$output = new DisplayMaker();
-		
-		$output->set_display_template($this->template);
-		$output->add_content('name', $this->name);
-		$output->add_content('class', $this->class);
-		$output->add_content('content', $this->content);
-		
-		return $output->make_display();
-		
-	}
-	
-}
-
-
-
 
 ?>

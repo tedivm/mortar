@@ -223,6 +223,17 @@ class Location implements intlocation
 		return $this->parent;
 	}
 	
+	public function getId()
+	{
+		return $this->id;
+	}
+	
+	public function getName()
+	{
+		return $this->name;
+	}
+	
+	//need to get rid of that
 	public function location_id()
 	{
 		return $this->id;

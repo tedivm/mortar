@@ -160,7 +160,6 @@ class Form
 								}
 	
 							}
-	
 							break;
 						
 						case 'radio':
@@ -246,7 +245,7 @@ class Form
 		$output = $formHtml;
 		
 		$javascript = '$(\'#' . $this->name . '\').validate()';
-		$jqueryPlugins = array('form', 'validate', 'validate-methods');
+		$jqueryPlugins = array('form', 'validate', 'validate-methods', 'cluetip');
 		if(class_exists('ActivePage', false))
 		{
 			$page = ActivePage::get_instance();
@@ -363,6 +362,19 @@ class Form
 		$package['intros'] = $this->sectionIntro;
 		$package['legends'] = $this->sectionLegends;
 		return $package;
+	}
+	
+	public function getInputList()
+	{
+		$inputList = array();
+		foreach($this->inputs as $section)
+		{
+			foreach($section as $input)
+			{
+				$inputList[] = $input->name;
+			}
+		}
+		return $inputList;
 	}
 }
 

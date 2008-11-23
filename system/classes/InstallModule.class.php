@@ -19,16 +19,17 @@ class InstallModule
 	public $id;
 	public $location;
 	
-	public function __construct($package, $name, $location, $settings = '')
+	public function __construct($package, $name, $parentLocation, $settings = '')
 	{
+		echo 'Package: ' . $package . '<br>Name: ' . $name . '<br>Location: ' . $location . '<br>';
 		$this->package = $package;
 		$this->name = $name;
-		$this->parentLocation = (is_a($location, 'Location')) ? $location->id : $location;
+		$this->parentLocation = (is_a($parentLocation, 'Location')) ? $parentLocation->id : $parentLocation;
 
 		$config = Config::getInstance();
 		$this->pathToPackage = $config['path']['packages'] . $this->package . '/';
 					
-		if(is_array($settings))
+		if(is_array($settings) && count($settings) > 0)
 		{
 			$this->settings = $settings;
 		}else{
@@ -41,7 +42,7 @@ class InstallModule
 	
 
 	
-	public  function installModule()
+	public function installModule()
 	{
 		
 		try{
@@ -178,10 +179,8 @@ class InstallModule
 			foreach($classPlugins as $fileName)
 			{
 				try{
-					
-				
-				$tmpArray = explode('/', $fileName);
-				$tmpArray = explode('.', array_pop($tmpArray));		
+
+				$tmpArray = explode('.', array_pop(explode('/', $fileName)));		
 				$pluginName = $tmpArray[0];
 				$tmpArray = explode('-', $tmpArray[1]);
 				$hookType = $tmpArray[0];
@@ -189,6 +188,9 @@ class InstallModule
 				$className = $this->package . $pluginName . $hookType . $hookName;
 
 				
+				if($hookType == 'Internal')
+					throw new BentoNotice('Plugin Type not valid or internal, skipping: ' . $className);
+					
 				if(!class_exists($className, false))
 				{
 					include($fileName);
@@ -222,7 +224,7 @@ class InstallModule
 						
 					case 'Internal':	
 					default:
-						throw new BentoError('Plugin Type not valid or internal, skipping: ' . $className);
+						throw new BentoNotice('Plugin Type not valid or internal, skipping: ' . $className);
 						break;
 				}
 
@@ -303,11 +305,10 @@ class InstallModule
 			
 			// Run Post Install
 			
-			$customPath = $pathToPackage . 'hooks/' . 'Installation.php';
-			
-			if(file_exists($customPath))
+			$customPath = $pathToPackage . 'hooks/' . 'Installation.Internal.php';
+			$className = $this->package . 'Install';
+			if(class_exists($className, false) || (file_exists($customPath) && include($customPath) && class_exists($classActions, false)))
 			{
-				$className = $this->package . 'Install';
 				$customCode = new $className($this->id);
 				$customCode->run();
 			}

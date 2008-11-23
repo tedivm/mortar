@@ -62,7 +62,7 @@ class HtmlObject
 			}
 			return $this;
 			
-		}elseif(is_string($value)){
+		}elseif(is_string($property)){
 			
 			$this->properties[$property] = $value;
 			return $this;

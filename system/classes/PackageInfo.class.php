@@ -133,7 +133,7 @@ class PackageInfo
 	
 	public function getPath()
 	{
-		$this->path;
+		return $this->path;
 	}
 	
 	public function getName()
