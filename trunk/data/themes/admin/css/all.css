@@ -372,10 +372,14 @@ div#center-content fieldset {
 
 div#packageListing div#description
 {
+
 	margin-bottom: 10px;
 }
 
-
+div#packageListing legend
+{
+	font-size:13px;
+}
 /* Forms */
 
 form fieldset > input,select,textarea {
@@ -409,5 +413,4 @@ form div.intro {
 	margin-left: 10px;
 	margin-bottom: 10px;
 }
-
 

@@ -6,6 +6,8 @@ class InfoRegistry
 	protected $User;
 	protected $Configuration;
 	protected $Site;
+	protected $Post;
+	protected $Get;
 	
 	static $instance;
 	
@@ -40,7 +42,13 @@ class InfoRegistry
 				case 'Site':
 					$this->Site = ActiveSite::get_instance();
 					break;
-									
+				case 'Post':
+					$this->Post = Post::getInstance();
+					break;
+				case 'Get':
+					$this->Get = Get::getInstance();
+					break;					
+					
 				default:
 					break;
 			}

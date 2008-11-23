@@ -99,7 +99,7 @@ class Theme
 		$this->cssFiles = $data['css'];
 	}
 
-	public function jsUrl($name, $library = 'jquery')
+	public function jsUrl($plugin, $library = 'jquery')
 	{
 		if(isset($this->jsFiles[$library][$plugin]))
 		{
@@ -132,8 +132,6 @@ class Theme
 		}
 		return $fileArray;
 	}
-	
-	
 	
 	
 }
