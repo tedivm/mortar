@@ -108,7 +108,7 @@ try {
 	
 	include($path);
 	
-	$engine = new $engineName($config['moduleId'], $config['action']);
+	$engine = new $engineName();
 	$engine->runModule();
 	$output = $engine->display();	
 	// two steps in case it throws an exception
@@ -142,8 +142,6 @@ try {
 	$site = ActiveSite::get_instance();
 	
 	$moduleInfo = new ModuleInfo($site->location->meta('error'));
-	
-
 	$packageInfo = new PackageInfo($moduleInfo['Package']);
 	
 	//$packageInfo;

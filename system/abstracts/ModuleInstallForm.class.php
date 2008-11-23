@@ -12,8 +12,8 @@ abstract class ModuleInstallForm
 		$settings = array();
 		foreach($this->settings as $settingName)
 		{
-			$savedName = substr($settingName, strlen($this->packageName));
-			if(isset($inputHandler[$packageName . '_' .$settingName]))
+			$savedName = substr($settingName, strlen($this->packageName) + 1);
+			if(isset($inputHandler[$settingName]))
 				$settings[$savedName] = $inputHandler[$settingName];
 		}
 

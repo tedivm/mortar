@@ -118,15 +118,26 @@ class BentoBaseActionInstallModule extends PackageAction
 			
 			if($form->checkSubmit())
 			{
+				try{
+					
+				
 				$inputHandler = $form->getInputhandler();
 				if($formExtention)
+				{
 					$settings = $formExtention->getSettings($inputHandler);
-					
+				}	
 				
 				$installer = new InstallModule($installPackage, $inputHandler['name'], $inputHandler['location'], $settings);
 				if($installer->installModule())
 				{
 					$this->success = true;
+				}
+				
+				
+				
+				
+				}catch(Exception $e){
+					$this->AdminSettings['headerSubTitle'] = 'An error occured';
 				}
 			}else{
 				

@@ -21,14 +21,18 @@ class InstallModule
 	
 	public function __construct($package, $name, $parentLocation, $settings = '')
 	{
-		echo 'Package: ' . $package . '<br>Name: ' . $name . '<br>Location: ' . $location . '<br>';
 		$this->package = $package;
 		$this->name = $name;
 		$this->parentLocation = (is_a($parentLocation, 'Location')) ? $parentLocation->id : $parentLocation;
+		
+		$location = new Location($this->parentLocation);
 
+		$child = $location->getChildByName($name);
+		if($location->getChildByName($name))
+			throw new BentoError('You can not create two locations with the same name and parent.');
+		
 		$config = Config::getInstance();
 		$this->pathToPackage = $config['path']['packages'] . $this->package . '/';
-					
 		if(is_array($settings) && count($settings) > 0)
 		{
 			$this->settings = $settings;
