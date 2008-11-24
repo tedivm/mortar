@@ -56,7 +56,7 @@ class Get extends Post
 						if($child->resource == 'alias')
 						{
 
-								//$alias = new Alias(); //some sort of alias loading thing.
+								$alias = new Alias(); //some sort of alias loading thing.
 								
 								switch($alias->type)
 								{
@@ -67,17 +67,20 @@ class Get extends Post
 								}								
 						}
 						
-						switch ($child->resource)
+						switch ($child->resource_type())
 						{
 							case 'directory':
 								$pathArray[] = $pathPiece;
 								unset($pathVariables[$pathIndex]);
 								$currentLocation = $child;
 								break;
-									
-							case 'module':
-								$moduleInfo = new ModuleInfo($child->location_id, 'location');
+								
+							case 'module':		
+							case 'Module':
+								$moduleInfo = new ModuleInfo($child->getId(), 'location');
 								$pathArray[] = $pathPiece;
+								
+								$this->variables['moduleId'] = $moduleInfo->getId();
 								unset($pathVariables[$pathIndex]);
 								break 2; //break out of foreach loop
 								
@@ -87,6 +90,9 @@ class Get extends Post
 					}else{
 						break; //break out of foreach loop
 					}
+					
+					
+					
 				}//foreach($pathVariables as $pathIndex => $pathPiece)				
 				
 				$this->variables['pathArray'] = $pathArray;

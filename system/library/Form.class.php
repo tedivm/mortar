@@ -141,10 +141,57 @@ class Form
 	
 					switch ($input->type)
 					{
+						case'html':// for now we'll dump it in the text area, but we need to wire in the javascript code as some point
 						case 'textarea':
 							$inputHtml = new HtmlObject('textarea');
 							$inputHtml->wrapAround($input->value);
 							break;
+						
+							
+							
+						case 'location':
+							// check property for base location
+							// check for array of location types
+							if(is_array($input->property('types')))
+							{
+								$types = $input->property('types');
+								unset($input->properties['types']);
+							}elseif(is_string($input->property('types'))){
+								$types = $input->property('types');
+							}else{
+								$types = '';
+							}
+
+							if(is_numeric($input->property('baseLocation')))
+							{
+								$locationId = $input->property('baseLocation');
+								unset($input->properties['baseLocation']);
+							}else{
+								$locationId = 1;
+							}							
+							
+							if(is_numeric($input->property('value')))
+							{
+								$value = $input->property('value');
+								unset($input->properties['value']);
+							}else{
+								$value = 1;
+							}							
+							
+							
+							
+							$baseLocation = new Location($locationId);
+							$locationList = $baseLocation->getTreeArray($types);
+							
+							foreach($locationList as $id => $string)
+							{
+								$attributes = array();
+								if($value == $id)
+									$attributes = array('selected' => 'selected');
+								$input->setOptions($id, $string, $attributes);
+							}
+							
+							
 							
 						case 'select':
 							$inputHtml = new HtmlObject('select');

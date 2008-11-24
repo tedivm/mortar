@@ -26,13 +26,13 @@ class HtmlEngine extends Engine
 		$page->addRegion('PathToPackage', $this->main_action->info['PathToPackage']);
 		
 		return $this->page->makeDisplay();
-	}	
+	}
 	
 	
 	
 	protected function processAction($actionResults)
 	{
-		if(isset($actionResults))
+		if(isset($actionResults) && strlen($actionResults) > 0)
 			$this->page['main_content'] = $actionResults;
 	}
 	

@@ -7,7 +7,6 @@ class RuntimeConfig implements ArrayAccess
 	private function __construct()
 	{
 		$get = Get::getInstance();
-		
 		$this->config['engine'] = ((isset($get['engine'])) ? $get['engine'] : 'Html');
 		$this->config['action'] = (isset($get['action'])) ? $get['action'] : 'Default';
 		$this->config['package'] = $get['package'];

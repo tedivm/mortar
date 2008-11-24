@@ -24,7 +24,7 @@ abstract class Engine
 		$this->action = (strlen($action) > 0) ? $action : $info->Runtime['action']; $info->Runtime['action'];
 		if(is_numeric($this->moduleId))
 			$this->moduleInfo = new ModuleInfo($this->moduleId);
-			
+		
 		$this->package = ($this->moduleInfo) ? $this->moduleInfo['Package'] : $info->Runtime['package'];
 		
 		session_start();
