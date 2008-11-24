@@ -154,6 +154,7 @@ class Location implements intlocation
 	
 	public $siteId;
 
+	protected $directoryTypes = array('directory', 'site');
 	
 	
 	/*
@@ -167,7 +168,6 @@ class Location implements intlocation
 	
 	public function __construct($id = '')
 	{
-		
 		if($id != '')
 		{
 			$this->id = $id;
@@ -369,11 +369,11 @@ class Location implements intlocation
 		}		
 		
 		
-		if(count($childrenIds) < 1)
+		if(!$childrenIds || count($childrenIds) < 1)
 		{
 			return false;
 		}
-		
+
 		foreach($childrenIds as $id)
 		{
 			$locations[] = new Location($id);
@@ -393,18 +393,19 @@ class Location implements intlocation
 		if(isset($this->parent))
 		{
 			$output = (string) $this->parent;
-		}elseif($this->name == 'root'){
-			return $output = '/';
+		}
+		
+		if($this->name == 'root'){
+			return '/';
 		}
 		
 		$output .= $this->name;
 		
 		if($this->resource == 'directory' || $this->resource == 'site')
 			$output .= '/';
-		
-		return $string;
+			
+		return $output;
 	}
-	
 	
 	public function getSite()
 	{
@@ -425,96 +426,58 @@ class Location implements intlocation
 		return $site;
 	}
 	
-}
 
-
-
-
-
-// IGNORE EVERYTHING BELOW THIS LINE FOR THE TIME BEING KTHX
-
-/*
-
-class PermissionsListings extends Permissions 
-{
-	public function __construct($location, $user)
+	public function getTreeArray($types = '', $isFirst = true)
 	{
-		parent::__construct($location, $user);
-		$this->load_relaxed_usergroup_permissions();
-		$this->load_relaxed_user_permissions();
-		
-	}
-	protected function load_relaxed_usergroup_permissions()
-	{
-		$db = db_connect('default_read_only');
-		$stmt = $db->stmt_init();
-		$stmt->prepare("SELECT actions.action_name, permissionsprofile_has_actions.permission_status
-			FROM actions
-			LEFT JOIN (permissionsprofile_has_actions, group_permissions, user_in_member_group, locations)
-				ON (actions.action_id = permissionsprofile_has_actions.action_id 
-				AND permissionsprofile_has_actions.perprofile_id = group_permissions.perprofile_id
-				AND group_permissions.memgroup_id = user_in_member_group.memgroup_id
-				AND group_permissions.location_id = locations.location_id)
-			WHERE
-			locations.mod_id = ? AND user_in_member_group.user_id = ?");
-		$stmt->bind_param_and_execute('ii', $this->location->module_id(), $this->user);
-		
-		$this->adjust_action($stmt);
-		
-	}
-	
-	protected function load_relaxed_user_permissions()
-	{
-		$db = db_connect('default_read_only');
-		$stmt = $db->stmt_init();
-		$stmt->prepare("SELECT actions.action_name, permissionsprofile_has_actions.permission_status
-			FROM actions
-			LEFT JOIN (permissionsprofile_has_actions, user_permissions, locations)
-				ON (actions.action_id = permissionsprofile_has_actions.action_id 
-				AND permissionsprofile_has_actions.perprofile_id = user_permissions.perprofile_id
-				AND user_permissions.location_id = locations.location_id)
-			WHERE
-			locations.mod_id = ? AND user_permissions.user_id = ?");
-		$stmt->bind_param_and_execute('ii', $this->location->module_id(), $this->user);
-		$this->adjust_action($stmt);
-	}
-	
-	
-	
-	public function action_has_ids($action)
-	{
-		if(!$this->is_allowed($action))
-			return false;
-			
-		$db = db_connect('default_read_only');
-		$stmt = $db->stmt_init();
-		$stmt->prepare("SELECT actions.action_name, locations.mod_internalid
-			FROM actions
-			LEFT JOIN (permissionsprofile_has_actions, group_permissions, user_in_member_group, locations)
-				ON (actions.action_id = permissionsprofile_has_actions.action_id 
-				AND permissionsprofile_has_actions.perprofile_id = group_permissions.perprofile_id
-				AND group_permissions.memgroup_id = user_in_member_group.memgroup_id
-				AND group_permissions.location_id = locations.location_id)
-			WHERE
-			locations.mod_id = ? AND user_in_member_group.user_id = ? AND actions_name = ? AND permissionsprofile_has_actions.permission_status = 1");
-		$stmt->bind_param_and_execute('iis', $this->location->module_id(), $this->user, $action);
-		$array = array();
-		if($stmt->num_rows > 0)
+		if(is_string($types) && strlen($types) > 0)
 		{
-			$array = array();
-			while($permission = $stmt->fetch_array())
+			$types = array($types);
+		}elseif(!is_array($types)){
+			$types = array();
+		}
+		
+		if(in_array('directory', $types))
+			$types = array_merge($types, $this->directoryTypes);
+		
+		
+		$outputArray = array();
+		if((count($types) < 1 || in_array($this->resource, $types)) && $this->name != 'root')// && !(in_array($this->resource, $this->directoryTypes) && !$listDirectory))
+		{
+			$outputArray[$this->id] = (string) $this;
+		}
+
+		
+		if(count($type) > 0)
+		{
+			if(!in_array('directory', $types))
+				$types = array_merge($types, $this->directoryTypes);
+			
+			$children = array();
+			foreach($types as $type)
 			{
-				$array[] = $permission['mod_internalid'];
+				$children = array_merge($children, $this->getChildren($type));
+			}
+		}else{
+			$children = $this->getChildren();
+		}
+			
+		if(is_array($children))
+		{
+			foreach($children as $child)
+			{
+				$outputArray = array_merge($outputArray, $child->getTreeArray($types, false));
 			}
 		}
 		
+		if($isFirst)
+			asort($outputArray);
 		
-		return $array;
 		
-		
+		return $outputArray;
+			
 	}
+	
 	
 }
 
-*/
 ?>

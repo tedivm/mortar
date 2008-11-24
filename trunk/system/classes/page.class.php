@@ -395,11 +395,14 @@ class Page implements ArrayAccess
 		$cms = new CMSPage();
 		if($modId > 0)
 		{
-			$cms->load_by_pagename($idOrName, $modId);
+			$result = $cms->load_by_pagename($idOrName, $modId);
 		}else{
-			$cms->load_by_pageid($idOrName);
+			$result = $cms->load_by_pageid($idOrName);
 		}
 				
+		if(!$result)
+			return false;
+		
 		$this->regions['moduleId'] = $cms->mod_id;
 		$this->regions['title'] = $cms->title;
 		$this->regions['name'] = $cms->name;

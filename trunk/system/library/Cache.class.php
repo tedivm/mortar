@@ -22,7 +22,7 @@ class Cache
 {
 	public $name;
 	public $path;
-	public $cache_time = 30; //seconds
+	public $cache_time = 300; //seconds
 	
 	public $cacheReturned = false;
 	protected $cache_enabled = true;
@@ -192,13 +192,28 @@ class cacheHandlerFilesystem implements cacheHandler
 
 	public function getData()
 	{
-		if(!$file = @file_get_contents($this->path))
+		if(file_exists($this->path))
 		{
-			return false;
-		}
+			
+			
+			$file = fopen($this->path, 'r');
+			$filesize = filesize($this->path);
+			if(flock($file, LOCK_SH | LOCK_NB))
+			{
+				$data = fread($file, $filesize);
+				flock($file, LOCK_UN);
+				$store = unserialize($data);
+				return $store;
+
+			}else{
+				$this->cache_enabled = false; 
+				// the only way to get here is if there is a write lock already in place
+				// so we disable caching to make sure this one doesn't attempt to write to the file
+			}
 		
-		$store = unserialize($file);
-		return $store;
+		}
+		return false;
+		
 	}	
 
 	public function storeData($data, $expiration)

@@ -5,8 +5,8 @@ define('BASE_PATH', dirname(__FILE__) . '/');
 define('DEBUG', 3);	// 3, 2, 1- info, warning, error
 define('DISPATCHER', 'index.php');
 define('IGNOREPERMISSIONS', false);	//FOR TESTING ONLY!!!!
-define('BENCHMARK', true);
-define('DISABLECACHE', true);
+define('BENCHMARK', false);
+define('DISABLECACHE', false);
 
 if(BENCHMARK)
 {
@@ -195,6 +195,7 @@ if(BENCHMARK)
 	{
 		echo $query , '<br>';
 	}
+	
 }
 
 ?>

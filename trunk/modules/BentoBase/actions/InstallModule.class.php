@@ -13,6 +13,7 @@ class BentoBaseActionInstallModule extends PackageAction
 	protected $packageCount = array();
 	protected $packageList;
 	protected $success = false;
+	
 	protected function logic()
 	{
 		$info = InfoRegistry::getInstance();
@@ -33,7 +34,6 @@ class BentoBaseActionInstallModule extends PackageAction
 			
 			$this->packageCount = $packageCount;
 			
-
 			$this->packageList = new PackageList();
 			
 			
@@ -78,25 +78,10 @@ class BentoBaseActionInstallModule extends PackageAction
 					addRule('required');
 				
 			$input = $this->form->createInput('location')->
-					setType('select')->
-					setLabel('Location');//->	
-//					addRule('required');
+					setType('location')->
+					setLabel('Location')->
+					property('types', array('directory'));
 					
-			foreach($sites as $site)
-			{
-				$siteName = $site->getName() . '/';
-				$input->setOptions($site->getId(), $siteName);
-				$directories = $site->getChildren('directory');
-				
-				// one level only for now
-				
-				foreach($directories as $directory)
-				{
-					$input->setOptions($directory->getId(), $siteName . $directory->getName(), array());
-				}
-							
-			}
-			
 			
 			$formExtensionPath = $PackageInfo->getPath() . 'hooks/InstallModuleForm.Internal.php';
 			$formExtentionClassname = $PackageInfo->getName() . 'InstallModuleForm';
