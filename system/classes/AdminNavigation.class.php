@@ -34,7 +34,7 @@ Class AdminNavigation
 				if(is_array($packageInfo[$package]->actions))
 				foreach($packageInfo[$package]->actions as $name => $action)
 				{
-					if($action['engineSupport']['Admin']['settings']['linkLabel'] && $action['engineSupport']['Admin']['settings']['linkTab'])
+					if($action['engineSupport']['Admin']['settings']['linkLabel'] && $action['engineSupport']['Admin']['settings']['linkTab'] && $action['type'] == 'genericPackage')
 					{
 						$linkInfo = array();
 						$linkInfo['installedModules'] = $packageInfo->installedModules;
