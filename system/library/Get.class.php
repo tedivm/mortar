@@ -7,8 +7,7 @@ class Get extends Post
 
 	private function __construct()
 	{
-		$_GET = get_magic_quotes_gpc() ? array_map('stripslashes', $_GET) : $_GET;
-		$this->variables = $_GET;
+		$this->variables = get_magic_quotes_gpc() ? array_map('stripslashes', $_GET) : $_GET;
 		$config = Config::getInstance();
 		
 
@@ -23,18 +22,7 @@ class Get extends Post
 
 		if(isset($_GET['parameters']))
 		{
-			$variable_split = explode('?', $_GET['parameters']);
-			$pathVariables = explode('/', $variable_split['0']);
-			$queryVariables = explode('&', $variable_split['1']);
-			
-			// Run through everything after the ? so that get values work even on rewritten urls
-			foreach($queryVariables as $variable)
-			{
-				$ts = explode('=', $variable);
-				$this->variables[$ts[0]] = $ts[1];
-			}		
-			unset($queryVariables);
-	
+			$pathVariables = explode('/', $_GET['parameters']);	
 		}
 
 			
