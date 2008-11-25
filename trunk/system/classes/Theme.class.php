@@ -4,131 +4,157 @@ class Theme
 {
 	public $name;
 	
-	protected $cssPath;
-	protected $jsPath;
-	protected $formPath;
+	protected $cssUrls;
+	protected $jsUrls;
 	
-	protected $cssFiles;
-	protected $jsFiles;
-	protected $formFiles;
-	
-	protected $url;
-	
+	protected $url;	
+	protected $allowMin = true;
+
 	public function __construct($name)
 	{
 		$this->name = $name;
 		$info = InfoRegistry::getInstance();
 		
-		$cache = new Cache('themes', $name, 'themeinfo');
-		
+		$cache = new Cache('theme', $this->name, $info->Site->currentLink);
 		$data = $cache->getData();
 		
 		if(!$cache->cacheReturned)
 		{
+			$baseModulePath = $info->Configuration['path']['modules'];
+			$baseModuleUrl = $info->Configuration['url']['modules'];
 			
-			$info = InfoRegistry::getInstance();
+			$baseModulePath = $info->Configuration['path']['modules'];
+			$baseModuleUrl = $info->Configuration['url']['modules'];		
 			
-			$path = $info->Configuration['path']['theme'] . $name . '/';
 			
-			if(file_exists($path))
+			$packageList = new PackageList(true);
+			$packages = $packageList->getPackageList();
+			
+			$javascriptLinks = array();
+			$cssLinks = array();
+			
+			foreach($packages as $package)
 			{
-				
-				$data['path']['javascript'] = $path . 'javascript/';
-				$javascriptFiles = $this->getFiles($data['path']['javascript']);
-				foreach($javascriptFiles as $file)
-				{
-					$library = $file[0];
-					$plugin = $file[1];
-					$compression = ($file[2] == 'min');
+				$packagePath = $baseModulePath . $package . '/';
+				$packageUrl = $baseModuleUrl . $package . '/';
+	
+				// javascript
+				$javascriptResult = $this->getFiles($packagePath . 'javascript/', $packageUrl . 'javascript/', 'js');
+				if($javascriptResult)
+					$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
 					
-					$data['javascript'][$library][$plugin] = $compression;
-				}
+				// css
+				$cssResult = $this->getFiles($packagePath . 'css/', $packageUrl . 'css/', 'css');
+				if($cssResult)
+					$cssLinks = array_merge_recursive($cssLinks, $cssResult);
 				
-				
-				$data['path']['forms'] = $path . 'forms/';
-				$formFiles = $this->getFiles($data['path']['forms']);
-				foreach($formFiles as $file)
-				{
-					$extension = array_pop($file);
-					$name = $file[0];
-					$data['forms'][$name][$extension] = true; 
-				}
-				
-				
-				$data['path']['css'] = $path . 'css/';
-				$cssFiles = $this->getFiles($data['path']['css']);
-				foreach($cssFiles as $file)
-				{
-					$extension = array_pop($file);
-					if($extension == 'css')
-					{
-						switch (count($file)) {
-							case 1:
-								$file[1] = $file[0];
-								$file[0] = 'user';
-								break;
-							case 2:
-								$data['css'][$file[0]][$file[1]];
-								break;
-						
-							default:	
-								break 2;	// just skip it, since it follows no naming convention to speak of
-						}
-					}
-					$data['css'] = $file;
-				}
-								
-				
-			}else{
-				//doom
 			}
 			
+			
+			$themePath = $info->Configuration['path']['theme'] . $name . '/';
+			$themeUrl = $info->Site->currentLink . $info->Configuration['url']['theme'] . $this->name . '/';
+			
+			
+			// javascript
+			$javascriptResult = $this->getFiles($themePath . 'javascript/', $themeUrl . 'javascript/', 'js');
+			if($javascriptResult)
+				$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
+			
+			// css
+			$cssResult = $this->getFiles($themePath . 'css/', $themeUrl . 'css/', 'css');
+			if($cssResult)
+				$cssLinks = array_merge_recursive($cssLinks, $cssResult);
+				
+			$bentoJavascriptPath = $info->Configuration['path']['javascript'];
+			$bentoJavascriptUrl = $info->Site->getLink('javascript');	
+				
+			// javascript
+			// This code loads the javascript that ships with Bento- we load it last so it overrides any
+			// javascript in the modules. Since we only store libraries here, and all modules use those libraries,
+			// we don't want modules or themes to be able to overwrite those specific ones.
+			$javascriptResult = $this->getFiles($bentoJavascriptPath, $bentoJavascriptUrl, 'js');
+			if($javascriptResult)
+				$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
+				
+			$data['cssLinks'] = $cssLinks;
+			$data['jsLinks'] = $javascriptLinks;
+			
 			$cache->storeData($data);
-		}
+		}		
 		
-		
-		
-		$this->url = $info->Site->currentLink . $info->Configuration['url']['theme'] . $this->name . '/';
-		
-		$this->jsPath = $data['path']['javascript'];
-		$this->cssPath = $data['path']['css'];
-		$this->formPath = $data['path']['forms'];
-		
-		$this->jsFiles = $data['javascript'];
-		$this->formFiles = $data['forms'];
-		$this->cssFiles = $data['css'];
+		$this->jsUrls = $data['jsLinks'];
+		$this->cssUrls = $data['cssLinks'];
 	}
-
-	public function jsUrl($plugin, $library = 'jquery')
+	
+	protected function loadUrl($type, $name, $library)
 	{
-		if(isset($this->jsFiles[$library][$plugin]))
+		$filesAttribute = $type . 'Urls';
+		if(isset($this->{$filesAttribute}[$library][$name]))
 		{
-			$compression = ($this->jsFiles[$library][$plugin]) ? '.min' : '';
-			return $this->url . 'javascript/' . $library . '.' . $plugin . $compression . '.js';
+			$output = ($this->allowMin && isset($this->{$filesAttribute}[$library][$name]['minLink'])) ? 
+															$this->{$filesAttribute}[$library][$name]['minLink'] :
+															$this->{$filesAttribute}[$library][$name]['mainLink'];
+			return $output;
+		}else{
+			return false;
 		}
-		return false;
+	}
+	
+	
+	
+	public function jsUrl($name, $library = 'none')
+	{
+		return $this->loadUrl('js', $name, $library);
 	}	
 	
-	public function cssUrl($name, $extension)
+	public function cssUrl($name, $library = 'none')
 	{
-		return (in_array($name, $this->cssFiles)) ? $this->url . 'css/' . $name . '.css' : false;
+		return $this->loadUrl('css', $name, $library);
 	}
 	
-	
-	public function formResource($name, $extension)
+	protected function getFiles($path, $url, $extention = '.*')
 	{
-		return ($this->formFiles[$name][$extension]) ? $this->url . 'forms/' . $name . '.' . $extension : false;
-	}
-	
-	
-	protected function getFiles($path)
-	{
-		$pattern = glob($path . '*');
+		$pattern = glob($path . '*' . $extention);
 		$fileArray = array();
 		foreach($pattern as $file)
 		{
-			$fullFile = array_pop(explode('/', $file));
-			$fileArray[] = explode('.', $fullFile);
+			$fileName = array_pop(explode('/', $file));
+			$fileDetails = explode('.', $fileName);
+			$min = false;
+			
+			$extension = array_pop($fileDetails);
+			
+			$library = array_shift($fileDetails);
+			
+			switch (count($fileDetails))
+			{
+				case 0:
+					$name = $library;
+					$library = 'none';
+					break;
+					
+				case 2:
+					$option = array_pop($fileDetails);
+					if($option = 'min')
+					{
+						$min = true;
+					}
+				
+				case 1:
+					$name = array_pop($fileDetails);
+					break;	
+					
+			}
+			
+			// name, library, extension, min
+			
+			if($min)
+			{
+				$fileArray[$library][$name]['minLink'] = $url . $fileName;
+			}else{
+				$fileArray[$library][$name]['mainLink'] = $url . $fileName;
+			}
+			
 		}
 		return $fileArray;
 	}

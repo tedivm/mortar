@@ -41,7 +41,7 @@ class ModuleInfo implements ArrayAccess
 				$info['Name'] = $infoRow->mod_name;
 				$info['ID'] = $infoRow->mod_id;
 				$info['Package'] = $infoRow->mod_package;
-				$info['PathToPackage'] = $config['path']['packages'] . $info['Package'] . '/';
+				$info['PathToPackage'] = $config['path']['modules'] . $info['Package'] . '/';
 				$info['locationId'] = $infoRow->location_id;
 				$location = new Location($infoRow->location_id);
 				$info['siteId'] = $location->siteId;
@@ -68,6 +68,24 @@ class ModuleInfo implements ArrayAccess
 		$this->settings = $info['settings'];
 		
 	}	
+	
+	public function checkAuth($action)
+	{
+		if(!($this->permissions instanceof Permissions))
+		{
+			$user = ActiveUser::getInstance();
+			$location = new Location($this->info['locationId']);
+			$this->permission = new Permissions($location, $user);
+			//echo 1;
+		}		
+	//	var_dump($this->permission);
+		//echo $action;
+		
+		return $this->permission->is_allowed($action);
+	}
+	
+	
+	
 	
 	public function settings()
 	{

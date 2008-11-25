@@ -139,17 +139,13 @@ class Form
 				{
 					$input->property('id', $this->name . "_" . $input->name);
 	
-					switch ($input->type)
-					{
-						case'html':// for now we'll dump it in the text area, but we need to wire in the javascript code as some point
-						case 'textarea':
-							$inputHtml = new HtmlObject('textarea');
-							$inputHtml->wrapAround($input->value);
-							break;
-						
-							
-							
+					
+					
+					// preprocess special types
+					
+					switch ($input->type) {
 						case 'location':
+							$input->type = 'select';
 							// check property for base location
 							// check for array of location types
 							if(is_array($input->property('types')))
@@ -191,7 +187,47 @@ class Form
 								$input->setOptions($id, $string, $attributes);
 							}
 							
+							break;
 							
+						case 'module':
+							
+							if(!isset($input->properties['moduleName']))
+								throw new BentoError('Module type required for input type module.');
+								
+							$packageInfo = new PackageInfo($input->properties['moduleName']);
+							$permission = ($input->properties['permission']) ? $input->properties['permission'] : '';
+							$moduleList = $packageInfo->getModules($permission);
+							$input->type = 'select';
+							
+							foreach($moduleList as $module)
+							{
+								$location = new Location($module['locationId']);								
+								$input->setOptions($module['modId'], (string) $location);
+							}
+							
+							
+							break;
+							
+						default:
+							break;
+					}
+					
+					
+					
+					
+					
+					
+					
+					// process raw types
+					
+					
+					switch ($input->type)
+					{
+						case'html':// for now we'll dump it in the text area, but we need to wire in the javascript code as some point
+						case 'textarea':
+							$inputHtml = new HtmlObject('textarea');
+							$inputHtml->wrapAround($input->value);
+							break;
 							
 						case 'select':
 							$inputHtml = new HtmlObject('select');
@@ -298,6 +334,7 @@ class Form
 			$page = ActivePage::get_instance();
 			$page->addStartupScript($javascript);
 			$page->addJQueryInclude($jqueryPlugins);
+			//$page->
 			
 		}else{
 			

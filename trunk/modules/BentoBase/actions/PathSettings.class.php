@@ -48,12 +48,17 @@ class BentoBaseActionPathSettings extends PackageAction
 				
 				createInput('abstract')->
 					setLabel('Abstract Classes')->
-					property('value', $configIni->get('path', 'abstract'))->
+					property('value', $configIni->get('path', 'abstracts'))->
 				getForm()->
 				
 				createInput('engines')->
 					setLabel('Engine Classes')->
 					property('value', $configIni->get('path', 'engines'))->
+				getForm()->
+				
+				createInput('javascript')->
+					setLabel('Javascript')->
+					property('value', $configIni->get('path', 'javascript'))->
 				getForm()->
 				
 				createInput('temp')->
@@ -73,7 +78,7 @@ class BentoBaseActionPathSettings extends PackageAction
 					$inputHandler = $form->getInputhandler();
 					
 					
-					foreach(array('base', 'theme', 'config', 'mainclasses', 'packages', 'abstract', 'engines', 'library') as $value)
+					foreach(array('base', 'theme', 'config', 'mainclasses', 'packages', 'abstracts', 'engines', 'library', 'javascript') as $value)
 					{
 						$configIni->set('path', $value, $inputHandler[$value]);
 					}

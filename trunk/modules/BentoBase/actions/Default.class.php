@@ -30,6 +30,19 @@ class BentoBaseActionDefault extends PackageAction
 	
 	public function viewAdmin()
 	{
+		$user = ActiveUser::getInstance();
+		
+		if($user->getName() == 'guest')
+		{
+			$url = $this->linkToSelf();
+			$url->property('action', 'LogIn');
+			$url->property('engine', 'Admin');
+			header('Location:' . $url);
+ 		}
+			
+		
+		
+		
 		$get = Get::getInstance();
 		$tab = ($get['tab']) ? $get['tab'] : 'Main';
 		$this->AdminSettings['linkTab'] = $tab;
