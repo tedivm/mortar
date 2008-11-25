@@ -89,7 +89,7 @@ class DisplayMaker
 		
 		if($package != '')
 		{
-			$path_to_package .= $config['path']['packages'] . $package . '/templates/' . $template . '.template.php';
+			$path_to_package .= $config['path']['modules'] . $package . '/templates/' . $template . '.template.php';
 			if($this->set_display_template_byfile($path_to_package))
 				return true;
 		}

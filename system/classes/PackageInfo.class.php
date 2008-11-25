@@ -26,7 +26,7 @@ class PackageInfo
 				
 				$db = db_connect('default_read_only');
 				
-				$packagePath = $config['path']['packages'] . $packageName;
+				$packagePath = $config['path']['modules'] . $packageName;
 				if(file_exists($packagePath))
 				{
 					$path = $packagePath;
@@ -149,6 +149,30 @@ class PackageInfo
 	public function getMeta($name)
 	{
 		return $this->meta[$name];
+	}
+	
+	public function getModules($requiredPermission = '')
+	{
+		$requiredPermission = 'Add';
+		if(strlen($requiredPermission) > 0)
+		{
+			$user = ActiveUser::getInstance();
+			$outputModules = array();
+			foreach($this->installedModules as $module)
+			{
+			//	var_dump($module);
+				$moduleInfo = new ModuleInfo($module['modId']);
+				
+				if($moduleInfo->checkAuth($requiredPermission))
+				{
+					$outputModules[] = $module;
+				}
+			}
+		}else{
+			$outputModules = $this->installedModules;
+		}
+		
+		return $outputModules;
 	}
 	
 	public function checkAuth($action)

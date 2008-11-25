@@ -4,16 +4,22 @@ class PackageList
 {
 	protected $packages = array();
 	
-	public function __construct()
+	public function __construct($installedOnly = false)
 	{
-		$this->loadPackages();
+		if($installedOnly)
+		{
+			$this->loadInstalledPackages();
+		}else{
+			$this->loadPackages();
+		}
+		
 	}
 	
 	protected function loadPackages()
 	{
 		$info = InfoRegistry::getInstance();
 		
-		$packageDirectories = glob($info->Configuration['path']['packages'] . '*');
+		$packageDirectories = glob($info->Configuration['path']['modules'] . '*');
 		$packageList = array();
 		foreach ($packageDirectories as $packagePath)
 		{
@@ -21,6 +27,20 @@ class PackageList
 			$packageList[$packageName] = new PackageInfo($packageName);
 		}
 		
+		$this->packages = $packageList;
+	}
+	
+	protected function loadInstalledPackages()
+	{
+		$db = dbConnect('default_read_only');
+		$results = $db->query('SELECT mod_package FROM modules');
+		$packageList = array();
+		while($row = $results->fetch_assoc())
+		{
+			$packages[] = $row['mod_package'];
+			$packageList[$row['mod_package']] = new PackageInfo($row['mod_package']);
+		}
+
 		$this->packages = $packageList;
 	}
 	

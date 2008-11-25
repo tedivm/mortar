@@ -80,7 +80,7 @@ function autoloadError($class_name)
 function autoloadAbstract($class_name)
 {
 	$config = Config::getInstance();
-	$class_filename = $config['path']['abstract'] . $class_name . '.class.php';
+	$class_filename = $config['path']['abstracts'] . $class_name . '.class.php';
 	
 	try{
 		if(is_readable($class_filename))
@@ -110,7 +110,7 @@ function load_helper($package, $class)
 
 	if(!class_exists($classname, false))
 	{
-		$class_path = $config['path']['packages'] . $package . '/classes/' . $class .'.helper_class.php';
+		$class_path = $config['path']['modules'] . $package . '/classes/' . $class .'.helper_class.php';
 
 		if(file_exists($class_path))
 		{

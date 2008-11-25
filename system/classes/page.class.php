@@ -480,8 +480,7 @@ class Page implements ArrayAccess
 			{
 				foreach($this->$variable as $content)
 				{
-					$output .= $content . '
-';
+					$output .= $content . PHP_EOL;
 				}
 				$display->addContent($variable, $output);
 			}			
@@ -597,7 +596,7 @@ class ActivePage extends Page
 	 */
 	private function __construct()
 	{	
-		$this->addJQueryInclude(array('1.2.6', 'ui-1.6b', 'metadata', 'demensions'));
+		$this->addJQueryInclude(array('1_2_6', 'ui-1_6b', 'metadata', 'demensions'));
 
 	}
 	

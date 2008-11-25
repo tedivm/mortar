@@ -32,7 +32,7 @@ class InstallModule
 			throw new BentoError('You can not create two locations with the same name and parent.');
 		
 		$config = Config::getInstance();
-		$this->pathToPackage = $config['path']['packages'] . $this->package . '/';
+		$this->pathToPackage = $config['path']['modules'] . $this->package . '/';
 		if(is_array($settings) && count($settings) > 0)
 		{
 			$this->settings = $settings;
@@ -52,7 +52,7 @@ class InstallModule
 		try{
 				
 			$config = Config::getInstance();
-			$pathToPackage = $config['path']['packages'] . $this->package . '/';
+			$pathToPackage = $config['path']['modules'] . $this->package . '/';
 			$version = new Version();
 			
 			if(file_exists($pathToPackage . 'meta.php'))

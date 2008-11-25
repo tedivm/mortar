@@ -16,7 +16,7 @@ class InstallEngine // extends Engine
 	{
 		$config = Config::getInstance();
 		
-		$path = $config['path']['packages'] . 'BentoBase/actions/Install.class.php';
+		$path = $config['path']['modules'] . 'BentoBase/actions/Install.class.php';
 		
 		// Load Action Class
 		try {

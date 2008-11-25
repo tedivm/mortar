@@ -20,7 +20,7 @@ class AdminEngine extends Engine
 		{
 			$config['modulePackage'] = ereg_replace("[^A-Za-z0-9]", "", $get['modulePackage']);
 			$this->className = ($config['modulePackage'] . 'Action' . $config['action']);
-			$this->pathToModule = $config['path']['packages'] . $config['modulePackage'] . '/';
+			$this->pathToModule = $config['path']['modules'] . $config['modulePackage'] . '/';
 			$this->runMethod = 'viewGeneric' . $this->engine_type;
 		}
 		

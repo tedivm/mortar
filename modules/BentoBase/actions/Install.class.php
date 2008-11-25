@@ -69,7 +69,7 @@ class BentoBaseActionInstall //extends Action
 					$path['temp'] = ($_POST['tempPath']) ? $_POST['tempPath'] : $path['base'] . 'temp/';
 					$path['library'] = ($_POST['library']) ? $_POST['library'] : $path['base'] . 'system/library/';
 					$path['functions'] = ($_POST['functions']) ? $_POST['functions'] : $path['base'] . 'system/functions/';
-					
+					$path['javascript'] = ($_POST['javascript']) ? $_POST['javascript'] : $path['base'] . 'javascript/';
 					
 					
 					
@@ -93,13 +93,14 @@ class BentoBaseActionInstall //extends Action
 						$configFile->set('path', 'theme', $path['theme']);
 						$configFile->set('path', 'config', $path['config']);
 						$configFile->set('path', 'mainclasses', $path['mainClasses']);
-						$configFile->set('path', 'packages', $path['packages']);
-						$configFile->set('path', 'abstract', $path['abstracts']);
+						$configFile->set('path', 'modules', $path['packages']);
+						$configFile->set('path', 'abstracts', $path['abstracts']);
 						$configFile->set('path', 'engines', $path['engines']);
 						$configFile->set('path', 'temp', $path['temp']);
 						$configFile->set('path', 'library', $path['library']);
 						$configFile->set('path', 'functions', $path['functions']);
-					
+						$configFile->set('path', 'javascript', $path['javascript']);
+						
 						$configFile->set('url', 'theme', $url['theme']);
 						$configFile->set('url', 'modules', $url['modules']);
 						$configFile->set('url', 'javascript', $url['javascript']);
@@ -195,7 +196,7 @@ class BentoBaseActionInstall //extends Action
 							
 					// Set Up database structure
 							
-					$pathToSQL = $config['path']['packages'] . 'BentoBase/sql/system_install.sql.php';
+					$pathToSQL = $config['path']['modules'] . 'BentoBase/sql/system_install.sql.php';
 					$sql = file_get_contents($pathToSQL);
 							
 
@@ -473,7 +474,7 @@ class BentoBaseActionInstall //extends Action
 		$config = Config::getInstance();
 		$output = '';
 		
-		$modulePath = $config['path']['packages'] . 'BentoBase/';
+		$modulePath = $config['path']['modules'] . 'BentoBase/';
 		
 		if($this->error)
 		{
