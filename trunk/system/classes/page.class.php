@@ -309,30 +309,32 @@ class Page implements ArrayAccess
 	protected $script = array();
 	protected $scriptStartup = array();	
 	protected $regions = array();
-	protected $css = array();
 	public $theme = 'default';
 
 	
 	protected $display;
+
+	// plugins
+	protected $css = array();
+	protected $javascript = array();
+	
+	// actual paths
 	protected $jsIncludes = array();
+	protected $cssIncludes = array();
+	
 	
 	protected $templateFile = 'index.html';
 	
 	protected $headerTemplate = '
 	<title>{# title #}<title>
-	
 	{# meta #}
-	
-	{# css #}
-	
+	{# cssIncludes #}
 	{# jsIncludes #}
 	
 	<script type="text/javascript">
 	
 		$(function(){
-		
 			{# scriptStartup #}
-			
 		});	
 			
 		{# script #}
@@ -352,7 +354,6 @@ class Page implements ArrayAccess
 		}		
 		
 		$cache = new Cache('themes', $this->theme, $file);
-		
 		$template = $cache->get_data();
 		
 		if(!$cache->cacheReturned)
@@ -368,12 +369,10 @@ class Page implements ArrayAccess
 			$template = file_get_contents($path);
 			$template = $this->preProcessTemplate($template);
 			$cache->store_data($template);
-
 		}
 		
 		$this->display = new DisplayMaker();
-		$this->display->set_display_template($template);		
-		
+		$this->display->set_display_template($template);
 	}
 	
 	public function getThemeUrl()
@@ -427,7 +426,29 @@ class Page implements ArrayAccess
 		$this->scriptStartup[] = $javascript;
 	}
 	
-	public function addJSInclude($jsfiles)
+	public function addJavaScript($name, $library = 'none')
+	{
+		if(!is_array($name))
+		{
+			$this->javascript[$library][] = $name;
+		}elseif(is_array($name))
+		{
+			$this->javascript = array_merge_recursive($this->javascript, $name);
+		}
+	}
+
+	public function addCss($name, $library = 'none')
+	{
+		if(!is_array($name))
+		{
+			$this->css[$library][] = $name;
+		}elseif(is_array($name))
+		{
+			$this->css = array_merge_recursive($this->css, $name);
+		}
+	}
+	
+	protected function addJSInclude($jsfiles)
 	{
 		if(is_string($jsfiles))
 			$jsfiles = array($jsfiles);
@@ -439,21 +460,21 @@ class Page implements ArrayAccess
  		}
 	}
 	
+	protected function addCssInclude($cssfiles)
+	{
+		if(is_string($cssfiles))
+			$cssfiles = array($cssfiles);
+			
+		foreach($cssfiles as $file)
+		{
+			if(!in_array($file, $this->cssIncludes))
+				$this->cssIncludes[] = '<link href="' . $file . '" rel="stylesheet" type="text/css"/>';
+ 		}
+	}
+	
 	public function addJQueryInclude($plugin)
 	{
-		
-		if(is_string($plugin))
-			$plugin = array($plugin);
-		
-		$info = InfoRegistry::getInstance();
-		$extensionPrefix = '.min';
-		$pathStart = $info->Site->getLink('javascript');
-						
-		foreach($plugin as $file)
-		{		
-			$path = $pathStart . 'jquery.' . $file . $extensionPrefix . '.js';
-			$this->addJSInclude($path);
-		}
+		$this->addJavaScript($plugin, 'jquery');
 	}
 	
 	public function makeDisplay()
@@ -470,8 +491,9 @@ class Page implements ArrayAccess
 		$tags = $display->tagsUsed(false);
 		
 		// This is a list of all of the 'array' items that need to be cycled through and added as a single items
-		$groups = array('script', 'scriptStartup', 'meta', 'jsIncludes', 'css');
-		
+		$groups = array('script', 'scriptStartup', 'meta', 'jsIncludes', 'cssIncludes');
+				
+		$output = PHP_EOL;
 		foreach($groups as $variable)
 		{
 			$content = '';
@@ -493,7 +515,7 @@ class Page implements ArrayAccess
 		
 		return $this->postProcessTemplate($display->make_display(false));
 	}
-
+	
 	public function addRegion($tag, $content)
 	{
 		$this->regions[$tag] = $content;
@@ -526,23 +548,34 @@ class Page implements ArrayAccess
 	// run every time page is loaded
 	protected function runtimeProcessTemplate()
 	{
+		//$this->addJavaScript('defaults', 'jquery');
+		//$this->addJavaScript('defaults', 'bento');
+		
 		$theme = new Theme($this->theme);
-		$js = $theme->jsUrl('defaults', 'jquery');
-		$info = InfoRegistry::getInstance();
-		$pathStart = $info->Site->getLink('javascript');
-
 		
-		$this->addJSInclude($pathStart . 'bento.defaults.js');
+		$jsUrls = array();
+		foreach($this->javascript as $library => $plugins)
+		{
+			foreach($plugins as $pluginName)
+			{
+				if($url = $theme->jsUrl($pluginName, $library))
+					$jsUrls[] = $url;
+			}
+		}
 		
-		if($js)
-			$this->addJSInclude($js);
+		$this->addJSInclude($jsUrls);
 		
+		$cssUrls = array();
+		foreach($this->css as $library => $plugins)
+		{
+			foreach($plugins as $pluginName)
+			{
+				if($url = $theme->cssUrl($pluginName, $library))
+					$cssUrls[] = $url;				
+			}
+		}
 		
-		
-		
-		
-		
-		$this->display;
+		$this->addCssInclude($cssUrls);
 	}
 	
 	// doesn't do much yet
@@ -596,7 +629,9 @@ class ActivePage extends Page
 	 */
 	private function __construct()
 	{	
-		$this->addJQueryInclude(array('1_2_6', 'ui-1_6b', 'metadata', 'demensions'));
+		$this->addJavaScript(array( 'jquery' => array('1_2_6', 'ui-1_6b', 'metadata', 'dimensions')));
+		$this->addCss(array('none' => array('all')));
+//		$this->addJQueryInclude(array('1_2_6', 'ui-1_6b', 'metadata', 'demensions'));
 
 	}
 	
@@ -618,6 +653,7 @@ class ActivePage extends Page
 	
 	public function clear()
 	{
+		$this->setTemplate();		
 		$this->id = '';
 		$this->mod_id = '';
 		$this->title = '';

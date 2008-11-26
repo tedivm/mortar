@@ -12,8 +12,12 @@ class Theme
 
 	public function __construct($name)
 	{
+		if(defined('DEBUG') && DEBUG > 1)
+			$this->allowMin = false;
+			
 		$this->name = $name;
 		$info = InfoRegistry::getInstance();
+		$this->url = $info->Site->currentLink . $info->Configuration['url']['theme'] . $name . '/';
 		
 		$cache = new Cache('theme', $this->name, $info->Site->currentLink);
 		$data = $cache->getData();
@@ -76,6 +80,19 @@ class Theme
 			if($javascriptResult)
 				$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
 				
+				
+			$bentoCssPath = $info->Configuration['path']['css'];
+			$bentoCssUrl = $info->Site->getLink('css');	
+				
+			// css
+			$CssResult = $this->getFiles($bentoCssPath, $bentoCssUrl, 'js');
+			if($CssResult)
+				$cssLinks = array_merge_recursive($CssResult, $cssLinks);				
+				// the order is important- this method favors the Theme CSS files over the system ones
+				
+				
+				
+				
 			$data['cssLinks'] = $cssLinks;
 			$data['jsLinks'] = $javascriptLinks;
 			
@@ -85,22 +102,6 @@ class Theme
 		$this->jsUrls = $data['jsLinks'];
 		$this->cssUrls = $data['cssLinks'];
 	}
-	
-	protected function loadUrl($type, $name, $library)
-	{
-		$filesAttribute = $type . 'Urls';
-		if(isset($this->{$filesAttribute}[$library][$name]))
-		{
-			$output = ($this->allowMin && isset($this->{$filesAttribute}[$library][$name]['minLink'])) ? 
-															$this->{$filesAttribute}[$library][$name]['minLink'] :
-															$this->{$filesAttribute}[$library][$name]['mainLink'];
-			return $output;
-		}else{
-			return false;
-		}
-	}
-	
-	
 	
 	public function jsUrl($name, $library = 'none')
 	{
@@ -112,8 +113,17 @@ class Theme
 		return $this->loadUrl('css', $name, $library);
 	}
 	
+	public function getUrl()
+	{
+		return $this->url;
+	}
+	
 	protected function getFiles($path, $url, $extention = '.*')
 	{
+		
+		if(strlen($path) < 1 || strlen($url) < 1)
+			return false;
+		
 		$pattern = glob($path . '*' . $extention);
 		$fileArray = array();
 		foreach($pattern as $file)
@@ -159,6 +169,20 @@ class Theme
 		return $fileArray;
 	}
 	
+	protected function loadUrl($type, $name, $library)
+	{
+		$filesAttribute = $type . 'Urls';
+		
+		if(isset($this->{$filesAttribute}[$library][$name]))
+		{
+			$output = ($this->allowMin && isset($this->{$filesAttribute}[$library][$name]['minLink'])) ? 
+															$this->{$filesAttribute}[$library][$name]['minLink'] :
+															$this->{$filesAttribute}[$library][$name]['mainLink'];
+			return $output;
+		}else{
+			return false;
+		}
+	}
 	
 }
 
