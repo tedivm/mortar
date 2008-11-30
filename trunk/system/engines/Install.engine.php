@@ -14,16 +14,14 @@ class InstallEngine // extends Engine
 	
 	public function runModule()
 	{
-		$config = Config::getInstance();
-		
-		$path = $config['path']['modules'] . 'BentoBase/actions/Install.class.php';
-		
 		// Load Action Class
 		try {
 
+			$config = Config::getInstance();
+			$path = $config['path']['modules'] . 'BentoBase/actions/Install.class.php';
+			
 			$classname = 'BentoBaseActionInstall'; 
 			$runMethod = 'viewInstall';
-			
 			
 			if(!class_exists($classname, false))
 			{
@@ -33,7 +31,6 @@ class InstallEngine // extends Engine
 			}
 							
 			$this->mainAction = new $classname();
-		
 			$this->content = $this->mainAction->$runMethod();
 			
 		}catch (ResourceNotFoundError $e) {	

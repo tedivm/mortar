@@ -59,12 +59,17 @@ class Post implements ArrayAccess
 		return self::$instance;
 	}
 
+	public function getRaw($key)
+	{
+		return $this->variables[$key];
+	}	
+	
 	public function get_raw($key)
 	{
 		return $this->variables[$key];
 	}
 	
-	public function with_html($key)
+	public function withHtml($key)
 	{
 		if(is_array($this->variables[$key]))
 		{
@@ -78,8 +83,6 @@ class Post implements ArrayAccess
 		}
 	}
 	
-
-	//lets make this sucker work like an array
 	
 	public function offsetExists($offset)
 	{

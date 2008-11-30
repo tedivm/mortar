@@ -481,7 +481,7 @@ class Page implements ArrayAccess
 	{
 		$config = Config::getInstance();
 
-		if(!is_a($this->display, 'DisplayMaker'))
+		if(!($this->display instanceof DisplayMaker))
 		{
 			$this->setTemplate();
 		}

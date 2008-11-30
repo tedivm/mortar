@@ -32,7 +32,7 @@ class Permissions
 		if(is_int($location))
 			$location = new Location($location);
 		
-		if(!is_a($location, 'Location'))
+		if(!($location instanceof Location))
 			throw new BentoError('Expecting location object.');
 			
 		$this->location = $location;	
@@ -256,7 +256,7 @@ class Location implements intlocation
 		}
 		
 		
-		if(is_a($this->parent, 'location'))
+		if(($this->parent instanceof Location))
 		{
 			$parentId = $this->parent->location_id();
 			
@@ -278,8 +278,8 @@ class Location implements intlocation
 
 		$db_location->inherit = ($this->inherits) ? 1 : 0;
 		
-		$db_location->save();
-		
+		$result = $db_location->save();
+
 		$this->id = $db_location->location_id;
 		
 		
@@ -419,7 +419,7 @@ class Location implements intlocation
 			else
 				$site = false;
 			
-		}elseif(is_a($this->parent, 'Location')){
+		}elseif($this->parent instanceof Location){
 			$site = $this->parent->getSite();
 		}
 		

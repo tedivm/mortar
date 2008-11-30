@@ -28,7 +28,7 @@ class AdminEngine extends Engine
 		
 		
 		$page = ActivePage::get_instance();
-		
+		$page->addRegion('title', 'BentoBase Admin');
 		
 		if(isset($get['ajax']))
 		{
