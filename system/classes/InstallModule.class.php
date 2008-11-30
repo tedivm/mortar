@@ -23,7 +23,7 @@ class InstallModule
 	{
 		$this->package = $package;
 		$this->name = $name;
-		$this->parentLocation = (is_a($parentLocation, 'Location')) ? $parentLocation->id : $parentLocation;
+		$this->parentLocation = ($parentLocation instanceof Location) ? $parentLocation->id : $parentLocation;
 		
 		$location = new Location($this->parentLocation);
 
@@ -206,7 +206,7 @@ class InstallModule
 				if(!isset($scope))
 					$scope = staticHack($className, 'scope');
 
-				if(is_a($scope, 'Location'))
+				if($scope instanceof Location)
 					$scope = $scope->id;
 					
 				

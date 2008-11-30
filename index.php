@@ -1,12 +1,29 @@
 <?php
-
 define('START_TIME', microtime(true));
 define('BASE_PATH', dirname(__FILE__) . '/');
-define('DEBUG', 3);	// 3, 2, 1- info, warning, error
-define('DISPATCHER', 'index.php');
+define('DISPATCHER', array_pop(explode('/', __FILE__)));
+
+
+// Developer Constants
+define('DEBUG', 0);	// 3, 2, 1, 0- info, warning, error, none
+// 3 - info, warning, error
+// 2 - warning, error
+// 1 - error
+// 0 - none, for production environments
+
+
 define('IGNOREPERMISSIONS', false);	//FOR TESTING ONLY!!!!
+// This was placed in while testing the permissions code during the early creation phases
+// It still comes in handy when testing those things, but if turned on in a development environment
+// there would be obvious problems.
+
 define('BENCHMARK', false);
+
 define('DISABLECACHE', false);
+// This program is designed to take advantage of caching, and in many cases code was optimized to with
+// that in mind. Disabling caching is not recommended outside of development, which is why it is not 
+// an option in the interface.
+
 
 if(BENCHMARK)
 {
@@ -50,8 +67,8 @@ if($config->error && !file_exists('.blockinstall'))
 	$path['base'] =  BASE_PATH; 
 	$path['engines'] = BASE_PATH . 'system/engines/';
 	$path['library'] = BASE_PATH . 'system/library/';	
-	$path['packages'] = BASE_PATH . 'modules/'; 
-	 
+	$path['modules'] = BASE_PATH . 'modules/'; 
+	 $path['main_classes'] = BASE_PATH . 'system/classes/';
 	 
 	 
 	 

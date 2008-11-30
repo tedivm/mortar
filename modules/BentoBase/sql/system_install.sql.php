@@ -14,26 +14,16 @@ CREATE TABLE actions
 /* Add Indexes for: actions */
 CREATE UNIQUE INDEX actions_action_name_Idx ON actions (action_name);
 
-/******************** Add Table: cms_pages ************************/
+/******************** Add Table: aliases ************************/
 
 /* Build Table Structure */
-CREATE TABLE cms_pages
+CREATE TABLE aliases
 (
-	page_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	mod_id INTEGER UNSIGNED NOT NULL,
-	page_title VARCHAR(255) NOT NULL,
-	page_name VARCHAR(50) NOT NULL,
-	page_content TEXT NULL,
-	page_keywords TEXT NULL,
-	page_description VARCHAR(150) NULL,
-	page_createdon DATETIME NOT NULL,
-	page_template VARCHAR(255) NULL
+	location_id BIGINT UNSIGNED NOT NULL,
+	aliasType VARCHAR(15) NOT NULL DEFAULT 'other',
+	aliasLocation BIGINT UNSIGNED NULL,
+	aliasOther VARCHAR(60) NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
-/* Table Items: cms_pages */
-
-/* Add Indexes for: cms_pages */
-CREATE UNIQUE INDEX cms_pages_mod_id_page_name_Idx ON cms_pages (mod_id, page_name);
 
 /******************** Add Table: group_permissions ************************/
 
@@ -79,6 +69,7 @@ CREATE TABLE locations
 
 /* Add Indexes for: locations */
 CREATE INDEX locations_location_parent_Idx ON locations (location_parent);
+CREATE UNIQUE INDEX locations_location_parent_location_name_Idx ON locations (location_parent, location_name);
 CREATE INDEX locations_location_resource_location_parent_Idx ON locations (location_resource, location_parent);
 
 /******************** Add Table: member_group ************************/
@@ -111,19 +102,6 @@ CREATE TABLE mod_config
 /* Add Indexes for: mod_config */
 CREATE INDEX mod_config_mod_id_Idx ON mod_config (mod_id);
 CREATE UNIQUE INDEX mod_config_mod_id_name_Idx ON mod_config (mod_id, name);
-
-/******************** Add Table: module_has_regions ************************/
-
-/* Build Table Structure */
-CREATE TABLE module_has_regions
-(
-	mod_id INTEGER UNSIGNED NOT NULL,
-	region_id INTEGER UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
-/* Table Items: module_has_regions */
-ALTER TABLE module_has_regions ADD CONSTRAINT pkmodule_has_regions
-	PRIMARY KEY (mod_id, region_id);
 
 /******************** Add Table: modules ************************/
 
@@ -159,20 +137,6 @@ CREATE TABLE package_installed
 /* Table Items: package_installed */
 ALTER TABLE package_installed ADD CONSTRAINT pkpackage_installed
 	PRIMARY KEY (name);
-
-/******************** Add Table: page_content ************************/
-
-/* Build Table Structure */
-CREATE TABLE page_content
-(
-	page_id INTEGER UNSIGNED NOT NULL,
-	region_id INTEGER UNSIGNED NOT NULL,
-	page_content TEXT NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
-/* Table Items: page_content */
-ALTER TABLE page_content ADD CONSTRAINT pkpage_content
-	PRIMARY KEY (page_id, region_id);
 
 /******************** Add Table: permission_profiles ************************/
 
@@ -254,7 +218,7 @@ CREATE TABLE plugin_lookup_module
 /* Add Indexes for: plugin_lookup_module */
 CREATE INDEX plugin_lookup_module_hook_name_Idx ON plugin_lookup_module (hook, name);
 
-/******************** Add Table: site_settings ************************/
+/******************** Add Table: site_meta ************************/
 
 /* Build Table Structure */
 CREATE TABLE site_meta
@@ -272,17 +236,6 @@ CREATE TABLE sites
 	site_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	location_id BIGINT UNSIGNED NOT NULL,
 	name VARCHAR(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
-/******************** Add Table: template_regions ************************/
-
-/* Build Table Structure */
-CREATE TABLE template_regions
-(
-	region_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	region_name VARCHAR(30) NOT NULL,
-	region_tag VARCHAR(128) NOT NULL,
-	region_lockedby_mod_id INTEGER UNSIGNED NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 /******************** Add Table: urls ************************/
@@ -337,7 +290,7 @@ CREATE TABLE users
 	user_name VARCHAR(16) NOT NULL,
 	user_password VARCHAR(128) NULL,
 	user_email VARCHAR(255) NULL,
-	user_allowlogin CHAR(1) NULL
+	user_allowlogin CHAR(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 /* Table Items: users */
@@ -346,16 +299,19 @@ CREATE TABLE users
 CREATE INDEX user_name ON users (user_name, user_password);
 CREATE UNIQUE INDEX user_name_2 ON users (user_name);
 
-
-
-
-
-
 /************ Add Foreign Keys to Database ***************/
 
-/************ Foreign Key: fk_cms_pages_modules ***************/
-ALTER TABLE cms_pages ADD CONSTRAINT fk_cms_pages_modules
-	FOREIGN KEY (mod_id) REFERENCES modules (mod_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+/************ Foreign Key: fk_aliases_locations ***************/
+ALTER TABLE aliases ADD CONSTRAINT fk_aliases_locations
+	FOREIGN KEY (location_id) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/************ Foreign Key: fk_aliases_locations_result ***************/
+ALTER TABLE aliases ADD CONSTRAINT fk_aliases_locations_result
+	FOREIGN KEY (aliasLocation) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/************ Foreign Key: fk_aliases_locations_target ***************/
+ALTER TABLE aliases ADD CONSTRAINT fk_aliases_locations_target
+	FOREIGN KEY (aliasLocation) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_group_permissions_locations ***************/
 ALTER TABLE group_permissions ADD CONSTRAINT fk_group_permissions_locations
@@ -381,25 +337,9 @@ ALTER TABLE locations ADD CONSTRAINT fk_locations_locations
 ALTER TABLE mod_config ADD CONSTRAINT fk_mod_config_modules
 	FOREIGN KEY (mod_id) REFERENCES modules (mod_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-/************ Foreign Key: fk_cms_module_has_regions_modules ***************/
-ALTER TABLE module_has_regions ADD CONSTRAINT fk_cms_module_has_regions_modules
-	FOREIGN KEY (mod_id) REFERENCES modules (mod_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
-
-/************ Foreign Key: fk_cms_module_has_regions_template_regions ***************/
-ALTER TABLE module_has_regions ADD CONSTRAINT fk_cms_module_has_regions_template_regions
-	FOREIGN KEY (region_id) REFERENCES template_regions (region_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
-
 /************ Foreign Key: fk_modules_locations ***************/
 ALTER TABLE modules ADD CONSTRAINT fk_modules_locations
 	FOREIGN KEY (location_id) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
-
-/************ Foreign Key: fk_page_content_cms_pages ***************/
-ALTER TABLE page_content ADD CONSTRAINT fk_page_content_cms_pages
-	FOREIGN KEY (page_id) REFERENCES cms_pages (page_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
-
-/************ Foreign Key: fk_page_content_cms_region ***************/
-ALTER TABLE page_content ADD CONSTRAINT fk_page_content_cms_region
-	FOREIGN KEY (region_id) REFERENCES template_regions (region_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_permissionsprofile_has_actions_actions ***************/
 ALTER TABLE permissionsprofile_has_actions ADD CONSTRAINT fk_permissionsprofile_has_actions_actions
@@ -438,16 +378,12 @@ ALTER TABLE plugin_lookup_module ADD CONSTRAINT fk_plugin_lookup_module_package_
 	FOREIGN KEY (package_name) REFERENCES package_installed (name) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_site_settings_sites ***************/
-ALTER TABLE site_settings ADD CONSTRAINT fk_site_settings_sites
+ALTER TABLE site_meta ADD CONSTRAINT fk_site_settings_sites
 	FOREIGN KEY (site_id) REFERENCES sites (site_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_sites_locations ***************/
 ALTER TABLE sites ADD CONSTRAINT fk_sites_locations
 	FOREIGN KEY (location_id) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
-
-/************ Foreign Key: fk_template_regions_modules ***************/
-ALTER TABLE template_regions ADD CONSTRAINT fk_template_regions_modules
-	FOREIGN KEY (region_lockedby_mod_id) REFERENCES modules (mod_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_domains_sites ***************/
 ALTER TABLE urls ADD CONSTRAINT fk_domains_sites
@@ -472,25 +408,3 @@ ALTER TABLE user_permissions ADD CONSTRAINT fk_user_permissions_permission_profi
 /************ Foreign Key: fk_user_permissions_users ***************/
 ALTER TABLE user_permissions ADD CONSTRAINT fk_user_permissions_users
 	FOREIGN KEY (user_id) REFERENCES users (user_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
-
-/************ Foreign Key: fk_blog_entry_locations ***************/
-ALTER TABLE blog_entry ADD CONSTRAINT fk_blog_entry_locations
-	FOREIGN KEY (location_id) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
-
-/************ Foreign Key: fk_blog_entry_modules ***************/
-ALTER TABLE blog_entry ADD CONSTRAINT fk_blog_entry_modules
-	FOREIGN KEY (mod_id) REFERENCES modules (mod_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
-
-/************ Foreign Key: fk_blog_entry_users ***************/
-ALTER TABLE blog_entry ADD CONSTRAINT fk_blog_entry_users
-	FOREIGN KEY (author_id) REFERENCES users (user_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
-
-/************ Foreign Key: fk_blog_tags_blog_entry ***************/
-ALTER TABLE blog_tags ADD CONSTRAINT fk_blog_tags_blog_entry
-	FOREIGN KEY (entry_id) REFERENCES blog_entry (entry_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
-	
-	
-	
-/************ End of 10/07/08 Installation SQL ***************/
-	
-	
