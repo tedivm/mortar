@@ -280,11 +280,21 @@ class ObjectRelationshipMapper
 				$this->selected = true;
 				return true;
 			}else{
-				// 1022 == duplicate key
-				if($this->sql_errno == 1022)
-				{
-					$this->sql_errno = 0;
-					return $this->update();
+				
+				switch ($this->sql_errno) {
+					case 0:
+						return true;
+						
+					case 1022:
+					// 1022 == duplicate key
+					
+						$this->sq_errno = 0;
+						return $this->update();
+						break;
+					
+					default:
+						false;
+						break;
 				}
 				
 				return false;
@@ -400,7 +410,9 @@ class ObjectRelationshipMapper
 		$db = db_connect($this->db_write);
 		$update_stmt = $db->stmt_init();
 		$update_stmt->prepare($query);
-		call_user_func_array(array($update_stmt, 'bind_param_and_execute'), $sql_input);
+		
+		$results = call_user_func_array(array($update_stmt, 'bind_param_and_execute'), $sql_input);
+		return $results;
 	}
 	
 	// programmer interface stuff
