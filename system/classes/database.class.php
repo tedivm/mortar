@@ -218,12 +218,19 @@ class Mystmt extends mysqli_stmt
 	public function bind_param_and_execute()
 	{
 		$params = func_get_args();
+		Mysql_Base::$query_count++;
+		
+		Mysql_Base::$query_array[] = $this->myQuery;		
 		if(!call_user_func_array(array($this, 'bind_param'), $params))
 			throw new BentoError('Invalid Resource: ' . $this->error);
-		$this->execute();
-		$this->store_result();
-		Mysql_Base::$query_count++;
-		Mysql_Base::$query_array[] = $this->myQuery;
+		
+		if($this->execute())
+		{
+			$this->store_result();
+			return true;
+		}else{
+			return false;
+		}			
 	}
 }
 
