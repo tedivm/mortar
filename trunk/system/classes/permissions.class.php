@@ -265,7 +265,7 @@ class Location implements intlocation
 				$db_location->location_parent = $parentId;
 			}
 			
-		}elseif(is_numeric($this->parent)){
+		}elseif(is_numeric($this->parent) && $this->parent > 0){
 			$db_location->location_parent = $this->parent;
 		}
 		
@@ -273,13 +273,15 @@ class Location implements intlocation
 		$db_location->location_name = $this->name;
 		$db_location->location_resource = $this->resource;
 		
-		if($parentid)
-			$db_location->location_parent = $parentid;
-
 		$db_location->inherit = ($this->inherits) ? 1 : 0;
-		
-		$result = $db_location->save();
 
+		if(!$db_location->save())
+		{
+			var_dump($this);
+			throw new BentoError('Unable to save location');
+		}
+			
+		
 		$this->id = $db_location->location_id;
 		
 		
@@ -446,7 +448,7 @@ class Location implements intlocation
 			$outputArray[$this->id] = (string) $this;
 		}
 
-		
+
 		if(count($type) > 0)
 		{
 			if(!in_array('directory', $types))
@@ -460,19 +462,23 @@ class Location implements intlocation
 		}else{
 			$children = $this->getChildren();
 		}
-			
+		
 		if(is_array($children))
 		{
 			foreach($children as $child)
 			{
-				$outputArray = array_merge($outputArray, $child->getTreeArray($types, false));
+				$childTree = $child->getTreeArray($types, false);
+				
+				foreach($childTree as $childId => $childName)
+				{
+					$outputArray[$childId] = $childName;
+				}
 			}
 		}
 		
 		if($isFirst)
 			asort($outputArray);
-		
-		
+
 		return $outputArray;
 			
 	}
