@@ -3,7 +3,8 @@
 class BentoBotchActionAuthenticationError extends Action
 {
 	public $AdminSettings = array(	'linkTab' => 'Universal',
-									'headerTitle' => 'Forbidden');		
+									'headerTitle' => 'Forbidden',
+									'EnginePermissionOverride' => true);	
 	
 	public function logic()
 	{

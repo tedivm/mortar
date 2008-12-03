@@ -48,60 +48,6 @@ function autoloadLibrary($class_name)
 	
 }
 
-function autoloadMain($class_name)
-{
-	$config = Config::getInstance();
-	$class_filename = $config['path']['mainclasses'] . $class_name . '.class.php';
-	
-	try{
-		if(is_readable($class_filename))
-		{
-			include($class_filename);
-		}else{
-//			throw new BentoNotice('Unable to include file: ' . $class_filename);
-		}
-		
-	}catch (Exception $e){
-		
-	}
-	
-} 
-
-function autoloadError($class_name)
-{
-	try{
-		throw new BentoNotice('Unable to include class: ' . $class_name);
-	}catch (Exception $e){
-		
-	}
-	
-} 
-
-function autoloadAbstract($class_name)
-{
-	$config = Config::getInstance();
-	$class_filename = $config['path']['abstracts'] . $class_name . '.class.php';
-	
-	try{
-		if(is_readable($class_filename))
-		{
-			include($class_filename);
-		}else{
-//			throw new BentoNotice('Unable to include file: ' . $class_filename);
-		}
-		
-	}catch (Exception $e){
-		
-	}
-	
-} 
-
-// This is temporary until the new namespaces stuff is out
-spl_autoload_register('autoloadMain');
-spl_autoload_register('autoloadAbstract');
-spl_autoload_register('autoloadLibrary');
-spl_autoload_register('autoloadError');
-
 function load_helper($package, $class)
 {
 	$config = Config::getInstance();

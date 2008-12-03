@@ -5,7 +5,7 @@ define('DISPATCHER', array_pop(explode('/', __FILE__)));
 
 
 // Developer Constants
-define('DEBUG', 0);	// 3, 2, 1, 0- info, warning, error, none
+define('DEBUG', 1);	// 3, 2, 1, 0- info, warning, error, none
 // 3 - info, warning, error
 // 2 - warning, error
 // 1 - error
@@ -19,7 +19,7 @@ define('IGNOREPERMISSIONS', false);	//FOR TESTING ONLY!!!!
 
 define('BENCHMARK', false);
 
-define('DISABLECACHE', false);
+define('DISABLECACHE', true);
 // This program is designed to take advantage of caching, and in many cases code was optimized to with
 // that in mind. Disabling caching is not recommended outside of development, which is why it is not 
 // an option in the interface.
@@ -56,6 +56,8 @@ require('system/abstracts/action.class.php');
 require('system/classes/hooks.class.php');
 require('system/classes/Site.class.php');
 require('system/classes/PackageInfo.class.php');
+
+require('system/classes/AutoLoader.class.php');
 
 $config = Config::getInstance();
 
@@ -133,10 +135,15 @@ try {
 	
 }catch (Exception $e){
 	
+	$info = InfoRegistry::getInstance();
+	$site = ActiveSite::get_instance();	
+	$errorModule = $site->location->meta('error'); 
+	
 	switch (get_class($e))
 	{
 		case 'AuthenticationError':
-			$action = 'AuthenticationError';
+			$action = 'LogIn';
+			$errorModule = 1;
 			break;
 			
 		case 'ResourceNotFoundError':
@@ -154,15 +161,12 @@ try {
 	}
 	
 	$e->getCode();
+
 	
-	$info = InfoRegistry::getInstance();
-	$site = ActiveSite::get_instance();
-	
-	$moduleInfo = new ModuleInfo($site->location->meta('error'));
+	$moduleInfo = new ModuleInfo($errorModule);
 	$packageInfo = new PackageInfo($moduleInfo['Package']);
 	
 	//$packageInfo;
-	
 	$engine = new $engineName($moduleInfo->getId(), $action);
 	$engine->runModule();
 	$output = $engine->display();

@@ -6,8 +6,8 @@ class BentoBaseActionLogIn extends PackageAction
 	
 	public $AdminSettings = array('linkLabel' => 'Log In',
 									'linkTab' => 'Universal',
-									'headerTitle' => 'Log In');
-						//			'linkContainer' => 'User');
+									'headerTitle' => 'Log In',
+									'EnginePermissionOverride' => true);
 									
 	protected $form;
 	protected $loginSuccessful = false;

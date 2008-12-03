@@ -277,8 +277,8 @@ class Location implements intlocation
 
 		if(!$db_location->save())
 		{
-			var_dump($this);
-			throw new BentoError('Unable to save location');
+			var_dump($db_location);
+ 			throw new BentoError('Unable to save location');
 		}
 			
 		
