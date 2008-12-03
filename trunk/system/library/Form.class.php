@@ -178,7 +178,7 @@ class Form
 							
 							$baseLocation = new Location($locationId);
 							$locationList = $baseLocation->getTreeArray($types);
-							
+
 							foreach($locationList as $id => $string)
 							{
 								$attributes = array();

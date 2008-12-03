@@ -3,7 +3,7 @@
 Class AdminNavigation
 {
 	protected $tabs = array();
-	
+	protected $enginePermission = 'Admin';
 	public function __construct()
 	{
 		
@@ -143,7 +143,7 @@ Class AdminNavigation
 			return false;
 			
 		$packageInfo = new PackageInfo($link['package']);
-		return $packageInfo->checkAuth($link['permission']);
+		return ($packageInfo->checkAuth($link['permission']) && $packageInfo->checkAuth($this->enginePermission));
 	}
 	
 	public function getTabs($activeTab = '')

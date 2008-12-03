@@ -19,7 +19,7 @@ class PackageInfo
 		$this->name = $packageName;
 		
 		$cache = new Cache('packages', $packageName, 'info');
-		$info = $cache->get_data();
+		$info = $cache->getData();
 		if(!$cache->cacheReturned)
 		{
 			try {
@@ -117,6 +117,7 @@ class PackageInfo
 						
 				
 			}catch(Exception $e){
+				throw new BentoError('requested package ' . $this->name . ' does not exist');
 				$info = false;
 			}
 			

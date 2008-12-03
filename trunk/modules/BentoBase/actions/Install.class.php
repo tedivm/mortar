@@ -452,13 +452,16 @@ class BentoBaseActionInstall //extends Action
 					//permissions
 				case 3:	
 					// database
+					
+					
+					
+					
 				case 2:
 					// database files
-					unlink($config['path']['base'] . 'data/configuration/db_connections/default.db_conf.php');
-					unlink($config['path']['base'] . 'data/configuration/db_connections/default_read_only.db_conf.php');
+					unlink($config['path']['base'] . 'data/configuration/databases.php');
 				case 1:
 					// configuration files
-					unlink($config['path']['base'] . 'data/configuration/main_config.php');
+					unlink($config['path']['base'] . 'data/configuration/configuration.php');
 				default:
 					break;
 			}

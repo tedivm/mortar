@@ -23,7 +23,7 @@ class InstallModule
 	{
 		$this->package = $package;
 		$this->name = $name;
-		$this->parentLocation = ($parentLocation instanceof Location) ? $parentLocation->id : $parentLocation;
+		$this->parentLocation = ($parentLocation instanceof Location) ? $parentLocation->getId() : $parentLocation;
 		
 		$location = new Location($this->parentLocation);
 
@@ -152,8 +152,10 @@ class InstallModule
 			$this->location = $location;
 			
 			// Insert Module Data to Database
+			
+			
 			$module = new ObjectRelationshipMapper('modules');
-			$module->location_id = $this->location->location_id();
+			$module->location_id = $this->location->getId();
 			$module->mod_name = $this->name;
 			$module->mod_package = $this->package;
 			

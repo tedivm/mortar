@@ -41,9 +41,10 @@ abstract class Action extends ModuleBase
 		return $this->checkAuth();
 	}
 	
-	public function checkAuth()
+	public function checkAuth($action = false)
 	{
-		return $this->is_allowed(staticHack($this, 'requiredPermission')); // retarded hack until php 5.3 comes out
+		$checkAction = ($action) ? $action : staticHack($this, 'requiredPermission');
+		return $this->is_allowed($checkAction); // retarded hack until php 5.3 comes out
 	}
 
     public function is_allowed($action)

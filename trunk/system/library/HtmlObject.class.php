@@ -53,18 +53,17 @@ class HtmlObject
 	
 	public function property($property, $value = false)
 	{
-		
-		if(is_array($property))
-		{
-			foreach($property as $name => $value)
-			{
-				$this->properties[$name] = (!is_null($value)) ? $value : false;
-			}
-			return $this;
-			
-		}elseif(is_string($property)){
+		if(is_string($property)){
 			
 			$this->properties[$property] = $value;
+			return $this;
+			
+		}elseif(is_array($property)){
+			
+			foreach($property as $name => $value)
+			{
+				$this->properties[$name] = ($value) ? $value : false;
+			}
 			return $this;
 		}
 		
@@ -78,9 +77,8 @@ class HtmlObject
 	
 	public function __toString()
 	{
-		$tabSpaces = '    ';
-		$tab = '
-' . str_repeat($tabSpaces, $this->tabLevel);
+		$tabSpaces = '   ';
+		$tab = PHP_EOL . str_repeat($tabSpaces, $this->tabLevel);
 		$string = $tab .'<' . $this->type;
 		
 		$string .= ($this->id) ? ' id="' . $this->id . '"': '';
@@ -122,8 +120,7 @@ class HtmlObject
 		{
 			if($internalStuff)
 			{
-				$string .= '
-' . $tab . '</' . $this->type . '>';
+				$string .= PHP_EOL . $tab . '</' . $this->type . '>';
 			}else{
 				$string .= '</' . $this->type . '>';
 			}

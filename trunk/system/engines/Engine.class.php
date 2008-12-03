@@ -79,7 +79,6 @@ abstract class Engine
 
 			}
 						
-			
 			$path = $modulePath . 'actions/' . $this->action . '.class.php';
 			
 			
@@ -127,7 +126,17 @@ abstract class Engine
 					
 			if(!$this->main_action->checkAuth())
 				throw new AuthenticationError('Not allowed to access this engine at this location.');				
+
+				
 			
+			$settingsArrayName = $this->engine_type . 'Settings';
+			if($this->requiredPermission && !($this->main_action->{$settingsArrayName}['EnginePermissionOverride']))
+			{
+				if(!$this->main_action->checkAuth($this->requiredPermission))
+					throw new AuthenticationError('Not allowed to access this engine at this location.');				
+			}
+				
+				
 			$this->processAction($this->main_action->$runMethod());		
 			
 		}catch (Exception $e){
