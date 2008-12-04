@@ -24,7 +24,7 @@ class BentoCMSCmsPage
 			{
 				$db = dbConnect('default_read_only');
 				$stmt = $db->stmt_init();
-				$stmt->prepare('SELECT * FROM CmsPages WHERE pageId = ?');
+				$stmt->prepare('SELECT * FROM cmsPages WHERE pageId = ?');
 				$stmt->bind_param_and_execute('i', $id);
 				
 				$CmsInfo = ($stmt->num_rows > 0) ? $stmt->fetch_array() : false;
@@ -116,7 +116,7 @@ class BentoCMSCmsPage
 		
 		
 		$this->id = $pageRecord->pageId;
-		
+		return is_numeric($this-id);
 	}
 }
 
@@ -146,21 +146,23 @@ class BentoCMSClassCmsContent
 			{
 				$db = dbConnect('default_read_only');
 				$contentStmt = $db->stmt_init();
-				$contentStmt->prepare('SELECT contentVersion, contentAuthor, updateTime, title, content WHERE pageId = ? AND contentVersion = ?');
+				$contentStmt->prepare('SELECT * FROM cmsContent WHERE pageId = ? AND contentVersion = ?');
 				$contentStmt->bind_param_and_execute('ii', $pageId, $revision);
 
-				$contentData = ($contentStmt->num_rows == 1) ? $contentData : false;
+				
+				$contentData = ($contentStmt->num_rows == 1) ? $contentStmt->fetch_array() : false;
 				$cache->storeData($contentData);
 			}
-			
+
 			if($contentData !== false)
 			{
-				$this->pageId = $contentData['pageid'];
+				$this->pageId = $contentData['pageId'];
 				$this->version = $contentData['contentVersion'];
 				$this->author = $contentData['contentAuthor'];
 				$this->timestamp = $contentData['updateTime'];
 				$this->title = $contentData['title'];
 				$this->content = $contentData['content'];
+				$this->rawContent = $contentData['rawContent'];
 				$this->id = $revision;
 			}
 		}elseif(is_numeric($pageId)){
@@ -217,8 +219,13 @@ class BentoCMSClassCmsContent
 													?, ?, ?)');
 		
 		$insertStmt->bind_param_and_execute('iiisss', $this->pageId, $this->pageId, $this->author, $this->title, $this->filterContent($this->content), $this->content);
-		$this->id = $insertStmt->insert_id;
 		
+		$getStmt = $db->stmt_init();
+		$getStmt->prepare('SELECT contentVersion FROM cmsContent WHERE pageId = ? AND contentAuthor = ? AND title = ? ORDER BY contentVersion DESC LIMIT 1');
+		$getStmt->bind_param_and_execute('iis', $this->pageId, $this->author, $this->title);
+		$newRow = $getStmt->fetch_array();		
+		$this->id = $newRow['contentVersion'];
+
 		return is_numeric($this->id);
 	}
 	
@@ -248,7 +255,8 @@ class BentoCMSClassCmsContent
 		$db = dbConnect('default');
 		$stmt = $db->stmt_init();
 		$stmt->prepare('UPDATE cmsPages SET pageCurrentVersion = ? WHERE pageId = ?');
-		$stmt->bind_param_and_execute('ii', $this->id, $this->pageId);
+		$result = $stmt->bind_param_and_execute('ii', $this->id, $this->pageId);
+
 	}
 }
 
