@@ -169,6 +169,10 @@ class Mystmt extends mysqli_stmt
 	public function prepare($query)
 	{
 		$this->myQuery = $query;
+		$result = parent::prepare($query);
+		
+		if(!$result)
+			throw new BentoWarning('Unable to prepare statement: ' . $this->error);
 		
 		return parent::prepare($query);
 	}
