@@ -10,22 +10,32 @@ class BentoCMSActionEditPage extends PackageAction
 									'linkContainer' => 'CMS');
 
 	protected $form;
-										
+	protected $success;
+	
 	public function logic()
 	{
 		$info = InfoRegistry::getInstance();
 		
 		if(is_numeric($info->Runtime['id']))
 		{
-			$cms = new CMSPage();
-			$cms->load_by_pageid($info->Runtime['id']);
 			
-			$current['name'] = $cms->name;
-			$current['title'] = $cms->title;
-			$current['content'] = $cms->content;
-			$current['keywords'] = $cms->keywords;
-			$current['description'] = $cms->description;
-			$current['mod_id'] = $cms->mod_id;
+			$cms = new BentoCMSCmsPage($info->Runtime['id']);
+			
+			
+			$cmsContent = $cms->getRevision();
+
+			$current['name'] = $cms->property('name');
+			$current['keywords'] = $cms->property('keywords');
+			$current['description'] = $cms->property('description');
+			$current['mod_id'] = $cms->property('module');
+			$current['pageId'] = $cms->property('id');
+			
+			$current['title'] = $cmsContent->property('title');
+			$current['content'] = $cmsContent->property('rawContent');
+			$current['version'] = $cmsContent->property('contentVersion');
+			
+		}else{
+			
 		}
 		
 		
@@ -44,7 +54,7 @@ class BentoCMSActionEditPage extends PackageAction
 				setType('textarea')->
 				setLabel('Description')->
 				addRule('required')->
-				property('value', $current['title'])->
+				property('value', $current['description'])->
 			getForm()->
 			
 			createInput('keywords')->
@@ -60,19 +70,44 @@ class BentoCMSActionEditPage extends PackageAction
 				setType('html')->
 				addRule('required')->
 				property('value', $current['content']);
-				
+
 				
 		if($form->checkSubmit())
 		{
-			$cms = new CMSPage();
-			$cms;
+			$inputHandler = $form->getInputhandler();
+			$cms->property('keywords', $inputHandler['keywords']);
+			$cms->property('description', $inputHandler['description']);
+			
+			$cmsContent->property('title', $inputHandler['title']);
+			$cmsContent->property('content', $inputHandler['content']);
+			
+			if($cms->save() && $cmsContent->save())
+			{
+				$cmsContent->makeActive();
+				$this->success = true;
+			}
+			
 		}
 			
 	}
 	
 	public function viewAdmin()
 	{
-		return $this->form->makeDisplay();
+		if($this->form->wasSubmitted())
+		{
+			if($this->success)
+			{
+				$this->AdminSettings['headerSubTitle'] = 'Page successfully edited';
+				return '';
+			}else{
+				$this->AdminSettings['headerSubTitle'] = 'An error has occured while trying to process this form';
+			}
+		}else{
+
+		}
+		
+		$output .= $this->form->makeDisplay();
+		return $output;
 	}
 }
 
