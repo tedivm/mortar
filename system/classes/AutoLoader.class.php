@@ -34,8 +34,12 @@ class AutoLoader
 		
 		if(!isset(self::$config))
 			self::$config = Config::getInstance();
-			
-		self::checkDirectory(self::$config['path']['modules'] . $info->RunTime['package'] . '/classes/' . $className . '.class.php');
+		
+		if(strpos($className, $info->Runtime['package']) === 0)
+		{
+			$className = substr($className, strlen($info->Runtime['package']));
+			self::checkDirectory(self::$config['path']['modules'] . $info->Runtime['package'] . '/classes/' . $className . '.class.php');
+		}
 	}	
 	
 	static public function loadError($className)
