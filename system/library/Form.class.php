@@ -227,7 +227,7 @@ class Form
 						case 'textarea':
 							$inputHtml = new HtmlObject('textarea');
 							$inputHtml->tightEnclose();
-							$inputHtml->wrapAround($input->value);
+							$inputHtml->wrapAround($input->property('value'));
 							break;
 							
 						case 'select':
@@ -471,7 +471,7 @@ class Input
 	public $label;
 	public $properties = array();
 	public $type;
-	public $value;
+	//public $value;
 	public $options;
 	
 	protected $required = false;
