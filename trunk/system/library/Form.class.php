@@ -226,6 +226,7 @@ class Form
 						case'html':// for now we'll dump it in the text area, but we need to wire in the javascript code as some point
 						case 'textarea':
 							$inputHtml = new HtmlObject('textarea');
+							$inputHtml->tightEnclose();
 							$inputHtml->wrapAround($input->value);
 							break;
 							

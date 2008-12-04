@@ -11,10 +11,22 @@ class HtmlObject
 	
 	protected $close = true;
 	protected $encloses = array();
+	protected $tightEnclose = false;
+	
 	
 	public function __construct($type)
 	{
 		$this->type = $type;
+		
+		if(in_array($type, array('a', 'label', 'textarea', 'input', 'legend', 'option', 'h1', 'h2', 'h3', 'h4', 'h5')))
+			$this->tightEnclose();
+		
+	}
+	
+	public function tightEnclose()
+	{
+		$this->tightEnclose = true;
+		return $this;
 	}
 	
 	public function noClose()
@@ -78,8 +90,8 @@ class HtmlObject
 	public function __toString()
 	{
 		$tabSpaces = '   ';
-		$tab = PHP_EOL . str_repeat($tabSpaces, $this->tabLevel);
-		$string = $tab .'<' . $this->type;
+		$tab = str_repeat($tabSpaces, $this->tabLevel);
+		$string = PHP_EOL . $tab .'<' . $this->type;
 		
 		$string .= ($this->id) ? ' id="' . $this->id . '"': '';
 		
@@ -107,10 +119,10 @@ class HtmlObject
 				{
 					$item->tabLevel = $this->tabLevel + 1;
 				}else{
-					$item = $tabSpaces . $item;
-				}
 					
-				$string .= $tab . $item;
+					$item = ($this->tightEnclose) ? rtrim($item, ' ') : $item . PHP_EOL;
+				}
+				$string .= $item;	
 			}
 			
 			$internalStuff = true;
@@ -118,15 +130,13 @@ class HtmlObject
 		
 		if($this->close)
 		{
-			if($internalStuff)
-			{
-				$string .= PHP_EOL . $tab . '</' . $this->type . '>';
-			}else{
-				$string .= '</' . $this->type . '>';
-			}
+			if(!$this->tightEnclose)
+				$string .= $tab;
+				
+			$string .= '</' . $this->type . '>';
 
 		}
-
+		$string .= PHP_EOL;
 		return $string;
 	}
 }
