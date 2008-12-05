@@ -86,7 +86,7 @@ class BentoCMSActionEditPage extends PackageAction
 				$cmsContent->makeActive();
 				$this->success = true;
 			}
-			
+			Cache::clear('modules', 'cms', $current['pageId']);
 		}
 			
 	}
