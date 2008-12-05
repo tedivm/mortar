@@ -59,7 +59,15 @@ class HtmlObject
 	
 	public function addClass($class)
 	{
-		$this->classes[] = $class;
+		if(is_array($class))
+		{
+			$this->classes = array_merge($this->classes, $class);
+		}
+		else
+		{
+			$this->classes[] = $class;
+		}
+			
 		return $this;
 	}
 	
@@ -67,14 +75,15 @@ class HtmlObject
 	{
 		if(is_string($property)){
 			
-			$this->properties[$property] = $value;
+			if($value !== false)
+				$this->properties[$property] = (string) $value;
 			return $this;
 			
 		}elseif(is_array($property)){
 			
 			foreach($property as $name => $value)
 			{
-				$this->properties[$name] = ($value) ? $value : false;
+				$this->properties[$name] = ($value !== false) ? (string) $value : false;
 			}
 			return $this;
 		}
