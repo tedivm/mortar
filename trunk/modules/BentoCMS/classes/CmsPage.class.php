@@ -10,7 +10,6 @@ class BentoCMSCmsPage
 	protected $createdDate;
 	protected $id;
 	
-	protected $content;
 	
 	public function __construct($id = false)
 	{
@@ -39,7 +38,7 @@ class BentoCMSCmsPage
 				$this->currentVersion = $CmsInfo['pageCurrentVersion'];
 				$this->keywords = $CmsInfo['pageKeywords'];
 				$this->description = $CmsInfo['pageDescription'];
-				$this->createDate = $CmsInfo['creationDate'];			
+				$this->createdDate = $CmsInfo['creationDate'];			
 			}
 		}
 	}
