@@ -1,6 +1,6 @@
 <?php
 
-class BentoCMSActionEditPage extends PackageAction
+class BentoCMSActionEditPage extends Action
 {
 	static $requiredPermission = 'Edit';
 	
@@ -35,7 +35,7 @@ class BentoCMSActionEditPage extends PackageAction
 			$current['version'] = $cmsContent->property('contentVersion');
 			
 		}else{
-			
+			throw new ResourceNotFoundError('No page id given.');
 		}
 		
 		
