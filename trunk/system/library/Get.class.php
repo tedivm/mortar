@@ -11,21 +11,17 @@ class Get extends Post
 		$config = Config::getInstance();
 		
 
-		if(isset($_GET['module']) && is_int($_GET['module']))
+		if(isset($_GET['moduleId']) && is_numeric($_GET['moduleId']))
 		{
-			$this->variables['moduleId'] = $_GET['module'];
+			$this->variables['moduleId'] = $_GET['moduleId'];
 			
-			$moduleInfo = new ModuleInfo($_GET['module']);
+			$moduleInfo = new ModuleInfo($_GET['moduleId']);
 		}
-
-		
 
 		if(isset($_GET['parameters']))
 		{
 			$pathVariables = explode('/', $_GET['parameters']);	
 		}
-
-			
 		
 		if(!$config->error)
 		{
@@ -85,17 +81,12 @@ class Get extends Post
 				
 				$this->variables['pathArray'] = $pathArray;
 			}
-
-				
-			
 			
 			// if the directory exists but the module isn't set, check to see if there is a default
 			if(!isset($moduleInfo) && !isset($this->variables['package']) && (($currentLocation->resource == 'directory' || $currentLocation->resource == 'site') && is_numeric($currentLocation->meta('default'))))
 			{
 				$moduleInfo = new ModuleInfo($currentLocation->meta('default'));
 			}
-			
-			
 			
 			// Map any remaining path variables to their respective name
 			if(isset($moduleInfo))
@@ -106,9 +97,6 @@ class Get extends Post
 			}elseif($this->variables['package']){
 				$package = $this->variables['package'];
 			}
-		
-			
-			
 			
 			if(count($pathVariables) > 0)
 			{

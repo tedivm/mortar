@@ -23,8 +23,8 @@ class Url
 		if(is_int($attributes['module']))
 		{
 			$moduleInfo = new ModuleInfo($attributes['module']);
-			$attributes['module'] = $moduleInfo['Name'];
-				
+			$attributes['moduleId'] = $attributes['module'];
+			unset($attributes['module']);
 		}
 					
 		
@@ -78,7 +78,7 @@ class Url
 			}		
 		}
 		
-		$urlString = rtrim(trim($urlString), '?&');
+		$urlString = rtrim(trim($urlString), '?& ');
 		
 		return $urlString;
 	}
