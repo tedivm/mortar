@@ -332,7 +332,7 @@ class Form
 		$jqueryPlugins = array('jquery' => array('form', 'validate', 'validate-methods', 'cluetip'));
 		if(class_exists('ActivePage', false))
 		{
-			$page = ActivePage::get_instance();
+			$page = ActivePage::getInstance();
 			$page->addStartupScript($javascript);
 			$page->addJQueryInclude($jqueryPlugins);
 			$page->addCss($this->name, 'forms');

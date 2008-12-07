@@ -14,7 +14,7 @@ class HtmlEngine extends Engine
 		$config = Config::getInstance();
 		$get = Get::getInstance();
 		
-		$this->page = ActivePage::get_instance();
+		$this->page = ActivePage::getInstance();
 		$user = ActiveUser::get_instance();		
 		
 	}
@@ -22,7 +22,7 @@ class HtmlEngine extends Engine
 	
 	public function display()
 	{
-		$page = ActivePage::get_instance();
+		$page = ActivePage::getInstance();
 		$page->addRegion('PathToPackage', $this->main_action->info['PathToPackage']);
 		
 		return $this->page->makeDisplay();

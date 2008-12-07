@@ -6,7 +6,7 @@ class HtmlHelper
 	
 	public function __construct()
 	{
-		$this->page = ActivePage::get_instance();
+		$this->page = ActivePage::getInstance();
 	}
 	
 	
