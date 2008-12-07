@@ -27,7 +27,7 @@ class AdminEngine extends Engine
 		$this->returnMode = (isset($get['ajax'])) ? 'ajax' : 'full'; //full or ajax
 		
 		
-		$page = ActivePage::get_instance();
+		$page = ActivePage::getInstance();
 		$page->addRegion('title', 'BentoBase Admin');
 		
 		if(isset($get['ajax']))
@@ -50,7 +50,7 @@ class AdminEngine extends Engine
 	
 	public function display()
 	{
-		$page = ActivePage::get_instance();
+		$page = ActivePage::getInstance();
 		$page->addRegion('PathToPackage', $this->main_action->info['PathToPackage']);
 		$info = InfoRegistry::getInstance();
 		if($this->returnMode == 'full')
@@ -80,7 +80,7 @@ class AdminEngine extends Engine
 	{
 		$get = Get::getInstance();
 		$processedOutput = new DisplayMaker();
-		$page = ActivePage::get_instance();
+		$page = ActivePage::getInstance();
 		
 		if($get['ajax'])
 		{
@@ -108,7 +108,7 @@ class AdminEngine extends Engine
 		$processedOutput->addContent('title', $title);
 		$processedOutput->addContent('subtitle', $subTitle);
 		
-		$page = ActivePage::get_instance();
+		$page = ActivePage::getInstance();
 		$page->addRegion('content', $processedOutput->make_display(false));
 	}
 

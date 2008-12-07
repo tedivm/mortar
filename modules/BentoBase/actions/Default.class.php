@@ -23,7 +23,7 @@ class BentoBaseActionDefault extends PackageAction
 			header('Location: ' . $adminUrl);
 		}		
 		
-		$page = ActivePage::get_instance();
+		$page = ActivePage::getInstance();
 		$page['title'] = 'Test Title';
 		return 'This is the main page';
 	}
