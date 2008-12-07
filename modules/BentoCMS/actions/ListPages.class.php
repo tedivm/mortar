@@ -30,7 +30,6 @@ class BentoCMSActionListPages extends PackageAction
 	
 	public function viewAdmin()
 	{
-		var_dump($this->pages);
 		foreach($this->pages as $locationString => $pageList)
 		{
 			$table = new HtmlTable('Table', array('name', 'editLink', 'deleteLink', 'pageLink'));

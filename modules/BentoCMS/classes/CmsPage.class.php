@@ -117,6 +117,40 @@ class BentoCMSCmsPage
 		$this->id = $pageRecord->pageId;
 		return is_numeric($this-id);
 	}
+	
+	public function sendToActivePage($revision = 0)
+	{
+		
+		if(!class_exists('ActivePage', false))
+			throw new BentoError('ActivePage class not found');
+		
+		$page = ActivePage::getInstance();
+		
+		$revision = $this->getRevision($revision);
+		
+		$page->addRegion('main_content', $revision->property('content'));
+		$page->addRegion('title', $revision->property('title'));
+		$page->addMeta('keywords', $this->keywords);
+		$page->addMeta('description', $this->description);
+		
+		
+		/*
+		
+		pageName
+		pageCurrentVersion
+		pagKeywords
+		pageDescription
+		creationDate
+		
+		title
+		content
+		*/
+		
+		
+		
+		
+		
+	}
 }
 
 
@@ -257,6 +291,8 @@ class BentoCMSClassCmsContent
 		$result = $stmt->bind_param_and_execute('ii', $this->id, $this->pageId);
 
 	}
+	
+	
 }
 
 interface Filter
