@@ -25,6 +25,7 @@ CREATE TABLE cmsPages
 	mod_id INTEGER UNSIGNED NOT NULL,
 	pageName TINYTEXT NULL,
 	pageCurrentVersion INTEGER UNSIGNED NULL,
+	pageStatus VARCHAR(25) NOT NULL,
 	pageKeywords TINYTEXT NULL,
 	pageDescription TINYTEXT NULL,
 	creationDate DATETIME NOT NULL
