@@ -3,6 +3,7 @@
 class BentoCMSActionDefault extends Action
 {
 	protected $page;
+	static $requiredPermission = 'Read';
 
 	public function logic()
 	{
