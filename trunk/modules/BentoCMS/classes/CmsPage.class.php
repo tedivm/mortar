@@ -107,7 +107,7 @@ class BentoCMSCmsPage
 
 		$pageRecord->save();
 
-
+		Cache::clear('modules', 'cms', $this->id);
 
 		$this->id = $pageRecord->pageId;
 		return is_numeric($this-id);
