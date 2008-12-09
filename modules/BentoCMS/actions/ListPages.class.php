@@ -22,7 +22,7 @@ class BentoCMSActionListPages extends PackageAction
 		{
 			$pageList = new BentoCMSPageList($module['modId']);
 			$moduleLocation = (string) new Location($module['locationId']);
-			$list[$moduleLocation] = $pageList->getPages();
+			$list[$moduleLocation] = $pageList->getPages(array('active', 'draft'));
 		}
 
 		$this->pages = $list;
