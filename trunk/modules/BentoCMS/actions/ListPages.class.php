@@ -36,8 +36,8 @@ class BentoCMSActionListPages extends PackageAction
 			$moduleInfo = $moduleList['moduleInfo'];
 			$pageList = $moduleList['pageList'];
 
-			if(count($pageList) < 1)
-				continue;
+			//if(count($pageList) < 1)
+			//	continue;
 
 			$permissions = array();
 			$columnArray = array('name');
@@ -57,7 +57,7 @@ class BentoCMSActionListPages extends PackageAction
 
 			$columnArray[] = 'pageLink';
 
-			$table = new HtmlTable('Table', $columnArray);
+			$table = new HtmlTable($this->actionName . '_' . $moduleInfo['name'], $columnArray);
 			$table->addClass(array('listing'));
 
 
