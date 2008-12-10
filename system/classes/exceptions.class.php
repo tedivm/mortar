@@ -17,7 +17,7 @@
  * Main Module Error Class
  *
  * responds to errors in the main modules.
- * 
+ *
  * @package		Bento Base
  * @subpackage	Main_Classes
  * @category	Exception
@@ -26,43 +26,43 @@
 class BentoError extends Exception
 {
 	protected $debugLevel = 1;
-	
+
 	public function __construct($message = '', $code = 0)
 	{
 		parent::__construct($message, $code);
-		
-		
+
+
 		if(method_exists($this, 'runAction'))
 			$this->runAction();
-		
+
 		if(DEBUG >= $this->debugLevel)
 			$this->debugAction();
-		
+
 	}
-	
+
 	public function __toString()
-	{	
+	{
 		$config = Config::getInstance();
-		
+
 		$output .= 'Action: ' . $config['action'] . '<br />';
 		$output .= 'Module: ' . $config['module'] . '<br />';
 		$output .= 'ID: ' . $config['id'] . '<br />';
 		$output .= 'Engine: ' . $config['engine'] . '<br />';
-				
-		
+
+
 		$file = $this->getFile();
 		$line = $this->getLine();
 		$message = $this->getMessage();
 		$code = $this->getCode();
-	
-		$site = ActiveSite::get_instance();	
+
+		$site = ActiveSite::getInstance();
 		$actionOutput = (isset($config['action'])) ? $config['action'] : '<i>unset</i>';
 		$moduleOutput = (isset($config['module'])) ? $config['module'] : '<i>unset</i>';
 		$idOutput = (is_numeric($config['id'])) ? $config['id'] : '<i>unset</i>';
 		$engineOutput = (isset($config['engine'])) ? $config['engine'] : '<i>unset</i>';
 		$siteOutput = (is_numeric($site->siteId)) ? $site->siteId : '<i>unset</i>';
 		$dispatcher = DISPATCHER;
-		
+
 		$errorClass = get_class($this);
 		$output = "<font size='1'><table class='Bento-error' dir='ltr' border='1' cellspacing='0' cellpadding='2'>
 <tr><th align='left' bgcolor='#f57900' colspan='4'>( ! ) " . $errorClass . ": {$message} in <br>{$file} on line <i>{$line}</i></th></tr>
@@ -72,7 +72,7 @@ class BentoError extends Exception
 	<td bgcolor='#eeeeec'><b>Action:</b> {$actionOutput}</td>
 	<td bgcolor='#eeeeec'><b>Module:</b> {$moduleOutput} </td>
 </tr>
-<tr>	
+<tr>
 	<td bgcolor='#eeeeec'><b>ID:</b> {$idOutput}</td>
 	<td bgcolor='#eeeeec'><b>Engine:</b> {$engineOutput}</td>
 	<td bgcolor='#eeeeec'><b>Dispatcher:</b> {$dispatcher}</td>
@@ -89,14 +89,14 @@ class BentoError extends Exception
 		<th align='left' bgcolor='#eeeeec'>Location</th>
 	</tr>";
 
-		
+
 		$stack = array_reverse($this->getTrace());
-		
+
 		$x = 0;
 		foreach($stack as $traceLine)
 		{
 			$x++;
-			
+
 			if(is_array($traceLine['args']))
 			{
 				$argValueShort = '';
@@ -111,23 +111,23 @@ class BentoError extends Exception
 				}
 				$argString = rtrim($argString, ',');
 				$argStringLong = rtrim($argStringLong, ',');
-				
+
 			}else{
 				$argString = ' ';
 			}
-			
+
 			$shortPath = str_replace(BASE_PATH, '/', $traceLine['file']);
-			
+
 			$functionName = $traceLine['class'] . $traceLine['type'] . $traceLine['function'];
-			
+
 			$output .= "<tr>
 	<td bgcolor='#eeeeec' align='center'>$x</td>
 	<!--<td bgcolor='#eeeeec' align='center'>Time</td>-->
 	<td title='{$functionName}({$argStringLong})' bgcolor='#eeeeec'>{$functionName}({$argString})</td>
 	<td title='{$traceLine['file']}' bgcolor='#eeeeec'>{$shortPath}<b>:</b>{$traceLine['line']}</td>
 </tr>";
-			
-			
+
+
 		}
 
 		$output .= '</table></font>
@@ -144,14 +144,14 @@ class BentoError extends Exception
 
 }
 
-class BentoWarning extends BentoError 
+class BentoWarning extends BentoError
 {
-	protected $debugLevel = 2;	
+	protected $debugLevel = 2;
 }
 
-class BentoNotice extends BentoError 
+class BentoNotice extends BentoError
 {
-	protected $debugLevel = 3;	
+	protected $debugLevel = 3;
 }
 
 

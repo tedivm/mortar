@@ -9,7 +9,7 @@ class HtmlTable implements ArrayAccess
 	protected $columns;
 	protected $classes = array();
 	protected $properties = array();
-
+	protected $header = array();
 
 	public function __construct($name, $columns)
 	{
@@ -37,6 +37,7 @@ class HtmlTable implements ArrayAccess
 	public function makeDisplay()
 	{
 		$div = new HtmlObject('div');
+		$div->addClass('table');
 		$table = $div->insertNewHtmlObject('table');
 		$table->property('id', $this->name);
 
@@ -45,8 +46,7 @@ class HtmlTable implements ArrayAccess
 
 		$tableBody = $table->insertNewHtmlObject('tbody');
 
-		if($this->displayHeader)
-			$this->addHeader($tableBody);
+		$this->addHeader($tableBody);
 
 		$this->addData($tableBody);
 
@@ -71,18 +71,38 @@ class HtmlTable implements ArrayAccess
 		$this->data[] = array();
 	}
 
+
+	public function setHeader($text, $colspan = 1)
+	{
+		$this->header[] = array('text' => $text, 'columnSpan' => $colspan);
+	}
+
 	protected function addHeader($tableBody)
 	{
-		if($this->singleHeader)
+
+		if(count($this->header) == 1)
 		{
 			$columns = count($this->columns);
-			$th = $tableBody->insertHtmlObject('tr')->insertHtmlObject('th');
+			$th = $tableBody->insertNewHtmlObject('tr')->insertNewHtmlObject('th');
 			$th->addClass('full');
 			$th->property('colspan', $columns);
+			$content = array_pop($this->header);
+			$th->wrapAround($content['text']);
+
+		}elseif(count($this->header) > 0){
+
+			$tr = $tableBody->insertNewHtmlObject('tr');
+			foreach($this->header as $header)
+			{
+				$th = $tr->insertNewHtmlObject('th');
+				$th->wrapAround($header['text']);
+				$th->property('colspan', $header['columnSpan']);
+			}
 
 		}else{
 
 		}
+
 	}
 
 	protected function addData($tableBody)
