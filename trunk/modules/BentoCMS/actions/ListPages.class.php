@@ -36,7 +36,6 @@ class BentoCMSActionListPages extends PackageAction
 			$moduleInfo = $moduleList['moduleInfo'];
 			$pageList = $moduleList['pageList'];
 
-
 			if(count($pageList) < 1)
 				continue;
 
@@ -60,6 +59,22 @@ class BentoCMSActionListPages extends PackageAction
 
 			$table = new HtmlTable('Table', $columnArray);
 			$table->addClass(array('listing'));
+
+
+			$table->setHeader($moduleInfo['Name'], count($columnArray) - 1);
+
+			if($moduleInfo->checkAuth('Add'))
+			{
+				$url = new Url();
+				$url->property('engine', 'Admin');
+				$url->property('module', $moduleInfo['ID']);
+				$url->property('action', 'AddPage');
+
+				$table->setHeader($url->getLink('Add Page'));
+
+			}
+
+
 			$x = 1;
 
 			foreach($pageList as $pageName => $page)
