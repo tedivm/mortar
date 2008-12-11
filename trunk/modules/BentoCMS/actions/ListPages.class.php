@@ -9,6 +9,7 @@ class BentoCMSActionListPages extends PackageAction
 									'headerTitle' => 'List Pages',
 									'linkContainer' => 'CMS');
 	protected $pages;
+	protected $pageTypes = array('active');
 
 	public function logic()
 	{
@@ -20,10 +21,20 @@ class BentoCMSActionListPages extends PackageAction
 		$list = array();
 		foreach($modules as $module)
 		{
-			$pageList = new BentoCMSPageList($module['modId']);
-			$moduleLocation = (string) new Location($module['locationId']);
-			$list[$moduleLocation]['pageList'] = $pageList->getPages(array('active', 'draft'));
-			$list[$moduleLocation]['moduleInfo'] = new ModuleInfo($module['modId']);
+			$moduleLocation = new Location($module['locationId']);
+			$childrenLocations = $moduleLocation->getChildren('page');
+
+			$pages = array();
+
+			if(is_array($childrenLocations))
+				foreach($childrenLocations as $pageLocation)
+			{
+				$id = $pageLocation->getId();
+				$pages[$pageLocation->getName()] = new BentoCMSCmsPage($id);
+			}
+
+			$list[(string) $moduleLocation]['pageList'] = $pages;
+			$list[(string) $moduleLocation]['module'] = array('moduleLocation' => $moduleLocation, 'moduleId' => $module['modId']);
 		}
 
 		$this->pages = $list;
@@ -33,23 +44,23 @@ class BentoCMSActionListPages extends PackageAction
 	{
 		foreach($this->pages as $locationString => $moduleList)
 		{
-			$moduleInfo = $moduleList['moduleInfo'];
+			$moduleLocation = $moduleList['module']['moduleLocation'];
+			$moduleId = $moduleList['module']['moduleId'];
 			$pageList = $moduleList['pageList'];
 
-			//if(count($pageList) < 1)
-			//	continue;
+			$user = ActiveUser::getInstance();
+			$modulePermission = new Permissions($moduleLocation, $user->getId());
 
-			$permissions = array();
 			$columnArray = array('name');
 
-			if($moduleInfo->checkAuth('Edit'))
+			if($modulePermission->checkAuth('Edit'))
 			{
 				$permissions['edit'] = true;
 				$columnArray[] = 'editLink';
 			}
 
 
-			if($moduleInfo->checkAuth('Delete'))
+			if($modulePermission->checkAuth('Delete'))
 			{
 				$permissions['delete'] = true;
 				$columnArray[] = 'deleteLink';
@@ -57,17 +68,17 @@ class BentoCMSActionListPages extends PackageAction
 
 			$columnArray[] = 'pageLink';
 
-			$table = new HtmlTable($this->actionName . '_' . $moduleInfo['name'], $columnArray);
+			$table = new HtmlTable($this->actionName . '_' . $moduleLocation->getName(), $columnArray);
 			$table->addClass(array('listing'));
 
 
-			$table->setHeader($moduleInfo['Name'], count($columnArray) - 1);
+			$table->setHeader($moduleLocation->getName(), count($columnArray) - 1);
 
-			if($moduleInfo->checkAuth('Add'))
+			if($modulePermission->checkAuth('Add'))
 			{
 				$url = new Url();
 				$url->property('engine', 'Admin');
-				$url->property('module', $moduleInfo['ID']);
+				$url->property('module', $moduleId);
 				$url->property('action', 'AddPage');
 
 				$table->setHeader($url->getLink('Add Page'));
@@ -79,14 +90,20 @@ class BentoCMSActionListPages extends PackageAction
 
 			foreach($pageList as $pageName => $page)
 			{
+				if(!in_array($page->property('status'), $this->pageTypes))
+					continue;
+
 				$table['name'] = $pageName;
 
+				$pageLocation = new Location($page->property('id'));
+				$pagePermission = new Permissions($pageLocation, $user->getId());
+
 				$url = new Url();
-				$url->property('module', $page->property('module'));
+				$url->property('module', $moduleId);
 				$url->property('engine', 'Admin');
 				$url->property('id', $page->property('id'));
 
-				if($permissions['edit'])
+				if($pagePermission->checkAuth('Edit'))
 				{
 					$url->property('action', 'EditPage');
 					$editLink = new HtmlObject('a');
@@ -95,7 +112,7 @@ class BentoCMSActionListPages extends PackageAction
 					$table['editLink'] = (string) $editLink;
 				}
 
-				if($permissions['delete'])
+				if($pagePermission->checkAuth('Delete'))
 				{
 					$url->property('action', 'RemovePage');
 					$deleteLink = new HtmlObject('a');
@@ -105,11 +122,10 @@ class BentoCMSActionListPages extends PackageAction
 				}
 
 				$url = new Url();
-				$url->property('module', $page->property('module'));
-				$url->property('id', $pageName);
+				$url->property('module', $moduleId);
+				$url->property('id', str_replace(' ', '_', $pageName));
 
-
-				$table['pageLink'] = '<a href=' . $url . ' target="_blank">View</a>';
+				$table['pageLink'] = '<a href="' . $url . '" target="_blank">View</a>';
 				$table->nextRow();
 			}
 

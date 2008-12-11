@@ -12,9 +12,12 @@ class BentoCMSActionRemovePage extends Action
 	public function logic()
 	{
 		$info = InfoRegistry::getInstance();
-		$cmsPage = new BentoCMSCmsPage($info->Runtime['id']);
+		$location = new Location($info->Runtime['id']);
 
-		if($this->moduleId != $cmsPage->property('module'))
+		if($location->getParent()->getId() != $this->location->getId())
+			throw new BentoError('Module/Page mismatch');
+
+		if($location->resource_type() != 'page')
 			throw new BentoError('Module/Page mismatch');
 
 		$form = new Form($this->actionName);
@@ -30,6 +33,7 @@ class BentoCMSActionRemovePage extends Action
 
 		if($form->checkSubmit())
 		{
+			$cmsPage = new BentoCMSCmsPage($info->Runtime['id']);
 			$cmsPage->property('status', 'deleted');
 			$cmsPage->save();
 			$this->status = 'deleted';

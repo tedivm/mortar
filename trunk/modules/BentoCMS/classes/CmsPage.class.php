@@ -10,6 +10,11 @@ class BentoCMSCmsPage
 	protected $createdDate;
 	protected $id;
 	protected $status;
+	protected $parent;
+
+	protected $location;
+	protected $type = 'page';
+
 
 	public function __construct($id = false)
 	{
@@ -21,12 +26,31 @@ class BentoCMSCmsPage
 
 			if(!$cache->cacheReturned)
 			{
-				$db = dbConnect('default_read_only');
-				$stmt = $db->stmt_init();
-				$stmt->prepare('SELECT * FROM cmsPages WHERE pageId = ?');
-				$stmt->bind_param_and_execute('i', $id);
+				try{
+					$location = new Location($id);
 
-				$CmsInfo = ($stmt->num_rows > 0) ? $stmt->fetch_array() : false;
+					if($location->getResource() != $this->type)
+						throw new BentoWarning('Wrong resource type- expecting ' . $this->type .
+												' but received ' . $location->getResource());
+
+					$CmsInfo['id'] = $location->getId();
+					$CmsInfo['createdOn'] = $location->getCreationDate();
+					$CmsInfo['name'] = $location->getName();
+
+					$db = dbConnect('default_read_only');
+					$stmt = $db->stmt_init();
+					$stmt->prepare('SELECT * FROM cmsPages WHERE location_id = ?');
+					$stmt->bind_param_and_execute('i', $id);
+
+					if($stmt->num_rows != 1)
+						throw new BentoWarning('CmsPage information did not load');
+
+					$CmsInfo = array_merge($CmsInfo, $stmt->fetch_array());
+
+				}catch(Exception $e){
+					$CmsInfo = false;
+				}
+
 				$cache->storeData($CmsInfo);
 			}
 
@@ -34,11 +58,11 @@ class BentoCMSCmsPage
 			{
 				$this->id = $id;
 				$this->module = $CmsInfo['mod_id'];
-				$this->name = $CmsInfo['pageName'];
+				$this->name = $CmsInfo['name'];
 				$this->currentVersion = $CmsInfo['pageCurrentVersion'];
 				$this->keywords = $CmsInfo['pageKeywords'];
 				$this->description = $CmsInfo['pageDescription'];
-				$this->createdDate = $CmsInfo['creationDate'];
+				$this->createdDate = $CmsInfo['createdOn'];
 				$this->status = $CmsInfo['pageStatus'];
 			}
 		}
@@ -90,26 +114,32 @@ class BentoCMSCmsPage
 
 		if(isset($this->id))
 		{
-			$pageRecord->pageId = $this->id;
+			$location = new Location($this->id);
+
+			$pageRecord->location_id = $this->id;
 			$pageRecord->select();
+		}else{
+			$location = new Location();
+			$location->resource = $this->type;
 		}
 
-		$pageRecord->mod_id = $this->module;
-		$pageRecord->pageName = $this->name;
-		$pageRecord->pageKeywords = $this->keywords;
-		$pageRecord->pageDescription = $this->description;
-		$pageRecord->pageStatus = (isset($this->status)) ? $this->status : 'active';
+		$location->name = $this->name;
+		$location->parent = $this->parent;
+		$location->save();
 
 		if(!isset($this->id))
 		{
-			$pageRecord->query_set('creationDate', 'NOW()');
+			$this->id = $location->getId();
 		}
 
+		$pageRecord->location_id = $this->id;
+		$pageRecord->pageKeywords = $this->keywords;
+		$pageRecord->pageDescription = $this->description;
+		$pageRecord->pageStatus = (isset($this->status)) ? $this->status : 'active';
 		$pageRecord->save();
 
 		Cache::clear('modules', 'cms', $this->id);
 
-		$this->id = $pageRecord->pageId;
 		return is_numeric($this-id);
 	}
 
@@ -143,7 +173,7 @@ class BentoCMSCmsPage
 
 class BentoCMSClassCmsContent
 {
-	protected $pageId;
+	protected $locationId;
 	protected $version;
 
 
@@ -155,19 +185,19 @@ class BentoCMSClassCmsContent
 	protected $id;
 	protected $filters = array();
 
-	public function __construct($pageId, $revision = false)
+	public function __construct($locationId, $revision = false)
 	{
-		if(is_numeric($pageId) && is_numeric($revision))
+		if(is_numeric($locationId) && is_numeric($revision))
 		{
-			$cache = new Cache('modules', 'cms', $id, 'content', $revision);
+			$cache = new Cache('modules', 'cms', $locationId, 'content', $revision);
 			$contentData = $cache->getData();
 
 			if(!$cache->cacheReturned)
 			{
 				$db = dbConnect('default_read_only');
 				$contentStmt = $db->stmt_init();
-				$contentStmt->prepare('SELECT * FROM cmsContent WHERE pageId = ? AND contentVersion = ?');
-				$contentStmt->bind_param_and_execute('ii', $pageId, $revision);
+				$contentStmt->prepare('SELECT * FROM cmsContent WHERE location_id = ? AND contentVersion = ?');
+				$contentStmt->bind_param_and_execute('ii', $locationId, $revision);
 
 
 				$contentData = ($contentStmt->num_rows == 1) ? $contentStmt->fetch_array() : false;
@@ -176,7 +206,7 @@ class BentoCMSClassCmsContent
 
 			if($contentData !== false)
 			{
-				$this->pageId = $contentData['pageId'];
+				$this->locationId = $contentData['location_id'];
 				$this->version = $contentData['contentVersion'];
 				$this->author = $contentData['contentAuthor'];
 				$this->timestamp = $contentData['updateTime'];
@@ -187,8 +217,10 @@ class BentoCMSClassCmsContent
 			}else{
 				throw new BentoError('Invalid page revision');
 			}
-		}elseif(is_numeric($pageId)){
-			$this->pageId = $pageId;
+		}elseif(is_numeric($locationId)){
+			$this->locationId = $locationId;
+		}else{
+			throw new BentoError('Location ID required');
 		}
 	}
 
@@ -230,27 +262,27 @@ class BentoCMSClassCmsContent
 		$db = dbConnect('default');
 		$insertStmt = $db->stmt_init();
 
-		$insertStmt->prepare('INSERT INTO cmsContent (pageId,
+		$insertStmt->prepare('INSERT INTO cmsContent (location_id,
 													 contentVersion,
 													contentAuthor, updateTime,
 													title, content, rawContent)
 												VALUES
 													 (?,
 													(IFNULL(  ((SELECT contentVersion FROM cmsContent AS tempContent
-																WHERE tempContent.pageId = ?
+																WHERE tempContent.location_id = ?
 																ORDER BY tempContent.contentVersion DESC LIMIT 1) + 1),
 															0)),
 													?, NOW(),
 													?, ?, ?)');
 
-		$insertStmt->bind_param_and_execute('iiisss', $this->pageId, $this->pageId, $this->author, $this->title,
+		$insertStmt->bind_param_and_execute('iiisss', $this->locationId, $this->locationId, $this->author, $this->title,
 														$this->filterContent($this->content), $this->content);
 
 		$getStmt = $db->stmt_init();
 		$getStmt->prepare('SELECT contentVersion FROM cmsContent
-								WHERE pageId = ? AND contentAuthor = ? AND title = ?
+								WHERE location_id = ? AND contentAuthor = ? AND title = ?
 								ORDER BY contentVersion DESC LIMIT 1');
-		$getStmt->bind_param_and_execute('iis', $this->pageId, $this->author, $this->title);
+		$getStmt->bind_param_and_execute('iis', $this->locationId, $this->author, $this->title);
 		$newRow = $getStmt->fetch_array();
 		$this->id = $newRow['contentVersion'];
 
@@ -282,8 +314,8 @@ class BentoCMSClassCmsContent
 
 		$db = dbConnect('default');
 		$stmt = $db->stmt_init();
-		$stmt->prepare('UPDATE cmsPages SET pageCurrentVersion = ? WHERE pageId = ?');
-		$result = $stmt->bind_param_and_execute('ii', $this->id, $this->pageId);
+		$stmt->prepare('UPDATE cmsPages SET pageCurrentVersion = ? WHERE location_id = ?');
+		$result = $stmt->bind_param_and_execute('ii', $this->id, $this->locationId);
 
 	}
 
