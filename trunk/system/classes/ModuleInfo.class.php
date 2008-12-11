@@ -19,7 +19,6 @@ class ModuleInfo implements ArrayAccess
 		{
 			$infoRow = new ObjectRelationshipMapper('modules');
 
-
 			switch ($loadBy)
 			{
 				case 'name':
@@ -35,10 +34,10 @@ class ModuleInfo implements ArrayAccess
 					break;
 			}
 
-
 			if($infoRow->select())
 			{
-				$info['Name'] = $infoRow->mod_name;
+				$location = new Location($infoRow->location_id);
+				$info['Name'] = $location->getName();
 				$info['ID'] = $infoRow->mod_id;
 				$info['Package'] = $infoRow->mod_package;
 				$info['PathToPackage'] = $config['path']['modules'] . $info['Package'] . '/';
@@ -46,7 +45,6 @@ class ModuleInfo implements ArrayAccess
 				$location = new Location($infoRow->location_id);
 				$info['siteId'] = $location->siteId;
 			}
-
 
 			$settingsInfoRow = new ObjectRelationshipMapper('mod_config');
 			$settingsInfoRow->mod_id = $info['id'];
@@ -60,13 +58,9 @@ class ModuleInfo implements ArrayAccess
 			$cacheInfo->store_data($info);
 		}
 
-
-
-
 		$this->info = $info;
 		$this->modId = $this->info['ID'];
 		$this->settings = $info['settings'];
-
 	}
 
 	public function checkAuth($action)
@@ -83,9 +77,6 @@ class ModuleInfo implements ArrayAccess
 
 		return $this->permission->is_allowed($action);
 	}
-
-
-
 
 	public function settings()
 	{
