@@ -13,6 +13,14 @@ class BentoCMSPageList
 
 	public function getPages($status = false)
 	{
+
+
+		$location = new Location();
+
+		$children = $location->getChildren('page');
+
+//		foreach
+
 		$db = dbConnect('default_read_only');
 		$listPages = $db->stmt_init();
 

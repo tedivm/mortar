@@ -61,26 +61,19 @@ class BentoCMSActionAddPage extends Action
 		if($form->checkSubmit())
 		{
 			$inputHandler = $form->getInputhandler();
+			$user = ActiveUser::getInstance();
 
-			$module = new ModuleInfo($this->moduleId);
-			if($module->checkAuth('Add'))
-			{
+			$cms = new BentoCMSCmsPage();
+			$cms->property(array('parent' => $this->location, 'name' => $inputHandler['name'], 'keywords' => $inputHandler['keywords'], 'description' => $inputHandler['description']));
+			$cms->save();
 
-				$user = ActiveUser::getInstance();
+			$content = $cms->newRevision();
+			$content->property(array('content' => $inputHandler['content'], 'title' => $inputHandler['title'], 'author', $user->getId()));
+			$content->save();
+			$content->makeActive();
 
-				$cms = new BentoCMSCmsPage();
-				$cms->property(array('module' => $this->moduleId, 'name' => $inputHandler['name'], 'keywords' => $inputHandler['keywords'], 'description' => $inputHandler['description']));
-				$cms->save();
+			$this->success = true;
 
-				$content = $cms->newRevision();
-				$content->property(array('content' => $inputHandler['content'], 'title' => $inputHandler['title'], 'author', $user->getId()));
-				$content->save();
-				$content->makeActive();
-
-				$this->success = true;
-			}else{
-				throw new AuthenticationError();
-			}
 
 		}
 
