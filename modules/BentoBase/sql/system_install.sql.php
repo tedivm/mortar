@@ -62,7 +62,8 @@ CREATE TABLE locations
 	location_parent BIGINT UNSIGNED NULL,
 	location_resource VARCHAR(16) NULL DEFAULT 'data',
 	location_name VARCHAR(65) NULL,
-	inherit TINYINT UNSIGNED NULL DEFAULT 1
+	inherit TINYINT UNSIGNED NULL DEFAULT 1,
+	location_createdOn DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 /* Table Items: locations */
@@ -110,14 +111,11 @@ CREATE TABLE modules
 (
 	mod_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	location_id BIGINT UNSIGNED NOT NULL,
-	mod_name VARCHAR(45) NOT NULL,
 	mod_package VARCHAR(45) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 /* Table Items: modules */
 
-/* Add Indexes for: modules */
-CREATE INDEX mod_name ON modules (mod_name);
 
 /******************** Add Table: package_installed ************************/
 
