@@ -27,6 +27,8 @@ class Form
 	public function __construct($name)
 	{
 		$this->name = $name;
+		if(method_exists($this, 'define'))
+			$this->define();
 	}
 
 	public function createInput($name)
@@ -465,12 +467,7 @@ class Form
 
 	public function getInput($name, $section = false)
 	{
-		if(!$section)
-		{
-			$inputList = $this->inputs;
-		}else{
-			$inputList = array($this->inputs[$section]);
-		}
+		$inputList = (!$section) ? $this->inputs : array($this->inputs[$section]);
 
 		foreach($inputList as $inputs)
 		{
@@ -480,7 +477,6 @@ class Form
 					return $input;
 			}
 		}
-
 		return false;
 	}
 }
@@ -520,7 +516,7 @@ class Input
 
 	public function attachToForm($form)
 	{
-		if(get_class($form) == 'Form' && $form->attachInput($this))
+		if($form instanceof Form && $form->attachInput($this))
 		{
 			$this->form = $form;
 		}
