@@ -23,19 +23,25 @@ class BentoCMSActionDefault extends Action
 
 	}
 
+	protected function htmlContentArea()
+	{
+		$revision = $this->page->getRevision();
+		return $revision->property('content');
+	}
+
 	public function viewHtml()
 	{
+		$page = ActivePage::getInstance();
 		$revision = $this->page->getRevision();
 		$status = $this->page->property('status');
 
 		switch (true){
 
 			case ($status == 'draft' && $this->checkAuth('Edit')):
-				$revision->property($revision->property('title', '*DRAFT* ' . $revision->property('title')));
 				break;
 
 			case ($status == 'deleted' && $this->checkAuth('Add')):
-				$revision->property($revision->property('title', '*DELETED* ' . $revision->property('title')));
+				$title = '*DELETED* ';
 				break;
 
 			case ($status == 'active'):
@@ -47,9 +53,20 @@ class BentoCMSActionDefault extends Action
 		}
 
 
-		$this->page->sendToActivePage($revision);
 
 
+//var_dump($revision->property('content'));
+
+		$page->addRegion('main_content', $this->htmlContentArea());
+
+//var_dump($page);
+
+		$page->addRegion('title', $revision->property('title'));
+		$page->addMeta('keywords', $this->page->property('keywords'));
+		$page->addMeta('description', $this->page->property('description'));
+
+
+		//return true;
 	}
 }
 

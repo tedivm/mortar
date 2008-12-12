@@ -27,7 +27,6 @@ class BentoCMSActionEditPage extends Action
 			$current['name'] = $cms->property('name');
 			$current['keywords'] = $cms->property('keywords');
 			$current['description'] = $cms->property('description');
-			$current['mod_id'] = $cms->property('module');
 			$current['pageId'] = $cms->property('id');
 
 			$current['title'] = $cmsContent->property('title');
@@ -38,45 +37,30 @@ class BentoCMSActionEditPage extends Action
 			throw new ResourceNotFoundError('No page id given.');
 		}
 
+		$this->form = new BentoCMSPageForm($this->actionName);
 
-		$form = new Form($this->actionName);
-		$this->form = $form;
+		$this->form->getInput('title')->
+			property('value', $current['title']);
 
-		$form->changeSection('info')->
-			setlegend('Page Information')->
-			createInput('title')->
-				setLabel('Title')->
-				addRule('required')->
-				property('value', $current['title'])->
-			getForm()->
+		$this->form->getInput('description')->
+			property('value', $current['description']);
 
-			createInput('description')->
-				setType('textarea')->
-				setLabel('Description')->
-				addRule('required')->
-				property('value', $current['description'])->
-			getForm()->
+		$this->form->getInput('content')->
+			property('value', $current['content']);
 
-			createInput('keywords')->
-				setType('textarea')->
-				setLabel('Keywords')->
-				addRule('required')->
-				property('value', $current['keywords'])->
-			getForm()->
+		$this->form->getInput('keywords')->
+			property('value', $current['keywords']);
+
+		$this->form->getInput('name')->
+			property('value', $current['name']);
 
 
-			changeSection('content')->
-			createInput('content')->
-				setType('html')->
-				addRule('required')->
-				property('value', $current['content']);
-
-
-		if($form->checkSubmit())
+		if($this->form->checkSubmit())
 		{
-			$inputHandler = $form->getInputhandler();
+			$inputHandler = $this->form->getInputhandler();
 			$cms->property('keywords', $inputHandler['keywords']);
 			$cms->property('description', $inputHandler['description']);
+			$cms->property('name', $inputHandler['name']);
 
 			$cmsContent->property('title', $inputHandler['title']);
 			$cmsContent->property('content', $inputHandler['content']);
