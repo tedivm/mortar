@@ -57,7 +57,6 @@ class BentoCMSCmsPage
 			if($CmsInfo !== false)
 			{
 				$this->id = $id;
-				$this->module = $CmsInfo['mod_id'];
 				$this->name = $CmsInfo['name'];
 				$this->currentVersion = $CmsInfo['pageCurrentVersion'];
 				$this->keywords = $CmsInfo['pageKeywords'];
@@ -143,31 +142,6 @@ class BentoCMSCmsPage
 		return is_numeric($this-id);
 	}
 
-	public function sendToActivePage($revision = 0)
-	{
-		if(!($revision instanceof BentoCMSClassCmsContent))
-		{
-			if(is_numeric($revision))
-			{
-				$revision = $this->getRevision($revision);
-			}else{
-				throw new BentoError('Invalid resource passed as argument');
-			}
-		}
-
-		if(!class_exists('ActivePage', false))
-			throw new BentoError('ActivePage class not found');
-
-		$page = ActivePage::getInstance();
-
-		$page->addRegion('main_content', $revision->property('content'));
-		$page->addRegion('title', $revision->property('title'));
-		$page->addMeta('keywords', $this->keywords);
-		$page->addMeta('description', $this->description);
-
-
-		return true;
-	}
 }
 
 
