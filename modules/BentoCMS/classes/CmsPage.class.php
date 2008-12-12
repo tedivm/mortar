@@ -39,7 +39,7 @@ class BentoCMSCmsPage
 
 					$db = dbConnect('default_read_only');
 					$stmt = $db->stmt_init();
-					$stmt->prepare('SELECT * FROM cmsPages WHERE location_id = ?');
+					$stmt->prepare('SELECT * FROM BentoCMS_Pages WHERE location_id = ?');
 					$stmt->bind_param_and_execute('i', $id);
 
 					if($stmt->num_rows != 1)
@@ -109,7 +109,7 @@ class BentoCMSCmsPage
 
 	public function save()
 	{
-		$pageRecord = new ObjectRelationshipMapper('cmsPages');
+		$pageRecord = new ObjectRelationshipMapper('BentoCMS_Pages');
 
 		if(isset($this->id))
 		{
@@ -170,7 +170,7 @@ class BentoCMSClassCmsContent
 			{
 				$db = dbConnect('default_read_only');
 				$contentStmt = $db->stmt_init();
-				$contentStmt->prepare('SELECT * FROM cmsContent WHERE location_id = ? AND contentVersion = ?');
+				$contentStmt->prepare('SELECT * FROM BentoCMS_Content WHERE location_id = ? AND contentVersion = ?');
 				$contentStmt->bind_param_and_execute('ii', $locationId, $revision);
 
 
@@ -236,13 +236,13 @@ class BentoCMSClassCmsContent
 		$db = dbConnect('default');
 		$insertStmt = $db->stmt_init();
 
-		$insertStmt->prepare('INSERT INTO cmsContent (location_id,
+		$insertStmt->prepare('INSERT INTO BentoCMS_Content (location_id,
 													 contentVersion,
 													contentAuthor, updateTime,
 													title, content, rawContent)
 												VALUES
 													 (?,
-													(IFNULL(  ((SELECT contentVersion FROM cmsContent AS tempContent
+													(IFNULL(  ((SELECT contentVersion FROM BentoCMS_Content AS tempContent
 																WHERE tempContent.location_id = ?
 																ORDER BY tempContent.contentVersion DESC LIMIT 1) + 1),
 															0)),
@@ -253,7 +253,7 @@ class BentoCMSClassCmsContent
 														$this->filterContent($this->content), $this->content);
 
 		$getStmt = $db->stmt_init();
-		$getStmt->prepare('SELECT contentVersion FROM cmsContent
+		$getStmt->prepare('SELECT contentVersion FROM BentoCMS_Content
 								WHERE location_id = ? AND contentAuthor = ? AND title = ?
 								ORDER BY contentVersion DESC LIMIT 1');
 		$getStmt->bind_param_and_execute('iis', $this->locationId, $this->author, $this->title);
