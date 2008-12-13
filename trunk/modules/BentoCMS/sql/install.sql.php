@@ -33,14 +33,14 @@ ALTER TABLE BentoCMS_Pages ADD CONSTRAINT pkBentoCMS_Pages
 	PRIMARY KEY (location_id);
 
 
-/************ Foreign Key: fk_cmsContent_locations ***************/
+/************ Foreign Key: fk_BentoCMS_Content_locations ***************/
 ALTER TABLE BentoCMS_Content ADD CONSTRAINT fk_BentoCMS_Content_locations
-	FOREIGN KEY (location_id) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+	FOREIGN KEY (location_id) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-/************ Foreign Key: fk_cmsContent_users ***************/
+/************ Foreign Key: fk_BentoCMS_Content_users ***************/
 ALTER TABLE BentoCMS_Content ADD CONSTRAINT fk_BentoCMS_Content_users
-	FOREIGN KEY (contentAuthor) REFERENCES users (user_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+	FOREIGN KEY (contentAuthor) REFERENCES users (user_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-/************ Foreign Key: fk_cmsPages_locations ***************/
+/************ Foreign Key: fk_BentoCMS_Pages_locations ***************/
 ALTER TABLE BentoCMS_Pages ADD CONSTRAINT fk_BentoCMS_Pages_locations
-	FOREIGN KEY (location_id) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+	FOREIGN KEY (location_id) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
