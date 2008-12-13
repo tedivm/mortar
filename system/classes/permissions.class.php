@@ -283,7 +283,6 @@ class Location implements intlocation
 
 		if(!$db_location->save())
 		{
-			var_dump($db_location);
  			throw new BentoError('Unable to save location');
 		}
 
@@ -306,6 +305,7 @@ class Location implements intlocation
 				$metaAdd->save();
 			}
 		}
+		Cache::clear('locations', $this->id, 'info');
 	}
 
 	public function inheritsPermission()
