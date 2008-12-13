@@ -52,13 +52,22 @@ class AutoLoader
 				$packageInfo = new PackageInfo($package);
 				$path = $packageInfo->getPath();
 				$fileName = substr($className, strlen($package)) . '.class.php';
-				foreach(array('classes', 'library', 'actions') as $directory)
+				foreach(array('classes', 'library') as $directory)
 				{
-
 					$pathToCheck = $path . $directory . '/' . $fileName;
 					if(self::checkDirectory($pathToCheck, $className))
 						return true;
 				}
+
+				if(strpos($className, $package . 'Action') === 0)
+				{
+					$fileName = substr($className, strlen($package) + 6) . '.class.php';
+					$pathToCheck = $path . 'actions/' . $fileName;
+					if(self::checkDirectory($pathToCheck, $className))
+						return true;
+				}
+
+
 
 			}//if(strpos($className, $info->Runtime['package']) === 0)
 		}//foreach(self::$packages as $package)
@@ -67,7 +76,7 @@ class AutoLoader
 	static public function loadError($className)
 	{
 		try{
-			throw new BentoNotice('Unable to include class: ' . $class_name);
+			throw new BentoNotice('Unable to include class: ' . $className);
 		}catch (Exception $e){
 
 		}
