@@ -11,13 +11,17 @@ class BentoCMSActionAddPage extends FormAction
 									'linkContainer' => 'CMS');
 
 	protected $formName = 'BentoCMSPageForm';
+	protected $resourceClass = 'BentoCMSCmsPage';
 
+	protected $resource;
 
 	protected function processInput($inputHandler)
 	{
 		$user = ActiveUser::getInstance();
 
-		$cms = new BentoCMSCmsPage();
+		$resource = $this->resourceClass;
+		$cms = new $resource();
+		$this->resource = $cms;
 		$cms->property(array('parent' => $this->location, 'name' => $inputHandler['name'],
 							'keywords' => $inputHandler['keywords'],
 							'description' => $inputHandler['description']));
@@ -26,6 +30,7 @@ class BentoCMSActionAddPage extends FormAction
 		$content = $cms->newRevision();
 		$content->property(array('content' => $inputHandler['content'], 'title' => $inputHandler['title'],
 							'author', $user->getId()));
+
 		$content->save();
 		$content->makeActive();
 		return true;

@@ -9,6 +9,9 @@ class BentoCMSActionRemovePage extends Action
 
 	protected $status;
 
+	protected $resourceType = 'Page';
+	protected $resourceClass = 'BentoCMSCmsPage';
+
 	public function logic()
 	{
 		$info = InfoRegistry::getInstance();
@@ -17,14 +20,14 @@ class BentoCMSActionRemovePage extends Action
 		if($location->getParent()->getId() != $this->location->getId())
 			throw new BentoError('Module/Page mismatch');
 
-		if($location->resource_type() != 'page')
+		if($location->resource_type() != $this->resourceType)
 			throw new BentoError('Module/Page mismatch');
 
 		$form = new Form($this->actionName);
 		$this->form = $form;
 
 		$form->changeSection('info')->
-			setSectionIntro('Are you sure you want to delete this page?')->
+			setSectionIntro('Are you sure you want to delete this ' . strtolower($this->resourceType) . '?')->
 			createInput('submit')->
 				setType('submit')->
 				addRule('required')->
@@ -33,7 +36,8 @@ class BentoCMSActionRemovePage extends Action
 
 		if($form->checkSubmit())
 		{
-			$cmsPage = new BentoCMSCmsPage($info->Runtime['id']);
+			$resourceClass = $this->resourceClass;
+			$cmsPage = new $resourceClass($info->Runtime['id']);
 			$cmsPage->property('status', 'deleted');
 			$cmsPage->save();
 			$this->status = 'deleted';
@@ -44,7 +48,7 @@ class BentoCMSActionRemovePage extends Action
 	{
 		if($this->status == 'deleted')
 		{
-			return 'Page successfully deleted.';
+			return  $this->resourceType . ' successfully deleted.';
 		}else{
 			return $this->form->makeDisplay();
 		}

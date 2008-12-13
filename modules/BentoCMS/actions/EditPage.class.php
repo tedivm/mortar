@@ -10,8 +10,9 @@ class BentoCMSActionEditPage extends FormAction
 									'linkContainer' => 'CMS');
 
 	protected $formName = 'BentoCMSPageForm';
+	protected $resourceClass = 'BentoCMSCmsPage';
 
-
+	protected $resource;
 
 	protected function getForm()
 	{
@@ -20,7 +21,10 @@ class BentoCMSActionEditPage extends FormAction
 
 		if(is_numeric($info->Runtime['id']))
 		{
-			$cms = new BentoCMSCmsPage($info->Runtime['id']);
+			$resourceClass = $this->resourceClass;
+			$cms = new $resourceClass($info->Runtime['id']);
+			$this->resource = $cms;
+
 			$cmsContent = $cms->getRevision();
 
 			$current['name'] = $cms->property('name');
@@ -33,8 +37,6 @@ class BentoCMSActionEditPage extends FormAction
 		}else{
 			throw new ResourceNotFoundError('No page id given.');
 		}
-
-		$form = new BentoCMSPageForm($this->actionName);
 
 		$form->getInput('title')->
 			property('value', $current['title']);
