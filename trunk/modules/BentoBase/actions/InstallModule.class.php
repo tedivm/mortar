@@ -110,7 +110,7 @@ class BentoBaseActionInstallModule extends PackageAction
 
 			}
 		}
-		Cache::clear('packages', 'adminTabs');
+		Cache::clear('packages');
 	}
 
 	public function viewAdmin()
