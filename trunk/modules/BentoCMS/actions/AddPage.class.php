@@ -1,7 +1,7 @@
 <?php
 
 
-class BentoCMSActionAddPage extends Action
+class BentoCMSActionAddPage extends FormAction
 {
 	static $requiredPermission = 'Add';
 
@@ -10,48 +10,33 @@ class BentoCMSActionAddPage extends Action
 									'headerTitle' => 'Add Page',
 									'linkContainer' => 'CMS');
 
-	protected $form;
-	protected $success = false;
-	public function logic()
+	protected $formName = 'BentoCMSPageForm';
+
+
+	protected function processInput($inputHandler)
 	{
-		$info = InfoRegistry::getInstance();
+		$user = ActiveUser::getInstance();
 
-//		$form = new Form($this->actionName);
-	//	$this->form = $form;
+		$cms = new BentoCMSCmsPage();
+		$cms->property(array('parent' => $this->location, 'name' => $inputHandler['name'],
+							'keywords' => $inputHandler['keywords'],
+							'description' => $inputHandler['description']));
+		$cms->save();
 
-		$this->form = new BentoCMSPageForm($this->actionName);
-
-
-
-		if($this->form->checkSubmit())
-		{
-			$inputHandler = $this->form->getInputhandler();
-			$user = ActiveUser::getInstance();
-
-			$cms = new BentoCMSCmsPage();
-			$cms->property(array('parent' => $this->location, 'name' => $inputHandler['name'],
-								'keywords' => $inputHandler['keywords'],
-								'description' => $inputHandler['description']));
-			$cms->save();
-
-			$content = $cms->newRevision();
-			$content->property(array('content' => $inputHandler['content'], 'title' => $inputHandler['title'],
-								'author', $user->getId()));
-			$content->save();
-			$content->makeActive();
-
-			$this->success = true;
-
-
-		}
-
+		$content = $cms->newRevision();
+		$content->property(array('content' => $inputHandler['content'], 'title' => $inputHandler['title'],
+							'author', $user->getId()));
+		$content->save();
+		$content->makeActive();
+		return true;
 	}
+
 
 	public function viewAdmin()
 	{
 		if($this->form->wasSubmitted())
 		{
-			if($this->success)
+			if($this->formStatus)
 			{
 				$this->AdminSettings['headerSubTitle'] = 'Page successfully added';
 				return '';
