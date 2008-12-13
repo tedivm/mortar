@@ -11,26 +11,30 @@ class BentoCMSActionListPages extends PackageAction
 	protected $pages;
 	protected $pageTypes = array('active');
 
+	protected $resourceType = 'Page';
+	protected $resourceHandler = 'BentoCMSCmsPage';
+
 	public function logic()
 	{
-		$packageList = new PackageInfo('BentoCMS');
-
+		$packageList = new PackageInfo($this->package);
 		$modules = $packageList->getModules('Read');
-		$db = dbConnect('default_read_only');
 
+		$db = dbConnect('default_read_only');
 		$list = array();
+
 		foreach($modules as $module)
 		{
 			$moduleLocation = new Location($module['locationId']);
-			$childrenLocations = $moduleLocation->getChildren('page');
+			$childrenLocations = $moduleLocation->getChildren($this->resourceType);
 
 			$pages = array();
+			$resourceHandler = $this->resourceHandler;
 
 			if(is_array($childrenLocations))
 				foreach($childrenLocations as $pageLocation)
 			{
 				$id = $pageLocation->getId();
-				$pages[$pageLocation->getName()] = new BentoCMSCmsPage($id);
+				$pages[$pageLocation->getName()] = new $resourceHandler($id);
 			}
 
 			$list[(string) $moduleLocation]['pageList'] = $pages;
@@ -79,7 +83,7 @@ class BentoCMSActionListPages extends PackageAction
 				$url = new Url();
 				$url->property('engine', 'Admin');
 				$url->property('module', $moduleId);
-				$url->property('action', 'AddPage');
+				$url->property('action', 'Add' . $this->resourceType);
 
 				$table->setHeader($url->getLink('Add Page'));
 
@@ -105,7 +109,7 @@ class BentoCMSActionListPages extends PackageAction
 
 				if($pagePermission->checkAuth('Edit'))
 				{
-					$url->property('action', 'EditPage');
+					$url->property('action', 'Edit' . $this->resourceType);
 					$editLink = new HtmlObject('a');
 					$editLink->property('href', (string) $url);
 					$editLink->wrapAround('Edit');
@@ -114,7 +118,7 @@ class BentoCMSActionListPages extends PackageAction
 
 				if($pagePermission->checkAuth('Delete'))
 				{
-					$url->property('action', 'RemovePage');
+					$url->property('action', 'Remove' . $this->resourceType);
 					$deleteLink = new HtmlObject('a');
 					$deleteLink->property('href', (string) $url);
 					$deleteLink->wrapAround('Delete');

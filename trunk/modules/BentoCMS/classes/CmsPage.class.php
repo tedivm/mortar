@@ -13,7 +13,7 @@ class BentoCMSCmsPage
 	protected $parent;
 
 	protected $location;
-	protected $type = 'page';
+	protected $type = 'Page';
 
 
 	public function __construct($id = false)
@@ -245,7 +245,7 @@ class BentoCMSClassCmsContent
 													(IFNULL(  ((SELECT contentVersion FROM BentoCMS_Content AS tempContent
 																WHERE tempContent.location_id = ?
 																ORDER BY tempContent.contentVersion DESC LIMIT 1) + 1),
-															0)),
+															1)),
 													?, NOW(),
 													?, ?, ?)');
 
