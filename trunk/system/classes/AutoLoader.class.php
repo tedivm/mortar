@@ -10,70 +10,97 @@ class AutoLoader
 {
 	static protected $config;
 	static protected $activeModule;
-	
+	static protected $packages = array();
+
+	static function import($package)
+	{
+		if(!in_array($package, self::$packages))
+			self::$packages[] = $package;
+	}
+
 	static public function loadBentoLibrary($className)
 	{
 		self::loadBentoConfigPath('library', $className);
 	}
-	
+
 	static public function loadBentoAbstract($className)
 	{
 		self::loadBentoConfigPath('abstracts', $className);
 	}
-	
 
 	static public function loadBentoClasses($className)
 	{
 		self::loadBentoConfigPath('mainclasses', $className);
-	}	
-	
+	}
+
 
 	static public function loadActiveModule($className)
 	{
+		$packages = self::$packages;
 		$info = InfoRegistry::getInstance();
-		
-		if(!isset(self::$config))
-			self::$config = Config::getInstance();
-		
-		if(strpos($className, $info->Runtime['package']) === 0)
+		$packages[] = $info->Runtime['package'];
+		$packages = array_unique($packages);
+
+		/*
+		I know how ridiculous a forloop is in an autoincluder, so please don't judge.
+		Remember, this is just until we get namespaces.
+		*/
+		foreach($packages as $package)
 		{
-			$className = substr($className, strlen($info->Runtime['package']));
-			self::checkDirectory(self::$config['path']['modules'] . $info->Runtime['package'] . '/classes/' . $className . '.class.php');
-		}
-	}	
-	
+			if(strpos($className, $package) === 0)
+			{
+				$packageInfo = new PackageInfo($package);
+				$path = $packageInfo->getPath();
+				$fileName = substr($className, strlen($package)) . '.class.php';
+				foreach(array('classes', 'library', 'actions') as $directory)
+				{
+
+					$pathToCheck = $path . $directory . '/' . $fileName;
+					if(self::checkDirectory($pathToCheck, $className))
+						return true;
+				}
+
+			}//if(strpos($className, $info->Runtime['package']) === 0)
+		}//foreach(self::$packages as $package)
+	}
+
 	static public function loadError($className)
 	{
 		try{
 			throw new BentoNotice('Unable to include class: ' . $class_name);
 		}catch (Exception $e){
-			
+
 		}
-	}	
-	
+	}
+
 
 	static protected function loadBentoConfigPath($type, $className)
 	{
 		if(!isset(self::$config))
 			self::$config = Config::getInstance();
-			
-		self::checkDirectory(self::$config['path'][$type] . $className . '.class.php');
+
+		self::checkDirectory(self::$config['path'][$type] . $className . '.class.php', $className);
 	}
-	
-		
-	
-	static protected function checkDirectory($directory)
+
+
+
+	static protected function checkDirectory($directory, $classname)
 	{
 		try{
 			if(is_readable($directory))
 			{
 				include($directory);
-			}		
+			}
+
+			if(class_exists($classname, false))
+				return true;
+
 		}catch (Exception $e){
-			
-		}		
+
+		}
+		return false;
 	}
-	
+
 }
 
 spl_autoload_register(array('AutoLoader', 'loadBentoLibrary'));
