@@ -123,7 +123,7 @@ class BentoCMSCmsPage
 		}
 
 		$location->name = $this->name;
-		$location->parent = $this->parent;
+		$location->parent = ($this->parent instanceof Location) ? $this->parent->getId() : $this->parent;
 		$location->save();
 
 		if(!isset($this->id))
@@ -288,7 +288,7 @@ class BentoCMSClassCmsContent
 
 		$db = dbConnect('default');
 		$stmt = $db->stmt_init();
-		$stmt->prepare('UPDATE cmsPages SET pageCurrentVersion = ? WHERE location_id = ?');
+		$stmt->prepare('UPDATE BentoCMS_Pages SET pageCurrentVersion = ? WHERE location_id = ?');
 		$result = $stmt->bind_param_and_execute('ii', $this->id, $this->locationId);
 
 	}
