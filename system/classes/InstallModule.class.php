@@ -1,11 +1,6 @@
 <?php
 $config = Config::getInstance();
 
-if(!class_exists('Version', false))
-{
-	include($config['path']['mainclasses'] . 'version.class.php');
-}
-
 class InstallModule
 {
 
@@ -74,8 +69,8 @@ class InstallModule
 				$packageVersion->major = $packageInstalled->majorVersion;
 				$packageVersion->minor = $packageInstalled->mminorVersion;
 				$packageVersion->micro = $packageInstalled->microVersion;
-				$packageVersion->releaseType = $packageInstalled->releaseType;
-				$packageVersion->releaseVersion = $packageInstalled->releaseVersion;
+				$packageVersion->releaseType = $packageInstalled->prereleaseType;
+				$packageVersion->releaseVersion = $packageInstalled->prereleaseVersion;
 
 				if($version->compare($packageVersion) > 0)
 				{
@@ -97,8 +92,8 @@ class InstallModule
 				$packageInstalled->majorVersion = $version->major;
 				$packageInstalled->minorVersion = $version->minor;
 				$packageInstalled->microVersion = $version->micro;
-				$packageInstalled->releaseType = $version->releaseType;
-				$packageInstalled->releaseVersion = $version->releaseVersion;
+				$packageInstalled->prereleaseType = $version->releaseType;
+				$packageInstalled->prereleaseVersion = $version->releaseVersion;
 				$packageInstalled->status = 'filesystem';
 
 				if(!$packageInstalled->save())
