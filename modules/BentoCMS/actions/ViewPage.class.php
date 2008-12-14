@@ -6,7 +6,7 @@ class BentoCMSActionViewPage extends Action
 	static $requiredPermission = 'Read';
 
 	protected $resourceType = 'Page';
-
+	protected $resourceClass = 'BentoCMSCmsPage';
 	public function logic()
 	{
 		$info = InfoRegistry::getInstance();
@@ -14,7 +14,8 @@ class BentoCMSActionViewPage extends Action
 
 		if($child && $child->getResource() == $this->resourceType)
 		{
-			$this->page = new BentoCMSCmsPage($child->getId());
+			$class = $this->resourceClass;
+			$this->page = new $class($child->getId());
 		}else{
 			throw new ResourceNotFoundError();
 		}
@@ -50,21 +51,10 @@ class BentoCMSActionViewPage extends Action
 				break;
 		}
 
-
-
-
-//var_dump($revision->property('content'));
-
 		$page->addRegion('main_content', $this->htmlContentArea());
-
-//var_dump($page);
-
 		$page->addRegion('title', $revision->property('title'));
 		$page->addMeta('keywords', $this->page->property('keywords'));
 		$page->addMeta('description', $this->page->property('description'));
-
-
-		//return true;
 	}
 }
 
