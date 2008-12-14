@@ -70,10 +70,7 @@ class ModuleInfo implements ArrayAccess
 			$user = ActiveUser::getInstance();
 			$location = new Location($this->info['locationId']);
 			$this->permission = new Permissions($location, $user);
-			//echo 1;
 		}
-	//	var_dump($this->permission);
-		//echo $action;
 
 		return $this->permission->is_allowed($action);
 	}
