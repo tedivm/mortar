@@ -111,6 +111,9 @@ class Url
 
 	public function __set($name, $value)
 	{
+		if($name == 'id')
+			$value = str_replace(' ', '_', $value);
+
 		$this->attributes[$name] = $value;
 	}
 
