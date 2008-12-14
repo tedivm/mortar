@@ -25,6 +25,7 @@ class BentoBlogActionAddPost extends BentoCMSActionAddPage
 
 
 			$user = ActiveUser::getInstance();
+			$user = ActiveUser::getInstance();
 			$this->resource->property(array('tags' => $tags,
 									'author', $user->getId()));
 
