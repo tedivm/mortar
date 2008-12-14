@@ -38,9 +38,6 @@ class AutoLoader
 	{
 		$packages = self::$packages;
 		$info = InfoRegistry::getInstance();
-		$packages[] = $info->Runtime['package'];
-		$packages = array_unique($packages);
-
 		$packagePath = $info->Configuration['path']['modules'];
 
 		/*
@@ -53,12 +50,6 @@ class AutoLoader
 			{
 				$path = $packagePath . $package . '/';
 				$fileName = substr($className, strlen($package)) . '.class.php';
-				foreach(array('classes', 'library') as $directory)
-				{
-					$pathToCheck = $path . $directory . '/' . $fileName;
-					if(self::checkDirectory($pathToCheck, $className))
-						return true;
-				}
 
 				if(strpos($className, $package . 'Action') === 0)
 				{
@@ -68,7 +59,14 @@ class AutoLoader
 						return true;
 				}
 
+				$dirs = array('classes', 'library');
 
+				foreach($dirs as $directory)
+				{
+					$pathToCheck = $path . $directory . '/' . $fileName;
+					if(self::checkDirectory($pathToCheck, $className))
+						return true;
+				}
 
 			}//if(strpos($className, $info->Runtime['package']) === 0)
 		}//foreach(self::$packages as $package)
