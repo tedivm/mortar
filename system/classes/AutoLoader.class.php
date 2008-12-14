@@ -41,6 +41,8 @@ class AutoLoader
 		$packages[] = $info->Runtime['package'];
 		$packages = array_unique($packages);
 
+		$packagePath = $info->Configuration['path']['modules'];
+
 		/*
 		I know how ridiculous a forloop is in an autoincluder, so please don't judge.
 		Remember, this is just until we get namespaces.
@@ -49,8 +51,7 @@ class AutoLoader
 		{
 			if(strpos($className, $package) === 0)
 			{
-				$packageInfo = new PackageInfo($package);
-				$path = $packageInfo->getPath();
+				$path = $packagePath . $package . '/';
 				$fileName = substr($className, strlen($package)) . '.class.php';
 				foreach(array('classes', 'library') as $directory)
 				{
