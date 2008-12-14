@@ -24,6 +24,7 @@ class PackageInfo
 		{
 			try {
 
+				AutoLoader::import($this->name);
 				$db = db_connect('default_read_only');
 
 				$packagePath = $config['path']['modules'] . $packageName;
@@ -31,7 +32,8 @@ class PackageInfo
 				{
 					$path = $packagePath;
 				}else{
-					throw new BentoWarning('Unable to locate directory: ' . $packagePath . ' when loading: ' . $packageName);
+					throw new BentoWarning('Unable to locate directory: ' . $packagePath .
+											 ' when loading: ' . $packageName);
 				}
 
 				$info['path'] = $packagePath;
@@ -51,7 +53,8 @@ class PackageInfo
 							include($filename);
 							if(!class_exists($action['className'], false))
 							{
-								throw new BentoWarning('Unable to load action ' . $action['className'] . ' file at: ' . $filename);
+								throw new BentoWarning('Unable to load action ' . $action['className'] .
+														 ' file at: ' . $filename);
 							}
 						}
 
@@ -112,7 +115,8 @@ class PackageInfo
 
 				while($modules = $packageStmt->fetch_array())
 				{
-					$info['installedModules'][] = array('modId' => $modules['mod_id'], 'locationId' => $modules['location_id']);
+					$info['installedModules'][] = array('modId' => $modules['mod_id'],
+													 'locationId' => $modules['location_id']);
 				}
 
 
@@ -161,9 +165,7 @@ class PackageInfo
 			$outputModules = array();
 			foreach($this->installedModules as $module)
 			{
-			//	var_dump($module);
 				$moduleInfo = new ModuleInfo($module['modId']);
-
 				if($moduleInfo->checkAuth($requiredPermission))
 				{
 					$outputModules[] = $module;
@@ -213,11 +215,6 @@ class PackageInfo
 	}
 
 
-
-}
-
-class PackageInfoLink
-{
 
 }
 
