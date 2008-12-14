@@ -1,20 +1,18 @@
 <?php
 
-class BentoCMSViewPage extends Action
+class BentoCMSActionViewPage extends Action
 {
 	protected $page;
 	static $requiredPermission = 'Read';
 
+	protected $resourceType = 'Page';
+
 	public function logic()
 	{
-		//$this->location;
-		//$location = new Location();
-		//$location = $this->location;
-
 		$info = InfoRegistry::getInstance();
 		$child = $this->location->getChildByName(str_replace('_', ' ', $info->Get['id']));
 
-		if($child && $child->getResource() == 'page')
+		if($child && $child->getResource() == $this->resourceType)
 		{
 			$this->page = new BentoCMSCmsPage($child->getId());
 		}else{
