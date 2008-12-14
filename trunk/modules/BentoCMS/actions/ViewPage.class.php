@@ -1,6 +1,6 @@
 <?php
 
-class BentoCMSActionDefault extends Action
+class BentoCMSViewPage extends Action
 {
 	protected $page;
 	static $requiredPermission = 'Read';
