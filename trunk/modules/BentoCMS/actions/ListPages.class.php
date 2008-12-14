@@ -128,7 +128,7 @@ class BentoCMSActionListPages extends PackageAction
 				$url = new Url();
 				$url->property('module', $moduleId);
 				$url->property('id', str_replace(' ', '_', $pageName));
-
+				$url->property('action', 'View' . $this->resourceType);
 				$table['pageLink'] = '<a href="' . $url . '" target="_blank">View</a>';
 				$table->nextRow();
 			}
