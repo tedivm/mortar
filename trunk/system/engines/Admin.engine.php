@@ -1,21 +1,21 @@
 <?php
 
-class AdminEngine extends Engine 
+class AdminEngine extends Engine
 {
 	public $engine_type = 'Admin';
-		
+
 	public $default_action = 'MainDisplay';
-	
+
 	protected $requiredPermission = 'Admin';
 
 	protected $returnMode;
-	
-	
+
+
 	protected function startEngine()
 	{
 		$get = Get::getInstance();
 		$config = Config::getInstance();
-		
+
 		if($get['modulePackage'] && !$config['module'])
 		{
 			$config['modulePackage'] = ereg_replace("[^A-Za-z0-9]", "", $get['modulePackage']);
@@ -23,31 +23,31 @@ class AdminEngine extends Engine
 			$this->pathToModule = $config['path']['modules'] . $config['modulePackage'] . '/';
 			$this->runMethod = 'viewGeneric' . $this->engine_type;
 		}
-		
+
 		$this->returnMode = (isset($get['ajax'])) ? 'ajax' : 'full'; //full or ajax
-		
-		
+
+
 		$page = ActivePage::getInstance();
 		$page->addRegion('title', 'BentoBase Admin');
-		
+
 		if(isset($get['ajax']))
 		{
-			
+
 			$page->setTemplate('
 			{# script #}
-			
+
 			$(#content).html(\'{# main_content #}\');');
-			
+
 		}else{
-			
+
 			$page->setTemplate('index.html', 'admin');
 		}
-		
-		
-	}	
-	
 
-	
+
+	}
+
+
+
 	public function display()
 	{
 		$page = ActivePage::getInstance();
@@ -59,47 +59,47 @@ class AdminEngine extends Engine
 			{
 				$adminNav = new AdminNavigation();
 				$tab = ($this->main_action->AdminSettings['linkTab']) ? $this->main_action->AdminSettings['linkTab'] : 'Main';
-				
+
 				$adminLinks = $adminNav->getLinks($tab);
 				$adminTabs = $adminNav->getTabs($tab);
-			
+
 				$page->addRegion('navbar', $adminLinks);
 				$page->addRegion('navtabs', $adminTabs);
 			}
-			
+
 		}
-		
-		
-		
-		
+
+
+
+
 		return $page->makeDisplay();
-	}	
-	
-	
+	}
+
+
 	protected function processAction($actionResults)
 	{
 		$get = Get::getInstance();
 		$processedOutput = new DisplayMaker();
 		$page = ActivePage::getInstance();
-		
+
 		if($get['ajax'])
 		{
-			
+
 		}else{
-			
+
 			$themePath = $page->getThemePath();
 			$themePath .= 'adminContent.html';
 			$text = file_get_contents($themePath);
 			$processedOutput->set_display_template($text);
-			
+
 			/*
 			add sidebar
 			*/
-			
+
 			/*
 			add tabs
 			*/
-			
+
 		}
 
 		$title = (isset($this->main_action->AdminSettings['headerTitle'])) ? $this->main_action->AdminSettings['headerTitle'] : '';
@@ -107,13 +107,13 @@ class AdminEngine extends Engine
 		$processedOutput->addContent('content', $actionResults);
 		$processedOutput->addContent('title', $title);
 		$processedOutput->addContent('subtitle', $subTitle);
-		
+
 		$page = ActivePage::getInstance();
 		$page->addRegion('content', $processedOutput->make_display(false));
 	}
 
-	
-	
+
+
 }
 
 
