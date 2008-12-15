@@ -248,17 +248,11 @@ class Form
 							}
 							break;
 
-						case 'radio':
-							$inputHtml = new HtmlObject('input');
-							break;
-
-						case 'checkbox':
-							$inputHtml = new HtmlObject('input');
-							break;
-
-
 						case 'submit':
 							$this->submitButton = true;
+
+						case 'radio':
+						case 'checkbox':
 						case 'hidden':
 						case 'image':
 						case 'text':
@@ -389,8 +383,18 @@ class Form
 						$error[$input->name] = $validationResults;
 
 					if(!in_array($input->type, $this->discardInput))
-						$input->property('value', $inputHandler[$input->name]);
+					{
 
+						switch ($input->type)
+						{
+							case 'checkbox':
+								$input->check(isset($inputHandler[$input->name]));
+								break;
+							default:
+								$input->property('value', $inputHandler[$input->name]);
+						}
+
+					}
 					if(isset($inputHandler[$input->name]))
 						$this->wasSubmitted = true;
 				}
@@ -586,6 +590,17 @@ class Input
 		}
 
 		return true;
+	}
+
+	public function check($isChecked)
+	{
+		if($isChecked == true)
+		{
+			$this->property('checked', 'checked');
+		}elseif($isChecked === false && isset($this->properties['checked'])){
+			unset($this->properties['checked']);
+		}
+		return $this;
 	}
 
 	public function setOptions($value, $label = false, $properties = false)
