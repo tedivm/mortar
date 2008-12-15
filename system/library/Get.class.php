@@ -32,9 +32,15 @@ class Get extends Post
 			if(isset($pathVariables) && !is_numeric($this->variables['moduleId']))
 			{
 				$pathArray = array();
+
 				foreach($pathVariables as $pathIndex => $pathPiece)
 				{
-					if($child = $currentLocation->getChildByName($pathPiece))
+
+					$name = str_replace('_', ' ', $pathPiece);
+
+					$current = $currentLocation->getChildByName($name);
+
+					if($child = $currentLocation->getChildByName(str_replace('_', ' ', $pathPiece)))
 					{
 
 						if($child->resource == 'alias')
@@ -100,19 +106,23 @@ class Get extends Post
 
 			if(count($pathVariables) > 0)
 			{
+
 				$template = new DisplayMaker();
 				$template->load_template('url', $package);
 
 				if(!$template->load_template('url', $package))
 				{
-					$template->set_display_template('{# id #}/{# action #}/');
+					$template->set_display_template('{# action #}/{# id #}/');
 				}
 
+
 				$tags = $template->tagsUsed();
+
 				foreach($tags as $tag)
 				{
 					$this->variables[$tag] = array_shift($pathVariables);
 				}
+
 			}
 
 
