@@ -276,7 +276,7 @@ class Location implements intlocation
 		}
 
 
-		$db_location->location_name = $this->name;
+		$db_location->location_name = str_replace('_', ' ', $this->name);
 		$db_location->location_resource = $this->resource;
 
 		$db_location->inherit = ($this->inherits) ? 1 : 0;
