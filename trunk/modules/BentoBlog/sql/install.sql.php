@@ -22,7 +22,7 @@ CREATE TABLE BentoBlog_BlogHasTags
 
 /* Table Items: cmsPages */
 ALTER TABLE BentoBlog_BlogHasTags ADD CONSTRAINT pkBentoBlog_BlogHasTags
-	PRIMARY KEY (location_id);
+	PRIMARY KEY (location_id, tag);
 
 
 /************ Foreign Key: fk_BentoBlog_postDetail_locations ***************/
