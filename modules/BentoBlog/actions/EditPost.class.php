@@ -10,6 +10,7 @@ class BentoBlogActionEditPost extends BentoCMSActionEditPage
 	{
 		$form = parent::getForm();
 		$tags = $this->resource->property('tags');
+
 		if(count($tags) > 0)
 		{
 			$form->getInput('tags')->
@@ -22,7 +23,7 @@ class BentoBlogActionEditPost extends BentoCMSActionEditPage
 	{
 		if(parent::processInput($inputHandler))
 		{
-			$this->resource->property('tags', $inputHandler['tags']);
+			$this->resource->property('tags', explode(',', $inputHandler['tags']));
 			if($this->resource->save())
 				return true;
 		}

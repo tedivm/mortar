@@ -58,7 +58,7 @@ class BentoBlogPost extends BentoCMSCmsPage
 		{
 			$insertQuery = $db->stmt_init();
 			$insertQuery->prepare('INSERT INTO BentoBlog_BlogHasTags (location_id, tag) VALUES (?, ?)');
-			$insertQuery->bind_param_and_execute('is', $this->id, $tag);
+			$insertQuery->bind_param_and_execute('is', $this->id, trim($tag));
 		}
 
 		$postInfoQuery = $db->stmt_init();
