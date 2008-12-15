@@ -85,6 +85,9 @@ class BentoBaseSystemSettingsForm extends Form
 					property('value', $configIni->get('path', 'library'));
 
 
+		$this->createInput('path_interfaces')->
+					setLabel('Interfaces')->
+					property('value', $configIni->get('path', 'interfaces'));
 
 
 	}

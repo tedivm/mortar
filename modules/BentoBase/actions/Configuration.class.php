@@ -21,7 +21,7 @@ class BentoBaseActionConfiguration extends FormPackageAction
 
 
 
-		foreach(array('base', 'theme', 'config', 'mainclasses', 'modules', 'abstracts', 'engines', 'library', 'javascript') as $value)
+		foreach(array('base', 'theme', 'config', 'mainclasses', 'modules', 'abstracts', 'engines', 'library', 'javascript', 'interfaces') as $value)
 		{
 			$configIni->set('path', $value, $inputHandler['path_' . $value]);
 		}
