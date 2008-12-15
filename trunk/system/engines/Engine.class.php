@@ -90,7 +90,8 @@ abstract class Engine
 			$result = get_class_methods($this->className);
 
 			if(!in_array($this->getRunMethod(), get_class_methods($this->className)))
-				throw new ResourceNotFoundError('Action cannot run with this engine.');
+				throw new ResourceNotFoundError('Action cannot run with this engine because it doesn\'t contain the
+							right run method.');
 
 
 		}catch (Exception $e){
