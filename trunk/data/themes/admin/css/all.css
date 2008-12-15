@@ -52,7 +52,7 @@ a.logo {
 	top:5px;
 	left:20px;
 	}
-	
+
 /* header tabs */
 #top-navigation {
 	position:absolute;
@@ -101,7 +101,7 @@ a.logo {
 	line-height:19px;
 	color:#606060;
 	}
-	
+
 /* middle */
 #middle {
 	float:left;
@@ -128,7 +128,7 @@ a.logo {
 	background:url(../img/bg-center-column.jpg) no-repeat left top;
 	min-height:584px;
 	padding:12px 16px 0 13px;
-	}	
+	}
 * html #center-column {height:584px;}
 
 /* footer */
@@ -138,12 +138,12 @@ a.logo {
 	background:url(../img/bg-footer.gif) no-repeat;
 	height:15px;
 	}
-	
+
 /* left column styles */
 
 #left-column div
 {
-	margin:0 0 11px 0; 
+	margin:0 0 11px 0;
 }
 
 #left-column a {color:#3E3E3E;}
@@ -195,10 +195,10 @@ ul.nav li.last {background:none;}
 	height:25px;
 
 	background:#ECEFE7;
-	background:url(../img/arrow.gif) no-repeat 0 4px;	
-	list-style:none;	
+	background:url(../img/arrow.gif) no-repeat 0 4px;
+	list-style:none;
 	}
-	
+
 /* center column styles */
 .top-bar {
 	float:left;
@@ -206,7 +206,7 @@ ul.nav li.last {background:none;}
 	border-left:2px solid #f70;
 	padding:0 0 0 9px;
 	margin:0 0 4px 0;
-		border-bottom:2px solid #f70;
+	border-bottom:2px solid #f70;
 	}
 /* text page header */
 .top-bar h1 {
@@ -214,21 +214,12 @@ ul.nav li.last {background:none;}
 	color:#43729F;
 	margin:0 0 4px 0;
 	}
-/* orange button */
-.top-bar a.button {
-	float:right;
-	display:block;
-	width:75px;
-	height:35px;
-	text-align:center;
-	color:#fff;
-	text-transform:uppercase;
-	font-weight:bold;
-		
-	line-height:27px;
-	background:url(../img/bg-orange-button.gif) no-repeat;
-	}
-	
+.top-bar div {
+	margin:0 0 0 0;
+	padding: 0;
+
+}
+
 /* bar with select */
 .select-bar {
 	clear:both;
@@ -272,7 +263,7 @@ table.listing td,
 table.listing th {
 	border:1px solid #fff;
 	text-align:center;
-	}	
+	}
 table.listing th {
 	background:#9097A9;
 	color:#fff;
@@ -288,7 +279,7 @@ table.listing .bg td {
 	}
 table.listing .white td {
 	background:#fff;
-	}	
+	}
 table.listing .first {border-left:0px solid #9097A9;text-align:left;}
 table.listing .last {border-right:0px solid #9097A9;}
 
@@ -316,14 +307,14 @@ div.table .select {
 div.table .select strong {
 	float:left;
 	padding:5px 0 0 5px;
-	}	
+	}
 div.table .select select {
 	float:right;
 	width:78px;
 	margin:2px 3px 0 0;
-	text-align:right;	
+	text-align:right;
 	}
-	
+
 /* right column header */
 #right-column .h {
 	float:left;
@@ -343,7 +334,7 @@ div.table .select select {
 	background:#EBEBEB;
 	margin:0 0 15px 0;
 	}
-	
+
 /* right column buttons */
 .buttons {
 	clear:both;
@@ -362,13 +353,6 @@ div#center-column fieldset {
 	width: 585px;
 }
 
-
-div#center-content fieldset {
-	padding-top: 10px;
-	margin-left: 10px;
-	margin-bottom: 10px;
-	width: 585px;
-}
 
 div#packageListing div#description
 {
@@ -396,8 +380,8 @@ form fieldset > label {
 	display: block;
 	width: 160px;
 	float: left;
-	margin-bottom: 10px;	
-	clear: left;	
+	margin-bottom: 10px;
+	clear: left;
 }
 
 form fieldset > label.formError {
