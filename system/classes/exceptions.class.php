@@ -105,6 +105,14 @@ class BentoError extends Exception
 				$comma = ' ';
 				foreach($traceLine['args'] as $argName => $argValue)
 				{
+					if(is_string($argValue))
+					{
+
+					}elseif(is_object($argValue)){
+						$argValue = get_class($argValue);
+					}
+
+
 					$argString .= $comma .( (strlen($argValue) > '8') ? substr($argValue, '0', 6) . '..' : $argValue);
 					$argStringLong .= $comma .  $argValue;
 					$comma = ', ';
