@@ -32,6 +32,8 @@ class User
 	protected $username;
 	protected $email;
 	protected $allowLogin;
+	protected $memberGroups;
+
 
 	/**
 	 * Load user by ID
@@ -40,9 +42,11 @@ class User
 	 */
 	public function load_user($userId)
 	{
-
 		$this->id = false;
 		$this->user_info = array();
+
+		if($userId instanceof User)
+			throw new BentoError();
 
 		$cache = new Cache('users', $userId, 'lookup');
 
@@ -64,6 +68,22 @@ class User
 				$info = false;
 			}
 
+			$stmtMemberGroups = $db->stmt_init();
+			$stmtMemberGroups->prepare('SELECT memgroup_id FROM user_in_member_group WHERE user_id = ?');
+
+			$stmtMemberGroups->bind_param_and_execute('i', $userId);
+
+			if($stmtMemberGroups->num_rows > 0)
+			{
+				$memberGroups = array();
+				while($memgroup = $stmtMemberGroups->fetch_array())
+				{
+					$memberGroups[] = $memgroup['memgroup_id'];
+				}
+
+				$info['membergroups'] = $memberGroups;
+			}
+
 			$cache->store_data($info);
 		}
 
@@ -74,9 +94,10 @@ class User
 			$this->username = $info['user_name'];
 			$this->email = $info['user_email'];
 			$this->allowLogin = $info['user_allowlogin'];
+			$this->memberGroups = $info['membergroups'];
 			return $userId;
 		}else{
-			return $this->load_user_by_username('guest');
+			return false;
 		}
 
 		return false;
@@ -100,69 +121,11 @@ class User
 	}
 
 
-	/**
-	 * Load user from by username and password
-	 *
-	 * @param string $user
-	 * @param string $pass
-	 */
-	public function load_user_by_userpass($user, $pass)
+	public function getMemberGroups()
 	{
-		$db = db_connect('default_read_only');
-		$stmt = $db->stmt_init();
-		$stmt->prepare("SELECT * FROM users WHERE user_name=?");
-		$stmt->bind_param_and_execute('s', $user);
-		$numRows = $stmt->num_rows;
-		$user_array = $stmt->fetch_array();
-
-		$stmt->close();
-		$password = new StoredPassword($user_array['user_password']);
-
-		if($numRows == 1 && $password->is_match($pass))
-		{
-			$this->clear_user();
-			return $this->load_user($user_array['user_id']);
-		}
-
-		return false;
-
+		return $this->memberGroups;
 	}
 
-	public function load_user_by_username($user)
-	{
-		return $this->loadUserByName($user);
-	}
-
-	public function loadUserByName($user)
-	{
-
-		$cache = new Cache('usersname', $user, 'id');
-
-		$id = $cache->get_data();
-
-		if(!$cache->cacheReturned)
-		{
-			$db = db_connect('default_read_only');
-			$stmt = $db->stmt_init();
-			$stmt->prepare("SELECT * FROM users WHERE user_name=? LIMIT 1");
-			$stmt->bind_param_and_execute('s', $user);
-
-			if($stmt->num_rows == 1)
-			{
-				$array = $stmt->fetch_array();
-				$id = $array['user_id'];
-			}else{
-				$id = false;
-			}
-			$cache->store_data($id);
-		}
-
-		if(is_numeric($id))
-			return $this->load_user($id);
-
-		return false;
-
-	}
 
 	/**
 	 * Return user information
@@ -231,7 +194,9 @@ class ActiveUser extends User
 
 	public function load_user($id)
 	{
+//		var_dump($id);
 		$result = parent::load_user($id);
+	//	var_dump($this);
 		$this->sessionStart(true);
 		return $result;
 	}
@@ -303,6 +268,74 @@ class ActiveUser extends User
 		$_SESSION['user_id'] = $this->id;
 	}
 
+
+	/**
+	 * Load user from by username and password
+	 *
+	 * @param string $user
+	 * @param string $pass
+	 */
+	public function load_user_by_userpass($user, $pass)
+	{
+		$db = db_connect('default_read_only');
+		$stmt = $db->stmt_init();
+		$stmt->prepare("SELECT * FROM users WHERE user_name=?");
+		$stmt->bind_param_and_execute('s', $user);
+		$numRows = $stmt->num_rows;
+		$user_array = $stmt->fetch_array();
+
+		$stmt->close();
+		$password = new StoredPassword($user_array['user_password']);
+
+		if($numRows == 1 && $password->is_match($pass))
+		{
+			$this->clear_user();
+			if($this->load_user($user_array['user_id']))
+			{
+				return true;
+			}else{
+				$this->load_user_by_username('guest');
+			}
+		}
+
+		return false;
+	}
+
+	public function load_user_by_username($user)
+	{
+		return $this->loadUserByName($user);
+	}
+
+	public function loadUserByName($user)
+	{
+
+		$cache = new Cache('usersname', $user, 'id');
+
+		$id = $cache->get_data();
+
+		if(!$cache->cacheReturned)
+		{
+			$db = db_connect('default_read_only');
+			$stmt = $db->stmt_init();
+			$stmt->prepare("SELECT * FROM users WHERE user_name=? LIMIT 1");
+			$stmt->bind_param_and_execute('s', $user);
+
+			if($stmt->num_rows == 1)
+			{
+				$array = $stmt->fetch_array();
+				$id = $array['user_id'];
+			}else{
+				$id = false;
+			}
+			$cache->store_data($id);
+		}
+
+		if(is_numeric($id))
+			return $this->load_user($id);
+
+		return false;
+
+	}
 }
 
 ?>
