@@ -90,6 +90,14 @@ class AutoLoader
 		self::checkDirectory(self::$config['path'][$type] . $className . '.class.php', $className);
 	}
 
+	static public function loadBentoInterface($className)
+	{
+		if(!isset(self::$config))
+			self::$config = Config::getInstance();
+
+		self::checkDirectory(self::$config['path']['interfaces'] . $className . '.interface.php', $className);
+	}
+
 
 
 	static protected function checkDirectory($directory, $classname)
@@ -115,6 +123,7 @@ spl_autoload_register(array('AutoLoader', 'loadBentoLibrary'));
 spl_autoload_register(array('AutoLoader', 'loadBentoClasses'));
 spl_autoload_register(array('AutoLoader', 'loadBentoAbstract'));
 spl_autoload_register(array('AutoLoader', 'loadActiveModule'));
+spl_autoload_register(array('AutoLoader', 'loadBentoInterface'));
 spl_autoload_register(array('AutoLoader', 'loadError'));
 
 
