@@ -23,7 +23,7 @@ class Page implements ArrayAccess
 	protected $templateFile = 'index.html';
 	
 	protected $headerTemplate = '
-	<title>{# title #}<title>
+	<title>{# title #}</title>
 	{# meta #}
 	{# cssIncludes #}
 	{# jsIncludes #}
