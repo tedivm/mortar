@@ -16,18 +16,24 @@ class Permissions
 {
 	public $user;
 	public $location;
-	public $allowed_actions = array();
+	public $allowedActions = array();
+	public $inheritedActions = array();
 
-	public function __construct($location, $user)
+	public function __construct($location, $userId)
 	{
 
 
-		if(!is_int($user))
+		if(!($userId instanceof User) && is_numeric($userId))
 		{
-			$user = $user->id;
+			$user = new User();
+			$user->load_user($userId);
+		}elseif($userId instanceof User){
+			$user = $userId;
+			$userId = $user->getId();
 		}
 
-		$this->user = $user;
+
+		$this->user = $user->getId();
 
 		if(is_int($location))
 			$location = new Location($location);
@@ -47,11 +53,18 @@ class Permissions
 			if($this->location->parent_location() && $this->location->inheritsPermission())
 			{
 				$parent_permissions = new Permissions($this->location->parent_location(), $user);
-				$allowed_actions = $parent_permissions->allowed_actions;
+				$inheritedActions = $parent_permissions->getActions();
 				unset($parent_permissions);
 			}
 
-			$usergroup_permissions = $this->load_usergroup_permissions($this->location->location_id());
+			$memberGroups = $user->getMemberGroups();
+			$usergroup_permissions = array();
+			foreach($memberGroups as $groupId)
+			{
+				if($usergroupActions = $this->load_usergroup_permissions($this->location->location_id(), $groupId))
+					$usergroup_permissions = array_merge($usergroup_permissions, $usergroupActions);
+			}
+
 			$user_permissions = $this->load_user_permissions($this->location->location_id());
 
 			$tmp = array_merge($usergroup_permissions, $user_permissions);
@@ -66,9 +79,17 @@ class Permissions
 						unset($allowed_actions[$key]);
 				}
 			}
-			$cache->store_data($allowed_actions);
+
+
+			$actions['inherited'] = $inheritedActions;
+			$actions['allowed'] = $allowed_actions;
+
+			$cache->store_data($actions);
 		}
-		$this->allowed_actions = $allowed_actions;
+
+		if(is_array($actions['inherited']))
+			$this->inheritedActions = $actions['inherited'];
+		$this->allowedActions = $actions['allowed'];
 	}
 
 	public function is_allowed($action)
@@ -76,7 +97,7 @@ class Permissions
 		if(IGNOREPERMISSIONS)
 			return true;
 
-		return in_array($action, $this->allowed_actions);
+		return in_array($action, $this->getActions());
 	}
 
 	public function checkAuth($action)
@@ -84,20 +105,26 @@ class Permissions
 		return $this->is_allowed($action);
 	}
 
-	protected function load_usergroup_permissions($id)
+	protected function load_usergroup_permissions($locationId, $memgroupId)
 	{
-		$db = db_connect('default_read_only');
-		$stmt = $db->stmt_init();
-		$stmt->prepare("SELECT actions.action_name, permissionsprofile_has_actions.permission_status
-			FROM actions
-			LEFT JOIN (permissionsprofile_has_actions, group_permissions, user_in_member_group)
-				ON (actions.action_id = permissionsprofile_has_actions.action_id
-				AND permissionsprofile_has_actions.perprofile_id = group_permissions.perprofile_id
-				AND group_permissions.memgroup_id = user_in_member_group.memgroup_id)
-			WHERE
-			group_permissions.location_id = ? AND user_in_member_group.user_id = ?");
-		$stmt->bind_param_and_execute('ii', $id, $this->user);
-		return $this->adjust_action($stmt);
+		$cache = new Cache('permissions', 'membergroups', $memgroupId, $locationId);
+		$actions = $cache->getData();
+
+		if(!$cache->cacheReturned)
+		{
+			$db = db_connect('default_read_only');
+			$stmt = $db->stmt_init();
+			$stmt->prepare("SELECT actions.action_name, permissionsprofile_has_actions.permission_status FROM actions
+				LEFT JOIN (permissionsprofile_has_actions, group_permissions)
+					ON (permissionsprofile_has_actions.perprofile_id = group_permissions.perprofile_id
+					AND actions.action_id = permissionsprofile_has_actions.action_id)
+				WHERE location_id= ? AND memgroup_id = ?");
+			$stmt->bind_param_and_execute('ii', $locationId, $memgroupId);
+
+			$actions = $this->adjust_action($stmt);
+			$cache->storeData($actions);
+		}
+		return $actions;
 	}
 
 	protected function load_user_permissions($id)
@@ -129,6 +156,10 @@ class Permissions
 		return $tmp_array;
 	}
 
+	public function getActions()
+	{
+		return array_merge($this->inheritedActions, $this->allowedActions);
+	}
 
 }
 
