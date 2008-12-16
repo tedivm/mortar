@@ -35,17 +35,10 @@ class Get extends Post
 
 				foreach($pathVariables as $pathIndex => $pathPiece)
 				{
-
-					$name = str_replace('_', ' ', $pathPiece);
-
-					$current = $currentLocation->getChildByName($name);
-
 					if($child = $currentLocation->getChildByName(str_replace('_', ' ', $pathPiece)))
 					{
-
 						if($child->resource == 'alias')
 						{
-
 								$alias = new Alias(); //some sort of alias loading thing.
 
 								switch($alias->type)
@@ -53,12 +46,12 @@ class Get extends Post
 									case 'location':
 										$child = new Location($alias->locationId);
 										break;
-
 								}
 						}
 
 						switch ($child->resource_type())
 						{
+							case 'Directory':
 							case 'directory':
 								$pathArray[] = $pathPiece;
 								unset($pathVariables[$pathIndex]);
@@ -77,16 +70,13 @@ class Get extends Post
 							default:
 								break 2; //break out of foreach loop
 						}
+
 					}else{
 						break; //break out of foreach loop
 					}
-
-
-
 				}//foreach($pathVariables as $pathIndex => $pathPiece)
-
-				$this->variables['pathArray'] = $pathArray;
 			}
+
 
 			// if the directory exists but the module isn't set, check to see if there is a default
 			if(!isset($moduleInfo) && !isset($this->variables['package']) && (($currentLocation->resource == 'directory' || $currentLocation->resource == 'site') && is_numeric($currentLocation->meta('default'))))
@@ -108,7 +98,6 @@ class Get extends Post
 			{
 
 				$template = new DisplayMaker();
-				$template->load_template('url', $package);
 
 				if(!$template->load_template('url', $package))
 				{
@@ -117,10 +106,12 @@ class Get extends Post
 
 
 				$tags = $template->tagsUsed();
-
 				foreach($tags as $tag)
 				{
-					$this->variables[$tag] = array_shift($pathVariables);
+					$variable = array_shift($pathVariables);
+
+					if(strlen($variable) > 0)
+						$this->variables[$tag] = $variable;
 				}
 
 			}
