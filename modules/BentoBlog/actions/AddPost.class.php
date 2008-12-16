@@ -29,7 +29,8 @@ class BentoBlogActionAddPost extends BentoCMSActionAddPage
 			$this->resource->property(array('tags' => $tags,
 									'author', $user->getId()));
 
-			$this->resource->save();
+			if($this->resource->save())
+				return true;
 
 		}else{
 
