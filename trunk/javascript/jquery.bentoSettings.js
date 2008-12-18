@@ -1,80 +1,28 @@
 (function($) {
-	
-	
-  //
-  // utilitiy definition
-  
-  $.bentoSettings = function(name, value) {
-  	
-  	var opts = $.extend({}, $.fn.bentoSettings.defaults);
-  	if(name = 'options')
-  	{
-  		opts = $.extend({}, opts, options);
-  	}
-    
-  	if(!isLoaded)
-  	{
-	  	$.bentoSettings.loadSettings(opts);
-  	}
-    switch(name)
-    {
-    	case 'reload':
-    		$.bentoSettings.loadSettings(opts);
-    	case 'options':
-    		return;
-    		break;
-    		    	
-    	default:
-    		if(value)
-    		{
-    			siteInfo[name] = value;
-    		}else{
-    			return siteInfo[name];
-    		}
-    }
-    
-    
- 
-    });
-  };
- 
-  //
-  // private function for debugging
-  //
-//  Example:
-//  function functionName($obj) {
-//    
-//  };
- 
-  //
-  // define and expose our public functions
-  //
-//  Example:
-//  $.fn.NAME.functionName = function() {
-//
-//  };
- 
-//  Example:
-  $.bentoSettings.loadSettings = function(opts) {
-	
-  	$.getJson(opts.Url,
-  		function(data){
-  			siteInfo = $.extend({}, $.fn.bentoSettings.siteDefaults, data);
-  		});
-  		isLoaded = true;
-  };
 
-  // private
-  var siteInfo = {};
-  var isLoaded = false;
+var siteInfo;
 
-  //
-  // plugin defaults
-  //
-  
-  
-  $.bentoSettings.defaults = {};
-  $.bentoSettings.siteDefaults = {};
+	$.siteSetting = function(name) {
+		{
+			if(!isLoaded)
+			{
+				$.ajax({
+					url: $.siteSetting.defaults.url,
+					dataType:"json",
+					async: false,
+					success: function(json){
+						siteInfo = json;
+						isLoaded = true;
+					}
+			 	});				
+			}
+		}
+		return siteInfo[name];
+    };
 
-	
+  	$.siteSetting.defaults = {"url":""};
+  	// private
+	var isLoaded = false;
+	var siteInfo;
+  
 })(jQuery);
