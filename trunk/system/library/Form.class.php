@@ -137,141 +137,23 @@ class Form
 				}
 
 
+				$jsIncludes = array();
+				$jsStartup = array();
+
 				foreach($inputs as $input)
 				{
 					$input->property('id', $this->name . "_" . $input->name);
+					$inputJavascript = $this->getInputJavascript($input);
+
+					if(is_array($inputJavascript['startup']))
+						$jsStartup = array_merge_recursive($jsStartup, $inputJavascript['startup']);
+
+					if(is_array($inputJavascript['includes']))
+						$jsIncludes = array_merge_recursive($jsIncludes, $inputJavascript['includes']);
 
 
-
-					// preprocess special types
-
-					switch ($input->type) {
-						case 'location':
-							$input->type = 'select';
-							// check property for base location
-							// check for array of location types
-							if(is_array($input->property('types')))
-							{
-								$types = $input->property('types');
-								unset($input->properties['types']);
-							}elseif(is_string($input->property('types'))){
-								$types = $input->property('types');
-							}else{
-								$types = '';
-							}
-
-							if(is_numeric($input->property('baseLocation')))
-							{
-								$locationId = $input->property('baseLocation');
-								unset($input->properties['baseLocation']);
-							}else{
-								$locationId = 1;
-							}
-
-							if(is_numeric($input->property('value')))
-							{
-								$value = $input->property('value');
-								unset($input->properties['value']);
-							}else{
-								$value = 1;
-							}
-
-
-
-							$baseLocation = new Location($locationId);
-							$locationList = $baseLocation->getTreeArray($types);
-
-							foreach($locationList as $id => $string)
-							{
-								$attributes = array();
-								if($value == $id)
-									$attributes = array('selected' => 'selected');
-								$input->setOptions($id, $string, $attributes);
-							}
-
-							break;
-
-						case 'module':
-
-							if(!isset($input->properties['moduleName']))
-								throw new BentoError('Module type required for input type module.');
-
-							$packageInfo = new PackageInfo($input->properties['moduleName']);
-							$permission = ($input->properties['permission']) ? $input->properties['permission'] : '';
-							$moduleList = $packageInfo->getModules($permission);
-							$input->type = 'select';
-
-							foreach($moduleList as $module)
-							{
-								$location = new Location($module['locationId']);
-								$input->setOptions($module['modId'], (string) $location);
-							}
-
-
-							break;
-
-						default:
-							break;
-					}
-
-
-
-
-
-
-
-					// process raw types
-
-
-					switch ($input->type)
-					{
-						case'html':// for now we'll dump it in the text area, but we need to wire in the javascript code as some point
-						case 'textarea':
-							$inputHtml = new HtmlObject('textarea');
-							$inputHtml->tightEnclose();
-							$inputHtml->wrapAround($input->property('value'));
-							break;
-
-						case 'select':
-							$inputHtml = new HtmlObject('select');
-							foreach($input->options as $option)
-							{
-								$optionHtml = $inputHtml->insertNewHtmlObject('option')->
-									property('value', $option['value'])->
-									wrapAround($option['label']);
-
-								if(is_array($option['properties']))
-								{
-									$optionHtml->property($option['properties']);
-								}
-
-							}
-							break;
-
-						case 'submit':
-							$this->submitButton = true;
-
-						case 'radio':
-						case 'checkbox':
-						case 'hidden':
-						case 'image':
-						case 'text':
-						default:
-							$inputHtml = new HtmlObject('input');
-							$inputHtml->property('type', $input->type);
-							break;
-					}
-
-					$inputHtml->property($input->properties)->
-						property('name', $input->name);
-
-					$validationRules = $input->getRules();
-
-					if(!is_null($validationRules))
-					{
-						$validationClasses = json_encode(array('validation' => $validationRules));
-						$inputHtml->addClass($validationClasses);
-					}
+					$this->processSpecialInputFields($input);
+					$inputHtml = $this->getInputHtmlByType($input);
 
 					if($input->type == 'hidden')
 					{
@@ -281,7 +163,8 @@ class Form
 
 						$labelHtml = new HtmlObject('label');
 
-						$labelHtml->property('for', $input->property('id'))->property('id', $input->property('id') . '_label');
+						$labelHtml->property('for', $input->property('id'))->
+							property('id', $input->property('id') . '_label');
 
 						if(isset($input->label))
 						{
@@ -299,7 +182,10 @@ class Form
 							wrapAround($br);
 
 					}
-				}
+
+
+
+				}//foreach($this->inputs as $section => $inputs)
 
 				$formHtml->wrapAround($sectionHtml);
 			}
@@ -320,17 +206,25 @@ class Form
 
 			$formHtml = (string) $formHtml;
 			$cache->storeData($formHtml);
+
+
+
+
 		}
 
 		$output = $formHtml;
 
-		$javascript = '$(\'#' . $this->name . '\').validate()';
-		$jqueryPlugins = array('jquery' => array('form', 'validate', 'validate-methods', 'cluetip'));
+		$jsStartup[] = '$(\'#' . $this->name . '\').validate()';
+
+
+		$jqueryPlugins = array('jquery' => array('form', 'validate', 'validate-methods', 'cluetip', 'FCKeditor'));
+
 		if(class_exists('ActivePage', false))
 		{
 			$page = ActivePage::getInstance();
-			$page->addStartupScript($javascript);
+			$page->addStartupScript($jsStartup);
 			$page->addJQueryInclude($jqueryPlugins);
+			$page->addJavaScript($jsIncludes);
 			$page->addCss($this->name, 'forms');
 			//$page->
 
@@ -340,6 +234,161 @@ class Form
 
 		return $output;
 	}
+
+
+	protected function processSpecialInputFields(Input $input)
+	{
+
+		// preprocess special types
+		switch ($input->type) {
+			case 'location':
+				$input->type = 'select';
+				// check property for base location
+				// check for array of location types
+				if(is_array($input->property('types')))
+				{
+					$types = $input->property('types');
+					unset($input->properties['types']);
+				}elseif(is_string($input->property('types'))){
+					$types = $input->property('types');
+				}else{
+					$types = '';
+				}
+
+				if(is_numeric($input->property('baseLocation')))
+				{
+					$locationId = $input->property('baseLocation');
+					unset($input->properties['baseLocation']);
+				}else{
+					$locationId = 1; // If no location is set, default toroot
+				}
+
+				if(is_numeric($input->property('value')))
+				{
+					$value = $input->property('value');
+					unset($input->properties['value']);
+				}else{
+					$value = 1;
+				}
+
+				$baseLocation = new Location($locationId);
+				$locationList = $baseLocation->getTreeArray($types);
+
+				foreach($locationList as $id => $string)
+				{
+					$attributes = array();
+					if($value == $id)
+						$attributes = array('selected' => 'selected');
+					$input->setOptions($id, $string, $attributes);
+				}
+				break;
+
+			case 'module':
+				if(!isset($input->properties['moduleName']))
+					throw new BentoError('Module type required for input type module.');
+
+				$packageInfo = new PackageInfo($input->properties['moduleName']);
+				$permission = ($input->properties['permission']) ? $input->properties['permission'] : '';
+				$moduleList = $packageInfo->getModules($permission);
+				$input->type = 'select';
+
+				foreach($moduleList as $module)
+				{
+					$location = new Location($module['locationId']);
+					$input->setOptions($module['modId'], (string) $location);
+				}
+				break;
+
+			default:
+				break;
+		}
+
+	}
+
+	protected function getInputHtmlByType(Input $input)
+	{
+
+		switch ($input->type)
+		{
+			case'html':// for now we'll dump it in the text area, but we need to wire in the javascript code as some point
+			case 'textarea':
+				$inputHtml = new HtmlObject('textarea');
+				$inputHtml->tightEnclose();
+				$inputHtml->wrapAround($input->property('value'));
+				break;
+
+			case 'select':
+				$inputHtml = new HtmlObject('select');
+				foreach($input->options as $option)
+				{
+					$optionHtml = $inputHtml->insertNewHtmlObject('option')->
+						property('value', $option['value'])->
+						wrapAround($option['label']);
+
+						if(is_array($option['properties']))
+						{
+							$optionHtml->property($option['properties']);
+						}
+				}
+				break;
+
+			case 'submit':
+				$this->submitButton = true;
+
+			case 'radio':
+			case 'checkbox':
+			case 'hidden':
+			case 'image':
+			case 'text':
+			default:
+				$inputHtml = new HtmlObject('input');
+				$inputHtml->property('type', $input->type);
+				break;
+		}//switch ($input->type)
+
+		$inputHtml->property($input->properties)->
+			property('name', $input->name);
+
+		$validationRules = $input->getRules();
+
+		if(!is_null($validationRules))
+		{
+			$validationClasses = json_encode(array('validation' => $validationRules));
+			$inputHtml->addClass($validationClasses);
+		}
+
+
+		return $inputHtml;
+
+	}
+
+	protected function getInputJavascript(Input $input)
+	{
+
+		// to require a javascript file, return $include['Library'][] = 'Name';
+		$includes = $startup = array();
+
+		switch ($input->type) {
+			case 'html':
+				if(is_array($input->property('options')))
+					$fckOptions = json_encode($input->property('options'));
+
+				$includes['jquery'] = array('FCKEditor');
+				$startup[] = '$(\'textarea#' . $input->property('id') . '\').fck(' . $fckOptions . ');';
+				break;
+
+			default:
+				break;
+		}
+
+
+		if(count($plugin) > 0 || count($startup) > 0)
+			return array('includes' => $includes, 'startup' => $startup);
+
+
+		return false;
+	}
+
 
 	public function wasSubmitted()
 	{
