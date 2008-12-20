@@ -131,6 +131,12 @@ a.logo {
 	}
 * html #center-column {height:584px;}
 
+#center-content
+{
+	float:left;
+	padding-top: 8px;
+}
+
 /* footer */
 #footer {
 	float:left;
