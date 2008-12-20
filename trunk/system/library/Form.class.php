@@ -308,17 +308,37 @@ class Form
 	protected function getInputHtmlByType(Input $input)
 	{
 
+		$tagByType = array(
+		'html' => 'textarea',
+		'textarea' => 'textarea',
+		'select' => 'select',
+		'checkbox' => 'input',
+		'submit' => 'input',
+		'radio' => 'input',
+		'hidden' => 'input',
+		'image' => 'input',
+		'text' => 'input',
+		'input' => 'input'
+		);
+
+		$tagType = ($tagByType[$input->type]) ? $tagByType[$input->type] : 'input';
+		$inputHtml = new HtmlObject($tagByType[$tagType]);
+		$inputHtml->property('name', $input->name);
+
+		if($tagByType[$input->type] == 'input');
+		{
+			$inputHtml->property('type', $input->type);
+		}
+
 		switch ($input->type)
 		{
-			case'html':// for now we'll dump it in the text area, but we need to wire in the javascript code as some point
+			case'html':
 			case 'textarea':
-				$inputHtml = new HtmlObject('textarea');
 				$inputHtml->tightEnclose();
 				$inputHtml->wrapAround($input->property('value'));
 				break;
 
 			case 'select':
-				$inputHtml = new HtmlObject('select');
 				foreach($input->options as $option)
 				{
 					$optionHtml = $inputHtml->insertNewHtmlObject('option')->
@@ -332,22 +352,18 @@ class Form
 				}
 				break;
 
+
+			// Checkboxes need to be arrays if they have multiple items, but we'll just make them all arrays
+			// If only one checkbox item exists with a single name, we'll take care of it in 'checkSubmit'
+			case 'checkbox':
+				$inputHtml->property('name', $input->name . '[]');
+				break;
+
 			case 'submit':
 				$this->submitButton = true;
-
-			case 'radio':
-			case 'checkbox':
-			case 'hidden':
-			case 'image':
-			case 'text':
-			default:
-				$inputHtml = new HtmlObject('input');
-				$inputHtml->property('type', $input->type);
-				break;
 		}//switch ($input->type)
 
-		$inputHtml->property($input->properties)->
-			property('name', $input->name);
+		$inputHtml->property($input->properties);
 
 		$validationRules = $input->getRules();
 
@@ -437,8 +453,24 @@ class Form
 						switch ($input->type)
 						{
 							case 'checkbox':
-								$input->check(isset($inputHandler[$input->name]));
+
+								if(isset($inputHandler[$input->name]))
+								{
+									$checkboxInputs = $this->getInput($input->name);
+
+									if($checkboxInputs == 1)
+									{
+										$inputHandler[$input->name] = $inputHandler[$input->name][0];
+										$input->check(true);
+									}else{
+										$input->check(in_array($input->property('value'), $inputHandler[$input->name]));
+									}
+								}else{
+									$input->check(false);
+								}
+
 								break;
+
 							default:
 								$input->property('value', $inputHandler[$input->name]);
 						}
@@ -521,16 +553,25 @@ class Form
 	public function getInput($name, $section = false)
 	{
 		$inputList = (!$section) ? $this->inputs : array($this->inputs[$section]);
-
+		$matchedInputs = array();
 		foreach($inputList as $inputs)
 		{
 			foreach($inputs as $input)
 			{
 				if($input->name == $name)
-					return $input;
+					$matchedInputs[] = $input;
 			}
 		}
-		return false;
+
+		switch(count($matchedInputs))
+		{
+			case 0:
+				return false;
+			case 1:
+				return array_pop($matchedInputs);
+			default:
+				return $matchedInputs;
+		}
 	}
 }
 
@@ -540,7 +581,7 @@ class Input
 	public $name;
 	public $label;
 	public $properties = array();
-	public $type;
+	public $type = 'input';
 	//public $value;
 	public $options;
 
