@@ -327,7 +327,8 @@ class ManageUser
 		{
 			case (!$user_id && !$password):// NO ID, ADD USERNAME (not password)
 				$insert_stmt = $db_write->stmt_init();
-				$insert_stmt->prepare('INSERT INTO users (user_id, user_name, user_email, user_allowlogin) VALUES (NULL, ?, ?, ?)');
+				$insert_stmt->prepare('INSERT INTO users (user_id, user_name, user_email, user_allowlogin)
+					VALUES (NULL, ?, ?, ?)');
 				$insert_stmt->bind_param_and_execute('ssi', $this->user_name, $this->user_email, $allow_login);
 				$this->user_id = $insert_stmt->insert_id;
 				break;
@@ -336,8 +337,10 @@ class ManageUser
 			case (!$user_id && $password): // NO ID, ADD USERNAME AND PASSWORD
 				$store_password = new NewPassword($this->user_password);
 				$insert_stmt = $db_write->stmt_init();
-				$insert_stmt->prepare('INSERT INTO users (user_id, user_name, user_password, user_email, user_allowlogin) VALUES (NULL, ?, ?, ?, ?)');
-				$insert_stmt->bind_param_and_execute('sssi', $this->user_name, $store_password->stored, $this->user_email, $allow_login);
+				$insert_stmt->prepare('INSERT INTO users (user_id, user_name, user_password, user_email, user_allowlogin)
+							 VALUES (NULL, ?, ?, ?, ?)');
+				$insert_stmt->bind_param_and_execute('sssi', $this->user_name, $store_password->stored,
+							$this->user_email, $allow_login);
 				$this->user_id = $insert_stmt->insert_id;
 				unset($this->user_password);
 				break;
@@ -346,8 +349,10 @@ class ManageUser
 
 			case ($user_id && !$password):	// HAS ID, UPDATE USERNAME (not password)
 				$update_stmt = $db_write->stmt_init();
-				$update_stmt->prepare('UPDATE users SET user_name = ?, user_email = ?, user_allowlogin = ? WHERE user_id = ?');
-				$update_stmt->bind_param_and_execute('ssii', $this->user_name, $this->user_email, $allow_login, $this->user_id);
+				$update_stmt->prepare('UPDATE users SET user_name = ?, user_email = ?, user_allowlogin = ?
+										WHERE user_id = ?');
+				$update_stmt->bind_param_and_execute('ssii', $this->user_name, $this->user_email, $allow_login,
+									$this->user_id);
 				break;
 
 			case ($user_id && $password): // HAS USERID, UPDATE USERNAME AND PASSWORD
