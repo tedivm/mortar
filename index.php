@@ -59,15 +59,12 @@ $config = Config::getInstance();
 if($config->error && !file_exists('.blockinstall'))
 {
 	// prep for installations
-
 	$engine = 'Install';
 	$path['base'] =  BASE_PATH;
 	$path['engines'] = BASE_PATH . 'system/engines/';
 	$path['library'] = BASE_PATH . 'system/library/';
 	$path['modules'] = BASE_PATH . 'modules/';
-	 $path['main_classes'] = BASE_PATH . 'system/classes/';
-
-
+	$path['main_classes'] = BASE_PATH . 'system/classes/';
 
 
 	$config['path'] = $path;
@@ -83,32 +80,8 @@ if($config->error && !file_exists('.blockinstall'))
 
 }else{
 	define('INSTALLMODE', false);
-
-	$get = Get::getInstance();
-	$engine = ((isset($get['engine'])) ? $get['engine'] : 'Html');
-
-	$config['Url'] = $get['currentUrl'];
-	$config['moduleId'] = $get['moduleId'];
-	$config['siteId'] = $get['siteId'];
-
-
-
-
-	$moduleInfo = new ModuleInfo($config['moduleId']);
-	$config['module'] = $moduleInfo['Name'];
-
-	$config['engine'] = (isset($get['engine'])) ? $get['engine'] : 'Html';
-	$config['action'] = (isset($get['action'])) ? $get['action'] : 'Default';
-	$config['id'] = $get['id'];
-
-	/*
-	echo '<BR> Module: ', $config['module'],
-	'<BR> Module ID: ', $config['moduleId'],
-	'<BR> Action: ', $config['action'],
-	'<BR> ID: ', $config['id'],
-	'<BR> Engine: ', $config['engine'],
-	'<BR> SiteID: ', $config['siteId'], '<br>';
-	*/
+	$runtime = RuntimeConfig::getInstance();
+	$engine = $runtime['engine'];
 }
 
 try {
@@ -182,7 +155,6 @@ if(BENCHMARK)
 	{
 
 		$user = ActiveUser::getInstance();
-		//var_dump($user);
 		echo '<br>Active User: '. $user->getName();
 	}
 
