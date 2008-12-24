@@ -11,15 +11,11 @@ class BentoBaseActionDefault extends PackageAction
 
 	public function viewHtml()
 	{
-		$config = Config::getInstance();
-
-		if($config['id'] == 'admin')
+		$info = InfoRegistry::getInstance();
+		if($info->Runtime['id'] == 'admin')
 		{
 			$adminUrl = new Url();
 			$adminUrl->engine = 'Admin';
-
-			//return $adminUrl;
-
 			header('Location: ' . $adminUrl);
 		}
 
