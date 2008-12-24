@@ -85,6 +85,10 @@ class Site
 		}
 	}
 
+	public function getLocation()
+	{
+		return $this->location;
+	}
 
 
 	protected function loadMeta()
