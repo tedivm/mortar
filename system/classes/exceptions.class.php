@@ -42,12 +42,12 @@ class BentoError extends Exception
 
 	public function __toString()
 	{
-		$config = Config::getInstance();
+		$runtimeConfig = RuntimeConfig::getInstance();
 
-		$output .= 'Action: ' . $config['action'] . '<br />';
-		$output .= 'Module: ' . $config['module'] . '<br />';
-		$output .= 'ID: ' . $config['id'] . '<br />';
-		$output .= 'Engine: ' . $config['engine'] . '<br />';
+		$output .= 'Action: ' . $runtimeConfig['action'] . '<br />';
+		$output .= 'Module: ' . $runtimeConfig['module'] . '<br />';
+		$output .= 'ID: ' . $runtimeConfig['id'] . '<br />';
+		$output .= 'Engine: ' . $runtimeConfig['engine'] . '<br />';
 
 
 		$file = $this->getFile();
@@ -56,10 +56,10 @@ class BentoError extends Exception
 		$code = $this->getCode();
 
 		$site = ActiveSite::getInstance();
-		$actionOutput = (isset($config['action'])) ? $config['action'] : '<i>unset</i>';
-		$moduleOutput = (isset($config['module'])) ? $config['module'] : '<i>unset</i>';
-		$idOutput = (is_numeric($config['id'])) ? $config['id'] : '<i>unset</i>';
-		$engineOutput = (isset($config['engine'])) ? $config['engine'] : '<i>unset</i>';
+		$actionOutput = (isset($runtimeConfig['action'])) ? $runtimeConfig['action'] : '<i>unset</i>';
+		$moduleOutput = (isset($runtimeConfig['module'])) ? $runtimeConfig['module'] : '<i>unset</i>';
+		$idOutput = (is_numeric($runtimeConfig['id'])) ? $runtimeConfig['id'] : '<i>unset</i>';
+		$engineOutput = (isset($runtimeConfig['engine'])) ? $runtimeConfig['engine'] : '<i>unset</i>';
 		$siteOutput = (is_numeric($site->siteId)) ? $site->siteId : '<i>unset</i>';
 		$dispatcher = DISPATCHER;
 
@@ -163,16 +163,42 @@ class BentoNotice extends BentoError
 }
 
 
+class TypeMismatch extends BentoError
+{
+	public function __construct($message = '', $code = 0)
+	{
+		if(is_array($message))
+		{
+			$expectedType = $message[0];
+			$receivedObject = $message[1];
+			$customMessage = $message[2];
 
+			if(!$className = (get_class($receivedObject)))
+			{
+				$receivedType = 'Class ' . $className;
+			}else{
+				$receivedType = gettype($className);
+			}
+
+			$receivedType = (!$className = (get_class($receivedObject))) ? $receivedType = 'Class ' . $className : gettype($className);
+			$message = 'Expected object of type: ' . $expectedType . ' but received' . $receivedType . '.';
+
+			if(strlen($customMessage) > 0)
+				$message .= ' ' . $customMessage;
+		}
+
+		parent::__construct($message, $code);
+	}
+}
 
 class AuthenticationError extends BentoError
 {
-	protected $debugLevel = 2;
+	protected $debugLevel = 3;
 }
 
 class ResourceNotFoundError extends BentoError
 {
-	protected $debugLevel = 2;
+	protected $debugLevel = 3;
 }
 
 
