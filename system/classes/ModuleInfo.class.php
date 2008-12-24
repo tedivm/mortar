@@ -72,7 +72,7 @@ class ModuleInfo implements ArrayAccess
 			$this->permission = new Permissions($location, $user);
 		}
 
-		return $this->permission->is_allowed($action);
+		return $this->permission->isAllowed($action);
 	}
 
 	public function settings()
