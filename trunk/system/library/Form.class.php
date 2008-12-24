@@ -458,9 +458,13 @@ class Form
 								{
 									$checkboxInputs = $this->getInput($input->name);
 
-									if($checkboxInputs == 1)
+									if(count($checkboxInputs) == 1)
 									{
 										$inputHandler[$input->name] = $inputHandler[$input->name][0];
+
+										if($inputHandler[$input->name] == 'on')
+											$inputHandler[$input->name] = true;
+
 										$input->check(true);
 									}else{
 										$input->check(in_array($input->property('value'), $inputHandler[$input->name]));
@@ -608,6 +612,11 @@ class Input
 		return $this;
 	}
 
+	public function getLabel()
+	{
+		return $this->label;
+	}
+
 	public function attachToForm($form)
 	{
 		if($form instanceof Form && $form->attachInput($this))
@@ -643,7 +652,6 @@ class Input
 			$this->properties[$property] = $value;
 			return $this;
 		}
-
 		return $this->properties[$property];
 	}
 
