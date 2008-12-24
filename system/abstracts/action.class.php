@@ -16,11 +16,11 @@ abstract class Action extends ModuleBase
 
 	public function startUp()
 	{
-		$config = Config::getInstance();
+		$runtime = RuntimeConfig::getInstance();
 
-		$pathToEngineHelper = $config['path']['engines'] . $config['engine'] . '.engineHelper.php';
+		$pathToEngineHelper = $config['path']['engines'] . $runtime['engine'] . '.engineHelper.php';
 
-		$helperClassName = $config['engine'] . 'Helper';
+		$helperClassName = $runtime['engine'] . 'Helper';
 
 		if(!class_exists($helperClassName, false) && file_exists($pathToEngineHelper))
 			include($pathToEngineHelper);
@@ -33,7 +33,6 @@ abstract class Action extends ModuleBase
 		if(method_exists($this, 'logic'))
 			$this->logic();
 
-
 	}
 
 	public function check_auth()
@@ -44,24 +43,18 @@ abstract class Action extends ModuleBase
 	public function checkAuth($action = false)
 	{
 		$checkAction = ($action) ? $action : staticHack($this, 'requiredPermission');
-		return $this->is_allowed($checkAction); // retarded hack until php 5.3 comes out
+		return $this->isAllowed($checkAction); // retarded hack until php 5.3 comes out
 	}
-
-    public function is_allowed($action)
-    {
-    	return $this->isAllowed($action);
-    }
-
 
     public function isAllowed($action)
     {
         if(!$this->permissions)
         {
             $user = ActiveUser::get_instance();
-            $this->permissions = new Permissions($this->location, $user->id);
+            $this->permissions = new Permissions($this->location, $user->getId());
         }
 
-    	return $this->permissions->is_allowed($action);
+    	return $this->permissions->isAllowed($action);
     }
 
     protected function linkToSelf()
