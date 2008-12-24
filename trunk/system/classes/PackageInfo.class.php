@@ -186,8 +186,8 @@ class PackageInfo
 		if(is_array($this->installedModules))
 			foreach($this->installedModules as $module)
 		{
-			$permission = new Permissions($module['locationId'], $user->id);
-			if($permission->is_allowed($action))
+			$permission = new Permissions($module['locationId'], $user->getId());
+			if($permission->isAllowed($action))
 			{
 				$allowed = true;
 				break;
