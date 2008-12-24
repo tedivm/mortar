@@ -11,8 +11,6 @@
  * @link		http://www.bentobase.org
  */
 
-
-
 /**
  * User Class
  *
@@ -33,7 +31,6 @@ class User
 	protected $email;
 	protected $allowLogin;
 	protected $memberGroups;
-
 
 	/**
 	 * Load user by ID
@@ -108,43 +105,120 @@ class User
 		return $this->username;
 	}
 
+	public function isAllowedLogin()
+	{
+		return ($this->allowLogin == true);
+	}
+
+	public function setName($name)
+	{
+		if(!is_string($name))
+			throw new TypeMismatch(array('string', $name));
+		// Check for a charactor that isn't
+		if(ereg('[^A-Za-z0-9_ \-]', $name))
+			throw new BentoWarning('Username must be alphanumeric or be a space, underscore or hyphen. Attempted username: ' . $name);
+
+		$this->username = $name;
+
+	}
 
 	public function getEmail()
 	{
 		return $this->email;
 	}
 
+	public function setEmail($email)
+	{
+		if(!is_string($email))
+			throw new TypeMismatch(array('string', $email));
+		// Check for a charactor that isn't
+
+		$this->email = $email;
+	}
+
+	public function setPassword($password)
+	{
+		$passwordString = $password;
+		$passwordObject = new NewPassword($password);
+		$this->password = $passwordObject->stored;
+	}
 
 	public function getId()
 	{
 		return $this->id;
 	}
 
-
 	public function getMemberGroups()
 	{
 		return $this->memberGroups;
 	}
 
-
-	/**
-	 * Return user information
-	 *
-	 * @param string $param
-	 * @return mixed
-	 */
-	public function setting($param)
+	public function setMemberGroups($groups)
 	{
-		return $this->user_info[$param];
+		$this->memberGroups = $groups;
 	}
 
-	protected function clear_user()
+	public function setAllowLogin($input)
 	{
-		unset($this->id);
-		unset($this->password);
-		unset($this->username);
-		unset($this->email);
-		unset($this->allowLogin);
+		$this->allowLogin = ($input === true);
+	}
+
+	public function save()
+	{
+		$db = dbConnect('default');
+		$db->autocommit(false);
+		try{
+
+			$stmt = $db->stmt_init();
+
+			if(!is_numeric($this->id))
+			{
+
+				$stmt->prepare('INSERT INTO users (user_id, user_name, user_password, user_email, user_allowlogin)
+												VALUES (NULL, ?, ?, ?, ?)');
+				if(!$stmt->bind_param_and_execute('sssi', $this->username, $this->password,
+											 $this->email, ($this->allowLogin) ? 1 : 0))
+				{
+					throw new BentoWarning('Unable to add user to database');
+				}
+
+				$this->id = $stmt->insert_id;
+
+			}else{
+
+				$stmt->prepare('UPDATE users SET user_name = ?, user_password = ?, user_email = ?, user_allowlogin = ?
+										WHERE user_id = ?');
+
+				if(!$stmt->bind_param_and_execute('sssii', $this->username, $this->password,
+											 $this->email, ($this->allowLogin) ? 1 : 0, $this->id))
+				{
+					throw new BentoWarning('Unable to update user.');
+				}
+			}
+
+
+			$deleteStmt = $db->stmt_init();
+			$deleteStmt->prepare('DELETE FROM user_in_member_group WHERE user_id = ?');
+			$deleteStmt->bind_param_and_execute('i', $this->id);
+
+
+			foreach($this->memberGroups as $id)
+			{
+				$insertMemgroupStmt = $db->stmt_init();
+				$insertMemgroupStmt->prepare('INSERT INTO user_in_member_group (user_id, memgroup_id) VALUES (?,?)');
+				$insertMemgroupStmt->bind_param_and_execute('ii', $this->id, $id);
+			}
+
+			$db->commit();
+
+		}catch(Exception $e){
+			$db->rollback();
+			$db->autocommit(true);
+			return false;
+		}
+
+		$db->autocommit(true);
+		return true;
 	}
 
 }
@@ -162,10 +236,11 @@ class User
  * @category	User
  * @author		Robert Hafner
  */
-class ActiveUser extends User
+class ActiveUser // extends User
 {
 	private static $instance;
 
+	protected $user;
 
 
 	/**
@@ -183,26 +258,44 @@ class ActiveUser extends User
 			if($_SESSION['userAgent'] != $_SERVER['HTTP_USER_AGENT'])
 				throw new BentoNotice('Useragent mixmatch (possible session hijacking attempt).');
 
-			$this->load_user($_SESSION['user_id']);
+			if(!$this->loadUser($_SESSION['user_id']))
+				throw new BentoWarning('Attempted to log in user that does not exist with ID: ' . $_SESSION['user_id']);
+
+			if(mt_rand(1, 100) == 1)
+			{
+				session_regenerate_id(true);
+			}
 
 		}catch(Exception $e){
-			$this->load_user_by_username('guest');
+			$this->loadUserByName('guest');
 		}
 
 		$this->loggedIn = ($this->username != 'guest');
 	}
 
-	public function load_user($id)
+	public function loadUser($id)
 	{
-//		var_dump($id);
-		$result = parent::load_user($id);
-	//	var_dump($this);
-		$this->sessionStart(true);
-		return $result;
+		if(!is_numeric($id))
+			throw new TypeMismatch(array('int', $id));
+
+		$user = new User();
+		if($user->load_user($id))
+		{
+			$this->user = $user;
+			$this->sessionStart(true);
+			return true;
+		}else{
+			return false;
+		}
+
 	}
 
 	protected function sessionStart($reload = false)
 	{
+		// Since the user is most likely changing, its a good time to switch the id up
+		session_regenerate_id(true);
+
+		// This token is used by forms to prevent cross site forgery attempts
 		if(!isset($_SESSION['nonce']) || $reload)
 			$_SESSION['nonce'] = md5($this->id . START_TIME);
 
@@ -212,7 +305,7 @@ class ActiveUser extends User
 		if(!isset($_SESSION['userAgent']) || $reload)
 			$_SESSION['userAgent'] = $_SERVER['HTTP_USER_AGENT'];
 
-		$_SESSION['user_id'] = $this->id;
+		$_SESSION['user_id'] = $this->user->getId();
 	}
 
 	public function session($session, $value = false)
@@ -235,9 +328,33 @@ class ActiveUser extends User
 		return $_SESSION[$session];
 	}
 
-	public function change_user($user, $password)
+	public function changeUser($userName, $password)
 	{
-		return $this->load_user_by_userpass($user, $password);
+		$db = db_connect('default_read_only');
+		$stmt = $db->stmt_init();
+		$stmt->prepare("SELECT * FROM users WHERE user_name=?");
+		$stmt->bind_param_and_execute('s', $userName);
+		$numRows = $stmt->num_rows;
+		$user_array = $stmt->fetch_array();
+
+		$stmt->close();
+		$storedPassword = new StoredPassword($user_array['user_password']);
+
+
+		if($numRows == 1 && $storedPassword->is_match($password))
+		{
+			if($this->loadUser($user_array['user_id']))
+			{
+				return true;
+			}else{
+
+				$this->loadUserByName('guest');
+			}
+		}else{
+			$this->loadUserByName('guest');
+		}
+
+		return false;
 	}
 
 
@@ -265,45 +382,7 @@ class ActiveUser extends User
 
 	public function __destruct()
 	{
-		$_SESSION['user_id'] = $this->id;
-	}
-
-
-	/**
-	 * Load user from by username and password
-	 *
-	 * @param string $user
-	 * @param string $pass
-	 */
-	public function load_user_by_userpass($user, $pass)
-	{
-		$db = db_connect('default_read_only');
-		$stmt = $db->stmt_init();
-		$stmt->prepare("SELECT * FROM users WHERE user_name=?");
-		$stmt->bind_param_and_execute('s', $user);
-		$numRows = $stmt->num_rows;
-		$user_array = $stmt->fetch_array();
-
-		$stmt->close();
-		$password = new StoredPassword($user_array['user_password']);
-
-		if($numRows == 1 && $password->is_match($pass))
-		{
-			$this->clear_user();
-			if($this->load_user($user_array['user_id']))
-			{
-				return true;
-			}else{
-				$this->load_user_by_username('guest');
-			}
-		}
-
-		return false;
-	}
-
-	public function load_user_by_username($user)
-	{
-		return $this->loadUserByName($user);
+		$_SESSION['user_id'] = $this->user->getId();
 	}
 
 	public function loadUserByName($user)
@@ -330,12 +409,27 @@ class ActiveUser extends User
 			$cache->store_data($id);
 		}
 
-		if(is_numeric($id))
-			return $this->load_user($id);
+		if($id === false)
+			return false;
 
-		return false;
-
+		return $this->loadUser($id);
 	}
+
+	public function getName()
+	{
+		return $this->user->getName();
+	}
+
+	public function getId()
+	{
+		return $this->user->getId();
+	}
+
+	public function getMemberGroups()
+	{
+		return $this->user->getMemberGroups();
+	}
+
 }
 
 ?>
