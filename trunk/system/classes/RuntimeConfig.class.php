@@ -6,38 +6,143 @@ class RuntimeConfig implements ArrayAccess
 
 	private function __construct()
 	{
+		$this->config = $this->setData();
+	}
+
+	protected function setData()
+	{
 		$get = Get::getInstance();
-		$this->config['engine'] = ((isset($get['engine'])) ? $get['engine'] : 'Html');
-		$this->config['action'] = (isset($get['action'])) ? $get['action'] : 'Default';
-		$this->config['moduleId'] = $get['moduleId'];
+		$data = array();
+
+		// Path
+		$path = ($get['parameters']) ? $get['parameters'] : NULL;
+		$pathArray = $this->convertPath($path);
+
+		if(is_array($pathArray))
+			$data = array_merge($data, $pathArray);
 
 
-		try{
+		$data['engine'] = ((isset($get['engine'])) ? $get['engine'] : 'Html');
+		$data['action'] = (isset($get['action'])) ? $get['action'] : 'Default';
 
-			if(is_numeric($this->config['moduleId']))
-			{
-				$moduleInfo = new ModuleInfo($get['moduleId']);
-				$this->config['package'] = $moduleInfo['Package'];
-				$this->config['packagePath'] = $moduleInfo['PathToPackage'];
-				AutoLoader::import($moduleInfo['Package']);
+		if(isset($get['id']))
+			$data['id'] = $get['id'];
 
-			}elseif(isset($get['package'])){
+		if(is_numeric($get['moduleId']) && !is_numeric($data['moduleId']))
+		{
+			$data['moduleId'] = $get['moduleId'];
+		}
 
-				AutoLoader::import($get['package']);
-				$packageInfo = new PackageInfo($get['package']);
-				$this->config['package'] = $packageInfo->getName();
-				$this->config['packagePath'] = $packageInfo->getPath();
+		if(is_numeric($data['moduleId']))
+		{
+			$moduleInfo = new ModuleInfo($data['moduleId']);
+			$data['package'] = $moduleInfo['Package'];
+		}
 
-			}
-
-		}catch(Exception $e){
+		// Package
+		if(!isset($data['package']) && isset($get['package']))
+		{
+			$data['package'] = $get['package'];
 
 		}
 
-		$this->config['siteId'] = $get['siteId'];
-		$this->config['id'] = $get['id'];
+		if(isset($data['package']))
+		{
+			$packageInfo = new PackageInfo($data['package']);
+			$data ['pathToPackage']= $packageInfo->getPath();
+		}
 
+		if(!isset($data['currentLocation']) && isset($get['location']))
+		{
+			$data['currentLocation']= $get['location'];
+		}
+
+
+
+//		var_dump($data);
+		return $data;
 	}
+
+	protected function convertPath($pathString)
+	{
+		$site = ActiveSite::getInstance();
+		$currentLocation = $site->getLocation();
+
+		if(strlen($pathString) > 0 )
+		{
+			$pathVariables = explode('/', $pathString);
+
+			foreach($pathVariables as $pathIndex => $pathPiece)
+			{
+				if(!($childLocation = $currentLocation->getChildByName(str_replace('_', ' ', $pathPiece))))
+				{
+					break;
+				}
+
+				switch (strtolower($childLocation->getResource()))
+				{
+					case 'directory':
+						$currentLocation = $childLocation;
+						break;
+
+					case 'module':
+						$currentLocation = $childLocation;
+						$moduleInfo = new ModuleInfo($childLocation->getId(), 'location');
+						$moduleId = $moduleInfo->getId();
+						unset($pathVariables[$pathIndex]);
+						break 2; //break out of foreach loop
+
+					default:
+						break 2;
+				}
+				unset($pathVariables[$pathIndex]);
+			}
+
+			switch ($currentLocation->getResource()) {
+				case 'directory':
+				case 'site':
+
+					$moduleId = $currentLocation->meta('default');
+
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		if(is_numeric($moduleId))
+		{
+			//echo $moduleId;
+			$moduleInfo = new ModuleInfo($moduleId);
+			$pathReturn['package'] = $moduleInfo['Package'];
+			$pathReturn['moduleId'] = $moduleInfo->getId();
+		}
+
+		// Dump extra path variables to our good friend 'get'
+		if(count($pathVariables) > 0)
+		{
+			$get = Get::getInstance();
+			$template = new DisplayMaker();
+			if(!(isset($pathReturn['package']) && $template->load_template('url', $pathReturn['package'])))
+			{
+				$template->set_display_template('{# action #}/{# id #}/');
+			}
+
+			$tags = $template->tagsUsed();
+			foreach($tags as $tag)
+			{
+				$variable = array_shift($pathVariables);
+				if(strlen($variable) > 0)
+					$get[$tag] = $variable;
+			}
+		}
+
+		$pathReturn['currentLocation'] = $currentLocation->getId();
+		return $pathReturn;
+	}
+
+
 
 	public static function getInstance()
 	{
