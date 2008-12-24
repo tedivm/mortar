@@ -236,6 +236,7 @@ class BentoBaseActionInstall //extends Action
 					$user_admin = new ManageUser();
 					$user_admin->user_name = $_POST['username'];
 					$user_admin->user_password = $_POST['password'];
+					$user_admin->allow_login = true;
 					$user_admin->save();
 
 					$user_guest = new ManageUser();
