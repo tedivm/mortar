@@ -1,8 +1,8 @@
-<?php 
+<?php
 
 /*
- Modified from UPSTrack Class by Jon Whitcraft <jon_whitcraft@sweetwater.com> 
- 
+ Modified from UPSTrack Class by Jon Whitcraft <jon_whitcraft@sweetwater.com>
+
  upsRate class
 
  It's simple XML ups rate calculation class. I didn't have much time.
@@ -10,15 +10,15 @@
 
  Chris Lee (http://www.neox.net)
  01/14/2007 - some modification on upsrate.php
- 
+
  John Hamson (http://www.solunanet.com)
  05/14/2008  - modified class to php5
 
 */
 
 
-//service code to service name mapping is different according to shipping 
-//originting country. 
+//service code to service name mapping is different according to shipping
+//originting country.
 //This table is only used in service code to name conversion to show user
 //Empty entry means N/A
 //Ex. If shipping origin is Europe, use European Union Origin map.
@@ -26,7 +26,7 @@
 
 /*
 //From European Union Origin
-$ups_service = array ( 
+$ups_service = array (
 	'01' => '',
        	'02' => '',
 	'03' => '',
@@ -44,7 +44,7 @@ $ups_service = array (
 
 
 //From Canada origin
-$ups_service = array ( 
+$ups_service = array (
 	'01' => 'UPS Express',
        	'02' => 'UPS Expedited',
 	'03' => '',
@@ -64,14 +64,14 @@ $ups_service = array (
 
 */
 
- 
+
 class UPS
-{ 
-   // You need to create userid ... at http://www.ec.ups.com    
- 
-    public $userid = "techiemon"; 
-    public $passwd = "jahmon"; 
-    public $accesskey = "3C0F18A370F10378"; 
+{
+   // You need to create userid ... at http://www.ec.ups.com
+
+    public $userid = "";
+    public $passwd = "";
+    public $accesskey = "";
     public $upstool='https://www.ups.com/ups.app/xml/Rate';
     public $request;  //'rate' for single service or 'shop' for all possible services
     public $service;
@@ -89,7 +89,7 @@ class UPS
   //ship from location or shipper
     public $s_zip;
     public $s_state;
-    public $s_country;  
+    public $s_country;
   //ship to location
     public $t_zip;
     public $t_state;
@@ -99,11 +99,11 @@ class UPS
     public $weight;
     public $error=0;
     public $errormsg;
-    public $xmlarray = array(); 
-    public $xmlreturndata = ""; 
-    
+    public $xmlarray = array();
+    public $xmlreturndata = "";
+
   //US ORIGIN
-	public  $ups_service = array ( 
+	public  $ups_service = array (
 		'01' => 'UPS Next Day Air',
 	    '02' => 'UPS 2nd Day Air',
 		'03' => 'UPS Ground',
@@ -117,16 +117,16 @@ class UPS
 		'59' => 'UPS 2nd Day Air A.M.',
 		'65' => 'UPS Express Saver',
 	   );
- 
-    public function __construct($szip,$sstate,$scountry) { 
-          // init function 
+
+    public function __construct($szip,$sstate,$scountry) {
+          // init function
 	      $this->s_zip = $szip;
 	      $this->s_state = $sstate;
 	      $this->s_country = $scountry;
 
-    } 
+    }
 
-    //<RequestOption>$this->request</RequestOption> 
+    //<RequestOption>$this->request</RequestOption>
     private function construct_request_xml(){
       $xml="<?xml version=\"1.0\"?>
 			<AccessRequest xml:lang=\"en-US\">
@@ -141,8 +141,8 @@ class UPS
 			      <CustomerContext>Rating and Service</CustomerContext>
 			      <XpciVersion>1.0001</XpciVersion>
 			    </TransactionReference>
-			    <RequestAction>Rate</RequestAction> 
-			    <RequestOption>$this->request</RequestOption> 
+			    <RequestAction>Rate</RequestAction>
+			    <RequestOption>$this->request</RequestOption>
 			  </Request>
 			  <PickupType>
 			 	 <Code>$this->pickuptype</Code>
@@ -182,25 +182,25 @@ class UPS
       //echo $xml;
        return $xml;
     }
- 
-    public function rate($service='',$tzip,$tstate='',$tcountry='US', $weight,$residential=0,$packagetype='02') { 
+
+    public function rate($service='',$tzip,$tstate='',$tcountry='US', $weight,$residential=0,$packagetype='02') {
 
     	if($service=='') {
         	$this->request = 'shop';
         } else {
 		 	$this->request = 'rate';
-        }	
-       
-     	$this->service = $service; 
+        }
+
+     	$this->service = $service;
 		$this->t_zip = $tzip;
 		$this->t_state= $tstate;
 		$this->t_country = $tcountry;
 		$this->weight = $weight;
 		$this->residential=$residential;
 		$this->package_type=$packagetype;
-	
-        $this->__runCurl(); 
-        $this->xmlarray = $this->_get_xml_array($this->xmlreturndata); 
+
+        $this->__runCurl();
+        $this->xmlarray = $this->_get_xml_array($this->xmlreturndata);
 
     	//check if error occurred
 		if($this->xmlarray==""){
@@ -210,168 +210,168 @@ class UPS
 	    }
 
 		$values = $this->xmlarray[RatingServiceSelectionResponse][Response][0];
- 
+
 		if($values[ResponseStatusCode] == 0){
 		  	$this->error=$values[Error][0][ErrorCode];
 		  	$this->errormsg=$values[Error][0][ErrorDescription];
 	        return NULL;
         }
-	
+
  		return $this->get_rates();
 
-    } 
+    }
 
-    private function __runCurl() { 
-	    /** 
-	    * __runCurl() 
-	    * 
-	    * This is processes the curl command. 
-	    * 
-	    * @access    private 
-	    */ 
-	    
+    private function __runCurl() {
+	    /**
+	    * __runCurl()
+	    *
+	    * This is processes the curl command.
+	    *
+	    * @access    private
+	    */
+
 		$y = $this->construct_request_xml();
 	     	//echo $y;
-		/* 
+		/*
 			// -k : do not check certification for https
-		 	// -d with @ filename : read post data from the file 
+		 	// -d with @ filename : read post data from the file
 			//curl -k -d @input http://www.neox.net/ups/curltest/t.php
-		
-		
+
+
 			//generate tmp file name & save data
 			$tmpfname = tempnam ("/tmp", "tmpfile");
 			$fp = fopen($tmpfname,"w");
 			fwrite($fp,$y);
 			fclose($fp);
-		
+
 			$cmd = "curl -k -d @$tmpfname ".$this->upstool;
 			$fp = popen($cmd,"r");
 			while(($tmp=fread($fp,4096))!=null){
 			  $output .=$tmp;
 			}
 			pclose($fp);
-			
+
 			unlink($tmpfname);
-		
+
 			$this->xmlreturndata = $output;
-		
+
 		        //comment rest of the lines to the end of the function
 		*/
 
-        $ch = curl_init(); 
-        curl_setopt ($ch, CURLOPT_URL,"$this->upstool"); /// set the post-to url (do not include the ?query+string here!) 
-        curl_setopt ($ch, CURLOPT_HEADER, 0); /// Header control 
-        curl_setopt ($ch, CURLOPT_POST, 1);  /// tell it to make a POST, not a GET 
-        curl_setopt ($ch, CURLOPT_POSTFIELDS, "$y");  /// put the querystring here starting with "?" 
-        curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1); /// This allows the output to be set into a variable $xyz 
+        $ch = curl_init();
+        curl_setopt ($ch, CURLOPT_URL,"$this->upstool"); /// set the post-to url (do not include the ?query+string here!)
+        curl_setopt ($ch, CURLOPT_HEADER, 0); /// Header control
+        curl_setopt ($ch, CURLOPT_POST, 1);  /// tell it to make a POST, not a GET
+        curl_setopt ($ch, CURLOPT_POSTFIELDS, "$y");  /// put the querystring here starting with "?"
+        curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1); /// This allows the output to be set into a variable $xyz
         curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, 0);
 
-        $this->xmlreturndata = curl_exec ($ch); /// execute the curl session and return the output to a variable $xyz 
-        
+        $this->xmlreturndata = curl_exec ($ch); /// execute the curl session and return the output to a variable $xyz
+
         //echo "\n<P>:result--------------\n<P>";
 		//echo $this->xmlreturndata;
         //curl_errno($ch);
         curl_close ($ch); /// close the curl session
- 
-    } 
 
-    private function __get_xml_array($values, &$i) { 
-    	
-	    /** 
-	    * __get_xml_array($values, &$i) 
-	    * 
-	    * This is adds the contents of the return xml into the array for easier processing. 
-	    * 
-	    * @access    private 
-	    * @param    array    $values this is the xml data in an array 
-	    * @param    int    $i    this is the current location in the array 
-	    * @return    Array 
-	    */ 
-		    
-	      $child = array(); 
-	      if ($values[$i]['value']) array_push($child, $values[$i]['value']); 
-	     
-	      while (++$i < count($values)) 
-	      { 
-	        switch ($values[$i]['type']) 
-	        { 
-	          case 'cdata': 
-	            array_push($child, $values[$i]['value']); 
-	          break; 
-	     
-	          case 'complete': 
-	            $name = $values[$i]['tag']; 
-	            $child[$name]= $values[$i]['value']; 
-	            if($values[$i]['attributes']) 
-	            { 
-	              $child[$name] = $values[$i]['attributes']; 
-	            } 
-	          break; 
-	     
-	          case 'open': 
-	            $name = $values[$i]['tag']; 
-	            $size = sizeof($child[$name]); 
-	            if($values[$i]['attributes']) 
-	            { 
-	                 $child[$name][$size] = $values[$i]['attributes']; 
-	                  $child[$name][$size] = $this->__get_xml_array($values, $i); 
-	            } 
-	            else 
-	            { 
-	                  $child[$name][$size] = $this->__get_xml_array($values, $i); 
-	            } 
-	          break; 
-	     
-	          case 'close': 
-	            return $child; 
-	          break; 
-	        } 
-	      } 
-	      return $child; 
-    } 
-     
-    private function _get_xml_array($data) { 
-    	
-	    /** 
-	    * _get_xml_array($data) 
-	    * 
-	    * This is adds the contents of the return xml into the array for easier processing. 
-	    * 
-	    * @access    private 
-	    * @param    string    $data this is the string of the xml data 
-	    * @return    Array 
-	    */ 
-	    
-	      $values = array(); 
-	      $index = array(); 
-	      $array = array(); 
-	      $parser = xml_parser_create(); 
-	      xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1); 
-	      xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0); 
-	      xml_parse_into_struct($parser, $data, $values, $index); 
-	      xml_parser_free($parser); 
-	     
-	      $i = 0; 
-	     
-	      $name = $values[$i]['tag']; 
-	      $array[$name] = $values[$i]['attributes']; 
-	      $array[$name] = $this->__get_xml_array($values, $i); 
-	     
-	      return $array; 
-    } 
-     
-    public function get_rates() 
-    { 
+    }
+
+    private function __get_xml_array($values, &$i) {
+
+	    /**
+	    * __get_xml_array($values, &$i)
+	    *
+	    * This is adds the contents of the return xml into the array for easier processing.
+	    *
+	    * @access    private
+	    * @param    array    $values this is the xml data in an array
+	    * @param    int    $i    this is the current location in the array
+	    * @return    Array
+	    */
+
+	      $child = array();
+	      if ($values[$i]['value']) array_push($child, $values[$i]['value']);
+
+	      while (++$i < count($values))
+	      {
+	        switch ($values[$i]['type'])
+	        {
+	          case 'cdata':
+	            array_push($child, $values[$i]['value']);
+	          break;
+
+	          case 'complete':
+	            $name = $values[$i]['tag'];
+	            $child[$name]= $values[$i]['value'];
+	            if($values[$i]['attributes'])
+	            {
+	              $child[$name] = $values[$i]['attributes'];
+	            }
+	          break;
+
+	          case 'open':
+	            $name = $values[$i]['tag'];
+	            $size = sizeof($child[$name]);
+	            if($values[$i]['attributes'])
+	            {
+	                 $child[$name][$size] = $values[$i]['attributes'];
+	                  $child[$name][$size] = $this->__get_xml_array($values, $i);
+	            }
+	            else
+	            {
+	                  $child[$name][$size] = $this->__get_xml_array($values, $i);
+	            }
+	          break;
+
+	          case 'close':
+	            return $child;
+	          break;
+	        }
+	      }
+	      return $child;
+    }
+
+    private function _get_xml_array($data) {
+
+	    /**
+	    * _get_xml_array($data)
+	    *
+	    * This is adds the contents of the return xml into the array for easier processing.
+	    *
+	    * @access    private
+	    * @param    string    $data this is the string of the xml data
+	    * @return    Array
+	    */
+
+	      $values = array();
+	      $index = array();
+	      $array = array();
+	      $parser = xml_parser_create();
+	      xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
+	      xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
+	      xml_parse_into_struct($parser, $data, $values, $index);
+	      xml_parser_free($parser);
+
+	      $i = 0;
+
+	      $name = $values[$i]['tag'];
+	      $array[$name] = $values[$i]['attributes'];
+	      $array[$name] = $this->__get_xml_array($values, $i);
+
+	      return $array;
+    }
+
+    public function get_rates()
+    {
      // $retArray = array('service'=>'','basic'=>0,'option'=>0,'total'=>0,'days'=>'','time'=>'');
-          
+
         $retArray=array();
- 
+
         $values = $this->xmlarray[RatingServiceSelectionResponse][RatedShipment];
       	$ct = count($values);
         for($i=0;$i<$ct;$i++){
 	  $current=&$values[$i];
 
-          $retArray[$i]['service'] = $current[Service][0][Code]; 
+          $retArray[$i]['service'] = $current[Service][0][Code];
           $retArray[$i]['basic'] = $current[TransportationCharges][0][MonetaryValue];
 	  $retArray[$i]['option'] = $current[ServiceOptionsCharges][0][MonetaryValue];
 	  $retArray[$i]['total'] = $current[TotalCharges][0][MonetaryValue];
@@ -379,22 +379,22 @@ class UPS
 	  $retArray[$i]['time'] = $current[ScheduledDeliveryTime];
         }
 
-        unset($values); 
-         
-        return $retArray; 
-    } 
+        unset($values);
 
-} 
+        return $retArray;
+    }
+
+}
 
 /*
 //example
 $ups = new UPS('01040','MA','US');
 
-//function rate($service='',$tzip,$tstate='',$tcountry='US',$weight,$residential=0,$packagetype='02') 
+//function rate($service='',$tzip,$tstate='',$tcountry='US',$weight,$residential=0,$packagetype='02')
 // if first arg is empty, show all possible services
 $ok = $ups->rate('','56093','MN','US',33.2);
 //else use service code such as '03' for ground
-$data = $ups->xmlarray;   
+$data = $ups->xmlarray;
 //print_r($data);
 print_r($ups->get_rates());
 
