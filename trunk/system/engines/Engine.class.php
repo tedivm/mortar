@@ -19,16 +19,42 @@ abstract class Engine
 	public function __construct($moduleId = '', $action = '')
 	{
 		$info = InfoRegistry::getInstance();
-		$this->moduleId = (is_numeric($moduleId)) ? $moduleId : $info->Runtime['moduleId'];
-		$this->action = (strlen($action) > 0) ? $action : $info->Runtime['action']; $info->Runtime['action'];
-		if(is_numeric($this->moduleId))
-			$this->moduleInfo = new ModuleInfo($this->moduleId);
+		$runtime = RuntimeConfig::getInstance();
 
-		$this->package = ($this->moduleInfo) ? $this->moduleInfo['Package'] : $info->Runtime['package'];
+		$this->moduleId = (is_numeric($moduleId)) ? $moduleId : $info->Runtime['moduleId'];
+		if(is_numeric($this->moduleId))
+			$moduleInfo = new ModuleInfo($this->moduleId);
+
+		$this->package = ($moduleInfo) ? $moduleInfo['Package'] : $info->Runtime['package'];
+		$this->action = (strlen($action) > 0) ? $action : $info->Runtime['action'];
+
 		session_start();
-		// I know this seems silly, but I want to give people a way to have a constructor while still reserving the real constructor for future needs
+		// I know this seems silly, but I want to give people a way to have a constructor while
+		//still reserving the real constructor for future needs
 		$this->startEngine();
 	}
+
+	public function loadLocation($locationId)
+	{
+		$location = new Location($locationId);
+
+		switch(strtolower($location->getResource()))
+		{
+			case 'directory':
+			case 'site':
+				$moduleId = $currentLocation->meta('default');
+				$info = new ModuleInfo($moduleId);
+				return $this->loadLocation($info['locationId']);
+				break;
+			case 'module':
+				return $locationId;
+				break;
+
+			case '':
+		}
+
+	}
+
 
 	protected function startEngine()
 	{
@@ -116,16 +142,8 @@ abstract class Engine
 				$this->main_action = new $this->className($this->moduleId);
 			}
 
-			/*
-			echo $this->requiredPermission;
-			if($this->requiredPermission && !$this->main_action->isAllowed($this->requiredPermission))
-				throw new AuthenticationError('Not allowed to access this engine at this location.');
-			*/
-
 			if(!$this->main_action->checkAuth())
 				throw new AuthenticationError('Not allowed to access this engine at this location.');
-
-
 
 			$settingsArrayName = $this->engine_type . 'Settings';
 			if($this->requiredPermission && !($this->main_action->{$settingsArrayName}['EnginePermissionOverride']))
