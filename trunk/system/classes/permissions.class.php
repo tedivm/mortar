@@ -47,7 +47,8 @@ class Permissions
 
 
 		$cache = new Cache('permissions', $this->location->location_id(), $this->user);
-		$allowed_actions = $cache->get_data();
+		$actions = $cache->getData();
+
 		if(!$cache->cacheReturned)
 		{
 			$allowed_actions = array();
@@ -86,7 +87,7 @@ class Permissions
 			$actions['inherited'] = $inheritedActions;
 			$actions['allowed'] = $allowed_actions;
 
-			$cache->store_data($actions);
+			$cache->storeData($actions);
 		}
 
 		if(is_array($actions['inherited']))
