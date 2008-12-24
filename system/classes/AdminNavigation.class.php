@@ -4,6 +4,7 @@ Class AdminNavigation
 {
 	protected $tabs = array();
 	protected $enginePermission = 'Admin';
+
 	public function __construct()
 	{
 
@@ -68,12 +69,26 @@ Class AdminNavigation
 					}
 				}
 
+
 			}
 
 			foreach($tabs as $tabName => $tabContents)
 			{
 				if(count($tabContents) < 1)
+				{
 					unset($tabs[$tabName]);
+					continue;
+				}
+
+				ksort($tabs[$tabName]);
+
+				foreach($tabs[$tabName] as $linkIndex => $links)
+				{
+					if(!$links['linkLabel'] && is_array($tabs[$tabName][$linkIndex]))
+					{
+						usort($tabs[$tabName][$linkIndex], array(get_class($this), 'linkSort'));
+					}
+				}
 			}
 
 			$cache->store_data($tabs);
@@ -111,6 +126,16 @@ Class AdminNavigation
 
 		$this->tabs = $cleanTabs;
 	}
+
+	public static function linkSort($a, $b)
+	{
+		echo $aLink;
+		$aLink = $a['linkLabel'];
+		$bLink = $b['linkLabel'];
+
+		return ($aLink < $bLink) ? -1 : 1;
+	}
+
 
 	protected function cleanLinks($linkGroup, $removeActions = false)
 	{
