@@ -150,39 +150,70 @@ if(BENCHMARK)
 	$endtime = microtime(true);
 	$runtime = $endtime - START_TIME;
 
-	echo '<br><br>';
+	$benchmarkString = '';
 	if(class_exists('ActiveUser', false) && !INSTALLMODE)
 	{
 
 		$user = ActiveUser::getInstance();
-		echo '<br>Active User: '. $user->getName();
+		$benchmarkString .= 'Active User: '. $user->getName() . PHP_EOL;
 	}
 
 
-	echo '<br>Script Runtime (seconds): ' , $runtime;
+	$benchmarkString .=  'Script Runtime (seconds): ' . $runtime . PHP_EOL;
 	if(function_exists('getrusage'))
 	{
 		$dat = getrusage();
-		echo '<br>CPU time (seconds): ', ($dat["ru_utime.tv_usec"] - $startProcTime)/ 1000000;
+		$benchmarkString .=  'CPU time (seconds): ' . ($dat["ru_utime.tv_usec"] - $startProcTime)/ 1000000;
+		$benchmarkString .=  PHP_EOL;
 		//echo '<br>User Time Used (seconds): ', $dat["ru_utime.tv_sec"];
 	}
-	echo '<br>Memory Usage: ', (int) (memory_get_usage() / 1024) . 'k';
-	echo '<br>Peak Memory Usage: ', (int) (memory_get_peak_usage() / 1024) . 'k';
+	$benchmarkString .=  'Memory Usage: ' . (int) (memory_get_usage() / 1024) . 'k';
+	$benchmarkString .= PHP_EOL;
+
+	$benchmarkString .=  'Peak Memory Usage: ' . (int) (memory_get_peak_usage() / 1024) . 'k';
+	$benchmarkString .= PHP_EOL;
 
 	if(function_exists('getrusage'))
 	{
-		echo '<br>Number of swaps: ', $dat["ru_nswap"];
-		echo '<br>Number of Page Faults: ', $dat["ru_majflt"];
+		$benchmarkString .=  'Number of swaps: ' . $dat["ru_nswap"] . PHP_EOL;
+		$benchmarkString .=  'Number of Page Faults: '. $dat["ru_majflt"] . PHP_EOL;
 	}
 
-	echo '<br>Cache Calls: ' , Cache::$cacheCalls;
-	echo '<br>Cache Returns: ' , Cache::$cacheReturns;
-	echo '<br>Query Count: ' , Mysql_Base::$query_count , '<br>';
-	foreach(Mysql_Base::$query_array as $query)
+	$benchmarkString .=  'Cache Calls: ' . Cache::$cacheCalls . PHP_EOL;
+	$benchmarkString .=  'Cache Returns: ' . Cache::$cacheReturns . PHP_EOL;
+	$calls = Cache::getCalls();
+	ksort($calls);
+	foreach($calls as $name => $count)
 	{
-		echo $query , '<br>';
+		$benchmarkString .= $count . ' ' . $name . PHP_EOL;
 	}
 
+
+	$queryCount = 0;
+	$queryArray = Mysql_Base::$query_array;
+	ksort($queryArray);
+
+	foreach($queryArray as $queryString => $count)
+	{
+		$queryList .= $count . ' ' . $queryString . PHP_EOL;
+		$queryCount += $count;
+	}
+
+	$benchmarkString .= 'Query Count: ' . $queryCount . PHP_EOL;
+	$benchmarkString .= $queryList;
+
+	$config = Config::getInstance();
+	if(!$config->error)
+	{
+		$fileName = date("ymdHis") . '.txt';
+
+		$benchmarkPath = $config['path']['temp'] . 'benchmarks/';
+
+		if(!is_dir($benchmarkPath))
+			mkdir($benchmarkPath, 0755, true);
+
+		file_put_contents($config['path']['temp'] . 'benchmarks/' . $fileName, $benchmarkString);
+	}
 }
 
 ?>
