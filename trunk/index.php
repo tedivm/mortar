@@ -44,7 +44,6 @@ require('system/functions/general.functions.php');
 require('system/engines/Engine.class.php');
 require('system/classes/password.class.php');
 require('system/classes/user.class.php');
-require('system/interfaces/module.interfaces.php');
 require('system/interfaces/ActionInterface.interface.php');
 require('system/classes/permissions.class.php');
 require('system/classes/page.class.php');
