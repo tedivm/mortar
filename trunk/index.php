@@ -16,8 +16,11 @@ define('IGNOREPERMISSIONS', false);	//FOR TESTING ONLY!!!!
 // there would be obvious problems.
 
 define('BENCHMARK', false);
-// This will pop some useful information onto the end of each run
-// This breaks the formatting of pretty much everything, especially json and other things
+// When enabled the system logs a variety of information. This informaion is saved in the temp/benchmark directory
+// As each run of the system generates a new file, it is important not to keep this running on a live system
+// This tool is useful in seeing what database queries and cache calls are made, how much memory and cpu time
+// the script takes to run, and information about system settings during during that run.
+
 
 define('DISABLECACHE', false);
 // This program is designed to take advantage of caching, and in many cases code was optimized to with
@@ -151,19 +154,33 @@ if(BENCHMARK)
 	$endtime = microtime(true);
 	$runtime = $endtime - START_TIME;
 
+	// moved this up here to make sure the statistics aren't affected too much by the benchmarking setup
+	if(function_exists('getrusage'))
+		$dat = getrusage();
+
 	$benchmarkString = '';
+
+	$siteInfo = ActiveSite::getInstance();
+	$runtimeConfig = RuntimeConfig::getInstance();
+
+	$benchmarkString .= 'Site Name: ' . $siteInfo->name . PHP_EOL;
+	$benchmarkString .= 'Location: ' . $runtimeConfig['action'] . PHP_EOL;
+	$benchmarkString .= 'Action: ' . $runtimeConfig['currentLocation'] . PHP_EOL;
+	$benchmarkString .= 'Module: ' . $runtimeConfig['package'] . PHP_EOL;
+	$benchmarkString .= 'ID: ' . $runtimeConfig['id'] . PHP_EOL;
+	$benchmarkString .= 'Engine: ' . $runtimeConfig['engine'] . PHP_EOL;
+
+
 	if(class_exists('ActiveUser', false) && !INSTALLMODE)
 	{
-
 		$user = ActiveUser::getInstance();
 		$benchmarkString .= 'Active User: '. $user->getName() . PHP_EOL;
 	}
 
 
 	$benchmarkString .=  'Script Runtime (seconds): ' . $runtime . PHP_EOL;
-	if(function_exists('getrusage'))
+	if(isset($dat))
 	{
-		$dat = getrusage();
 		$benchmarkString .=  'CPU time (seconds): ' . ($dat["ru_utime.tv_usec"] - $startProcTime)/ 1000000;
 		$benchmarkString .=  PHP_EOL;
 		//echo '<br>User Time Used (seconds): ', $dat["ru_utime.tv_sec"];
