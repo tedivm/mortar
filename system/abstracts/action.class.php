@@ -1,6 +1,8 @@
 <?php
 
-abstract class Action extends ModuleBase
+//spl_autoload_call('ActionInterface');
+
+abstract class Action extends ModuleBase implements ActionInterface
 {
 	static $requiredPermission = 'Read';
 	protected $permissions;
@@ -14,7 +16,7 @@ abstract class Action extends ModuleBase
 		$this->startUp();
 	}
 
-	public function startUp()
+	protected function startUp()
 	{
 		$runtime = RuntimeConfig::getInstance();
 
@@ -33,11 +35,6 @@ abstract class Action extends ModuleBase
 		if(method_exists($this, 'logic'))
 			$this->logic();
 
-	}
-
-	public function check_auth()
-	{
-		return $this->checkAuth();
 	}
 
 	public function checkAuth($action = false)

@@ -45,6 +45,7 @@ require('system/engines/Engine.class.php');
 require('system/classes/password.class.php');
 require('system/classes/user.class.php');
 require('system/interfaces/module.interfaces.php');
+require('system/interfaces/ActionInterface.interface.php');
 require('system/classes/permissions.class.php');
 require('system/classes/page.class.php');
 require('system/abstracts/ModuleBase.abstract.php');
@@ -53,6 +54,7 @@ require('system/abstracts/action.class.php');
 require('system/classes/Site.class.php');
 
 require('system/classes/AutoLoader.class.php');
+
 
 $config = Config::getInstance();
 
@@ -191,6 +193,7 @@ if(BENCHMARK)
 
 	$queryCount = 0;
 	$queryArray = Mysql_Base::$query_array;
+	if(is_array($queryArray));
 	ksort($queryArray);
 
 	foreach($queryArray as $queryString => $count)
