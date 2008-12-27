@@ -98,18 +98,19 @@ class RuntimeConfig implements ArrayAccess
 				unset($pathVariables[$pathIndex]);
 			}
 
-			switch ($currentLocation->getResource()) {
-				case 'directory':
-				case 'site':
-
-					$moduleId = $currentLocation->meta('default');
-
-					break;
-
-				default:
-					break;
-			}
 		}
+
+
+	 	switch ($currentLocation->getResource()) {
+			case 'directory':
+			case 'site':
+				$moduleId = $currentLocation->meta('default');
+				break;
+
+			default:
+				break;
+			}
+
 
 		if(is_numeric($moduleId))
 		{
