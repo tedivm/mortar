@@ -25,6 +25,7 @@ abstract class Engine
 		if(is_numeric($this->moduleId))
 			$moduleInfo = new ModuleInfo($this->moduleId);
 
+
 		$this->package = ($moduleInfo) ? $moduleInfo['Package'] : $info->Runtime['package'];
 		$this->action = (strlen($action) > 0) ? $action : $info->Runtime['action'];
 
@@ -112,7 +113,6 @@ abstract class Engine
 				include($path);
 			}
 
-
 			$result = get_class_methods($this->className);
 
 			if(!in_array($this->getRunMethod(), get_class_methods($this->className)))
@@ -120,6 +120,7 @@ abstract class Engine
 							right run method.');
 
 
+			AutoLoader::import($this->package);
 		}catch (Exception $e){
 			throw new ResourceNotFoundError();
 		}
@@ -134,6 +135,10 @@ abstract class Engine
 			$runMethod = $this->getRunMethod();
 			$reflectionClass = new ReflectionClass($this->className);
 
+			$interfaces = $reflectionClass->getInterfaceNames();
+
+			if(!in_array('ActionInterface', $interfaces))
+				throw new BentoError('Class should implement interface');
 
 			if($reflectionClass->isSubclassOf('PackageAction'))
 			{
@@ -146,7 +151,7 @@ abstract class Engine
 				throw new AuthenticationError('Not allowed to access this engine at this location.');
 
 			$settingsArrayName = $this->engine_type . 'Settings';
-			if($this->requiredPermission && !($this->main_action->{$settingsArrayName}['EnginePermissionOverride']))
+			if($this->requiredPermission && !isset($this->main_action->{$settingsArrayName}['EnginePermissionOverride']))
 			{
 				if(!$this->main_action->checkAuth($this->requiredPermission))
 					throw new AuthenticationError('Not allowed to access this engine at this location.');
