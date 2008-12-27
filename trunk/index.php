@@ -5,10 +5,9 @@ define('DISPATCHER', array_pop(explode('/', __FILE__)));
 
 // Developer Constants
 define('DEBUG', 0);	// 3, 2, 1, 0- info, warning, error, none
-// 3 - info, warning, error
-// 2 - warning, error
-// 1 - error
-// 0 - none, for production environments
+// The higher the number, the more information you get. This constant also controls the php error levels- 0 disables
+// error reporting (useful for production environments), while 3 will give all errors and notices. For development
+// purposes your best bet would be 2.
 
 define('IGNOREPERMISSIONS', false);	//FOR TESTING ONLY!!!!
 // This was placed in while testing the permissions code during the early creation phases
@@ -36,6 +35,23 @@ if(BENCHMARK)
 		$startProcTime = $startdat["ru_utime.tv_usec"];
 		unset($startdat);
 	}
+}
+
+
+switch(DEBUG)
+{
+	case 3:
+		error_reporting(E_ALL);
+		break;
+	case 2:
+		error_reporting(E_ERROR | E_PARSE | E_WARNING);
+		break;
+	case 1:
+		error_reporting(E_ERROR | E_PARSE);
+		break;
+	case 0:
+	default:
+		error_reporting(0);
 }
 
 require('system/classes/exceptions.class.php');
