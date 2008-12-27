@@ -55,6 +55,7 @@ class BentoCMSActionAddPage extends FormAction
 		$output .= $this->form->makeDisplay();
 		return $output;
 	}
+
 }
 
 ?>
