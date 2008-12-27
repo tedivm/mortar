@@ -33,7 +33,6 @@ class AutoLoader
 		self::loadBentoConfigPath('mainclasses', $className);
 	}
 
-
 	static public function loadActiveModule($className)
 	{
 		$packages = self::$packages;
@@ -80,7 +79,6 @@ class AutoLoader
 
 		}
 	}
-
 
 	static protected function loadBentoConfigPath($type, $className)
 	{

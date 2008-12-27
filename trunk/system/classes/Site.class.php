@@ -33,9 +33,7 @@ class Site
 
 			if($url->select(1))
 			{
-
 				$site = new ObjectRelationshipMapper('sites');
-
 				$site->site_id = $url->site_id;
 				$site->select();
 
@@ -46,12 +44,9 @@ class Site
 				$mainUrls = new ObjectRelationshipMapper('urls');
 				$mainUrls->site_id = $siteInfo['siteId'];
 				$mainUrls->urlAlias = 0;
-
+				$mainUrls->select();
 				$mainUrls->select();
 
-				echo $this->sql_errno;
-
-				$mainUrls->select();
 				$results = $mainUrls->resultsToArray();
 				foreach ($results as $url)
 				{
