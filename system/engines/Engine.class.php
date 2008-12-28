@@ -56,7 +56,6 @@ abstract class Engine
 
 	}
 
-
 	protected function startEngine()
 	{
 
@@ -142,10 +141,14 @@ abstract class Engine
 
 			if($reflectionClass->isSubclassOf('PackageAction'))
 			{
-				$this->main_action = new $this->className($this->package);
+				$actionIdentifier = $this->package;
 			}elseif($reflectionClass->isSubclassOf('Action')){
-				$this->main_action = new $this->className($this->moduleId);
+				$actionIdentifier = $this->moduleId;
 			}
+
+
+			$this->main_action = new $this->className($actionIdentifier);
+
 
 			if(!$this->main_action->checkAuth())
 				throw new AuthenticationError('Not allowed to access this engine at this location.');
@@ -157,7 +160,7 @@ abstract class Engine
 					throw new AuthenticationError('Not allowed to access this engine at this location.');
 			}
 
-
+			$this->main_action->start();
 			$this->processAction($this->main_action->$runMethod());
 
 		}catch (Exception $e){
