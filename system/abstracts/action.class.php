@@ -88,7 +88,6 @@ abstract class PackageAction extends Action
 	{
 		$this->package = $package;
 		$this->loadSettings();
-		$this->start();
 	}
 
 
