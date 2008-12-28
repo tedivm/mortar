@@ -13,10 +13,9 @@ abstract class Action extends ModuleBase implements ActionInterface
 	{
 		$this->moduleId = $modId;
 		$this->loadSettings();
-		$this->startUp();
 	}
 
-	protected function startUp()
+	public function start()
 	{
 		$runtime = RuntimeConfig::getInstance();
 
