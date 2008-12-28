@@ -1,6 +1,6 @@
 <?php
 
-Interface Model
+Interface ModelInterface
 {
 	public function __construct($locationId);
 

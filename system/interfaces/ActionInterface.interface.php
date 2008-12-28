@@ -6,8 +6,7 @@ interface ActionInterface
 
 	public function checkAuth($action = NULL);
 
-
-
+	public function start();
 
 }
 

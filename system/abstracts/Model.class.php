@@ -6,9 +6,6 @@ abstract class Model
 	protected $location;
 	protected $id;
 
-
-
-
 	public function __construct($locationId = false)
 	{
 		if($locationId)
@@ -32,8 +29,7 @@ abstract class Model
 	{
 		if(!is_null($date))
 		{
-			//save this
-			date('Y-m-d H:i:s', $date);
+			$this->location->setCreationDate($date);
 		}
 
 		return strtotime($this->location->createdOn());
@@ -76,6 +72,19 @@ abstract class Model
 		$this->location = $location;
 
 	}
+
+	public function isAllowed($action, $user = NULL)
+	{
+		if(is_null($user))
+			$user = ActiveUser::getInstance();
+
+		if(!method_exists($user, 'getId'))
+			throw new TypeMismatch(array('User', $user));
+
+		$permission = new Permissions($this->getId(), $user->getId());
+		return $permission->isAllowed($action);
+	}
+
 
 }
 
