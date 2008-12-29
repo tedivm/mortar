@@ -14,7 +14,7 @@ class BentoBaseSystemSettingsForm extends Form
 		$handlerInput = $this->createInput('cacheHandler');
 
 		$handlerInput->setType('select')->
-				setLabel('Cache Method');
+				setLabel('Caching Method');
 
 		foreach($cacheHandlers as $handlerName => $handlerClass)
 		{
@@ -22,6 +22,20 @@ class BentoBaseSystemSettingsForm extends Form
 			if($configIni->get('cache', 'handler') == $handlerName)
 				$attributes = array('selected' => 'selected');
 			$handlerInput->setOptions($handlerName, $handlerName, $attributes);
+		}
+
+		$timezoneHandler = $this->createInput('system_timezone');
+		$timezoneHandler->setType('select')->
+				setLabel('Time Zone');
+
+		$timezones = DateTimeZone::listIdentifiers();
+		$currentTimezone = ($configIni->get('system', 'timezone')) ? $configIni->get('system', 'timezone') : 'US/Eastern';
+		foreach($timezones as $timezone)
+		{
+			$attributes = array();
+			if($currentTimezone == $timezone)
+				$attributes = array('selected' => 'selected');
+			$timezoneHandler->setOptions($timezone, $timezone, $attributes);
 		}
 
 

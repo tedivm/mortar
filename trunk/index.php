@@ -4,7 +4,10 @@ define('BASE_PATH', dirname(__FILE__) . '/');
 define('DISPATCHER', array_pop(explode('/', __FILE__)));
 
 // Developer Constants
-define('DEBUG', 0);	// 4, 3, 2, 1, 0- notices, info, warning, error, none
+define('DEBUG', 0);
+// 4,		3,		2,			1,		0
+// notices,	info, 	warning, 	error,	none
+// strict - E_STRICT with no Bento error displays.
 // The higher the number, the more information you get. This constant also controls the php error levels- 0 disables
 // error reporting (useful for production environments), while 3 will give all errors and notices. For development
 // purposes your best bet would be 2 or 3.
@@ -41,11 +44,14 @@ if(BENCHMARK)
 switch(DEBUG)
 {
 
+	case 'strict':
+		error_reporting(E_STRICT);
+		break;
 	case 4:
 		error_reporting(E_ALL);
 		break;
 	case 2:
-		error_reporting(E_ERROR | E_PARSE | E_WARNING);
+		error_reporting(E_ALL ^ E_NOTICE);
 		break;
 	case 1:
 		error_reporting(E_ERROR | E_PARSE);
@@ -103,6 +109,9 @@ if($config->error && !file_exists('.blockinstall'))
 	define('INSTALLMODE', false);
 	$runtime = RuntimeConfig::getInstance();
 	$engine = $runtime['engine'];
+
+	$timezone = ($config['system']['timezone']) ? $config['system']['timezone'] : 'UTC';
+	date_default_timezone_set($timezone);
 }
 
 try {

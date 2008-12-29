@@ -31,11 +31,19 @@ class BentoBaseActionConfiguration extends FormPackageAction
 			$configIni->set('url', $value, $inputHandler['url_' . $value]);
 		}
 
+
+		foreach(array('timezone') as $value)
+		{
+			$configIni->set('system', $value, $inputHandler['system_' . $value]);
+		}
+
 		$modRewrite = isset($inputHandler['url_modRewrite']);
 		$configIni->set('url', 'modRewrite', $modRewrite);
 		return $configIni->write();
 
 	}
+
+
 
 	public function viewAdmin()
 	{
