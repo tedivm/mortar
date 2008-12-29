@@ -4,10 +4,10 @@ define('BASE_PATH', dirname(__FILE__) . '/');
 define('DISPATCHER', array_pop(explode('/', __FILE__)));
 
 // Developer Constants
-define('DEBUG', 0);	// 3, 2, 1, 0- info, warning, error, none
+define('DEBUG', 0);	// 4, 3, 2, 1, 0- notices, info, warning, error, none
 // The higher the number, the more information you get. This constant also controls the php error levels- 0 disables
 // error reporting (useful for production environments), while 3 will give all errors and notices. For development
-// purposes your best bet would be 2.
+// purposes your best bet would be 2 or 3.
 
 define('IGNOREPERMISSIONS', false);	//FOR TESTING ONLY!!!!
 // This was placed in while testing the permissions code during the early creation phases
@@ -40,7 +40,8 @@ if(BENCHMARK)
 
 switch(DEBUG)
 {
-	case 3:
+
+	case 4:
 		error_reporting(E_ALL);
 		break;
 	case 2:
@@ -123,43 +124,57 @@ try {
 
 }catch (Exception $e){
 
-	$info = InfoRegistry::getInstance();
-	$site = ActiveSite::getInstance();
-	$errorModule = $site->location->meta('error');
+	try{
 
-	switch (get_class($e))
-	{
-		case 'AuthenticationError':
-			$action = 'LogIn';
-			$errorModule = 1;
-			break;
+		$info = InfoRegistry::getInstance();
+		$site = ActiveSite::getInstance();
+		$errorModule = $site->location->meta('error');
 
-		case 'ResourceNotFoundError':
-			$action = 'ResourceNotFound';
-			break;
+		switch (get_class($e))
+		{
+			case 'AuthenticationError':
+				$action = 'LogIn';
+				$errorModule = 1;
+				break;
 
-		case 'BentoWarning':
-		case 'BentoNotice':
-			// uncaught minor thing
+			case 'ResourceNotFoundError':
+				$action = 'ResourceNotFound';
+				break;
 
-		case 'BentoError':
-		default:
-			$action = 'TechnicalError';
-			break;
+			case 'BentoWarning':
+			case 'BentoNotice':
+				// uncaught minor thing
+
+			case 'BentoError':
+			default:
+				$action = 'TechnicalError';
+				break;
+		}
+
+
+
+
+		$moduleInfo = new ModuleInfo($errorModule);
+		$packageInfo = new PackageInfo($moduleInfo['Package']);
+
+	//	var_dump($moduleInfo);
+		//$moduleInfo['locationId']
+		//$packageInfo;
+		$engine = new $engineName($moduleInfo['locationId'], $action);
+		$engine->runModule();
+		$output = $engine->display();
+
+	}catch(Exception $e){
+		$moduleInfo = new ModuleInfo($errorModule);
+
+		$engine = new $engineName($moduleInfo['locationId'], 'TechnicalError');
+		$engine->runModule();
+		$output = $engine->display();
+
+
 	}
 
-	$e->getCode();
 
-
-	$moduleInfo = new ModuleInfo($errorModule);
-	$packageInfo = new PackageInfo($moduleInfo['Package']);
-
-//	var_dump($moduleInfo);
-	//$moduleInfo['locationId']
-	//$packageInfo;
-	$engine = new $engineName($moduleInfo['locationId'], $action);
-	$engine->runModule();
-	$output = $engine->display();
 
 
 }
