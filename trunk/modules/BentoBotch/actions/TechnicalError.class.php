@@ -3,7 +3,8 @@
 class BentoBotchActionTechnicalError extends Action
 {
 	public $AdminSettings = array(	'linkTab' => 'Universal',
-									'headerTitle' => 'Unknown Error');
+									'headerTitle' => 'Unknown Error',
+									'EnginePermissionOverride' => true);
 
 	public function logic()
 	{
