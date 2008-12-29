@@ -154,8 +154,10 @@ try {
 	$moduleInfo = new ModuleInfo($errorModule);
 	$packageInfo = new PackageInfo($moduleInfo['Package']);
 
+//	var_dump($moduleInfo);
+	//$moduleInfo['locationId']
 	//$packageInfo;
-	$engine = new $engineName($moduleInfo->getId(), $action);
+	$engine = new $engineName($moduleInfo['locationId'], $action);
 	$engine->runModule();
 	$output = $engine->display();
 

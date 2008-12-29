@@ -29,7 +29,13 @@ abstract class Action extends ModuleBase implements ActionInterface
 		if(class_exists($helperClassName, false))
 			$this->engineHelper = new $helperClassName();
 
-		$this->actionName = array_pop(explode('Action', get_class($this)));
+	//	$this->actionName = array_pop(explode('Action', get_class($this)));
+
+		$namingInfo = explode('Action', get_class($this));
+
+		$this->actionName = array_pop($namingInfo);
+		$this->package = array_shift($namingInfo);
+
 
 		if(method_exists($this, 'logic'))
 			$this->logic();

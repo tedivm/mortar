@@ -14,46 +14,42 @@ abstract class Engine
 	protected $moduleId;
 	protected $action;
 	protected $moduleInfo;
-	protected $package
-	;
-	public function __construct($moduleId = '', $action = '')
+	protected $package;
+
+	public function __construct($locationId = '', $action = '')
 	{
 		$info = InfoRegistry::getInstance();
 		$runtime = RuntimeConfig::getInstance();
 
-		$this->moduleId = (is_numeric($moduleId)) ? $moduleId : $info->Runtime['moduleId'];
-		if(is_numeric($this->moduleId))
-			$moduleInfo = new ModuleInfo($this->moduleId);
 
+		if(!is_numeric($locationId) && $info->Runtime['package'])
+		{
+			$package = $info->Runtime['package'];
+		}else{
 
-		$this->package = ($moduleInfo) ? $moduleInfo['Package'] : $info->Runtime['package'];
+			$location = (is_numeric($locationId)) ? new Location($locationId) : new Location($info->Runtime['currentLocation']);
+
+			switch (strtolower($location->getResource()))
+			{
+				case 'module':
+					$moduleInfo = new ModuleInfo($location->getId(), 'location');
+					$this->moduleId = $moduleInfo['ID'];
+					$package = $moduleInfo['Package'];
+					break;
+
+				case 'site':
+
+				default:
+					break;
+			}
+
+		}
+
+		$this->package = $package;
 		$this->action = (strlen($action) > 0) ? $action : $info->Runtime['action'];
 
 		session_start();
-		// I know this seems silly, but I want to give people a way to have a constructor while
-		//still reserving the real constructor for future needs
 		$this->startEngine();
-	}
-
-	public function loadLocation($locationId)
-	{
-		$location = new Location($locationId);
-
-		switch(strtolower($location->getResource()))
-		{
-			case 'directory':
-			case 'site':
-				$moduleId = $currentLocation->meta('default');
-				$info = new ModuleInfo($moduleId);
-				return $this->loadLocation($info['locationId']);
-				break;
-			case 'module':
-				return $locationId;
-				break;
-
-			case '':
-		}
-
 	}
 
 	protected function startEngine()
@@ -147,6 +143,7 @@ abstract class Engine
 			}
 
 
+			//var_dump($actionIdentifier);
 			$this->main_action = new $this->className($actionIdentifier);
 
 
