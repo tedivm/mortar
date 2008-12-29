@@ -5,16 +5,14 @@ abstract class Engine
 {
 	public $main_action;
 	public $engine_type = 'engine';
-	protected $content;
-	protected $requiredPermission = false;
-	protected $pathToModule;
-	protected $className;
-	protected $runMethod;
 
-	protected $moduleId;
+	protected $requiredPermission = false;
+
 	protected $action;
-	protected $moduleInfo;
+
 	protected $package;
+	protected $location;
+	protected $moduleId;
 
 	public function __construct($locationId = '', $action = '')
 	{
@@ -42,6 +40,8 @@ abstract class Engine
 				default:
 					break;
 			}
+
+			$this->location = $location;
 
 		}
 
