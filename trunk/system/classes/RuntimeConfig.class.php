@@ -16,7 +16,13 @@ class RuntimeConfig implements ArrayAccess
 
 		// Path
 		$path = ($get['parameters']) ? $get['parameters'] : NULL;
-		$pathArray = $this->convertPath($path);
+
+		if(!isset($get['package']))
+		{
+			$pathArray = $this->convertPath($path);
+		}else{
+			$data['package'] = $get['package'];
+		}
 
 		if(is_array($pathArray))
 			$data = array_merge($data, $pathArray);
@@ -31,25 +37,6 @@ class RuntimeConfig implements ArrayAccess
 		if(is_numeric($get['moduleId']) && !is_numeric($data['moduleId']))
 		{
 			$data['moduleId'] = $get['moduleId'];
-		}
-
-		if(is_numeric($data['moduleId']))
-		{
-			$moduleInfo = new ModuleInfo($data['moduleId']);
-			$data['package'] = $moduleInfo['Package'];
-		}
-
-		// Package
-		if(!isset($data['package']) && isset($get['package']))
-		{
-			$data['package'] = $get['package'];
-
-		}
-
-		if(isset($data['package']))
-		{
-			$packageInfo = new PackageInfo($data['package']);
-			$data ['pathToPackage']= $packageInfo->getPath();
 		}
 
 		if(!isset($data['currentLocation']) && isset($get['location']))
@@ -118,6 +105,7 @@ class RuntimeConfig implements ArrayAccess
 			$moduleInfo = new ModuleInfo($moduleId);
 			$pathReturn['package'] = $moduleInfo['Package'];
 			$pathReturn['moduleId'] = $moduleInfo->getId();
+			$currentLocation = new Location($moduleInfo['locationId']);
 		}
 
 		// Dump extra path variables to our good friend 'get'
@@ -138,6 +126,8 @@ class RuntimeConfig implements ArrayAccess
 					$get[$tag] = $variable;
 			}
 		}
+
+		unset($pathReturn['package']);
 
 		$pathReturn['currentLocation'] = $currentLocation->getId();
 		return $pathReturn;
