@@ -209,8 +209,8 @@ class Mystmt extends mysqli_stmt
 			$count++;
 		}
 
-		call_user_func_array(array('Mystmt', 'bind_result'), $fields);
-
+		//call_user_func_array(array('Mystmt', 'bind_result'), $fields);
+		call_user_func_array(array($this, 'bind_result'), $fields);
 		if($this->fetch())
 		{
 			return $out;
