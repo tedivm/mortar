@@ -44,7 +44,13 @@ class PackageInfo
 				{
 					try {
 						$action = array();
-						$actionName = array_shift(explode('.', array_pop(explode('/', $filename))));
+						$tmpArray = explode('/', $filename);
+						$tmpArray = array_pop($tmpArray);
+						$tmpArray = explode('.', $tmpArray);
+						$actionName = array_shift($tmpArray);
+						//explode, pop. explode. shift
+
+						//$actionName = array_shift(explode($dot, array_pop(explode($slash, $filename))));
 						$action['className'] = $this->name . 'Action' . $actionName;
 						$action['path'] = $filename;
 
