@@ -248,8 +248,16 @@ class ActiveUser // extends User
 	 */
 	private function __construct()
 	{
-		try{
+		if(!$this->checkSession())
+			$this->loadUserByName('guest');
 
+		$this->loggedIn = ($this->username != 'guest');
+	}
+
+
+	protected function checkSession()
+	{
+		try{
 			if($_SESSION['OBSOLETE'] && ($_SESSION['EXPIRES'] < time()))
 				throw new BentoWarning('Attempt to use expired session.');
 
@@ -271,10 +279,9 @@ class ActiveUser // extends User
 			}
 
 		}catch(Exception $e){
-			$this->loadUserByName('guest');
+			return false;
 		}
-
-		$this->loggedIn = ($this->username != 'guest');
+		return true;
 	}
 
 	public function loadUser($id)
@@ -286,30 +293,12 @@ class ActiveUser // extends User
 		if($user->load_user($id))
 		{
 			$this->user = $user;
-			$this->sessionStart(true);
+			$this->regenerateSession(true);
 			return true;
 		}else{
 			return false;
 		}
 
-	}
-
-	protected function sessionStart($reload = false)
-	{
-		// Since the user is most likely changing, its a good time to switch the id up
-		$this->regenerateSession();
-
-		// This token is used by forms to prevent cross site forgery attempts
-		if(!isset($_SESSION['nonce']) || $reload)
-			$_SESSION['nonce'] = md5($this->id . START_TIME);
-
-		if(!isset($_SESSION['IPaddress']) || $reload)
-			$_SESSION['IPaddress'] = $_SERVER['REMOTE_ADDR'];
-
-		if(!isset($_SESSION['userAgent']) || $reload)
-			$_SESSION['userAgent'] = $_SERVER['HTTP_USER_AGENT'];
-
-		$_SESSION['user_id'] = $this->user->getId();
 	}
 
 	public function session($session, $value = false)
@@ -434,8 +423,21 @@ class ActiveUser // extends User
 		return $this->user->getMemberGroups();
 	}
 
-	protected function regenerateSession()
+	protected function regenerateSession($reload = false)
 	{
+		// This token is used by forms to prevent cross site forgery attempts
+		if(!isset($_SESSION['nonce']) || $reload)
+			$_SESSION['nonce'] = md5($this->id . START_TIME);
+
+		if(!isset($_SESSION['IPaddress']) || $reload)
+			$_SESSION['IPaddress'] = $_SERVER['REMOTE_ADDR'];
+
+		if(!isset($_SESSION['userAgent']) || $reload)
+			$_SESSION['userAgent'] = $_SERVER['HTTP_USER_AGENT'];
+
+		$_SESSION['user_id'] = $this->user->getId();
+
+
 		// Set current session to expire in 1 minute
 		$_SESSION['OBSOLETE'] = true;
 		$_SESSION['EXPIRES'] = time() + 60;
