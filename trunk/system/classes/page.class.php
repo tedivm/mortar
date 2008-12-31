@@ -18,12 +18,16 @@ class Page implements ArrayAccess
 	// actual paths
 	protected $jsIncludes = array();
 	protected $cssIncludes = array();
-
+	protected $preStartupJs = array();
 
 	protected $templateFile = 'index.html';
 
 	protected $headerTemplate = '
 	<title>{# title #}</title>
+	<script type="text/javascript">
+	{# preStartupJs #}
+	</script>
+
 	{# meta #}
 	{# cssIncludes #}
 	{# jsIncludes #}
@@ -171,7 +175,7 @@ class Page implements ArrayAccess
 		$tags = $display->tagsUsed(false);
 
 		// This is a list of all of the 'array' items that need to be cycled through and added as a single items
-		$groups = array('script', 'scriptStartup', 'meta', 'jsIncludes', 'cssIncludes');
+		$groups = array('script', 'scriptStartup', 'meta', 'jsIncludes', 'cssIncludes', 'preStartupJs');
 
 		$output = PHP_EOL;
 		foreach($groups as $variable)
@@ -256,6 +260,9 @@ class Page implements ArrayAccess
 		}
 
 		$this->addCssInclude($cssUrls);
+
+		$site = ActiveSite::getInstance();
+		$this->preStartupJs[] = 'var baseUrl = ' . json_encode($site->currentLink) . ';';
 	}
 
 	// doesn't do much yet
@@ -265,8 +272,8 @@ class Page implements ArrayAccess
 		$template->set_display_template($templateString);
 		$template->add_content('theme_path', $this->getThemeUrl());
 
-		$get = Get::getInstance();
-		$jsInclude = $get['currentUrl'] . 'javascript/';
+		$site = ActiveSite::getInstance();
+		$jsInclude = $site->currentLink . 'javascript/';
 
 		$template->add_content('js_path', $jsInclude);
 
