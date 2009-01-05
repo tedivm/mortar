@@ -20,7 +20,7 @@ abstract class FormPackageAction extends PackageAction
 	protected function getForm()
 	{
 		$formName = $this->formName;
-		return new $formName($this->actionName);
+		return new $formName(get_class($this));
 	}
 
 	abstract protected function processInput($inputHandler);
