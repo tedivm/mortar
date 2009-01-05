@@ -12,13 +12,11 @@ class BentoCMSPageForm extends Form
 
 			$this->createInput('description')->
 				setType('textarea')->
-				setLabel('Description')->
-				addRule('required');
+				setLabel('Description');;
 
 			$this->createInput('keywords')->
 				setType('textarea')->
-				setLabel('Keywords')->
-				addRule('required');
+				setLabel('Keywords');
 
 			$this->createInput('name')->
 				setLabel('Name (as appears in URLS)')->
