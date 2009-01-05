@@ -13,6 +13,12 @@ abstract class Action extends ModuleBase implements ActionInterface
 	{
 		$this->moduleId = $modId;
 		$this->loadSettings();
+
+		$namingInfo = explode('Action', get_class($this));
+		$this->actionName = array_pop($namingInfo);
+		$this->package = array_shift($namingInfo);
+
+
 	}
 
 	public function start()
@@ -31,10 +37,10 @@ abstract class Action extends ModuleBase implements ActionInterface
 
 	//	$this->actionName = array_pop(explode('Action', get_class($this)));
 
-		$namingInfo = explode('Action', get_class($this));
+//		$namingInfo = explode('Action', get_class($this));
 
-		$this->actionName = array_pop($namingInfo);
-		$this->package = array_shift($namingInfo);
+	//	$this->actionName = array_pop($namingInfo);
+	//	$this->package = array_shift($namingInfo);
 
 
 		if(method_exists($this, 'logic'))
@@ -92,7 +98,9 @@ abstract class PackageAction extends Action
 
 	public function __construct($package)
 	{
-		$this->package = $package;
+		$namingInfo = explode('Action', get_class($this));
+		$this->actionName = array_pop($namingInfo);
+		$this->package = array_shift($namingInfo);
 		$this->loadSettings();
 	}
 
