@@ -145,17 +145,57 @@ class Mysql_Base extends mysqli
 
 	public function query($query, $resultmode = 0)
 	{
-		Mysql_Base::$query_count++;
+		try{
+			Mysql_Base::$query_count++;
 
-		if(isset(Mysql_Base::$query_array[$query]))
-		{
-			Mysql_Base::$query_array[$query]++;
-		}else{
-			Mysql_Base::$query_array[$query] = 1;
+			if(isset(Mysql_Base::$query_array[$query]))
+			{
+				Mysql_Base::$query_array[$query]++;
+			}else{
+				Mysql_Base::$query_array[$query] = 1;
+			}
+
+			if(!($result = parent::query($query, $resultmode)))
+				$this->throwError();
+
+		}catch (Exception $e){
+
 		}
 
+		return $result;
+	}
 
-		return parent::query($query, $resultmode);
+	public function runFile($path)
+	{
+		try{
+
+			if(!($sql = file_get_contents($path)))
+				throw new BentoNotice('SQL file not found at ' . $path);
+
+			if($connection->multi_query($sql))
+			{
+				do
+				{
+					if($result = $connection->store_result())
+						$result->free();
+				}while($connection->more_results() && $connection->next_result());
+			}else{
+				$this->throwError();
+			}
+
+		}catch(Exception $e){
+
+		}
+	}
+
+	public function throwError()
+	{
+		if($this->errno !== 0)
+		{
+			throw new BentoError($this->error);
+		}else{
+			throw new BentoNotice($this->error);
+		}
 	}
 }
 
@@ -180,7 +220,7 @@ class Mystmt extends mysqli_stmt
 		$result = parent::prepare($query);
 
 		if(!$result)
-			throw new BentoError('Unable to prepare statement: ' . $this->error);
+			$this->throwError('Unable to prepare statement');
 
 		return parent::prepare($query);
 	}
@@ -220,6 +260,10 @@ class Mystmt extends mysqli_stmt
 
     }
 
+    public function bind_and_execute()
+    {
+    	return call_user_func_array(array($this, 'bind_param_and_execute'), func_get_args());
+    }
     /**
      * Combines the bind_param, execute, and store_results into a single function
      *
@@ -239,9 +283,8 @@ class Mystmt extends mysqli_stmt
 			Mysql_Base::$query_array[$this->myQuery] = 1;
 		}
 
-
 		if(!call_user_func_array(array($this, 'bind_param'), $params))
-			throw new BentoError('Invalid Resource: ' . $this->error);
+			$this->throwError();
 
 		if($this->execute())
 		{
@@ -249,6 +292,17 @@ class Mystmt extends mysqli_stmt
 			return true;
 		}else{
 			return false;
+		}
+	}
+
+	public function throwError($message = '')
+	{
+		$message .= ' MySQL Error-' .$this->error;
+		if($this->errno !== 0)
+		{
+			throw new BentoError($message);
+		}else{
+			throw new BentoNotice($message);
 		}
 	}
 }
