@@ -22,7 +22,7 @@ class Cache
 {
 	public $name;
 	public $path;
-	public $cache_time = 300; //seconds
+	public $cache_time = 1800; //seconds
 
 	public $cacheReturned = false;
 	protected $cache_enabled = true;
@@ -54,7 +54,7 @@ class Cache
 		try {
 
 			if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable)
-				throw new Exception('Cache disabled.');
+				throw new BentoNotice('Cache disabled.');
 
 			if(func_num_args() == 0)
 				throw new BentoError('no cache argument');
@@ -62,7 +62,9 @@ class Cache
 			if(self::$handlerClass == '')
 			{
 				$config = Config::getInstance();
-				self::$handlerClass = (isset(self::$handlers[$config['cache']['handler']])) ? self::$handlers[$config['cache']['handler']] : self::$handlers['FileSystem'];
+				self::$handlerClass = (isset(self::$handlers[$config['system']['cache']]))
+										? self::$handlers[$config['system']['cache']]
+										: self::$handlers['FileSystem'];
 			}
 
 			$key = func_get_args();
@@ -131,16 +133,14 @@ class Cache
 			self::$memStore[$this->keyString] = $record;
 		}
 
-
-		if($record['time'] - microtime(true) < 0)
+		if($record['expiration'] - START_TIME < 0)
 		{
 			return false;
 		}
 		$this->cacheReturned = true;
 
 		self::$cacheReturns++;
-
-		return $record['data'];
+		return $record['data']['return'];
 	}
 
 	public function storeData($data)
@@ -148,16 +148,24 @@ class Cache
 		if(!$this->cache_enabled)
 			return;
 
+		$store['return'] = $data;
+		$store['createdOn'] = START_TIME;
+
 		try{
 			$random = $this->cache_time * .1 ;
 			$expiration = (microtime(true) + ($this->cache_time + rand(-1 * $random , $random)));
 
-			self::$memStore[$this->keyString] = array('time' => $expiration, 'data' => $data);
+			self::$memStore[$this->keyString] = array('expiration' => $expiration, 'data' => $store);
 
-			$this->handler->storeData($data, $expiration);
+			$this->handler->storeData($store, $expiration);
 		}catch(Exception $e){
 
 		}
+	}
+
+	public function extendCache()
+	{
+		return $this->storeData(self::$memStore[$this->keyString]['data']['return']);
 	}
 
 	static function getHandlers()
@@ -219,8 +227,6 @@ class cacheHandlerFilesystem implements cacheHandler
 	{
 		if(file_exists($this->path))
 		{
-
-
 			$file = fopen($this->path, 'r');
 			$filesize = filesize($this->path);
 			if(flock($file, LOCK_SH | LOCK_NB))
@@ -249,7 +255,7 @@ class cacheHandlerFilesystem implements cacheHandler
 				return false;
 		}
 
-		$store['time'] = $expiration; // (microtime(true) + ($this->cache_time + rand(-1 * $random , $random)));
+		$store['expiration'] = $expiration; // (microtime(true) + ($this->cache_time + rand(-1 * $random , $random)));
 		$store['data'] = $data;
 
 
@@ -396,7 +402,7 @@ class cacheHandlerSqlite implements cacheHandler
 
 		if($resultArray = $query->fetch(SQLITE_ASSOC))
 		{
-			$results = array('time' => $resultArray['expires'], 'data' => unserialize($resultArray['data']));
+			$results = array('expiration' => $resultArray['expires'], 'data' => unserialize($resultArray['data']));
 		}else{
 			$results = false;
 		}
