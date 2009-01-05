@@ -11,7 +11,7 @@ class BentoBaseSystemSettingsForm extends Form
 
 		$cacheHandlers = Cache::getHandlers();
 
-		$handlerInput = $this->createInput('cacheHandler');
+		$handlerInput = $this->createInput('system_cache');
 
 		$handlerInput->setType('select')->
 				setLabel('Caching Method');
@@ -19,7 +19,7 @@ class BentoBaseSystemSettingsForm extends Form
 		foreach($cacheHandlers as $handlerName => $handlerClass)
 		{
 			$attributes = array();
-			if($configIni->get('cache', 'handler') == $handlerName)
+			if($configIni->get('system', 'cache') == $handlerName)
 				$attributes = array('selected' => 'selected');
 			$handlerInput->setOptions($handlerName, $handlerName, $attributes);
 		}

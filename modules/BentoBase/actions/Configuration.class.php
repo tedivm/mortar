@@ -32,7 +32,7 @@ class BentoBaseActionConfiguration extends FormPackageAction
 		}
 
 
-		foreach(array('timezone') as $value)
+		foreach(array('timezone', 'cache') as $value)
 		{
 			$configIni->set('system', $value, $inputHandler['system_' . $value]);
 		}
@@ -40,7 +40,6 @@ class BentoBaseActionConfiguration extends FormPackageAction
 		$modRewrite = isset($inputHandler['url_modRewrite']);
 		$configIni->set('url', 'modRewrite', $modRewrite);
 		return $configIni->write();
-
 	}
 
 
@@ -61,5 +60,7 @@ class BentoBaseActionConfiguration extends FormPackageAction
 
 		$output .= $this->form->makeDisplay();
 		return $output;
-	}}
+	}
+
+}
 ?>
