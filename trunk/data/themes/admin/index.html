@@ -4,7 +4,6 @@
 
 	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
 
-<link href='{# theme_path #}css/all.css' rel='stylesheet' type='text/css'/>
 <link href='{# theme_path #}css/jquery.cluetip.css' rel='stylesheet' type='text/css'/>
 
 
@@ -14,12 +13,12 @@
 <script>
 
 $(function(){
-	
-	
-// left column animation	
+
+
+// left column animation
 	$('#left-column > div > h3').click(function (event) {
 		var $target = $(event.target);
-		if( $target.is("h3") ) 
+		if( $target.is("h3") )
 		{
 			$navfields = $target.parent().children('ul.nav');
 			if($navfields.is(':hidden'))
@@ -30,62 +29,9 @@ $(function(){
 			}
 		}
 	});
-/*
-	$('#left-column a').click(function (event) {
-		var $target = $(event.target);
-		
-		$.getJSON(url, 
-			function (data)
-				{
-					$('#center-column').html(data.content);
-				}
-			);
-		
-		
-		
-	//	$target.hide("pulsate").show("slide");
-	});
-	
-//tab click	
-	$('#top-navigation li').click(function (event) {
-		var target = $(this);
-		if( target.is("li") && !target.hasClass("active") ) 
-		{
-			// make clicked tag active, all other tabs inactive
-			target.siblings('li').removeClass('active').end().addClass('active');
-			
-			// load new sidebar
-			// blind clip drop explode fold puff slide scale pulsate
-			$('#left-column').hide("slide", {direction: "left"}, 650).show("slide", {direction: "left"}, 650);
-			
-			//load new center column
-			$('#center-column').hide("slide", 
-									{direction: "down"},
-									650, 
-										function(){ 
-											$(this).html('New Center').
-												show("slide", {direction: "down"}, 650);
-										}); //.show("slide", {direction: "down"}, 650);
-			
-			// add events to sidebar
-			$('#left-column a').click(function (event) {
-				var $target = $(event.target);
-				$target.hide("pulsate").show("pulsate");
-			});
-			
-			// load default actions
 
-			
-		}
-
-	});	
-	
-*/	
-	
-	
-	
 });
-  
+
 
 
 
@@ -96,29 +42,29 @@ $(function(){
 <div id="main">
 
 	<div id="header">
-	
+
 		<!-- logo -->
 		<a href="index.html" class="logo"><img src="{# theme_path #}img/logo.gif" width="101" height="29" alt="" /></a>
-		
+
 		{# navtabs #}
-		
+
 		<!-- tabs -->
 
 		<!-- tabs -->
 
 	</div> <!-- #main -->
 
-	
+
 	<div id="middle">
-	
-	{# navbar #}	
-	
-		
-		
+
+	{# navbar #}
+
+
+
 		<div id="center-column">
 			{# content #}
 		</div>
-		
+
 		<!--
 		<div id="right-column">
 			<strong class="h">INFO</strong>
