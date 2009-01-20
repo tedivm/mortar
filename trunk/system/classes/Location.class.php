@@ -50,6 +50,7 @@ class Location implements intlocation
 
 					$db_meta = new ObjectRelationshipMapper('location_meta');
 					$db_meta->location_id = $locationInfo['id'];
+					$meta = array();
 					if($db_meta->select())
 					{
 						$results = $db_meta->resultsToArray();
@@ -57,8 +58,8 @@ class Location implements intlocation
 						{
 							$meta[$row['name']] = $row['value'];
 						}
-						$locationInfo['meta'] = $meta;
 					}
+					$locationInfo['meta'] = $meta;
 				}else{
 					$locationInfo = false;
 				}
@@ -73,6 +74,10 @@ class Location implements intlocation
 				$this->resource = $locationInfo['resource'];
 				$this->name = $locationInfo['name'];
 				$this->inherits = $locationInfo['inherits'];
+
+				if($this->parent)
+					$locationInfo['meta'] = array_merge($this->parent->meta, $locationInfo['meta']);
+
 				$this->meta = $locationInfo['meta'];
 				$this->createdOn = $locationInfo['createdOn'];
 				return true;
@@ -112,6 +117,11 @@ class Location implements intlocation
 		return $this->createdOn;
 	}
 
+	public function setCreationDate($dateTime)
+	{
+		$this->createdOn = date('Y-m-d H:i:s', $date);
+	}
+
 	//need to get rid of that
 	public function location_id()
 	{
@@ -131,6 +141,8 @@ class Location implements intlocation
 		{
 			$db_location->location_id = $this->id ;
 			$db_location->select('1');
+		}elseif(isset($this->createdOn)){
+			$db_location->location_createdOn = $this->createdOn;
 		}else{
 			$db_location->query_set('location_createdOn', 'NOW()');
 		}
@@ -138,7 +150,7 @@ class Location implements intlocation
 
 		if(($this->parent instanceof Location))
 		{
-			$parentId = $this->parent->location_id();
+			$parentId = $this->parent->getId();
 
 			if(is_numeric($parentId))
 			{
@@ -157,7 +169,7 @@ class Location implements intlocation
 
 		if(!$db_location->save())
 		{
- 			throw new BentoError('Unable to save location');
+ 			throw new BentoError('Unable to save location due to error ' . $db_location->sql_errno);
 		}
 
 
