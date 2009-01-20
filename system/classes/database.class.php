@@ -104,7 +104,6 @@ class DB_Connection
 		}
 	}
 
-
 	public function __destruct()
 	{
 
@@ -158,7 +157,9 @@ class Mysql_Base extends mysqli
 			if(!($result = parent::query($query, $resultmode)))
 				$this->throwError();
 
-		}catch (Exception $e){
+		}catch(BentoError $e){
+			throw $e;
+		}catch(Exception $e){
 
 		}
 
@@ -168,23 +169,22 @@ class Mysql_Base extends mysqli
 	public function runFile($path)
 	{
 		try{
-
 			if(!($sql = file_get_contents($path)))
 				throw new BentoNotice('SQL file not found at ' . $path);
 
-			if($connection->multi_query($sql))
+			if($this->multi_query($sql))
 			{
 				do
 				{
-					if($result = $connection->store_result())
+					if($result = $this->store_result())
 						$result->free();
-				}while($connection->more_results() && $connection->next_result());
+				}while($this->more_results() && $this->next_result());
 			}else{
 				$this->throwError();
 			}
-
+			return true;
 		}catch(Exception $e){
-
+			return false;
 		}
 	}
 
@@ -291,6 +291,8 @@ class Mystmt extends mysqli_stmt
 			$this->store_result();
 			return true;
 		}else{
+			if($this->errno > 0)
+				$this->throwError();
 			return false;
 		}
 	}
