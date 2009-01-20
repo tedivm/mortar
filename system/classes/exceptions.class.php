@@ -57,7 +57,8 @@ class BentoError extends Exception
 
 		$site = ActiveSite::getInstance();
 		$actionOutput = (isset($runtimeConfig['action'])) ? $runtimeConfig['action'] : '<i>unset</i>';
-		$moduleOutput = (isset($runtimeConfig['module'])) ? $runtimeConfig['module'] : '<i>unset</i>';
+		$packageOutput = (isset($runtimeConfig['package'])) ? $runtimeConfig['package'] : '<i>unset</i>';
+
 		$idOutput = (is_numeric($runtimeConfig['id'])) ? $runtimeConfig['id'] : '<i>unset</i>';
 		$engineOutput = (isset($runtimeConfig['engine'])) ? $runtimeConfig['engine'] : '<i>unset</i>';
 		$siteOutput = (is_numeric($site->siteId)) ? $site->siteId : '<i>unset</i>';
@@ -70,7 +71,7 @@ class BentoError extends Exception
 <tr>
 	<td bgcolor='#eeeeec'><b>Site ID:</b> {$siteOutput}</td>
 	<td bgcolor='#eeeeec'><b>Action:</b> {$actionOutput}</td>
-	<td bgcolor='#eeeeec'><b>Module:</b> {$moduleOutput} </td>
+	<td bgcolor='#eeeeec'><b>Module:</b> {$packageOutput} </td>
 </tr>
 <tr>
 	<td bgcolor='#eeeeec'><b>ID:</b> {$idOutput}</td>
@@ -180,8 +181,11 @@ class TypeMismatch extends BentoError
 				$receivedType = gettype($className);
 			}
 
-			$receivedType = (!$className = (get_class($receivedObject))) ? $receivedType = 'Class ' . $className : gettype($className);
-			$message = 'Expected object of type: ' . $expectedType . ' but received' . $receivedType . '.';
+			$receivedType = ($className = (get_class($receivedObject)))
+								? $receivedType = 'Class ' . $className
+								: gettype($className);
+
+			$message = 'Expected object of type: ' . $expectedType . ' but received ' . $receivedType . ' ';
 
 			if(strlen($customMessage) > 0)
 				$message .= ' ' . $customMessage;
