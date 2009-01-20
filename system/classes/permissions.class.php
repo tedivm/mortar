@@ -14,93 +14,139 @@
 
 class Permissions
 {
-	public $user;
-	public $location;
-	public $allowedActions = array();
-	public $inheritedActions = array();
+	protected $user;
+	protected $location;
+
+	// $permission[type][action] = permissions
+	protected $permissions = array();
+
 
 	public function __construct($location, $userId)
 	{
 
-		if(!($userId instanceof User) && is_numeric($userId))
-		{
-			$user = new User();
-			$user->load_user($userId);
-		}elseif($userId instanceof User){
-			$user = $userId;
-			$userId = $user->getId();
+		if($userId instanceof User){
+			$this->user = $userId;
+			$userId = $this->user->getId();
+		}elseif(is_numeric($userId)){
+			$this->user = new User();
+			$this->user->load_user($userId);
 		}elseif($userId instanceof ActiveUser){
-			$user = new User();
-			$user->load_user($userId->getId());
-			$userId = $userId->getId();
+			$this->user = new User();
+			$this->user->load_user($userId->getId());
+			$userId = $this->user->getId();
+		}else{
+			throw new TypeMismatch(array('User', $userId));
 		}
-
-		$this->user = $user->getId();
 
 		if(is_int($location))
 			$location = new Location($location);
 
 		if(!($location instanceof Location))
-			throw new BentoError('Expecting location object.');
+			throw new TypeMismatch(array('Location', $location));
+
 
 		$this->location = $location;
 
+		$this->permissions = $this->loadPermissions();
 
-		$cache = new Cache('permissions', $this->location->location_id(), $this->user);
-		$actions = $cache->getData();
-
-		if(!$cache->cacheReturned)
-		{
-			$allowed_actions = array();
-
-			if($this->location->parent_location() && $this->location->inheritsPermission())
-			{
-				$parent_permissions = new Permissions($this->location->parent_location(), $user);
-				$inheritedActions = $parent_permissions->getActions();
-				unset($parent_permissions);
-			}
-
-			$memberGroups = $user->getMemberGroups();
-			$usergroup_permissions = array();
-			foreach($memberGroups as $groupId)
-			{
-				if($usergroupActions = $this->load_usergroup_permissions($this->location->location_id(), $groupId))
-					$usergroup_permissions = array_merge($usergroup_permissions, $usergroupActions);
-			}
-
-			$user_permissions = $this->load_user_permissions($this->location->location_id());
-
-			$tmp = array_merge($usergroup_permissions, $user_permissions);
-			foreach($tmp as $name => $value)
-			{
-				if($value)
-				{
-					if(!in_array($name, $allowed_actions))
-						$allowed_actions[] = $name;
-				}else{
-					if($key = array_search($name, $allowed_actions))
-						unset($allowed_actions[$key]);
-				}
-			}
-
-
-			$actions['inherited'] = $inheritedActions;
-			$actions['allowed'] = $allowed_actions;
-
-			$cache->storeData($actions);
-		}
-
-		if(is_array($actions['inherited']))
-			$this->inheritedActions = $actions['inherited'];
-		$this->allowedActions = $actions['allowed'];
 	}
 
-	public function isAllowed($action)
+	protected function loadPermissions()
 	{
+		$memberGroupPermissions = array();
+		$memberGroups = $this->user->getMemberGroups();
+		foreach($memberGroups as $memberGroup)
+		{
+			$memgroupPermissions = new GroupPermission($memberGroup, $this->location->getId());
+			$memberGroupPermissionsArray = $this->mergePermissions($memberGroupPermissionsArray,
+															$memgroupPermission->getPermissions());
+		}
+
+		$userPermissions = new UserPermission($this->user->getId(), $this->location->getId());
+		$userPermissionsArray = $userPermissions->getPermissions();
+		return $this->mergePermissions($memberGroupPermissions, $userPermissionsArray);
+	}
+
+	protected function mergePermissions($current, $new)
+	{
+		if(!is_array($current))
+			throw new TypeMismatch(array('Array', $current));
+
+		if(!is_array($new))
+			throw new TypeMismatch(array('Array', $new));
+
+		// Run check to make sure we only iterate through the smallest array
+		if(count($current, 1) < count($new, 1))
+		{
+			$tmp = $current;
+			$current = $new;
+			$new = $tmp;
+			unset($tmp);
+		}
+
+		foreach($new as $typeIndex => $typeActions)
+		{
+			foreach($typeActions as $actionIndex => $actionValue)
+			{
+				switch (true)
+				{
+					case ($current[$typeIndex][$actionIndex] === true):
+					case ($actionValue === true):
+						$current[$typeIndex][$actionIndex] = true;
+						break;
+
+					case ($current[$typeIndex][$actionIndex] == false):
+					case($actionValue == false):
+						$current[$typeIndex][$actionIndex] = false;
+						break;
+
+					case ($current[$typeIndex][$actionIndex] == 'inherit'):
+					case ($actionValue == 'inherit'):
+					default:
+						unset($current[$typeIndex][$actionIndex]);
+				}
+			}
+		}
+
+		return $current;
+	}
+
+	public function isAllowed($action, $type = 'base')
+	{
+		// This should only be used when testing the permissions system, particularly when breaking it but needing
+		// to perform some action, like resetting the cache
 		if(IGNOREPERMISSIONS)
 			return true;
 
-		return in_array($action, $this->getActions());
+		// Check to see if user is in the superuser group
+		$adminMemberGroup = new MemberGroup(MemberGroup::lookupIdbyName('SuperUser'));
+		if($adminMemberGroup->containsUser($this->user->getId()))
+			return true;
+
+		// This allows us to add permissions to a special type (universal) which will over ride all over
+		// permissions granted. The two cases I can see this being useful for are for administrators and
+		// banned users, although it currently only checks for positive cases. This is still subject to the
+		// same location rules as other permissions.
+		if($this->isAllowed($action, 'universal'))
+			return true;
+
+		// If the permission isn't set, or is set to inherit (which shouldn't really occur, as thats the default
+		if(!isset($this->permissions[$type][$action]) || $this->permissions[$type][$action] == 'inherit')
+		{
+			$parentLocation = $this->location->getParent();
+
+			// If you've inherited back to the top of the tree and didn't find anything, give it a negative
+			if($parentLocation === false || !$this->location->inheritsPermission())
+				return false;
+
+			//Check the parent location
+			$parentPermission = new Permissions($parentLocation->getId(), $this->user);
+
+			return $parentPermission->isAllowed($action, $type);
+
+		}else{
+			return ($this->permissions[$type][$action] === true);
+		}
 	}
 
 	public function checkAuth($action)
@@ -108,70 +154,232 @@ class Permissions
 		return $this->isAllowed($action);
 	}
 
-	protected function load_usergroup_permissions($locationId, $memgroupId)
-	{
-		$cache = new Cache('permissions', 'membergroups', $memgroupId, $locationId);
-		$actions = $cache->getData();
+}
 
+class UserPermission
+{
+	protected $type = 'user';
+	protected $typeId = 'user_id';
+	protected $location;
+	protected $id;
+
+	// $permission[type][action] = permissions
+	protected $permissions = array();
+
+	public function __construct($id, $location)
+	{
+		if(!is_numeric($id))
+			throw new TypeMismatch(array('Integer', $id));
+
+		$this->id = $id;
+
+		if($location instanceof Location)
+			$location = $location->getId();
+
+		if(!is_int($location))
+			throw new TypeMismatch(array('Integer', $location));
+
+		$this->location = $location;
+
+		$this->permissions = $this->loadPermissionsFromDatabase();
+	}
+
+	public function setPermission($resource, $action, $permission)
+	{
+		if(!is_numeric($action))
+			$action = PermissionActionList::getAction($action);
+
+		if(!is_numeric($action))
+			throw new TypeMismatch(array('Integer', $action));
+
+		if($permission == 1 || $permission == true)
+		{
+			$this->permissions[$resource][$action] = true;
+
+		}elseif($permission == 0 || $permission === false){
+
+			$this->permissions[$resource][$action] = false;
+
+		}else{
+
+			unset($this->permissions[$resource][$action]);
+		}
+	}
+
+	public function getPermissions()
+	{
+		return $this->permissions;
+	}
+
+	protected function loadPermissionsFromDatabase()
+	{
+		$type = $this->type;
+		$typeId = $this->typeId;
+		$id = $this->id;
+
+		$cache = new Cache('permissions', $type, $id, $this->location);
+		$permissions = $cache->getData();
 		if(!$cache->cacheReturned)
 		{
-			$db = db_connect('default_read_only');
+			$permissions = array();
+			$db = dbConnect('default_read_only');
 			$stmt = $db->stmt_init();
-			$stmt->prepare("SELECT actions.action_name, permissionsprofile_has_actions.permission_status FROM actions
-				LEFT JOIN (permissionsprofile_has_actions, group_permissions)
-					ON (permissionsprofile_has_actions.perprofile_id = group_permissions.perprofile_id
-					AND actions.action_id = permissionsprofile_has_actions.action_id)
-				WHERE location_id= ? AND memgroup_id = ?");
-			$stmt->bind_param_and_execute('ii', $locationId, $memgroupId);
-
-			$actions = $this->adjust_action($stmt);
-			$cache->storeData($actions);
-		}
-		return $actions;
-	}
-
-	protected function load_user_permissions($id)
-	{
-		$db = db_connect('default_read_only');
-		$stmt = $db->stmt_init();
-		$stmt->prepare("SELECT actions.action_name, permissionsprofile_has_actions.permission_status
-			FROM actions
-			LEFT JOIN (permissionsprofile_has_actions, user_permissions)
-				ON (actions.action_id = permissionsprofile_has_actions.action_id
-				AND permissionsprofile_has_actions.perprofile_id = user_permissions.perprofile_id)
-			WHERE
-			user_permissions.location_id = ? AND user_permissions.user_id = ?");
-		$stmt->bind_param_and_execute('ii', $id, $this->user);
-		return $this->adjust_action($stmt);
-	}
-
-	protected function adjust_action($stmt)
-	{
-		$tmp_array = array();
-		if($stmt->num_rows > 0)
-		{
-			$tmp_array = array();
-			while($permission = $stmt->fetch_array())
+			$stmt->prepare('SELECT ' . $type . 'Permissions.permission, '. $type .'Permissions.resource,
+								actions.action_id
+							FROM actions, ' . $type . 'Permissions
+							WHERE (actions.action_id = ' . $type . 'Permissions.action_id)
+								AND ' . $type . 'Permissions.location_id = ?
+								AND ' . $type . 'Permissions.' . $typeId . ' = ?');
+			$stmt->bind_param_and_execute('ii', $this->location, $id);
+			if($stmt->num_rows > 0)
 			{
-				$tmp_array[$permission['action_name']] = ($permission['permission_status'] == 1);
+				$tmp_array = array();
+				while($permissionRow = $stmt->fetch_array())
+				{
+					$resource = ($permissionRow['resource']) ? $permissionRow['resource'] : 'base';
+
+					if($permissionRow['permission'] == 1)
+					{
+						$permissions[$resource][$permissionRow['action_id']] = true;
+					}elseif($permissionRow['permission'] == 0){
+
+						$permissions[$resource][$permissionRow['action_id']] = false;
+					}
+					// if its not true, and not false, the only option is to inherit which we are treating as unset
+				}
 			}
+			$cache->storeData($permissions);
 		}
-		return $tmp_array;
+		return $permissions;
 	}
 
-	public function getActions()
+	public function save()
 	{
-		if(!is_array($this->inheritedActions))
-			$this->inheritedActions = array();
+		$tableName = $this->type . 'Permissions';
+		$db = dbConnect('default');
 
-		if(!is_array($this->allowedActions))
-			$this->allowedActions = array();
+		// If someone were to disable autocommit outside of this class, we don't want to intefere with that.
+		if($modifyCommit = (bool) $db->query("SELECT @@autocommit"))
+			$db->autocommit(false);
 
-		return array_merge($this->inheritedActions, $this->allowedActions);
+		try
+		{
+			$clearStmt = $db->stmt_init();
+			$clearStmt->prepare('DELETE FROM ' . $tableName . '
+									WHERE ' . $tableName . '.' . $this->typeId . ' = ?');
+			$clearStmt->bind_param_and_execute('i', $this->id);
+
+			foreach($this->permissions as $typeIndex => $typeActions)
+			{
+				foreach($typeActions as $actionIndex => $actionValue)
+				{
+					if($actionValue === true)
+					{
+						$saveValue = 1;
+					}elseif($actionValue === false){
+						$saveValue = 0;
+					}else{
+						// No need to save inherit, since its the default
+						continue;
+					}
+
+					$saveStmt = $db->stmt_init();
+					$saveStmt->prepare('INSERT INTO ' . $tableName .
+										'(location_id, action_id, resource, permission, ' . $this->typeId . ')
+										Values (?, ?, ?, ?, ?)');
+
+					$saveStmt->bind_param_and_execute('iisii', $this->location,
+															$actionIndex,
+															$typeIndex, $saveValue, $this->id);
+				}
+			}
+
+			Cache::clear('permissions', $type, $id, $this->location);
+
+		}catch(Exception $e){
+			$db->rollback();
+
+			if($modifyCommit)
+				$db->autocommit(true);
+
+			throw new BentoError('Error while inserting ' . $type . 'Permissions');
+		}
+
+
+		if($modifyCommit)
+		{
+			// We place the commit in here so as not to interfere with any changed to autocommit outside this class
+			$db->commit();
+			$db->autocommit(true);
+		}
+
+
 	}
 
 }
 
+class GroupPermission extends UserPermission
+{
+	protected $type = 'group';
+	protected $typeId = 'memgroup_id';
+}
 
+
+class PermissionActionList
+{
+	static protected $actionList = false;
+
+	static public function getAction($action)
+	{
+		if(self::$actionList === false)
+			self::loadActionList();
+
+		$output = (isset(self::$actionList[$action])) ? self::$actionList[$action] : false;
+
+		return $output;
+	}
+
+	static public function addAction($action)
+	{
+		if(self::$actionList === false)
+					self::loadActionList();
+
+		if(self::getAction($action) !== false)
+			return true;
+
+		$db = dbConnect('default');
+		$stmt = $db->stmt_init();
+		$stmt->prepare('INSERT INTO actions (action_name) VALUES (?)');
+
+		if($stmt->bind_param_and_execute('s', $action))
+		{
+
+			$id = $stmt->insert_id;
+
+			// All new permissions should be granted to the administrator membergroup.
+			$adminPermissions = new GroupPermission(MemberGroup::lookupIdbyName('Administrator'), 1);
+			$adminPermissions->setPermission('universal', $id, true);
+			$adminPermissions->save();
+
+			self::loadActionList();
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	static protected function loadActionList()
+	{
+		$db = db_connect('default_read_only');
+		$result = $db->query('SELECT action_id, action_name FROM actions');
+
+		while($row = $result->fetch_array())
+		{
+			$actions[$row['action_name']] = $row['action_id'];
+		}
+		self::$actionList = $actions;
+	}
+
+}
 
 ?>
