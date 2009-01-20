@@ -31,8 +31,8 @@ class Theme
 			$baseModuleUrl = $info->Configuration['url']['modules'];
 
 
-			$packageList = new PackageList(true);
-			$packages = $packageList->getPackageList();
+			$packageList = new PackageList();
+			$packages = $packageList->getInstalledPackages();
 
 			$javascriptLinks = array();
 			$cssLinks = array();
