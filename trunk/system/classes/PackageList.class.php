@@ -2,20 +2,19 @@
 
 class PackageList
 {
-	protected $packages = array();
+	protected $installedPackages = array();
+	protected $installablePackages = array();
 
-	public function __construct($installedOnly = false)
+	public function __construct()
 	{
-		if($installedOnly)
-		{
-			$this->loadInstalledPackages();
-		}else{
-			$this->loadPackages();
-		}
+		$this->installedPackages = $this->loadInstalledPackages();
+			sort($this->installedPackages, SORT_STRING);
 
+		$this->installablePackages = array_diff($this->loadInstallablePackages(), $this->installedPackages);
+			sort($this->installablePackages, SORT_STRING);
 	}
 
-	protected function loadPackages()
+	protected function loadInstallablePackages()
 	{
 		$info = InfoRegistry::getInstance();
 
@@ -24,10 +23,10 @@ class PackageList
 		foreach ($packageDirectories as $packagePath)
 		{
 			$packageName = array_shift(explode('.', array_pop(explode('/', $packagePath))));
-			$packageList[$packageName] = new PackageInfo($packageName);
+			$packageList[] = $packageName;
 		}
 
-		$this->packages = $packageList;
+		return $packageList;
 	}
 
 	protected function loadInstalledPackages()
@@ -37,21 +36,27 @@ class PackageList
 		$packageList = array();
 		while($row = $results->fetch_assoc())
 		{
-			$packages[] = $row['package'];
-			$packageList[$row['package']] = new PackageInfo($row['package']);
+			$packageList[] = $row['package'];
 		}
 
-		$this->packages = $packageList;
+		return $packageList;
 	}
 
 	public function getPackageList()
 	{
-		return array_keys($this->packages);
+		$fullSet = array_merge($this->installedPackages, $this->installablePackages);
+		sort($fullSet, SORT_STRING);
+		return $fullSet;
 	}
 
-	public function getPackageDetails()
+	public function getInstalledPackages()
 	{
-		return $this->packages;
+		return $this->installedPackages;
+	}
+
+	public function getInstallablePackages()
+	{
+		return $this->installablePackages;
 	}
 
 }
