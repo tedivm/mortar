@@ -1,20 +1,34 @@
 <?php
 
-abstract class Model
+abstract class Model implements ModelInterface
 {
 	protected $type;
 	protected $location;
 	protected $id;
 
+	protected $package;
+	protected $name;
+
+	static public $type;
+
 	public function __construct($locationId = false)
 	{
-		if($locationId)
-		{
-			if(!is_numeric($locationId))
-				throw new TypeMismatch(array('integer', $locationId));
-
+		if(is_numeric($locationId)){
 			$location = new Location($locationId);
+		}elseif($locationId instanceof Location){
+			$location = $locationId;
+		}else{
+			throw new TypeMismatch(array('Location or Integer', $locationId));
 		}
+
+		if($this->type != $location->getResource())
+			throw new BentoError('Expecting location type ' . $this->type);
+
+		$classInfo = explode('Model', get_class($this));
+		$this->package = $classInfo[0];
+		$this->name = $classInfo[1];
+
+		$this->location = $location;
 	}
 
 	public function name($name = NULL)
@@ -85,6 +99,17 @@ abstract class Model
 		return $permission->isAllowed($action);
 	}
 
+	public function actionLookup($action)
+	{
+		$package = $this->package;
+		$action = $this->name . $action;
+
+		$packageInfo = new PackageInfo($package);
+		if(!$packageInfo->packageHasAction($action))
+			return false;
+
+		return array('package' => $package, 'action' => $action);
+	}
 
 }
 

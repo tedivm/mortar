@@ -17,7 +17,7 @@ abstract class ModuleBase
 	{
 		if(isset($this->moduleId))
 		{
-			$info = new ModuleInfo($this->moduleId);
+			$info = new ModuleInfo($this->moduleId, 'moduleId');
 			$this->location = new Location($info['locationId']);
 			$this->moduleName = $info['Name'];
 			$this->settings = $info->settings;
