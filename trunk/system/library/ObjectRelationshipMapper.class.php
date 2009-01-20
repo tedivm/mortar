@@ -40,7 +40,7 @@ class ObjectRelationshipMapper
 	private $previous_results = array();
 	private $select_stmt;
 	protected $num_rows = 0;
-	protected $sql_errno = 0;
+	public $sql_errno = 0;
 
 
 	public function __construct($table, $db_write = '', $db_read = '')
@@ -275,12 +275,15 @@ class ObjectRelationshipMapper
 		{
 			return $this->update();
 		}else{
-			if($this->insert())
-			{
-				$this->selected = true;
-				return true;
-			}else{
 
+			try{
+				if($this->insert())
+				{
+					$this->selected = true;
+					return true;
+				}
+
+			}catch(Exception $e){
 				switch ($this->sql_errno) {
 					case 0:
 						return true;
@@ -288,7 +291,7 @@ class ObjectRelationshipMapper
 					case 1022:
 					// 1022 == duplicate key
 
-						$this->sq_errno = 0;
+						$this->sql_errno = 0;
 						return $this->update();
 						break;
 
@@ -298,9 +301,13 @@ class ObjectRelationshipMapper
 				}
 
 				return false;
+
 			}
+
+		return false;
 		}
 	}
+
 
 	protected function insert()
 	{
