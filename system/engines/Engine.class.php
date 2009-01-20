@@ -14,41 +14,84 @@ abstract class Engine
 	protected $location;
 	protected $moduleId;
 
-	public function __construct($locationId = '', $action = '')
+	public function __construct($package = NULL, $action = '')
 	{
 		$info = InfoRegistry::getInstance();
 		$runtime = RuntimeConfig::getInstance();
 
+		if(isset($package))
+		{
+			$this->package = $package;
+			$this->action = $action;
+		}else{
+			$this->package = $info->Runtime['package'];
+			$this->action = (strlen($action) > 0) ? $action : $info->Runtime['action'];
+		}
 
+		/*
 		if(!is_numeric($locationId) && $info->Runtime['package'])
 		{
-			$package = $info->Runtime['package'];
+			$this->package = $info->Runtime['package'];
+			$this->action = $action;
 		}else{
 
-			$location = (is_numeric($locationId)) ? new Location($locationId) : new Location($info->Runtime['currentLocation']);
+			$location = (is_numeric($locationId))
+						? new Location($locationId)
+						: new Location($info->Runtime['currentLocation']);
 
 			switch (strtolower($location->getResource()))
 			{
 				case 'module':
-					$moduleInfo = new ModuleInfo($location->getId(), 'location');
+					$moduleInfo = new ModuleInfo($location->getId());
 					$this->moduleId = $moduleInfo['ID'];
-					$package = $moduleInfo['Package'];
+					$this->package = $moduleInfo['Package'];
+					$this->action = $action;
 					break;
 
 				case 'site':
-
 				default:
+					try{
+						$modelType = $location->getResource();
+						$modelClass = ModelInfo::getHandler($modelType);
+
+						if($modelClass)
+						{
+							$model = new Model($location);
+							$actionArray = $model->actionLookup($action);
+
+							if(is_array($actionArray))
+							{
+								$this->package = $actionArray['package'];
+								$this->action = $actionArray['action'];
+							}
+
+						}else{
+							// this will need to be replaced shortly with the default location stuff
+
+
+
+							if($package = $location->meta('default'))
+							{
+								$this->package = $location->meta('default');
+							}else{
+								throw new BentoNotice('Unable to load location type ' . $location->getResource());
+							}
+
+						}
+
+					}catch(Exception $e){
+						throw new ResourceNotFoundError('Unable to load package and action.');
+					}
 					break;
 			}
 
 			$this->location = $location;
 
 		}
+		*/
+	//	var_dump($package);
 
-		$this->package = $package;
-		$this->action = (strlen($action) > 0) ? $action : $info->Runtime['action'];
-
-		session_start();
+		$this->className = $this->package . 'Action' . $this->action;
 		$this->startEngine();
 	}
 
@@ -81,7 +124,6 @@ abstract class Engine
 	protected function loadClass()
 	{
 		try {
-
 			$info = InfoRegistry::getInstance();
 
 			$config = Config::getInstance();
@@ -96,7 +138,6 @@ abstract class Engine
 			if(!$this->className)
 			{
 				$this->className = ($this->package . 'Action' . $this->action);
-
 			}
 
 			$path = $modulePath . 'actions/' . $this->action . '.class.php';
@@ -146,11 +187,12 @@ abstract class Engine
 			//var_dump($actionIdentifier);
 			$this->main_action = new $this->className($actionIdentifier);
 
-
 			if(!$this->main_action->checkAuth())
 				throw new AuthenticationError('Not allowed to access this engine at this location.');
 
 			$settingsArrayName = $this->engine_type . 'Settings';
+
+
 			if($this->requiredPermission && !isset($this->main_action->{$settingsArrayName}['EnginePermissionOverride']))
 			{
 				if(!$this->main_action->checkAuth($this->requiredPermission))
