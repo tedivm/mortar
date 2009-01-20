@@ -15,7 +15,6 @@ class Site
 
 	public function loadByUrl($baseUrl, $ssl = false)
 	{
-
 		$cache = new Cache('sites', 'lookup', ($ssl) ? 'https' : 'http', $baseUrl);
 		$siteInfo = $cache->get_data();
 
@@ -30,17 +29,37 @@ class Site
 			if($ssl)
 				$url->urlSSL = '1';
 
+			$db = dbConnect('default_read_only');
+			$stmtSite = $db->stmt_init();
 
 			if($url->select(1))
 			{
-				$site = new ObjectRelationshipMapper('sites');
-				$site->site_id = $url->site_id;
-				$site->select();
+				$stmtSite->prepare('SELECT * FROM sites WHERE site_id = ?');
+				$stmtSite->bind_param_and_execute('i', $url->site_id);
 
-				$siteInfo['siteId'] = $site->site_id;
-				$siteInfo['siteLocationId'] = $site->location_id;
-				$siteInfo['siteName'] = $site->name;
+				if($row = $stmtSite->fetch_array())
+				{
+					$siteInfo['siteId'] = $row['site_id'];
+					$siteInfo['siteLocationId'] = $row['location_id'];
+					$siteInfo['siteName'] = $row['name'];
+				}
 
+			}
+
+			if(!isset($siteInfo['siteId']))
+			{
+				if($queryResults = $db->query('SELECT * FROM sites ORDER BY site_id DESC LIMIT 1'))
+				{
+					$row = $queryResults->fetch_array();
+					$siteInfo['siteId'] = $row['site_id'];
+					$siteInfo['siteLocationId'] = $row['location_id'];
+					$siteInfo['siteName'] = $row['name'];
+				}
+			}
+
+
+			if(isset($siteInfo['siteId']))
+			{
 				$mainUrls = new ObjectRelationshipMapper('urls');
 				$mainUrls->site_id = $siteInfo['siteId'];
 				$mainUrls->urlAlias = 0;
@@ -57,7 +76,6 @@ class Site
 						$siteInfo['mainUrl'] = 'http://' . $mainUrls->urlPath;
 					}
 				}
-
 			}
 			$cache->store_data($siteInfo);
 		}
