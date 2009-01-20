@@ -25,11 +25,13 @@ class ModuleInfo implements ArrayAccess
 					$infoRow->mod_name = $id;
 					break;
 
+				default:
 				case 'location':
 					$infoRow->location_id = $id;
 					break;
+				case 'moduleId':
 				case 'id':
-				default:
+
 					$infoRow->mod_id = $id;
 					break;
 			}
