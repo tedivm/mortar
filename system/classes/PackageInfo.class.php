@@ -6,7 +6,6 @@ class PackageInfo
 	public $name;
 	public $path;
 	public $actions;
-	public $installedModules;
 	protected $meta;
 
 	public function __construct($packageName)
@@ -18,6 +17,15 @@ class PackageInfo
 		$config = Config::getInstance();
 		$this->name = $packageName;
 
+		$path = $config['path']['modules'] . $packageName . '/';
+		if(is_dir($path))
+		{
+			$this->path = $path;
+		}else{
+			throw new BentoError('Unable to locate package ' . $this->name);
+		}
+
+
 		$cache = new Cache('packages', $packageName, 'info');
 		$info = $cache->getData();
 		if(!$cache->cacheReturned)
@@ -27,104 +35,20 @@ class PackageInfo
 				AutoLoader::import($this->name);
 				$db = db_connect('default_read_only');
 
-				$packagePath = $config['path']['modules'] . $packageName;
-				if(file_exists($packagePath))
-				{
-					$path = $packagePath;
-				}else{
-					throw new BentoWarning('Unable to locate directory: ' . $packagePath .
-											 ' when loading: ' . $packageName);
-				}
-
-				$info['path'] = $packagePath;
-				// Load Actions
-
-				$actionPaths = glob($path . '/actions/*.class.php');
-				foreach($actionPaths as $filename)
-				{
-					try {
-						$action = array();
-						$tmpArray = explode('/', $filename);
-						$tmpArray = array_pop($tmpArray);
-						$tmpArray = explode('.', $tmpArray);
-						$actionName = array_shift($tmpArray);
-						//explode, pop. explode. shift
-
-						//$actionName = array_shift(explode($dot, array_pop(explode($slash, $filename))));
-						$action['className'] = $this->name . 'Action' . $actionName;
-						$action['path'] = $filename;
-
-						if(!class_exists($action['className'], false))
-						{
-							include($filename);
-							if(!class_exists($action['className'], false))
-							{
-								throw new BentoWarning('Unable to load action ' . $action['className'] .
-														 ' file at: ' . $filename);
-							}
-						}
-
-						$actionReflection = new ReflectionClass($action['className']);
-
-
-						if($actionReflection->isSubclassOf('Action'))
-							$action['type'] = 'specificModule';
-
-						if($actionReflection->isSubclassOf('PackageAction'))
-							$action['type'] = 'genericPackage';
-
-
-
-						$methods = $actionReflection->getMethods();
-						$engines = array();
-						foreach($methods as $method)
-						{
-							$engine = array();
-
-							if(strpos($method->name, 'view') === 0)
-							{
-								$engineName = substr($method->name, '4');
-							//	$engine['type'] = ($method->isStatic()) ? 'generic' : 'moduleSpecific';
-
-								$settings = $engineName . 'Settings';
-								if($actionReflection->hasProperty($settings))
-								{
-									$properties = get_class_vars($action['className']);
-									$engine['settings'] = $properties[$settings];
-								}
-
-								$engines[$engineName] = $engine;
-
-							}
-						}
-
-						$action['engineSupport'] = $engines;
-						$action['permissions'] = staticHack($action['className'], 'requiredPermission');
-						$info['actions'][$actionName] = $action;
-
-					}catch(Exception $e){
-
-					}
-
-
-				}
-
-
-
-				// Load Module IDs
 
 				$packageStmt = $db->stmt_init();
-
-				$packageStmt->prepare('SELECT mod_id, location_id FROM modules WHERE mod_package = ?');
+				$packageStmt->prepare('SELECT * FROM modules WHERE package = ?');
 				$packageStmt->bind_param_and_execute('s', $packageName);
 
-
-				while($modules = $packageStmt->fetch_array())
+				if($moduleInfo = $packageStmt->fetch_array())
 				{
-					$info['installedModules'][] = array('modId' => $modules['mod_id'],
-													 'locationId' => $modules['location_id']);
+						$info['majorVersion'] = $moduleInfo['moduleVersion'];
+						$info['minorVersion'] = $moduleInfo['minorVersion'];
+						$info['microVersion'] = $moduleInfo['microVersion'];
+						$info['releaseType'] = $moduleInfo['releaseType'];
+						$info['releaseVersion'] = $moduleInfo['releaseVersion'];
+						$info['status'] = $moduleInfo['status'];
 				}
-
 
 			}catch(Exception $e){
 				throw new BentoError('requested package ' . $this->name . ' does not exist');
@@ -132,13 +56,21 @@ class PackageInfo
 			}
 
 			$cache->store_data($info);
-
 		}
 
-		$this->path = $info['path'] . '/';
-		$this->actions = $info['actions'];
-		$this->installedModules = $info['installedModules'];
+		$this->actions = $this->loadActions();
 		$this->loadMeta();
+
+		if(isset($info['status']))
+		{
+			$this->status = $info['status'];
+			$this->version = new Version();
+			$this->version->major = $info['majorVersion'];
+			$this->version->minor = $info['minorVersion'];
+			$this->version->micro = $info['microVersion'];
+			$this->version->releaseType = $info['releaseType'];
+			$this->version->releaseVersion = $info['releaseVersion'];
+		}
 
 	}
 
@@ -157,31 +89,14 @@ class PackageInfo
 		return $this->actions;
 	}
 
+	public function packageHasAction($name)
+	{
+		return isset($this->actions[$name]);
+	}
+
 	public function getMeta($name)
 	{
 		return $this->meta[$name];
-	}
-
-	public function getModules($requiredPermission = '')
-	{
-		$requiredPermission = 'Add';
-		if(strlen($requiredPermission) > 0)
-		{
-			$user = ActiveUser::getInstance();
-			$outputModules = array();
-			foreach($this->installedModules as $module)
-			{
-				$moduleInfo = new ModuleInfo($module['modId']);
-				if($moduleInfo->checkAuth($requiredPermission))
-				{
-					$outputModules[] = $module;
-				}
-			}
-		}else{
-			$outputModules = $this->installedModules;
-		}
-
-		return $outputModules;
 	}
 
 	public function checkAuth($action)
@@ -200,9 +115,9 @@ class PackageInfo
 			}
 		}
 
+		return true;
 		return $allowed;
 	}
-
 
 	protected function loadMeta()
 	{
@@ -221,7 +136,83 @@ class PackageInfo
 	}
 
 
+	protected function loadActions()
+	{
+		$cache = new Cache('packages', $packageName, 'actions');
+		$info = $cache->getData();
+		if(!$cache->cacheReturned)
+		{
+				// Load Actions
+				$actionPaths = glob($this->path . 'actions/*.class.php');
+				foreach($actionPaths as $filename)
+				{
+					try {
+						$action = array();
+						$tmpArray = explode('/', $filename);
+						$tmpArray = array_pop($tmpArray);
+						$tmpArray = explode('.', $tmpArray);
+						$actionName = array_shift($tmpArray);
+						//explode, pop. explode. shift
 
-}
+						$action['className'] = $this->name . 'Action' . $actionName;
+						$action['path'] = $filename;
+
+						if(!class_exists($action['className'], false))
+						{
+
+							if(!include($filename))
+							{
+								throw new BentoWarning('Unable to load action ' . $action['className'] .
+														 ' file at: ' . $filename);
+							}
+
+							if(!class_exists($action['className'], false))
+							{
+								throw new BentoWarning('Action ' . $action['className'] . 'does not exist at' .
+														 ' file at: ' . $filename);
+							}
+						}
+
+						$actionReflection = new ReflectionClass($action['className']);
+
+						if($actionReflection->isSubclassOf('Action'))
+							$action['type'] = 'specificModule';
+
+						if($actionReflection->isSubclassOf('PackageAction'))
+							$action['type'] = 'genericPackage';
+
+						$methods = $actionReflection->getMethods();
+						$engines = array();
+						foreach($methods as $method)
+						{
+							$engine = array();
+							if(strpos($method->name, 'view') === 0)
+							{
+								$engineName = substr($method->name, '4');
+								$settings = $engineName . 'Settings';
+								if($actionReflection->hasProperty($settings))
+								{
+									$properties = get_class_vars($action['className']);
+									$engine['settings'] = $properties[$settings];
+								}
+								$engines[$engineName] = $engine;
+							}
+						}
+
+						$action['engineSupport'] = $engines;
+						$action['permissions'] = staticHack($action['className'], 'requiredPermission');
+
+						$actions[$actionName] = $action;
+
+					}catch(Exception $e){
+
+					}
+				}
+
+			}// end cache
+
+			return $actions;
+		}
+	}
 
 ?>
