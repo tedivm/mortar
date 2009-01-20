@@ -24,7 +24,7 @@ class Url
 		//if module is an integer, load the moduleinfo class
 		if(is_numeric($attributes['module']))
 		{
-			$moduleInfo = new ModuleInfo($attributes['module']);
+			$moduleInfo = new ModuleInfo($attributes['module'], 'moduleId');
 			$attributes['moduleId'] = $attributes['module'];
 			unset($attributes['module']);
 		}
