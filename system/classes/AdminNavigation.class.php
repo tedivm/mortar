@@ -15,11 +15,11 @@ Class AdminNavigation
 		if(!$cache->cacheReturned)
 		{
 			$db = db_connect('default_read_only');
-			$packageResults = $db->query('SELECT mod_id, location_id, mod_package FROM modules');
+			$packageResults = $db->query('SELECT mod_id, package FROM modules');
 
 			while($module = $packageResults->fetch_array())
 			{
-				$packages[$module['mod_package']]['modules'][] = array('modId' => $module['mod_id'], 'locationId' => $module['location_id']);
+				$packages[$module['package']]['modules'][] = array('modId' => $module['mod_id'], 'locationId' => $module['location_id']);
 			}
 
 
