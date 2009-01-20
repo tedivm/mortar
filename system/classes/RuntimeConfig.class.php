@@ -17,7 +17,7 @@ class RuntimeConfig implements ArrayAccess
 		// Path
 		$path = ($get['parameters']) ? $get['parameters'] : NULL;
 
-		if(!isset($get['package']))
+		if(!isset($get['package']) && !INSTALLMODE)
 		{
 			$pathArray = $this->convertPath($path);
 		}else{
@@ -26,7 +26,6 @@ class RuntimeConfig implements ArrayAccess
 
 		if(is_array($pathArray))
 			$data = array_merge($data, $pathArray);
-
 
 		$data['engine'] = ((isset($get['engine'])) ? $get['engine'] : 'Html');
 		$data['action'] = (isset($get['action'])) ? $get['action'] : 'Default';
@@ -45,8 +44,12 @@ class RuntimeConfig implements ArrayAccess
 		}
 
 
+		$location = new Location($data['currentLocation']);
+		if(!isset($data['package']))
+		{
+			$data['package'] = $location->meta('default');
+		}
 
-//		var_dump($data);
 		return $data;
 	}
 
@@ -74,7 +77,7 @@ class RuntimeConfig implements ArrayAccess
 
 					case 'module':
 						$currentLocation = $childLocation;
-						$moduleInfo = new ModuleInfo($childLocation->getId(), 'location');
+						$moduleInfo = new ModuleInfo($childLocation->getId());
 						$moduleId = $moduleInfo->getId();
 						unset($pathVariables[$pathIndex]);
 						break 2; //break out of foreach loop
@@ -102,17 +105,24 @@ class RuntimeConfig implements ArrayAccess
 		if(is_numeric($moduleId))
 		{
 			//echo $moduleId;
-			$moduleInfo = new ModuleInfo($moduleId);
+			$moduleInfo = new ModuleInfo($moduleId, 'moduleId');
 			$pathReturn['package'] = $moduleInfo['Package'];
 			$pathReturn['moduleId'] = $moduleInfo->getId();
 			$currentLocation = new Location($moduleInfo['locationId']);
 		}
+
+		if(!isset($data['package']))
+		{
+			$pathReturn['package'] = $currentLocation->meta('default');
+		}
+
 
 		// Dump extra path variables to our good friend 'get'
 		if(count($pathVariables) > 0)
 		{
 			$get = Get::getInstance();
 			$template = new DisplayMaker();
+
 			if(!(isset($pathReturn['package']) && $template->load_template('url', $pathReturn['package'])))
 			{
 				$template->set_display_template('{# action #}/{# id #}/');
