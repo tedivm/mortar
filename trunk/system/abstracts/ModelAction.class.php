@@ -5,7 +5,7 @@ abstract class ModelAction implements ActionInterface
 	protected $modelClass;
 	protected $moduleType;
 	protected $model;
-
+	protected $package;
 	static $requiredPermission = 'Read';
 
 
@@ -18,6 +18,12 @@ abstract class ModelAction implements ActionInterface
 
 		if($location->getResource() != $this->moduleType)
 			throw new BentoError('You can not use this action with that type of model');
+
+
+		$namingInfo = explode('Action', get_class($this));
+
+		$this->actionName = array_pop($namingInfo);
+		$this->package = array_shift($namingInfo);
 
 		$className = $this->modelClass;
 		$model = new $className($identifier);
