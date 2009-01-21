@@ -2,7 +2,6 @@
 
 class ModuleInstaller
 {
-	protected $version;
 	protected $pathToPackage;
 	protected $package;
 	public $packageInfo;
@@ -16,7 +15,6 @@ class ModuleInstaller
 	protected function loadSettings()
 	{
 		$info = InfoRegistry::getInstance();
-
 		$pathToPackage = $info->Configuration['path']['modules'] . $this->package;
 
 		if(!is_dir($pathToPackage))
@@ -25,59 +23,52 @@ class ModuleInstaller
 		$this->packageInfo = new PackageInfo($this->package);
 		$this->pathToPackage = $pathToPackage;
 		$this->changeStatus('fileSystem');
-
-
-		echo 'purple';
-		if(file_exists($this->pathToPackage . 'meta.php'))
-		{
-			include($pathToPackage . 'meta.php');
-			$versionString = $version;
-			var_dump($versionString);
-			$version = new Version();
-			$version->fromString($versionString);
-			$this->version = $version;
-			var_dump($version);
-		}
 	}
 
 	public function fullInstall()
 	{
-		if($this->checkRequirements())
-		{
-			// Because the dbConnect function pools connections, changing this 'default' connections settings
-			// changes it for everything else that gets called, allowing us to easily roll back everything but
-			// additions to the database structure (new tables, indexes, foreign keys).
-			$db = dbConnect('default');
-			$db->autocommit(false);
+		try{
+			if($this->checkRequirements())
+			{
+				// Because the dbConnect function pools connections, changing this 'default' connections settings
+				// changes it for everything else that gets called, allowing us to easily roll back everything but
+				// additions to the database structure (new tables, indexes, foreign keys).
+				$db = dbConnect('default');
+				$db->autocommit(false);
 
-			try{
-				switch ($status) {
-					default:
-					case 'filesystem':
-						$this->installDatabaseStructure();
+				try{
+					switch ($this->packageInfo->status)
+					{
+						default:
+						case 'filesystem':
+							$this->installDatabaseStructure();
 
-					case 'dbStructure':
-						$this->installDatabaseData();
+						case 'dbStructure':
+							$this->installDatabaseData();
 
-					case 'dbData':
-						$this->addPermissions();
-						$this->installModels();
-						$this->installPlugins();
-						$this->changeStatus('installed');
+						case 'dbData':
+							$this->addPermissions();
+							$this->installModels();
+							$this->installPlugins();
+							$this->changeStatus('installed');
+					}
+
+					$db->commit();
+					$db->autocommit(true);
+					return true;
+				}catch(Exception $e){
+					$db->rollback();
+					$db->autocommit(true);
+					throw new BentoError('Unable to install module ' . $this->package . ', rolling back database changes.');
 				}
 
-				$db->commit();
-				$db->autocommit(true);
-				return true;
-			}catch(Exception $e){
-				$db->rollback();
-				$db->autocommit(true);
-				throw new BentoError('Unable to install module ' . $this->package . ', rolling back database changes.');
+			}else{
+				// some sort of way to show the error
 			}
-
-		}else{
-			// some sort of way to show the error
+		}catch(Exception $e){
+			return false;
 		}
+		return true;
 	}
 
 	public function checkRequirements()
@@ -166,6 +157,10 @@ class ModuleInstaller
 		$moduleRecord->select();
 
 		$moduleRecord->status = $status;
+
+		$version = new Version();
+		$version->fromString($this->packageInfo->getMeta('version'));
+
 		if(is_numeric($version->major))
 			$moduleRecord->majorVersion = $version->major;
 		if(is_numeric($version->minor))
@@ -173,8 +168,10 @@ class ModuleInstaller
 		if(is_numeric($version->micro))
 			$moduleRecord->microVersion = $version->micro;
 
-		$moduleRecord->prereleaseType = $version->releaseType;
-		$moduleRecord->prereleaseVersion = $version->releaseVersion;
+		$moduleRecord->releaseType = $version->releaseType;
+		$moduleRecord->releaseVersion = $version->releaseVersion;
+
+		$moduleRecord->query_set('lastupdated', 'NOW()');
 
 		if(!$moduleRecord->save())
 		{
