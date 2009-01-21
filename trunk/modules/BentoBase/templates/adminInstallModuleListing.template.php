@@ -1,7 +1,8 @@
 <div id='packageListing'>
 	<fieldset>
-		<legend id="name">{# name #}</legend>
-		<div id="description">{# description #}</div>
-		<div id="install"><a href="{# link_to_install #}">Install</a></div>
-	</fieldset>	
+		<legend id="install_{# name #}">{# name #}</legend>
+		<div class="description">{# description #}</div>
+		<div class="install"><a href="{# link_to_install #}">Install</a></div>
+		<div class="version">{# version #}</div>
+	</fieldset>
 </div>
