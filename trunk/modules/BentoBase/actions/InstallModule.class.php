@@ -20,12 +20,9 @@ class BentoBaseActionInstallModule extends PackageAction
 		Cache::$runtimeDisable = true;
 
 		$packageList = new PackageList();
-
 		$info = InfoRegistry::getInstance();
 		$installPackage = $info->Get['id'];
-
 		$installablePackages = $packageList->getInstallablePackages();
-
 
 		if(!$installPackage)
 		{
@@ -36,7 +33,7 @@ class BentoBaseActionInstallModule extends PackageAction
 			if(in_array($installPackage, $installablePackages))
 			{
 				$packageInfo = new PackageInfo($installPackage);
-				$this->form = new Form($this->actionName);
+				$this->form = new Form($this->actionName . '_' . $installPackage);
 				$this->form->createInput('confirm')->
 					setType('submit')->
 					property('value', 'Install ' . $installPackage);
@@ -54,13 +51,6 @@ class BentoBaseActionInstallModule extends PackageAction
 			}
 
 		}
-
-
-
-
-
-
-
 
 		Cache::clear('packages');
 	}
