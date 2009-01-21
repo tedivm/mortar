@@ -36,7 +36,10 @@ class BentoBaseActionInstallModule extends PackageAction
 			if(in_array($installPackage, $installablePackages))
 			{
 				$packageInfo = new PackageInfo($installPackage);
-				$this->form = new Form('pony');
+				$this->form = new Form($this->actionName);
+				$this->form->createInput('confirm')->
+					setType('submit')->
+					property('value', 'Install ' . $installPackage);
 
 				if($this->form->checkSubmit())
 				{
@@ -88,7 +91,12 @@ class BentoBaseActionInstallModule extends PackageAction
 				$output .= $packageDisplay->makeDisplay();
 			}
 		}elseif($this->form){
-			$output = $this->form->makeDisplay();
+			if($this->success)
+			{
+				$output = 'Module successfully installed';
+			}else{
+				$output = $this->form->makeDisplay();
+			}
 		}
 
 		return $output;
