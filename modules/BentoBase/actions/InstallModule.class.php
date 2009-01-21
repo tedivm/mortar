@@ -10,146 +10,85 @@ class BentoBaseActionInstallModule extends PackageAction
 									'linkContainer' => 'Modules');
 
 	protected $form;
-	protected $packageCount = array();
-	protected $packageList;
+
 	protected $success = false;
+
+	protected $installablePackages;
 
 	protected function logic()
 	{
+		Cache::$runtimeDisable = true;
+
+		$packageList = new PackageList();
+
 		$info = InfoRegistry::getInstance();
 		$installPackage = $info->Get['id'];
 
+		$installablePackages = $packageList->getInstallablePackages();
+
+
 		if(!$installPackage)
 		{
-			$db = dbConnect('default_read_only');
-			$packageCountRecord = $db->query('SELECT mod_package, COUNT(*) as numInstalls FROM `modules` GROUP BY mod_package');
-
-			while($packageRow = $packageCountRecord->fetch_assoc())
-			{
-				$packageCount[$packageRow['mod_package']] = $packageRow['numInstalls'];
-			}
-
-			$this->packageCount = $packageCount;
-			$this->packageList = new PackageList();
-
+			//make listing
+			$this->installablePackages = $installablePackages;
 		}else{
 
-			$PackageInfo = new PackageInfo($installPackage);
-			$locationOptions = array();
-			$rootLocation = new Location(1);
-			$sites = $rootLocation->getChildren('site');
-			foreach($sites as $site)
+			if(in_array($installPackage, $installablePackages))
 			{
-				$siteName = $site->getName();
-				$locationOptions[$site->getId()] = $siteName;
+				$packageInfo = new PackageInfo($installPackage);
+				$this->form = new Form('pony');
 
-				$directories = $site->getChildren('directory');
-
-				// one level only for now
-
-				foreach($directories as $directory)
+				if($this->form->checkSubmit())
 				{
-					$locationOptions[$directory->getId()] = $siteName . '/' . $directory->getName();
+					$moduleInstaller = new ModuleInstaller($installPackage);
+					$this->success = $moduleInstaller->fullInstall();
 				}
 
-			}
-
-			// make form
-			$form = new Form('installModule');
-			$this->form = $form;
-			$form->changeSection('Main')->
-				setLegend('Basic Information')->
-				createInput('name')->
-					setLabel('Module Name')->
-					addRule('required');
-
-			$input = $this->form->createInput('location')->
-					setType('location')->
-					setLabel('Location')->
-					property('types', array('directory'));
-
-
-			$formExtensionPath = $PackageInfo->getPath() . 'hooks/InstallModuleForm.Internal.php';
-			$formExtentionClassname = $PackageInfo->getName() . 'InstallModuleForm';
-
-			if(!class_exists($formExtentionClassname, false))
-			{
-				if(is_readable($formExtensionPath))
-				{
-					include $formExtensionPath;
-				}
-			}
-
-			if(class_exists($formExtentionClassname, false))
-			{
-				$formExtention = new $formExtentionClassname();
-				$moduleForm = $formExtention->getForm();
-				$form->merge($moduleForm);
-			}
-
-			if($form->checkSubmit())
-			{
-				try{
-
-				$inputHandler = $form->getInputhandler();
-				if($formExtention)
-				{
-					$settings = $formExtention->getSettings($inputHandler);
-				}
-
-				$installer = new InstallModule($installPackage, $inputHandler['name'], $inputHandler['location'], $settings);
-				if($installer->installModule())
-				{
-					$this->success = true;
-				}
-
-				}catch(Exception $e){
-					$this->AdminSettings['headerSubTitle'] = 'An error occured';
-				}
 			}else{
-
+				unset($this->form);
+				$this->installablePackages = $installablePackages;
+				//redirect to listing
 			}
+
 		}
+
+
+
+
+
+
+
+
 		Cache::clear('packages');
 	}
 
 	public function viewAdmin()
 	{
-		if(isset($this->packageList))
+		if(isset($this->installablePackages) && !isset($this->form))
 		{
 			$template = $this->loadTemplate('adminInstallModuleListing');
-			$packageList = $this->packageList->getPackageDetails();
-			$output .= '';
-			foreach($packageList as $packageInfo)
+
+			foreach($this->installablePackages as $package)
 			{
-				$packageHtml = new DisplayMaker();
-				$packageHtml->set_display_template($template);
-				/* description name link_to_install */
+				$packageInfo = new PackageInfo($package);
 
-				$name = $packageInfo->getMeta('name');
-				$packageHtml->addContent('name', $name);
+				$packageDisplay = new DisplayMaker();
+				$packageDisplay->setDisplayTemplate($template);
+				$packageDisplay->addContent('name', $package);
 
-				$description = $packageInfo->getMeta('description');
-				$packageHtml->addContent('description', $description);
+				$packageDisplay->addContent('description', $packageInfo->getMeta('description'));
 
-				$version = $packageInfo->getMeta('version');
-				$packageHtml->addContent('version', $version);
+				$installLink = $this->linkToSelf();
+				$installLink->property('id', $package);
+				$installLink->property('engine', 'Admin');
+				$packageDisplay->addContent('link_to_install', $installLink);
+				$packageDisplay->addContent('version', $this->packageInfo->getMeta('version'));
+				// link_to_install
 
-				$url = $this->linkToSelf();
-				$url->property('id', $packageInfo->getMeta('name'));
-				$url->property('engine', 'Admin');
-				$packageHtml->addContent('link_to_install', (string) $url);
-
-				$output .= $packageHtml->make_display(true);
+				$output .= $packageDisplay->makeDisplay();
 			}
-
-		}elseif($this->form && !$this->success){
-
-			$output .= $this->form->makeDisplay();
-
-
-		}elseif($this->success){
-			$output = 'Module successfully installed.';
+		}elseif($this->form){
+			$output = $this->form->makeDisplay();
 		}
 
 		return $output;
