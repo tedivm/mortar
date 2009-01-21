@@ -42,8 +42,12 @@ class DisplayMaker
 
 	// Any template setting functions should ultimately pass the text to this function
 	// This way all tag processing will get called whenever the text is changed
-	public function set_display_template($text)
+	public function setDisplayTemplate($text)
 	{
+		if(!is_string($text))
+			throw new TypeMismatch(array('String', $text));
+
+
 		$this->main_string = $text;
 		$cache = new Cache('templates', 'schema', md5($this->main_string));
 		$cache->cache_time = '86400';
@@ -70,7 +74,13 @@ class DisplayMaker
 		$this->tags = $tags;
 	}
 
-	public function load_template($template, $package = '')
+	public function set_display_template($text)
+	{
+		return $this->setDisplayTemplate($text);
+	}
+
+
+	public function loadTemplate($template, $package = '')
 	{
 		$config = Config::getInstance();
 		$path_to_theme = $config['url']['theme'];
@@ -92,7 +102,14 @@ class DisplayMaker
 
 	}
 
-	public function set_display_template_byfile($filepath)
+	public function load_template($template, $package = '')
+	{
+		$this->loadTemplate($template, $package);
+	}
+
+
+
+	public function setDisplayTemplateByFile($filepath)
 	{
 		try{
 			if(!file_exists($filepath))
@@ -108,6 +125,13 @@ class DisplayMaker
 
 		}
 	}
+
+	public function set_display_template_byfile($filepath)
+	{
+		return $this->setDisplayTemplateByFile($filepath);
+	}
+
+
 
 	// Depreciated in favor of ::addContent
 	public function add_replacement($tag, $replacement)
@@ -143,18 +167,8 @@ class DisplayMaker
 		return $this->addDate($name, $timestamp);
 	}
 
-	public function make_display($cleanup = false)
+	public function makeDisplay($cleanup = false)
 	{
-		foreach ($this->replacement_array as $key => $value)
-		{
-
-
-
-	//		$tag = '{# ' . $key . ' #}';
-//			$this->main_string = str_replace($this->tags[$key]['original'], $value, $this->main_string);
-
-		}
-
 
 		$processTags = array();
 		$processContent = array();
@@ -173,6 +187,12 @@ class DisplayMaker
 
 		return str_replace($processTags, $processContent, $this->main_string);
 	}
+
+	public function make_display($cleanup = false)
+	{
+		return $this->makeDisplay($cleanup);
+	}
+
 }
 
 
