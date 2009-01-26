@@ -439,9 +439,9 @@ class ActiveUser // extends User
 
 		if($reload || !$_SESSION['OBSOLETE'] && mt_rand(1, 100) == 1)
 		{
-			// Set current session to expire in 1 minute
+			// Set current session to expire in 15 seconds
 			$_SESSION['OBSOLETE'] = true;
-			$_SESSION['EXPIRES'] = time() + 60;
+			$_SESSION['EXPIRES'] = time() + 15;
 
 
 			// Create new session without destroying the old one
@@ -455,7 +455,7 @@ class ActiveUser // extends User
 			session_id($newSession);
 			session_start();
 
-			$_SESSION['idExpiration'] = time() + (60 * 5);
+			$_SESSION['idExpiration'] = time() + (300);
 			// Don't want this one to expire
 			unset($_SESSION['OBSOLETE']);
 			unset($_SESSION['EXPIRES']);
