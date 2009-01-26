@@ -1,6 +1,5 @@
 <?php
 
-
 abstract class Engine
 {
 	public $main_action;
@@ -28,68 +27,11 @@ abstract class Engine
 			$this->action = (strlen($action) > 0) ? $action : $info->Runtime['action'];
 		}
 
-		/*
-		if(!is_numeric($locationId) && $info->Runtime['package'])
-		{
-			$this->package = $info->Runtime['package'];
-			$this->action = $action;
-		}else{
+		$packageInfo = new PackageInfo($this->package);
 
-			$location = (is_numeric($locationId))
-						? new Location($locationId)
-						: new Location($info->Runtime['currentLocation']);
+		if($packageInfo->getStatus() != 'installed')
+			throw new ResourceNotFoundError();
 
-			switch (strtolower($location->getResource()))
-			{
-				case 'module':
-					$moduleInfo = new ModuleInfo($location->getId());
-					$this->moduleId = $moduleInfo['ID'];
-					$this->package = $moduleInfo['Package'];
-					$this->action = $action;
-					break;
-
-				case 'site':
-				default:
-					try{
-						$modelType = $location->getResource();
-						$modelClass = ModelInfo::getHandler($modelType);
-
-						if($modelClass)
-						{
-							$model = new Model($location);
-							$actionArray = $model->actionLookup($action);
-
-							if(is_array($actionArray))
-							{
-								$this->package = $actionArray['package'];
-								$this->action = $actionArray['action'];
-							}
-
-						}else{
-							// this will need to be replaced shortly with the default location stuff
-
-
-
-							if($package = $location->meta('default'))
-							{
-								$this->package = $location->meta('default');
-							}else{
-								throw new BentoNotice('Unable to load location type ' . $location->getResource());
-							}
-
-						}
-
-					}catch(Exception $e){
-						throw new ResourceNotFoundError('Unable to load package and action.');
-					}
-					break;
-			}
-
-			$this->location = $location;
-
-		}
-		*/
-	//	var_dump($package);
 
 		$this->className = $this->package . 'Action' . $this->action;
 		$this->startEngine();
