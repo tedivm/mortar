@@ -24,9 +24,7 @@ function db_connect($database_name = 'default_read_only')
 
 function dbConnect($database_name = 'default_read_only')
 {
-	$dbconnector = DB_Connection::getInstance();
-	$db = $dbconnector->getConnection($database_name);
-	return $db;
+	return DatabaseConnection::getConnection($database_name);
 }
 
 function load_helper($package, $class)
