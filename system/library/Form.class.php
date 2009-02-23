@@ -1,8 +1,11 @@
 <?php
+require('Form/Input.class.php');
+
 
 class Form
 {
 	public $name;
+	static public $userInput = false;
 
 	protected $activeSection = 'main';
 	protected $inputs = array();
@@ -11,12 +14,10 @@ class Form
 	protected $sectionIntro = array();
 
 	//protected $handlerClass = 'FormHandlerHtml';
-	protected $availableMethods = array('post' => 'FormHandlerHtml', 'get' => 'FormHandlerHtml', 'cli' => 'FormHandlerCli');
 	protected $method = 'post';
-	protected $methodOptions = array();
 	protected $submitButton = false;
 
-	protected $xsfrProtection = true;
+	static protected $xsfrProtection = true;
 	protected $wasSubmitted = false;
 	protected $error = array();
 	protected $cacheEnabled = false;
@@ -33,7 +34,7 @@ class Form
 
 	public function createInput($name)
 	{
-		$input = new Input($name);
+		$input = new FormInput($name);
 		$input->attachToForm($this);
 		return $input;
 	}
@@ -56,11 +57,11 @@ class Form
 		return $this;
 	}
 
-	public function setMethod($method, $methodOptions = '')
+	public function setMethod($method)
 	{
-		$this->method = $method;
-		$this->handlerClass = $this->availableMethods[$this->method];
-		$this->methodOptions = is_array($methodOptions) ? $methodOptions : array();
+		if(in_array($method, array('post', 'get')))
+			$this->method = $method;
+
 		return $this;
 	}
 
@@ -89,8 +90,11 @@ class Form
 
 	}
 
-	public function makeDisplay()
+	public function makeDisplay($resource = null)
 	{
+		// $resource isn't used yet
+
+
 		$cacheKey = array_merge(array('forms', $this->name), $this->cacheKey);
 		$cache = new Cache($cacheKey);
 
@@ -108,10 +112,6 @@ class Form
 						property('value', $this->getNonce());
 				}
 			}
-
-			$this->createInput('formIdentifier')->
-				setType('hidden')->
-				property('value', $this->name);
 
 			$formHtml = new HtmlObject('form');
 			$formHtml->property('method', $this->method)->
@@ -214,10 +214,13 @@ class Form
 
 		$output = $formHtml;
 
-		$jsStartup[] = '$(\'#' . $this->name . '\').validate()';
+		//$jsStartup[] = '$(\'#' . $this->name . '\').validate();';
 
+		// if the form was submitted, trigger the errors on reload
+		if($this->wasSubmitted())
+			$jsStartup[] = '$(\'#' . $this->name . '\').valid();';
 
-		$jqueryPlugins = array('jquery' => array('form', 'validate', 'validate-methods', 'cluetip', 'FCKeditor'));
+		$jqueryPlugins = array('form', 'validate', 'validate-methods', 'cluetip', 'FCKeditor');
 
 		if(class_exists('ActivePage', false))
 		{
@@ -236,7 +239,7 @@ class Form
 	}
 
 
-	protected function processSpecialInputFields(Input $input)
+	protected function processSpecialInputFields(FormInput $input)
 	{
 
 		// preprocess special types
@@ -305,7 +308,7 @@ class Form
 
 	}
 
-	protected function getInputHtmlByType(Input $input)
+	protected function getInputHtmlByType(FormInput $input)
 	{
 
 		$tagByType = array(
@@ -340,16 +343,24 @@ class Form
 				break;
 
 			case 'select':
+
+				$value = $input->property('value');
+
 				foreach($input->options as $option)
 				{
+					unset($properties);
+					if($option['value'] == $value)
+					{
+						$properties['selected'] = 'selected';
+					}
 					$optionHtml = $inputHtml->insertNewHtmlObject('option')->
 						property('value', $option['value'])->
 						wrapAround($option['label']);
 
 						if(is_array($option['properties']))
-						{
-							$optionHtml->property($option['properties']);
-						}
+							$properties = array_merge($properties, $option);
+
+						$optionHtml->property($properties);
 				}
 				break;
 
@@ -379,7 +390,7 @@ class Form
 
 	}
 
-	protected function getInputJavascript(Input $input)
+	protected function getInputJavascript(FormInput $input)
 	{
 
 		// to require a javascript file, return $include['Library'][] = 'Name';
@@ -409,107 +420,91 @@ class Form
 
 	public function wasSubmitted()
 	{
-		return $this->wasSubmitted;
+		$inputHandler = $this->getInputhandler();
+		return (count($inputHandler) > 0);
 	}
 
 	public function getInputhandler()
 	{
-		switch($this->method)
-		{
-			case 'get':
-				$inputHandler = Get::getInstance();
-				break;
+		if(isset(self::$userInput))
+			self::$userInput = Input::getInput();
 
-			case 'post':
-				$inputHandler = Post::getInstance();
-				break;
-		}
-
-		return $inputHandler;
+		return self::$userInput;
 	}
 
 	public function checkSubmit()
 	{
-
-		$inputHandler = $this->getInputhandler();
-
-		if($inputHandler['formIdentifier'] != $this->name)
-			return false;
-
 		try
 		{
+			$inputHandler = $this->getInputhandler();
+
+			if(!$this->wasSubmitted())
+				return false;
+
+			$success = true;
+
 
 			foreach($this->inputs as $section => $inputs)
-			{
 				foreach($inputs as $input)
+			{
+
+				$validationResults = $input->validate();
+
+				if($input->validate() !== true)
 				{
-					$validationResults = $input->validate($inputHandler[$input->name]);
-
-					if($validationResults !== true)
-						$error[$input->name] = $validationResults;
-
-					if(!in_array($input->type, $this->discardInput))
-					{
-
-						switch ($input->type)
-						{
-							case 'checkbox':
-
-								if(isset($inputHandler[$input->name]))
-								{
-									$checkboxInputs = $this->getInput($input->name);
-
-									if(count($checkboxInputs) == 1)
-									{
-										$inputHandler[$input->name] = $inputHandler[$input->name][0];
-
-										if($inputHandler[$input->name] == 'on')
-											$inputHandler[$input->name] = true;
-
-										$input->check(true);
-									}else{
-										$input->check(in_array($input->property('value'), $inputHandler[$input->name]));
-									}
-								}else{
-									$input->check(false);
-								}
-
-								break;
-
-							default:
-								$input->property('value', $inputHandler[$input->name]);
-						}
-
-					}
-					if(isset($inputHandler[$input->name]))
-						$this->wasSubmitted = true;
+					$success = false;
+					//$error[$input->name] = $input->getErrors;
 				}
-			}
+				// Is the input allows it, place the user value in as the default this way if the form isn't
+				// validated, the user doesn't need to re-enter it
+				if(in_array($input->type, $this->discardInput))
+					continue;
 
-			if($this->xsfrProtection && $inputHandler['nonce'] == $this->getNonce())
+
+				switch ($input->type)
+				{
+					case 'checkbox':
+						if(isset($inputHandler[$input->name]))
+						{
+							$checkboxInputs = $this->getInput($input->name);
+							if(count($checkboxInputs) == 1)
+							{
+								$inputHandler[$input->name] = $inputHandler[$input->name][0];
+								if($inputHandler[$input->name] == 'on')
+									$inputHandler[$input->name] = true;
+								$input->check(true);
+							}else{
+								$input->check(in_array($input->property('value'), $inputHandler[$input->name]));
+							}
+						}else{
+							$input->check(false);
+						}
+						break;
+
+					default:
+						$input->property('value', $inputHandler[$input->name]);
+				} // switch ($input->type)
+
+			} // foreach($inputs as $input) / foreach($this->inputs as $section => $inputs)
+
+
+			// we place this here on the off chance someone is submitting a stale form, so things get filled again
+			if(self::$xsfrProtection && $inputHandler['nonce'] != $this->getNonce())
 			{
 				throw new BentoWarning('Potential XSFR attack blocked');
 			}
 
-			if(count($error) > 0)
-			{
-
-				$this->error = $error;
-				throw new BentoNotice('Form submit cancelled do to validation rules.');
-			}
-
-			return true;
-
 		}catch(Exception $e){
 
-			return false;
+			$success = false;
 		}
 
+		return $success;
 	}
 
 	protected function getNonce()
 	{
-		if(!$this->xsfrProtection &&class_exists('ActiveUser', false))
+		if(!self::$xsfrProtection &&class_exists('ActiveUser', false))
 		{
 			$activeUser = ActiveUser::get_instance();
 			$output = $activeUser->session('nonce');
@@ -519,10 +514,9 @@ class Form
 		return '0';
 	}
 
-	public function disableXsfrProtection()
+	static public function disableXsfrProtection()
 	{
-		$this->xsfrProtection = false;
-		return $this;
+		self::$xsfrProtection = false;
 	}
 
 	public function merge($form)
@@ -579,144 +573,5 @@ class Form
 		}
 	}
 }
-
-
-class Input
-{
-	public $name;
-	public $label;
-	public $properties = array();
-	public $type = 'input';
-	//public $value;
-	public $options;
-
-	protected $required = false;
-	protected $form;
-	protected $validationRules = array();
-	protected $validationMessages = array();
-
-	public function __construct($name)
-	{
-		$this->name = $name;
-	}
-
-
-	public function setType($type)
-	{
-		$this->type = $type;
-		return $this;
-	}
-
-	public function setLabel($label)
-	{
-		$this->label = $label;
-		return $this;
-	}
-
-	public function getLabel()
-	{
-		return $this->label;
-	}
-
-	public function attachToForm($form)
-	{
-		if($form instanceof Form && $form->attachInput($this))
-		{
-			$this->form = $form;
-		}
-		return $this;
-	}
-
-	public function isRequired($bool = '')
-	{
-		$this->required = ($bool === false);
-		return $this;
-	}
-
-	public function getForm()
-	{
-		return $this->form;
-	}
-
-	public function property($property, $value = false)
-	{
-		if(is_array($property))
-		{
-			foreach($property as $name => $value)
-			{
-				$this->properties[$name] = (!is_null($value)) ? $value : false;
-			}
-			return $this;
-
-		}elseif($value !== false){
-
-			$this->properties[$property] = $value;
-			return $this;
-		}
-		return $this->properties[$property];
-	}
-
-	public function addRule($rule, $params = false, $errorMessage = false)
-	{
-		$this->validationRules[$rule] = (!$params) ? true : $params;
-		if($errorMessage !== false)
-			$this->validationMessages[$rule] = $errorMessage;
-
-		return $this;
-	}
-
-	public function getRules()
-	{
-		if(count($this->validationRules) > 0)
-		{
-			$array = $this->validationRules;
-
-			if(count($this->validationMessages) > 1)
-			{
-				$array['messages'] = $this->validationMessages;
-			}
-		}
-		return $array;
-	}
-
-	public function validate()
-	{
-		foreach($this->validationRules as $rule)
-		{
-			$this->form;
-			$this->name;
-			// grab handler (
-		}
-
-		return true;
-	}
-
-	public function check($isChecked)
-	{
-		if($isChecked == true)
-		{
-			$this->property('checked', 'checked');
-		}elseif($isChecked === false && isset($this->properties['checked'])){
-			unset($this->properties['checked']);
-		}
-		return $this;
-	}
-
-	public function setOptions($value, $label = false, $properties = false)
-	{
-		if(is_array($value))
-		{
-			$this->options = array_merge($this->options, $value);
-		}else{
-			$option['value'] = $value;
-			$option['label'] = ($label) ? $label : $value;
-			$option['properties'] = (is_array($properties) && count($properties)) ? $properties : false;
-			$this->options[] = $option;
-		}
-
-		return $this;
-	}
-}
-
 
 ?>
