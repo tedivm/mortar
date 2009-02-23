@@ -25,34 +25,11 @@
  * @category	Database
  * @author		Robert Hafner
  */
-class DB_Connection
+class DatabaseConnection
 {
-	private static $instance;
-	private $db_connections = array();
-
-	/**
-	 * Protected Constructor
-	 *
-	 */
-	protected function __construct()
-	{
-
-	}
-
-	/**
-	 * Returns the stored instance of the DB_Connection object. If no object
-	 * is stored, it will create it
-	 *
-	 * @return DB_Connection allows
-	 */
-	public static function getInstance()
-	{
-		if(!isset(self::$instance)){
-			$object= __CLASS__;
-			self::$instance=new $object;
-		}
-		return self::$instance;
-	}
+//	private static $instance;
+	static private $db_connections = array();
+	static private $iniFile;
 
 	/**
 	 * Returns a database connection based off of the database config array
@@ -60,29 +37,28 @@ class DB_Connection
 	 * @param string $param
 	 * @return Mysql_Base|false
 	 */
-	public function getConnection($database = 'default')
+	static public function getConnection($database = 'default')
 	{
-		if(isset($this->db_connections[$database]))
+		if(isset(self::$db_connections[$database]))
 		{
-			return $this->db_connections[$database];
+			return self::$db_connections[$database];
 		}else{
 
 
 			try
 			{
 
-				if(!$this->iniFile)
+				if(!self::$iniFile)
 				{
 					$config = Config::getInstance();
 					$path_to_dbfile = $config['path']['config'] . 'databases.php';
 
 					$iniFile = new IniFile($path_to_dbfile);
 
-					$this->iniFile = $iniFile;
+					self::$iniFile = $iniFile;
 				}
 
-				$connectionInfo = $this->iniFile->getArray($database);
-
+				$connectionInfo = self::$iniFile->getArray($database);
 
 				$db_connection = new Mysql_Base(
 				$connectionInfo['host'],
@@ -93,9 +69,9 @@ class DB_Connection
 				if($db_connection === false)
 					throw new BentoError('Could not connect to database ' . $db_name);
 
-				$this->db_connections[$database] = $db_connection;
+				self::$db_connections[$database] = $db_connection;
 
-				return $this->db_connections[$database];
+				return self::$db_connections[$database];
 
 			}catch(BentoError $e){
 
@@ -104,12 +80,12 @@ class DB_Connection
 		}
 	}
 
-	public function __destruct()
+	static function close()
 	{
-
-		foreach ($this->db_connections as $db)
+		foreach (self::$db_connections as $dbName => $db)
 		{
 			$db->close();
+			unset(self::$db_connections[$dbName]);
 		}
 	}
 }
