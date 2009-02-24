@@ -65,7 +65,7 @@ CREATE TABLE locations
 	location_resource VARCHAR(16) NOT NULL,
 	location_name VARCHAR(65) NULL,
 	inherit TINYINT UNSIGNED NULL DEFAULT 1,
-	defaultChild TINYINT UNSIGNED NULL,
+	defaultChild BIGINT UNSIGNED NULL,
 	location_createdOn DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
@@ -73,6 +73,7 @@ CREATE TABLE locations
 
 /* Add Indexes for: locations */
 CREATE INDEX locations_location_parent_Idx ON locations (location_parent);
+CREATE INDEX locations_location_defaultChild_Idx ON locations (defaultChild);
 CREATE INDEX locations_location_resource_location_parent_Idx ON locations (location_resource, location_parent);
 
 /******************** Add Table: member_group ************************/
@@ -129,7 +130,7 @@ CREATE TABLE modules
 /* Build Table Structure */
 CREATE TABLE modelsRegistered
 (
-	name VARCHAR(20) NOT NULL PRIMARY KEY,
+	name VARCHAR(65) NOT NULL PRIMARY KEY,
 	resource VARCHAR(16) NOT NULL,
 	mod_id INTEGER UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -257,6 +258,10 @@ ALTER TABLE location_meta ADD CONSTRAINT fk_location_meta_locations
 /************ Foreign Key: fk_locations_locations ***************/
 ALTER TABLE locations ADD CONSTRAINT fk_locations_locations
 	FOREIGN KEY (location_parent) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/************ Foreign Key: fk_locations_locations_defaultChild ***************/
+ALTER TABLE locations ADD CONSTRAINT fk_locations_locations_defaultChild
+	FOREIGN KEY (defaultChild) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_mod_config_modules ***************/
 ALTER TABLE mod_config ADD CONSTRAINT fk_mod_config_modules
