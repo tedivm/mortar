@@ -57,7 +57,8 @@ class ModuleInstaller
 					$db->autocommit(true);
 					return true;
 				}catch(Exception $e){
-					$db->rollback();
+					$db->rollback();	// problem, this could erase the status, which means the database structure
+										// would be set up but the system wouldn't know
 					$db->autocommit(true);
 					throw new BentoError('Unable to install module ' . $this->package . ', rolling back database changes.');
 				}
@@ -100,29 +101,11 @@ class ModuleInstaller
 
 	public function installModels()
 	{
-		$modelFiles = glob($this->pathToPackage . 'models/*');
-		foreach($modelFiles as $modelFile)
+		$models = $this->packageInfo->getModels();
+
+		foreach($models as $model)
 		{
-			$action = array();
-			$tmpArray = explode('/', $modelFile);
-			$tmpArray = array_pop($tmpArray);
-			$tmpArray = explode('.', $tmpArray);
-			$modelName = array_shift($tmpArray);
-			//explode, pop. explode. shift
-			$className = $this->package . 'Model' . $modelName;
-			$type = staticHack($className, 'type');
-
-			$modelRegistration = new ObjectRelationshipMapper('modelsRegistered');
-			$modelRegistration->name = $className;
-			$modelRegistration->resource = $type;
-
-			// This way we're updating any existing row, not adding duplicates (although the database index should
-			// stop duplicates anyways).
-			$modelRegistration->select();
-
-			$modelRegistration->name = $className;
-			$modelRegistration->package = $this->package;
-			$modelRegistration->save();
+			ModelRegistry::setHandler($model['type'], $this->package, $model['name']);
 		}
 	}
 
