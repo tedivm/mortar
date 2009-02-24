@@ -6,9 +6,9 @@ class InstallationForm extends Form
 	{
 		$config = Config::getInstance();
 
-		$this->disableXsfrProtection()->
+		$this->disableXsfrProtection();
 
-			changeSection('system')->
+		$this->changeSection('system')->
 				setLegend('System Information')->
 
 				createInput('siteName')->
@@ -19,7 +19,8 @@ class InstallationForm extends Form
 
 				createInput('domain')->
 					setLabel('Domain')->
-					property('value', $_SERVER['SERVER_NAME'] . substr($_SERVER['PHP_SELF'], 0, strpos($_SERVER['PHP_SELF'], DISPATCHER)))->
+					property('value', $_SERVER['SERVER_NAME'] . substr($_SERVER['PHP_SELF'], 0,
+														strpos($_SERVER['PHP_SELF'], DISPATCHER)))->
 					addRule('required')->
 				getForm()->
 
