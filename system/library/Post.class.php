@@ -26,24 +26,41 @@
  * @category	Configuration
  * @author		Robert Hafner
  */
-class Post implements ArrayAccess
+class Post extends ArrayObject
 {
-	protected $variables = array();
 	static $instance;
 
-
-
-	/**
-	 * Private constuctor, can only be called through GetInstance
-	 *
-	 */
-	private function __construct()
+	public function __construct($baseArray = null)
 	{
-		$this->variables = ((function_exists("get_magic_quotes_gpc") && get_magic_quotes_gpc()) || (ini_get('magic_quotes_sybase') && (strtolower(ini_get('magic_quotes_sybase'))!="off")))
-			 ? stripslashes_deep($_POST)
-			 : $_POST;
+		if(isset(self::$instance))
+			throw new BentoError('Constructor for singleton ' . get_class($this) . ' called twice');
+
+		$this->load($baseArray);
+		$this->filter();
 	}
 
+	protected function load($baseArray = null)
+	{
+		if(is_null($baseArray))
+			$baseArray = $_POST;
+
+		$baseArray = ((function_exists("get_magic_quotes_gpc") && get_magic_quotes_gpc())
+								|| (ini_get('magic_quotes_sybase')
+										&& (strtolower(ini_get('magic_quotes_sybase'))!="off")))
+
+			 ? stripslashes_deep($baseArray)
+			 : $baseArray;
+
+		foreach ($baseArray as $key => $value)
+		{
+			$this[$key] = $value;
+		}
+	}
+
+	protected function filter()
+	{
+
+	}
 
 	/**
 	 * Returns the stored instance of the Post object. If no object is stored, it will create it
@@ -75,13 +92,33 @@ class Post implements ArrayAccess
 		{
 			$XSS = new XSS();
 			$temp =  $this->variables[$key];
-			@array_walk_recursive($temp, array($XSS, 'filter'));	// rph lok at this
+			@array_walk_recursive($temp, array($XSS, 'filter'));	// rph look at this
 			return $temp;
 		}else{
 			$XSS = new XSS();
 			return $XSS->filter($this->variables[$key]);
 		}
 	}
+
+	public function alphaNumeric($key)
+	{
+		if(is_array($this->variables[$key]))
+		{
+			@array_walk_recursive($temp, array(isAlphaNumberic, 'filter'));	// rph look at this
+			return $temp;
+		}else{
+			return $this->isAlphaNumberic($this->variables[$key]);
+		}
+	}
+
+	public function isAlphaNumberic($string)
+	{
+		return preg_replace("/[^a-zA-Z0-9s]/", "", $string);
+	}
+
+
+
+
 
 
 	public function offsetExists($offset)
