@@ -126,7 +126,6 @@ abstract class Engine
 			}
 
 
-			//var_dump($actionIdentifier);
 			$this->main_action = new $this->className($actionIdentifier);
 
 			if(!$this->main_action->checkAuth())
@@ -149,8 +148,6 @@ abstract class Engine
 		}
 	}
 
-
-
 	protected function processAction($actionResults)
 	{
 		$this->content = $actionResults;
@@ -163,16 +160,9 @@ abstract class Engine
 
 	public function finish()
 	{
-		$this->commit_logs();
 		//no more database access after this point!
-		$dbConnector = DB_Connection::getInstance();
-		unset($dbConnector);
+		$dbConnector = DatabaseConnection::close();
 		session_commit();
-	}
-
-	protected function commit_logs()
-	{
-		return true;
 	}
 
 

@@ -17,10 +17,6 @@ abstract class ModuleBase
 	{
 		if(isset($this->moduleId))
 		{
-			$info = new ModuleInfo($this->moduleId, 'moduleId');
-			$this->location = new Location($info['locationId']);
-			$this->moduleName = $info['Name'];
-			$this->settings = $info->settings;
 			$package = $info['Package'];
 		}elseif(isset($this->package)){
 			$package = $this->package;
@@ -30,8 +26,9 @@ abstract class ModuleBase
 		{
 			$packageInfo = new PackageInfo($package);
 			$this->packageInfo = $packageInfo;
-			$this->package = $packageInfo->name;
-			$this->pathToPackage = $packageInfo->path;
+			$this->package = $packageInfo->getName();
+			$this->pathToPackage = $packageInfo->getPath();
+			$this->moduleId = $packageInfo->getId();
 		}
 	}
 

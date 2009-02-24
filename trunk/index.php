@@ -4,7 +4,7 @@ define('BASE_PATH', dirname(__FILE__) . '/');
 define('DISPATCHER', array_pop(explode('/', __FILE__)));
 
 // Developer Constants
-define('DEBUG', 0);
+define('DEBUG', 3);
 // 4,		3,		2,			1,		0
 // notices,	info, 	warning, 	error,	none
 // strict - E_STRICT with no Bento error displays.
@@ -24,42 +24,48 @@ define('BENCHMARK', false);
 // the script takes to run, and information about system settings during during that run.
 
 
-define('DISABLECACHE', false);
-// This program is designed to take advantage of caching, and in many cases code was optimized to with
-// that in mind. Disabling caching is not recommended outside of development, which is why it is not
-// an option in the interface.
+define('DISABLECACHE', true);
+// This program is designed to take advantage of caching, and in many cases code was optimized with that in mind.
+// Disabling caching is not recommended outside of development, which is why it is not an option in the interface.
 
 
-if(BENCHMARK)
+if(BENCHMARK && function_exists('getrusage'))
 {
-	if(function_exists('getrusage'))
-	{
-		$startdat = getrusage();
-		$startProcTime = $startdat["ru_utime.tv_usec"];
-		unset($startdat);
-	}
+	$startdat = getrusage();
+	$startProcTime = $startdat["ru_utime.tv_usec"];
+	unset($startdat);
 }
+
 
 
 switch(DEBUG)
 {
+	case 4:
+		error_reporting(E_ALL);
+		break;
+
+	case 3:
+		error_reporting(E_STRICT | E_ALL ^ E_NOTICE);
+		break;
+
+	case 2:
+		error_reporting(E_ALL ^ E_NOTICE);
+		break;
+
+	case 1:
+		error_reporting(E_ERROR | E_PARSE);
+		break;
+
+	case 0:
+	default:
+		error_reporting(0);
+		break;
 
 	case 'strict':
 		error_reporting(E_STRICT);
 		break;
-	case 4:
-		error_reporting(E_ALL);
-		break;
-	case 2:
-		error_reporting(E_ALL ^ E_NOTICE);
-		break;
-	case 1:
-		error_reporting(E_ERROR | E_PARSE);
-		break;
-	case 0:
-	default:
-		error_reporting(0);
 }
+
 
 require('system/classes/exceptions.class.php');
 require('system/classes/config.class.php');
@@ -78,119 +84,55 @@ require('system/abstracts/Plugin.abstract.php');
 require('system/abstracts/action.class.php');
 require('system/classes/Site.class.php');
 
+require('system/classes/RequestWrapper.class.php');
+
+
 require('system/classes/AutoLoader.class.php');
 
+try{
 
-$config = Config::getInstance();
-
-if($config->error && !file_exists('.blockinstall'))
-{
-	// prep for installations
-	$engine = 'Install';
-	$path['base'] =  BASE_PATH;
-	$path['engines'] = BASE_PATH . 'system/engines/';
-	$path['library'] = BASE_PATH . 'system/library/';
-	$path['modules'] = BASE_PATH . 'modules/';
-	$path['main_classes'] = BASE_PATH . 'system/classes/';
+	$config = Config::getInstance();
 
 
-	$config['path'] = $path;
-	$config['engine'] = $engine;
-	Cache::$runtimeDisable = true;
+	$requestWrapperName = 'RequestWrapper';
 
-	define('INSTALLMODE', true);
+	// If an error occured we may be looking at a pre-installation setup
+	if($config->error)
+	{
+		// disable cache, since we can't load the settings for it anyways
+		Cache::$runtimeDisable = true;
 
-
-}elseif($config->error){
-	define('INSTALLMODE', false);
-	throw new BentoError('Unable to load engine: ' . $path);
-
-}else{
-	define('INSTALLMODE', false);
-	$runtime = RuntimeConfig::getInstance();
-	$engine = $runtime['engine'];
-
-	$timezone = ($config['system']['timezone']) ? $config['system']['timezone'] : 'UTC';
-	date_default_timezone_set($timezone);
-}
-
-try {
-
-	$path = $config['path']['engines'] . $engine . '.engine.php';
-	$engineName = $engine . 'Engine';
-
-
-	if(!file_exists($path))
-		throw new BentoError('Unable to load engine: ' . $path);
-
-	include($path);
-
-	$engine = new $engineName();
-	$engine->runModule();
-	$output = $engine->display();
-	// two steps in case it throws an exception
-
-
-}catch (Exception $e){
-
-	try{
-
-		$info = InfoRegistry::getInstance();
-		$site = ActiveSite::getInstance();
-		$errorModule = $site->location->meta('error');
-
-		switch (get_class($e))
+		// If the blockinstall file is there, or the install class file is not, we shouldn't attempt an install
+		if(file_exists('.blockinstall')
+			|| !file_exists($config['path']['modules'] . 'BentoBase/actions/Install.class.php'))
 		{
-			case 'AuthenticationError':
-				$action = 'LogIn';
-				$errorModule = 1;
-				break;
-
-			case 'ResourceNotFoundError':
-				$action = 'ResourceNotFound';
-				break;
-
-			case 'BentoWarning':
-			case 'BentoNotice':
-				// uncaught minor thing
-
-			case 'BentoError':
-			default:
-				$action = 'TechnicalError';
-				break;
+			define('INSTALLMODE', false);
+			throw new BentoError('Unable to load configuration file.');
+		}else{
+			// there is no block file, no configuration or block install file, so lets set this into install mode
+			define('INSTALLMODE', true);
+			$requestWrapperName = 'RequestWrapperInstaller';
+			require('system/classes/RequestWrapperInstaller.class.php');
 		}
 
+	}else{
+		// config loaded, so lets take the redundent step of setting install mode to false
+		define('INSTALLMODE', false);
 
-
-
-		$moduleInfo = new ModuleInfo($errorModule);
-		$packageInfo = new PackageInfo($moduleInfo['Package']);
-
-	//	var_dump($moduleInfo);
-		//$moduleInfo['locationId']
-		//$packageInfo;
-		$engine = new $engineName($moduleInfo['locationId'], $action);
-		$engine->runModule();
-		$output = $engine->display();
-
-	}catch(Exception $e){
-		$moduleInfo = new ModuleInfo($errorModule);
-
-		$engine = new $engineName($moduleInfo['locationId'], 'TechnicalError');
-		$engine->runModule();
-		$output = $engine->display();
-
-
+		// system timezone, defaulting to UTC
+		$timezone = ($config['system']['timezone']) ? $config['system']['timezone'] : 'UTC';
+		date_default_timezone_set($timezone);
 	}
 
+	$request = new $requestWrapperName();
+	$request->main();
 
-
-
+}catch (Exception $e){
+	echo 'An uncaught error occured.';
 }
 
-echo $output;
 
-$engine->finish();
+
 if(BENCHMARK)
 {
 	$endtime = microtime(true);
@@ -199,6 +141,11 @@ if(BENCHMARK)
 	// moved this up here to make sure the statistics aren't affected too much by the benchmarking setup
 	if(function_exists('getrusage'))
 		$dat = getrusage();
+
+
+
+	// at some point dump all the shit below this line into its own class.
+
 
 	$benchmarkString = '';
 
@@ -242,24 +189,29 @@ if(BENCHMARK)
 	$benchmarkString .=  'Cache Calls: ' . Cache::$cacheCalls . PHP_EOL;
 	$benchmarkString .=  'Cache Returns: ' . Cache::$cacheReturns . PHP_EOL;
 	$calls = Cache::getCalls();
-	ksort($calls);
-	foreach($calls as $name => $count)
+	if(is_array($calls))
 	{
-		$benchmarkString .= $count . ' ' . $name . PHP_EOL;
+		ksort($calls);
+
+		foreach($calls as $name => $count)
+		{
+			$benchmarkString .= $count . ' ' . $name . PHP_EOL;
+		}
+
 	}
-
-
 	$queryCount = 0;
 	$queryArray = Mysql_Base::$query_array;
-	if(is_array($queryArray));
-	ksort($queryArray);
 
-	foreach($queryArray as $queryString => $count)
+	if(is_array($queryArray))
 	{
-		$queryList .= $count . ' ' . $queryString . PHP_EOL;
-		$queryCount += $count;
-	}
+		ksort($queryArray);
 
+		foreach($queryArray as $queryString => $count)
+		{
+			$queryList .= $count . ' ' . $queryString . PHP_EOL;
+			$queryCount += $count;
+		}
+	}
 	$benchmarkString .= 'Query Count: ' . $queryCount . PHP_EOL;
 	$benchmarkString .= $queryList;
 

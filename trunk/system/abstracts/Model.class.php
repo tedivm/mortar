@@ -2,7 +2,7 @@
 
 abstract class Model implements ModelInterface
 {
-	protected $type;
+//	protected $type;
 	protected $location;
 	protected $id;
 
@@ -11,24 +11,29 @@ abstract class Model implements ModelInterface
 
 	static public $type;
 
-	public function __construct($locationId = false)
+	public function __construct($locationId = null)
 	{
-		if(is_numeric($locationId)){
-			$location = new Location($locationId);
-		}elseif($locationId instanceof Location){
-			$location = $locationId;
-		}else{
-			throw new TypeMismatch(array('Location or Integer', $locationId));
+		if(!is_null($locationId))
+		{
+			if(is_numeric($locationId)){
+				$location = new Location($locationId);
+			}elseif($locationId instanceof Location){
+				$location = $locationId;
+			}else{
+				throw new TypeMismatch(array('Location or Integer', $locationId));
+			}
+
+			if(self::$type != $location->getResource())
+				throw new BentoError('Expecting location type ' . $this->type);
+
+			$this->location = $location;
+
+			$classInfo = explode('Model', get_class($this));
+			$this->package = $classInfo[0];
+			$this->name = $classInfo[1];
+
+			$this->location = $location;
 		}
-
-		if($this->type != $location->getResource())
-			throw new BentoError('Expecting location type ' . $this->type);
-
-		$classInfo = explode('Model', get_class($this));
-		$this->package = $classInfo[0];
-		$this->name = $classInfo[1];
-
-		$this->location = $location;
 	}
 
 	public function name($name = NULL)
@@ -59,6 +64,37 @@ abstract class Model implements ModelInterface
 		return $this->location->getParent();
 	}
 
+	public function isAllowed($action, $user = NULL)
+	{
+		if(is_null($user))
+			$user = ActiveUser::getInstance();
+
+		if(!method_exists($user, 'getId'))
+			throw new TypeMismatch(array('User', $user));
+
+		$permission = new Permissions($this->getId(), $user->getId());
+		return $permission->isAllowed($action);
+	}
+
+	public function actionLookup($action)
+	{
+		$package = $this->package;
+		$action = $this->name . $action;
+
+		$packageInfo = new PackageInfo($package);
+		if(!$packageInfo->packageHasAction($action))
+			return false;
+
+		return array('package' => $package, 'action' => $action);
+	}
+
+
+
+	public function delete()
+	{
+
+	}
+
 	public function save($saveToLocation = false)
 	{
 		if(isset($this->location))
@@ -87,29 +123,9 @@ abstract class Model implements ModelInterface
 
 	}
 
-	public function isAllowed($action, $user = NULL)
-	{
-		if(is_null($user))
-			$user = ActiveUser::getInstance();
 
-		if(!method_exists($user, 'getId'))
-			throw new TypeMismatch(array('User', $user));
 
-		$permission = new Permissions($this->getId(), $user->getId());
-		return $permission->isAllowed($action);
-	}
 
-	public function actionLookup($action)
-	{
-		$package = $this->package;
-		$action = $this->name . $action;
-
-		$packageInfo = new PackageInfo($package);
-		if(!$packageInfo->packageHasAction($action))
-			return false;
-
-		return array('package' => $package, 'action' => $action);
-	}
 
 }
 

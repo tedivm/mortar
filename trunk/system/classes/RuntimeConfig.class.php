@@ -20,12 +20,14 @@ class RuntimeConfig implements ArrayAccess
 		if(!isset($get['package']) && !INSTALLMODE)
 		{
 			$pathArray = $this->convertPath($path);
+			if(is_array($pathArray))
+				$data = array_merge($data, $pathArray);
+
 		}else{
 			$data['package'] = $get['package'];
 		}
 
-		if(is_array($pathArray))
-			$data = array_merge($data, $pathArray);
+
 
 		$data['engine'] = ((isset($get['engine'])) ? $get['engine'] : 'Html');
 		$data['action'] = (isset($get['action'])) ? $get['action'] : 'Default';
@@ -75,13 +77,6 @@ class RuntimeConfig implements ArrayAccess
 						$currentLocation = $childLocation;
 						break;
 
-					case 'module':
-						$currentLocation = $childLocation;
-						$moduleInfo = new ModuleInfo($childLocation->getId());
-						$moduleId = $moduleInfo->getId();
-						unset($pathVariables[$pathIndex]);
-						break 2; //break out of foreach loop
-
 					default:
 						break 2;
 				}
@@ -101,15 +96,6 @@ class RuntimeConfig implements ArrayAccess
 				break;
 			}
 
-
-		if(is_numeric($moduleId))
-		{
-			//echo $moduleId;
-			$moduleInfo = new ModuleInfo($moduleId, 'moduleId');
-			$pathReturn['package'] = $moduleInfo['Package'];
-			$pathReturn['moduleId'] = $moduleInfo->getId();
-			$currentLocation = new Location($moduleInfo['locationId']);
-		}
 
 		if(!isset($data['package']))
 		{

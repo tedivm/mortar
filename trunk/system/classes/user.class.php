@@ -236,10 +236,10 @@ class User
  * @category	User
  * @author		Robert Hafner
  */
-class ActiveUser // extends User
+class ActiveUser implements SplSubject
 {
 	private static $instance;
-
+	private $observers = array();
 	protected $user;
 
 
@@ -248,36 +248,8 @@ class ActiveUser // extends User
 	 */
 	private function __construct()
 	{
-		if(!$this->checkSession())
-			$this->loadUserByName('guest');
-
-		$this->loggedIn = ($this->username != 'guest');
-	}
-
-
-	protected function checkSession()
-	{
-		try{
-
-			if($_SESSION['OBSOLETE'] && ($_SESSION['EXPIRES'] < time()))
-				throw new BentoWarning('Attempt to use expired session.');
-
-			if(!is_numeric($_SESSION['user_id']))
-				throw new BentoNotice('No session started.');
-
-			if($_SESSION['IPaddress'] != $_SERVER['REMOTE_ADDR'])
-				throw new BentoNotice('IP Address mixmatch (possible session hijacking attempt).');
-
-			if($_SESSION['userAgent'] != $_SERVER['HTTP_USER_AGENT'])
-				throw new BentoNotice('Useragent mixmatch (possible session hijacking attempt).');
-
-			if(!$this->loadUser($_SESSION['user_id']))
-				throw new BentoWarning('Attempted to log in user that does not exist with ID: ' . $_SESSION['user_id']);
-
-		}catch(Exception $e){
-			return false;
-		}
-		return true;
+		// By default you're a guest
+		$this->loadUserByName('guest');
 	}
 
 	public function loadUser($id)
@@ -289,32 +261,12 @@ class ActiveUser // extends User
 		if($user->load_user($id))
 		{
 			$this->user = $user;
-			$this->regenerateSession();
+			$this->notify();
 			return true;
 		}else{
 			return false;
 		}
 
-	}
-
-	public function session($session, $value = false)
-	{
-
-		if(is_array($session))
-		{
-			foreach($session as $name => $value)
-			{
-				$_SESSION[$name] = (!is_null($value)) ? $value : false;
-			}
-			return $this;
-
-		}elseif(is_string($value)){
-
-			$_SESSION[$session] = $value;
-			return $this;
-		}
-
-		return $_SESSION[$session];
 	}
 
 	public function changeUser($userName, $password)
@@ -371,7 +323,7 @@ class ActiveUser // extends User
 
 	public function __destruct()
 	{
-		$_SESSION['user_id'] = $this->user->getId();
+		$this->notify();
 	}
 
 	public function loadUserByName($user)
@@ -419,53 +371,29 @@ class ActiveUser // extends User
 		return $this->user->getMemberGroups();
 	}
 
-	protected function regenerateSession()
+
+
+
+	public function attach(SplObserver $class)
 	{
-
-		// This forces the system to reload certain variables when the user changes.
-		$reload = ($_SESSION['user_id'] != $this->user->getId() || ($_SESSION['idExpiration'] < time()));
-
-		// This token is used by forms to prevent cross site forgery attempts
-		if(!isset($_SESSION['nonce']) || $reload)
-			$_SESSION['nonce'] = md5($this->id . START_TIME);
-
-		if(!isset($_SESSION['IPaddress']) || $reload)
-			$_SESSION['IPaddress'] = $_SERVER['REMOTE_ADDR'];
-
-		if(!isset($_SESSION['userAgent']) || $reload)
-			$_SESSION['userAgent'] = $_SERVER['HTTP_USER_AGENT'];
-
-		$_SESSION['user_id'] = $this->user->getId();
-
-		if($reload || !$_SESSION['OBSOLETE'] && mt_rand(1, 100) == 1)
-		{
-			// Set current session to expire in 15 seconds
-			$_SESSION['OBSOLETE'] = true;
-			$_SESSION['EXPIRES'] = time() + 15;
-
-
-			// Create new session without destroying the old one
-			session_regenerate_id(false);
-
-			// Grab current session ID and close both sessions to allow other scripts to use them
-			$newSession = session_id();
-			session_write_close();
-
-			// Set session ID to the new one, and start it back up again
-			session_id($newSession);
-			session_start();
-
-			$_SESSION['idExpiration'] = time() + (300);
-			// Don't want this one to expire
-			unset($_SESSION['OBSOLETE']);
-			unset($_SESSION['EXPIRES']);
-		}
-
+		$this->observers[] = $class;
+		$class->update($this);
 	}
 
-	protected function sessionCleanUp()
+	public function detach(SplObserver $obj)
 	{
+		foreach ($this->observers as $index => $class)
+		{
+			if($class == $obj)
+				unset($this->observers[$index]);
 
+		}
+	}
+
+	public function notify()
+	{
+		foreach ($this->observers as $observers)
+			$observers->update($this);
 	}
 
 }

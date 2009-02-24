@@ -18,16 +18,8 @@ class Url
 		$info = InfoRegistry::getInstance();
 
 		$attributes = $this->attributes;
+		ksort($attributes);
 		$urlString = $site->currentLink;
-
-
-		//if module is an integer, load the moduleinfo class
-		if(is_numeric($attributes['module']))
-		{
-			$moduleInfo = new ModuleInfo($attributes['module'], 'moduleId');
-			$attributes['moduleId'] = $attributes['module'];
-			unset($attributes['module']);
-		}
 
 
 		if($info->Configuration['url']['modRewrite'] && isset($moduleInfo))

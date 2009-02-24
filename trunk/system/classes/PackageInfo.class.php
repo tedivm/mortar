@@ -2,16 +2,55 @@
 
 class PackageInfo
 {
-
+	public $id;
 	public $name;
 	public $path;
 	public $actions;
+	public $status;
+	public $version;
+	public $models;
 	protected $meta;
 
-	public function __construct($packageName)
+	public function __construct($package)
 	{
+		if(is_numeric($package))
+		{
+			$this->loadById($package);
+		}elseif(is_string($package)){
+			$this->loadByName($package);
+		}else{
+			throw new TypeMismatch(array('String or Integer', $package));
+		}
+	}
 
-		if(is_null($packageName))
+	public function loadById($id)
+	{
+		$cache = new Cache('packages', 'moduleLookup', $id);
+		$package = $cache->getData();
+
+		if(!$cache->cacheReturned)
+		{
+			$db = DatabaseConnection::getConnection('default_read_only');
+			$packageStmt = $db->stmt_init();
+			$packageStmt->prepare('SELECT * FROM modules WHERE mod_id = ?');
+			$packageStmt->bind_param_and_execute('i', $id);
+
+			if($packageStmt->num_rows == 1)
+			{
+				$row = $packageStmt->fetch_array();
+				$package = $row['package'];
+			}else{
+				$package = false;
+			}
+			$cache->storeData($package);
+		}
+
+		$this->loadByName($package);
+	}
+
+	public function loadByName($packageName)
+	{
+		if(is_null($packageName) || strlen($packageName) < 1)
 			throw new BentoError('Class PackageInfo constructor expects one arguement');
 
 		$config = Config::getInstance();
@@ -42,12 +81,15 @@ class PackageInfo
 
 				if($moduleInfo = $packageStmt->fetch_array())
 				{
-						$info['majorVersion'] = $moduleInfo['moduleVersion'];
-						$info['minorVersion'] = $moduleInfo['minorVersion'];
-						$info['microVersion'] = $moduleInfo['microVersion'];
-						$info['releaseType'] = $moduleInfo['releaseType'];
-						$info['releaseVersion'] = $moduleInfo['releaseVersion'];
-						$info['status'] = $moduleInfo['status'];
+					$info['moduleId'] = $moduleInfo['mod_id'];
+					$info['majorVersion'] = $moduleInfo['moduleVersion'];
+					$info['minorVersion'] = $moduleInfo['minorVersion'];
+					$info['microVersion'] = $moduleInfo['microVersion'];
+					$info['releaseType'] = $moduleInfo['releaseType'];
+					$info['releaseVersion'] = $moduleInfo['releaseVersion'];
+					$info['status'] = $moduleInfo['status'];
+				}else{
+					$info['status'] - 'filesystem';
 				}
 
 			}catch(Exception $e){
@@ -59,10 +101,14 @@ class PackageInfo
 		}
 
 		$this->actions = $this->loadActions();
+		$this->models = $this->loadModels();
 		$this->loadMeta();
 
-		if(isset($info['status']))
+		$this->status = $info['status'];
+
+		if(isset($info['moduleId']))
 		{
+			$this->id = $info['moduleId'];
 			$this->status = $info['status'];
 			$this->version = new Version();
 			$this->version->major = $info['majorVersion'];
@@ -79,14 +125,37 @@ class PackageInfo
 		return $this->path;
 	}
 
+	public function getId()
+	{
+		return $this->id;
+	}
+
+	public function getStatus()
+	{
+		return ($this->status) ? $this->status : false;
+	}
+
+
 	public function getName()
 	{
 		return $this->name;
 	}
 
-	public function getActions()
+	public function getActions($actionName = null)
 	{
+		if($actionName)
+		{
+			if(!$this->packageHasAction($actionName))
+				return false;
+
+			return $this->actions[$actionName];
+		}
 		return $this->actions;
+	}
+
+	public function getModels()
+	{
+		return $this->models;
 	}
 
 	public function packageHasAction($name)
@@ -97,26 +166,6 @@ class PackageInfo
 	public function getMeta($name)
 	{
 		return $this->meta[$name];
-	}
-
-	public function checkAuth($action)
-	{
-		$user = ActiveUser::get_instance();
-		$allowed = false;
-
-		if(is_array($this->installedModules))
-			foreach($this->installedModules as $module)
-		{
-			$permission = new Permissions($module['locationId'], $user->getId());
-			if($permission->isAllowed($action))
-			{
-				$allowed = true;
-				break;
-			}
-		}
-
-		return true;
-		return $allowed;
 	}
 
 	protected function loadMeta()
@@ -135,84 +184,142 @@ class PackageInfo
 		}
 	}
 
-
 	protected function loadActions()
 	{
-		$cache = new Cache('packages', $packageName, 'actions');
-		$info = $cache->getData();
+		$cache = new Cache('packages', $this->packageName, 'actions');
+		$actions = $cache->getData();
 		if(!$cache->cacheReturned)
 		{
-				// Load Actions
-				$actionPaths = glob($this->path . 'actions/*.class.php');
-				foreach($actionPaths as $filename)
-				{
-					try {
-						$action = array();
-						$tmpArray = explode('/', $filename);
-						$tmpArray = array_pop($tmpArray);
-						$tmpArray = explode('.', $tmpArray);
-						$actionName = array_shift($tmpArray);
-						//explode, pop. explode. shift
+			$actions = array();
+			// Load Actions
+			$actionNames = $this->loadClasses('action');
+			foreach($actionNames as $actionName => $action)
+			{
+				try {
+					$actionReflection = new ReflectionClass($action['className']);
 
-						$action['className'] = $this->name . 'Action' . $actionName;
-						$action['path'] = $filename;
+					if($actionReflection->isSubclassOf('Action'))
+						$action['type'] = 'specificModule';
 
-						if(!class_exists($action['className'], false))
+					if($actionReflection->isSubclassOf('PackageAction'))
+						$action['type'] = 'genericPackage';
+
+					$methods = $actionReflection->getMethods();
+					$engines = array();
+					foreach($methods as $method)
+					{
+						$engine = array();
+						if(strpos($method->name, 'view') === 0)
 						{
-
-							if(!include($filename))
+							$engineName = substr($method->name, '4');
+							$settings = $engineName . 'Settings';
+							if($actionReflection->hasProperty($settings))
 							{
-								throw new BentoWarning('Unable to load action ' . $action['className'] .
-														 ' file at: ' . $filename);
+								$properties = get_class_vars($action['className']);
+								$engine['settings'] = $properties[$settings];
 							}
-
-							if(!class_exists($action['className'], false))
-							{
-								throw new BentoWarning('Action ' . $action['className'] . 'does not exist at' .
-														 ' file at: ' . $filename);
-							}
+							$engines[$engineName] = $engine;
 						}
-
-						$actionReflection = new ReflectionClass($action['className']);
-
-						if($actionReflection->isSubclassOf('Action'))
-							$action['type'] = 'specificModule';
-
-						if($actionReflection->isSubclassOf('PackageAction'))
-							$action['type'] = 'genericPackage';
-
-						$methods = $actionReflection->getMethods();
-						$engines = array();
-						foreach($methods as $method)
-						{
-							$engine = array();
-							if(strpos($method->name, 'view') === 0)
-							{
-								$engineName = substr($method->name, '4');
-								$settings = $engineName . 'Settings';
-								if($actionReflection->hasProperty($settings))
-								{
-									$properties = get_class_vars($action['className']);
-									$engine['settings'] = $properties[$settings];
-								}
-								$engines[$engineName] = $engine;
-							}
-						}
-
-						$action['engineSupport'] = $engines;
-						$action['permissions'] = staticHack($action['className'], 'requiredPermission');
-
-						$actions[$actionName] = $action;
-
-					}catch(Exception $e){
-
 					}
+					$action['engineSupport'] = $engines;
+					$action['permissions'] = staticHack($action['className'], 'requiredPermission');
+					$actions[$actionName] = $action;
+				}catch(Exception $e){
+
+				}
+			}
+
+			$cache->storeData($actions);
+		}// end cache
+
+
+		return $actions;
+
+	}
+
+	protected function loadPlugins()
+	{
+		$cache = new Cache('packages', $this->packageName, 'plugins');
+		$plugins = $cache->getData();
+
+		if($cache->cacheReturned)
+		{
+			$plugins = array();
+			$pluginFiles = $this->loadClasses('plugins');
+			foreach($pluginFiles as $pluginFile)
+			{
+
+			}
+		}
+
+
+		return $plugins;
+	}
+
+	protected function loadModels()
+	{
+		$cache = new Cache('packages', $this->packageName, 'models');
+		$models = $cache->getData();
+
+		if(!$cache->cacheReturned)
+		{
+			$models = array();
+			$modelFiles = $this->loadClasses('model');
+			foreach($modelFiles as $modelFile)
+			{
+				$models[$modelFile['name']]['type'] = staticHack($modelFile['className'], 'type');
+				$models[$modelFile['name']]['className'] = $modelFile['className'];
+				$models[$modelFile['name']]['name'] = $modelFile['name'];
+				$models[$modelFile['name']]['path'] = $modelFile['path'];
+			}
+			$cache->storeData($models);
+		}
+
+		return $models;
+	}
+
+
+
+	protected function loadClasses($type)
+	{
+		$filePaths =  glob($this->path . $type  . 's/*.class.php');
+		$typeDelimiter = ucfirst(strtolower($type));
+		$files = array();
+		foreach($filePaths as $filename)
+		{
+			try {
+				$fileInfo = array();
+				$tmpArray = explode('/', $filename);
+				$tmpArray = array_pop($tmpArray);
+				$tmpArray = explode('.', $tmpArray);
+				$fileClassName = array_shift($tmpArray);
+				//explode, pop. explode. shift
+
+				$fileInfo['name'] =$fileClassName;
+				$fileInfo['className'] = $this->name . $typeDelimiter . $fileClassName;
+				$fileInfo['path'] = $filename;
+
+				if(!class_exists($fileInfo['className'], false))
+				{
+
+					if(!include($filename))
+						throw new BentoWarning('Unable to load ' . $type . ' ' . $fileInfo['className'] .
+												 ' file at: ' . $filename);
+
+					if(!class_exists($fileInfo['className'], false))
+						throw new BentoWarning($type . ' ' . $fileInfo['className'] . 'does not exist at' .
+												 ' file at: ' . $filename);
+
 				}
 
-			}// end cache
+				$files[$fileClassName] = $fileInfo;
+			}catch(Exception $e){
 
-			return $actions;
+			}
 		}
+		return $files;
 	}
+
+}
 
 ?>
