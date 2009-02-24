@@ -66,7 +66,7 @@ class BentoCMSActionEditPage extends FormAction
 		$this->cms->property('name', $inputHandler['name']);
 
 		$cmsContent->property('title', $inputHandler['title']);
-		$cmsContent->property('content', $inputHandler['content']);
+		$cmsContent->property('content', $inputHandler->getRaw('content'));
 
 		if($this->cms->save() && $cmsContent->save())
 		{

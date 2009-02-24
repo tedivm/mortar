@@ -28,7 +28,7 @@ class BentoCMSActionAddPage extends FormAction
 		$cms->save();
 
 		$content = $cms->newRevision();
-		$content->property(array('content' => $inputHandler['content'], 'title' => $inputHandler['title'],
+		$content->property(array('content' => $inputHandler->getRaw('content'), 'title' => $inputHandler['title'],
 							'author', $user->getId()));
 
 		$content->save();

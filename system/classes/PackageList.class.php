@@ -31,6 +31,9 @@ class PackageList
 
 	protected function loadInstalledPackages()
 	{
+		if(INSTALLMODE)
+			return array();
+
 		$db = dbConnect('default_read_only');
 		$results = $db->query('SELECT package FROM modules');
 		$packageList = array();

@@ -11,6 +11,7 @@ class AdminEngine extends Engine
 	{
 		$this->returnMode = 'full';
 		$page = ActivePage::getInstance();
+
 		$page->addRegion('title', 'BentoBase Admin');
 		$page->setTemplate('index.html', 'admin');
 	}
@@ -45,8 +46,12 @@ class AdminEngine extends Engine
 		$text = file_get_contents($themePath);
 		$processedOutput->set_display_template($text);
 
-		$title = (isset($this->main_action->AdminSettings['headerTitle'])) ? $this->main_action->AdminSettings['headerTitle'] : '';
-		$subTitle = (isset($this->main_action->AdminSettings['headerSubTitle'])) ? $this->main_action->AdminSettings['headerSubTitle'] : '';
+		$title = (isset($this->main_action->AdminSettings['headerTitle']))
+					? $this->main_action->AdminSettings['headerTitle'] : '';
+
+		$subTitle = (isset($this->main_action->AdminSettings['headerSubTitle']))
+					? $this->main_action->AdminSettings['headerSubTitle'] : '';
+
 		$processedOutput->addContent('content', $actionResults);
 		$processedOutput->addContent('title', $title);
 		$processedOutput->addContent('subtitle', $subTitle);

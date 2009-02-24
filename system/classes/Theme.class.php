@@ -81,6 +81,7 @@ class Theme
 				$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
 
 
+/*
 			$bentoCssPath = $info->Configuration['path']['css'];
 			$bentoCssUrl = $info->Site->getLink('css');
 
@@ -89,7 +90,7 @@ class Theme
 			if($CssResult)
 				$cssLinks = array_merge_recursive($CssResult, $cssLinks);
 				// the order is important- this method favors the Theme CSS files over the system ones
-
+*/
 
 
 

@@ -42,13 +42,7 @@ class BentoError extends Exception
 
 	public function __toString()
 	{
-		$runtimeConfig = RuntimeConfig::getInstance();
-
-		$output .= 'Action: ' . $runtimeConfig['action'] . '<br />';
-		$output .= 'Module: ' . $runtimeConfig['module'] . '<br />';
-		$output .= 'ID: ' . $runtimeConfig['id'] . '<br />';
-		$output .= 'Engine: ' . $runtimeConfig['engine'] . '<br />';
-
+		$runtimeConfig = Query::getQuery();
 
 		$file = $this->getFile();
 		$line = $this->getLine();
@@ -60,7 +54,7 @@ class BentoError extends Exception
 		$packageOutput = (isset($runtimeConfig['package'])) ? $runtimeConfig['package'] : '<i>unset</i>';
 
 		$idOutput = (is_numeric($runtimeConfig['id'])) ? $runtimeConfig['id'] : '<i>unset</i>';
-		$engineOutput = (isset($runtimeConfig['engine'])) ? $runtimeConfig['engine'] : '<i>unset</i>';
+		$engineOutput = (isset($runtimeConfig['format'])) ? $runtimeConfig['format'] : '<i>unset</i>';
 		$siteOutput = (is_numeric($site->siteId)) ? $site->siteId : '<i>unset</i>';
 		$dispatcher = DISPATCHER;
 

@@ -18,6 +18,7 @@ class Location implements intlocation
 	public $inherits = true;
 	public $meta = array();
 	public $siteId;
+	public $defaultChild;
 	protected $directoryTypes = array('directory', 'site');
 	protected $createdOn;
 
@@ -47,6 +48,7 @@ class Location implements intlocation
 					$locationInfo['inherits'] = ($db_location->inherit == 1);
 					$locationInfo['siteId'] = $this->getSite();
 					$locationInfo['createdOn'] = $db_location->location_createdOn;
+					$locationInfo['defaultChild'] = $db_location->defaultChild;
 
 					$db_meta = new ObjectRelationshipMapper('location_meta');
 					$db_meta->location_id = $locationInfo['id'];
@@ -74,6 +76,7 @@ class Location implements intlocation
 				$this->resource = $locationInfo['resource'];
 				$this->name = $locationInfo['name'];
 				$this->inherits = $locationInfo['inherits'];
+				$this->defaultChild = $locationInfo['defaultChild'];
 
 				if($this->parent)
 					$locationInfo['meta'] = array_merge($this->parent->meta, $locationInfo['meta']);
@@ -122,6 +125,16 @@ class Location implements intlocation
 		$this->createdOn = date('Y-m-d H:i:s', $date);
 	}
 
+	public function getDefaultChild()
+	{
+		if(is_numeric($this->defaultChild))
+		{
+			return new Location($this->defaultChild);
+		}else{
+			return false;
+		}
+	}
+
 	//need to get rid of that
 	public function location_id()
 	{
@@ -164,6 +177,13 @@ class Location implements intlocation
 
 		$db_location->location_name = str_replace('_', ' ', $this->name);
 		$db_location->location_resource = $this->resource;
+
+		if(is_numeric($this->defaultChild))
+		{
+			$db_location->defaultChild = $this->defaultChild;
+		}else{
+			$db_location->query_set('defaultChild', 'NULL');
+		}
 
 		$db_location->inherit = ($this->inherits) ? 1 : 0;
 

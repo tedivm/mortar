@@ -115,9 +115,14 @@ class Page implements ArrayAccess
 		if(!is_array($name))
 		{
 			$this->javascript[$library][] = $name;
-		}elseif(is_array($name))
-		{
-			$this->javascript = array_merge_recursive($this->javascript, $name);
+		}else{
+
+			if(!is_array($this->javascript[$library]))
+			{
+				$this->javascript[$library] = $name;
+			}else{
+				$this->javascript[$library] = array_merge_recursive($this->javascript[$library], $name);
+			}
 		}
 	}
 
@@ -316,7 +321,7 @@ class ActivePage extends Page
 	 */
 	private function __construct()
 	{
-		$this->addJavaScript(array( 'jquery' => array('1_2_6', 'ui-1_6b', 'metadata', 'dimensions', 'bentoSettings')));
+		$this->addJQueryInclude(array('1_2_6', 'ui-1_6b', 'metadata', 'dimensions', 'bentoSettings'));
 		$this->addCss(array('none' => array('all')));
 //		$this->addJQueryInclude(array('1_2_6', 'ui-1_6b', 'metadata', 'demensions'));
 
@@ -336,27 +341,6 @@ class ActivePage extends Page
 		}
 		return self::$instance;
 	}
-
-
-	public function clear()
-	{
-		$this->setTemplate();
-		$this->id = '';
-		$this->mod_id = '';
-		$this->title = '';
-		$this->name = '';
-		$this->content = '';
-		$this->keywords = '';
-		$this->description = '';
-		$this->createdon = '';
-		$this->template = '';
-		$this->regions = array();
-		$this->template = '';
-		$this->meta = array();
-		$this->css = array();
-	}
-
-
 }
 
 ?>

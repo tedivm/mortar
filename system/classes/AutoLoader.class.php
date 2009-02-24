@@ -93,6 +93,7 @@ class AutoLoader
 		if(!isset(self::$config))
 			self::$config = Config::getInstance();
 
+
 		self::checkDirectory(self::$config['path']['interfaces'] . $className . '.interface.php', $className);
 	}
 
@@ -100,6 +101,7 @@ class AutoLoader
 
 	static protected function checkDirectory($directory, $classname)
 	{
+
 		try{
 			if(is_readable($directory))
 			{
