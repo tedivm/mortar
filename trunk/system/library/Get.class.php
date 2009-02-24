@@ -1,35 +1,78 @@
 <?php
 
-class Get extends Post
+class Get
 {
-	public $variables = array();
-	static $instance;
 
-	private function __construct()
+	static public function getArray()
 	{
-		$this->variables = get_magic_quotes_gpc() ? array_map('stripslashes', $_GET) : $_GET;
-	}
+		$queryArray = get_magic_quotes_gpc() ? array_map('stripslashes', $_GET) : $_GET;
 
-	public function addValues($values)
-	{
-		if(!is_array($values))
-			return;
-
-		foreach($values as $index => $value)
+		if(isset($queryArray['p']))
 		{
-			$this->variables[$index] = $value;
-		}
-	}
+			$pathArray = explode('/', str_replace('_', ' ', $queryArray['p']));
+			$rootPiece = strtolower($pathArray[0]);
 
-	public static function getInstance()
-	{
-		if(!isset(self::$instance)){
-			$object = __CLASS__;
-			self::$instance = new $object();
+			if($rootPiece == 'admin' || $rootPiece == 'rest')
+			{
+				if($rootPiece == 'admin')
+					$queryArray['format'] = 'admin';
+
+				if($rootPiece == 'rest')
+					RequestWrapper::$ioHandler = 'Rest';
+
+				array_shift($pathArray);
+				$rootPiece = strtolower($pathArray[0]);
+			}
+
+			if($rootPiece == 'module')
+			{
+				// discard the 'module' tag
+				array_shift($pathArray);
+
+				// grab the name, drop it from the path
+				$queryArray['module'] = strtolower(array_shift($pathArray));
+			}
+
+			if(count($pathArray) > 0)
+				$queryArray['pathArray'] = $pathArray;
 		}
-		return self::$instance;
+
+
+		switch (strtolower($queryArray['format']))
+		{
+			case 'xml':
+				$queryArray['format'] = 'Xml';
+				break;
+
+			case 'rss':
+				$queryArray['format'] = 'Rss';
+				break;
+
+			case 'json':
+				$queryArray['format'] = 'Json';
+				break;
+
+			case 'admin':
+				$queryArray['format'] = 'Admin';
+				break;
+
+			case 'html':
+				$queryArray['format'] = 'Html';
+				break;
+
+			default:
+
+				unset($queryArray['format']);
+				break;
+		}
+
+		if(isset($queryArray['action']))
+		{
+			$queryArray['action'] = preg_replace("/[^a-zA-Z0-9s]/", "", $queryArray['action']);
+		}
+
+		return $queryArray;
 	}
 }
-
 
 ?>
