@@ -19,9 +19,9 @@ CREATE UNIQUE INDEX actions_action_name_Idx ON actions (action_name);
 /* Build Table Structure */
 CREATE TABLE aliases
 (
-	location_id BIGINT UNSIGNED NOT NULL,
+	location_id INTEGER UNSIGNED NOT NULL,
 	aliasType VARCHAR(15) NOT NULL DEFAULT 'other',
-	aliasLocation BIGINT UNSIGNED NULL,
+	aliasLocation INTEGER UNSIGNED NULL,
 	aliasOther VARCHAR(60) NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
@@ -31,7 +31,7 @@ CREATE TABLE aliases
 CREATE TABLE groupPermissions
 (
 	memgroup_id INTEGER UNSIGNED NOT NULL,
-	location_id BIGINT UNSIGNED NOT NULL,
+	location_id INTEGER UNSIGNED NOT NULL,
 	action_id INTEGER UNSIGNED NOT NULL,
 	permission VARCHAR(4) NOT NULL DEFAULT 'i',
 	resource VARCHAR(16) NULL
@@ -46,7 +46,7 @@ ALTER TABLE groupPermissions ADD CONSTRAINT pkgroupPermissions
 /* Build Table Structure */
 CREATE TABLE location_meta
 (
-	location_id BIGINT UNSIGNED NOT NULL,
+	location_id INTEGER UNSIGNED NOT NULL,
 	name VARCHAR(45) NOT NULL,
 	value VARCHAR(45) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -60,21 +60,22 @@ ALTER TABLE location_meta ADD CONSTRAINT pklocation_meta
 /* Build Table Structure */
 CREATE TABLE locations
 (
-	location_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	location_parent BIGINT UNSIGNED NULL,
-	location_resource VARCHAR(16) NOT NULL,
-	location_name VARCHAR(65) NULL,
-	inherit TINYINT UNSIGNED NULL DEFAULT 1,
-	defaultChild BIGINT UNSIGNED NULL,
-	location_createdOn DATETIME NOT NULL
+	location_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	parent INTEGER UNSIGNED NULL,
+	name VARCHAR(65) NOT NULL,
+	resourceType VARCHAR(16) NOT NULL,
+	resourceId INTEGER UNSIGNED NOT NULL,
+	creationDate DATETIME NOT NULL,
+	lastModified TIMESTAMP ON UPDATE CURRENT_TIMESTAMP /* This will update on each save */
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 /* Table Items: locations */
 
 /* Add Indexes for: locations */
-CREATE INDEX locations_location_parent_Idx ON locations (location_parent);
-CREATE INDEX locations_location_defaultChild_Idx ON locations (defaultChild);
-CREATE INDEX locations_location_resource_location_parent_Idx ON locations (location_resource, location_parent);
+CREATE INDEX locations_parent_Idx ON locations (parent);
+CREATE INDEX locations_parent_name_Idx ON locations (parent, name);
+CREATE INDEX locations_parent_resourceType_Idx ON locations (parent, resourceType);
+CREATE UNIQUE INDEX locations_resourceType_resourceId ON locations (resourceType, resourceId);
 
 /******************** Add Table: member_group ************************/
 
@@ -156,7 +157,7 @@ CREATE TABLE site_meta
 CREATE TABLE sites
 (
 	site_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	location_id BIGINT UNSIGNED NOT NULL,
+	location_id INTEGER UNSIGNED NOT NULL,
 	name VARCHAR(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
@@ -195,7 +196,7 @@ ALTER TABLE user_in_member_group ADD CONSTRAINT pkuser_in_member_group
 CREATE TABLE userPermissions
 (
 	user_id INTEGER UNSIGNED NOT NULL,
-	location_id BIGINT UNSIGNED NOT NULL,
+	location_id INTEGER UNSIGNED NOT NULL,
 	action_id INTEGER UNSIGNED NOT NULL,
 	permission VARCHAR(4) NOT NULL DEFAULT 'i',
 	resource VARCHAR(16) NULL
@@ -257,11 +258,7 @@ ALTER TABLE location_meta ADD CONSTRAINT fk_location_meta_locations
 
 /************ Foreign Key: fk_locations_locations ***************/
 ALTER TABLE locations ADD CONSTRAINT fk_locations_locations
-	FOREIGN KEY (location_parent) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
-
-/************ Foreign Key: fk_locations_locations_defaultChild ***************/
-ALTER TABLE locations ADD CONSTRAINT fk_locations_locations_defaultChild
-	FOREIGN KEY (defaultChild) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+	FOREIGN KEY (parent) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_mod_config_modules ***************/
 ALTER TABLE mod_config ADD CONSTRAINT fk_mod_config_modules
