@@ -456,7 +456,7 @@ class BentoBaseInstaller
 				{
 					throw new Exception('Module Installation failed.');
 				}
-				$rootLocation->meta[$name] = $package;
+				$rootLocation->setMeta($name, $package);
 			}
 			$rootLocation->save();
 

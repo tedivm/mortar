@@ -52,7 +52,7 @@ class Location
 	protected $meta = array();
 	protected $inherit = true;
 
-	public function __construct($id = '')
+	public function __construct($id = null)
 	{
 		$this->loadLocation($id);
 	}
@@ -176,9 +176,9 @@ class Location
 			{
 				$dbLocation = new ObjectRelationshipMapper('locations');
 				$dbLocation->location_id = $id;
-				if($dbLocation->select('1'))
+				if($dbLocation->select(1))
 				{
-					$locationInfo['id'] = $dbLocation->id;
+					$locationInfo['id'] = $dbLocation->location_id;
 					$locationInfo['parent'] = $dbLocation->parent;
 					$locationInfo['name'] = $dbLocation->name;
 					$locationInfo['resourceType'] = $dbLocation->resourceType;
@@ -233,9 +233,9 @@ class Location
 
 		if($this->id > 0)
 		{
-
 			$db_location->location_id = $this->id ;
 			$db_location->select('1'); // fill the object with the saved values
+
 		}else{
 			// should only run when id isn't set (so new objects only)
 			$db_location->query_set('creationDate', 'NOW()');
