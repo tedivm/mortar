@@ -42,7 +42,9 @@ class ModelRegistry
 			while($row = $moduleRows->fetch_assoc())
 			{
 				$moduleInfo = new PackageInfo($row['mod_id']);
+
 				$className = $moduleInfo->getName() . 'Model' . $row['name'];
+
 				$handlers[$row['resource']] = array('name' => $row['name'],
 													'module' => $row['mod_id'],
 													'resource' => $row['resource'],

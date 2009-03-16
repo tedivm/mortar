@@ -44,6 +44,9 @@ class MemberGroup
 		if(!$this->id)
 			return false;
 
+		if($userId instanceof User)
+			$userId = $userId->getId();
+
 		if($this->containsUser($userId))
 			return true;
 

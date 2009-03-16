@@ -22,61 +22,57 @@ class Url
 		$urlString = $site->currentLink;
 
 
-		if($info->Configuration['url']['modRewrite'] && isset($moduleInfo))
+		if(!$info->Configuration['url']['modRewrite'])
 		{
-			// ModRewrite check
-		//	unset($attributes['engine']);
-			unset($attributes['moduleId']);
+			$urlString .= 'index.php?';
 
-			$location = new Location($moduleInfo['locationId']);
-			$pathString = '';
+			if(isset($attributes['locationId']))
+				$urlString .= 'p=';
+		}
 
-			while($parent = $location->getParent())
+		$location = new Location($attributes['locationId']);
+		unset($attributes['locationId']);
+		$pathString = '';
+
+		while($parent = $location->getParent())
+		{
+			if($parent->getResource() == 'site')
+				break;
+
+			$pathString = str_replace(' ', '-', $parent->getName()) . '/' . $pathString;
+
+			$location = $parent;
+		}
+
+		$modelInfo = $location->getResource(true);
+
+
+		$parameters = new DisplayMaker();
+
+		if(!$parameters->load_template('UrlPath', $moduleInfo['Package']))
+		{
+			$parameters->set_display_template('{# action #}/{# id #}/');
+		}
+
+		$urlTags = $parameters->tagsUsed();
+
+		foreach($urlTags as $tag)
+		{
+
+			$string = (isset($attributes[$tag])) ? $attributes[$tag] : '_';
+			if(isset($attributes[$tag]))
 			{
-				if($parent->getResource() == 'site')
-					break;
-
-				$pathString = str_replace(' ', '_', $parent->getName()) . '/' . $pathString;
-
-				$location = $parent;
+				$parameters->add_content($tag, htmlentities($attributes[$tag]));
+				unset($attributes[$tag]);
+			}else{
+				$parameters->add_content($tag, '_');
 			}
-
-			$urlString .= $pathString . str_replace(' ', '_', $moduleInfo['Name']) . '/';
-
-			$parameters = new DisplayMaker();
-
-			if(!$parameters->load_template('UrlPath', $moduleInfo['Package']))
-			{
-				$parameters->set_display_template('{# action #}/{# id #}/');
-			}
-
-			$urlTags = $parameters->tagsUsed();
-
-			foreach($urlTags as $tag)
-			{
-
-				$string = (isset($attributes[$tag])) ? $attributes[$tag] : '_';
-
-
-				if(isset($attributes[$tag]))
-				{
-					$parameters->add_content($tag, htmlentities($attributes[$tag]));
-					unset($attributes[$tag]);
-				}else{
-					$parameters->add_content($tag, '_');
-				}
-
-			}
-
-			$urlString .= $parameters->make_display(true);
-			$urlString = rtrim(trim($urlString), '_/');
-
-
-		}else{
-
-			$urlString .= 'index.php';
 
 		}
+
+		$urlString .= $parameters->make_display(true);
+		$urlString = rtrim(trim($urlString), '_/');
+
 
 
 		if(count($attributes) > 0)
@@ -124,7 +120,7 @@ class Url
 	public function __set($name, $value)
 	{
 		if($name == 'id')
-			$value = str_replace(' ', '_', $value);
+			$value = str_replace(' ', '-', $value);
 
 		$this->attributes[$name] = $value;
 	}
@@ -140,3 +136,5 @@ class Url
 	}
 
 }
+
+?>

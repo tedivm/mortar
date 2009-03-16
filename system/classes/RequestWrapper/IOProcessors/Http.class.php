@@ -46,6 +46,35 @@ class IOProcessorHttp extends IOProcessorCli
 	}
 
 
+
+	public function finishPath($pathArray, $package, $resource = null)
+	{
+		$moduleInfo = new PackageInfo($package);
+
+		if(is_array($pathArray) && count($pathArray) > 0)
+		{
+			$query = Query::getQuery();
+
+			$urlTemplate = new DisplayMaker();
+
+			if( (!is_null($resource) && $url->loadTemplate($resource . 'UrlMapping', $package))
+				|| $url->loadTemplate('UrlMapping', $package))
+			{
+				$tags = $url->tagsUsed();
+				if(count($tags) > 0)
+				{
+					foreach($tags as $name)
+						$query[$name] = array_shift($pathArray);
+				}
+
+			}elseif(is_string($pathArray[0])){
+				$query['action'] = $pathArray[0];
+			}
+
+			$query->save();
+		}
+	}
+
 }
 
 

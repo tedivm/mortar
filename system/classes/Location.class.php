@@ -9,46 +9,183 @@ interface intlocation
 	public function resource_type();
 }
 
-class Location implements intlocation
+/*
+interface Location
 {
-	public $id;
-	public $parent;
-	public $name;
-	public $resource;
-	public $inherits = true;
-	public $meta = array();
-	public $siteId;
-	public $defaultChild;
-	protected $directoryTypes = array('directory', 'site');
+	public function __construct($id = null);
+
+	public function getId();
+
+	public function parent($id = null);
+
+	public function name($name = null);
+
+	public function resource();
+
+	public function resourceId();
+
+	public function setResource($model);
+
+	public function getCreationDate();
+
+	public function getLastModified();
+
+	public function owner();
+
+	public function save();
+
+	public function delete();
+
+}
+
+*/
+
+class Location
+{
+	protected $id;
+	protected $parent;
+	protected $name;
+	protected $resourceType;
+	protected $resourceId;
 	protected $createdOn;
+	protected $lastModified;
+	protected $meta = array();
+	protected $inherit = true;
 
 	public function __construct($id = '')
 	{
 		$this->loadLocation($id);
 	}
 
-	protected function loadLocation($id)
+	public function attachResource(Model $object)
 	{
-		if($id != '')
-		{
+		$this->resourceType = $object->getType();
+		$this->resourceId = $object->getId();
+	}
 
+	public function setResource($type, $id)
+	{
+		$this->resourceId = $id;
+		$this->resourceType = $type;
+	}
+
+	public function getResource($id = false)
+	{
+		if($id)
+		{
+			return array('id' => $this->resourceId, 'type' => $this->resourceType);
+		}else{
+			$modelInfo = ModelRegistry::getHandler($this->resourceType);
+			$model = new $modelInfo['class']($this->resourceId);
+			return $model;
+		}
+
+	}
+
+	public function getCreationDate()
+	{
+		return $this->createdOn;
+	}
+
+	public function getLastModified()
+	{
+		return $this->lastModified;
+	}
+
+	public function getParent()
+	{
+		return new Location($this->parent);
+		return $this->parent;
+	}
+
+	public function getId()
+	{
+		return $this->id;
+	}
+
+	public function getName()
+	{
+		return $this->name;
+	}
+
+	public function getMeta($name = null)
+	{
+		if($name)
+		{
+			return $this->meta[$name];
+		}else{
+			return $this->meta;
+		}
+	}
+
+	public function setMeta($name, $value)
+	{
+		$this->meta[$name] = $value;
+	}
+
+	public function getLink()
+	{
+		 switch(strtolower($this->resourceType))
+		 {
+		 	case 'site':
+
+		 		break;
+
+		 	case 'root':
+
+		 		break;
+
+		 	default:
+
+		 		$url = $this->parent->getLink();
+		 		$url .= $this->getName() . '/';
+
+
+
+
+
+
+		 		break;
+		 }
+	}
+
+
+	public function inheritsPermission()
+	{
+		return ($this->inherits == 1);
+	}
+
+	public function setName($name)
+	{
+		$this->name = str_replace(' ', '_', $name);
+	}
+
+	public function setParent(Location $parent = null)
+	{
+		$this->parent = $location;
+	}
+
+	protected function loadLocation($id = null)
+	{
+		if($id != null)
+		{
 			$cache = new Cache('locations', $id, 'info');
-			!$locationInfo = $cache->get_data();
+			$locationInfo = $cache->getData();
 
 			if(!$cache->cacheReturned)
 			{
-				$db_location = new ObjectRelationshipMapper('locations');
-				$db_location->location_id = $id;
-				if($db_location->select('1'))
+				$dbLocation = new ObjectRelationshipMapper('locations');
+				$dbLocation->location_id = $id;
+				if($dbLocation->select('1'))
 				{
-					$locationInfo['parentId'] = $db_location->location_parent;
-					$locationInfo['id'] = $db_location->location_id;
-					$locationInfo['resource'] = $db_location->location_resource;
-					$locationInfo['name'] = $db_location->location_name;
-					$locationInfo['inherits'] = ($db_location->inherit == 1);
-					$locationInfo['siteId'] = $this->getSite();
-					$locationInfo['createdOn'] = $db_location->location_createdOn;
-					$locationInfo['defaultChild'] = $db_location->defaultChild;
+					$locationInfo['id'] = $dbLocation->id;
+					$locationInfo['parent'] = $dbLocation->parent;
+					$locationInfo['name'] = $dbLocation->name;
+					$locationInfo['resourceType'] = $dbLocation->resourceType;
+					$locationInfo['resourceId'] = $dbLocation->resourceId;
+					$locationInfo['createdOn'] = $dbLocation->createdOn;
+					$locationInfo['lastModified'] = $dbLocation->lastModified;
+					$locationInfo['inherits'] = ($dbLocation->inherits == 1);
 
 					$db_meta = new ObjectRelationshipMapper('location_meta');
 					$db_meta->location_id = $locationInfo['id'];
@@ -65,24 +202,23 @@ class Location implements intlocation
 				}else{
 					$locationInfo = false;
 				}
+
 				$cache->store_data($locationInfo);
 			}
 
 			if($locationInfo != false)
 			{
-				$this->id = $locationInfo['id'];
-				$this->parent = ($locationInfo['parentId'] > 0) ? new Location($locationInfo['parentId']) : false;
-				$this->siteId = $locationInfo['siteId'];
-				$this->resource = $locationInfo['resource'];
-				$this->name = $locationInfo['name'];
-				$this->inherits = $locationInfo['inherits'];
-				$this->defaultChild = $locationInfo['defaultChild'];
+				$properties = array_keys($locationInfo);
 
-				if($this->parent)
-					$locationInfo['meta'] = array_merge($this->parent->meta, $locationInfo['meta']);
+				foreach($properties as $property)
+					$this->$property = $locationInfo[$property];
 
-				$this->meta = $locationInfo['meta'];
-				$this->createdOn = $locationInfo['createdOn'];
+				if(is_numeric($this->parent))
+				{
+					$this->parent = new Location($this->parent);
+					$this->meta = array_merge($this->parent->getMeta(), $this->meta);
+				}
+
 				return true;
 			}else{
 				return false;
@@ -90,61 +226,6 @@ class Location implements intlocation
 		}
 	}
 
-	public function parent_location()
-	{
-		return $this->parent;
-	}
-
-	public function getParent()
-	{
-		return $this->parent;
-	}
-
-	public function getId()
-	{
-		return $this->id;
-	}
-
-	public function getName()
-	{
-		return $this->name;
-	}
-
-	public function getResource()
-	{
-		return $this->resource;
-	}
-
-	public function getCreationDate()
-	{
-		return $this->createdOn;
-	}
-
-	public function setCreationDate($dateTime)
-	{
-		$this->createdOn = date('Y-m-d H:i:s', $date);
-	}
-
-	public function getDefaultChild()
-	{
-		if(is_numeric($this->defaultChild))
-		{
-			return new Location($this->defaultChild);
-		}else{
-			return false;
-		}
-	}
-
-	//need to get rid of that
-	public function location_id()
-	{
-		return $this->id;
-	}
-
-	public function resource_type()
-	{
-		return $this->resource;
-	}
 
 	public function save()
 	{
@@ -152,40 +233,30 @@ class Location implements intlocation
 
 		if($this->id > 0)
 		{
+
 			$db_location->location_id = $this->id ;
-			$db_location->select('1');
-		}elseif(isset($this->createdOn)){
-			$db_location->location_createdOn = $this->createdOn;
+			$db_location->select('1'); // fill the object with the saved values
 		}else{
-			$db_location->query_set('location_createdOn', 'NOW()');
+			// should only run when id isn't set (so new objects only)
+			$db_location->query_set('creationDate', 'NOW()');
 		}
 
+		$db_location->query_set('lastModified', 'NOW()');
 
 		if(($this->parent instanceof Location))
 		{
 			$parentId = $this->parent->getId();
 
 			if(is_numeric($parentId))
-			{
-				$db_location->location_parent = $parentId;
-			}
-
-		}elseif(is_numeric($this->parent) && $this->parent > 0){
-			$db_location->location_parent = $this->parent;
+				$db_location->parent = $parentId;
 		}
 
 
-		$db_location->location_name = str_replace('_', ' ', $this->name);
-		$db_location->location_resource = $this->resource;
-
-		if(is_numeric($this->defaultChild))
-		{
-			$db_location->defaultChild = $this->defaultChild;
-		}else{
-			$db_location->query_set('defaultChild', 'NULL');
-		}
-
+		$db_location->name = $this->name;
+		$db_location->resourceType = $this->resourceType;
+		$db_location->resourceId = $this->resourceId;
 		$db_location->inherit = ($this->inherits) ? 1 : 0;
+
 
 		if(!$db_location->save())
 		{
@@ -193,31 +264,31 @@ class Location implements intlocation
 		}
 
 
-		$this->id = $db_location->location_id;
+		if(!is_numeric($this->id))
+			$this->id = $db_location->location_id;
 
 
+		// Erase all current values, since they are going to be replaced anyways
 		$metaDelete = new ObjectRelationshipMapper('location_meta');
 		$metaDelete->location_id = $this->id;
 		$metaDelete->delete(0);
 
-		if(is_array($this->meta))
+
+		foreach($this->meta as $name => $value)
 		{
-			foreach($this->meta as $name => $value)
-			{
-				$metaAdd = new ObjectRelationshipMapper('location_meta');
-				$metaAdd->location_id = $this->id;
-				$metaAdd->name = $name;
-				$metaAdd->value = $value;
-				$metaAdd->save();
-			}
+			$metaAdd = new ObjectRelationshipMapper('location_meta');
+			$metaAdd->location_id = $this->id;
+			$metaAdd->name = $name;
+			$metaAdd->value = $value;
+			$metaAdd->save();
 		}
+
 		Cache::clear('locations', $this->id, 'info');
 	}
 
-	public function inheritsPermission()
-	{
-		return ($this->inherits == 1);
-	}
+
+
+
 
 	public function getChildByName($name)
 	{
@@ -230,7 +301,7 @@ class Location implements intlocation
 			$stmt = $db->stmt_init();
 
 
-			$stmt->prepare('SELECT location_id FROM locations WHERE location_parent = ? AND location_name = ?');
+			$stmt->prepare('SELECT location_id FROM locations WHERE parent = ? AND name = ?');
 			$stmt->bind_param_and_execute('is', $this->id, $name);
 
 			$childLocation = $stmt->fetch_array();
@@ -262,10 +333,10 @@ class Location implements intlocation
 
 			if($type != 'all')
 			{
-				$stmt->prepare('SELECT location_id FROM locations WHERE location_parent = ? AND location_resource = ?');
+				$stmt->prepare('SELECT location_id FROM locations WHERE parent = ? AND resource = ?');
 				$stmt->bind_param_and_execute('is', $this->id, $type);
 			}else{
-				$stmt->prepare('SELECT location_id FROM locations WHERE location_parent = ?');
+				$stmt->prepare('SELECT location_id FROM locations WHERE parent = ?');
 				$stmt->bind_param_and_execute('i', $this->id);
 			}
 

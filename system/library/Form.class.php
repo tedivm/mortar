@@ -102,7 +102,7 @@ class Form
 
 		if(!$cache->cacheReturned || !$this->cacheEnabled)
 		{
-			if($this->xsfrProtection)
+			if(self::$xsfrProtection)
 			{
 				$nonce = $this->getNonce();
 				if($nonce != 0)

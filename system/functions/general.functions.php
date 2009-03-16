@@ -80,8 +80,8 @@ function loadHook($LocationId, $name)
 
 function staticHack($className, $memberName)
 {
-
-	if (!is_string($className)) $className = get_class($className);
+	if(is_object($className))
+		$className = get_class($className);
 
 	if(!class_exists($className, false))
 		return;

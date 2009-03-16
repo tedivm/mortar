@@ -13,6 +13,8 @@ class ObjectRelationshipMapper
 	protected $columns = array();
 	private $primary_keys = array();
 	private $selected = false;
+
+	public static $cacheTime = 3600;
 	protected $data_types = array(
 	'tinyint' => 'i',
 	'smallint' => 'i',
@@ -41,6 +43,8 @@ class ObjectRelationshipMapper
 	private $select_stmt;
 	protected $num_rows = 0;
 	public $sql_errno = 0;
+
+
 
 
 	public function __construct($table, $db_write = '', $db_read = '')
@@ -284,19 +288,20 @@ class ObjectRelationshipMapper
 				}
 
 			}catch(Exception $e){
+
 				switch ($this->sql_errno) {
 					case 0:
 						return true;
 
 					case 1022:
 					// 1022 == duplicate key
-
 						$this->sql_errno = 0;
 						return $this->update();
 						break;
 
 					default:
-						false;
+						echo 4;
+						return false;
 						break;
 				}
 
@@ -308,121 +313,6 @@ class ObjectRelationshipMapper
 		}
 	}
 
-
-	protected function insert()
-	{
-		$sql_columns = '(';
-		$sql_values = '(';
-		$sql_input = array();
-
-		foreach($this->columns as $column_name => $column_info)
-		{
-			if($column_info['Null'] == 'No' && !isset($this->values[$column_name]) && !isset($this->values[$column_info['Default']]))
-				return false;
-
-			$sql_columns .= $column_name . ', ';
-			if($this->direct_values[$column_name])
-			{
-				$sql_values .= $this->direct_values[$column_name] .= ', ';
-			}else{
-				if(isset($this->values[$column_name]))
-				{
-					$sql_typestring .= $this->get_type($column_info['Type']);
-					$sql_input[] = $this->values[$column_name];
-					$sql_values .= '?, ';
-				}else{
-					$sql_values .= 'NULL, ';
-				}
-			}
-		}
-
-		$sql_columns = rtrim($sql_columns, ' ,') . ') ';
-		$sql_values = rtrim($sql_values, ' ,') . ') ';
-		array_unshift($sql_input, $sql_typestring);
-
-		$query = 'INSERT INTO ' . $this->table . ' ' . $sql_columns . 'VALUES ' . $sql_values;
-
-		$db = db_connect($this->db_write);
-		$insert_stmt = $db->stmt_init();
-		$insert_stmt->prepare($query);
-		call_user_func_array(array($insert_stmt, 'bind_param_and_execute'), $sql_input);
-
-
-		if($insert_stmt->errno > 0)
-		{
-			$this->sql_errno = $insert_stmt->errno;
-			return false;
-		}
-
-		if(strpos($this->columns[$this->primary_keys[0]]['Extra'], 'auto_increment') !== false)
-			$this->values[$this->primary_keys[0]] = $insert_stmt->insert_id;
-
-		return true;
-
-	}
-
-	protected function update()
-	{
-
-		// UPDATE table SET column = ?, column = value, WHERE id = ?
-
-		$sql_set = 'SET ';
-		$sql_input = array();
-
-
-		foreach($this->columns as $column_name => $column_info)
-		{
-			if($column_info['Null'] == 'No' && !isset($this->values[$column_name]) && !isset($this->values[$column_info['Default']]))
-				return false;
-
-			$sql_columns .= $column_name . ', ';
-			if($this->direct_values[$column_name])
-			{
-				$sql_set .= $column_name . ' = ' . $this->direct_values[$column_name] .= ', ';
-			}else{
-				if(isset($this->values[$column_name]))
-				{
-					$sql_typestring .= $this->get_type($column_info['Type']);
-					$sql_input[] = $this->values[$column_name];
-					$sql_set .= $column_name . ' = ?, ';
-				}else{
-					$sql_set .= $column_name . ' = NULL, ';
-				}
-			}
-		}
-
-
-		$sql_where = 'WHERE ';
-		$loop = 0;
-		foreach($this->primary_keys as $primary_key)
-		{
-			if($loop > 0)
-			{
-				$sql_where .= 'AND ';
-			}else{
-				$loop = 1;
-			}
-
-			$sql_where .= $primary_key . '= ? ';
-			$sql_input[] = $this->values[$primary_key];
-			$sql_typestring .= $this->get_type($this->columns[$primary_key]['Type']);
-		}
-
-		$sql_where = rtrim($sql_where, ' ,');
-		$sql_set = rtrim($sql_set, ' ,');
-		array_unshift($sql_input, $sql_typestring);
-
-		$query = 'UPDATE ' . $this->table . ' ' . $sql_set . ' ' . $sql_where;
-
-		$db = db_connect($this->db_write);
-		$update_stmt = $db->stmt_init();
-		$update_stmt->prepare($query);
-
-		$results = call_user_func_array(array($update_stmt, 'bind_param_and_execute'), $sql_input);
-		return $results;
-	}
-
-	// programmer interface stuff
 
 	public function next()
 	{
@@ -477,7 +367,8 @@ class ObjectRelationshipMapper
 	public function __get($name)
 	{
 
-		switch ($name) {
+		switch (strtolower($name))
+		{
 			case 'num_rows':
 				$value = $this->num_rows;
 				break;
@@ -485,6 +376,10 @@ class ObjectRelationshipMapper
 			case 'errno':
 				$value = $this->sql_errno;
 				break;
+
+			case 'primaryKey':
+				if(count($this->primary_keys) == 1)
+					$name = $this->primary_keys[0];
 
 			default:
 				$value = $this->values[$name];
@@ -496,6 +391,9 @@ class ObjectRelationshipMapper
 
 	public function __set($name, $value)
 	{
+		if(strtolower($name) == 'primarykey' && count($this->primary_keys) == 1)
+			$name = $this->primary_keys[0];
+
 		return ($this->values[$name] = $value);
 	}
 
@@ -527,6 +425,16 @@ class ObjectRelationshipMapper
 		return $temp;
 	}
 
+	public function getColumns($withAttributes = false, $includePrimaryKey = true)
+	{
+		$output = $this->columns;
+
+		if(!$includePrimaryKey && count($this->primary_keys) == 1)
+			unset($output[$this->primary_keys[0]]);
+
+		return ($withAttributes) ? $output : array_keys($output);
+	}
+
 
 	// internal stuff
 
@@ -534,7 +442,7 @@ class ObjectRelationshipMapper
 	{
 
 		$cache = new Cache('orm', 'schema', $this->table);
-		$cache->cache_time = '3600';
+		$cache->cache_time = self::$cacheTime;
 
 		if(!($schema = $cache->get_data()))
 		{
@@ -594,6 +502,135 @@ class ObjectRelationshipMapper
 
 		return ($this->data_types[$datatype]) ? ($this->data_types[$datatype]) : 's';
 	}
+
+	protected function insert()
+	{
+		$sql_columns = '(';
+		$sql_values = '(';
+		$sql_input = array();
+
+		// the following code snippet is identical to the one in the update function, and should be refractured
+		// into its own function
+		foreach($this->columns as $column_name => $column_info)
+		{
+
+			if($column_info['Null'] == 'No' && !isset($this->values[$column_name]) && !isset($this->values[$column_info['Default']]))
+				return false;
+
+			if($this->direct_values[$column_name])
+			{
+				$sql_columns .= $column_name . ', ';
+				$sql_values .= $this->direct_values[$column_name] . ', ';
+
+			}else{
+
+				if(isset($this->values[$column_name]))
+				{
+					$sql_columns .= $column_name . ', ';
+					$sql_typestring .= $this->get_type($column_info['Type']);
+					$sql_input[] = $this->values[$column_name];
+					$sql_values .= '?, ';
+				}else{
+					//$sql_values .= 'NULL, ';
+				}
+			}
+		}
+
+		$sql_columns = rtrim($sql_columns, ' ,') . ') ';
+		$sql_values = rtrim($sql_values, ' ,') . ') ';
+		array_unshift($sql_input, $sql_typestring);
+
+		$query = 'INSERT INTO ' . $this->table . ' ' . $sql_columns . 'VALUES ' . $sql_values;
+
+
+		$db = db_connect($this->db_write);
+		$insert_stmt = $db->stmt_init();
+		$insert_stmt->prepare($query);
+		call_user_func_array(array($insert_stmt, 'bind_param_and_execute'), $sql_input);
+
+
+		if($insert_stmt->errno > 0)
+		{
+			$this->sql_errno = $insert_stmt->errno;
+			return false;
+		}
+
+		if(strpos($this->columns[$this->primary_keys[0]]['Extra'], 'auto_increment') !== false)
+			$this->values[$this->primary_keys[0]] = $insert_stmt->insert_id;
+
+		return true;
+
+	}
+
+	protected function update()
+	{
+
+		// UPDATE table SET column = ?, column = value, WHERE id = ?
+
+		$sql_set = 'SET ';
+		$sql_input = array();
+
+		// the following code snippet is identical to the one in the update function, and should be refractured
+		// into its own function
+		foreach($this->columns as $column_name => $column_info)
+		{
+			if($column_info['Null'] == 'No' && !isset($this->values[$column_name]) && !isset($this->values[$column_info['Default']]))
+				return false;
+
+			$sql_columns .= $column_name . ', ';
+			if($this->direct_values[$column_name])
+			{
+				$sql_set .= $column_name . ' = ' . $this->direct_values[$column_name] .= ', ';
+			}else{
+
+				if(isset($this->values[$column_name]))
+				{
+					$sql_typestring .= $this->get_type($column_info['Type']);
+					$sql_input[] = $this->values[$column_name];
+					$sql_set .= $column_name . ' = ?, ';
+				}else{
+					$sql_set .= $column_name . ' = NULL, ';
+				}
+			}
+		}
+
+
+		$sql_where = 'WHERE ';
+		$loop = 0;
+		foreach($this->primary_keys as $primary_key)
+		{
+			if($loop > 0)
+			{
+				$sql_where .= 'AND ';
+			}else{
+				$loop = 1;
+			}
+
+			$sql_where .= $primary_key . '= ? ';
+			$sql_input[] = $this->values[$primary_key];
+			$sql_typestring .= $this->get_type($this->columns[$primary_key]['Type']);
+		}
+
+		$sql_where = rtrim($sql_where, ' ,');
+		$sql_set = rtrim($sql_set, ' ,');
+		array_unshift($sql_input, $sql_typestring);
+
+		$query = 'UPDATE ' . $this->table . ' ' . $sql_set . ' ' . $sql_where;
+
+		$db = db_connect($this->db_write);
+		$update_stmt = $db->stmt_init();
+		$update_stmt->prepare($query);
+
+		$results = call_user_func_array(array($update_stmt, 'bind_param_and_execute'), $sql_input);
+		return $results;
+	}
+
+	protected function createColumnString()
+	{
+
+	}
+
+
 
 }
 
