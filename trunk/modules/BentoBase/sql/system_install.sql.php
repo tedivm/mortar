@@ -75,7 +75,7 @@ CREATE TABLE locations
 CREATE INDEX locations_parent_Idx ON locations (parent);
 CREATE INDEX locations_parent_name_Idx ON locations (parent, name);
 CREATE INDEX locations_parent_resourceType_Idx ON locations (parent, resourceType);
-CREATE UNIQUE INDEX locations_resourceType_resourceId ON locations (resourceType, resourceId);
+CREATE INDEX locations_resourceType_resourceId ON locations (resourceType, resourceId);
 
 /******************** Add Table: member_group ************************/
 

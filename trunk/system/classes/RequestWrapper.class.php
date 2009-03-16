@@ -24,7 +24,8 @@ class RequestWrapper
 				}catch(Exception $e){
 
 
-					exit();
+					echo 'Attempting to deal with above errors';
+				//	exit();
 
 					$errorAction = $this->handleError($e);
 					$this->runAction($errorAction);
@@ -48,11 +49,16 @@ class RequestWrapper
 
 	}
 
+	public function getHandler()
+	{
+		return $this->ioHandler;
+	}
+
 	protected function runAction($action)
 	{
-		$outputFilter = $this->loadFormatHandler();
-		$outputFilter->initialize($action);
-		$output = $outputFilter->getFinalOutput();
+		$outputController = $this->loadFormatHandler();
+		$outputController->initialize($action);
+		$output = $outputController->getFinalOutput();
 		$this->ioHandler->output($output);
 	}
 
@@ -101,7 +107,6 @@ class RequestWrapper
 			if(!class_exists('AbstractOutputController'))
 				throw new BentoError('Unable to find output filter AbstractOutputController');
 		}
-
 
 		$formatFilter = $format . 'OutputController';
 
@@ -208,8 +213,6 @@ class RequestWrapper
 
 		$pathArray = $query['pathArray'];
 
-
-
 		if($query['module'] || $pathArray[0] == 'module')
 		{
 			if($pathArray[0] == 'module')
@@ -220,22 +223,23 @@ class RequestWrapper
 				$module = $query['module'];
 			}
 
+			$this->ioHandler->finishPath($pathArray, $module);
+			$query = Query::getQuery();
+
 			$moduleInfo = new PackageInfo($module);
 
-			if(is_array($pathArray) && count($pathArray) > 0)
-			{
-				if($url->loadTemplate($modelHandler['resource'] . 'UrlMapping', $moduleInfo->getName())
-					|| $url->loadTemplate('UrlMapping', $moduleInfo->getName())
-					|| $url->setDisplayTemplate('{# action #}/{# id #}/'))
-					{
-						$this->customQueryFromPath($url->tagsUsed(), $pathArray);
-						$query = Query::getQuery();
-					}
-			}
+			if($moduleInfo->getStatus() != 'Installed')
+				throw new ResourceNotFoundError('Module not installed');
 
 			$action = ($query['action']) ? $query['action'] : 'Default';
 
+			if(!($actionInfo = $moduleInfo->getActions(($query['action']) ? $query['action'] : 'Default')))
+				throw new ResourceNotFoundError();
 
+
+			$className = $actionInfo['className'];
+			$path = $actionInfo['path'];
+			$argument = '';
 
 
 		}else{
@@ -243,7 +247,8 @@ class RequestWrapper
 
 			// get location
 
-			if(is_numeric($query['location'])){
+			if(is_numeric($query['location']))
+			{
 				$location = new Location($query['location']);
 
 			}elseif(count($pathArray) > 0){
@@ -263,62 +268,42 @@ class RequestWrapper
 			}
 
 
-
 			// figure out what to do with it
-
 			$modelHandler = ModelRegistry::getHandler($location->getResource());
-			$moduleInfo = new PackageInfo($modelHandler['module']);
 
-			if(is_array($pathArray) && count($pathArray) > 0)
-			{
-				if($url->loadTemplate($modelHandler['resource'] . 'UrlMapping', $moduleInfo->getName())
-					|| $url->loadTemplate('UrlMapping', $moduleInfo->getName())
-					|| $url->setDisplayTemplate('{# action #}/{# id #}/'))
-					{
-						$this->customQueryFromPath($url->tagsUsed(), $pathArray);
-						$query = Query::getQuery();
-					}
-			}
+			if(!$modelHandler)
+				throw new ResourceNotFoundError('Unable to load model handler.');
 
-			$action = $query['action'] ? $query['action'] : 'read';
-			$actionInfo = staticFunctionHack($modelHandler['class'], 'getAction', $action);
-			$actionInfo['argument'] = $location;
+			$this->ioHandler->finishPath($pathArray, $modelHandler['module'], $modelHandler['resource']);
 
-
-
-	}
-
-
-
-
-		if(!class_exists($actionInfo['className']))
-			include($actionInfo['path']);
-
-
-
-
-
-
-
-
-
-
-
-
-		return array('className' => $actionInfo['className'], 'argument' => $actionInfo['argument']);
-	}
-
-	protected function customQueryFromPath($tags, $pathArray)
-	{
-		if(count($tags) > 0)
-		{
 			$query = Query::getQuery();
-			foreach($tags as $name)
+
+			if($query['action'] != 'Add')
 			{
-				$query[$name] = array_shift($pathArray);
+				$modelClassName = $modelHandler['className'];
+				$model = new $modelClassName($location->getResourceId());
+
+				if(!$model->checkAuth($query['action']))
+					throw new AuthenticationError();
+
+				$actionInfo = $model->actionLookup($query['action'] ? $query['action'] : 'Read');
+				$className = $actionInfo['className'];
+				$path = $actionInfo['path'];
+
+				$argument = $model;
+			}else{
+
 			}
-			$query->save();
+
 		}
+
+		if(!class_exists($className, false))
+		{
+			if(!include($path) || !class_exists($className, false))
+				throw new ResourceNotFoundError('Unable to load action class ' . $className . ' at location: ' . $path);
+		}
+
+		return array('className' => $className, 'argument' => $argument);
 	}
 
 	protected function processPathArray($pathArray)
@@ -329,7 +314,7 @@ class RequestWrapper
 
 		foreach($pathArray as $pathIndex => $pathPiece)
 		{
-			if(!($childLocation = $currentLocation->getChildByName(str_replace('_', ' ', $pathPiece))))
+			if(!($childLocation = $currentLocation->getChildByName(str_replace('-', ' ', $pathPiece))))
 			{
 				// will only execute during the last iteration
 				while(ModelRegistry::getHandler($currentLocation->getResource()) === false)
@@ -356,6 +341,10 @@ class RequestWrapper
 
 		return $info;
 	}
+
+
+
+
 
 }
 

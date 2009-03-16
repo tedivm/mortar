@@ -22,7 +22,12 @@ class PackageList
 		$packageList = array();
 		foreach ($packageDirectories as $packagePath)
 		{
-			$packageName = array_shift(explode('.', array_pop(explode('/', $packagePath))));
+			// STRICT standards don't let me place the explode functions as arguments of array_pop
+			// $packageName = array_shift(explode('.', array_pop(explode('/', $packagePath))));
+
+			$tmp = explode('/', $packagePath);
+			$tmp = explode('.', array_pop($tmp));
+			$packageName = array_shift($tmp);
 			$packageList[] = $packageName;
 		}
 

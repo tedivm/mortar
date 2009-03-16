@@ -30,7 +30,7 @@ class User
 	protected $username;
 	protected $email;
 	protected $allowLogin;
-	protected $memberGroups;
+	protected $memberGroups = array();
 
 	/**
 	 * Load user by ID
@@ -319,7 +319,6 @@ class ActiveUser implements SplSubject
 	{
 		return self::getInstance();
 	}
-
 
 	public function __destruct()
 	{

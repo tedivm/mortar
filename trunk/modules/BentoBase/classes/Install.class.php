@@ -42,8 +42,8 @@ class BentoBaseInstaller
 				if(!$this->setupStructure())
 					throw new Exception('Error setting up permissions', 4);
 
-				if(!$this->setupCoreModule())
-					throw new Exception('Error installing Core module.', 5);
+		//		if(!$this->setupCoreModule())
+		//			throw new Exception('Error installing Core module.', 5);
 
 
 				file_put_contents($config['path_base'] . '.blockinstall', 'To unblock installation, delete this file.');
@@ -63,7 +63,7 @@ class BentoBaseInstaller
 					$config = Config::getInstance();
 					$pathToSQL = $config['path']['modules'] . 'BentoBase/sql/system_remove.sql.php';
 					$db = dbConnect('default');
-					$db->runFile($pathToSQL);
+			//		$db->runFile($pathToSQL);
 				case 2: // database files
 					unlink($config['path']['base'] . 'data/configuration/databases.php');
 				case 1: // configuration files
@@ -249,20 +249,19 @@ class BentoBaseInstaller
 			$input = Input::getInput();
 
 			// CREATE USERS
-			if(!class_exists('ManageUser', false))
+			if(!class_exists('User', false))
 			{
-				include($config['path']['mainclasses'] . 'permissions_editing.class.php');
+				include($config['path']['mainclasses'] . 'user.class.php');
 			}
 
-			$user_admin = new ManageUser();
-			$user_admin->user_name = $input['username'];
-			$user_admin->user_password = $input['password'];
-			$user_admin->allow_login = true;
-			$user_admin->save();
+			$userAdmin = new User();
+			$userAdmin->setName($input['username']);
+			$userAdmin->setPassword($input['password']);
+			$userAdmin->save();
 
-			$user_guest = new ManageUser();
-			$user_guest->user_name = 'guest';
-			$user_guest->save();
+			$userGuest = new User();
+			$userGuest->setName('guest');
+			$userGuest->save();
 
 			// CREATE MEMBERGROUPS
 			$memgroup_admin = new MemberGroup();
@@ -282,23 +281,47 @@ class BentoBaseInstaller
 			$memgroup_user->save();
 
 			// ADD USERS TO MEMBERGROUPS
-			$memgroup_admin->addUser($user_admin->user_id);
-			$memgroup_user->addUser($user_admin->user_id);
-			$memgroup_guest->addUser($user_guest->user_id);
+			$memgroup_admin->addUser($userAdmin);
+			$memgroup_user->addUser($userAdmin);
+			$memgroup_guest->addUser($userGuest);
+
+
+
+
+
+
+
+
+			//
+
+
+
+
+
 
 			// CREATE ROOT LOCATION
-			$location_root = new Location();
-			$location_root->name = 'root';
-			$location_root->resource = 'directory';
-			$location_root->meta = array('adminTheme' => 'admin', 'htmlTheme' => 'default');
-			$location_root->save();
+			$locationRoot = new Location();
+			$locationRoot->setName('root');
+			$locationRoot->setResource('root', '0');
+
+			$locationRoot->setMeta('adminTheme', 'admin');
+			$locationRoot->setMeta('htmlTheme', 'default');
+
+			$locationRoot->save();
+
+
+
+
+			if(!$this->setupCoreModule())
+				return false;
+
 
 			// CREATE SITE
-			$location_site = new Location();
-			$location_site->name = $input['siteName'];
-			$location_site->resource = 'site';
-			$location_site->parent = $location_root;
-			$location_site->save();
+			$locationSite = new Location();
+			$locationSite->name = $input['siteName'];
+			$locationSite->resource = 'site';
+			$locationSite->parent = $location_root;
+			$locationSite->save();
 
 
 			$site = new ObjectRelationshipMapper('sites');
@@ -337,19 +360,19 @@ class BentoBaseInstaller
 				$sslDomainRecord->save();
 			}
 
-			$location_membersonly = new Location();
-			$location_membersonly->name = 'members_only';
-			$location_membersonly->resource = 'directory';
-			$location_membersonly->parent = $location_site;
-			$location_membersonly->inherits = false;
-			$location_membersonly->save();
+			$locationMembersonly = new Location();
+			$locationMembersonly->name = 'members_only';
+			$locationMembersonly->resource = 'directory';
+			$locationMembersonly->parent = $location_site;
+			$locationMembersonly->inherits = false;
+			$locationMembersonly->save();
 
-			$location_adminonly = new Location();
-			$location_adminonly->name = 'admin_only';
-			$location_adminonly->resource = 'directory';
-			$location_adminonly->parent = $location_site;
-			$location_adminonly->inherits = false;
-			$location_adminonly->save();
+			$locationAdminOnly = new Location();
+			$locationAdminOnly->name = 'admin_only';
+			$locationAdminOnly->resource = 'directory';
+			$locationAdminOnly->parent = $location_site;
+			$locationAdminOnly->inherits = false;
+			$locationAdminOnly->save();
 
 
 
@@ -365,7 +388,7 @@ class BentoBaseInstaller
 			PermissionActionList::addAction('Admin');
 
 			// Add Admin permissions
-			$adminRootPermissions = new GroupPermission($memgroup_admin->getId(), $location_root->getId());
+			$adminRootPermissions = new GroupPermission($memgroup_admin->getId(), $locationRoot->getId());
 			$adminRootPermissions->setPermission('universal', 'Read', true);
 			$adminRootPermissions->setPermission('universal', 'Edit', true);
 			$adminRootPermissions->setPermission('universal', 'Add', true);
@@ -374,7 +397,7 @@ class BentoBaseInstaller
 			$adminRootPermissions->setPermission('universal', 'System', true);
 			$adminRootPermissions->setPermission('universal', 'Admin', true);
 
-			$adminOnlyPermissions = new GroupPermission($memgroup_admin->getId(), $location_adminonly->getId());
+			$adminOnlyPermissions = new GroupPermission($memgroup_admin->getId(), $locationAdminOnly->getId());
 			$adminOnlyPermissions->setPermission('universal', 'Read', true);
 			$adminOnlyPermissions->setPermission('universal', 'Edit', true);
 			$adminOnlyPermissions->setPermission('universal', 'Add', true);
@@ -383,7 +406,7 @@ class BentoBaseInstaller
 			$adminOnlyPermissions->setPermission('universal', 'System', true);
 			$adminOnlyPermissions->setPermission('universal', 'Admin', true);
 
-			$adminMembersPermissions = new GroupPermission($memgroup_admin->getId(), $location_membersonly->getId());
+			$adminMembersPermissions = new GroupPermission($memgroup_admin->getId(), $locationMembersonly->getId());
 			$adminMembersPermissions->setPermission('universal', 'Read', true);
 			$adminMembersPermissions->setPermission('universal', 'Edit', true);
 			$adminMembersPermissions->setPermission('universal', 'Add', true);
@@ -393,14 +416,14 @@ class BentoBaseInstaller
 			$adminMembersPermissions->setPermission('universal', 'Admin', true);
 
 			// Add private permissions
-			$userMembersPermissions = new GroupPermission($memgroup_user->getId(), $location_membersonly->getId());
+			$userMembersPermissions = new GroupPermission($memgroup_user->getId(), $locationMembersonly->getId());
 			$userMembersPermissions->setPermission('universal', 'Read', true);
 
 			// Add public permissions
-			$userSitePermissions = new GroupPermission($memgroup_user->getId(), $location_site->getId());
+			$userSitePermissions = new GroupPermission($memgroup_user->getId(), $locationSite->getId());
 			$userSitePermissions->setPermission('universal', 'Read', true);
 
-			$guestSitePermissions = new GroupPermission($memgroup_guest->getId(), $location_site->getId());
+			$guestSitePermissions = new GroupPermission($memgroup_guest->getId(), $locationSite->getId());
 			$guestSitePermissions->setPermission('universal', 'Read', true);
 
 		}catch(Exception $e){

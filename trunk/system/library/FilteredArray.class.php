@@ -39,7 +39,6 @@ class FilteredArray extends ArrayObject
 		return $this->filterOutput($value);
 	}
 
-
 	public function getIterator()
 	{
 		$iterator = parent::getIterator();
@@ -124,6 +123,5 @@ class FilteredArrayIterator extends ArrayIterator
 		}
 	}
 }
-
 
 ?>

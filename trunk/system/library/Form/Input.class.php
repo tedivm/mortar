@@ -40,6 +40,11 @@ class FormInput
 		return $this->label;
 	}
 
+	public function setValue($value)
+	{
+		$this->property('value', $value);
+	}
+
 	public function attachToForm($form)
 	{
 		if($form instanceof Form && $form->attachInput($this))

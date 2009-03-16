@@ -107,6 +107,9 @@ class Mysql_Base extends mysqli
 {
 	static $query_count = 0;
 	static $query_array = array();
+
+	protected $autocommitCounter = 1;
+
     /**
      * This function overloads the original to return the new Mystmt class
      *
@@ -173,6 +176,25 @@ class Mysql_Base extends mysqli
 			throw new BentoNotice($this->error);
 		}
 	}
+
+
+
+	public function autocommit($mode)
+	{
+		if($mode) //enable
+		{
+			// highest value should be 1
+			if($this->autocommitCounter < 1)
+				$this->autocommitCounter++;
+
+			if($this->autocommitCounter == 1)
+				parent::autocommit(true);
+
+		}else{ //disable
+			$this->autocommitCounter--;
+			parent::autocommit(false);
+		}
+	}
 }
 
 /**
@@ -236,10 +258,12 @@ class Mystmt extends mysqli_stmt
 
     }
 
-    public function bind_and_execute()
+    public function bind_param_and_execute()
     {
-    	return call_user_func_array(array($this, 'bind_param_and_execute'), func_get_args());
+    	$args = func_get_args();
+    	return call_user_func_array(array($this, 'bindAndExecute'), $args);
     }
+
     /**
      * Combines the bind_param, execute, and store_results into a single function
      *
@@ -247,7 +271,7 @@ class Mystmt extends mysqli_stmt
      * @param string $types
      * @param mixed $var
      */
-	public function bind_param_and_execute()
+	public function bindAndExecute()
 	{
 		$params = func_get_args();
 		Mysql_Base::$query_count++;

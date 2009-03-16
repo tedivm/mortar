@@ -3,30 +3,7 @@ define('START_TIME', microtime(true));
 define('BASE_PATH', dirname(__FILE__) . '/');
 define('DISPATCHER', array_pop(explode('/', __FILE__)));
 
-// Developer Constants
-define('DEBUG', 3);
-// 4,		3,		2,			1,		0
-// notices,	info, 	warning, 	error,	none
-// strict - E_STRICT with no Bento error displays.
-// The higher the number, the more information you get. This constant also controls the php error levels- 0 disables
-// error reporting (useful for production environments), while 3 will give all errors and notices. For development
-// purposes your best bet would be 2 or 3.
-
-define('IGNOREPERMISSIONS', false);	//FOR TESTING ONLY!!!!
-// This was placed in while testing the permissions code during the early creation phases
-// It still comes in handy when testing those things, but if turned on in a development environment
-// there would be obvious problems.
-
-define('BENCHMARK', false);
-// When enabled the system logs a variety of information. This informaion is saved in the temp/benchmark directory
-// As each run of the system generates a new file, it is important not to keep this running on a live system
-// This tool is useful in seeing what database queries and cache calls are made, how much memory and cpu time
-// the script takes to run, and information about system settings during during that run.
-
-
-define('DISABLECACHE', true);
-// This program is designed to take advantage of caching, and in many cases code was optimized with that in mind.
-// Disabling caching is not recommended outside of development, which is why it is not an option in the interface.
+require('data/systemConstants.php');
 
 
 if(BENCHMARK && function_exists('getrusage'))
@@ -36,36 +13,43 @@ if(BENCHMARK && function_exists('getrusage'))
 	unset($startdat);
 }
 
-
+// Error Handling Setup
 
 switch(DEBUG)
 {
 	case 4:
 		error_reporting(E_ALL);
+		$errorLevel = E_ALL;
 		break;
 
 	case 3:
-		error_reporting(E_STRICT | E_ALL ^ E_NOTICE);
+		error_reporting(E_ALL ^ E_NOTICE);
+		$errorLevel = E_ALL;
 		break;
 
 	case 2:
 		error_reporting(E_ALL ^ E_NOTICE);
+		$errorLevel = E_ALL ^ E_NOTICE;
 		break;
 
 	case 1:
 		error_reporting(E_ERROR | E_PARSE);
+		$errorLevel = E_ERROR | E_PARSE;
 		break;
 
 	case 0:
 	default:
+		$errorLevel = 0;
 		error_reporting(0);
 		break;
 
-	case 'strict':
-		error_reporting(E_STRICT);
-		break;
 }
 
+if(STRICT)
+{
+	$errorLevel = $errorLevel | E_STRICT;
+}
+error_reporting($errorLevel);
 
 require('system/classes/exceptions.class.php');
 require('system/classes/config.class.php');
@@ -84,7 +68,19 @@ require('system/abstracts/Plugin.abstract.php');
 require('system/abstracts/action.class.php');
 require('system/classes/Site.class.php');
 
-require('system/classes/RequestWrapper.class.php');
+require('system/classes/modelSupport/actions/Base.class.php');
+require('system/classes/modelSupport/actions/Edit.class.php');
+require('system/classes/modelSupport/actions/Delete.class.php');
+require('system/classes/modelSupport/actions/Add.class.php');
+require('system/classes/modelSupport/actions/Read.class.php');
+require('system/interfaces/Model.interface.php');
+require('system/abstracts/Model.class.php');
+
+
+require('system/classes/modelSupport/Converters/Array.class.php');
+require('system/classes/modelSupport/Converters/Html.class.php');
+
+
 
 
 require('system/classes/AutoLoader.class.php');
@@ -118,11 +114,11 @@ try{
 	}else{
 		// config loaded, so lets take the redundent step of setting install mode to false
 		define('INSTALLMODE', false);
-
-		// system timezone, defaulting to UTC
-		$timezone = ($config['system']['timezone']) ? $config['system']['timezone'] : 'UTC';
-		date_default_timezone_set($timezone);
 	}
+
+	// system timezone, defaulting to UTC
+	$timezone = ($config['system']['timezone']) ? $config['system']['timezone'] : 'UTC';
+	date_default_timezone_set($timezone);
 
 	$request = new $requestWrapperName();
 	$request->main();
