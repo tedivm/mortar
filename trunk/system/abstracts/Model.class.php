@@ -2,7 +2,7 @@
 
 class AbstractModel implements Model
 {
-	protected $type;
+	static public $type;
 
 	protected $table;
 
@@ -143,7 +143,7 @@ class AbstractModel implements Model
 
 	public function getType()
 	{
-		return $this->resource;
+		return self::$type;
 	}
 
 

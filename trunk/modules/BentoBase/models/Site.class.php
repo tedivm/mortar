@@ -2,7 +2,7 @@
 
 class BentoBaseModelSite extends AbstractModel
 {
-	protected $type = 'Site';
+	static public $type = 'Site';
 }
 
 ?>

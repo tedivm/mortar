@@ -2,7 +2,7 @@
 
 class BentoBaseModelDirectory extends AbstractModel
 {
-	protected $type = 'Directory';
+	static public $type = 'Directory';
 	protected $table = 'Directories';
 
 
