@@ -63,7 +63,7 @@ class BentoBaseInstaller
 					$config = Config::getInstance();
 					$pathToSQL = $config['path']['modules'] . 'BentoBase/sql/system_remove.sql.php';
 					$db = dbConnect('default');
-			//		$db->runFile($pathToSQL);
+					$db->runFile($pathToSQL);
 				case 2: // database files
 					unlink($config['path']['base'] . 'data/configuration/databases.php');
 				case 1: // configuration files
