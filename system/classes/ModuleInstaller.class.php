@@ -102,7 +102,6 @@ class ModuleInstaller
 	public function installModels()
 	{
 		$models = $this->packageInfo->getModels();
-
 		foreach($models as $model)
 		{
 			ModelRegistry::setHandler($model['type'], $this->package, $model['name']);

@@ -2,6 +2,7 @@
 
 Interface Model extends ArrayAccess
 {
+
 	public function __construct($id = null);
 
 	public function delete();

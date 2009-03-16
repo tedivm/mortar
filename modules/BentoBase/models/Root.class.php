@@ -2,7 +2,7 @@
 
 class BentoBaseModelRoot extends AbstractModel
 {
-	protected $type = 'Root';
+	static public $type = 'Root';
 }
 
 ?>
