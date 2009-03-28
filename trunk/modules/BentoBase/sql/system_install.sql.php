@@ -7,7 +7,7 @@ CREATE TABLE actions
 (
 	action_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	action_name VARCHAR(30) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: actions */
 
@@ -23,7 +23,20 @@ CREATE TABLE aliases
 	aliasType VARCHAR(15) NOT NULL DEFAULT 'other',
 	aliasLocation INTEGER UNSIGNED NULL,
 	aliasOther VARCHAR(60) NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+/******************** Add Table: directories ************************/
+
+/* Build Table Structure */
+CREATE TABLE directories
+(
+	id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	allowIndex CHAR(1) NOT NULL DEFAULT 0,
+	defaultChild INTEGER UNSIGNED
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+/* Add Indexes for: sites */
+CREATE INDEX directories_id_defaultChild_Idx ON directories (id, defaultChild);
 
 /******************** Add Table: groupPermissions ************************/
 
@@ -35,7 +48,7 @@ CREATE TABLE groupPermissions
 	action_id INTEGER UNSIGNED NOT NULL,
 	permission VARCHAR(4) NOT NULL DEFAULT 'i',
 	resource VARCHAR(16) NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: groupPermissions */
 ALTER TABLE groupPermissions ADD CONSTRAINT pkgroupPermissions
@@ -49,7 +62,7 @@ CREATE TABLE location_meta
 	location_id INTEGER UNSIGNED NOT NULL,
 	name VARCHAR(45) NOT NULL,
 	value VARCHAR(45) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: location_meta */
 ALTER TABLE location_meta ADD CONSTRAINT pklocation_meta
@@ -66,16 +79,21 @@ CREATE TABLE locations
 	resourceType VARCHAR(16) NOT NULL,
 	resourceId INTEGER UNSIGNED NOT NULL,
 	creationDate DATETIME NOT NULL,
+	owner INTEGER UNSIGNED,
+	groupOwner INTEGER UNSIGNED,
+	inherits CHAR(1) NOT NULL DEFAULT 1,
 	lastModified TIMESTAMP ON UPDATE CURRENT_TIMESTAMP /* This will update on each save */
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: locations */
 
 /* Add Indexes for: locations */
-CREATE INDEX locations_parent_Idx ON locations (parent);
-CREATE INDEX locations_parent_name_Idx ON locations (parent, name);
-CREATE INDEX locations_parent_resourceType_Idx ON locations (parent, resourceType);
-CREATE INDEX locations_resourceType_resourceId ON locations (resourceType, resourceId);
+
+CREATE INDEX locations_parent_name_Idx ON locations (parent, name, location_id);
+CREATE INDEX locations_parent_resourceType_Idx ON locations (parent, resourceType, location_id);
+CREATE INDEX locations_resourceType_resourceId ON locations (resourceType, resourceId, location_id);
+CREATE INDEX locations_creationDate ON locations (creationDate, location_id);
+CREATE INDEX locations_lastModified ON locations (lastModified, location_id);
 
 /******************** Add Table: member_group ************************/
 
@@ -83,13 +101,14 @@ CREATE INDEX locations_resourceType_resourceId ON locations (resourceType, resou
 CREATE TABLE member_group
 (
 	memgroup_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	memgroup_name VARCHAR(35) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+	memgroup_name VARCHAR(35) NOT NULL,
+	is_system CHAR(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: member_group */
 
 /* Add Indexes for: member_group */
-CREATE INDEX member_group_memgroup_name_Idx ON member_group (memgroup_name);
+CREATE INDEX member_group_memgroup_name_Idx ON member_group (memgroup_name, memgroup_id, is_system);
 
 /******************** Add Table: mod_config ************************/
 
@@ -100,7 +119,7 @@ CREATE TABLE mod_config
 	mod_id INTEGER UNSIGNED NOT NULL,
 	name VARCHAR(125) NOT NULL,
 	value VARCHAR(125) NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: mod_config */
 
@@ -122,9 +141,12 @@ CREATE TABLE modules
 	releaseType VARCHAR(12) NULL,
 	releaseVersion INTEGER UNSIGNED NULL,
 	status VARCHAR(12) NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: modules */
+
+/* Add Indexes for: modules */
+CREATE INDEX modules_package_Idx ON modules (package, mod_id, status);
 
 /******************** Add Table: modelsRegistered ************************/
 
@@ -134,22 +156,12 @@ CREATE TABLE modelsRegistered
 	name VARCHAR(65) NOT NULL PRIMARY KEY,
 	resource VARCHAR(16) NOT NULL,
 	mod_id INTEGER UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: modelsRegistered */
 
 /* Add Indexes for: modelsRegistered */
 CREATE INDEX modelsRegistered_resource_Idx ON modelsRegistered (resource);
-
-/******************** Add Table: site_meta ************************/
-
-/* Build Table Structure */
-CREATE TABLE site_meta
-(
-	site_id INTEGER UNSIGNED NOT NULL,
-	name VARCHAR(40) NOT NULL,
-	value VARCHAR(40) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 /******************** Add Table: sites ************************/
 
@@ -157,25 +169,28 @@ CREATE TABLE site_meta
 CREATE TABLE sites
 (
 	site_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	location_id INTEGER UNSIGNED NOT NULL,
-	name VARCHAR(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+	primaryUrl VARCHAR(255),
+	allowIndex CHAR(1) NOT NULL DEFAULT 0,
+	defaultChild INTEGER UNSIGNED
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+/* Add Indexes for: sites */
+CREATE INDEX sites_primaryUrl_Idx ON sites (primaryUrl);
 
 /******************** Add Table: urls ************************/
 
 /* Build Table Structure */
 CREATE TABLE urls
 (
+	path VARCHAR(255) NOT NULL PRIMARY KEY,
 	site_id INTEGER UNSIGNED NOT NULL,
-	urlPath VARCHAR(255) NOT NULL,
-	urlSSL TINYINT UNSIGNED NULL,
-	urlAlias TINYINT UNSIGNED NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+	sslEnabled TINYINT UNSIGNED NOT NULL DEFAULT 0
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: urls */
 
 /* Add Indexes for: urls */
-CREATE UNIQUE INDEX urls_urlPath_Idx ON urls (urlPath);
+CREATE INDEX urls_site_id_sslEnabled_Idx ON urls (site_id, sslEnabled);
 
 /******************** Add Table: user_in_member_group ************************/
 
@@ -184,7 +199,7 @@ CREATE TABLE user_in_member_group
 (
 	user_id INTEGER UNSIGNED NOT NULL,
 	memgroup_id INTEGER UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: user_in_member_group */
 ALTER TABLE user_in_member_group ADD CONSTRAINT pkuser_in_member_group
@@ -200,7 +215,7 @@ CREATE TABLE userPermissions
 	action_id INTEGER UNSIGNED NOT NULL,
 	permission VARCHAR(4) NOT NULL DEFAULT 'i',
 	resource VARCHAR(16) NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: userPermissions */
 ALTER TABLE userPermissions ADD CONSTRAINT pkuserPermissions
@@ -216,13 +231,14 @@ CREATE TABLE users
 	user_password VARCHAR(128) NULL,
 	user_email VARCHAR(255) NULL,
 	user_allowlogin CHAR(1) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: users */
 
 /* Add Indexes for: users */
 CREATE INDEX user_name ON users (user_name, user_password);
 CREATE UNIQUE INDEX user_name_2 ON users (user_name);
+
 
 
 
@@ -239,6 +255,10 @@ ALTER TABLE aliases ADD CONSTRAINT fk_aliases_locations_result
 /************ Foreign Key: fk_aliases_locations_target ***************/
 ALTER TABLE aliases ADD CONSTRAINT fk_aliases_locations_target
 	FOREIGN KEY (aliasLocation) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/************ Foreign Key: fk_directories_locations ***************/
+ALTER TABLE directories ADD CONSTRAINT fk_directories_locations
+	FOREIGN KEY (id) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_groupPermissions_locations ***************/
 ALTER TABLE groupPermissions ADD CONSTRAINT fk_groupPermissions_locations
@@ -260,6 +280,14 @@ ALTER TABLE location_meta ADD CONSTRAINT fk_location_meta_locations
 ALTER TABLE locations ADD CONSTRAINT fk_locations_locations
 	FOREIGN KEY (parent) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
+/************ Foreign Key: fk_locations_users ***************/
+ALTER TABLE locations ADD CONSTRAINT fk_locations_users
+	FOREIGN KEY (owner) REFERENCES users (user_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/************ Foreign Key: fk_locations_member_group ***************/
+ALTER TABLE locations ADD CONSTRAINT fk_locations_member_group
+	FOREIGN KEY (groupOwner) REFERENCES member_group (memgroup_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
 /************ Foreign Key: fk_mod_config_modules ***************/
 ALTER TABLE mod_config ADD CONSTRAINT fk_mod_config_modules
 	FOREIGN KEY (mod_id) REFERENCES modules (mod_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
@@ -268,13 +296,13 @@ ALTER TABLE mod_config ADD CONSTRAINT fk_mod_config_modules
 ALTER TABLE modelsRegistered ADD CONSTRAINT fk_modelsRegistered_modules
 	FOREIGN KEY (mod_id) REFERENCES modules (mod_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-/************ Foreign Key: fk_site_settings_sites ***************/
-ALTER TABLE site_meta ADD CONSTRAINT fk_site_settings_sites
-	FOREIGN KEY (site_id) REFERENCES sites (site_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
-
 /************ Foreign Key: fk_sites_locations ***************/
 ALTER TABLE sites ADD CONSTRAINT fk_sites_locations
-	FOREIGN KEY (location_id) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+	FOREIGN KEY (site_id) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/************ Foreign Key: fk_sites_urls ***************/
+ALTER TABLE sites ADD CONSTRAINT fk_sites_urls
+	FOREIGN KEY (primaryUrl) REFERENCES urls (path) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_domains_sites ***************/
 ALTER TABLE urls ADD CONSTRAINT fk_domains_sites

@@ -21,7 +21,7 @@ class Get
 					RequestWrapper::$ioHandler = 'Rest';
 
 				array_shift($pathArray);
-				$rootPiece = strtolower($pathArray[0]);
+				$rootPiece = (isset($pathArray[0])) ? $pathArray[0] : null;
 			}
 
 			if($rootPiece == 'module')
@@ -38,32 +38,35 @@ class Get
 		}
 
 
-		switch (strtolower($queryArray['format']))
+		if(isset($queryArray['format']))
 		{
-			case 'xml':
-				$queryArray['format'] = 'Xml';
-				break;
+			switch(strtolower($queryArray['format']))
+			{
+				case 'xml':
+					$queryArray['format'] = 'Xml';
+					break;
 
-			case 'rss':
-				$queryArray['format'] = 'Rss';
-				break;
+				case 'rss':
+					$queryArray['format'] = 'Rss';
+					break;
 
-			case 'json':
-				$queryArray['format'] = 'Json';
-				break;
+				case 'json':
+					$queryArray['format'] = 'Json';
+					break;
 
-			case 'admin':
-				$queryArray['format'] = 'Admin';
-				break;
+				case 'admin':
+					$queryArray['format'] = 'Admin';
+					break;
 
-			case 'html':
-				$queryArray['format'] = 'Html';
-				break;
+				case 'html':
+					$queryArray['format'] = 'Html';
+					break;
 
-			default:
+				default:
 
-				unset($queryArray['format']);
-				break;
+					unset($queryArray['format']);
+					break;
+			}
 		}
 
 		if(isset($queryArray['action']))

@@ -321,10 +321,11 @@ class Form
 		'hidden' => 'input',
 		'image' => 'input',
 		'text' => 'input',
+		'password' => 'input',
 		'input' => 'input'
 		);
 
-		$tagType = ($tagByType[$input->type]) ? $tagByType[$input->type] : 'input';
+		$tagType = isset($tagByType[$input->type]) ? $tagByType[$input->type] : 'input';
 		$inputHtml = new HtmlObject($tagByType[$tagType]);
 		$inputHtml->property('name', $input->name);
 
@@ -348,17 +349,17 @@ class Form
 
 				foreach($input->options as $option)
 				{
-					unset($properties);
+					$properties = array();
+
 					if($option['value'] == $value)
-					{
 						$properties['selected'] = 'selected';
-					}
+
 					$optionHtml = $inputHtml->insertNewHtmlObject('option')->
 						property('value', $option['value'])->
 						wrapAround($option['label']);
 
-						if(is_array($option['properties']))
-							$properties = array_merge($properties, $option);
+						if(isset($properties) && is_array($option['properties']))
+							$properties = array_merge($properties, $option['properties']);
 
 						$optionHtml->property($properties);
 				}
@@ -394,7 +395,7 @@ class Form
 	{
 
 		// to require a javascript file, return $include['Library'][] = 'Name';
-		$includes = $startup = array();
+		$includes = $startup = $plugin = array();
 
 		switch ($input->type) {
 			case 'html':

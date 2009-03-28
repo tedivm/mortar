@@ -41,7 +41,7 @@ class InfoRegistry
 					$this->Configuration = Config::getInstance();
 					break;
 				case 'Site':
-					$this->Site = ActiveSite::getInstance();
+					$this->Site = ActiveSite::getSite();
 					break;
 				case 'Post':
 					$this->Post = Post::getInstance();

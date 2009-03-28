@@ -18,29 +18,24 @@ if(BENCHMARK && function_exists('getrusage'))
 switch(DEBUG)
 {
 	case 4:
-		error_reporting(E_ALL);
 		$errorLevel = E_ALL;
 		break;
 
 	case 3:
-		error_reporting(E_ALL ^ E_NOTICE);
-		$errorLevel = E_ALL;
+		$errorLevel = E_ALL ^ E_NOTICE;
 		break;
 
 	case 2:
-		error_reporting(E_ALL ^ E_NOTICE);
 		$errorLevel = E_ALL ^ E_NOTICE;
 		break;
 
 	case 1:
-		error_reporting(E_ERROR | E_PARSE);
 		$errorLevel = E_ERROR | E_PARSE;
 		break;
 
 	case 0:
 	default:
 		$errorLevel = 0;
-		error_reporting(0);
 		break;
 
 }
@@ -145,7 +140,8 @@ if(BENCHMARK)
 
 	$benchmarkString = '';
 
-	$siteInfo = ActiveSite::getInstance();
+
+	$siteInfo = ActiveSite::getSite();
 	$runtimeConfig = RuntimeConfig::getInstance();
 
 	$benchmarkString .= 'Site Name: ' . $siteInfo->name . PHP_EOL;

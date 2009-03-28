@@ -34,9 +34,8 @@ class FilteredArray extends ArrayObject
 
 	public function offsetGet($offset)
 	{
-		$value = parent::offsetGet($offset);
-
-		return $this->filterOutput($value);
+		if(parent::offsetExists($offset))
+			return parent::offsetGet($offset);
 	}
 
 	public function getIterator()

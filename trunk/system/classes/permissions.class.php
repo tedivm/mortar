@@ -53,18 +53,27 @@ class Permissions
 
 	protected function loadPermissions()
 	{
-		$memberGroupPermissions = array();
+		$memberGroupPermissionsArray = array();
 		$memberGroups = $this->user->getMemberGroups();
+
+		if($resourceOwner = $this->location->getOwner() && $resourceOwner->getId() == $this->user->getId())
+			$memberGroups[] = MemberGroup::lookupIdbyName('ResourceOwner');
+
+		if($memberGroup = $this->location->getOwnerGroup() && in_array($memberGroup->getId(), $memberGroups))
+			$memberGroups[] = MemberGroup::lookupIdbyName('ResourceGroupOwner');
+
+
+
 		foreach($memberGroups as $memberGroup)
 		{
 			$memgroupPermissions = new GroupPermission($memberGroup, $this->location->getId());
 			$memberGroupPermissionsArray = $this->mergePermissions($memberGroupPermissionsArray,
-															$memgroupPermission->getPermissions());
+															$memgroupPermissions->getPermissions());
 		}
 
 		$userPermissions = new UserPermission($this->user->getId(), $this->location->getId());
 		$userPermissionsArray = $userPermissions->getPermissions();
-		return $this->mergePermissions($memberGroupPermissions, $userPermissionsArray);
+		return $this->mergePermissions($memberGroupPermissionsArray, $userPermissionsArray);
 	}
 
 	protected function mergePermissions($current, $new)
@@ -123,7 +132,7 @@ class Permissions
 		if($adminMemberGroup->containsUser($this->user->getId()))
 			return true;
 
-		// This allows us to add permissions to a special type (universal) which will over ride all over
+		// This allows us to add permissions to a special type (universal) which will over ride all other
 		// permissions granted. The two cases I can see this being useful for are for administrators and
 		// banned users, although it currently only checks for positive cases. This is still subject to the
 		// same location rules as other permissions.
@@ -151,6 +160,7 @@ class Permissions
 
 	public function checkAuth($action)
 	{
+		depreciationError();
 		return $this->isAllowed($action);
 	}
 
@@ -256,18 +266,18 @@ class UserPermission
 	public function save()
 	{
 		$tableName = $this->type . 'Permissions';
-		$db = dbConnect('default');
+		$db = DatabaseConnection::getConnection('default');
 
-		// If someone were to disable autocommit outside of this class, we don't want to intefere with that.
-		if($modifyCommit = (bool) $db->query("SELECT @@autocommit"))
-			$db->autocommit(false);
+		$db->autocommit(false);
 
 		try
 		{
 			$clearStmt = $db->stmt_init();
 			$clearStmt->prepare('DELETE FROM ' . $tableName . '
-									WHERE ' . $tableName . '.' . $this->typeId . ' = ?');
-			$clearStmt->bind_param_and_execute('i', $this->id);
+									WHERE ' . $tableName . '.' . $this->typeId . ' = ? AND location_id = ?' );
+
+
+			$clearStmt->bindAndExecute('ii', $this->id, $this->location);
 
 			foreach($this->permissions as $typeIndex => $typeActions)
 			{
@@ -288,32 +298,26 @@ class UserPermission
 										'(location_id, action_id, resource, permission, ' . $this->typeId . ')
 										Values (?, ?, ?, ?, ?)');
 
-					$saveStmt->bind_param_and_execute('iisii', $this->location,
+					$saveStmt->bindAndExecute('iisii', $this->location,
 															$actionIndex,
 															$typeIndex, $saveValue, $this->id);
 				}
 			}
 
-			Cache::clear('permissions', $type, $id, $this->location);
+			Cache::clear('permissions', $typeIndex, $this->id, $this->location);
 
 		}catch(Exception $e){
 			$db->rollback();
-
-			if($modifyCommit)
-				$db->autocommit(true);
-
+			$db->autocommit(true);
 			throw new BentoError('Error while inserting ' . $type . 'Permissions');
 		}
 
 
-		if($modifyCommit)
-		{
-			// We place the commit in here so as not to interfere with any changed to autocommit outside this class
-			$db->commit();
-			$db->autocommit(true);
-		}
+		// We place the commit in here so as not to interfere with any changed to autocommit outside this class
+		$db->commit();
+		$db->autocommit(true);
 
-
+		return true;
 	}
 
 }
@@ -328,6 +332,11 @@ class GroupPermission extends UserPermission
 class PermissionActionList
 {
 	static protected $actionList = false;
+
+	static public function clear()
+	{
+		self::$actionList = false;
+	}
 
 	static public function getAction($action)
 	{
@@ -358,10 +367,10 @@ class PermissionActionList
 
 			// All new permissions should be granted to the administrator membergroup.
 			$adminPermissions = new GroupPermission(MemberGroup::lookupIdbyName('Administrator'), 1);
-			$adminPermissions->setPermission('universal', $id, true);
+			$adminPermissions->setPermission('Universal', $id, true);
 			$adminPermissions->save();
 
-			self::loadActionList();
+			self::clear();
 			return true;
 		}else{
 			return false;
@@ -372,7 +381,7 @@ class PermissionActionList
 	{
 		$db = db_connect('default_read_only');
 		$result = $db->query('SELECT action_id, action_name FROM actions');
-
+		$actions = array();
 		while($row = $result->fetch_array())
 		{
 			$actions[$row['action_name']] = $row['action_id'];

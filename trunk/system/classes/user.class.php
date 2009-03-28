@@ -52,9 +52,11 @@ class User
 		if(!$cache->cacheReturned)
 		{
 			$db = db_connect('default_read_only');
+			$db = DatabaseConnection::getConnection('default_read_only');
+
 			$stmt = $db->stmt_init();
 			$stmt->prepare("SELECT * FROM users WHERE user_id=? LIMIT 1");
-			$stmt->bind_param_and_execute('i', $userId);
+			$stmt->bindAndExecute('i', $userId);
 
 			if($stmt->num_rows == 1)
 			{
@@ -68,7 +70,7 @@ class User
 			$stmtMemberGroups = $db->stmt_init();
 			$stmtMemberGroups->prepare('SELECT memgroup_id FROM user_in_member_group WHERE user_id = ?');
 
-			$stmtMemberGroups->bind_param_and_execute('i', $userId);
+			$stmtMemberGroups->bindAndExecute('i', $userId);
 
 			if($stmtMemberGroups->num_rows > 0)
 			{
@@ -165,7 +167,7 @@ class User
 
 	public function save()
 	{
-		$db = dbConnect('default');
+		$db = DatabaseConnection::getConnection('default');
 		$db->autocommit(false);
 		try{
 
@@ -176,7 +178,7 @@ class User
 
 				$stmt->prepare('INSERT INTO users (user_id, user_name, user_password, user_email, user_allowlogin)
 												VALUES (NULL, ?, ?, ?, ?)');
-				if(!$stmt->bind_param_and_execute('sssi', $this->username, $this->password,
+				if(!$stmt->bindAndExecute('sssi', $this->username, $this->password,
 											 $this->email, ($this->allowLogin) ? 1 : 0))
 				{
 					throw new BentoWarning('Unable to add user to database');
@@ -189,7 +191,7 @@ class User
 				$stmt->prepare('UPDATE users SET user_name = ?, user_password = ?, user_email = ?, user_allowlogin = ?
 										WHERE user_id = ?');
 
-				if(!$stmt->bind_param_and_execute('sssii', $this->username, $this->password,
+				if(!$stmt->bindAndExecute('sssii', $this->username, $this->password,
 											 $this->email, ($this->allowLogin) ? 1 : 0, $this->id))
 				{
 					throw new BentoWarning('Unable to update user.');
@@ -199,14 +201,14 @@ class User
 
 			$deleteStmt = $db->stmt_init();
 			$deleteStmt->prepare('DELETE FROM user_in_member_group WHERE user_id = ?');
-			$deleteStmt->bind_param_and_execute('i', $this->id);
+			$deleteStmt->bindAndExecute('i', $this->id);
 
 
 			foreach($this->memberGroups as $id)
 			{
 				$insertMemgroupStmt = $db->stmt_init();
 				$insertMemgroupStmt->prepare('INSERT INTO user_in_member_group (user_id, memgroup_id) VALUES (?,?)');
-				$insertMemgroupStmt->bind_param_and_execute('ii', $this->id, $id);
+				$insertMemgroupStmt->bindAndExecute('ii', $this->id, $id);
 			}
 
 			$db->commit();
@@ -310,7 +312,7 @@ class ActiveUser implements SplSubject
 	{
 		if(!isset(self::$instance)){
 			$object = __CLASS__;
-			self::$instance = new $object;
+			self::$instance = new $object();
 		}
 		return self::$instance;
 	}

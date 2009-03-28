@@ -8,57 +8,112 @@ class AbstractModel implements Model
 
 	protected $id;
 	protected $location;
-	protected $package;
+	protected $module;
 
-	protected $attributes;
 	protected $properties;
+	protected $content;
 
 
 	public function __construct($id = null)
 	{
 		if(!is_null($id))
-			$this->load($id);
-	}
-
-	public function save()
-	{
-		if(!$this->location)
 		{
-			$location = new Location();
-			$location->setName($this->attributes['name']);
-			$location->setResource('new', 0);
-			$location->save();
+			$cache = new Cache('models', $this->getType(), $id, 'location');
+			$locationId = $cache->getData();
+
+			if(!$cache->cacheReturned)
+			{
+				$db = DatabaseConnection::getConnection('default_read_only');
+				$stmt = $db->stmt_init();
+				$stmt->prepare('SELECT location_id FROM locations WHERE resourceType = ? AND resourceId = ? LIMIT 1');
+				$stmt->bindAndExecute('si', $this->getType(), $id);
+
+				if($stmt->num_rows > 0)
+				{
+					$locationArray = $stmt->fetch_array();
+					$locationId = $locationArray['location_id'];
+					$cache->storeData($locationId);
+				}else{
+					$locationId = false;
+				}
+			}
+
+			if($locationId)
+				$this->location = new Location($locationId);
+
+			$this->load($id);
+
 		}
 
-		if(isset($this->table))
+	}
+
+	public function save($parent = null)
+	{
+		$db = DatabaseConnection::getConnection('default');
+		$db->autocommit(false);
+
+		try
 		{
-			$record = new ObjectRelationshipMapper($this->table);
 
-			if(isset($this->id))
-				$record->primaryKey = $this->id;
-
-			$columns = $record->getColumns(false, false);
-
-			foreach($columns as $columnName)
-				$record->$columnName = $this->properties[$columnName];
-
-
-			if($record->save())
+			if(!$this->location)
 			{
+				if(!$parent)
+					throw new BentoError('On creation a parent location is required.');
+				$this->location = new Location();
+			}
+
+
+			if($parent)
+			{
+				if(!($parent instanceof Location))
+					throw new TypeMismatch(array('Location', $parent));
+
+				if(!$this->canAttach($parent->getType()))
+					throw new BentoError('Unable to save to resource type ' . $parent->getType());
+
+				$this->location->setParent($parent);
+			}
+
+
+			if(isset($this->table))
+			{
+				$record = new ObjectRelationshipMapper($this->table);
+
+				if(isset($this->id))
+					$record->primaryKey = $this->id;
+
+				$columns = $record->getColumns(false, false);
+
+				foreach($columns as $columnName)
+				{
+					if(isset($this->content[$columnName]))
+						$record->$columnName = $this->content[$columnName];
+				}
+
+
+				if(!$record->save())
+					throw new BentoError('Unable to save model information to table');
+
 				if(!isset($this->id))
 					$this->id = $record->primaryKey;
 
-				$location = $this->getLocation();
-				$location->attachResource($this);
-				$location->save();
-
-				return $location;
-			}else{
-				return false;
 			}
+
+			$this->location->setResource($this->getType(), $this->getId());
+			$this->location->setName($this->properties['name']);
+
+			if(!$this->location->save())
+				throw new BentoError('Unable to save model location');
+
+
+		}catch(Exception $e){
+			$db->rollback();
+			$db->autocommit(true);
+			return false;
 		}
 
-		return false;
+		$db->autocommit(true);
+		return true;
 	}
 
 	public function delete()
@@ -85,16 +140,16 @@ class AbstractModel implements Model
 		if(!$user)
 			$user = ActiveUser::getInstance();
 
-		$permission = new Permissions($this->location, 'user');
+
+		$permission = new Permissions($this->location, $user);
 		return $permission->isAllowed($action, staticHack($this->model, 'type'));
 	}
 
 	public function getAction($actionName)
 	{
-		$packageInfo = new PackageInfo($this->package);
+		$packageInfo = new PackageInfo($this->module);
 
-		$moduleActionName = self::$type . $actionName;
-
+		$moduleActionName = $this->getType() . $actionName;
 		$actionInfo = $packageInfo->getActions($moduleActionName);
 
 		if(!$actionInfo)
@@ -125,14 +180,6 @@ class AbstractModel implements Model
 
 	public function getLocation()
 	{
-		if(!isset($this->location))
-		{
-			$location = new Location();
-			$location->setName($this->attributes['name']);
-			$location->setResource('new', 0);
-			$this->location = $location;
-		}
-
 		return $this->location;
 	}
 
@@ -143,22 +190,36 @@ class AbstractModel implements Model
 
 	public function getType()
 	{
-		return self::$type;
+		return staticHack(get_class($this), 'type');
 	}
 
+	public function getModule()
+	{
+		return $this->module;
+	}
+
+	public function canAttach($resourceType)
+	{
+		if(in_array($resourceType, $this->allowedParents))
+			return true;
+
+		return false;
+	}
 
 	protected function load($id)
 	{
-		if(isset($this->table))
+		$cache = new Cache('models', $this->getType(), $id, 'info');
+		$info = $cache->getData();
+
+		if(!$cache->cacheReturned)
 		{
-			$cache = new Cache('models', $this->getType(), $id, 'info');
+			$modelInfo = ModelRegistry::getHandler($this->getType());
+			$info['module'] = $modelInfo['module'];
 
-			$info = $cache->getData();
-
-			if(!$cache->cacheReturned)
+			if(isset($this->table))
 			{
 				$record = new ObjectRelationshipMapper($this->table);
-				$record->primaryKey($id);
+				$record->primaryKey = $id;
 
 				if($record->select(1))
 				{
@@ -167,80 +228,62 @@ class AbstractModel implements Model
 
 					foreach($columns as $columnName)
 					{
-						$info['properties'][$columnName] = $record->$columnName;
-					}
-
-					$db = DatabaseConnection::getConnection('default_read_only');
-					$stmt = $db->stmt_init();
-					$stmt->prepare('SELECT location_id FROM locations WHERE resourceType = ? AND resourceId = ? LIMIT 1');
-
-					$stmt->bindAndExecute('si', $this->getType(), $this->getId());
-
-					if($stmt->num_rows > 0)
-					{
-						$locationArray = $stmt->fetch_array();
-						$info['locationId'] = $locationArray['location_id'];
+						$info['content'][$columnName] = $record->$columnName;
 					}
 				}
-
-				$cache->storeData($info);
 			}
-
-			$this->id = $info['id'];
-			$this->properties = $info['properties'];
-			$this->location = new Location($info['locationId']);
-
-
-
-		}else{
-
+			$cache->storeData($info);
 		}
 
+		$this->id = $info['id'];
+		$this->module = $info['module'];
+		$this->properties = $info['content'];
 	}
 
 
-	// array functions define attributes and meta data
-	public function offsetGet($offset)
+	// class properties define attributes and meta data
+	public function __get($offset)
 	{
-		return $this->properties[$offset];
+		if(isset($this->properties[$offset]))
+			return $this->properties[$offset];
 	}
 
-	public function offsetSet($offset, $value)
+	public function __set($offset, $value)
 	{
-		if(!is_string($value))
-			throw new BentoError('Model attributes must be strings.');
+		if(!is_scalar($value))
+			throw new BentoError('Model attributes must be scalar.');
 
 		return $this->properties[$offset] = $value;
 	}
 
-	public function offsetExists($offset)
+	public function __isset($offset)
 	{
 		return isset($this->properties[$offset]);
 	}
 
-	public function offsetUnset($offset)
+	public function __unset($offset)
 	{
 		unset($this->properties[$offset]);
 	}
 
 
-	// class properties define content and the actual substance of the class
-	public function __get($name)
+	// array functions define content and the actual substance of the class
+	public function offsetGet($name)
 	{
 		return $this->content[$name];
 	}
 
-	public function __set($name, $value)
+	public function offsetSet($name, $value)
 	{
 		return $this->content[$name] = $value;
 	}
 
-	public function __isset($name)
+	public function offsetExists($name)
 	{
 		return isset($this->content[$name]);
 	}
 
-	public function __unset($name)
+	public function offsetUnset($name)
 	{
 		unset($this->content[$name]);
 	}

@@ -174,7 +174,8 @@ class Config implements ArrayAccess
 
 	public function offsetGet($offset)
 	{
-		return $this->config[$offset];
+		if(isset($this->config[$offset]))
+			return $this->config[$offset];
 	}
 
 

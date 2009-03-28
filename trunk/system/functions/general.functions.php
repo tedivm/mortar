@@ -24,11 +24,13 @@ function db_connect($database_name = 'default_read_only')
 
 function dbConnect($database_name = 'default_read_only')
 {
+	depreciationWarning();
 	return DatabaseConnection::getConnection($database_name);
 }
 
 function load_helper($package, $class)
 {
+	depreciationWarning();
 	$config = Config::getInstance();
 
 	$classname = $package . $class;
@@ -78,6 +80,67 @@ function loadHook($LocationId, $name)
 	return $hook->plugins;
 }
 
+
+function importClass($classname, $path, $basePath = null)
+{
+	if(!class_exists($classname, false))
+	{
+		if(isset($basePath))
+		{
+			$config = Config::getInstance();
+			if(isset($config['path'][$basePath]))
+				$path = $config['path'][$basePath] . $path;
+		}
+
+		if(file_exists($path))
+			include($path);
+
+		if(class_exists($classname, false))
+		{
+			return $classname;
+		}else{
+			throw new BentoError('Unable to load class ' . $classname . ' at ' . $path);
+		}
+
+	}else{
+		return $classname;
+	}
+}
+
+function importModel($modelName)
+{
+	$modelInfo = ModelRegistry::getHandler($modelName);
+	return importFromModule($modelInfo['name'], $modelInfo['module'], 'Model');
+}
+
+function importFromModule($name, $module, $classType)
+{
+	$moduleFolders = array('abstract' => 'abstracts',
+		'abstract' => 'abstracts',
+		'actions' => 'actions',
+		'action' => 'actions',
+		'class'  => 'classes',
+		'classes'  => 'classes',
+		'hook'  => 'hooks',
+		'hooks'  => 'hooks',
+		'interfaces'  => 'interfaces',
+		'interface'  => 'interfaces',
+		'library'  => 'library',
+		'model' => 'models');
+
+	if(isset($moduleFolders[strtolower($classType)]))
+	{
+		$classDivider = ucwords(strtolower($classType));
+	}elseif($classDivider = array_search(strtolower($classType), $moduleFolders)){
+		$classDivider = ucwords($classDivider);
+	}
+
+	$packageInfo = new PackageInfo($module);
+	$path = $packageInfo->getPath() . $moduleFolders[strtolower($classType)] . '/' . $name . '.class.php';
+	$className = $packageInfo->getName() . $classDivider . $name;
+	return importClass($className, $path);
+}
+
 function staticHack($className, $memberName)
 {
 	if(is_object($className))
@@ -89,8 +152,6 @@ function staticHack($className, $memberName)
 	if (!@property_exists($className,$memberName)) {
 		//trigger_error("Static property does not exist: $class::\$$var");
 		//debug_callstack(); //This is just a wrapper for debug_backtrace() for HTML
-
-
 		return;
 	}
 
@@ -127,6 +188,19 @@ function staticFunctionHack()
 
 
 
+}
+
+function depreciationWarning()
+{
+	try
+	{
+		throw new BentoDepreciated('Function has been depreciated.');
+	}catch(Exception $e){}
+}
+
+function depreciationError()
+{
+	throw new BentoDepreciated('Function has been depreciated.');
 }
 
 ?>

@@ -49,13 +49,17 @@ class BentoError extends Exception
 		$message = $this->getMessage();
 		$code = $this->getCode();
 
-		$site = ActiveSite::getInstance();
+
 		$actionOutput = (isset($runtimeConfig['action'])) ? $runtimeConfig['action'] : '<i>unset</i>';
 		$packageOutput = (isset($runtimeConfig['package'])) ? $runtimeConfig['package'] : '<i>unset</i>';
 
 		$idOutput = (is_numeric($runtimeConfig['id'])) ? $runtimeConfig['id'] : '<i>unset</i>';
 		$engineOutput = (isset($runtimeConfig['format'])) ? $runtimeConfig['format'] : '<i>unset</i>';
-		$siteOutput = (is_numeric($site->siteId)) ? $site->siteId : '<i>unset</i>';
+		$siteOutput = '<i>unset</i>';
+
+	//	if($site = ActiveSite::getSite())
+	//		$siteOutput = (is_numeric($site->siteId)) ? $site->siteId : '<i>unset</i>';
+
 		$dispatcher = DISPATCHER;
 
 		$errorClass = get_class($this);
@@ -119,9 +123,26 @@ class BentoError extends Exception
 				$argString = ' ';
 			}
 
-			$shortPath = str_replace(BASE_PATH, '/', $traceLine['file']);
 
-			$functionName = $traceLine['class'] . $traceLine['type'] . $traceLine['function'];
+			if((isset($traceLine['file'])))
+			{
+				$shortPath = str_replace(BASE_PATH, '/', $traceLine['file']);
+			}else{
+				$shortPath = 'Global';
+				$traceLine['file'] = '';
+				$traceLine['line'] = '';
+			}
+
+			$functionName = '';
+
+			if(isset($traceLine['class']))
+				$functionName .= $traceLine['class'];
+
+
+			if(isset($traceLine['type']))
+				$functionName .= $traceLine['type'];
+
+			$functionName .= $traceLine['function'];
 
 			$output .= "<tr>
 	<td bgcolor='#eeeeec' align='center'>$x</td>
@@ -157,31 +178,50 @@ class BentoNotice extends BentoError
 	protected $debugLevel = 3;
 }
 
+class BentoDepreciated extends BentoError
+{
+	protected $debugLevel = 9;
+
+	public function __construct($message = '', $code = 0)
+	{
+		if(DEPRECIATION_WARNINGS == true)
+			$this->debugLevel = 1;
+
+		parent::__construct($message, $code);
+	}
+
+}
+
+class BentoDepreciatedError extends BentoDepreciated
+{
+	protected $debugLevel = 2;
+}
 
 class TypeMismatch extends BentoError
 {
+	// type, object, message
 	public function __construct($message = '', $code = 0)
 	{
 		if(is_array($message))
 		{
-			$expectedType = $message[0];
-			$receivedObject = $message[1];
-			$customMessage = $message[2];
+			$expectedType = isset($message[0]) ? $message[0] : '';
+			$customMessage = isset($message[2]) ? $message[2] : '';
 
-			if(!$className = (get_class($receivedObject)))
+			if(isset($message[1]))
 			{
-				$receivedType = 'Class ' . $className;
+				$receivedObject = $message[1];
+				$receivedType = is_object($receivedObject)
+									? 'Class ' . get_class($receivedObject)
+									: gettype($className);
+
 			}else{
-				$receivedType = gettype($className);
+				$receivedType = 'Null or Unknown';
 			}
 
-			$receivedType = ($className = (get_class($receivedObject)))
-								? $receivedType = 'Class ' . $className
-								: gettype($className);
 
 			$message = 'Expected object of type: ' . $expectedType . ' but received ' . $receivedType . ' ';
 
-			if(strlen($customMessage) > 0)
+			if(isset($customMessage))
 				$message .= ' ' . $customMessage;
 		}
 

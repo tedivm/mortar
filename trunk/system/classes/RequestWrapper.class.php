@@ -25,7 +25,7 @@ class RequestWrapper
 
 
 					echo 'Attempting to deal with above errors';
-				//	exit();
+
 
 					$errorAction = $this->handleError($e);
 					$this->runAction($errorAction);
@@ -72,7 +72,6 @@ class RequestWrapper
 			$argument = $actionClassInfo['argument'];
 		}
 
-
 		// Check the class to make sure its usable with the current settings
 		$reflectionClass = new ReflectionClass($className);
 
@@ -81,11 +80,11 @@ class RequestWrapper
 			throw new BentoError('Class should implement interface');
 
 		// Create the class
-		$action = new $className($argument);
+		$action = new $className($argument, $this->ioHandler);
 
 		// Check authentication
 		if(!$action->checkAuth())
-			throw new AuthenticationError('Not allowed to access this engine at this location.');
+			throw new AuthenticationError('Not allowed to access this action at this location.');
 
 		return $action;
 
@@ -120,7 +119,7 @@ class RequestWrapper
 			if(!include($path))
 				throw new BentoError('Unable to load file ' . $path);
 
-			if(!class_exists($formatFilter))
+			if(!class_exists($formatFilter, false))
 				throw new BentoError('Unable to find output filter ' . $formatFilter);
 		}
 
@@ -131,7 +130,7 @@ class RequestWrapper
 
 	protected function handleError($e)
 	{
-		$site = ActiveSite::getInstance();
+		$site = ActiveSite::getSite();
 		$errorModule = $site->location->meta('error');
 
 		switch (get_class($e))
@@ -263,30 +262,35 @@ class RequestWrapper
 
 			if(!isset($location))
 			{
-				$site = ActiveSite::getInstance();
+				$site = ActiveSite::getSite();
 				$location = $site->getLocation();
 			}
 
+			$model = $location->getResource();
 
 			// figure out what to do with it
-			$modelHandler = ModelRegistry::getHandler($location->getResource());
+
+			$locationResourceInfo = $location->getResource(true);
+
+			$modelHandler = ModelRegistry::getHandler($locationResourceInfo['type']);
 
 			if(!$modelHandler)
 				throw new ResourceNotFoundError('Unable to load model handler.');
 
-			$this->ioHandler->finishPath($pathArray, $modelHandler['module'], $modelHandler['resource']);
+			$this->ioHandler->finishPath($pathArray, $model->getModule(), $modelHandler['resource']);
 
 			$query = Query::getQuery();
 
 			if($query['action'] != 'Add')
 			{
-				$modelClassName = $modelHandler['className'];
-				$model = new $modelClassName($location->getResourceId());
+
+				$model = $location->getResource();
 
 				if(!$model->checkAuth($query['action']))
 					throw new AuthenticationError();
 
-				$actionInfo = $model->actionLookup($query['action'] ? $query['action'] : 'Read');
+
+				$actionInfo = $model->getAction($query['action'] ? $query['action'] : 'Read');
 				$className = $actionInfo['className'];
 				$path = $actionInfo['path'];
 
@@ -308,7 +312,7 @@ class RequestWrapper
 
 	protected function processPathArray($pathArray)
 	{
-		$site = ActiveSite::getInstance();
+		$site = ActiveSite::getSite();
 		$currentLocation = $site->getLocation;
 		$location = new Location();
 

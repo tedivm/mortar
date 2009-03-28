@@ -80,20 +80,29 @@ class DisplayMaker
 	}
 
 
-	public function loadTemplate($template, $package = '')
+	public function loadTemplate($template, $package = null)
 	{
 		$config = Config::getInstance();
 		$path_to_theme = $config['url']['theme'];
-		if($package != '')
+
+
+		if(is_numeric($package))
+		{
+			$modelInfo = new PackageInfo($package);
+			$package = $modelInfo->getName();
+		}
+
+		if(isset($package))
 			$path_to_theme .= 'package/' . $package . '/';
+
 		$path_to_theme .= $template . '.template.php';
 
 		if($this->set_display_template_byfile($path_to_theme))
 			return true;
 
-		if($package != '')
+		if(isset($package))
 		{
-			$path_to_package .= $config['path']['modules'] . $package . '/templates/' . $template . '.template.php';
+			$path_to_package = $config['path']['modules'] . $package . '/templates/' . $template . '.template.php';
 			if($this->set_display_template_byfile($path_to_package))
 				return true;
 		}

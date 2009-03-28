@@ -43,6 +43,7 @@ class FormInput
 	public function setValue($value)
 	{
 		$this->property('value', $value);
+		return $this;
 	}
 
 	public function attachToForm($form)
@@ -102,8 +103,9 @@ class FormInput
 			{
 				$array['messages'] = $this->validationMessages;
 			}
+			return $array;
 		}
-		return $array;
+		return array();
 	}
 
 	public function validate()

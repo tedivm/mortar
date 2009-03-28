@@ -16,7 +16,7 @@ class ResourcePath
 
 	public function loadFromString($pathString, $site = null)
 	{
-		$site = ($site) ? $site : ActiveSite::getInstance();
+		$site = ($site) ? $site : ActiveSite::getSite();
 
 		$pathVariables = $this->setLocation(explode('/', $pathString), $site->getLocation());
 

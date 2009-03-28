@@ -4,6 +4,7 @@ class MemberGroup
 {
 	protected $name;
 	protected $id = false;
+	protected $isSystem = false;
 
 	public function __construct($id = null)
 	{
@@ -70,14 +71,24 @@ class MemberGroup
 		return $deleteStmt->bind_param_and_execute('ii', $userId, $this->id);
 	}
 
+	public function isSystem()
+	{
+		return ($this->isSystem);
+	}
+
+	public function makeSystem()
+	{
+		$this->isSystem = true;
+	}
+
 	public function save()
 	{
-		$dbWrite = db_connect('default');
+		$dbWrite = DatabaseConnection::getConnection('default');
 		if(!$this->id)
 		{
 			$insertStmt = $dbWrite->stmt_init();
-			$insertStmt->prepare('INSERT INTO member_group (memgroup_name) VALUES (?)');
-			if($insertStmt->bind_param_and_execute('s', $this->name))
+			$insertStmt->prepare('INSERT INTO member_group (memgroup_name, is_system) VALUES (?, ?)');
+			if($insertStmt->bindAndExecute('si', $this->name, ($this->isSystem ? 1 : 0)))
 			{
 				$this->id = $insertStmt->insert_id;
 				return true;
@@ -87,8 +98,8 @@ class MemberGroup
 		}else{
 
 			$insertStmt = $dbWrite->stmt_init();
-			$insertStmt->prepare('UPDATE member_group SET memgroup_name = ? WHERE memgroup_id = ?');
-			return $insertStmt->bind_param_and_execute('si', $this->name, $this->id);
+			$insertStmt->prepare('UPDATE member_group SET memgroup_name = ? AND is_system = ? WHERE memgroup_id = ?');
+			return $insertStmt->bindAndExecute('sii', $this->name, ($this->isSystem ? 1 : 0), $this->id);
 		}
 	}
 
@@ -101,15 +112,16 @@ class MemberGroup
 
 		if(!$cache->cacheReturned)
 		{
-			$db = dbConnect('default_read_only');
+			$db = DatabaseConnection::getConnection('default_read_only');
 			$stmt = $db->stmt_init();
 			$stmt->prepare('SELECT memgroup_name FROM member_group WHERE memgroup_id = ?');
-			$stmt->bind_param_and_execute('i', $id);
+			$stmt->bindAndExecute('i', $id);
 
 			if($stmt->num_rows == 1)
 			{
 				$row = $stmt->fetch_array();
 				$info['name'] = $row['memgroup_name'];
+				$info['isSystem'] = ($row['is_system'] == 1);
 			}else{
 				$info = false;
 			}
@@ -119,7 +131,7 @@ class MemberGroup
 		if($info)
 		{
 			$this->id = $id;
-			$this->name = $info['name'];
+			$this->isSystem = $info['isSystem'];
 			return true;
 		}else{
 			return false;
@@ -134,10 +146,10 @@ class MemberGroup
 
 		if(!$cache->cacheReturned)
 		{
-			$db = dbConnect('default_read_only');
+			$db = DatabaseConnection::getConnection('default_read_only');
 			$stmt = $db->stmt_init();
 			$stmt->prepare('SELECT memgroup_id FROM member_group WHERE memgroup_name = ?');
-			$stmt->bind_param_and_execute('s', $name);
+			$stmt->bindAndExecute('s', $name);
 
 			if($stmt->num_rows == 1)
 			{
