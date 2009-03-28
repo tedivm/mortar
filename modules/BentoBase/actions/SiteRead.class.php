@@ -1,11 +1,11 @@
 <?php
 
-class ModelActionRead extends ModelActionBase
+class BentoBaseActionSiteRead extends ModelActionBase
 {
 
 	public function logic()
 	{
-
+		echo 1111;
 	}
 
 

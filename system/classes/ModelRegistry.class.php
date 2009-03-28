@@ -4,8 +4,16 @@ class ModelRegistry
 {
 	protected static $handlerList;
 
+	static public function clearHandlers()
+	{
+		self::$handlerList = null;
+	}
+
 	static public function getHandler($name)
 	{
+		if(!is_scalar($name))
+			throw new TypeMismatch(array('String', $name));
+
 		if(!is_array(self::$handlerList))
 			self::loadHandlers();
 
@@ -26,6 +34,14 @@ class ModelRegistry
 
 		Cache::clear('system', 'models', 'handlers');
 		self::loadHandlers();
+	}
+
+	static public function getModelList()
+	{
+		if(!is_array(self::$handlerList))
+			self::loadHandlers();
+
+		return array_keys(self::$handlerList);
 	}
 
 	static protected function loadHandlers()
@@ -55,6 +71,7 @@ class ModelRegistry
 		}
 		self::$handlerList = $handlers;
 	}
+
 }
 
 ?>

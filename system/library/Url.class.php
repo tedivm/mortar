@@ -13,7 +13,7 @@ class Url
 	{
 		$config = Config::getInstance();
 		$get = get::getInstance();
-		$site = ActiveSite::getInstance();
+		$site = ActiveSite::getSite();
 
 		$info = InfoRegistry::getInstance();
 

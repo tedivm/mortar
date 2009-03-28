@@ -2,7 +2,7 @@
 
 //spl_autoload_call('ActionInterface');
 
-abstract class Action extends ModuleBase implements ActionInterface
+abstract class Action extends ModuleBase// implements ActionInterface
 {
 	static $requiredPermission = 'Read';
 	protected $permissions;

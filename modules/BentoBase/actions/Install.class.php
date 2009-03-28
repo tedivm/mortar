@@ -11,7 +11,7 @@ class BentoBaseActionInstall implements ActionInterface //extends Action
 	protected $dbConnection;
 	public $subtitle = '';
 
-	public function __construct($identifier)
+	public function __construct($identifier, $handler)
 	{
 
 	}

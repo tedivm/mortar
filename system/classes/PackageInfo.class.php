@@ -82,7 +82,7 @@ class PackageInfo
 				if($moduleInfo = $packageStmt->fetch_array())
 				{
 					$info['moduleId'] = $moduleInfo['mod_id'];
-					$info['majorVersion'] = $moduleInfo['moduleVersion'];
+					$info['majorVersion'] = $moduleInfo['majorVersion'];
 					$info['minorVersion'] = $moduleInfo['minorVersion'];
 					$info['microVersion'] = $moduleInfo['microVersion'];
 					$info['releaseType'] = $moduleInfo['releaseType'];
@@ -186,7 +186,7 @@ class PackageInfo
 
 	protected function loadActions()
 	{
-		$cache = new Cache('packages', $this->packageName, 'actions');
+		$cache = new Cache('packages', $this->name, 'actions');
 		$actions = $cache->getData();
 		if(!$cache->cacheReturned)
 		{
@@ -232,9 +232,7 @@ class PackageInfo
 			$cache->storeData($actions);
 		}// end cache
 
-
 		return $actions;
-
 	}
 
 	protected function loadPlugins()
@@ -258,7 +256,7 @@ class PackageInfo
 
 	protected function loadModels()
 	{
-		$cache = new Cache('packages', $this->packageName, 'models');
+		$cache = new Cache('packages', $this->name, 'models');
 		$models = $cache->getData();
 
 		if(!$cache->cacheReturned)
@@ -295,7 +293,7 @@ class PackageInfo
 				$fileClassName = array_shift($tmpArray);
 				//explode, pop. explode. shift
 
-				$fileInfo['name'] =$fileClassName;
+				$fileInfo['name'] = $fileClassName;
 				$fileInfo['className'] = $this->name . $typeDelimiter . $fileClassName;
 				$fileInfo['path'] = $filename;
 

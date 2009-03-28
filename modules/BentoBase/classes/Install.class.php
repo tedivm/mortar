@@ -6,6 +6,7 @@ class BentoBaseInstaller
 	public $installed = false;
 	protected $dbConnection;
 
+	protected $dbDebug = false;
 
 	public function install()
 	{
@@ -40,7 +41,8 @@ class BentoBaseInstaller
 					throw new Exception('Unable to load database structure.', 3);
 
 				if(!$this->setupStructure())
-					throw new Exception('Error setting up permissions', 4);
+					throw new Exception('Error setting up base structure', 4);
+
 
 		//		if(!$this->setupCoreModule())
 		//			throw new Exception('Error installing Core module.', 5);
@@ -57,13 +59,15 @@ class BentoBaseInstaller
 			$this->error[] = $e->getMessage();
 			// step back through the program undoing everything up to the number
 			switch ($e->getCode()) {
-				case 5: //module
-				case 4: //permissions
+				case 5: // data
+				case 4: // structure
 				case 3: // database
 					$config = Config::getInstance();
 					$pathToSQL = $config['path']['modules'] . 'BentoBase/sql/system_remove.sql.php';
 					$db = dbConnect('default');
-					$db->runFile($pathToSQL);
+
+					if(!$this->dbDebug)
+						$db->runFile($pathToSQL);
 				case 2: // database files
 					unlink($config['path']['base'] . 'data/configuration/databases.php');
 				case 1: // configuration files
@@ -81,6 +85,7 @@ class BentoBaseInstaller
 	protected function checkRequirements()
 	{
 		try{
+			$config = Config::getInstance();
 			if(file_exists($config['path']['base'] . '.blockinstall'))
 				throw new Exception('blockinstall file found.');
 
@@ -117,7 +122,7 @@ class BentoBaseInstaller
 			$url['theme'] = 'data/themes/';
 			$url['modules'] = 'bin/modules/';
 			$url['javascript'] = 'javascript/';
-			$cache = ($query['cacheHandler']) ? $query['cacheHandler'] : 'FileHandler'; // string, not boolean
+			$cache = ($input['cacheHandler']) ? $input['cacheHandler'] : 'FileHandler'; // string, not boolean
 
 			// Write Config File
 			$directory = $config['path']['base'] . 'data/configuration/';
@@ -263,46 +268,68 @@ class BentoBaseInstaller
 			$userGuest->setName('guest');
 			$userGuest->save();
 
+			$userSystem = new User();
+			$userSystem->setName('system');
+			$userSystem->save();
+
 			// CREATE MEMBERGROUPS
-			$memgroup_admin = new MemberGroup();
-			$memgroup_admin->setName('SuperUser');
-			$memgroup_admin->save();
 
-			$memgroup_admin = new MemberGroup();
-			$memgroup_admin->setName('Administrator');
-			$memgroup_admin->save();
 
-			$memgroup_guest = new MemberGroup();
-			$memgroup_guest->setName('Guest');
-			$memgroup_guest->save();
+			$memgroupAdmin = new MemberGroup();
+			$memgroupAdmin->setName('Administrator');
+			$memgroupAdmin->save();
 
-			$memgroup_user = new MemberGroup();
-			$memgroup_user->setName('User');
-			$memgroup_user->save();
+
+
+			$memgroupUser = new MemberGroup();
+			$memgroupUser->setName('User');
+			$memgroupUser->save();
+
+
+			$memgroupGuest = new MemberGroup();
+			$memgroupGuest->setName('Guest');
+			$memgroupGuest->makeSystem();
+			$memgroupGuest->save();
+
+			$memgroupResourceOwner = new MemberGroup();
+			$memgroupResourceOwner->setName('ResourceOwner');
+			$memgroupResourceOwner->makeSystem();
+			$memgroupResourceOwner->save();
+
+			$memgroupResourceGroupOwner = new MemberGroup();
+			$memgroupResourceGroupOwner->setName('ResourceGroupOwner');
+			$memgroupResourceGroupOwner->makeSystem();
+			$memgroupResourceGroupOwner->save();
+
+			$memgroupSuperUser = new MemberGroup();
+			$memgroupSuperUser->setName('SuperUser');
+			$memgroupSuperUser->makeSystem();
+			$memgroupSuperUser->save();
+
 
 			// ADD USERS TO MEMBERGROUPS
-			$memgroup_admin->addUser($userAdmin);
-			$memgroup_user->addUser($userAdmin);
-			$memgroup_guest->addUser($userGuest);
+			$memgroupAdmin->addUser($userAdmin);
+			$memgroupUser->addUser($userAdmin);
+			$memgroupGuest->addUser($userGuest);
+
+			// Root Users (these guys can do anything)
+			$memgroupSuperUser->addUser($userAdmin);
+			$memgroupSuperUser->addUser($userSystem);
 
 
-
-
-
-
-
-
-			//
-
-
-
-
+			// Make the active user the system
+			$activeUser = ActiveUser::getInstance();
+			$activeUser->loadUser($userSystem->getId());
 
 
 			// CREATE ROOT LOCATION
+
+			// The root location causes a chicken and egg problem- we can't create register the first model without
+			// installing its module, but we can't install the module without the first location.
+			// So we just force it to start the system.
 			$locationRoot = new Location();
 			$locationRoot->setName('root');
-			$locationRoot->setResource('root', '0');
+			$locationRoot->setResource('Root', '0');
 
 			$locationRoot->setMeta('adminTheme', 'admin');
 			$locationRoot->setMeta('htmlTheme', 'default');
@@ -312,119 +339,117 @@ class BentoBaseInstaller
 
 
 
+
+
 			if(!$this->setupCoreModule())
 				return false;
 
 
-			// CREATE SITE
-			$locationSite = new Location();
-			$locationSite->name = $input['siteName'];
-			$locationSite->resource = 'site';
-			$locationSite->parent = $location_root;
-			$locationSite->save();
 
+			// Create Site
 
-			$site = new ObjectRelationshipMapper('sites');
-			$site->location_id = $location_site->location_id();
+			$site = new BentoBaseModelSite();
 			$site->name = $input['siteName'];
-			$site->save();
+			$site['allowIndex'] = 1;
+			$site->save($locationRoot);
 
-			$primaryDomain = ($input['domain']) ? rtrim(trim($input['domain']), '/') . '/' : '';
+			$ssl = isset($input['ssl'][0]);
+			$site->addUrl($input['domain'], $ssl, true);
 
-			if(strpos($primaryDomain, 'http://') !== false)
-			{
-				$primaryDomain = substr($primaryDomain, strpos($url['domain'], 'http://') + 7);
-			}
+			$siteLocation = $site->getLocation();
 
-			if($primaryDomain != '')
-			{
-				$primaryDomainRecord = new ObjectRelationshipMapper('urls');
-				$primaryDomainRecord->site_id = $site->site_id;
-				$primaryDomainRecord->urlPath = $primaryDomain;
-				$primaryDomainRecord->save();
-			}
 
-			$sslDomain = ($input['ssl']) ? rtrim(trim($input['ssl']), '/') . '/' : '';
 
-			if($sslDomain != '' && (strpos($sslDomain, 'https://') !== false))
-			{
-				$sslDomain = substr($sslDomain, strpos($sslDomain, 'https://') + 8);
-			}
+			$membersOnlyDirectory = new BentoBaseModelDirectory();
+			$membersOnlyDirectory->name = 'MembersOnly';
+			$membersOnlyDirectory['allowIndex'] = 1;
+			$membersOnlyDirectory->save($siteLocation);
+			$locationMembersOnly = $membersOnlyDirectory->getLocation();
+			$locationMembersOnly->setInherit(false);
+			$locationMembersOnly->save();
 
-			if($sslDomain != '')
-			{
-				$sslDomainRecord = new ObjectRelationshipMapper('urls');
-				$sslDomainRecord->site_id = $site->site_id;
-				$sslDomainRecord->urlPath = $sslDomain;
-				$sslDomainRecord->urlSSL = '1';
-				$sslDomainRecord->save();
-			}
 
-			$locationMembersonly = new Location();
-			$locationMembersonly->name = 'members_only';
-			$locationMembersonly->resource = 'directory';
-			$locationMembersonly->parent = $location_site;
-			$locationMembersonly->inherits = false;
-			$locationMembersonly->save();
-
-			$locationAdminOnly = new Location();
-			$locationAdminOnly->name = 'admin_only';
-			$locationAdminOnly->resource = 'directory';
-			$locationAdminOnly->parent = $location_site;
-			$locationAdminOnly->inherits = false;
+			$adminOnlyDirectory = new BentoBaseModelDirectory();
+			$adminOnlyDirectory->name = 'AdminOnly';
+			$adminOnlyDirectory['allowIndex'] = 1;
+			$adminOnlyDirectory->save($siteLocation);
+			$locationAdminOnly = $adminOnlyDirectory->getLocation();
+			$locationAdminOnly->setInherit(false);
 			$locationAdminOnly->save();
 
 
+			$page = new BentoCMSModelPage();
+			$page->name = 'home';
+			$page['title'] = 'Welcome to BentoBase';
+			$page['content'] = 'BentoBase- default installation text coming soon!';
+			$page->save($siteLocation);
+			$pageLocation = $page->getLocation();
 
-			// CREATE PERMISSION PROFILES
 
-			// Read, Add, Edit, Delete, Execute
-			PermissionActionList::addAction('Read');
-			PermissionActionList::addAction('Add');
-			PermissionActionList::addAction('Edit');
-			PermissionActionList::addAction('Delete');
-			PermissionActionList::addAction('Execute');
-			PermissionActionList::addAction('System');
-			PermissionActionList::addAction('Admin');
+			$site['defaultChild'] = $pageLocation->getId();
+			$site->save();
+
+
+
 
 			// Add Admin permissions
-			$adminRootPermissions = new GroupPermission($memgroup_admin->getId(), $locationRoot->getId());
-			$adminRootPermissions->setPermission('universal', 'Read', true);
-			$adminRootPermissions->setPermission('universal', 'Edit', true);
-			$adminRootPermissions->setPermission('universal', 'Add', true);
-			$adminRootPermissions->setPermission('universal', 'Delete', true);
-			$adminRootPermissions->setPermission('universal', 'Execute', true);
-			$adminRootPermissions->setPermission('universal', 'System', true);
-			$adminRootPermissions->setPermission('universal', 'Admin', true);
 
-			$adminOnlyPermissions = new GroupPermission($memgroup_admin->getId(), $locationAdminOnly->getId());
-			$adminOnlyPermissions->setPermission('universal', 'Read', true);
-			$adminOnlyPermissions->setPermission('universal', 'Edit', true);
-			$adminOnlyPermissions->setPermission('universal', 'Add', true);
-			$adminOnlyPermissions->setPermission('universal', 'Delete', true);
-			$adminOnlyPermissions->setPermission('universal', 'Execute', true);
-			$adminOnlyPermissions->setPermission('universal', 'System', true);
-			$adminOnlyPermissions->setPermission('universal', 'Admin', true);
 
-			$adminMembersPermissions = new GroupPermission($memgroup_admin->getId(), $locationMembersonly->getId());
-			$adminMembersPermissions->setPermission('universal', 'Read', true);
-			$adminMembersPermissions->setPermission('universal', 'Edit', true);
-			$adminMembersPermissions->setPermission('universal', 'Add', true);
-			$adminMembersPermissions->setPermission('universal', 'Delete', true);
-			$adminMembersPermissions->setPermission('universal', 'Execute', true);
-			$adminMembersPermissions->setPermission('universal', 'System', true);
-			$adminMembersPermissions->setPermission('universal', 'Admin', true);
+			ModelRegistry::clearHandlers();
+			$coreResources = ModelRegistry::getModelList();
+			$corePermissions = array('Read', 'Edit', 'Add', 'Execute', 'System', 'Admin');
 
-			// Add private permissions
-			$userMembersPermissions = new GroupPermission($memgroup_user->getId(), $locationMembersonly->getId());
-			$userMembersPermissions->setPermission('universal', 'Read', true);
+			$adminResources = $coreResources;
+			$adminResources[] = 'Universal';
 
-			// Add public permissions
-			$userSitePermissions = new GroupPermission($memgroup_user->getId(), $locationSite->getId());
-			$userSitePermissions->setPermission('universal', 'Read', true);
 
-			$guestSitePermissions = new GroupPermission($memgroup_guest->getId(), $locationSite->getId());
-			$guestSitePermissions->setPermission('universal', 'Read', true);
+
+			$adminRootPermissions = new GroupPermission($memgroupAdmin->getId(), $locationRoot->getId());
+			$adminOnlyPermissions = new GroupPermission($memgroupAdmin->getId(), $locationAdminOnly->getId());
+			$adminMembersPermissions = new GroupPermission($memgroupAdmin->getId(), $locationMembersOnly->getId());
+
+			foreach($corePermissions as $permission)
+			{
+				// Register action type
+				PermissionActionList::addAction($permission);
+				$permissionId = PermissionActionList::getAction($permission);
+
+				// loop through resources to add permissions for eachs
+				foreach($adminResources as $resource)
+				{
+					   $adminRootPermissions->setPermission($resource, $permissionId, true);
+					   $adminOnlyPermissions->setPermission($resource, $permissionId, true);
+					$adminMembersPermissions->setPermission($resource, $permissionId, true);
+				}
+
+			}
+
+			$adminRootPermissions->save();
+			$adminOnlyPermissions->save();
+			$adminMembersPermissions->save();
+
+			// Add user permissions
+			$userMembersPermissions = new GroupPermission($memgroupUser->getId(), $locationMembersOnly->getId());
+			$userSitePermissions = new GroupPermission($memgroupUser->getId(), $siteLocation->getId());
+			$guestSitePermissions = new GroupPermission($memgroupGuest->getId(), $siteLocation->getId());
+
+
+			$restrictedObjects = array('Root');
+			$permissionId = PermissionActionList::getAction('Read');
+			foreach($coreResources as $resource)
+			{
+				if(in_array($resource, $restrictedObjects))
+					continue;
+
+				$userMembersPermissions->setPermission($resource, $permissionId, true);
+				$userSitePermissions->setPermission($resource, $permissionId, true);
+				$guestSitePermissions->setPermission($resource, $permissionId, true);
+			}
+
+			$userMembersPermissions->save();
+			$userSitePermissions->save();
+			$guestSitePermissions->save();
+
 
 		}catch(Exception $e){
 			return false;
@@ -435,34 +460,42 @@ class BentoBaseInstaller
 	protected function setupCoreModule()
 	{
 		try{
-
-			$config = Config::getInstance();
-			$input = Input::getInput();
-
-			if(!class_exists('ModuleInstaller', false))
-				include($config['path']['mainclasses'] . 'ModuleInstaller.class.php');
-
 			$rootLocation = new Location(1);
-
 			$defaultModules = array ('default' => 'BentoBase', 'error' => 'BentoBotch');
 
 			foreach($defaultModules as $name => $package)
 			{
-				$postName = 'moduleInstall' . $name;
-
-
-				$installation = new ModuleInstaller($package, $input[$postName], $location_site);
-				if(!$installation->fullInstall())
-				{
-					throw new Exception('Module Installation failed.');
-				}
-				$rootLocation->setMeta($name, $package);
+				if($this->installModule($package))
+					$rootLocation->setMeta($name, $package);
 			}
 			$rootLocation->save();
+
+			$this->installModule('BentoCMS');
 
 		}catch(Exception $e){
 			return false;
 		}
+		return true;
+	}
+
+	protected function installModule($moduleName)
+	{
+		$config = Config::getInstance();
+		if(!class_exists('ModuleInstaller', false))
+				include($config['path']['mainclasses'] . 'ModuleInstaller.class.php');
+
+		$customInstallerName = 'moduleInstall' . $moduleName;
+		$path = $config['path']['modules'] . 'classes/hooks/moduleInstaller.class.php';
+
+		if(!class_exists($customInstallerName, false) && file_exists($path))
+			include($path);
+
+		$class = (class_exists($customInstallerName, false)) ? $customInstallerName : 'ModuleInstaller';
+
+		$installation = new $class($moduleName);
+		if(!$installation->fullInstall())
+			throw new Exception('Module Installation failed.');
+
 		return true;
 	}
 }

@@ -31,15 +31,17 @@ class DatabaseConnection
 	static private $db_connections = array();
 	static private $iniFile;
 
+
+
 	/**
 	 * Returns a database connection based off of the database config array
 	 *
 	 * @param string $param
 	 * @return Mysql_Base|false
 	 */
-	static public function getConnection($database = 'default')
+	static public function getConnection($database = 'default_read_only', $useSaved = true)
 	{
-		if(isset(self::$db_connections[$database]))
+		if($useSaved && isset(self::$db_connections[$database]))
 		{
 			return self::$db_connections[$database];
 		}else{
@@ -66,12 +68,18 @@ class DatabaseConnection
 				$connectionInfo['password'],
 				$connectionInfo['dbname']);
 
-				if($db_connection === false)
-					throw new BentoError('Could not connect to database ' . $db_name);
+				if($db_connection->connect_errno)
+					throw new BentoError('Could not connect to database ' . $db_name . ': ' . $db_connection->error);
 
-				self::$db_connections[$database] = $db_connection;
+				$charset = (isset($connectionInfo['charset'])) ? $connectionInfo['charset'] : 'utf8';
 
-				return self::$db_connections[$database];
+				if(!$db_connection->set_charset($charset))
+					throw new BentoError('Unable to switch db connection to utf8 charset.');
+
+				if(!isset(self::$db_connections[$database]))
+					self::$db_connections[$database] = $db_connection;
+
+				return $db_connection;
 
 			}catch(BentoError $e){
 
@@ -79,6 +87,13 @@ class DatabaseConnection
 			}
 		}
 	}
+
+	static public function getStatement($database = 'default_read_only', $useSaved = true)
+	{
+		$db = DatabaseConnection::getConnection($database, $useSaved);
+		return $db->stmt_init();
+	}
+
 
 	static function close()
 	{
@@ -260,6 +275,7 @@ class Mystmt extends mysqli_stmt
 
     public function bind_param_and_execute()
     {
+    	depreciationWarning();
     	$args = func_get_args();
     	return call_user_func_array(array($this, 'bindAndExecute'), $args);
     }
@@ -295,6 +311,7 @@ class Mystmt extends mysqli_stmt
 				$this->throwError();
 			return false;
 		}
+
 	}
 
 	public function throwError($message = '')

@@ -57,7 +57,7 @@ class RuntimeConfig implements ArrayAccess
 
 	protected function convertPath($pathString)
 	{
-		$site = ActiveSite::getInstance();
+		$site = ActiveSite::getSite();
 		$currentLocation = $site->getLocation();
 
 		if(strlen($pathString) > 0 )

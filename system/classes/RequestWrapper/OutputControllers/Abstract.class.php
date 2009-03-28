@@ -101,14 +101,6 @@ abstract class AbstractOutputController
 
 
 
-
-
-
-
-
-
-
-
 	protected function checkAction($action)
 	{
 		if(!$action)

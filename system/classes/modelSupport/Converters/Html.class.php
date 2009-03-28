@@ -2,29 +2,36 @@
 
 class ModelToHtml
 {
-	static public function convert($model)
+
+	static public function convert($model, $handler)
 	{
 		$display = new DisplayMaker();
-		$display->loadTemplate($modelName, $this->package);
 
-		$tags = $display->tagsUsed();
-
-		foreach($tags as $tagName => $tagInfo)
+		if($display->loadTemplate($model->getType(), $model->getModule()))
 		{
-			if(strpos($tagName, 'attr_') === 0)
+			$tags = $display->tagsUsed();
+
+			foreach($tags as $tagName => $tagInfo)
 			{
-				$tagName = substr($tagName, 5);
+				if(strpos($tagName, 'attr_') === 0)
+				{
+					$tagName = substr($tagName, 5);
 
-				if(isset($model[$tagName]))
-					$display->addContent($tagName, $model[$tagName]);
+					if(isset($model[$tagName]))
+						$display->addContent($tagName, $model[$tagName]);
 
-			}elseif(isset($model->$tagName)){
+				}elseif(isset($model->$tagName)){
 
-				$display->addContent($tagName, $model->$tagName);
+					$display->addContent($tagName, $model->$tagName);
+				}
 			}
-		}
 
-		return $display->makeDisplay();
+			return $display->makeDisplay();
+
+		}else{
+			if(isset($model['content']))
+				return $model['content'];
+		}
 	}
 
 }

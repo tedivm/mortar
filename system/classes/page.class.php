@@ -78,10 +78,7 @@ class Page implements ArrayAccess
 
 	public function getThemeUrl()
 	{
-		$config = Config::getInstance();
-		$info = InfoRegistry::getInstance();
-
-		return $info->Site->currentLink . $info->Configuration['url']['theme'] . $this->theme . '/';
+		return ActiveSite::getLink('theme') . $this->theme . '/';
 	}
 
 	public function getThemePath()
@@ -117,7 +114,7 @@ class Page implements ArrayAccess
 			$this->javascript[$library][] = $name;
 		}else{
 
-			if(!is_array($this->javascript[$library]))
+			if(!isset($this->javascript[$library]))
 			{
 				$this->javascript[$library] = $name;
 			}else{
@@ -266,8 +263,7 @@ class Page implements ArrayAccess
 
 		$this->addCssInclude($cssUrls);
 
-		$site = ActiveSite::getInstance();
-		$this->preStartupJs[] = 'var baseUrl = ' . json_encode($site->currentLink) . ';';
+		$this->preStartupJs[] = 'var baseUrl = ' . json_encode(ActiveSite::getLink()) . ';';
 	}
 
 	// doesn't do much yet
@@ -277,8 +273,7 @@ class Page implements ArrayAccess
 		$template->set_display_template($templateString);
 		$template->add_content('theme_path', $this->getThemeUrl());
 
-		$site = ActiveSite::getInstance();
-		$jsInclude = $site->currentLink . 'javascript/';
+		$jsInclude = ActiveSite::getLink() . 'javascript/';
 
 		$template->add_content('js_path', $jsInclude);
 

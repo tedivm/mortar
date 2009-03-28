@@ -25,20 +25,10 @@ class InstallationForm extends Form
 				getForm()->
 
 				createInput('ssl')->
-					setLabel('SSL Domain')->
+					setType('checkbox')->
+					setLabel('SSL enabled')->
 				getForm()->
 
-				createInput('moduleInstalldefault')->
-					setLabel('System Module Name')->
-					property('value', 'System')->
-					addRule('required')->
-				getForm()->
-
-				createInput('moduleInstallerror')->
-					setLabel('Error Module Name')->
-					property('value', 'Error')->
-					addRule('required')->
-				getForm()->
 
 				createInput('base')->
 					setLabel('Base Path')->
@@ -67,6 +57,7 @@ class InstallationForm extends Form
 				createInput('cacheHandler')->
 					setLabel('Cache Handler')->
 					setType('select')->
+					setValue('SQLite')->
 					addRule('required');
 
 				$cacheHandlers = Cache::getHandlers();

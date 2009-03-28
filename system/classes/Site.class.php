@@ -64,7 +64,6 @@ class Site
 				$mainUrls->site_id = $siteInfo['siteId'];
 				$mainUrls->urlAlias = 0;
 				$mainUrls->select();
-				$mainUrls->select();
 
 				$results = $mainUrls->resultsToArray();
 				foreach ($results as $url)
@@ -77,8 +76,16 @@ class Site
 					}
 				}
 			}
+
+			$locationStmt = $db->stmt_init();
+			$locationStmt->bindAndExecute('SELECT location_id FROM locations WHERE resourceType = ? AND resourceId = ?');
+
+
+
+
 			$cache->store_data($siteInfo);
 		}
+
 
 		$this->siteId = $siteInfo['siteId'];
 		$this->location = new Location($siteInfo['siteLocationId']);
@@ -135,37 +142,60 @@ class Site
 
 class ActiveSite extends Site
 {
-	static $instance;
-	public $currentLink;
+	protected static $site;
+	public static $currentLink;
 
-	protected function __construct()
+	public static function getSite()
 	{
-		$ssl = ($_SERVER['HTTPS']);
 
-		$url = $_SERVER['SERVER_NAME'] . substr($_SERVER['PHP_SELF'], 0, strpos($_SERVER['PHP_SELF'], DISPATCHER));
-		$this->currentLink = 'http' . ($ssl ? 's' : '') .  '://' . $url;
+		if(is_null(self::$site))
+		{
+			$ssl = isset($_SERVER['HTTPS']);
 
-		if(!INSTALLMODE)
-			$this->loadByUrl($url, $ssl);
-	}
+			$url = $_SERVER['SERVER_NAME'] . substr($_SERVER['PHP_SELF'], 0, strpos($_SERVER['PHP_SELF'], DISPATCHER));
 
-	public static function getInstance()
-	{
-		if(!isset(self::$instance)){
-			$object = __CLASS__;
-			self::$instance = new $object;
+			if(INSTALLMODE)
+				return false;
+
+
+			$urlRecord = new ObjectRelationshipMapper('urls');
+			$urlRecord->path = $url;
+
+
+			if($urlRecord->select(1))
+			{
+				$siteHandler = importModel('Site');
+				$site = new $siteHandler($urlRecord->site_id);
+				self::$site = $site;
+			}else{
+				self::$site = false;
+			}
 		}
-		return self::$instance;
+
+		return self::$site;
 	}
 
-	public function getLink($name = false)
+	public static function getLink($name = null)
 	{
+		if(is_null(self::$currentLink))
+		{
+			$ssl = isset($_SERVER['HTTPS']);
+			$url = $_SERVER['SERVER_NAME'] . substr($_SERVER['PHP_SELF'], 0, strpos($_SERVER['PHP_SELF'], DISPATCHER));
+			self::$currentLink = 'http' . ($ssl ? 's' : '') .  '://' . $url;
+		}
 
-		$info = InfoRegistry::getInstance();
-		$append = $info->Configuration['url'][$name];
-		$link = (strlen($append) > 0 || $name === false) ? $this->currentLink . $append : false;
+
+		$link = self::$currentLink;
+
+		$config = Config::getInstance();
+
+		if(isset($config['url'][$name]))
+			$link .= $config['url'][$name];
+
 		return $link;
 	}
+
+
 
 }
 

@@ -55,13 +55,12 @@ class AdminControllerContentFilter
 
 		$processedOutput = new DisplayMaker();
 		$processedOutput->setDisplayTemplate($text);
-
 		$processedOutput->addContent('content', $output);
 		$processedOutput->addContent('title', $title);
 		$processedOutput->addContent('subtitle', $subTitle);
 		$output = $processedOutput->makeDisplay();
 
-		return $output;
+		$page->addRegion('content', $output);
 	}
 }
 

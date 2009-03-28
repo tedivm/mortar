@@ -43,7 +43,7 @@ class ObjectRelationshipMapper
 	private $select_stmt;
 	protected $num_rows = 0;
 	public $sql_errno = 0;
-
+	public $errorString;
 
 
 
@@ -67,8 +67,7 @@ class ObjectRelationshipMapper
 	{
 
 		// retreive database connection
-		$db = db_connect($this->db_read);
-
+		$db = DatabaseConnection::getConnection($this->db_read);
 		// setup SELECT
 
 		$sql_select = 'SELECT * FROM ' . $this->table;
@@ -78,6 +77,7 @@ class ObjectRelationshipMapper
 		// setup WHERE
 
 		$sql_where = 'WHERE ';
+		$sql_typestring = '';
 		$where_loop = 0;
 		foreach($this->values as $column => $value)
 		{
@@ -88,6 +88,10 @@ class ObjectRelationshipMapper
 
 			$sql_input[] = $value;
 			$sql_where .= $column . ' = ? ';
+
+			if(!isset($this->columns[$column]['Type']))
+				throw new BentoError('Column ' . $column . ' not found in table ' . $this->table);
+
 			$sql_typestring .= $this->get_type($this->columns[$column]['Type']);
 			$where_loop++;
 		}
@@ -124,9 +128,12 @@ class ObjectRelationshipMapper
 			$sql_orderby = 'ORDER BY ' . $orderby;
 		}
 
-		if(isset($sql_orderby ))
+		if(isset($sql_orderby))
+		{
 			$sql_orderby .= ($order == 'ASC') ? ' ASC' : ' DESC';
-
+		}else{
+			$sql_orderby = '';
+		}
 		// END setup ORDER BY
 
 		// setup LIMIT
@@ -136,6 +143,8 @@ class ObjectRelationshipMapper
 			$sql_limit = 'LIMIT ' . $limit;
 			if($position > 0)
 				$sql_limit .= ',' . $position;
+		}else{
+			$sql_limit = '';
 		}
 
 		// END setup LIMIT
@@ -154,14 +163,14 @@ class ObjectRelationshipMapper
 			$select_stmt = $db->stmt_init();
 			$select_stmt->prepare($query);
 
-			call_user_func_array(array($select_stmt, 'bind_param_and_execute'), $sql_input);
+			call_user_func_array(array($select_stmt, 'bindAndExecute'), $sql_input);
 			$results = $select_stmt;
 		}
 
 
-		if($insert_stmt->errno > 0)
+		if($select_stmt->errno > 0)
 		{
-			$this->sql_errno = $insert_stmt->errno;
+			$this->sql_errno = $select_stmt->errno;
 			return false;
 		}
 
@@ -197,8 +206,7 @@ class ObjectRelationshipMapper
 	{
 
 		// retreive database connection
-		$db = db_connect($this->db_write);
-
+		$db = DatabaseConnection::getConnection($this->db_write);
 		// setup SELECT
 
 		$sql_delete = 'DELETE FROM ' . $this->table;
@@ -208,6 +216,9 @@ class ObjectRelationshipMapper
 		// setup WHERE
 
 		$sql_where = 'WHERE ';
+		$sql_typestring = '';
+		$sql_input = array();
+
 		$loop = 0;
 		foreach($this->values as $column => $value)
 		{
@@ -225,24 +236,23 @@ class ObjectRelationshipMapper
 			}
 
 		}
-
-
 		// END setup WHERE
-
-
 
 		// setup LIMIT
 
-		if($limit > 0)
-		{
-			$sql_limit = 'LIMIT ' . $limit;
-
-		}
+		$sql_limit = ($limit > 0) ? $limit : '';
 
 		// END setup LIMIT
 
 
 		// create query
+
+		if(strlen($sql_where) <= 6)
+		{
+			// this prevents the query from emptying a table
+			return false;
+		}
+
 		$query = rtrim($sql_delete, ' ,') . ' ' . rtrim($sql_where, ' ,') . ' ' . rtrim($sql_limit, ' ,');
 
 		if(count($sql_input) < 1)
@@ -255,7 +265,7 @@ class ObjectRelationshipMapper
 			$delete_stmt = $db->stmt_init();
 			$delete_stmt->prepare($query);
 
-			call_user_func_array(array($delete_stmt, 'bind_param_and_execute'), $sql_input);
+			call_user_func_array(array($delete_stmt, 'bindAndExecute'), $sql_input);
 			$results = $delete_stmt;
 		}
 
@@ -275,42 +285,44 @@ class ObjectRelationshipMapper
 
 	public function save()
 	{
-		if($this->selected)
-		{
-			return $this->update();
-		}else{
-
-			try{
-				if($this->insert())
+		try{
+			// If the primary key is assigned by mysql and exists, it means we need to run an update
+			// elsewise, if the 'selected' tag is hit, it means we pulled the info from the database
+			// and thus need to do an update as well
+			if((isset($this->values[$this->primary_keys[0]])
+							&& strpos($this->columns[$this->primary_keys[0]]['Extra'], 'auto_increment') !== false)
+						|| $this->selected )
+			{
+				if($this->update())
 				{
 					$this->selected = true;
 					return true;
 				}
+			}else{
 
-			}catch(Exception $e){
+				try{
 
-				switch ($this->sql_errno) {
-					case 0:
+					if($this->insert())
+					{
+						$this->selected = true;
 						return true;
+					}
 
-					case 1022:
-					// 1022 == duplicate key
-						$this->sql_errno = 0;
-						return $this->update();
-						break;
+				}catch(Exception $e){
 
-					default:
-						echo 4;
-						return false;
-						break;
+					if($this->sql_errno == 1022 && $this->update())
+					{
+						$this->selected = true;
+						return true;
+					}
+
+					throw $e;
 				}
-
-				return false;
-
 			}
 
+		}catch(Exception $e){} // just let the system return false
+
 		return false;
-		}
 	}
 
 
@@ -377,12 +389,14 @@ class ObjectRelationshipMapper
 				$value = $this->sql_errno;
 				break;
 
-			case 'primaryKey':
+			case 'primarykey':
 				if(count($this->primary_keys) == 1)
-					$name = $this->primary_keys[0];
-
+					$value = $this->values[$this->primary_keys[0]];
+				break;
 			default:
-				$value = $this->values[$name];
+				$value = null;
+				if(isset($this->values[$name]))
+					$value = $this->values[$name];
 				break;
 		}
 
@@ -446,12 +460,9 @@ class ObjectRelationshipMapper
 
 		if(!($schema = $cache->get_data()))
 		{
-
-			$db = db_connect($this->db_write);
+			$db = DatabaseConnection::getConnection($this->db_write);
 			$result = $db->query('SHOW FIELDS FROM ' . $this->table);
-
-
-
+			$primarykey = array();
 
 			if(!$result)
 				throw new BentoError('Database Error:' . $db->error . '    ORM unable to load table ' . $this->table);
@@ -467,25 +478,22 @@ class ObjectRelationshipMapper
 				if($pos)
 					$results['Type'] = substr($results['Type'], 0, $pos);
 
-
+				$results['Null'] = ($results['Null'] != 'NO');
 
 				$columns[$results['Field']] = $results;
 
 
 				if($results['Key'] == 'PRI')
 				{
-
-					if(strpos($columns['Extra'], 'autoincrement') === false)
+					if(isset($results['Extra']) && strpos($results['Extra'], 'auto_increment') !== false)
 					{
+						$columns[$results['Field']]['autoIncrement'] = true;
 						$primarykey[] = $results['Field'];
 					}else{
 						array_unshift($primarykey, $results['Field']);
 					}
 				}
-
-
 			}
-
 
 			$schema['columns'] = $columns;
 			$schema['primarykey'] = $primarykey;
@@ -500,24 +508,22 @@ class ObjectRelationshipMapper
 	protected function get_type($datatype)
 	{
 
-		return ($this->data_types[$datatype]) ? ($this->data_types[$datatype]) : 's';
+		return isset($this->data_types[$datatype]) ? $this->data_types[$datatype] : 's';
 	}
 
 	protected function insert()
 	{
+
 		$sql_columns = '(';
 		$sql_values = '(';
-		$sql_input = array();
+		$sql_typestring = '';
+		//$sql_input = array();
 
 		// the following code snippet is identical to the one in the update function, and should be refractured
 		// into its own function
 		foreach($this->columns as $column_name => $column_info)
 		{
-
-			if($column_info['Null'] == 'No' && !isset($this->values[$column_name]) && !isset($this->values[$column_info['Default']]))
-				return false;
-
-			if($this->direct_values[$column_name])
+			if(isset($this->direct_values[$column_name]))
 			{
 				$sql_columns .= $column_name . ', ';
 				$sql_values .= $this->direct_values[$column_name] . ', ';
@@ -531,32 +537,67 @@ class ObjectRelationshipMapper
 					$sql_input[] = $this->values[$column_name];
 					$sql_values .= '?, ';
 				}else{
-					//$sql_values .= 'NULL, ';
+
+
+					if(isset($column_info['Default']))
+					{
+						$sql_columns .= $column_name . ', ';
+						$sql_values .= 'DEFAULT, ';
+
+					}elseif($column_info['Null']){
+
+						$sql_columns .= $column_name . ', ';
+						$sql_values .= 'NULL, ';
+
+					}else{
+
+						if(!isset($column_info['autoIncrement']))
+						{
+							$this->errorString = 'Need a value for column ' . $column_name;
+							return false;
+						}
+					}
 				}
 			}
 		}
 
 		$sql_columns = rtrim($sql_columns, ' ,') . ') ';
 		$sql_values = rtrim($sql_values, ' ,') . ') ';
-		array_unshift($sql_input, $sql_typestring);
 
 		$query = 'INSERT INTO ' . $this->table . ' ' . $sql_columns . 'VALUES ' . $sql_values;
 
+		$db = DatabaseConnection::getConnection($this->db_write);
 
-		$db = db_connect($this->db_write);
-		$insert_stmt = $db->stmt_init();
-		$insert_stmt->prepare($query);
-		call_user_func_array(array($insert_stmt, 'bind_param_and_execute'), $sql_input);
-
-
-		if($insert_stmt->errno > 0)
+		if(count($sql_input) < 1)
 		{
-			$this->sql_errno = $insert_stmt->errno;
-			return false;
+			if(!$db->query($query))
+			{
+				$this->sql_errno = $db->errno;
+				$this->errorString = $db->error;
+			}
+
+			if(strpos($this->columns[$this->primary_keys[0]]['Extra'], 'auto_increment') !== false)
+				$this->values[$this->primary_keys[0]] = $db->insert_id;
+
+		}else{
+
+			array_unshift($sql_input, $sql_typestring);
+
+			$insert_stmt = $db->stmt_init();
+			$insert_stmt->prepare($query);
+			call_user_func_array(array($insert_stmt, 'bindAndExecute'), $sql_input);
+
+			if($insert_stmt->errno > 0)
+			{
+				$this->sql_errno = $insert_stmt->errno;
+				$this->errorString = $insert_stmt->error;
+				return false;
+			}
+
+			if(strpos($this->columns[$this->primary_keys[0]]['Extra'], 'auto_increment') !== false)
+				$this->values[$this->primary_keys[0]] = $insert_stmt->insert_id;
 		}
 
-		if(strpos($this->columns[$this->primary_keys[0]]['Extra'], 'auto_increment') !== false)
-			$this->values[$this->primary_keys[0]] = $insert_stmt->insert_id;
 
 		return true;
 
@@ -569,16 +610,14 @@ class ObjectRelationshipMapper
 
 		$sql_set = 'SET ';
 		$sql_input = array();
-
+		$sql_columns = '';
+		$sql_typestring = '';
 		// the following code snippet is identical to the one in the update function, and should be refractured
 		// into its own function
 		foreach($this->columns as $column_name => $column_info)
 		{
-			if($column_info['Null'] == 'No' && !isset($this->values[$column_name]) && !isset($this->values[$column_info['Default']]))
-				return false;
-
 			$sql_columns .= $column_name . ', ';
-			if($this->direct_values[$column_name])
+			if(isset($this->direct_values[$column_name]))
 			{
 				$sql_set .= $column_name . ' = ' . $this->direct_values[$column_name] .= ', ';
 			}else{
@@ -589,10 +628,24 @@ class ObjectRelationshipMapper
 					$sql_input[] = $this->values[$column_name];
 					$sql_set .= $column_name . ' = ?, ';
 				}else{
-					$sql_set .= $column_name . ' = NULL, ';
-				}
-			}
-		}
+
+					if(isset($column_info['Default']))
+					{
+						$sql_set .= $column_name . ' = DEFAULT, ';
+
+					}elseif($column_info['Null']){
+
+						$sql_set .= $column_name . ' = NULL, ';
+
+					}else{
+
+						return false;
+
+					}
+
+				} // if(isset($this->values[$column_name])) else
+			} // if($this->direct_values[$column_name]) else
+		}//foreach($this->columns as $column_name => $column_info)
 
 
 		$sql_where = 'WHERE ';
@@ -617,11 +670,11 @@ class ObjectRelationshipMapper
 
 		$query = 'UPDATE ' . $this->table . ' ' . $sql_set . ' ' . $sql_where;
 
-		$db = db_connect($this->db_write);
+		$db = DatabaseConnection::getConnection($this->db_write);
 		$update_stmt = $db->stmt_init();
 		$update_stmt->prepare($query);
 
-		$results = call_user_func_array(array($update_stmt, 'bind_param_and_execute'), $sql_input);
+		$results = call_user_func_array(array($update_stmt, 'bindAndExecute'), $sql_input);
 		return $results;
 	}
 

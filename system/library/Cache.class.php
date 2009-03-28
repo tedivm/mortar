@@ -107,10 +107,15 @@ class Cache
 
 	static public function clear()
 	{
+		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable)
+			return true;
+
 		if(self::$handlerClass == '')
 		{
+			$handlers = self::getHandlers();
 			$config = Config::getInstance();
-			self::$handlerClass = (isset(self::$handlers[$config['cacheType']])) ? self::$handlers[$config['cacheType']] : self::$handlers['filesystem'];
+			self::$handlerClass = (isset($handlers[$config['cacheType']])) ? $handlers[$config['cacheType']]
+																			: $handlers['FileSystem'];
 		}
 
 		if(self::$handlerClass != '')
@@ -165,6 +170,9 @@ class Cache
 
 	public function extendCache()
 	{
+		if(!$this->cache_enabled)
+			return;
+
 		return $this->storeData(self::$memStore[$this->keyString]['data']['return']);
 	}
 

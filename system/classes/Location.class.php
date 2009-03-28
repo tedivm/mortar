@@ -52,6 +52,9 @@ class Location
 	protected $meta = array();
 	protected $inherit = true;
 
+	protected $owner;
+	protected $group;
+
 	public function __construct($id = null)
 	{
 		$this->loadLocation($id);
@@ -67,6 +70,11 @@ class Location
 	{
 		$this->resourceId = $id;
 		$this->resourceType = $type;
+	}
+
+	public function getType()
+	{
+		return $this->resourceType;
 	}
 
 	public function getResource($id = false)
@@ -149,10 +157,40 @@ class Location
 		 }
 	}
 
+	public function setOwner(User $user)
+	{
+		$this->owner = $user->getId();
+	}
+
+	public function getOwner()
+	{
+		if(isset($this->owner))
+			return new User($this->owner);
+
+		return false;
+	}
+
+	public function setOwnerGroup(MemberGroup $memberGroup)
+	{
+		$this->group = $memberGroup->getId();
+	}
+
+	public function getOwnerGroup()
+	{
+		if(isset($this->group))
+			return new MemberGroup($this->group);
+
+		return false;
+	}
 
 	public function inheritsPermission()
 	{
 		return ($this->inherits == 1);
+	}
+
+	public function setInherit($on = true)
+	{
+		$this->inherits = $on ? 1 : 0;
 	}
 
 	public function setName($name)
@@ -160,9 +198,9 @@ class Location
 		$this->name = str_replace(' ', '_', $name);
 	}
 
-	public function setParent(Location $parent = null)
+	public function setParent(Location $parent)
 	{
-		$this->parent = $location;
+		$this->parent = $parent;
 	}
 
 	protected function loadLocation($id = null)
@@ -185,6 +223,8 @@ class Location
 					$locationInfo['resourceId'] = $dbLocation->resourceId;
 					$locationInfo['createdOn'] = $dbLocation->createdOn;
 					$locationInfo['lastModified'] = $dbLocation->lastModified;
+					$locationInfo['owner'] = $dbLocation->owner;
+					$locationInfo['group'] = $dbLocation->groupOwner;
 					$locationInfo['inherits'] = ($dbLocation->inherits == 1);
 
 					$db_meta = new ObjectRelationshipMapper('location_meta');
@@ -226,7 +266,6 @@ class Location
 		}
 	}
 
-
 	public function save()
 	{
 		$db_location = new ObjectRelationshipMapper('locations');
@@ -243,36 +282,48 @@ class Location
 
 		$db_location->query_set('lastModified', 'NOW()');
 
-		if(($this->parent instanceof Location))
+		if($this->parent instanceof Location)
 		{
 			$parentId = $this->parent->getId();
 
 			if(is_numeric($parentId))
 				$db_location->parent = $parentId;
+
 		}
 
 
 		$db_location->name = $this->name;
 		$db_location->resourceType = $this->resourceType;
 		$db_location->resourceId = $this->resourceId;
-		$db_location->inherit = ($this->inherits) ? 1 : 0;
+		$db_location->inherits = ($this->inherit) ? 1 : 0;
+
+		if(is_numeric($this->owner))
+		{
+			$db_location->owner = $this->owner;
+		}else{
+			$db_location->query_set('owner', 'NULL');
+		}
+
+		if(is_numeric($this->group))
+		{
+			$db_location->groupOwner = $this->group;
+		}else{
+			$db_location->query_set('groupOwner', 'NULL');
+		}
 
 
 		if(!$db_location->save())
 		{
- 			throw new BentoError('Unable to save location due to error ' . $db_location->sql_errno);
+ 			throw new BentoError('Unable to save location due to error ' . $db_location->errorString);
 		}
-
 
 		if(!is_numeric($this->id))
 			$this->id = $db_location->location_id;
-
 
 		// Erase all current values, since they are going to be replaced anyways
 		$metaDelete = new ObjectRelationshipMapper('location_meta');
 		$metaDelete->location_id = $this->id;
 		$metaDelete->delete(0);
-
 
 		foreach($this->meta as $name => $value)
 		{
@@ -284,11 +335,8 @@ class Location
 		}
 
 		Cache::clear('locations', $this->id, 'info');
+		return true;
 	}
-
-
-
-
 
 	public function getChildByName($name)
 	{

@@ -7,12 +7,6 @@ class IOProcessorHttp extends IOProcessorCli
 	{
 		$query = Query::getQuery();
 
-		if($this->arguments['inputHandler'] == 'put'){
-			Form::$userInput = Put::getInstance();
-		}else{
-			Form::$userInput = Post::getInstance();
-		}
-
 		if(!isset($query['format']))
 			$query['format'] = 'Html';
 
@@ -108,7 +102,7 @@ class SessionObserver implements SplObserver
 
 		// This token is used by forms to prevent cross site forgery attempts
 		if(!isset($_SESSION['nonce']) || $reload)
-			$_SESSION['nonce'] = md5($this->id . START_TIME);
+			$_SESSION['nonce'] = md5($this->userId . START_TIME);
 
 		if(!isset($_SESSION['IPaddress']) || $reload)
 			$_SESSION['IPaddress'] = $_SERVER['REMOTE_ADDR'];
@@ -118,7 +112,8 @@ class SessionObserver implements SplObserver
 
 		$_SESSION['user_id'] = $this->userId;
 
-		if($reload || !$_SESSION['OBSOLETE'] && mt_rand(1, 100) == 1)
+		// there's a one percent of the session id changing to help prevent session theft
+		if($reload || !isset($_SESSION['OBSOLETE']) && mt_rand(1, 100) == 1)
 		{
 			// Set current session to expire in x seconds
 			$_SESSION['OBSOLETE'] = true;
@@ -147,7 +142,7 @@ class SessionObserver implements SplObserver
 	{
 		try{
 
-			if($_SESSION['OBSOLETE'] && ($_SESSION['EXPIRES'] < time()))
+			if(isset($_SESSION['OBSOLETE']) && ($_SESSION['EXPIRES'] < time()))
 				throw new BentoWarning('Attempt to use expired session.');
 
 			if(!is_numeric($_SESSION['user_id']))

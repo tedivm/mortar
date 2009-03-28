@@ -12,23 +12,24 @@ class Theme
 
 	public function __construct($name)
 	{
+		$config = Config::getInstance();
+
 		if(defined('DEBUG') && DEBUG > 1)
 			$this->allowMin = false;
 
 		$this->name = $name;
-		$info = InfoRegistry::getInstance();
-		$this->url = $info->Site->currentLink . $info->Configuration['url']['theme'] . $name . '/';
+		$this->url = ActiveSite::getLink('theme') . $name . '/';
 
-		$cache = new Cache('theme', $this->name, $info->Site->currentLink);
+		$cache = new Cache('theme', $this->name, ActiveSite::getLink('theme'));
 		$data = $cache->getData();
 
 		if(!$cache->cacheReturned)
 		{
-			$baseModulePath = $info->Configuration['path']['modules'];
-			$baseModuleUrl = $info->Configuration['url']['modules'];
+			$baseModulePath = $config['path']['modules'];
+			$baseModuleUrl = $config['url']['modules'];
 
-			$baseModulePath = $info->Configuration['path']['modules'];
-			$baseModuleUrl = $info->Configuration['url']['modules'];
+			$baseModulePath = $config['path']['modules'];
+			$baseModuleUrl = $config['url']['modules'];
 
 
 			$packageList = new PackageList();
@@ -55,8 +56,8 @@ class Theme
 			}
 
 
-			$themePath = $info->Configuration['path']['theme'] . $name . '/';
-			$themeUrl = $info->Site->currentLink . $info->Configuration['url']['theme'] . $this->name . '/';
+			$themePath = $config['path']['theme'] . $name . '/';
+			$themeUrl = $this->url;
 
 
 			// javascript
@@ -69,8 +70,8 @@ class Theme
 			if($cssResult)
 				$cssLinks = array_merge_recursive($cssLinks, $cssResult);
 
-			$bentoJavascriptPath = $info->Configuration['path']['javascript'];
-			$bentoJavascriptUrl = $info->Site->getLink('javascript');
+			$bentoJavascriptPath = $config['path']['javascript'];
+			$bentoJavascriptUrl = ActiveSite::getLink('javascript');
 
 			// javascript
 			// This code loads the javascript that ships with Bento- we load it last so it overrides any
@@ -82,7 +83,7 @@ class Theme
 
 
 /*
-			$bentoCssPath = $info->Configuration['path']['css'];
+			$bentoCssPath = $config['path']['css'];
 			$bentoCssUrl = $info->Site->getLink('css');
 
 			// css

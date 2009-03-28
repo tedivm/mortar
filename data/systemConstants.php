@@ -1,6 +1,6 @@
 <?php
 // Developer Constants
-define('DEBUG', 2);
+define('DEBUG', 4);
 // 4,		3,		2,			1,		0
 // notices,	info, 	warning, 	error,	none
 // strict - E_STRICT with no Bento error displays.
@@ -9,7 +9,7 @@ define('DEBUG', 2);
 // purposes your best bet would be 2 or 3.
 define('STRICT', true);
 
-define('IGNOREPERMISSIONS', false);	//FOR TESTING ONLY!!!!
+define('IGNOREPERMISSIONS', true);	//FOR TESTING ONLY!!!!
 // This was placed in while testing the permissions code during the early creation phases
 // It still comes in handy when testing those things, but if turned on in a development environment
 // there would be obvious problems.
@@ -24,5 +24,8 @@ define('BENCHMARK', false);
 define('DISABLECACHE', true);
 // This program is designed to take advantage of caching, and in many cases code was optimized with that in mind.
 // Disabling caching is not recommended outside of development, which is why it is not an option in the interface.
+
+
+define('DEPRECIATION_WARNINGS', false);
 
 ?>

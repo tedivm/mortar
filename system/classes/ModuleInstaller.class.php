@@ -8,6 +8,9 @@ class ModuleInstaller
 
 	public function __construct($package)
 	{
+		if(!is_string($package))
+			throw new TypeMismatch(array('String', $package, 'Must include the package name.'));
+
 		$this->package = $package;
 		$this->loadSettings();
 	}
@@ -79,7 +82,7 @@ class ModuleInstaller
 
 	public function installDatabaseStructure()
 	{
-		$sqlPath = $this->pathToPackage . 'sql/install.sql.php';
+		$sqlPath = $this->packageInfo->getPath() . 'sql/install.sql.php';
 		if(file_exists($sqlPath))
 		{
 			$db = db_connect('default');
