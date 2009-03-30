@@ -210,9 +210,6 @@ class RequestWrapper
 		if(isset($query['location']))
 			$locationId = $query['location'];
 
-
-
-
 		try {
 
 			if($query['module'])
@@ -281,11 +278,9 @@ class RequestWrapper
 
 		}
 
-
-
 		if(!class_exists($className, false))
 		{
-			if(!include($path) || !class_exists($className, false))
+			if(!(file_exists($path) && include($path)) || !class_exists($className, false))
 				throw new ResourceNotFoundError('Unable to load action class ' . $className . ' at location: ' . $path);
 		}
 
