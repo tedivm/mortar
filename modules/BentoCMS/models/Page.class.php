@@ -130,7 +130,7 @@ class PageRevision
 		if(is_numeric($this->pageId) && is_numeric($revisionId))
 		{
 
-			$cache = new Cache('models', 'page', $this->pageId, 'content', $this->revisionId);
+			$cache = new Cache('models', 'Page', $this->pageId, 'content', $this->revisionId);
 			$contentData = $cache->getData();
 
 			if(!$cache->cacheReturned)
