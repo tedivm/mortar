@@ -84,12 +84,13 @@ class Location
 
 	public function getResource($id = false)
 	{
+
 		if($id)
 		{
 			return array('id' => $this->resourceId, 'type' => $this->resourceType);
 		}else{
-			$modelInfo = ModelRegistry::getHandler($this->resourceType);
-			$model = new $modelInfo['class']($this->resourceId);
+			$className = importModel($this->resourceType);
+			$model = new $className($this->resourceId);
 			return $model;
 		}
 
