@@ -24,6 +24,9 @@ class Permissions
 	public function __construct($location, $userId)
 	{
 
+		if(IGNOREPERMISSIONS)
+			return;
+
 		if($userId instanceof User){
 			$this->user = $userId;
 			$userId = $this->user->getId();
