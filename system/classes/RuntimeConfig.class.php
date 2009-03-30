@@ -11,7 +11,7 @@ class RuntimeConfig implements ArrayAccess
 
 	protected function setData()
 	{
-		$get = Get::getInstance();
+		$get = Query::getQuery();
 		$data = array();
 
 		// Path
