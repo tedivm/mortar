@@ -61,18 +61,22 @@ class BentoCMSModelPage extends AbstractModel
 
 	public function loadRevision($id)
 	{
+//		var_dump($id);
 		$revision = new PageRevision($this->getId(), $id);
-
+//		var_dump($revision);
 		$this->content['title'] = $revision->title;
 		$this->content['content'] = $revision->filteredContent;
 		$this->content['rawContent'] = $revision->rawContent;
 
-		if($this->content['author'] != $revision->author)
-			$this->content['lastEditor'] = $revision->author;
+		//if($this->content['author'] != $revision->author)
+			//$this->content['lastEditor'] = $revision->author;
 	}
 
 	public function getRevision($id = null)
 	{
+		if(!$id)
+			$id = $this->activeRevision;
+
 		return new PageRevision($this->getId(), $id);
 	}
 
@@ -145,7 +149,7 @@ class PageRevision
 			{
 				$this->pageId = $contentData['pageId'];
 				$this->revisionId = $contentData['revisionId'];
-				$this->author = $contentData['contentAuthor'];
+				$this->author = $contentData['author'];
 				$this->updateTime = $contentData['updateTime'];
 				$this->title = $contentData['title'];
 				$this->rawContent = $contentData['rawContent'];

@@ -5,6 +5,9 @@ class HtmlOutputController extends AbstractOutputController
 {
 	protected function start()
 	{
+		$this->ioHandler->addHeader('Content-Type', 'text/html');
+
+
 		$page = ActivePage::getInstance();
 		$page->addRegion('title', 'BentoBase Admin');
 		$page->setTemplate('index.html', 'default');
@@ -36,6 +39,7 @@ class HtmlControllerContentFilter
 		$action = $htmlController->getAction();
 		$page = $htmlController->getResource();
 
+		return $output;
 	}
 }
 

@@ -36,6 +36,9 @@ class DisplayMaker
 
 	public function tagsUsed($withAttributes = false)
 	{
+		if(!is_array($this->tags))
+			return false;
+
 		$tags = ($withAttributes) ? $this->tags : array_keys($this->tags);
 		return $tags;
 	}
@@ -58,16 +61,97 @@ class DisplayMaker
 
 			foreach($matches as $unprocessed_tag)
 			{
+				$tagChars = str_split($unprocessed_tag[1]);
+
+				$enclosed = false;
+				$curName = 'name';
+				$curValue = null;
+				$curString = '';
+				$args = array();
+
+				foreach($tagChars as $char)
+				{
+					switch($char)
+					{
+						case ' ':
+							if($enclosed)
+							{
+								$curString .= $char;
+								break;
+							}
+
+							if(isset($curName))
+							{
+
+								if(!isset($curValue))
+									$curValue = true;
+
+								$args[$curName] = $curValue;
+								unset($curName);
+								unset($curValue);
+								$curString = '';
+							}
+							break;
+
+						case '"':
+							if($enclosed)
+							{
+								if(!isset($curName))
+								{
+									$curName = $curString;
+								}elseif(!isset($curValue)){
+									$curValue = $curString;
+								}else{
+									$args[$curName] = $curValue;
+									unset($curName);
+									unset($curValue);
+								}
+								$curString = '';
+								$enclosed = false;
+							}else{
+								$enclosed = true;
+							}
+
+							break;
+
+						case '=':
+							$curName = $curString;
+							$curString = '';
+							break;
+
+						default:
+							$curString .= $char;
+							break;
+					}
+				}
+
+				if(!isset($curName))
+				{
+					$curName = $curString;
+				}elseif(!isset($curValue)){
+					$curValue = $curString;
+				}
+
+				if(!isset($curValue))
+					$curValue = true;
+
+				$args[$curName] = $curValue;
+
 				$tag_chunks = explode(' ', $unprocessed_tag[1]);
 				$tag_name = array_shift($tag_chunks);
+
+
 				$tags[$tag_name] = array('original' => $unprocessed_tag[0]);
 
-				foreach($tag_chunks as $argument_string)
+
+				foreach($args as $name => $value)
 				{
-					$arg_temp = explode('=', $argument_string);
-					$tags[$tag_name][$arg_temp[0]] = trim($arg_temp[1], ' \'"');
+
+
+					$tags[$tag_name][$name] = trim($value, ' \'"');
 				}
 			}
+
 			$cache->store_data($tags);
 		}
 
@@ -166,6 +250,9 @@ class DisplayMaker
 		if(!key_exists($name, $this->tags))
 			return;
 
+		if(!is_numeric($timestamp))
+			$timestamp = strtotime($timestamp);
+
 		$format = (isset($this->tags[$name]['format'])) ? $this->tags[$name]['format'] : DATE_RFC850;
 		return $this->add_content($name, date($format, $timestamp));
 	}
@@ -181,7 +268,10 @@ class DisplayMaker
 
 		$processTags = array();
 		$processContent = array();
-		foreach($this->tags as $tagName => $tagArray)
+
+		//var_dump($this->tags);
+		if(is_array($this->tags))
+			foreach($this->tags as $tagName => $tagArray)
 		{
 			if(isset($this->replacement_array[$tagName]))
 			{

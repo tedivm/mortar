@@ -38,6 +38,7 @@ class AdminOutputController extends AbstractOutputController
 
 }
 
+// content filters
 
 class AdminControllerContentFilter
 {
@@ -60,9 +61,11 @@ class AdminControllerContentFilter
 		$processedOutput->addContent('subtitle', $subTitle);
 		$output = $processedOutput->makeDisplay();
 
-		$page->addRegion('content', $output);
+		return $output;
 	}
 }
+
+// resource filters
 
 class AdminControllerResourceFilterNavigation
 {

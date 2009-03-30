@@ -184,14 +184,15 @@ class ActiveSite extends Site
 			self::$currentLink = 'http' . ($ssl ? 's' : '') .  '://' . $url;
 		}
 
-
 		$link = self::$currentLink;
 
-		$config = Config::getInstance();
+		if($name)
+		{
+			$config = Config::getInstance();
 
-		if(isset($config['url'][$name]))
-			$link .= $config['url'][$name];
-
+			if(isset($config['url'][$name]))
+				$link .= $config['url'][$name];
+		}
 		return $link;
 	}
 

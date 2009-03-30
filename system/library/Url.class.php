@@ -12,53 +12,96 @@ class Url
 	public function __toString()
 	{
 		$config = Config::getInstance();
-		$get = get::getInstance();
 		$site = ActiveSite::getSite();
-
 		$info = InfoRegistry::getInstance();
 
 		$attributes = $this->attributes;
 		ksort($attributes);
 		$urlString = $site->currentLink;
 
-
-		if(!$info->Configuration['url']['modRewrite'])
+		if(isset($info->Configuration['url']['modRewrite']) && !$info->Configuration['url']['modRewrite'])
 		{
-			$urlString .= 'index.php?';
-
-			if(isset($attributes['locationId']))
-				$urlString .= 'p=';
+			$urlString .= 'index.php?p=';
 		}
 
-		$location = new Location($attributes['locationId']);
-		unset($attributes['locationId']);
-		$pathString = '';
+		// make path
 
-		while($parent = $location->getParent())
+		if(isset($attributes['format']) && strtolower($attributes['format']) == 'admin')
 		{
-			if($parent->getResource() == 'site')
+			$urlString .= 'admin/';
+			unset($attributes['format']);
+		}
+
+		if(isset($attributes['rest']) && $attributes['rest'])
+		{
+			$urlString .= 'rest/';
+			unset($attributes['rest']);
+		}
+
+		if(isset($attributes['module']))
+		{
+			$urlString .= 'module/' . $attributes['module'] . '/';
+			unset($attributes['module']);
+		}
+
+		if(isset($attributes['location']))
+		{
+			if($attributes['location'] instanceof Location)
+			{
+				$location = $attributes['location'];
+				unset($attributes['location']);
+			}elseif(is_numeric($attributes['location'])){
+				$location = new Location($attributes['location']);
+				unset($attributes['location']);
+			}
+		}elseif(isset($attributes['locationId']) && is_numeric($attributes['locationId'])){
+			$location = new Location($attributes['location']);
+			unset($attributes['locationId']);
+		}
+
+		$tempLoc = $location;
+		while($tempLoc->getType() != 'Site')
+		{
+			$urlString .= str_replace(' ', '-', $tempLoc->getName()) . '/';
+
+			if(!$parent = $tempLoc->getParent())
 				break;
 
-			$pathString = str_replace(' ', '-', $parent->getName()) . '/' . $pathString;
-
-			$location = $parent;
+			$tempLoc = $parent;
 		}
 
-		$modelInfo = $location->getResource(true);
+
+		if($site->getId() == $location->getSite())
+		{
+			$urlString = ActiveSite::getLink() . $urlString;
+		}else{
+			$site = ModelRegistry::loadModel('Site', $location->getSite());
+			$urlString = $site['primaryUrl'] . $urlString;
+		}
+
+		$handler = ModelRegistry::getHandler($location->getType());
+
+		$pathCache = new Cache($location->getType(), $handler['module'], 'url', 'pathCache');
+		$pathTemplate = $pathCache->getData();
+
+		if(!$pathCache->cacheReturned)
+		{
+			$pathCacheDisplay = new DisplayMaker();
+			if(!$pathCacheDisplay->loadTemplate('UrlPath', $handler['module']))
+				if(!$pathCacheDisplay->loadTemplate('UrlPath' . $location->getType() , $handler['module']))
+					$pathCacheDisplay->set_display_template('{# action #}/{# id #}/');
+
+			$pathTemplate = $pathCacheDisplay->makeDisplay(false);
+			$pathCache->storeData($pathTemplate);
+		}
 
 
 		$parameters = new DisplayMaker();
-
-		if(!$parameters->load_template('UrlPath', $moduleInfo['Package']))
-		{
-			$parameters->set_display_template('{# action #}/{# id #}/');
-		}
-
+		$parameters->setDisplayTemplate($pathTemplate);
 		$urlTags = $parameters->tagsUsed();
 
 		foreach($urlTags as $tag)
 		{
-
 			$string = (isset($attributes[$tag])) ? $attributes[$tag] : '_';
 			if(isset($attributes[$tag]))
 			{
@@ -67,27 +110,21 @@ class Url
 			}else{
 				$parameters->add_content($tag, '_');
 			}
-
 		}
 
 		$urlString .= $parameters->make_display(true);
 		$urlString = rtrim(trim($urlString), '_/');
 
-
-
 		if(count($attributes) > 0)
 		{
-
 			$urlString .= '?';
 
 			foreach($attributes as $name => $value)
-			{
-				$urlString .= htmlentities($name) . '=' . htmlentities($value) . '&';
-			}
+				$urlString .= urlencode($name) . '=' . urlencode($value) . '&';
+
 		}
 
 		$urlString = rtrim(trim($urlString), '?& ');
-
 		return $urlString;
 	}
 

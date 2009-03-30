@@ -10,8 +10,15 @@ abstract class AbstractOutputController
 	protected $resourceType;
 	protected $activeResource;
 
+	protected $ioHandler;
+
 	protected $contentFilters = array();
 	protected $outputFilters = array();
+
+	public function __construct($ioHandler)
+	{
+		$this->ioHandler = $ioHandler;
+	}
 
 	public function initialize($action)
 	{

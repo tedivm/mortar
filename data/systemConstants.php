@@ -1,6 +1,6 @@
 <?php
 // Developer Constants
-define('DEBUG', 4);
+define('DEBUG', 2);
 // 4,		3,		2,			1,		0
 // notices,	info, 	warning, 	error,	none
 // strict - E_STRICT with no Bento error displays.

@@ -111,6 +111,8 @@ class BentoError extends Exception
 						$argValue = get_class($argValue);
 					}
 
+					if(is_array($argValue))
+						$argValue = var_export($argValue, true);
 
 					$argString .= $comma .( (strlen($argValue) > '8') ? substr($argValue, '0', 6) . '..' : $argValue);
 					$argStringLong .= $comma .  $argValue;
@@ -212,12 +214,11 @@ class TypeMismatch extends BentoError
 				$receivedObject = $message[1];
 				$receivedType = is_object($receivedObject)
 									? 'Class ' . get_class($receivedObject)
-									: gettype($className);
-
+									: gettype($receivedObject);
 			}else{
 				$receivedType = 'Null or Unknown';
-			}
 
+			}
 
 			$message = 'Expected object of type: ' . $expectedType . ' but received ' . $receivedType . ' ';
 

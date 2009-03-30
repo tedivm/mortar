@@ -44,6 +44,29 @@ class ModelRegistry
 		return array_keys(self::$handlerList);
 	}
 
+	static public function loadModel($type, $id = null)
+	{
+		$handler = self::getHandler($type);
+
+		if(!$handler)
+			throw new BentoError('Unable to load handler for model ' . $type . '.');
+
+		if(!class_exists($handler['class'], false))
+		{
+			$packageInfo = new PackageInfo($handler['module']);
+			$path = $packageInfo->getPath();
+			$path .= 'models/' . $handler['name'] . 'class.php';
+			if(file_exists($path))
+				include($path);
+		}
+
+		if(!class_exists($handler['class'], false))
+			throw new BentoError('Unable to load handler for model ' . $type . '.');
+
+		$model = new $handler['class']($id);
+		return $model;
+	}
+
 	static protected function loadHandlers()
 	{
 		$cache = new Cache('system', 'models', 'handlers');
