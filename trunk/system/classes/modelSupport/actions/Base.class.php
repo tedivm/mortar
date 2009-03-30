@@ -3,9 +3,11 @@
 abstract class ModelActionBase implements ActionInterface
 {
 	protected $model;
-	protected $requestHandler;
+	protected $ioHandler;
 
 	protected $permissionObject;
+
+	protected $cacheExpirationOffset;
 
 	public static $requiredPermission;
 
@@ -15,7 +17,7 @@ abstract class ModelActionBase implements ActionInterface
 			throw new TypeMismatch(array('Model', $identifier));
 
 		$this->model = $identifier;
-		$this->requestHandler = $handler;
+		$this->ioHandler = $handler;
 	}
 
 
@@ -26,7 +28,23 @@ abstract class ModelActionBase implements ActionInterface
 
 		if(method_exists($this, 'logic'))
 			$this->logic();
+
+
+		if(method_exists($this, 'setHeaders'))
+			$this->setHeaders();
 	}
+
+	protected function setHeaders()
+	{
+		$location = $this->model->getLocation();
+		//$location = new Location();
+
+		$modifiedDate = strtotime($location->getLastModified());
+		$creationDate = strtotime($location->getCreationDate());
+
+		$this->ioHandler->addHeader('Last-Modified', gmdate('D, d M y H:i:s T', $modifiedDate));
+	}
+
 
 	public function checkAuth($action = NULL)
 	{

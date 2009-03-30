@@ -61,8 +61,7 @@ abstract class ModelActionEdit extends ModelAction
 
 	protected function redirect($message)
 	{
-		$redirect = $_SERVER['PHP_SELF'] . '&message=' . $message;
-		header('Location:' . $redirect);
+
 	}
 
 }

@@ -164,13 +164,12 @@ class AbstractModel implements Model
 				return false;
 			}
 		}
-
 		return $actionInfo;
 	}
 
-	public function getAttributes()
+	public function getContent()
 	{
-		return $this->attributes;
+		return $this->content;
 	}
 
 	public function getId()
@@ -223,6 +222,7 @@ class AbstractModel implements Model
 
 				if($record->select(1))
 				{
+
 					$info['id'] = $id;
 					$columns = $record->getColumns(false, false);
 
@@ -235,9 +235,16 @@ class AbstractModel implements Model
 			$cache->storeData($info);
 		}
 
-		$this->id = $info['id'];
-		$this->module = $info['module'];
-		$this->properties = $info['content'];
+		if(isset($info['id']))
+			$this->id = $info['id'];
+
+		if(isset($info['module']))
+			$this->module = $info['module'];
+
+		if(isset($info['content']))
+			$this->content = $info['content'];
+
+		return true;
 	}
 
 

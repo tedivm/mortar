@@ -3,6 +3,9 @@
 class IOProcessorHttp extends IOProcessorCli
 {
 
+	protected $headers = array();
+	protected $cacheExpirationOffset;
+
 	protected function setEnvironment()
 	{
 		$query = Query::getQuery();
@@ -26,12 +29,84 @@ class IOProcessorHttp extends IOProcessorCli
 
 		if(session_id() == '')
 		{
+			$site = ActiveSite::getSite();
+			$siteLocation = $site->getLocation();
+			$cookieName = $siteLocation->getName() . 'Session';
+
+			session_name($cookieName);
 			session_start();
 			$sessionObserver = new SessionObserver();
 			$user = ActiveUser::getInstance();
 			$user->attach($sessionObserver);
 		}
 	}
+
+	public function addHeader($name, $value)
+	{
+		$name = (string) $name;
+		$value = (string) $value;
+
+		if(strpos($name, "\n") || strpos($value, "\n"))
+			return false;
+
+		$this->headers[$name] = $value;
+	}
+
+	public function output($output)
+	{
+
+		if(!headers_sent())
+			$this->sendHeaders($output);
+
+		if(strtolower($_SERVER['REQUEST_METHOD']) != 'head');
+			echo $output;
+	}
+
+
+	protected function sendHeaders($output)
+	{
+		// this doesn't seem to have any affect, as it gets overridden by apache (the only one i've tested
+		// this on so far) or php
+		$this->addHeader('Content-Length', strlen($output));
+		$this->addHeader('Date', gmdate(DATE_RFC822) . ' GMT');
+
+		$requestMethod = strtolower($_SERVER['REQUEST_METHOD']);
+
+		// if the request is read-only we'll return some caching headers
+		if($requestMethod == 'head' || $requestMethod == 'get')
+		{
+			$contentMd5 = md5($output);
+			$this->addHeader('Content-MD5', $contentMd5);
+			$etag = $this->headers['Content-Length'] . $contentMd5;
+
+			if(isset($this->headers['Last-Modified']))
+				$etag .= strtotime($this->headers['Last-Modified']);
+
+			$time = time();
+			$timeBetweenNowAndLastChange = $time - strtotime($this->headers['Last-Modified']);
+
+			$offset = (isset($this->cacheExpirationOffset)) ? $this->cacheExpirationOffset : 21600;
+
+			// at most the cache time should be half the time between access and last modification
+			// so quick typoes and such can easily be checked
+			if($offset > $timeBetweenNowAndLastChange / 2)
+				$offset = floor($timeBetweenNowAndLastChange / 2);
+
+			$this->addHeader('Pragma', 'Asparagus');
+			$this->addHeader('ETag', hash('crc32', $etag));
+			$this->addHeader('Expires', gmdate('D, d M y H:i:s T', $time + $offset ));
+			$this->addHeader('Cache-Control', 'must-revalidate, max-age=' . $offset);
+		}
+
+
+
+		foreach($this->headers as $name => $value)
+		{
+			header($name . ':' . $value);
+		}
+
+	}
+
 
 	public function close()
 	{
@@ -43,30 +118,7 @@ class IOProcessorHttp extends IOProcessorCli
 
 	public function finishPath($pathArray, $package, $resource = null)
 	{
-		$moduleInfo = new PackageInfo($package);
 
-		if(is_array($pathArray) && count($pathArray) > 0)
-		{
-			$query = Query::getQuery();
-
-			$urlTemplate = new DisplayMaker();
-
-			if( (!is_null($resource) && $url->loadTemplate($resource . 'UrlMapping', $package))
-				|| $url->loadTemplate('UrlMapping', $package))
-			{
-				$tags = $url->tagsUsed();
-				if(count($tags) > 0)
-				{
-					foreach($tags as $name)
-						$query[$name] = array_shift($pathArray);
-				}
-
-			}elseif(is_string($pathArray[0])){
-				$query['action'] = $pathArray[0];
-			}
-
-			$query->save();
-		}
 	}
 
 }
@@ -75,7 +127,11 @@ class IOProcessorHttp extends IOProcessorCli
 class SessionObserver implements SplObserver
 {
 	protected $userId;
-	protected $obsoleteTime = 15; //seconds
+
+	// this is the delay between marking a session as expired and actually killing it
+	// this is needed because quick concurrent connections (ajax) doesn't handle immediate
+	// session changes well
+	protected $obsoleteTime = 15;
 
 
 	public function update(SplSubject $object)
@@ -145,13 +201,13 @@ class SessionObserver implements SplObserver
 			if(isset($_SESSION['OBSOLETE']) && ($_SESSION['EXPIRES'] < time()))
 				throw new BentoWarning('Attempt to use expired session.');
 
-			if(!is_numeric($_SESSION['user_id']))
+			if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id']))
 				throw new BentoNotice('No session started.');
 
-			if($_SESSION['IPaddress'] != $_SERVER['REMOTE_ADDR'])
+			if(!isset($_SESSION['IPaddress']) || $_SESSION['IPaddress'] != $_SERVER['REMOTE_ADDR'])
 				throw new BentoNotice('IP Address mixmatch (possible session hijacking attempt).');
 
-			if($_SESSION['userAgent'] != $_SERVER['HTTP_USER_AGENT'])
+			if(!isset($_SESSION['userAgent']) || $_SESSION['userAgent'] != $_SERVER['HTTP_USER_AGENT'])
 				throw new BentoNotice('Useragent mixmatch (possible session hijacking attempt).');
 
 		}catch(Exception $e){

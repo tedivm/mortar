@@ -299,7 +299,6 @@ class PackageInfo
 
 				if(!class_exists($fileInfo['className'], false))
 				{
-
 					if(!include($filename))
 						throw new BentoWarning('Unable to load ' . $type . ' ' . $fileInfo['className'] .
 												 ' file at: ' . $filename);

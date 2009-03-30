@@ -11,7 +11,7 @@ Interface Model extends ArrayAccess
 	public function checkAuth($action, $user = null);
 
 	public function getAction($actionName);
-	public function getAttributes();
+	public function getContent();
 	public function getId();
 	public function getLocation();
 	public function getProperties();

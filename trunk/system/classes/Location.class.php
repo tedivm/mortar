@@ -57,7 +57,12 @@ class Location
 
 	public function __construct($id = null)
 	{
-		$this->loadLocation($id);
+		if(!is_null($id) && !is_numeric($id))
+		{
+			throw new TypeMismatch(array('integer', $id));
+		}else{
+			$this->loadLocation($id);
+		}
 	}
 
 	public function attachResource(Model $object)
@@ -102,8 +107,15 @@ class Location
 
 	public function getParent()
 	{
-		return new Location($this->parent);
-		return $this->parent;
+		if(is_numeric($this->parent))
+		{
+			return new Location($this->parent);
+		}elseif($this->parent instanceof Location){
+			return $this->parent;
+		}
+
+
+		return false;
 	}
 
 	public function getId()
@@ -144,15 +156,9 @@ class Location
 		 		break;
 
 		 	default:
-
-		 		$url = $this->parent->getLink();
+		 		$parent = $this->getParent();
+		 		$url = $parent->getLink();
 		 		$url .= $this->getName() . '/';
-
-
-
-
-
-
 		 		break;
 		 }
 	}
@@ -200,13 +206,16 @@ class Location
 
 	public function setParent(Location $parent)
 	{
-		$this->parent = $parent;
+		$this->parent = $parent->getId();
 	}
 
 	protected function loadLocation($id = null)
 	{
 		if($id != null)
 		{
+			if(!is_numeric($id))
+				throw new TypeMismatch(array('integer', $id));
+
 			$cache = new Cache('locations', $id, 'info');
 			$locationInfo = $cache->getData();
 
@@ -221,7 +230,7 @@ class Location
 					$locationInfo['name'] = $dbLocation->name;
 					$locationInfo['resourceType'] = $dbLocation->resourceType;
 					$locationInfo['resourceId'] = $dbLocation->resourceId;
-					$locationInfo['createdOn'] = $dbLocation->createdOn;
+					$locationInfo['createdOn'] = $dbLocation->creationDate;
 					$locationInfo['lastModified'] = $dbLocation->lastModified;
 					$locationInfo['owner'] = $dbLocation->owner;
 					$locationInfo['group'] = $dbLocation->groupOwner;
@@ -239,6 +248,7 @@ class Location
 						}
 					}
 					$locationInfo['meta'] = $meta;
+
 				}else{
 					$locationInfo = false;
 				}
@@ -253,11 +263,10 @@ class Location
 				foreach($properties as $property)
 					$this->$property = $locationInfo[$property];
 
-				if(is_numeric($this->parent))
-				{
-					$this->parent = new Location($this->parent);
-					$this->meta = array_merge($this->parent->getMeta(), $this->meta);
-				}
+				// keeping the parent information out of cache will make sure changes cascade faster
+				if($parent = $this->getParent())
+					$this->meta = array_merge($parent->getMeta(), $this->meta);
+
 
 				return true;
 			}else{
@@ -282,13 +291,12 @@ class Location
 
 		$db_location->query_set('lastModified', 'NOW()');
 
-		if($this->parent instanceof Location)
+		if($parent == $this->getParent())
 		{
-			$parentId = $this->parent->getId();
+			$parentId = $parent->getId();
 
 			if(is_numeric($parentId))
 				$db_location->parent = $parentId;
-
 		}
 
 
@@ -348,9 +356,8 @@ class Location
 
 			$stmt = $db->stmt_init();
 
-
 			$stmt->prepare('SELECT location_id FROM locations WHERE parent = ? AND name = ?');
-			$stmt->bind_param_and_execute('is', $this->id, $name);
+			$stmt->bind_param_and_execute('is', $this->getId(), $name);
 
 			$childLocation = $stmt->fetch_array();
 
@@ -441,21 +448,23 @@ class Location
 
 	public function getSite()
 	{
-		if($this->resource == 'site'){
-			$siteObject = new ObjectRelationshipMapper('sites');
-			$siteObject->location_id = $this->id;
-			$siteObject->select(1);
+		$tempLoc = $this;
 
-			if($siteObject->total_rows() > 0)
-				$site = $siteObject->site_id;
-			else
-				$site = false;
+		while($tempLoc->getType() != 'Site')
+		{
+			if(!$parent = $tempLoc->getParent())
+				break;
 
-		}elseif($this->parent instanceof Location){
-			$site = $this->parent->getSite();
+			$tempLoc = $parent;
 		}
 
-		return $site;
+		if($tempLoc->getType() == 'Site')
+		{
+			$tempResource = $tempLoc->getResource(true);
+			return $tempResource['id'];
+		}else{
+			return false;
+		}
 	}
 
 	public function getTreeArray($types = '', $isFirst = true)
