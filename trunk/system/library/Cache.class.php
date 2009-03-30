@@ -72,9 +72,21 @@ class Cache
 			if(count($key) == 1 && is_array($key[0]))
 				$key = $key[0];
 
+			$key = (is_array($key[0])) ? $key[0] : $key;
+
+			$this->key =array_map('strtolower', $key);
+
+			$this->keyString = implode(':::', $this->key);
+			$this->handler = new self::$handlerClass();
+			if(!$this->handler->setup($this->key))
+				throw new BentoError('Unable to setup cache handler.');
+
+			$this->cache_enabled = true;
+
+
 			if(BENCHMARK)
 			{
-				$keyString = implode('/', $key);
+				$keyString = implode('/', $this->key);
 
 				if(isset(self::$queryRecord[$keyString]))
 				{
@@ -83,16 +95,6 @@ class Cache
 					self::$queryRecord[$keyString] = 1;
 				}
 			}
-
-
-
-			$this->key = (is_array($key[0])) ? $key[0] : $key;
-			$this->keyString = implode(':::', $this->key);
-			$this->handler = new self::$handlerClass();
-			if(!$this->handler->setup($this->key))
-				throw new BentoError('Unable to setup cache handler.');
-
-			$this->cache_enabled = true;
 
 		}catch (Exception $e){
 			$this->cache_enabled = false;
