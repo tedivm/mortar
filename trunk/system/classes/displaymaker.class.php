@@ -30,6 +30,18 @@ class DisplayMaker
 
 	protected $tags = array();
 
+	protected $dateConstants = array('date_atom' => DATE_ATOM,
+'cookie' => DATE_COOKIE,
+'iso8601' => DATE_ISO8601,
+'rfc822' => DATE_RFC822,
+'rfc850' => DATE_RFC850,
+'rfc1036' => DATE_RFC1036,
+'rfc1123' => DATE_RFC1123,
+'rfc2822' => DATE_RFC2822,
+'rfc3339' => DATE_RFC3339,
+'rss' => DATE_RSS,
+'w3c' => DATE_W3C  );
+
 	// strings
 	protected $replacement_array = array();
 
@@ -253,7 +265,19 @@ class DisplayMaker
 		if(!is_numeric($timestamp))
 			$timestamp = strtotime($timestamp);
 
-		$format = (isset($this->tags[$name]['format'])) ? $this->tags[$name]['format'] : DATE_RFC850;
+		if(isset($this->tags[$name]['format']))
+		{
+			$templateFormat = $this->tags[$name]['format'];
+
+			$format = (isset($this->dateConstants[$templateFormat]))
+						? $this->dateConstants[$templateFormat]
+						: $templateFormat;
+
+		}else{
+			$format = DATE_RFC850;
+		}
+
+		//$format = (isset($this->tags[$name]['format'])) ? $this->tags[$name]['format'] : DATE_RFC850;
 		return $this->add_content($name, date($format, $timestamp));
 	}
 
