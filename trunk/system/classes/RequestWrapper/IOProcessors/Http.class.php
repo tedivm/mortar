@@ -5,6 +5,7 @@ class IOProcessorHttp extends IOProcessorCli
 
 	protected $headers = array();
 	protected $cacheExpirationOffset;
+	protected $responseCode = 200;
 
 	protected function setEnvironment()
 	{
@@ -61,27 +62,35 @@ class IOProcessorHttp extends IOProcessorCli
 
 		$method = strtolower($_SERVER['REQUEST_METHOD']);
 
-		if($method == 'get')
+		switch(round($this->responseCode, -2)/100)
 		{
-			$clientCacheTime = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ?
-											$_SERVER['HTTP_IF_MODIFIED_SINCE'] : '0';
-
-			$serverCacheTime = isset($this->headers['Last-Modified']) ? $this->headers['Last-Modified'] : 1;
-
-			$clientCacheEtag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? $_SERVER['HTTP_IF_NONE_MATCH'] : '0';
-
-			$serverEtag = isset($this->headers['ETag']) ? $this->headers['ETag'] : 1;
-
-			if((isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || isset($_SERVER['HTTP_IF_NONE_MATCH'])) &&
-				(!isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || $serverCacheTime == $clientCacheTime) &&
-				(!isset($_SERVER['HTTP_IF_NONE_MATCH']) || $serverEtag == $clientCacheEtag))
-			{
+			case 5:
+				break;
+			case 4:
+				break;
+			case 3:
 				$sendOutput = false;
-				header("HTTP/1.1 304 Not Modified");
-			}
-		}elseif($method == 'head'){
-			$sendOutput = false;
+				break;
+			case 1:
+				break;
+			default:
+			case 2:
+				break;
 		}
+
+
+		if($method == 'head')
+			$output = false;
+
+
+		if($this->responseCode != 200)
+		{
+			if($codeString = ResponseCodeLookup::stringFromCode($this->responseCode))
+			{
+				header('HTTP/1.1 ' . $this->responseCode . ' ' . $codeString);
+			}
+		}
+
 
 		if($sendOutput)
 			echo $output;
@@ -98,8 +107,10 @@ class IOProcessorHttp extends IOProcessorCli
 		$requestMethod = strtolower($_SERVER['REQUEST_METHOD']);
 
 		// if the request is read-only we'll return some caching headers
-		if($requestMethod == 'head' || $requestMethod == 'get')
+		if(($requestMethod == 'head' || $requestMethod == 'get') &&
+					(!defined('DISABLECLIENTCACHE') || DISABLECLIENTCACHE !== true))
 		{
+
 			$contentMd5 = md5($output);
 			$this->addHeader('Content-MD5', $contentMd5);
 			$etag = $this->headers['Content-Length'] . $contentMd5;
@@ -123,14 +134,28 @@ class IOProcessorHttp extends IOProcessorCli
 			$this->addHeader('ETag', hash('crc32', $etag));
 			$this->addHeader('Expires', gmdate('D, d M y H:i:s T', $time + $offset ));
 			$this->addHeader('Cache-Control', 'must-revalidate, max-age=' . $offset);
+
+
+			$clientCacheTime = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ?
+											$_SERVER['HTTP_IF_MODIFIED_SINCE'] : '0';
+
+			$serverCacheTime = isset($this->headers['Last-Modified']) ? $this->headers['Last-Modified'] : 1;
+
+			$clientCacheEtag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? $_SERVER['HTTP_IF_NONE_MATCH'] : '0';
+			$serverEtag = isset($this->headers['ETag']) ? $this->headers['ETag'] : 1;
+
+			if((isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || isset($_SERVER['HTTP_IF_NONE_MATCH'])))
+			{
+				 if((!isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || $serverCacheTime == $clientCacheTime) &&
+					(!isset($_SERVER['HTTP_IF_NONE_MATCH']) || $serverEtag == $clientCacheEtag))
+				{
+					$this->setHttpCode(304);
+				}
+			}
 		}
-
-
 
 		foreach($this->headers as $name => $value)
-		{
 			header($name . ':' . $value);
-		}
 
 	}
 
@@ -146,6 +171,14 @@ class IOProcessorHttp extends IOProcessorCli
 	public function finishPath($pathArray, $package, $resource = null)
 	{
 
+	}
+
+	public function setHttpCode($code)
+	{
+		if(!is_numeric($code))
+			throw new TypeMismatch(array('Numeric', $code));
+
+		$this->responseCode = $code;
 	}
 
 }
@@ -246,6 +279,65 @@ class SessionObserver implements SplObserver
 }
 
 
+class ResponseCodeLookup
+{
+	static $lookupArray = array(
+					100 => 'Continue',
+					101 => 'Switching Protocols',
 
+					200 => 'OK',
+					201 => 'Created',
+					202 => 'Accepted',
+					203 => 'Non-Authoritative Information',
+					204 => 'No Content',
+					205 => 'Reset Content',
+					206 => 'Partial Content',
+					207 => 'Multi-Status',
+
+					300 => 'Multiple Choices',
+					301 => 'Moved Permanently',
+					302 => 'Found',
+					303 => 'See Other',
+					304 => 'Not Modified',
+					305 => 'Use Proxy',
+					307 => 'Temporary Redirect',
+					400 => 'Bad Request',
+					401 => 'Unauthorized',
+					402 => 'Payment Required',
+					403 => 'Forbidden',
+					404 => 'Not Found',
+					405 => 'Method Not Allowed',
+					406 => 'Not Acceptable',
+					407 => 'Proxy Authentication Required',
+					408 => 'Request Timeout',
+					409 => 'Conflict',
+					410 => 'Gone',
+					411 => 'Length Required',
+					412 => 'Precondition Failed',
+					413 => 'Request Entity Too Large',
+					414 => 'Request-URI Too Long',
+					415 => 'Unsupported Media Type',
+					416 => 'Request Range Not Satisfiable',
+					417 => 'Expectation Failed',
+
+					500 => 'Internal Server Error',
+					501 => 'Not Implemented',
+					502 => 'Bad Gateway',
+					503 => 'Service Unavailable',
+					504 => 'Gateway Timeout',
+					505 => 'HTTP Version not Supported');
+
+
+
+	static public function stringFromCode($code)
+	{
+		if(isset(self::$lookupArray[$code]))
+		{
+			return self::$lookupArray[$code];
+		}else{
+			false;
+		}
+	}
+}
 
 ?>
