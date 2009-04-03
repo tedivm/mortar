@@ -54,11 +54,36 @@ class IOProcessorHttp extends IOProcessorCli
 
 	public function output($output)
 	{
+		$sendOutput = true;
 
 		if(!headers_sent())
 			$this->sendHeaders($output);
 
-		if(strtolower($_SERVER['REQUEST_METHOD']) != 'head');
+		$method = strtolower($_SERVER['REQUEST_METHOD']);
+
+		if($method == 'get')
+		{
+			$clientCacheTime = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ?
+											$_SERVER['HTTP_IF_MODIFIED_SINCE'] : '0';
+
+			$serverCacheTime = isset($this->headers['Last-Modified']) ? $this->headers['Last-Modified'] : 1;
+
+			$clientCacheEtag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? $_SERVER['HTTP_IF_NONE_MATCH'] : '0';
+
+			$serverEtag = isset($this->headers['ETag']) ? $this->headers['ETag'] : 1;
+
+			if((isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || isset($_SERVER['HTTP_IF_NONE_MATCH'])) &&
+				(!isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || $serverCacheTime == $clientCacheTime) &&
+				(!isset($_SERVER['HTTP_IF_NONE_MATCH']) || $serverEtag == $clientCacheEtag))
+			{
+				$sendOutput = false;
+				header("HTTP/1.1 304 Not Modified");
+			}
+		}elseif($method == 'head'){
+			$sendOutput = false;
+		}
+
+		if($sendOutput)
 			echo $output;
 	}
 
@@ -68,7 +93,7 @@ class IOProcessorHttp extends IOProcessorCli
 		// this doesn't seem to have any affect, as it gets overridden by apache (the only one i've tested
 		// this on so far) or php
 		$this->addHeader('Content-Length', strlen($output));
-		$this->addHeader('Date', gmdate(DATE_RFC822) . ' GMT');
+		$this->addHeader('Date',gmdate('D, d M y H:i:s T'));
 
 		$requestMethod = strtolower($_SERVER['REQUEST_METHOD']);
 
@@ -80,7 +105,9 @@ class IOProcessorHttp extends IOProcessorCli
 			$etag = $this->headers['Content-Length'] . $contentMd5;
 
 			if(isset($this->headers['Last-Modified']))
+			{
 				$etag .= strtotime($this->headers['Last-Modified']);
+			}
 
 			$time = time();
 			$timeBetweenNowAndLastChange = $time - strtotime($this->headers['Last-Modified']);
