@@ -91,9 +91,8 @@ abstract class AbstractOutputController
 	protected function processAction()
 	{
 		$runMethod = (isset($this->runMethod)) ? $this->runMethod : 'view' . $this->format;
-
 		$this->action->start();
-		$output = $this->action->$runMethod();
+		$output = $this->action->$runMethod($this->activeResource);
 		return $this->filterOutput($output);
 	}
 

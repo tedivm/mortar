@@ -16,6 +16,7 @@ abstract class ModelActionBase implements ActionInterface
 		if(!($identifier instanceof Model))
 			throw new TypeMismatch(array('Model', $identifier));
 
+
 		$this->model = $identifier;
 		$this->ioHandler = $handler;
 	}
@@ -37,11 +38,7 @@ abstract class ModelActionBase implements ActionInterface
 	protected function setHeaders()
 	{
 		$location = $this->model->getLocation();
-		//$location = new Location();
-
 		$modifiedDate = strtotime($location->getLastModified());
-		$creationDate = strtotime($location->getCreationDate());
-
 		$this->ioHandler->addHeader('Last-Modified', gmdate('D, d M y H:i:s T', $modifiedDate));
 	}
 

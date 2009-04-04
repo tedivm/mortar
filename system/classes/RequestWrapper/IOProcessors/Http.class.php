@@ -6,6 +6,7 @@ class IOProcessorHttp extends IOProcessorCli
 	protected $headers = array();
 	protected $cacheExpirationOffset;
 	protected $responseCode = 200;
+	public $maxClientCache = 21600;
 
 	protected function setEnvironment()
 	{
@@ -105,49 +106,48 @@ class IOProcessorHttp extends IOProcessorCli
 		$this->addHeader('Date',gmdate('D, d M y H:i:s T'));
 
 		$requestMethod = strtolower($_SERVER['REQUEST_METHOD']);
+		$cacheControl = 'must-revalidate';
+
+		$contentMd5 = md5($output);
+		$this->addHeader('Content-MD5', $contentMd5);
 
 		// if the request is read-only we'll return some caching headers
 		if(($requestMethod == 'head' || $requestMethod == 'get') &&
 					(!defined('DISABLECLIENTCACHE') || DISABLECLIENTCACHE !== true))
 		{
-
-			$contentMd5 = md5($output);
-			$this->addHeader('Content-MD5', $contentMd5);
 			$etag = $this->headers['Content-Length'] . $contentMd5;
 
 			if(isset($this->headers['Last-Modified']))
 			{
-				$etag .= strtotime($this->headers['Last-Modified']);
+				$lastModified = $this->headers['Last-Modified'];
+				$lastModifiedAsTime = strtotime($lastModified);
+				$timeBetweenNowAndLastChange = time() - $lastModifiedAsTime;
+
+				// at most the cache time should be 20% the time between access and last modification
+				$maxCache = floor($timeBetweenNowAndLastChange * .2);
+				$maxCache = ($this->maxClientCache > $maxCache) ? $maxCache : $this->maxClientCache;
+				$offset = (isset($this->cacheExpirationOffset) && $this->cacheExpirationOffset < $maxCache)
+									? $this->cacheExpirationOffset : $maxCache;
+
+				$etag .= $lastModifiedAsTime;
+
+				$this->addHeader('Expires', gmdate('D, d M y H:i:s T', $time + $offset ));
+				$cacheControl .= ',max-age=' . $offset;
 			}
 
-			$time = time();
-			$timeBetweenNowAndLastChange = $time - strtotime($this->headers['Last-Modified']);
+			$serverEtag = hash('crc32', $etag);
 
-			$offset = (isset($this->cacheExpirationOffset)) ? $this->cacheExpirationOffset : 21600;
-
-			// at most the cache time should be half the time between access and last modification
-			// so quick typoes and such can easily be checked
-			if($offset > $timeBetweenNowAndLastChange / 2)
-				$offset = floor($timeBetweenNowAndLastChange / 2);
-
+			$this->addHeader('ETag', $serverEtag);
 			$this->addHeader('Pragma', 'Asparagus');
-			$this->addHeader('ETag', hash('crc32', $etag));
-			$this->addHeader('Expires', gmdate('D, d M y H:i:s T', $time + $offset ));
-			$this->addHeader('Cache-Control', 'must-revalidate, max-age=' . $offset);
+			$this->addHeader('Cache-Control', $cacheControl);
 
+			if(!isset($lastModified))
+				$lastModified = 1;
 
-			$clientCacheTime = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ?
-											$_SERVER['HTTP_IF_MODIFIED_SINCE'] : '0';
-
-			$serverCacheTime = isset($this->headers['Last-Modified']) ? $this->headers['Last-Modified'] : 1;
-
-			$clientCacheEtag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? $_SERVER['HTTP_IF_NONE_MATCH'] : '0';
-			$serverEtag = isset($this->headers['ETag']) ? $this->headers['ETag'] : 1;
-
-			if((isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || isset($_SERVER['HTTP_IF_NONE_MATCH'])))
+			if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || isset($_SERVER['HTTP_IF_NONE_MATCH']))
 			{
-				 if((!isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || $serverCacheTime == $clientCacheTime) &&
-					(!isset($_SERVER['HTTP_IF_NONE_MATCH']) || $serverEtag == $clientCacheEtag))
+				 if((!isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || $lastModified == $_SERVER['HTTP_IF_MODIFIED_SINCE'])
+				 && (!isset($_SERVER['HTTP_IF_NONE_MATCH']) || $serverEtag == $_SERVER['HTTP_IF_NONE_MATCH']))
 				{
 					$this->setHttpCode(304);
 				}
@@ -156,7 +156,6 @@ class IOProcessorHttp extends IOProcessorCli
 
 		foreach($this->headers as $name => $value)
 			header($name . ':' . $value);
-
 	}
 
 
