@@ -126,7 +126,9 @@ function importFromModule($name, $module, $classType)
 		'interfaces'  => 'interfaces',
 		'interface'  => 'interfaces',
 		'library'  => 'library',
-		'model' => 'models');
+		'model' => 'models',
+		'plugin' => 'plugins',
+		'plugins' => 'plugins');
 
 	if(isset($moduleFolders[strtolower($classType)]))
 	{
