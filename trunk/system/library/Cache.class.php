@@ -132,7 +132,7 @@ class Cache
 		if(!$this->cache_enabled)
 			return false;
 
-		if(is_array(self::$memStore[$this->keyString]))
+		if(isset(self::$memStore[$this->keyString]) && is_array(self::$memStore[$this->keyString]))
 		{
 			$record = self::$memStore[$this->keyString];
 		}else{
@@ -225,7 +225,7 @@ class cacheHandlerFilesystem implements cacheHandler
 
 	protected static $memStore = array();
 
-	protected static $cachePath = false;
+	protected static $cachePath;
 
 	public function setup($key)
 	{
@@ -285,7 +285,7 @@ class cacheHandlerFilesystem implements cacheHandler
 
 	static protected function makePath($key)
 	{
-		if(!self::$cachePath)
+		if(!isset(self::$cachePath))
 		{
 			$config = Config::getInstance();
 			self::$cachePath = $config['path']['temp'] . 'cache/';
@@ -295,15 +295,13 @@ class cacheHandlerFilesystem implements cacheHandler
 
 		// When I profiled this compared to the "implode" function, this was much faster
 		// This is probably due to the small size of the arrays and the overhead from function calls
+		$memkey = '';
 		foreach($key as $group)
 		{
 			$memkey .= $group . '/' ;
 		}
 
-
-
-
-		if(self::$memStore['keys'][$memkey])
+		if(isset(self::$memStore['keys'][$memkey]))
 		{
 			$path = self::$memStore['keys'][$memkey];
 		}else{
@@ -424,13 +422,13 @@ class cacheHandlerSqlite implements cacheHandler
 	{
 		$data = sqlite_escape_string(serialize($data));
 
-		$query = self::$sqlObject->query("INSERT INTO cacheStore (key, expires, data) VALUES ('{$this->key}', '{$expiration}', '{$data}')");
-
+		$query = self::$sqlObject->query("INSERT INTO cacheStore (key, expires, data)
+											VALUES ('{$this->key}', '{$expiration}', '{$data}')");
 	}
 
-	static function clear($key = '')
+	static function clear($key = null)
 	{
-		if(count($key) == 0)
+		if(is_null($key))
 		{
 			$info = InfoRegistry::getInstance();
 			$filePath = $info->Configuration['path']['temp'] . 'cacheDatabase.sqlite';
