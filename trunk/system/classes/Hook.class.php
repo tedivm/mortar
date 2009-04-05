@@ -79,7 +79,6 @@ class Hook
 		$classList = array();
 		foreach($pluginList as $plugin)
 		{
-			var_dump($plugin);
 			$classList[] = importFromModule($plugin['plugin'], $plugin['module'], 'plugin');
 		}
 		$pluginObjects = array();
@@ -102,7 +101,7 @@ class Hook
 			try{
 				if(method_exists($plugin, $name))
 				{
-					$response= call_user_func_array(array($plugin, $name), &$arguments);
+					$response= call_user_func_array(array($plugin, $name), $arguments);
 					$responses[] = $response;
 				}
 			}catch(Exception $e){
