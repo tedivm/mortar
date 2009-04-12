@@ -100,18 +100,19 @@ class IOProcessorHttp extends IOProcessorCli
 
 	protected function sendHeaders($output)
 	{
+		// basic clickjacking protection
+		$this->addHeader('X-FRAME-OPTIONS', 'SAMEORIGIN');
+
 		// this doesn't seem to have any affect, as it gets overridden by apache (the only one i've tested
 		// this on so far) or php
 		$this->addHeader('Content-Length', strlen($output));
 		$this->addHeader('Date',gmdate('D, d M y H:i:s T'));
-
-		$requestMethod = strtolower($_SERVER['REQUEST_METHOD']);
-		$cacheControl = 'must-revalidate';
-
 		$contentMd5 = md5($output);
 		$this->addHeader('Content-MD5', $contentMd5);
 
+		$cacheControl = 'must-revalidate';
 		// if the request is read-only we'll return some caching headers
+		$requestMethod = strtolower($_SERVER['REQUEST_METHOD']);
 		if(($requestMethod == 'head' || $requestMethod == 'get') &&
 					(!defined('DISABLECLIENTCACHE') || DISABLECLIENTCACHE !== true))
 		{
@@ -121,7 +122,8 @@ class IOProcessorHttp extends IOProcessorCli
 			{
 				$lastModified = $this->headers['Last-Modified'];
 				$lastModifiedAsTime = strtotime($lastModified);
-				$timeBetweenNowAndLastChange = time() - $lastModifiedAsTime;
+				$time = time();
+				$timeBetweenNowAndLastChange = $time - $lastModifiedAsTime;
 
 				// at most the cache time should be 20% the time between access and last modification
 				$maxCache = floor($timeBetweenNowAndLastChange * .2);
