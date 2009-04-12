@@ -68,7 +68,7 @@ class User
 			}
 
 			$stmtMemberGroups = $db->stmt_init();
-			$stmtMemberGroups->prepare('SELECT memgroup_id FROM user_in_member_group WHERE user_id = ?');
+			$stmtMemberGroups->prepare('SELECT memgroup_id FROM userInMemberGroup WHERE user_id = ?');
 
 			$stmtMemberGroups->bindAndExecute('i', $userId);
 
@@ -200,14 +200,14 @@ class User
 
 
 			$deleteStmt = $db->stmt_init();
-			$deleteStmt->prepare('DELETE FROM user_in_member_group WHERE user_id = ?');
+			$deleteStmt->prepare('DELETE FROM userInMemberGroup WHERE user_id = ?');
 			$deleteStmt->bindAndExecute('i', $this->id);
 
 
 			foreach($this->memberGroups as $id)
 			{
 				$insertMemgroupStmt = $db->stmt_init();
-				$insertMemgroupStmt->prepare('INSERT INTO user_in_member_group (user_id, memgroup_id) VALUES (?,?)');
+				$insertMemgroupStmt->prepare('INSERT INTO userInMemberGroup (user_id, memgroup_id) VALUES (?,?)');
 				$insertMemgroupStmt->bindAndExecute('ii', $this->id, $id);
 			}
 
