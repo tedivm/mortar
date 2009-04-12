@@ -35,7 +35,7 @@ class MemberGroup
 	{
 		$db = db_connect('default_read_only');
 		$stmt = $db->stmt_init();
-		$stmt->prepare('SELECT user_id FROM user_in_member_group WHERE user_id = ? AND memgroup_id = ?');
+		$stmt->prepare('SELECT user_id FROM userInMemberGroup WHERE user_id = ? AND memgroup_id = ?');
 		$stmt->bind_param_and_execute('ii', $userId, $this->id);
 		return ($stmt->num_rows == 1);
 	}
@@ -53,7 +53,7 @@ class MemberGroup
 
 		$dbWrite = db_connect('default');
 		$insertStmt = $dbWrite->stmt_init();
-		$insertStmt->prepare('INSERT INTO user_in_member_group (user_id, memgroup_id) VALUES (?, ?)');
+		$insertStmt->prepare('INSERT INTO userInMemberGroup (user_id, memgroup_id) VALUES (?, ?)');
 		return $insertStmt->bind_param_and_execute('ii', $userId, $this->id);
 	}
 
@@ -67,7 +67,7 @@ class MemberGroup
 
 		$dbWrite = db_connect('default');
 		$deleteStmt = $dbWrite->stmt_init();
-		$deleteStmt->prepare('DELETE FROM user_in_member_group WHERE user_id = ? AND memgroup_id = ?');
+		$deleteStmt->prepare('DELETE FROM userInMemberGroup WHERE user_id = ? AND memgroup_id = ?');
 		return $deleteStmt->bind_param_and_execute('ii', $userId, $this->id);
 	}
 

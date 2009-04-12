@@ -123,7 +123,7 @@ class Permissions
 		return $current;
 	}
 
-	public function isAllowed($action, $type = 'base')
+	public function isAllowed($action, $type = null)
 	{
 		// This should only be used when testing the permissions system, particularly when breaking it but needing
 		// to perform some action, like resetting the cache
@@ -141,6 +141,10 @@ class Permissions
 		// same location rules as other permissions.
 		if($this->isAllowed($action, 'universal'))
 			return true;
+
+		if(is_null($type))
+			$type = $this->location->getType();
+
 
 		// If the permission isn't set, or is set to inherit (which shouldn't really occur, as thats the default
 		if(!isset($this->permissions[$type][$action]) || $this->permissions[$type][$action] == 'inherit')
@@ -331,6 +335,101 @@ class GroupPermission extends UserPermission
 	protected $typeId = 'memgroup_id';
 }
 
+class PermissionLists
+{
+	protected $userId;
+	protected $permissions;
+
+	public function __construct($userId)
+	{
+		$this->userId = $userId;
+
+		if(IGNOREPERMISSIONS !== true)
+			$this->load();
+	}
+
+	public function checkAction($type, $action)
+	{
+		if(IGNOREPERMISSIONS === true)
+			return true;
+
+		return ($this->permissions[$type][$action] == 1);
+	}
+
+	protected function load()
+	{
+		$user = new User($this->userId);
+		$memberGroups = $user->getMemberGroups();
+
+		$permissions = array();
+		$permissions[] = $this->loadUserPermissions($user->getId());
+
+		foreach($memberGroups as $memberGroup)
+		{
+			$permissions[] = $this->loadGroupPermissions($memberGroup);
+		}
+
+		$this->permissions = call_user_func_array('array_merge_recursive', $permissions);
+	}
+
+	protected function loadUserPermissions($userId)
+	{
+		$cache = new Cache('permissions', 'user', $userId, 'allowedActions');
+		$allowedPermissions = $cache->getData();
+
+		if(!$cache->cacheReturned)
+		{
+			$allowedPermissions = array();
+
+			$db = DatabaseConnection::getConnection('default_read_only');
+			$stmt = $db->stmt_init();
+
+			$stmt->prepare('SELECT userPermissions.resource as resource, actions.action_name as action
+								FROM userPermissions, actions
+								WHERE userPermissions.user_id = ?,
+									AND userPermissions.action_id = actions.action_id,
+									AND userPermissions.permission = 1');
+
+			$stmt->bindAndExecute('i', $userId);
+
+			while($row = $stmt->fetch_array())
+			{
+				$allowedPermissions[$row['resource']][$row['action']] = 1;
+			}
+			$cache->storeData($allowedPermissions);
+		}
+		return $allowedPermissions;
+	}
+
+	protected function loadGroupPermissions($groupId)
+	{
+		$cache = new Cache('permissions', 'group', $groupId, 'allowedActions');
+		$allowedPermissions = $cache->getData();
+
+		if(!$cache->cacheReturned)
+		{
+			$allowedPermissions = array();
+
+			$db = DatabaseConnection::getConnection('default_read_only');
+			$stmt = $db->stmt_init();
+
+			$stmt->prepare('SELECT groupPermissions.resource as resource, actions.action_name as action
+								FROM groupPermissions, actions
+								WHERE groupPermissions.memgroup_id = ?,
+									AND groupPermissions.action_id = actions.action_id,
+									AND groupPermissions.permission = 1');
+
+			$stmt->bindAndExecute('i', $groupId);
+
+			while($row = $stmt->fetch_array())
+			{
+				$allowedPermissions[$row['resource']][$row['action']] = 1;
+			}
+			$cache->storeData($allowedPermissions);
+		}
+		return $allowedPermissions;
+	}
+}
 
 class PermissionActionList
 {

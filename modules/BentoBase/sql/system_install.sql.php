@@ -208,17 +208,17 @@ CREATE TABLE urls
 /* Add Indexes for: urls */
 CREATE INDEX urls_site_id_sslEnabled_Idx ON urls (site_id, sslEnabled);
 
-/******************** Add Table: user_in_member_group ************************/
+/******************** Add Table: userInMemberGroup ************************/
 
 /* Build Table Structure */
-CREATE TABLE user_in_member_group
+CREATE TABLE userInMemberGroup
 (
 	user_id INTEGER UNSIGNED NOT NULL,
 	memgroup_id INTEGER UNSIGNED NOT NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
-/* Table Items: user_in_member_group */
-ALTER TABLE user_in_member_group ADD CONSTRAINT pkuser_in_member_group
+/* Table Items: userInMemberGroup */
+ALTER TABLE userInMemberGroup ADD CONSTRAINT pkuserInMemberGroup
 	PRIMARY KEY (user_id, memgroup_id);
 
 /******************** Add Table: userPermissions ************************/
@@ -328,12 +328,12 @@ ALTER TABLE sites ADD CONSTRAINT fk_sites_urls
 ALTER TABLE urls ADD CONSTRAINT fk_domains_sites
 	FOREIGN KEY (site_id) REFERENCES sites (site_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-/************ Foreign Key: fk_user_in_member_group_member_group ***************/
-ALTER TABLE user_in_member_group ADD CONSTRAINT fk_user_in_member_group_member_group
+/************ Foreign Key: fk_userInMemberGroup_member_group ***************/
+ALTER TABLE userInMemberGroup ADD CONSTRAINT fk_userInMemberGroup_member_group
 	FOREIGN KEY (memgroup_id) REFERENCES member_group (memgroup_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-/************ Foreign Key: fk_user_in_member_group_users ***************/
-ALTER TABLE user_in_member_group ADD CONSTRAINT fk_user_in_member_group_users
+/************ Foreign Key: fk_userInMemberGroup_users ***************/
+ALTER TABLE userInMemberGroup ADD CONSTRAINT fk_userInMemberGroup_users
 	FOREIGN KEY (user_id) REFERENCES users (user_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_userPermissions_users ***************/
