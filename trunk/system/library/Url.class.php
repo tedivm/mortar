@@ -42,6 +42,11 @@ class Url
 		{
 			$urlString .= 'module/' . $attributes['module'] . '/';
 			unset($attributes['module']);
+			if(isset($attributes['action']))
+			{
+				$urlString .= $attributes['action'] . '/';
+				unset($attributes['action']);
+			}
 		}
 
 		if(isset($attributes['location']))
@@ -59,61 +64,82 @@ class Url
 			unset($attributes['locationId']);
 		}
 
-		$tempLoc = $location;
-		while($tempLoc->getType() != 'Site')
+		if(isset($location))
 		{
-			$urlString .= str_replace(' ', '-', $tempLoc->getName()) . '/';
-
-			if(!$parent = $tempLoc->getParent())
-				break;
-
-			$tempLoc = $parent;
-		}
-
-
-		if($site->getId() == $location->getSite())
-		{
-			$urlString = ActiveSite::getLink() . $urlString;
-		}else{
-			$site = ModelRegistry::loadModel('Site', $location->getSite());
-			$urlString = $site['primaryUrl'] . $urlString;
-		}
-
-		$handler = ModelRegistry::getHandler($location->getType());
-
-		$pathCache = new Cache($location->getType(), $handler['module'], 'url', 'pathCache');
-		$pathTemplate = $pathCache->getData();
-
-		if(!$pathCache->cacheReturned)
-		{
-			$pathCacheDisplay = new DisplayMaker();
-			if(!$pathCacheDisplay->loadTemplate('UrlPath', $handler['module']))
-				if(!$pathCacheDisplay->loadTemplate('UrlPath' . $location->getType() , $handler['module']))
-					$pathCacheDisplay->set_display_template('{# action #}/{# id #}/');
-
-			$pathTemplate = $pathCacheDisplay->makeDisplay(false);
-			$pathCache->storeData($pathTemplate);
-		}
-
-
-		$parameters = new DisplayMaker();
-		$parameters->setDisplayTemplate($pathTemplate);
-		$urlTags = $parameters->tagsUsed();
-
-		foreach($urlTags as $tag)
-		{
-			$string = (isset($attributes[$tag])) ? $attributes[$tag] : '_';
-			if(isset($attributes[$tag]))
+			$tempLoc = $location;
+			while($tempLoc->getType() != 'Site')
 			{
-				$parameters->add_content($tag, htmlentities($attributes[$tag]));
-				unset($attributes[$tag]);
-			}else{
-				$parameters->add_content($tag, '_');
+				$urlString .= str_replace(' ', '-', $tempLoc->getName()) . '/';
+
+				if(!$parent = $tempLoc->getParent())
+					break;
+
+				$tempLoc = $parent;
 			}
+
+
+			if($site->getId() == $location->getSite())
+			{
+				$urlString = ActiveSite::getLink() . $urlString;
+			}else{
+				$site = ModelRegistry::loadModel('Site', $location->getSite());
+				$urlString = $site['primaryUrl'] . $urlString;
+			}
+
+			$handler = ModelRegistry::getHandler($location->getType());
+
+			$pathCache = new Cache($location->getType(), $handler['module'], 'url', 'pathCache');
+			$pathTemplate = $pathCache->getData();
+
+			if(!$pathCache->cacheReturned)
+			{
+				$pathCacheDisplay = new DisplayMaker();
+				if(!$pathCacheDisplay->loadTemplate('UrlPath', $handler['module']))
+					if(!$pathCacheDisplay->loadTemplate('UrlPath' . $location->getType() , $handler['module']))
+						$pathCacheDisplay->set_display_template('{# action #}/{# id #}/');
+
+				$pathTemplate = $pathCacheDisplay->makeDisplay(false);
+				$pathCache->storeData($pathTemplate);
+			}
+
+
+			$parameters = new DisplayMaker();
+			$parameters->setDisplayTemplate($pathTemplate);
+			$urlTags = $parameters->tagsUsed();
+
+			foreach($urlTags as $tag)
+			{
+				$string = (isset($attributes[$tag])) ? $attributes[$tag] : '_';
+				if(isset($attributes[$tag]))
+				{
+					$parameters->add_content($tag, htmlentities($attributes[$tag]));
+					unset($attributes[$tag]);
+				}else{
+					$parameters->add_content($tag, '_');
+				}
+			}
+
+			$urlString .= $parameters->make_display(true);
+			$urlString = rtrim(trim($urlString), '_/');
 		}
 
-		$urlString .= $parameters->make_display(true);
-		$urlString = rtrim(trim($urlString), '_/');
+
+		$site = (isset($location)) ? ModelRegistry::loadModel('Site', $location->getSite()) : ActiveSite::getSite();
+
+		if(isset($attributes['ssl']))
+		{
+			if($attributes['ssl'] == true)
+				$ssl = true;
+
+			unset($attributes['ssl']);
+		}elseif(isset($_SERVER['HTTPS'])){
+			$ssl = true;
+		}else{
+			$ssl = false;
+		}
+
+
+		$urlString = $site->getUrl($ssl) . $urlString;
 
 		if(count($attributes) > 0)
 		{
@@ -121,7 +147,6 @@ class Url
 
 			foreach($attributes as $name => $value)
 				$urlString .= urlencode($name) . '=' . urlencode($value) . '&';
-
 		}
 
 		$urlString = rtrim(trim($urlString), '?& ');
@@ -148,6 +173,11 @@ class Url
 		return $link;
 	}
 
+	public function attributesFromArray($attributes)
+	{
+		foreach($attributes as $name => $value)
+			$this->__set($name, $value);
+	}
 
 	public function __get($name)
 	{
@@ -156,6 +186,15 @@ class Url
 
 	public function __set($name, $value)
 	{
+		if($value instanceof Location)
+		{
+			$name = 'locationId';
+			$value = $value->getId();
+		}
+
+		if(!is_scalar($value))
+			return false;
+
 		if($name == 'id')
 			$value = str_replace(' ', '-', $value);
 
@@ -172,6 +211,11 @@ class Url
 		unset($this->attributes[$name]);
 	}
 
+	// for the sake of caching
+	public function __sleep()
+	{
+		return array('attributes');
+	}
 }
 
 ?>
