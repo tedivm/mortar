@@ -35,15 +35,15 @@ class HtmlObject
 		return $this;
 	}
 
-	public function wrapAround($text, $location = 'bottom')
+	public function wrapAround($html, $location = 'bottom')
 	{
 		switch ($location) {
 			case 'top':
-				array_unshift($this->encloses, $text);
+				array_unshift($this->encloses, $html);
 				break;
 			case 'bottom':
 			default:
-				$this->encloses[] = $text;
+				$this->encloses[] = $html;
 				break;
 		}
 
