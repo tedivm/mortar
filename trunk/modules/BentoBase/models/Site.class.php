@@ -10,6 +10,8 @@ class BentoBaseModelSite extends AbstractModel
 	{
 		$id = $this->getId();
 
+		$url = rtrim($url, '/');
+
 		if(!is_numeric($id))
 			throw new BentoError('Site must be saved before attaching urls');
 
@@ -66,12 +68,13 @@ class BentoBaseModelSite extends AbstractModel
 	public function getUrl($ssl = false)
 	{
 		$row = new ObjectRelationshipMapper('urls');
-		$row->urlPath = $this->content['primaryUrl'];
+		$row->path = $this->content['primaryUrl'];
+		$row->site_id = $this->getId();
 
 		if($row->select(1))
 		{
-			$url = ($ssl && $row->ssl == 1) ? 'https://' : 'http://';
-			$url .= $url->path . '/';
+			$url = ($ssl && $row->sslEnabled == 1) ? 'https://' : 'http://';
+			$url .= rtrim($row->path, '/') . '/';
 			return $url;
 
 		}else{
