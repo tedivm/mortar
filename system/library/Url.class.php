@@ -12,19 +12,16 @@ class Url
 	public function __toString()
 	{
 		$config = Config::getInstance();
-		$site = ActiveSite::getSite();
 		$info = InfoRegistry::getInstance();
 
 		$attributes = $this->attributes;
 		ksort($attributes);
-		$urlString = $site->currentLink;
+		$urlString = '';
 
 		if(isset($info->Configuration['url']['modRewrite']) && !$info->Configuration['url']['modRewrite'])
 		{
 			$urlString .= 'index.php?p=';
 		}
-
-		// make path
 
 		if(isset($attributes['format']) && strtolower($attributes['format']) == 'admin')
 		{
@@ -60,7 +57,7 @@ class Url
 				unset($attributes['location']);
 			}
 		}elseif(isset($attributes['locationId']) && is_numeric($attributes['locationId'])){
-			$location = new Location($attributes['location']);
+			$location = new Location($attributes['locationId']);
 			unset($attributes['locationId']);
 		}
 
@@ -70,24 +67,12 @@ class Url
 			while($tempLoc->getType() != 'Site')
 			{
 				$urlString .= str_replace(' ', '-', $tempLoc->getName()) . '/';
-
 				if(!$parent = $tempLoc->getParent())
 					break;
-
 				$tempLoc = $parent;
 			}
 
-
-			if($site->getId() == $location->getSite())
-			{
-				$urlString = ActiveSite::getLink() . $urlString;
-			}else{
-				$site = ModelRegistry::loadModel('Site', $location->getSite());
-				$urlString = $site['primaryUrl'] . $urlString;
-			}
-
 			$handler = ModelRegistry::getHandler($location->getType());
-
 			$pathCache = new Cache($location->getType(), $handler['module'], 'url', 'pathCache');
 			$pathTemplate = $pathCache->getData();
 
@@ -101,8 +86,6 @@ class Url
 				$pathTemplate = $pathCacheDisplay->makeDisplay(false);
 				$pathCache->storeData($pathTemplate);
 			}
-
-
 			$parameters = new DisplayMaker();
 			$parameters->setDisplayTemplate($pathTemplate);
 			$urlTags = $parameters->tagsUsed();
@@ -118,19 +101,14 @@ class Url
 					$parameters->add_content($tag, '_');
 				}
 			}
-
 			$urlString .= $parameters->make_display(true);
 			$urlString = rtrim(trim($urlString), '_/');
 		}
-
-
-		$site = (isset($location)) ? ModelRegistry::loadModel('Site', $location->getSite()) : ActiveSite::getSite();
 
 		if(isset($attributes['ssl']))
 		{
 			if($attributes['ssl'] == true)
 				$ssl = true;
-
 			unset($attributes['ssl']);
 		}elseif(isset($_SERVER['HTTPS'])){
 			$ssl = true;
@@ -138,13 +116,11 @@ class Url
 			$ssl = false;
 		}
 
-
+		$site = (isset($location)) ? ModelRegistry::loadModel('Site', $location->getSite()) : ActiveSite::getSite();
 		$urlString = $site->getUrl($ssl) . $urlString;
-
 		if(count($attributes) > 0)
 		{
 			$urlString .= '?';
-
 			foreach($attributes as $name => $value)
 				$urlString .= urlencode($name) . '=' . urlencode($value) . '&';
 		}
