@@ -1,125 +1,78 @@
 <?php
 
-//spl_autoload_call('ActionInterface');
-
-abstract class Action extends ModuleBase// implements ActionInterface
+abstract class ActionBase implements ActionInterface
 {
-	static $requiredPermission = 'Read';
-	protected $permissions;
-	protected $engineHelper;
+	protected $argument;
+	protected $ioHandler;
+	protected $package;
 	protected $actionName;
 
-	public function __construct($modId)
+	protected $permissionObject;
+
+	protected $cacheExpirationOffset;
+
+	public static $requiredPermission;
+
+	public function __construct($argument, $handler)
 	{
-		$this->moduleId = $modId;
-		$this->loadSettings();
+		$this->argument = $argument;
+		$this->ioHandler = $handler;
 
 		$namingInfo = explode('Action', get_class($this));
 		$this->actionName = array_pop($namingInfo);
 		$this->package = array_shift($namingInfo);
-
-
 	}
 
 	public function start()
 	{
-		$runtime = RuntimeConfig::getInstance();
-
-		$pathToEngineHelper = $config['path']['engines'] . $runtime['engine'] . '.engineHelper.php';
-
-		$helperClassName = $runtime['engine'] . 'Helper';
-
-		if(!class_exists($helperClassName, false) && file_exists($pathToEngineHelper))
-			include($pathToEngineHelper);
-
-		if(class_exists($helperClassName, false))
-			$this->engineHelper = new $helperClassName();
-
-	//	$this->actionName = array_pop(explode('Action', get_class($this)));
-
-//		$namingInfo = explode('Action', get_class($this));
-
-	//	$this->actionName = array_pop($namingInfo);
-	//	$this->package = array_shift($namingInfo);
-
+		if($this->checkAuth() !== true)
+			throw new AuthenticationError();
 
 		if(method_exists($this, 'logic'))
 			$this->logic();
-
 	}
 
-	public function checkAuth($action = false)
+	public function checkAuth($action = NULL)
 	{
-		$checkAction = ($action) ? $action : staticHack($this, 'requiredPermission');
-		return $this->isAllowed($checkAction); // retarded hack until php 5.3 comes out
+		if(!isset($this->permissionObject))
+		{
+			$user = ActiveUser::getInstance();
+			$site = ActiveSite::getSite();
+			$this->permissionObject = new Permissions($site->getLocation(), $user);
+		}
+
+		if(!$action)
+			$action = staticHack(get_class($this), 'requiredPermission');
+
+		$type = staticHack(get_class($this), 'permissionType');
+
+		if(!$type)
+			$type = 'Base';
+
+		return $this->permissionObject->isAllowed($action, $type);
 	}
-
-    public function isAllowed($action)
-    {
-        if(!$this->permissions)
-        {
-            $user = ActiveUser::get_instance();
-            $this->permissions = new Permissions($this->location, $user->getId());
-        }
-
-    	return $this->permissions->isAllowed($action);
-    }
-
-    protected function linkToSelf()
-    {
-
-    	$url = new Url();
-    	$url->property('module', $this->moduleId);
-    	$url->property('action', $this->actionName);
-    	return $url;
-    }
-
-
 
 	/*
+	public function viewAdmin()
+	{
 
-	Example displays
+	}
 
-	public function viewAdmin();
+	public function viewHtml()
+	{
 
-	public function viewHtml();
+	}
 
-	public function viewXml();
+	public function viewXml()
+	{
 
-	public function viewRss();
+	}
 
+	public function viewJson()
+	{
+
+	}
 	*/
-
-
-}
-
-abstract class PackageAction extends Action
-{
-
-	public function __construct($package)
-	{
-		$namingInfo = explode('Action', get_class($this));
-		$this->actionName = array_pop($namingInfo);
-		$this->package = array_shift($namingInfo);
-		$this->loadSettings();
-	}
-
-
-	public function isAllowed($action)
-	{
-		$user = ActiveUser::get_instance();
-		$packageInfo = new PackageInfo($this->package);
-		return $packageInfo->checkAuth($action);
-	}
-
-	protected function linkToSelf()
-	{
-		$url = new Url();
-		$url->property('package', $this->package);
-    	$url->property('action', $this->actionName);
-		return $url;
-	}
-
 }
 
 ?>
