@@ -3,7 +3,7 @@ define('START_TIME', microtime(true));
 define('BASE_PATH', dirname(__FILE__) . '/');
 define('DISPATCHER', array_pop(explode('/', __FILE__)));
 
-require('data/systemConstants.php');
+require('data/profiles/runtime.php');
 
 
 if(BENCHMARK && function_exists('getrusage'))
