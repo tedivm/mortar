@@ -53,6 +53,9 @@ class Form
 
 	public function setAction($action)
 	{
+		if($action instanceof Url)
+			$action = (string) $action;
+
 		$this->action = $action;
 		return $this;
 	}
@@ -105,7 +108,7 @@ class Form
 			if(self::$xsfrProtection)
 			{
 				$nonce = $this->getNonce();
-				if($nonce != 0)
+				if(isset($nonce))
 				{
 					$this->createInput('nonce')->
 						setType('hidden')->
@@ -116,7 +119,7 @@ class Form
 			$formHtml = new HtmlObject('form');
 			$formHtml->property('method', $this->method)->
 						property('id', $this->name)->
-						property('action', (($this->action) ? $this->action : $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']) );
+						property('action', (($this->action) ? $this->action : Query::getUrl()));
 
 			foreach($this->inputs as $section => $inputs)
 			{
@@ -214,7 +217,7 @@ class Form
 
 		$output = $formHtml;
 
-		//$jsStartup[] = '$(\'#' . $this->name . '\').validate();';
+		$jsStartup[] = '$(\'#' . $this->name . '\').validate();';
 
 		// if the form was submitted, trigger the errors on reload
 		if($this->wasSubmitted())
@@ -380,7 +383,7 @@ class Form
 
 		$validationRules = $input->getRules();
 
-		if(!is_null($validationRules))
+		if(!is_null($validationRules) && count($validationRules) > 0)
 		{
 			$validationClasses = json_encode(array('validation' => $validationRules));
 			$inputHtml->addClass($validationClasses);
@@ -505,14 +508,12 @@ class Form
 
 	protected function getNonce()
 	{
-		if(!self::$xsfrProtection &&class_exists('ActiveUser', false))
+		if(self::$xsfrProtection)
 		{
-			$activeUser = ActiveUser::get_instance();
-			$output = $activeUser->session('nonce');
-			return $output;
+			return $_SESSION['nonce'];
 		}
 
-		return '0';
+		return null;
 	}
 
 	static public function disableXsfrProtection()

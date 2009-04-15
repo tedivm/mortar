@@ -81,7 +81,8 @@ class FormInput
 			$this->properties[$property] = $value;
 			return $this;
 		}
-		return $this->properties[$property];
+
+		return (isset($this->properties[$property])) ? $this->properties[$property] : null;
 	}
 
 	public function addRule($rule, $params = false, $errorMessage = false)
