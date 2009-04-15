@@ -28,11 +28,6 @@ class IOProcessorCli
 
 	}
 
-	public function finishPath($pathArray, $package, $resource = null)
-	{
-
-	}
-
 	protected function setEnvironment()
 	{
 		$query = Query::getQuery();
