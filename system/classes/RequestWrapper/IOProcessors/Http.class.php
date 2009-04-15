@@ -167,13 +167,6 @@ class IOProcessorHttp extends IOProcessorCli
 			session_commit();
 	}
 
-
-
-	public function finishPath($pathArray, $package, $resource = null)
-	{
-
-	}
-
 	public function setHttpCode($code)
 	{
 		if(!is_numeric($code))
