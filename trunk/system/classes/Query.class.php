@@ -48,7 +48,6 @@ class Query
 		return $url;
 	}
 
-
 	static protected function processInput($inputArray)
 	{
 
@@ -92,7 +91,7 @@ class Query
 				// discard the 'module' tag
 				array_shift($pathArray);
 				// grab the name, drop it from the path
-				$inputArray['module'] = strtolower(array_shift($pathArray));
+				$inputArray['module'] = array_shift($pathArray);
 			}
 		}
 
