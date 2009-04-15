@@ -77,7 +77,7 @@ class RequestWrapper
 
 		// match interface
 		if(!in_array('ActionInterface', $reflectionClass->getInterfaceNames()))
-			throw new BentoError('Class should implement interface');
+			throw new BentoError($reflectionClass->getName() . ' should implement ActionInterface');
 
 		// Create the class
 		$action = new $className($argument, $this->ioHandler);
@@ -216,7 +216,7 @@ class RequestWrapper
 			{
 				$moduleInfo = new PackageInfo($query['module']);
 
-				if($moduleInfo->getStatus() != 'Installed')
+				if($moduleInfo->getStatus() != 'installed')
 					throw new ResourceNotFoundError('Module not installed');
 
 				$action = ($query['action']) ? $query['action'] : 'Default';
