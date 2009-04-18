@@ -26,7 +26,7 @@ class RequestWrapperInstaller extends RequestWrapper
 			throw new BentoError($className . ' should implement interface ActionInterface');
 
 		// Create the class
-		$action = new $className($argument);
+		$action = new $className($argument, $this->getHandler());
 
 		return $action;
 	}
