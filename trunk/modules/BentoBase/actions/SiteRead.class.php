@@ -2,16 +2,17 @@
 
 class BentoBaseActionSiteRead extends ModelActionBase
 {
-
+	public $adminSettings = array('headerTitle' => 'Installer',
+									'tab' => 'Main');
 	public function logic()
 	{
 
 	}
 
 
-	public function viewAdmin()
+	public function viewAdmin($resource)
 	{
-
+		return 'purp wle';
 	}
 
 	public function viewHtml()
@@ -19,7 +20,6 @@ class BentoBaseActionSiteRead extends ModelActionBase
 
 		if(is_numeric($this->model['defaultChild']))
 		{
-
 
 			$childrenArray = array($this->model['defaultChild']);
 			$childId = $this->model['defaultChild'];
@@ -33,7 +33,6 @@ class BentoBaseActionSiteRead extends ModelActionBase
 					$resource = $location->getResource();
 					if(is_numeric($location['defaultChild']))
 					{
-
 						if(in_array($location['defaultChild'], $childrenArray))
 							throw new BentoError('Redirect look detected');
 
@@ -54,6 +53,7 @@ class BentoBaseActionSiteRead extends ModelActionBase
 			$url->location = $location;
 
 			$this->ioHandler->addHeader('Location', (string) $url);
+			$this->ioHandler->setHttpCode(307);
 
 			return (string) $url;
 

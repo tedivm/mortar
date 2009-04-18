@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseActionLogIn extends PackageAction
+class BentoBaseActionLogIn extends ActionBase
 {
 	static $requiredPermission = 'Read';
 
@@ -22,10 +22,12 @@ class BentoBaseActionLogIn extends PackageAction
 
 		$form->createInput('username')->
 				setLabel('Username: ')->
+				addRule('required')->
 			getForm()->
 			createInput('password')->
 				setLabel('Password: ')->
 				setType('password')->
+				addRule('required')->
 			getForm()->
 			createInput('redirect')->
 				setType('hidden')->
@@ -37,7 +39,7 @@ class BentoBaseActionLogIn extends PackageAction
 				$inputHandler = $form->getInputhandler();
 				$active_user = ActiveUser::get_instance();
 
-				if($active_user->changeUser($inputHandler['username'], $inputHandler->getRaw('password')))
+				if($active_user->changeUser($inputHandler['username'], $inputHandler['password']))
 				{
 					$this->loginSuccessful = true;
 				}
@@ -52,10 +54,9 @@ class BentoBaseActionLogIn extends PackageAction
 
 	public function viewHtml()
 	{
-
+		$output = '';
 		if($this->loginSuccessful)
 		{
-
 			$url = new Url();
 			//$url->fromString();
 			$post = Post::getInstance();
