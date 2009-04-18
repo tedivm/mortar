@@ -117,7 +117,19 @@ class Url
 		}
 
 		$site = (isset($location)) ? ModelRegistry::loadModel('Site', $location->getSite()) : ActiveSite::getSite();
-		$urlString = $site->getUrl($ssl) . $urlString;
+
+		if($site)
+		{
+			$basePath = $site->getUrl($ssl);
+		}else{
+
+			$basePath = ($ssl) ? 'https://' : 'http://';
+			$basePath .= $_SERVER['SERVER_NAME'] . substr($_SERVER['PHP_SELF'], 0 ,
+															strpos($_SERVER['PHP_SELF'], DISPATCHER));
+		}
+
+		$urlString = $basePath . $urlString;
+
 		if(count($attributes) > 0)
 		{
 			$urlString .= '?';
