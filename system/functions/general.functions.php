@@ -81,7 +81,7 @@ function loadHook($LocationId, $name)
 }
 
 
-function importClass($classname, $path, $basePath = null)
+function importClass($classname, $path, $basePath = null, $require = false)
 {
 	if(!class_exists($classname, false))
 	{
@@ -99,7 +99,10 @@ function importClass($classname, $path, $basePath = null)
 		{
 			return $classname;
 		}else{
-			throw new BentoError('Unable to load class ' . $classname . ' at ' . $path);
+			if($require)
+				throw new BentoError('Unable to load class ' . $classname . ' at ' . $path);
+
+			return false;
 		}
 
 	}else{
@@ -110,10 +113,10 @@ function importClass($classname, $path, $basePath = null)
 function importModel($modelName)
 {
 	$modelInfo = ModelRegistry::getHandler($modelName);
-	return importFromModule($modelInfo['name'], $modelInfo['module'], 'Model');
+	return importFromModule($modelInfo['name'], $modelInfo['module'], 'Model', true);
 }
 
-function importFromModule($name, $module, $classType)
+function importFromModule($name, $module, $classType, $require = false)
 {
 	$moduleFolders = array('abstract' => 'abstracts',
 		'abstract' => 'abstracts',
@@ -140,7 +143,7 @@ function importFromModule($name, $module, $classType)
 	$packageInfo = new PackageInfo($module);
 	$path = $packageInfo->getPath() . $moduleFolders[strtolower($classType)] . '/' . $name . '.class.php';
 	$className = $packageInfo->getName() . $classDivider . $name;
-	return importClass($className, $path);
+	return importClass($className, $path, $require);
 }
 
 function staticHack($className, $memberName)
