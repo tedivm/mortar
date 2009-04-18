@@ -32,6 +32,12 @@ class User
 	protected $allowLogin;
 	protected $memberGroups = array();
 
+	public function __construct($userId = null)
+	{
+		if($userId)
+			$this->load_user($userId);
+	}
+
 	/**
 	 * Load user by ID
 	 *
@@ -62,25 +68,23 @@ class User
 			{
 
 				$info = $stmt->fetch_array();
-			}else{
 
-				$info = false;
-			}
+				$stmtMemberGroups = $db->stmt_init();
+				$stmtMemberGroups->prepare('SELECT memgroup_id FROM userInMemberGroup WHERE user_id = ?');
+				$stmtMemberGroups->bindAndExecute('i', $userId);
 
-			$stmtMemberGroups = $db->stmt_init();
-			$stmtMemberGroups->prepare('SELECT memgroup_id FROM userInMemberGroup WHERE user_id = ?');
-
-			$stmtMemberGroups->bindAndExecute('i', $userId);
-
-			if($stmtMemberGroups->num_rows > 0)
-			{
-				$memberGroups = array();
-				while($memgroup = $stmtMemberGroups->fetch_array())
+				if($stmtMemberGroups->num_rows > 0)
 				{
-					$memberGroups[] = $memgroup['memgroup_id'];
+					$memberGroups = array();
+					while($memgroup = $stmtMemberGroups->fetch_array())
+					{
+						$memberGroups[] = $memgroup['memgroup_id'];
+					}
+					$info['membergroups'] = $memberGroups;
 				}
 
-				$info['membergroups'] = $memberGroups;
+			}else{
+				$info = false;
 			}
 
 			$cache->store_data($info);
