@@ -39,7 +39,8 @@ class Query
 		if(!isset($attributes['location']))
 		{
 			$site = ActiveSite::getSite();
-			$url->location = $site->getLocation();
+			if($site)
+				$url->location = $site->getLocation();
 		}
 
 		foreach($attributes as $name => $value)
@@ -96,11 +97,11 @@ class Query
 		}
 
 
-// if location exits, use it
+// if location exists, use it
 		if(isset($inputArray['location']) && is_numeric($inputArray['location']))
 		{
 			$location = new Location($inputArray['location']);
-		}elseif(isset($pathArray) && count($pathArray) > 0){
+		}elseif(isset($pathArray) && count($pathArray) > 0 && INSTALLMODE == false){
 
 // if location isn't set, find it from the path
 			$site = ActiveSite::getSite();
