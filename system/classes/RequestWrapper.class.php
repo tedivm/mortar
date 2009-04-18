@@ -10,7 +10,6 @@ class RequestWrapper
 
 	public function main()
 	{
-
 		try{
 			$query = Query::getQuery();
 			$handlerClass = $this->loadIoHandler();
@@ -19,21 +18,12 @@ class RequestWrapper
 				try{
 					$action = $this->getAction();
 					$this->runAction($action);
-
-
 				}catch(Exception $e){
-
-
-					echo 'Attempting to deal with above errors';
-
-
 					$errorAction = $this->handleError($e);
 					$this->runAction($errorAction);
 				}
-
 			// If the io handler says it can handle another request, loop around and go for it
 			}while($this->ioHandler->nextRequest());
-
 		}catch(Exception $e){
 			// If we're here we bailed out of the program loop due to an error with the error handler
 			echo 'There was an error, and when attempting to deal with that error there was another error.';
@@ -81,13 +71,7 @@ class RequestWrapper
 
 		// Create the class
 		$action = new $className($argument, $this->ioHandler);
-
-		// Check authentication
-		if(!$action->checkAuth())
-			throw new AuthenticationError('Not allowed to access this action at this location.');
-
 		return $action;
-
 	}
 
 	protected function loadFormatHandler()
@@ -131,13 +115,15 @@ class RequestWrapper
 	protected function handleError($e)
 	{
 		$site = ActiveSite::getSite();
-		$errorModule = $site->location->meta('error');
+		$location = $site->getLocation();
 
-		switch (get_class($e))
+		$errorModule = $location->getMeta('error');
+
+		switch(get_class($e))
 		{
 			case 'AuthenticationError':
 				$action = 'LogIn';
-				$errorModule = $site->location->meta('default');
+				$errorModule = $location->getMeta('default');
 				break;
 
 			case 'ResourceNotFoundError':
@@ -239,6 +225,7 @@ class RequestWrapper
 				return array('className' => $className, 'argument' => $argument);
 
 			}
+
 		}catch(Exception $e){
 			throw new ResourceNotFoundError();
 		}
@@ -265,14 +252,9 @@ class RequestWrapper
 		if($query['action'] != 'Add')
 		{
 			$model = $location->getResource();
-
-			if(!$model->checkAuth($query['action']))
-				throw new AuthenticationError();
-
 			$actionInfo = $model->getAction($query['action'] ? $query['action'] : 'Read');
 			$className = $actionInfo['className'];
 			$path = $actionInfo['path'];
-
 			$argument = $model;
 		}else{
 
