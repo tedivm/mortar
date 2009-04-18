@@ -11,12 +11,12 @@ class ActiveSite
 		if(is_null(self::$site))
 		{
 			$ssl = isset($_SERVER['HTTPS']);
-
 			$url = $_SERVER['SERVER_NAME'] . substr($_SERVER['PHP_SELF'], 0, strpos($_SERVER['PHP_SELF'], DISPATCHER));
+
+			$url = rtrim($url, '/');
 
 			if(INSTALLMODE)
 				return false;
-
 
 			$urlRecord = new ObjectRelationshipMapper('urls');
 			$urlRecord->path = $url;
