@@ -84,22 +84,28 @@ class AdminControllerResourceFilterNavigation
 		$sidebar = new HtmlObject('div');
 		$sidebar->id = 'left-column';
 
-		$activeNav = $tabs[$activeTab];
-		foreach($activeNav as $container => $links)
-		{
-			$div = $sidebar->insertNewHtmlObject('div');
-			$div->insertNewHtmlObject('h3')->
-				wrapAround($container);
 
-			$ul = $div->insertNewHtmlObject('ul');
-			$ul->addClass('nav');
-			foreach($links as $link)
+
+		$activeNav = $tabs[$activeTab];
+		if(is_array($activeNav))
+			foreach($activeNav as $container => $links)
+		{
+			if(count($links) > 0)
 			{
-				$a = $link['url']->getLink($link['label']);
-				$li = $ul->insertNewHtmlObject('li')->
-				wrapAround($a);
+				$div = $sidebar->insertNewHtmlObject('div');
+				$div->insertNewHtmlObject('h3')->
+					wrapAround($container);
+
+				$ul = $div->insertNewHtmlObject('ul');
+				$ul->addClass('nav');
+				foreach($links as $link)
+				{
+					$a = $link['url']->getLink($link['label']);
+					$li = $ul->insertNewHtmlObject('li')->
+					wrapAround($a);
+				}
+				$li->addClass('last');
 			}
-			$li->addClass('last');
 		}
 		$page = $adminController->getResource();
 		$page['navbar'] = (string) $sidebar;
@@ -132,13 +138,22 @@ class AdminControllerResourceFilterNavigation
 		{
 			$links = array();
 			$hook = new Hook('system', 'adminInterface', 'navigation');
-			$tabs = call_user_func_array('array_merge_recursive', $hook->getTabs());
 
-			foreach($tabs as $tab)
+			$tabResults = $hook->getTabs();
+
+			if(count($tabResults) > 0)
 			{
-				$link = call_user_func_array('array_merge_recursive', $hook->getNav($tab));
-				if(count($link) > 0)
-					$links[$tab] = $link;
+				$tabs = call_user_func_array('array_merge_recursive', $tabResults);
+				foreach($tabs as $tab)
+				{
+					$navResults = $hook->getNav($tab);
+					if(count($navResults) > 0)
+					{
+						$link = call_user_func_array('array_merge_recursive', $hook->getNav($tab));
+						if(count($link) > 0)
+							$links[$tab] = $link;
+					}
+				}
 			}
 			$cache->storeData($links);
 		}
@@ -180,18 +195,31 @@ class AdminControllerResourceFilterNavigation
 
 		if(isset($url->locationId))
 		{
-			$permission = new Permissions($url->locationId, $userId);
 			$action = (isset($url->action)) ? $url->action : 'Read';
-			return $permission->isAllowed($action);
+
+			$location = new Location($url->locationId);
+			$resource = $location->getResource();
+			$actionName = $resource->getAction($action);
+			$requiredPermission = staticHack($actionName, 'requiredPermission');
+
+			$permission = new Permissions($url->locationId, $userId);
+			return $permission->isAllowed($requiredPermission);
 
 		}elseif(isset($url->module)){
-
-			$permissionList = new PermissionLists($userId);
-			$packageInfo = new PackageInfo($url->module);
-
 			$permissionList = new PermissionLists($userId);
 
-			if(!$permissionList->checkAction('type', 'action'))
+			$actionName = importFromModule($url->action, $url->module, 'action');
+
+			$permission = staticHack($actionName, 'requiredPermission');
+			$permissionType = staticHack($actionName, 'requiredPermissionType');
+
+			if(!$permission)
+				$permission = 'execute';
+
+			if(!$permissionType)
+				$permissionType = 'base';
+
+			if(!$permissionList->checkAction($permissionType, $permission))
 			{
 				return false;
 			}
@@ -242,7 +270,7 @@ class AdminControllerResourceFilterInstallerNavigation
 			<li><a href="#">Item</a></li>
 			<li class="last"><a href="#">Item</a></li>
 		</ul>
-	</div>\
+	</div>
 </div>'; // $adminNav->getLinks($tab);
 
 
