@@ -114,13 +114,14 @@ class MemberGroup
 		{
 			$db = DatabaseConnection::getConnection('default_read_only');
 			$stmt = $db->stmt_init();
-			$stmt->prepare('SELECT memgroup_name FROM member_group WHERE memgroup_id = ?');
+			$stmt->prepare('SELECT memgroup_name, is_system FROM member_group WHERE memgroup_id = ?');
 			$stmt->bindAndExecute('i', $id);
 
 			if($stmt->num_rows == 1)
 			{
 				$row = $stmt->fetch_array();
 				$info['name'] = $row['memgroup_name'];
+
 				$info['isSystem'] = ($row['is_system'] == 1);
 			}else{
 				$info = false;
@@ -131,6 +132,7 @@ class MemberGroup
 		if($info)
 		{
 			$this->id = $id;
+			$this->name = $info['name'];
 			$this->isSystem = $info['isSystem'];
 			return true;
 		}else{
