@@ -292,7 +292,7 @@ class Location
 
 		$db_location->query_set('lastModified', 'NOW()');
 
-		if($parent == $this->getParent())
+		if($parent = $this->getParent())
 		{
 			$parentId = $parent->getId();
 
