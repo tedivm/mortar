@@ -130,24 +130,23 @@ class Permissions
 		if(IGNOREPERMISSIONS)
 			return true;
 
+		if(!is_numeric($action))
+			$action = PermissionActionList::getAction($action);
+
 		// Check to see if user is in the superuser group
 		$adminMemberGroup = new MemberGroup(MemberGroup::lookupIdbyName('SuperUser'));
 		if($adminMemberGroup->containsUser($this->user->getId()))
 			return true;
 
-		// This allows us to add permissions to a special type (universal) which will over ride all other
-		// permissions granted. The two cases I can see this being useful for are for administrators and
-		// banned users, although it currently only checks for positive cases. This is still subject to the
-		// same location rules as other permissions.
-		if($this->isAllowed($action, 'universal'))
+		// Check to see if the universal action is set at this location
+		if(isset($this->permissions['universal'][$action]) && $this->permissions['universal'][$action] === true)
 			return true;
 
 		if(is_null($type))
 			$type = $this->location->getType();
 
-
-		// If the permission isn't set, or is set to inherit (which shouldn't really occur, as thats the default
-		if(!isset($this->permissions[$type][$action]) || $this->permissions[$type][$action] == 'inherit')
+		// If the permission isn't set check the parent
+		if(!isset($this->permissions[$type][$action]))
 		{
 			$parentLocation = $this->location->getParent();
 
@@ -350,10 +349,12 @@ class PermissionLists
 
 	public function checkAction($type, $action)
 	{
+		$type = strtolower($type);
+		$action = strtolower($action);
 		if(IGNOREPERMISSIONS === true)
 			return true;
 
-		return ($this->permissions[$type][$action] == 1);
+		return (isset($this->permissions[$type]) && in_array($action, $this->permissions[$type]));
 	}
 
 	protected function load()
@@ -367,8 +368,8 @@ class PermissionLists
 		foreach($memberGroups as $memberGroup)
 		{
 			$permissions[] = $this->loadGroupPermissions($memberGroup);
+			//var_dump($this->loadGroupPermissions($memberGroup));
 		}
-
 		$this->permissions = call_user_func_array('array_merge_recursive', $permissions);
 	}
 
@@ -384,17 +385,17 @@ class PermissionLists
 			$db = DatabaseConnection::getConnection('default_read_only');
 			$stmt = $db->stmt_init();
 
-			$stmt->prepare('SELECT userPermissions.resource as resource, actions.action_name as action
+			$stmt->prepare('SELECT DISTINCT userPermissions.resource as resource, actions.action_name as action
 								FROM userPermissions, actions
-								WHERE userPermissions.user_id = ?,
-									AND userPermissions.action_id = actions.action_id,
+								WHERE userPermissions.user_id = ?
+									AND userPermissions.action_id = actions.action_id
 									AND userPermissions.permission = 1');
 
 			$stmt->bindAndExecute('i', $userId);
 
 			while($row = $stmt->fetch_array())
 			{
-				$allowedPermissions[$row['resource']][$row['action']] = 1;
+				$allowedPermissions[strtolower($row['resource'])][] = strtolower($row['action']);
 			}
 			$cache->storeData($allowedPermissions);
 		}
@@ -413,17 +414,17 @@ class PermissionLists
 			$db = DatabaseConnection::getConnection('default_read_only');
 			$stmt = $db->stmt_init();
 
-			$stmt->prepare('SELECT groupPermissions.resource as resource, actions.action_name as action
+			$stmt->prepare('SELECT DISTINCT groupPermissions.resource as resource, actions.action_name as action
 								FROM groupPermissions, actions
-								WHERE groupPermissions.memgroup_id = ?,
-									AND groupPermissions.action_id = actions.action_id,
+								WHERE groupPermissions.memgroup_id = ?
+									AND groupPermissions.action_id = actions.action_id
 									AND groupPermissions.permission = 1');
 
 			$stmt->bindAndExecute('i', $groupId);
 
 			while($row = $stmt->fetch_array())
 			{
-				$allowedPermissions[$row['resource']][$row['action']] = 1;
+				$allowedPermissions[strtolower($row['resource'])][] = strtolower($row['action']);
 			}
 			$cache->storeData($allowedPermissions);
 		}
