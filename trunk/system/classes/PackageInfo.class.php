@@ -197,13 +197,6 @@ class PackageInfo
 			{
 				try {
 					$actionReflection = new ReflectionClass($action['className']);
-
-					if($actionReflection->isSubclassOf('Action'))
-						$action['type'] = 'specificModule';
-
-					if($actionReflection->isSubclassOf('PackageAction'))
-						$action['type'] = 'genericPackage';
-
 					$methods = $actionReflection->getMethods();
 					$engines = array();
 					foreach($methods as $method)
