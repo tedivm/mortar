@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseActionDefault extends PackageAction
+class BentoBaseActionDefault extends ActionBase
 {
 	//static $requiredPermission = 'Read';
 

@@ -1,7 +1,7 @@
 <?php
 
 
-class BentoCMSActionAddPage extends FormAction
+class BentoCMSActionAddPage //extends FormAction
 {
 	static $requiredPermission = 'Add';
 

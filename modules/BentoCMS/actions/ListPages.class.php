@@ -1,6 +1,6 @@
 <?php
 
-class BentoCMSActionListPages extends PackageAction
+class BentoCMSActionListPages extends ActionBase
 {
 	static $requiredPermission = 'Read';
 

@@ -1,6 +1,6 @@
 <?php
 
-class BentoBotchActionAuthenticationError extends PackageAction
+class BentoBotchActionAuthenticationError extends ActionBase
 {
 	public $AdminSettings = array(	'linkTab' => 'Universal',
 									'headerTitle' => 'Forbidden',

@@ -1,6 +1,6 @@
 <?php
 
-class BentoCMSActionRemovePage extends Action
+class BentoCMSActionRemovePage extends ActionBase
 {
 
 	static $requiredPermission = 'Delete';

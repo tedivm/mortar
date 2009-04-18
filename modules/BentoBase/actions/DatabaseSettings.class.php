@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseActionDatabaseSettings extends PackageAction
+class BentoBaseActionDatabaseSettings extends ActionBase
 {
 	static $requiredPermission = 'System';
 
