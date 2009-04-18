@@ -364,6 +364,7 @@ class BentoBaseInstaller
 			$membersOnlyDirectory->name = 'MembersOnly';
 			$membersOnlyDirectory['allowIndex'] = 1;
 			$membersOnlyDirectory->save($siteLocation);
+
 			$locationMembersOnly = $membersOnlyDirectory->getLocation();
 			$locationMembersOnly->setInherit(false);
 			$locationMembersOnly->save();
@@ -397,6 +398,7 @@ class BentoBaseInstaller
 
 			ModelRegistry::clearHandlers();
 			$coreResources = ModelRegistry::getModelList();
+			$coreResources[] = 'Base';
 			$corePermissions = array('Read', 'Edit', 'Add', 'Execute', 'System', 'Admin');
 
 			$adminResources = $coreResources;
