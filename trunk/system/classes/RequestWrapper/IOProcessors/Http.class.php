@@ -5,8 +5,13 @@ class IOProcessorHttp extends IOProcessorCli
 
 	protected $headers = array();
 	protected $cacheExpirationOffset;
-	protected $responseCode = 200;
+
+	public $obsoleteTime = 5;
 	public $maxClientCache = 21600;
+
+	static $compressionLevel = 6;
+	static $compressionMinimum = 2048;
+
 
 	protected function setEnvironment()
 	{
@@ -26,6 +31,8 @@ class IOProcessorHttp extends IOProcessorCli
 
 	protected function start()
 	{
+		ignore_user_abort(true);
+
 		if(INSTALLMODE === true)
 			return false;
 
@@ -36,6 +43,7 @@ class IOProcessorHttp extends IOProcessorCli
 			$cookieName = $siteLocation->getName() . 'Session';
 
 			session_name($cookieName);
+			session_set_cookie_params(0, '/', null, $_SERVER["HTTPS"], true);
 			session_start();
 			$sessionObserver = new SessionObserver();
 			$user = ActiveUser::getInstance();
@@ -56,12 +64,72 @@ class IOProcessorHttp extends IOProcessorCli
 
 	public function output($output)
 	{
+		if(session_id() != '')
+			session_commit();
+
 		$sendOutput = true;
 
+		$size = strlen($output);
+
+		$encoding = false;
+		if( (defined('OUTPUT_COMPRESSION') && OUTPUT_COMPRESSION) &&
+			$_SERVER['HTTP_ACCEPT_ENCODING'] &&
+			self::$compressionLevel > 0 &&
+			$size > self::$compressionMinimum &&
+			!headers_sent() &&
+			!ini_get('zlib.output_compression') &&
+			ini_get('output_handler') != 'ob_gzhandler')
+		{
+			if(strpos($_SERVER['HTTP_ACCEPT_ENCODING'],'deflate') !== false){
+				$encoding = 'deflate';
+			}elseif(strpos($_SERVER['HTTP_ACCEPT_ENCODING'],'gzip') !== false){
+				$encoding = 'gzip';
+			}
+		}
+
+		if($encoding)
+		{
+			$start = microtime(true);
+			if($encoding == 'deflate' && function_exists('gzdeflate'))
+			{
+				$this->addHeader('Vary', 'Accept-Encoding');
+				$this->addHeader('Content-Encoding', 'deflate');
+				$output = gzdeflate($output, self::$compressionLevel);
+			}elseif($encoding == 'gzip' && function_exists('gzencode')){
+				$this->addHeader('Vary', 'Accept-Encoding');
+				$this->addHeader('Content-Encoding', 'gzip');
+				$output = gzencode($output, self::$compressionLevel);
+			}
+			$compressedSize = strlen($output);
+			$stop = microtime(true);
+
+			if($compressedSize != $size)
+			{
+				if(defined('OUTPUT_COMPRESSION_HEADERS') && OUTPUT_COMPRESSION_HEADERS)
+				{
+					$this->addHeader('X-Compression-Results',
+										round(($compressedSize/$size) * 100  ) . '% ' . $compressedSize . '/' . $size);
+					$this->addHeader('X-Compression-Time', $stop - $start);
+				}
+				$size = $compressedSize;
+			}
+		}
+
+		$this->addHeader('Content-MD5', md5($output));
+		$this->addHeader('Content-Length', $size);
+
+		$serverEtag = hash('crc32',
+					$this->headers['Content-Length'] . $this->headers['Content-MD5'] . $this->headers['Last-Modified']);
+
+		$this->addHeader('ETag', $serverEtag);
+
 		if(!headers_sent())
-			$this->sendHeaders($output);
+			$this->sendHeaders();
 
 		$method = strtolower($_SERVER['REQUEST_METHOD']);
+
+		if(!isset($this->responseCode))
+			$this->responseCode = 200;
 
 		switch(round($this->responseCode, -2)/100)
 		{
@@ -83,7 +151,6 @@ class IOProcessorHttp extends IOProcessorCli
 		if($method == 'head')
 			$output = false;
 
-
 		if($this->responseCode != 200)
 		{
 			if($codeString = ResponseCodeLookup::stringFromCode($this->responseCode))
@@ -92,32 +159,28 @@ class IOProcessorHttp extends IOProcessorCli
 			}
 		}
 
-
 		if($sendOutput)
 			echo $output;
 	}
 
 
-	protected function sendHeaders($output)
+	protected function sendHeaders()
 	{
 		// basic clickjacking protection
 		$this->addHeader('X-FRAME-OPTIONS', 'SAMEORIGIN');
-
-		// this doesn't seem to have any affect, as it gets overridden by apache (the only one i've tested
-		// this on so far) or php
-		$this->addHeader('Content-Length', strlen($output));
 		$this->addHeader('Date',gmdate('D, d M y H:i:s T'));
-		$contentMd5 = md5($output);
-		$this->addHeader('Content-MD5', $contentMd5);
 
-		$cacheControl = 'must-revalidate';
+		if(isset($this->headers['Content-MD5']))
+			$contentMd5 = $this->headers['Content-MD5'];
+
 		// if the request is read-only we'll return some caching headers
 		$requestMethod = strtolower($_SERVER['REQUEST_METHOD']);
 		if(($requestMethod == 'head' || $requestMethod == 'get') &&
-					(!defined('DISABLECLIENTCACHE') || DISABLECLIENTCACHE !== true))
+					(!defined('DISABLECLIENTCACHE') || DISABLECLIENTCACHE !== true) &&
+					(!isset($this->responseCode)))
 		{
-			$etag = $this->headers['Content-Length'] . $contentMd5;
 
+			$cacheControl = 'must-revalidate';
 			if(isset($this->headers['Last-Modified']))
 			{
 				$lastModified = $this->headers['Last-Modified'];
@@ -137,44 +200,30 @@ class IOProcessorHttp extends IOProcessorCli
 				$cacheControl .= ',max-age=' . $offset;
 			}
 
-			$serverEtag = hash('crc32', $etag);
-
-			$this->addHeader('ETag', $serverEtag);
 			$this->addHeader('Pragma', 'Asparagus');
 			$this->addHeader('Cache-Control', $cacheControl);
 
-			if(!isset($lastModified))
-				$lastModified = 1;
-
 			if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || isset($_SERVER['HTTP_IF_NONE_MATCH']))
 			{
-				 if((!isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || $lastModified == $_SERVER['HTTP_IF_MODIFIED_SINCE'])
-				 && (!isset($_SERVER['HTTP_IF_NONE_MATCH']) || $serverEtag == $_SERVER['HTTP_IF_NONE_MATCH']))
+				 if((!isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || $this->headers['Last-Modified'] == $_SERVER['HTTP_IF_MODIFIED_SINCE'])
+					&& (!isset($_SERVER['HTTP_IF_NONE_MATCH']) || $this->headers['ETag'] == $_SERVER['HTTP_IF_NONE_MATCH']))
 				{
-					$this->setHttpCode(304);
+					$this->setStatusCode(304);
 				}
 			}
+
+		}else{
+			unset($this->headers['ETag']);
 		}
 
 		foreach($this->headers as $name => $value)
 			header($name . ':' . $value);
 	}
 
-
 	public function close()
 	{
-		if(session_id() != '')
-			session_commit();
+
 	}
-
-	public function setHttpCode($code)
-	{
-		if(!is_numeric($code))
-			throw new TypeMismatch(array('Numeric', $code));
-
-		$this->responseCode = $code;
-	}
-
 }
 
 
@@ -206,45 +255,59 @@ class SessionObserver implements SplObserver
 
 	protected function regenerateSession()
 	{
-
 		// This forces the system to reload certain variables when the user changes.
 		$reload = ($_SESSION['user_id'] != $this->userId || ($_SESSION['idExpiration'] < time()));
 
+		$_SESSION['user_id'] = $this->userId;
 		// This token is used by forms to prevent cross site forgery attempts
-		if(!isset($_SESSION['nonce']) || $reload)
+		if(!isset($_SESSION['nonce']))
 			$_SESSION['nonce'] = md5($this->userId . START_TIME);
 
-		if(!isset($_SESSION['IPaddress']) || $reload)
+		if(!isset($_SESSION['IPaddress']))
 			$_SESSION['IPaddress'] = $_SERVER['REMOTE_ADDR'];
 
-		if(!isset($_SESSION['userAgent']) || $reload)
+		if(!isset($_SESSION['userAgent']))
 			$_SESSION['userAgent'] = $_SERVER['HTTP_USER_AGENT'];
 
-		$_SESSION['user_id'] = $this->userId;
-
 		// there's a one percent of the session id changing to help prevent session theft
-		if($reload || !isset($_SESSION['OBSOLETE']) && mt_rand(1, 100) == 1)
+		if(($_SESSION['idExpiration'] < time()) || mt_rand(1, 100) == 1)
 		{
-			// Set current session to expire in x seconds
-			$_SESSION['OBSOLETE'] = true;
-			$_SESSION['EXPIRES'] = time() + $this->obsoleteTime;
+			//echo 1112;
+			//unset($_SESSION['user_id']);
 
+
+			$_SESSION['user_id'] = $this->userId;
+			$_SESSION['idExpiration'] = time() + (300);
+			session_regenerate_id(true);
+
+
+		//	session_write_close(); // save stale session (just changing its id without saving would keep the old user id
+		//	session_start();
+			// Set current session to expire in x seconds
+		//	$_SESSION['OBSOLETE'] = true;
+		//	$_SESSION['EXPIRES'] = time() + $this->obsoleteTime;
+
+
+			//$oldSession = session_id(); // get stale session id
+		//	session_write_close(); // save stale session (just changing its id without saving would keep the old user id
+			// session_id($oldSession); // reopen old session
+			//session_set_cookie_params( 0, null, null, $_SERVER["HTTPS"]);
+		//	session_start();
 
 			// Create new session without destroying the old one
-			session_regenerate_id(false);
+		//	session_regenerate_id(true);
 
 			// Grab current session ID and close both sessions to allow other scripts to use them
-			$newSession = session_id();
-			session_write_close();
+//			$newSession = session_id();
+//			session_write_close();
 
 			// Set session ID to the new one, and start it back up again
-			session_id($newSession);
-			session_start();
+//			session_id($newSession);
+//			session_start();
 
-			$_SESSION['idExpiration'] = time() + (300);
 			// Don't want this one to expire
-			unset($_SESSION['OBSOLETE']);
-			unset($_SESSION['EXPIRES']);
+			//unset($_SESSION['OBSOLETE']);
+			//unset($_SESSION['EXPIRES']);
 		}
 	}
 
@@ -256,8 +319,10 @@ class SessionObserver implements SplObserver
 				throw new BentoWarning('Attempt to use expired session.');
 
 			if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id']))
-				throw new BentoNotice('No session started.');
-
+			{
+//				var_dump($SESSION);
+				throw new Exception('No session started');
+			}
 			if(!isset($_SESSION['IPaddress']) || $_SESSION['IPaddress'] != $_SERVER['REMOTE_ADDR'])
 				throw new BentoNotice('IP Address mixmatch (possible session hijacking attempt).');
 
@@ -295,6 +360,7 @@ class ResponseCodeLookup
 					304 => 'Not Modified',
 					305 => 'Use Proxy',
 					307 => 'Temporary Redirect',
+
 					400 => 'Bad Request',
 					401 => 'Unauthorized',
 					402 => 'Payment Required',
