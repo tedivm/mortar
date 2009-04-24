@@ -5,4 +5,6 @@ define('IGNOREPERMISSIONS', false);	//FOR TESTING ONLY!!!!
 define('BENCHMARK', true);
 define('DISABLECACHE', false);
 define('DEPRECIATION_WARNINGS', false);
+define('OUTPUT_COMPRESSION', true);
+define('OUTPUT_COMPRESSION_HEADERS', true);
 ?>
