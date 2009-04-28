@@ -1,6 +1,6 @@
 <?php
 
-class FormValidationFilter extends FormValidationAbstract
+abstract class FormValidationFilter extends FormValidationAbstract
 {
 	protected $filter;
 

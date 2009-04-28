@@ -17,6 +17,8 @@ class FormInput
 	protected $validationRules = array();
 	protected $validationMessages = array();
 
+	protected $filters = array();
+
 	public function __construct($name)
 	{
 		$this->name = $name;
@@ -109,7 +111,7 @@ class FormInput
 		return array();
 	}
 
-	public function validate()
+	public function validate($value = null)
 	{
 		$success = true;
 		$errors = array();
@@ -118,7 +120,7 @@ class FormInput
 			$classname = ValidationLookup::getClass($rule);
 
 			$validationRule = new $classname();
-			$validationRule->attachInput($this, $argument);
+			$validationRule->attachInput($this, $value, $argument);
 
 			if(!$validationRule->validate())
 			{
@@ -134,6 +136,34 @@ class FormInput
 			$this->validationMessages = $errors;
 
 		return $success;
+	}
+
+	public function filter($userInput)
+	{
+		foreach($this->filters as $filter)
+		{
+			if(!($filter instanceof $filter))
+			{
+				if($filterClass = importClass($filter, 'Filters', 'library'))
+				{
+					$filter = new $filterClass();
+				}
+			}
+
+			$userInput = $filter->filter($userInput);
+		}
+		return $userInput;
+	}
+
+	public function addFilter($filter)
+	{
+		$this->filters[] = $filter;
+		return $this;
+	}
+
+	public function clearFilters()
+	{
+		$this->filters = array();
 	}
 
 	public function check($isChecked)

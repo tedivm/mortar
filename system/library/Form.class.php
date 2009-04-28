@@ -152,8 +152,9 @@ class Form
 						$jsStartup = array_merge_recursive($jsStartup, $inputJavascript['startup']);
 
 					if(is_array($inputJavascript['includes']))
+					{
 						$jsIncludes = array_merge_recursive($jsIncludes, $inputJavascript['includes']);
-
+					}
 
 					$this->processSpecialInputFields($input);
 					$inputHtml = $this->getInputHtmlByType($input);
@@ -195,7 +196,6 @@ class Form
 
 			if(!$this->submitButton)
 			{
-
 				$sectionHtml = new HtmlObject('div');
 				$sectionHtml->property('id', $this->name . "_section_" . 'control');
 				$inputHtml = new HtmlObject('input');
@@ -209,10 +209,6 @@ class Form
 
 			$formHtml = (string) $formHtml;
 			$cache->storeData($formHtml);
-
-
-
-
 		}
 
 		$output = $formHtml;
@@ -230,7 +226,11 @@ class Form
 			$page = ActivePage::getInstance();
 			$page->addStartupScript($jsStartup);
 			$page->addJQueryInclude($jqueryPlugins);
-			$page->addJavaScript($jsIncludes);
+
+			foreach ($jsIncludes as $library => $plugin)
+			{
+				$page->addJavaScript($plugin, $library);
+			}
 			$page->addCss($this->name, 'forms');
 			//$page->
 
@@ -402,9 +402,7 @@ class Form
 
 		switch ($input->type) {
 			case 'html':
-				if(is_array($input->property('options')))
-					$fckOptions = json_encode($input->property('options'));
-
+				$fckOptions = (is_array($input->property('options'))) ? json_encode($input->property('options')) : '';
 				$includes['jquery'] = array('FCKEditor');
 				$startup[] = '$(\'textarea#' . $input->property('id') . '\').fck(' . $fckOptions . ');';
 				break;
@@ -413,10 +411,8 @@ class Form
 				break;
 		}
 
-
 		if(count($plugin) > 0 || count($startup) > 0)
 			return array('includes' => $includes, 'startup' => $startup);
-
 
 		return false;
 	}
@@ -441,6 +437,8 @@ class Form
 		try
 		{
 			$inputHandler = $this->getInputhandler();
+			$processedInput = array();
+
 
 			if(!$this->wasSubmitted())
 				return false;
@@ -451,22 +449,24 @@ class Form
 			foreach($this->inputs as $section => $inputs)
 				foreach($inputs as $input)
 			{
-
 				$validationResults = $input->validate();
-
-				if($input->validate() !== true)
+				if($input->validate(isset($inputHandler[$input->name]) ? $inputHandler[$input->name] : null) !== true)
 				{
 					$success = false;
 					//$error[$input->name] = $input->getErrors;
 				}
+
 				// Is the input allows it, place the user value in as the default this way if the form isn't
 				// validated, the user doesn't need to re-enter it
-				if(in_array($input->type, $this->discardInput))
-					continue;
-
 
 				switch ($input->type)
 				{
+
+					case 'hidden':
+					case 'password':
+						$processedInput[$input->name] = $input->filter($inputHandler[$input->name]);
+						continue;
+
 					case 'checkbox':
 						if(isset($inputHandler[$input->name]))
 						{
@@ -474,11 +474,23 @@ class Form
 							if(count($checkboxInputs) == 1)
 							{
 								$inputHandler[$input->name] = $inputHandler[$input->name][0];
+
 								if($inputHandler[$input->name] == 'on')
+								{
 									$inputHandler[$input->name] = true;
+								}
+
+								$processedInput[$input->name] = $input->filter($inputHandler[$input->name]);
+
 								$input->check(true);
 							}else{
-								$input->check(in_array($input->property('value'), $inputHandler[$input->name]));
+								if(in_array($input->property('value'), $inputHandler[$input->name]))
+								{
+									$input->check(true);
+									$processedInput[$input->name][] = $input->filter($inputHandler[$input->name]);
+								}else{
+									$input->check(false);
+								}
 							}
 						}else{
 							$input->check(false);
@@ -487,6 +499,7 @@ class Form
 
 					default:
 						$input->property('value', $inputHandler[$input->name]);
+						$processedInput[$input->name] = $input->filter($inputHandler[$input->name]);
 				} // switch ($input->type)
 
 			} // foreach($inputs as $input) / foreach($this->inputs as $section => $inputs)
@@ -503,7 +516,10 @@ class Form
 			$success = false;
 		}
 
-		return $success;
+		if(!$success)
+			return false;
+
+		return $processedInput;
 	}
 
 	protected function getNonce()
