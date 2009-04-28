@@ -11,15 +11,12 @@ abstract class FormValidationAbstract
 
 	protected $error;
 
-	public function attachInput(FormInput $input, $argument = null)
+	public function attachInput(FormInput $input, $userValue, $argument = null)
 	{
 		$this->input = $input;
 		$this->argument = $argument;
 		$this->form = $input->getForm();
-		$this->userInput = $this->form->getInputHandler();
-
-		if(key_exists($input->name, $this->userInput))
-			$this->value = $this->userInput[$input->name];
+		$this->value = $userValue;
 	}
 
 	abstract public function validate();
