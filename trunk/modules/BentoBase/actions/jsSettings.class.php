@@ -28,12 +28,15 @@ class BentoBaseActionjsSettings extends ActionBase
 
 		$urls = ($info->Configuration['url']);
 
+$output['url']['theme'] = ActiveSite::getLink('theme');
+$output['url']['module'] = ActiveSite::getLink('module');
+$output['url']['javascript'] = ActiveSite::getLink('javascript');
 
-		$output['url']['adminTheme'] = $urls['theme'];
+//		$output['url']['adminTheme'] = $urls['theme'];
 
-		$output['url']['theme'] = $output['url']['current'] . $urls['theme'];
-		$output['url']['modules'] = $output['url']['current'] . $urls['modules'];
-		$output['url']['javascript'] = $output['url']['current'] . $urls['javascript'];
+//		$output['url']['theme'] = $output['url']['current'] . $urls['theme'];
+//		$output['url']['modules'] = $output['url']['current'] . $urls['modules'];
+//		$output['url']['javascript'] = $output['url']['current'] . $urls['javascript'];
 
 //		$output['url']['base'] = $urls[''];
 //		$output[] = 'cheese';
