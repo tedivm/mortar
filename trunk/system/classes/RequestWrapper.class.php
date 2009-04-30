@@ -122,8 +122,11 @@ class RequestWrapper
 		switch(get_class($e))
 		{
 			case 'AuthenticationError':
-				$action = 'LogIn';
-				$errorModule = $location->getMeta('default');
+
+				$action = 'AuthenticationError';
+
+				//$action = 'LogIn';
+				//$errorModule = $location->getMeta('default');
 				break;
 
 			case 'ResourceNotFoundError':
@@ -146,7 +149,7 @@ class RequestWrapper
 		if(!class_exists($actionInfo['className']))
 			include($actionInfo['path']);
 
-		return $this->getAction($actionInfo['className']);
+		return $this->getAction($actionInfo['className'], (is_numeric($e->getCode())));
 	}
 
 	protected function loadIoHandler($handlerName = null)
@@ -196,6 +199,9 @@ class RequestWrapper
 		if(isset($query['location']))
 			$locationId = $query['location'];
 
+		if(is_numeric($query['location']))
+			$location = new Location($query['location']);
+
 		try {
 
 			if($query['module'])
@@ -203,12 +209,12 @@ class RequestWrapper
 				$moduleInfo = new PackageInfo($query['module']);
 
 				if($moduleInfo->getStatus() != 'installed')
-					throw new ResourceNotFoundError('Module not installed');
+					throw new BentoError('Module ' . $query['module'] . ' present but not installed');
 
 				$action = ($query['action']) ? $query['action'] : 'Default';
 
 				if(!($actionInfo = $moduleInfo->getActions(($query['action']) ? $query['action'] : 'Default')))
-					throw new ResourceNotFoundError();
+					throw new BentoError('Unable to load action for module ' . $query['module']);
 
 
 				$className = $actionInfo['className'];
@@ -219,51 +225,70 @@ class RequestWrapper
 				{
 					if(!include($actionInfo['path']) || !class_exists($className, false))
 						throw new ResourceNotFoundError('Unable to load action class ' . $className
-															. ' at location: ' . $actionInfo['path']);
+															. ' from file: ' . $actionInfo['path']);
 				}
 
 				return array('className' => $className, 'argument' => $argument);
-
 			}
 
 		}catch(Exception $e){
 			throw new ResourceNotFoundError();
 		}
-			// get location
-
-		if(is_numeric($query['location']))
-			$location = new Location($query['location']);
-
-
-		if(!isset($location))
-		{
-			$site = ActiveSite::getSite();
-			$location = $site->getLocation();
-		}
-
-		$model = $location->getResource();
-		// figure out what to do with it
-		$locationResourceInfo = $location->getResource(true);
-		$modelHandler = ModelRegistry::getHandler($locationResourceInfo['type']);
-
-		if(!$modelHandler)
-			throw new ResourceNotFoundError('Unable to load model handler.');
 
 		if($query['action'] != 'Add')
 		{
+			if(!isset($location))
+			{
+				$site = ActiveSite::getSite();
+				$location = $site->getLocation();
+			}
+
 			$model = $location->getResource();
 			$actionInfo = $model->getAction($query['action'] ? $query['action'] : 'Read');
 			$className = $actionInfo['className'];
 			$path = $actionInfo['path'];
 			$argument = $model;
+
 		}else{
 
+			if(isset($query['type']))
+			{
+				$type = $query['type'];
+			}elseif(isset($location)){
+				$parentModel = $location->getResource();
+				if(!($type = $parentModel->getDefaultChildType()))
+				{
+					throw new ResourceNotFoundError('Attempted to add resource without specifying type', 400);
+				}
+			}else{
+				throw new ResourceNotFoundError('Attempted to add resource without specifying type', 400);
+			}
+
+			$modelHandler = ModelRegistry::loadModel($type);
+			if(!$modelHandler)
+				throw new ResourceNotFoundError('Unable to load model handler.');
+
+			$model = new $modelHandler();
+			$actionInfo = $model->getAction('Add');
+			$argument = $model;
+
+			if(isset($location))
+			{
+				$model->setParent($location);
+			}
+		}
+
+		if(isset($actionInfo))
+		{
+			$className = $actionInfo['className'];
+			$path = $actionInfo['path'];
 		}
 
 		if(!class_exists($className, false))
 		{
 			if(!(file_exists($path) && include($path)) || !class_exists($className, false))
-				throw new ResourceNotFoundError('Unable to load action class ' . $className . ' at location: ' . $path);
+				throw new ResourceNotFoundError('Unable to load action class ' . $className . ' at location: ' . $path,
+				 '405');
 		}
 
 		return array('className' => $className, 'argument' => $argument);
