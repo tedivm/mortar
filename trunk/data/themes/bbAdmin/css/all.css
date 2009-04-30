@@ -1,0 +1,184 @@
+html, body {
+height: 100%;
+margin: 0;
+padding: 0;
+}
+
+body {
+background: #cccccc;
+font-family: "Gill Sans", "Gill MT", GillSans, sans-serif;
+color: #659EC7;
+}
+
+#BB_wrapper {
+width: 960px;
+min-height: 100%;
+border: solid 1px #000;
+border: solid 1px #000;
+margin: 0 auto;
+background: #fff;
+position: relative;
+}
+
+#BB_header, #BB_body, #BB_footer {
+width: 100%;
+}
+
+.clean {
+clear: both;
+}
+
+#BB_branding {
+width: 90%;
+height: 3em;
+margin: 1em auto;
+border: solid 3px #659EC7;
+text-align: center;
+}
+
+#BB_branding h1 {
+margin: 0;
+padding: 0;
+}
+
+#BB_tools ul {
+list-style: none;
+margin: .3em 0;
+padding: 0;
+width: 100%;
+height: 1.5em;
+border-top: solid 3px #659EC7;
+border-bottom: solid 3px #659EC7;
+}
+
+#BB_tools ul li {
+display: block;
+width: 120px;
+height: 100%;
+float: left;
+border-right: solid 3px #659EC7;
+text-align: center;
+}
+
+.BB_sidebar {
+width: 140px;
+border: solid 3px #659EC7;
+margin: 0 7px;
+}
+
+.BB_sidebar_menu h2 {
+width: 100%;
+background: #659EC7;
+color: #fff;
+text-align: center;
+margin: 0;
+padding; 0;
+}
+
+.BB_sidebar_menu ul {
+list-style: none;
+margin: 0;
+padding: 0;
+}
+
+.BB_sidebar_menu ul li {
+height: 1.5em;
+border-top: solid 3px #659EC7;
+text-align: center;
+}
+
+ul li:hover {
+background: #659EC7;
+color: #fff;
+}
+
+#BB_left_sidebar {
+float: left;
+}
+
+#BB_main {
+width: 780px;
+border: solid 3px #659EC7;
+margin: 0 7px;
+float: right;
+}
+
+#BB_main_left {
+width: 565px;
+float: left;
+border: solid 3px #659EC7;
+margin: 0 7px;
+}
+
+#BB_main_right {
+float: right;
+width: 175px;
+border: solid 3px #659EC7;
+margin 0 7px;
+}
+
+#BB_footer {
+text-align: center;
+position: absolute;
+bottom: 0;
+}
+
+.BB_option_name {
+display: block;
+float: left;
+clear: both;
+width: 300px;
+height: 1.5em;
+margin: 5px;
+border: solid 3px #659EC7;
+}
+
+.BB_option_button {
+display: block;
+float: left;
+width: 65px;
+height: 1.5em;
+margin: 5px;
+border: solid 3px #659EC7;
+background: #659EC7;
+color: #fff;
+}
+
+.BB_option_button:hover {
+color: #659EC7;
+background: #fff;
+}
+
+/* Forms */
+
+form fieldset > input,select,textarea {
+	display: block;
+	width: 220px;
+	float: left;
+	margin-bottom: 10px;
+
+}
+
+form fieldset > label {
+	text-align: right;
+	padding-right: 25px;
+	display: block;
+	width: 160px;
+	float: left;
+	margin-bottom: 10px;
+	clear: left;
+}
+
+form fieldset > label.formError {
+	color: red;
+}
+
+form br {
+	clear: left;
+}
+
+
+form div.intro {
+	margin-left: 10px;
+	margin-bottom: 10px;
+}

@@ -331,7 +331,7 @@ class BentoBaseInstaller
 			$locationRoot->setName('root');
 			$locationRoot->setResource('Root', '0');
 
-			$locationRoot->setMeta('adminTheme', 'admin');
+			$locationRoot->setMeta('adminTheme', 'bbAdmin');
 			$locationRoot->setMeta('htmlTheme', 'default');
 
 			$locationRoot->save();
