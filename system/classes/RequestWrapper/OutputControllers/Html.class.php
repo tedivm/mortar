@@ -9,7 +9,7 @@ class HtmlOutputController extends AbstractOutputController
 
 
 		$page = ActivePage::getInstance();
-		$page->addRegion('title', 'BentoBase Admin');
+		$page->addRegion('title', 'BentoBase');
 		$page->setTemplate('index.html', 'default');
 
 		$this->activeResource = $page;
