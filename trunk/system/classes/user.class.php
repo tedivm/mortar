@@ -305,6 +305,12 @@ class ActiveUser implements SplSubject
 	}
 
 
+	static public function isLoggedIn()
+	{
+		$user = self::getInstance();
+		return ($user->getName() != 'guest');
+	}
+
 
 	/**
 	 * Returns the stored instance of the ActiveUser. If no object
@@ -328,12 +334,11 @@ class ActiveUser implements SplSubject
 
 	public function __destruct()
 	{
-		$this->notify();
+
 	}
 
 	public function loadUserByName($user)
 	{
-
 		$cache = new Cache('usersname', $user, 'id');
 
 		$id = $cache->get_data();
