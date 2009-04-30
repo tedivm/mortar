@@ -4,9 +4,12 @@ class AdminOutputController extends AbstractOutputController
 {
 	protected function start()
 	{
+		$site = ActiveSite::getSite();
+		$siteLocation = $site->getLocation();
+
 		$page = ActivePage::getInstance();
 		$page->addRegion('title', 'BentoBase Admin');
-		$page->setTemplate('index.html', 'admin');
+		$page->setTemplate('index.html', $siteLocation->getMeta('adminTheme'));
 
 		$this->activeResource = $page;
 
@@ -77,8 +80,8 @@ class AdminControllerResourceFilterNavigation
 		$tabs = $this->loadLinks();
 		$activeTab = isset($action->adminSettings['tab']) ? $action->adminSettings['tab'] : 'Main';
 		$sidebar = new HtmlObject('div');
-		$sidebar->id = 'left-column';
-
+		$sidebar->id = 'BB_left_sidebar';
+		$sidebar->addClass('BB_sidebar');
 		$activeNav = $tabs[$activeTab];
 		if(is_array($activeNav))
 			foreach($activeNav as $container => $links)
@@ -86,24 +89,34 @@ class AdminControllerResourceFilterNavigation
 			if(count($links) > 0)
 			{
 				$div = $sidebar->insertNewHtmlObject('div');
+				$div->addClass('BB_sidebar_menu');
+
 
 				if($container != 'StandAlone')
-					$div->insertNewHtmlObject('h3')->
+					$div->insertNewHtmlObject('h2')->
 						wrapAround($container);
 
 				$ul = $div->insertNewHtmlObject('ul');
-				$ul->addClass('nav');
+
 				foreach($links as $link)
 				{
 					$a = $link['url']->getLink($link['label']);
-					$li = $ul->insertNewHtmlObject('li')->
-					wrapAround($a);
+					$li = $ul->insertNewHtmlObject('li')
+						->addClass('BB_sidebar_menu')->
+						wrapAround($a);
 				}
 				$li->addClass('last');
 			}
 		}
 		$page = $adminController->getResource();
 		$page['navbar'] = (string) $sidebar;
+
+
+
+
+
+
+
 
 		$tabUl = new HtmlObject('ul');
 		$tabUl->id = 'top-navigation';
@@ -123,11 +136,10 @@ class AdminControllerResourceFilterNavigation
 			if($tab == $activeTab)
 				$li->addClass('active');
 
+			$li->addClass('BB_tool_box');
 			$url->tab = $tab;
 
-			$li->insertNewHtmlObject('span')->
-				insertNewHtmlObject('span')->
-				insertNewHtmlObject('a')->
+			$li->insertNewHtmlObject('a')->
 				property('href', (string) $url)->
 				wrapAround($tab);
 		}
