@@ -368,7 +368,6 @@ class PermissionLists
 		foreach($memberGroups as $memberGroup)
 		{
 			$permissions[] = $this->loadGroupPermissions($memberGroup);
-			//var_dump($this->loadGroupPermissions($memberGroup));
 		}
 		$this->permissions = call_user_func_array('array_merge_recursive', $permissions);
 	}

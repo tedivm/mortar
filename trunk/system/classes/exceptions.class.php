@@ -115,7 +115,7 @@ class BentoError extends Exception
 						$argValue = var_export($argValue, true);
 
 					$argString .= $comma .( (strlen($argValue) > '8') ? substr($argValue, '0', 6) . '..' : $argValue);
-					$argStringLong .= $comma .  $argValue;
+					$argStringLong .= $comma . $argValue;
 					$comma = ', ';
 				}
 				$argString = rtrim($argString, ',');
@@ -232,12 +232,12 @@ class TypeMismatch extends BentoError
 
 class AuthenticationError extends BentoError
 {
-	protected $debugLevel = 3;
+	protected $debugLevel = 4;
 }
 
 class ResourceNotFoundError extends BentoError
 {
-	protected $debugLevel = 3;
+	protected $debugLevel = 4;
 }
 
 

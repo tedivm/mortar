@@ -246,6 +246,7 @@ class Page implements ArrayAccess
 			{
 				if($url = $theme->jsUrl($pluginName, $library))
 					$jsUrls[] = $url;
+
 			}
 		}
 
