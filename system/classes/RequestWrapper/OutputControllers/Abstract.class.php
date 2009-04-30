@@ -15,6 +15,8 @@ abstract class AbstractOutputController
 	protected $contentFilters = array();
 	protected $outputFilters = array();
 
+	public $mimeType;
+
 	public function __construct($ioHandler)
 	{
 		$this->ioHandler = $ioHandler;
@@ -32,6 +34,11 @@ abstract class AbstractOutputController
 			$class = get_class($this);
 			$this->format = substr($class, 0, strpos($class, 'OutputController'));
 		}
+
+		if(isset($this->mimeType))
+			$this->ioHandler->addHeader('Content-type', $this->mimeType);
+
+
 		$this->start();
 	}
 
@@ -86,8 +93,6 @@ abstract class AbstractOutputController
 
 	}
 
-
-
 	protected function processAction()
 	{
 		$runMethod = (isset($this->runMethod)) ? $this->runMethod : 'view' . $this->format;
@@ -104,9 +109,6 @@ abstract class AbstractOutputController
 		return $output;
 	}
 
-
-
-
 	protected function checkAction($action)
 	{
 		if(!$action)
@@ -119,7 +121,8 @@ abstract class AbstractOutputController
 
 		// check to see that it has an output for the current format
 		if(!in_array($viewMethod, get_class_methods($action)))
-			throw new ResourceNotFoundError('Action needs ' . $viewMethod . ' method to be available for this format');
+			throw new ResourceNotFoundError('Action ' . get_class_methods($action) . ' needs ' . $viewMethod
+						. ' method to be available for this format');
 
 		if(isset($this->permission)
 			&& !isset($action->{$settingsArrayName}['EnginePermissionOverride']))
@@ -130,7 +133,6 @@ abstract class AbstractOutputController
 
 		return true;
 	}
-
 }
 
 
