@@ -17,7 +17,7 @@ Interface Model extends ArrayAccess
 	public function getProperties();
 	public function getType();
 
-
+	public function setParent(Location $parent);
 
 	// class properties define content, the actual substance of the class
 	public function __get($name);
