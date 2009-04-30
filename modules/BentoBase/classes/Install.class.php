@@ -144,7 +144,7 @@ class BentoBaseInstaller
 				$configFile->set('url', 'theme', $url['theme']);
 				$configFile->set('url', 'modules', $url['modules']);
 				$configFile->set('url', 'javascript', $url['javascript']);
-				$configFile->set('cache', 'handler', $cache);
+				$configFile->set('system', 'handler', $cache);
 				$configFile->write();
 
 			}else{
