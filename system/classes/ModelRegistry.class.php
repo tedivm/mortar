@@ -46,24 +46,14 @@ class ModelRegistry
 
 	static public function loadModel($type, $id = null)
 	{
-		$handler = self::getHandler($type);
+		$modelInfo = self::getHandler($type);
 
-		if(!$handler)
+		if(!$modelInfo)
 			throw new BentoError('Unable to load handler for model ' . $type . '.');
 
-		if(!class_exists($handler['class'], false))
-		{
-			$packageInfo = new PackageInfo($handler['module']);
-			$path = $packageInfo->getPath();
-			$path .= 'models/' . $handler['name'] . 'class.php';
-			if(file_exists($path))
-				include($path);
-		}
+		$handler = importFromModule($modelInfo['name'], $modelInfo['module'], 'Model', true);
 
-		if(!class_exists($handler['class'], false))
-			throw new BentoError('Unable to load handler for model ' . $type . '.');
-
-		$model = new $handler['class']($id);
+		$model = new $handler($id);
 		return $model;
 	}
 

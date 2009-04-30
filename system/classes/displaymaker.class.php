@@ -293,7 +293,6 @@ class DisplayMaker
 		$processTags = array();
 		$processContent = array();
 
-		//var_dump($this->tags);
 		if(is_array($this->tags))
 			foreach($this->tags as $tagName => $tagArray)
 		{

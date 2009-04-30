@@ -70,6 +70,7 @@ class Query
 				$path = $inputArray['p'];
 			}
 
+			$path = rtrim($path, '/');
 			$pathArray = explode('/', str_replace('_', ' ', $path));
 			$rootPiece = strtolower($pathArray[0]);
 
@@ -96,14 +97,13 @@ class Query
 			}
 		}
 
-
-// if location exists, use it
+	// if location exists, use it
 		if(isset($inputArray['location']) && is_numeric($inputArray['location']))
 		{
 			$location = new Location($inputArray['location']);
 		}elseif(isset($pathArray) && count($pathArray) > 0 && INSTALLMODE == false){
 
-// if location isn't set, find it from the path
+	// if location isn't set, find it from the path
 			$site = ActiveSite::getSite();
 			$currentLocation = $site->getLocation();
 
