@@ -118,9 +118,9 @@ abstract class FormActionBase extends ActionBase
 		}
 
 		$info = InfoRegistry::getInstance();
-		if(isset($info->Get['message']) && method_exists($this, 'adminMessage'))
+		if(isset($info->Query['message']) && method_exists($this, 'adminMessage'))
 		{
-			$this->adminMessage($info->Get['message']);
+			$this->adminMessage($info->Query['message']);
 		}
 
 

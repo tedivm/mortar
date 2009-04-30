@@ -1,6 +1,6 @@
 <?php
 
-abstract class FormAction extends Action
+abstract class FormAction extends ActionBase
 {
 	protected $formStatus = false;
 	protected $form;
