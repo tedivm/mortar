@@ -1,4 +1,4 @@
-$.siteSetting.defaults.url = baseUrl + 'index.php?engine=Json&action=jsSettings&package=BentoBase';
+$.siteSetting.defaults.url = baseUrl + 'index.php?format=json&action=jsSettings&module=BentoBase';
 
 if(typeof($.validator) == 'function')
 {
