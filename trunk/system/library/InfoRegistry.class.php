@@ -46,8 +46,8 @@ class InfoRegistry
 				case 'Post':
 					$this->Post = Post::getInstance();
 					break;
-				case 'Get':
-					$this->Get = Get::getInstance();
+				case 'Query':
+					$this->Query = Query::getQuery();
 					break;
 				case 'Runtime':
 					$this->Runtime = RuntimeConfig::getInstance();
