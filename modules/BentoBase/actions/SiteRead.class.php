@@ -12,7 +12,15 @@ class BentoBaseActionSiteRead extends ModelActionBase
 
 	public function viewAdmin($resource)
 	{
-		return 'purp wle';
+
+		$query = Query::getQuery();
+		if($query['tab'])
+		{
+			$this->adminSettings['tab'] = $query['tab'];
+		}
+
+
+		return 'Default Admin page';
 	}
 
 	public function viewHtml()
@@ -53,7 +61,7 @@ class BentoBaseActionSiteRead extends ModelActionBase
 			$url->location = $location;
 
 			$this->ioHandler->addHeader('Location', (string) $url);
-			$this->ioHandler->setHttpCode(307);
+			$this->ioHandler->setStatusCode(307);
 
 			return (string) $url;
 
