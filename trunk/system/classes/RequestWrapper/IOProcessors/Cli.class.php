@@ -2,6 +2,8 @@
 
 class IOProcessorCli
 {
+	protected $responseCode;
+
 	public function __construct()
 	{
 		$this->initialize();
@@ -68,6 +70,14 @@ class IOProcessorCli
 	protected function start()
 	{
 
+	}
+
+	public function setStatusCode($code)
+	{
+		if(!is_numeric($code))
+			throw new TypeMismatch(array('Numeric', $code));
+
+		$this->responseCode = $code;
 	}
 
 }
