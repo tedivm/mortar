@@ -18,7 +18,7 @@ class Url
 		ksort($attributes);
 		$urlString = '';
 
-		if(isset($info->Configuration['url']['modRewrite']) && !$info->Configuration['url']['modRewrite'])
+		if(!isset($info->Configuration['url']['modRewrite']) || !$info->Configuration['url']['modRewrite'])
 		{
 			$urlString .= 'index.php?p=';
 		}
