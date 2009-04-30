@@ -13,9 +13,11 @@ class AbstractModel implements Model
 	protected $properties;
 	protected $content;
 
-
 	public function __construct($id = null)
 	{
+		$handlerInfo = ModelRegistry::getHandler($this->getType());
+		$this->module = $handlerInfo['module'];
+
 		if(!is_null($id))
 		{
 			$cache = new Cache('models', $this->getType(), $id, 'location');
@@ -42,7 +44,6 @@ class AbstractModel implements Model
 				$this->location = new Location($locationId);
 
 			$this->load($id);
-
 		}
 
 	}
@@ -54,7 +55,6 @@ class AbstractModel implements Model
 
 		try
 		{
-
 			if(!$this->location)
 			{
 				if(!$parent)
@@ -62,13 +62,12 @@ class AbstractModel implements Model
 				$this->location = new Location();
 			}
 
-
 			if($parent)
 			{
 				if(!($parent instanceof Location))
 					throw new TypeMismatch(array('Location', $parent));
 
-				if(!$this->canAttach($parent->getType()))
+				if(!$this->canSaveTo($parent->getType()))
 					throw new BentoError('Unable to save to resource type ' . $parent->getType());
 
 				$this->location->setParent($parent);
@@ -140,7 +139,6 @@ class AbstractModel implements Model
 		if(!$user)
 			$user = ActiveUser::getInstance();
 
-
 		$permission = new Permissions($this->location, $user);
 		return $permission->isAllowed($action, staticHack($this->model, 'type'));
 	}
@@ -148,7 +146,6 @@ class AbstractModel implements Model
 	public function getAction($actionName)
 	{
 		$packageInfo = new PackageInfo($this->module);
-
 		$moduleActionName = $this->getType() . $actionName;
 		$actionInfo = $packageInfo->getActions($moduleActionName);
 
@@ -179,6 +176,14 @@ class AbstractModel implements Model
 
 	public function getLocation()
 	{
+		if(!isset($this->location))
+		{
+			$this->location = new Location();
+			$id = (isset($this->id)) ? $this->id : 0;
+			$name = (isset($this->properties['name'])) ? $this->properties['name'] : 'tmp';
+			$this->location->setResource($this->getType(), $id);
+			$this->location->setName($name);
+		}
 		return $this->location;
 	}
 
@@ -197,7 +202,16 @@ class AbstractModel implements Model
 		return $this->module;
 	}
 
-	public function canAttach($resourceType)
+	public function setParent(Location $parent)
+	{
+		if(!$this->canSaveTo($parent->getType()))
+			throw new BentoError('Attempted to save ' . $this->getType() . ' to incompatible parent location.', 409);
+
+		$location = $this->getLocation();
+		$location->setParent($parent);
+	}
+
+	public function canSaveTo($resourceType)
 	{
 		if(in_array($resourceType, $this->allowedParents))
 			return true;

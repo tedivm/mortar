@@ -1,7 +1,7 @@
 <?php
 
 
-abstract class FormPackageAction extends PackageAction
+abstract class FormPackageAction// extends PackageAction
 {
 	protected $formStatus = false;
 	protected $form;
