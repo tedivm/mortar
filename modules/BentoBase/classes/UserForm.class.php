@@ -33,6 +33,7 @@ class BentoBaseUserForm extends Form
 
 
 		$memberGroupRecords = new ObjectRelationshipMapper('member_group');
+		$memberGroupRecords->is_system = 0;
 		$memberGroupRecords->select();
 		$membergroups = $memberGroupRecords->resultsToArray();
 
