@@ -69,22 +69,15 @@ class AdminControllerContentFilter
 
 class AdminControllerResourceFilterNavigation
 {
-
 	public function update($adminController)
 	{
-
 		$user = ActiveUser::getInstance();
 		$userId = $user->getId();
 		$action = $adminController->getAction();
-		$unprocessedLinks = $this->loadLinks();
-		$tabs = $this->processLinks($unprocessedLinks);
-
+		$tabs = $this->loadLinks();
 		$activeTab = isset($action->adminSettings['tab']) ? $action->adminSettings['tab'] : 'Main';
-
 		$sidebar = new HtmlObject('div');
 		$sidebar->id = 'left-column';
-
-
 
 		$activeNav = $tabs[$activeTab];
 		if(is_array($activeNav))
@@ -93,8 +86,10 @@ class AdminControllerResourceFilterNavigation
 			if(count($links) > 0)
 			{
 				$div = $sidebar->insertNewHtmlObject('div');
-				$div->insertNewHtmlObject('h3')->
-					wrapAround($container);
+
+				if($container != 'StandAlone')
+					$div->insertNewHtmlObject('h3')->
+						wrapAround($container);
 
 				$ul = $div->insertNewHtmlObject('ul');
 				$ul->addClass('nav');
@@ -113,82 +108,106 @@ class AdminControllerResourceFilterNavigation
 		$tabUl = new HtmlObject('ul');
 		$tabUl->id = 'top-navigation';
 		$tabNames = array_keys($tabs);
+
+		$url = new Url();
+		$url->format = 'Admin';
+
+		unset($tabNames[array_search('Main', $tabNames)]);
+		array_unshift($tabNames, 'Main');
 		foreach($tabNames as $tab)
 		{
+			if($tab == 'Universal')
+				continue;
+
 			$li = $tabUl->insertNewHtmlObject('li');
 			if($tab == $activeTab)
 				$li->addClass('active');
 
+			$url->tab = $tab;
+
 			$li->insertNewHtmlObject('span')->
 				insertNewHtmlObject('span')->
 				insertNewHtmlObject('a')->
+				property('href', (string) $url)->
 				wrapAround($tab);
 		}
 
 		$page['navtabs'] = (string) $tabUl;
 	}
 
-
 	protected function loadLinks()
 	{
 		$cache = new Cache('admin', 'navigation', 'rawLinks');
 		$links = $cache->getData();
 
+		$hook = new Hook('system', 'adminInterface', 'navigation');
+		$tabResults = $hook->getTabs();
+
+		$tabs = call_user_func_array('array_merge_recursive', $tabResults);
+
 		if(!$cache->cacheReturned)
 		{
 			$links = array();
-			$hook = new Hook('system', 'adminInterface', 'navigation');
-
-			$tabResults = $hook->getTabs();
-
-			if(count($tabResults) > 0)
+			if(count($tabs) > 0)
 			{
-				$tabs = call_user_func_array('array_merge_recursive', $tabResults);
 				foreach($tabs as $tab)
 				{
-					$navResults = $hook->getNav($tab);
+					$navResults = $hook->getStaticNav($tab);
 					if(count($navResults) > 0)
 					{
-						$link = call_user_func_array('array_merge_recursive', $hook->getNav($tab));
+						$link = call_user_func_array('array_merge_recursive', $navResults);
 						if(count($link) > 0)
 							$links[$tab] = $link;
 					}
 				}
 			}
+
 			$cache->storeData($links);
 		}
-		return $links;
+
+		$processedLinks = $this->processLinks($links);
+
+		if(count($tabs) > 0)
+		{
+			$links = array();
+			foreach($tabs as $tab)
+			{
+				$navResults = $hook->getDynamicNav($tab);
+				if(count($navResults) > 0)
+				{
+					$link = call_user_func_array('array_merge_recursive', $navResults);
+					if(count($link) > 0)
+						$links[$tab] = $link;
+				}
+			}
+
+			$processedLinks = array_merge_recursive($processedLinks, $this->processLinks($links));
+		}
+
+		return $processedLinks;
 	}
 
 	protected function processLinks($unprocessedLinks)
 	{
 		$user = ActiveUser::getInstance();
 		$userId = $user->getId();
-
-		$cache = new Cache('admin', 'navigation', 'processedLinks', $userId);
-		$processedLinks = $cache->getData();
-
-		if(!$cache->cacheReturned)
+		$processedLinks = array();
+		foreach($unprocessedLinks as $tab => $containers)
 		{
-			$processedLinks = array();
-			foreach($unprocessedLinks as $tab => $containers)
+			foreach($containers as $container => $links)
 			{
-				foreach($containers as $container => $links)
+				$newLinks = array();
+				foreach($links as $link)
 				{
-					$newLinks = array();
-					foreach($links as $link)
-					{
-						if($this->checkLinkPermission($link['url'], $userId))
-							$newLinks[] = $link;
-					}
-					$processedLinks[$tab][$container] = $newLinks;
+					if($this->checkLinkPermission($link['url'], $userId))
+						$newLinks[] = $link;
 				}
+				if(count($newLinks) > 0)
+					$processedLinks[$tab][$container] = $newLinks;
 			}
-			$cache->storeData($processedLinks);
 		}
 		return $processedLinks;
 	}
-
 
 	protected function checkLinkPermission($url, $userId)
 	{
@@ -224,12 +243,6 @@ class AdminControllerResourceFilterNavigation
 				return false;
 			}
 		}
-
-
-
-
-
-
 
 		// check permissions
 		if(isset($link['permissionSet']))
