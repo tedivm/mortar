@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseActionAddUser extends FormPackageAction
+class BentoBaseActionAddUser extends FormActionBase
 {
 	static $requiredPermission = 'System';
 
