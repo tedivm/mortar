@@ -33,10 +33,11 @@ class BentoBaseActionLogIn extends ActionBase
 				setType('hidden')->
 				property('value', $info->Configuration['id']);
 
-		if($form->checkSubmit())
+
+		if($inputHandler = $form->checkSubmit())
 		{
 			try{
-				$inputHandler = $form->getInputhandler();
+				//$inputHandler = $form->getInputhandler();
 				$active_user = ActiveUser::get_instance();
 
 				if($active_user->changeUser($inputHandler['username'], $inputHandler['password']))
@@ -49,6 +50,7 @@ class BentoBaseActionLogIn extends ActionBase
 			}
 
 		}
+		$this->ioHandler->setStatusCode(200);
 	}
 
 
