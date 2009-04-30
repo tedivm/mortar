@@ -10,7 +10,7 @@ class IOProcessorHttp extends IOProcessorCli
 	public $maxClientCache = 21600;
 
 	static $compressionLevel = 6;
-	static $compressionMinimum = 2048;
+	static $compressionMinimum = 128; // minumum number of charactors for deflate/gzip to run
 
 
 	protected function setEnvironment()
@@ -24,9 +24,6 @@ class IOProcessorHttp extends IOProcessorCli
 			$query['format'] = 'Admin';
 
 		$query->save();
-
-
-
 	}
 
 	protected function start()
@@ -43,7 +40,7 @@ class IOProcessorHttp extends IOProcessorCli
 			$cookieName = $siteLocation->getName() . 'Session';
 
 			session_name($cookieName);
-			session_set_cookie_params(0, '/', null, $_SERVER["HTTPS"], true);
+			session_set_cookie_params(0, '/', null, isset($_SERVER["HTTPS"]), true);
 			session_start();
 			$sessionObserver = new SessionObserver();
 			$user = ActiveUser::getInstance();
@@ -72,12 +69,14 @@ class IOProcessorHttp extends IOProcessorCli
 		$size = strlen($output);
 
 		$encoding = false;
+		$this->addHeader('Vary', 'Accept-Encoding');
+
 		if( (defined('OUTPUT_COMPRESSION') && OUTPUT_COMPRESSION) &&
-			$_SERVER['HTTP_ACCEPT_ENCODING'] &&
+			isset($_SERVER['HTTP_ACCEPT_ENCODING']) &&
 			self::$compressionLevel > 0 &&
 			$size > self::$compressionMinimum &&
 			!headers_sent() &&
-			!ini_get('zlib.output_compression') &&
+			!ini_get('zlib.output_compression') && // let php.ini handle compression if it wants
 			ini_get('output_handler') != 'ob_gzhandler')
 		{
 			if(strpos($_SERVER['HTTP_ACCEPT_ENCODING'],'deflate') !== false){
@@ -92,7 +91,6 @@ class IOProcessorHttp extends IOProcessorCli
 			$start = microtime(true);
 			if($encoding == 'deflate' && function_exists('gzdeflate'))
 			{
-				$this->addHeader('Vary', 'Accept-Encoding');
 				$this->addHeader('Content-Encoding', 'deflate');
 				$output = gzdeflate($output, self::$compressionLevel);
 			}elseif($encoding == 'gzip' && function_exists('gzencode')){
@@ -119,12 +117,10 @@ class IOProcessorHttp extends IOProcessorCli
 		$this->addHeader('Content-Length', $size);
 
 		$serverEtag = hash('crc32',
-					$this->headers['Content-Length'] . $this->headers['Content-MD5'] . $this->headers['Last-Modified']);
+					$this->headers['Content-Length'] . $this->headers['Content-MD5'] .
+						(isset($this->headers['Last-Modified']) ? $this->headers['Last-Modified'] : 1));
 
 		$this->addHeader('ETag', $serverEtag);
-
-		if(!headers_sent())
-			$this->sendHeaders();
 
 		$method = strtolower($_SERVER['REQUEST_METHOD']);
 
@@ -147,16 +143,15 @@ class IOProcessorHttp extends IOProcessorCli
 				break;
 		}
 
-
 		if($method == 'head')
 			$output = false;
 
-		if($this->responseCode != 200)
+		if(!headers_sent())
 		{
-			if($codeString = ResponseCodeLookup::stringFromCode($this->responseCode))
-			{
+			$this->sendHeaders();
+
+			if($this->responseCode != 200 && $codeString = ResponseCodeLookup::stringFromCode($this->responseCode))
 				header('HTTP/1.1 ' . $this->responseCode . ' ' . $codeString);
-			}
 		}
 
 		if($sendOutput)
@@ -200,20 +195,19 @@ class IOProcessorHttp extends IOProcessorCli
 				$cacheControl .= ',max-age=' . $offset;
 			}
 
-			$this->addHeader('Pragma', 'Asparagus');
+			$this->addHeader('Pragma', 'Asparagus'); // if something isn't sent out, apache sends no-cache
 			$this->addHeader('Cache-Control', $cacheControl);
 
 			if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || isset($_SERVER['HTTP_IF_NONE_MATCH']))
 			{
-				 if((!isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || $this->headers['Last-Modified'] == $_SERVER['HTTP_IF_MODIFIED_SINCE'])
-					&& (!isset($_SERVER['HTTP_IF_NONE_MATCH']) || $this->headers['ETag'] == $_SERVER['HTTP_IF_NONE_MATCH']))
+				 if((!isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])
+				 				|| $this->headers['Last-Modified'] == $_SERVER['HTTP_IF_MODIFIED_SINCE'])
+					&& (!isset($_SERVER['HTTP_IF_NONE_MATCH'])
+								|| $this->headers['ETag'] == $_SERVER['HTTP_IF_NONE_MATCH']))
 				{
 					$this->setStatusCode(304);
 				}
 			}
-
-		}else{
-			unset($this->headers['ETag']);
 		}
 
 		foreach($this->headers as $name => $value)
@@ -263,10 +257,10 @@ class SessionObserver implements SplObserver
 		if(!isset($_SESSION['nonce']))
 			$_SESSION['nonce'] = md5($this->userId . START_TIME);
 
-		if(!isset($_SESSION['IPaddress']))
+		if(!isset($_SESSION['IPaddress']) || $_SESSION['IPaddress'] != $_SERVER['REMOTE_ADDR'])
 			$_SESSION['IPaddress'] = $_SERVER['REMOTE_ADDR'];
 
-		if(!isset($_SESSION['userAgent']))
+		if(!isset($_SESSION['userAgent']) || $_SESSION['userAgent'] != $_SERVER['HTTP_USER_AGENT'])
 			$_SESSION['userAgent'] = $_SERVER['HTTP_USER_AGENT'];
 
 		// there's a one percent of the session id changing to help prevent session theft
@@ -320,7 +314,6 @@ class SessionObserver implements SplObserver
 
 			if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id']))
 			{
-//				var_dump($SESSION);
 				throw new Exception('No session started');
 			}
 			if(!isset($_SESSION['IPaddress']) || $_SESSION['IPaddress'] != $_SERVER['REMOTE_ADDR'])
