@@ -6,9 +6,21 @@ class BentoBotchActionAuthenticationError extends ActionBase
 									'headerTitle' => 'Forbidden',
 									'EnginePermissionOverride' => true);
 
+	static $requiredPermission = 'Read';
+
 	public function logic()
 	{
-
+		if(isset($this->argument) && is_numeric($this->argument))
+		{
+			$this->ioHandler->setStatusCode($this->argument);
+		}else{
+			if(ActiveUser::isLoggedIn())
+			{
+				$this->ioHandler->setStatusCode(403);
+			}else{
+				$this->ioHandler->setStatusCode(401);
+			}
+		}
 	}
 
 	public function viewHtml()
