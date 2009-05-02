@@ -4,12 +4,10 @@ class AdminOutputController extends AbstractOutputController
 {
 	protected function start()
 	{
-		$site = ActiveSite::getSite();
-		$siteLocation = $site->getLocation();
+
 
 		$page = ActivePage::getInstance();
 		$page->addRegion('title', 'BentoBase Admin');
-		$page->setTemplate('index.html', $siteLocation->getMeta('adminTheme'));
 
 		$this->activeResource = $page;
 
@@ -21,7 +19,14 @@ class AdminOutputController extends AbstractOutputController
 		{
 			$navigation = new AdminControllerResourceFilterInstallerNavigation();
 			$this->addOutputFilter($navigation);
+			$page->setTemplate('index.html', 'bbAdmin');
 		}else{
+
+
+			$site = ActiveSite::getSite();
+			$siteLocation = $site->getLocation();
+			$page->setTemplate('index.html', $siteLocation->getMeta('adminTheme'));
+
 
 			// This filter adds our navigational bars
 			$navigation = new AdminControllerResourceFilterNavigation();
@@ -288,22 +293,37 @@ class AdminControllerResourceFilterInstallerNavigation
 	public function update($adminController)
 	{
 		$page = $adminController->getResource();
-		$page['navbar'] = '<div id="left-column">
-	<div><h3>Container Name</h3>
-		<ul class="nav">
+		$page['navbar'] = '
+   <div id="BB_left_sidebar" class="BB_sidebar">
+      <div class="BB_sidebar_menu">
+         <h2>Menu</h2>
+         <ul>
+            <li class="BB_sidebar_menu last">
+               <a href="#">Menu Item</a>
+            </li>
+         </ul>
+      </div>
+   </div>
 
-			<li><a href="#">Item</a></li>
-			<li class="last"><a href="#">Item</a></li>
-		</ul>
-	</div>
-</div>'; // $adminNav->getLinks($tab);
+'; // $adminNav->getLinks($tab);
 
 
 
-		$page['navtabs'] = '<ul id="top-navigation">
-	<li><span><span><a href="#">Tab</a></span></span></li>
-	<li><span><span><a href="#">Tab</span></span></a></li>
-</ul>'; // $adminNav->getTabs($tab);
+		$page['navtabs'] = '   <ul id="top-navigation">
+      <li class="active BB_tool_box">
+         <a href="#">Tab</a>
+      </li>
+
+      <li class="BB_tool_box">
+         <a href="#">Tab</a>
+      </li>
+
+      <li class="BB_tool_box">
+         <a href="#">Tab</a>
+      </li>
+
+   </ul>
+'; // $adminNav->getTabs($tab);
 
 
 	}

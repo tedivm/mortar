@@ -52,7 +52,7 @@ class ModuleInstaller
 						case 'dbData':
 							$this->addPermissions();
 							$this->installModels();
-							$this->installPlugins();
+							$this->installCustom();
 							$this->changeStatus('installed');
 					}
 
@@ -111,9 +111,13 @@ class ModuleInstaller
 		}
 	}
 
-	public function installPlugins()
+	public function installCustom()
 	{
-		// need to better define plugins still
+		if($className = importFromModule('CustomInstall', $this->package, 'plugin'))
+		{
+			$customInstallation = new $className($this->package);
+			$customInstallation->run();
+		}
 	}
 
 	public function addPermissions()
