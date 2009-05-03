@@ -105,6 +105,7 @@ abstract class FormActionBase extends ActionBase
 
 	public function viewAdminForm()
 	{
+		$output = '';
 		if($this->form->wasSubmitted())
 		{
 			if($this->formStatus)
