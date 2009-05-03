@@ -122,6 +122,11 @@ class BentoBaseInstaller
 			$url['theme'] = 'data/themes/';
 			$url['modules'] = 'bin/modules/';
 			$url['javascript'] = 'javascript/';
+			$url['modRewrite'] = (isset($input['url_modRewrite']));
+
+			$imezone = (isset($input['system_timezone'])) ? $input['system_timezone'] : 'UTC';
+
+
 			$cache = ($input['cacheHandler']) ? $input['cacheHandler'] : 'FileHandler'; // string, not boolean
 
 			// Write Config File
@@ -144,7 +149,11 @@ class BentoBaseInstaller
 				$configFile->set('url', 'theme', $url['theme']);
 				$configFile->set('url', 'modules', $url['modules']);
 				$configFile->set('url', 'javascript', $url['javascript']);
+
+				$configFile->set('url', 'modRewrite', $url['modRewrite']);
+
 				$configFile->set('system', 'handler', $cache);
+				$configFile->set('system', 'timezone', $imezone);
 				$configFile->write();
 
 			}else{

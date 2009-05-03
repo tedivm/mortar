@@ -112,7 +112,7 @@ try{
 	}
 
 	// system timezone, defaulting to UTC
-	$timezone = ($config['system']['timezone']) ? $config['system']['timezone'] : 'UTC';
+	$timezone = (isset($config['system']['timezone'])) ? $config['system']['timezone'] : 'UTC';
 	date_default_timezone_set($timezone);
 
 	$request = new $requestWrapperName();

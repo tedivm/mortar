@@ -11,6 +11,11 @@ class InstallationForm extends Form
 		$this->changeSection('system')->
 				setLegend('System Information')->
 
+
+
+
+
+
 				createInput('siteName')->
 					setLabel('Site Name')->
 					addRule('required')->
@@ -24,13 +29,30 @@ class InstallationForm extends Form
 					addRule('required')->
 				getForm()->
 
-				createInput('ssl')->
+				createInput('url_modRewrite')->
 					setType('checkbox')->
-					setLabel('SSL enabled')->
-				getForm()->
+					setLabel('Enable Url Rewriting')->
+				getForm();
 
 
-				createInput('base')->
+
+				$timezoneHandler = $this->createInput('system_timezone');
+				$timezoneHandler->setType('select')->
+						setLabel('Time Zone');
+
+				$timezones = DateTimeZone::listIdentifiers();
+				$currentTimezone = 'US/Eastern';
+				foreach($timezones as $timezone)
+				{
+					$attributes = array();
+					if($currentTimezone == $timezone)
+						$attributes = array('selected' => 'selected');
+					$timezoneHandler->setOptions($timezone, $timezone, $attributes);
+				}
+
+
+
+				$this->createInput('base')->
 					setLabel('Base Path')->
 					property('value', $config['path']['base'])->
 					addRule('required')->
