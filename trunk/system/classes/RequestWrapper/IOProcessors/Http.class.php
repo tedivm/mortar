@@ -250,7 +250,9 @@ class SessionObserver implements SplObserver
 	protected function regenerateSession()
 	{
 		// This forces the system to reload certain variables when the user changes.
-		$reload = ($_SESSION['user_id'] != $this->userId || ($_SESSION['idExpiration'] < time()));
+		$reload = (!isset($_SESSION['user_id']) ||
+						$_SESSION['user_id'] != $this->userId ||
+						($_SESSION['idExpiration'] < time()));
 
 		$_SESSION['user_id'] = $this->userId;
 		// This token is used by forms to prevent cross site forgery attempts
