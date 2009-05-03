@@ -1,30 +1,27 @@
 <?php
 
-class BentoCMSPageForm extends Form
+class BentoCMSClassPageForm extends Form
 {
 	protected function define()
 	{
 		$this->changeSection('info')->
 			setlegend('Page Information')->
-			createInput('title')->
+			createInput('model_title')->
 				setLabel('Title')->
 				addRule('required');
 
-			$this->createInput('description')->
+			$this->createInput('model_description')->
 				setType('textarea')->
 				setLabel('Description');;
 
-			$this->createInput('keywords')->
+			$this->createInput('model_keywords')->
 				setType('textarea')->
 				setLabel('Keywords');
 
-			$this->createInput('name')->
-				setLabel('Name (as appears in URLS)')->
-				addRule('required');
 
-			$this->changeSection('content')->
+			$this->changeSection('model_content')->
 			setlegend('Page Content')->
-			createInput('content')->
+			createInput('model_content')->
 				setType('html')->
 				addRule('required');
 
