@@ -59,10 +59,12 @@ class Permissions
 		$memberGroupPermissionsArray = array();
 		$memberGroups = $this->user->getMemberGroups();
 
-		if($resourceOwner = $this->location->getOwner() && $resourceOwner->getId() == $this->user->getId())
+		$resourceOwner = $this->location->getOwner();
+		if($resourceOwner && $resourceOwner->getId() == $this->user->getId())
 			$memberGroups[] = MemberGroup::lookupIdbyName('ResourceOwner');
 
-		if($memberGroup = $this->location->getOwnerGroup() && in_array($memberGroup->getId(), $memberGroups))
+		$memberGroup = $this->location->getOwnerGroup();
+		if($memberGroup && in_array($memberGroup->getId(), $memberGroups))
 			$memberGroups[] = MemberGroup::lookupIdbyName('ResourceGroupOwner');
 
 
