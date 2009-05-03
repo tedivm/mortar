@@ -111,6 +111,16 @@ class Hook
 		return $responses;
 	}
 
+
+	static public function registerPlugin($realm, $category, $name, $module, $plugin)
+	{
+		$db = DatabaseConnection::getConnection('default');
+		$stmt = $db->stmt_init();
+		$stmt->prepare('INSERT INTO plugins (realm, category, name, module, plugin) VALUES (?, ?, ?, ?, ?)');
+		$stmt->bindAndExecute('sssis', $realm, $category, $name, $module, $plugin);
+		Cache::clear('plugins', $realm, $category, $name);
+	}
+
 }
 
 
