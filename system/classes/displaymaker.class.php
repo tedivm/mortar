@@ -247,7 +247,7 @@ class DisplayMaker
 
 	public function addContent($tag, $content)
 	{
-		if(key_exists($tag, $this->tags)) // This will keep us from looking for tags that aren't there
+		if(is_array($this->tags) && key_exists($tag, $this->tags)) // This will keep us from looking for tags that aren't there
 			$this->replacement_array[$tag] = $content;
 	}
 
