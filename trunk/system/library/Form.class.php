@@ -121,6 +121,9 @@ class Form
 						property('id', $this->name)->
 						property('action', (($this->action) ? $this->action : Query::getUrl()));
 
+			$jsIncludes = array();
+			$jsStartup = array();
+
 			foreach($this->inputs as $section => $inputs)
 			{
 				$sectionHtml = new HtmlObject('fieldset');
@@ -139,10 +142,6 @@ class Form
 						addClass('intro');
 				}
 
-
-				$jsIncludes = array();
-				$jsStartup = array();
-
 				foreach($inputs as $input)
 				{
 					$input->property('id', $this->name . "_" . $input->name);
@@ -152,9 +151,7 @@ class Form
 						$jsStartup = array_merge_recursive($jsStartup, $inputJavascript['startup']);
 
 					if(is_array($inputJavascript['includes']))
-					{
 						$jsIncludes = array_merge_recursive($jsIncludes, $inputJavascript['includes']);
-					}
 
 					$this->processSpecialInputFields($input);
 					$inputHtml = $this->getInputHtmlByType($input);
