@@ -83,6 +83,7 @@ function loadHook($LocationId, $name)
 
 function importClass($classname, $path, $basePath = null, $require = false)
 {
+
 	if(!class_exists($classname, false))
 	{
 		if(isset($basePath))
@@ -92,7 +93,7 @@ function importClass($classname, $path, $basePath = null, $require = false)
 				$path = $config['path'][$basePath] . $path;
 		}
 
-		if(file_exists($path))
+		if(is_file($path))
 			include($path);
 
 		if(class_exists($classname, false))
@@ -143,7 +144,7 @@ function importFromModule($name, $module, $classType, $require = false)
 	$packageInfo = new PackageInfo($module);
 	$path = $packageInfo->getPath() . $moduleFolders[strtolower($classType)] . '/' . $name . '.class.php';
 	$className = $packageInfo->getName() . $classDivider . $name;
-	return importClass($className, $path, $require);
+	return importClass($className, $path, $basePath = null, $require);
 }
 
 function staticHack($className, $memberName)
