@@ -101,8 +101,7 @@ class Query
 		if(isset($inputArray['location']) && is_numeric($inputArray['location']))
 		{
 			$location = new Location($inputArray['location']);
-		}elseif(isset($pathArray) && count($pathArray) > 0 && INSTALLMODE == false){
-
+		}elseif(isset($pathArray) && INSTALLMODE == false){
 	// if location isn't set, find it from the path
 			$site = ActiveSite::getSite();
 			$currentLocation = $site->getLocation();
