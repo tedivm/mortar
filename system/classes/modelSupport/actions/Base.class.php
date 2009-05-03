@@ -9,7 +9,7 @@ abstract class ModelActionBase implements ActionInterface
 
 	protected $cacheExpirationOffset;
 
-	public static $requiredPermission;
+	public static $requiredPermission = 'Read';
 
 	public function __construct($identifier, $handler)
 	{
@@ -53,6 +53,7 @@ abstract class ModelActionBase implements ActionInterface
 
 		if(!$action)
 			$action = staticHack(get_class($this), 'requiredPermission');
+
 
 		return $this->permissionObject->isAllowed($action, $this->model->getType());
 	}
