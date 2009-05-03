@@ -17,7 +17,7 @@ class ModelRegistry
 		if(!is_array(self::$handlerList))
 			self::loadHandlers();
 
-		return (self::$handlerList[$name]) ? self::$handlerList[$name] : false;
+		return (isset(self::$handlerList[$name])) ? self::$handlerList[$name] : false;
 	}
 
 	static public function setHandler($resource, $module, $name = null)
