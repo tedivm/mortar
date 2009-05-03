@@ -312,6 +312,12 @@ class ActiveUser implements SplSubject
 	}
 
 
+	public static function getCurrentUser()
+	{
+		$self = self::getInstance();
+		return $self->getUser();
+	}
+
 	/**
 	 * Returns the stored instance of the ActiveUser. If no object
 	 * is stored, it will create it
@@ -330,6 +336,11 @@ class ActiveUser implements SplSubject
 	public static function get_instance()
 	{
 		return self::getInstance();
+	}
+
+	public function getUser()
+	{
+		return $this->user;
 	}
 
 	public function __destruct()
