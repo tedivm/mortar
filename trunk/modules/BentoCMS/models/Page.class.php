@@ -30,9 +30,9 @@ class BentoCMSModelPage extends AbstractModel
 
 		if(isset($this->activeRevision))
 		{
-
+			$revision = new PageRevision($this->getId(), $this->activeRevision);
 			if($revision->rawContent != $this->content['rawContent'] ||
-					$revision->filteredContent != $this->content['content']	||
+					$revision->filteredContent != $this->content['filteredContent']	||
 					$revision->title != $this->content['title'])
 			{
 				$revision = new PageRevision($this->getId(), $this->activeRevision);
@@ -49,8 +49,8 @@ class BentoCMSModelPage extends AbstractModel
 
 	protected function saveRevision($revision)
 	{
-		$revision->rawContent = $this->content['content'];
-		$revision->filteredContent = $this->filterContent($this->content['content']);
+		$revision->rawContent = $this->content['rawContent'];
+		$revision->filteredContent = $this->content['filteredContent'];
 		$revision->title = $this->content['title'];
 
 		$user = ActiveUser::getInstance();
@@ -65,7 +65,7 @@ class BentoCMSModelPage extends AbstractModel
 		$revision = new PageRevision($this->getId(), $id);
 //		var_dump($revision);
 		$this->content['title'] = $revision->title;
-		$this->content['content'] = $revision->filteredContent;
+		$this->content['filteredContent'] = $revision->filteredContent;
 		$this->content['rawContent'] = $revision->rawContent;
 
 		//if($this->content['author'] != $revision->author)
@@ -97,6 +97,31 @@ class BentoCMSModelPage extends AbstractModel
 		}
 	}
 
+	public function offsetGet($name)
+	{
+		if($name == 'content')
+		{
+			return $this->content['filteredContent'];
+		}else{
+			return parent::offsetGet($name);
+		}
+	}
+
+	public function offsetSet($name, $value)
+	{
+		if($name == 'content')
+		{
+			$this->content['rawContent'] = $value;
+			return $this->content['filteredContent'] = $this->filterContent($value);
+		}else{
+			return parent::offsetSet($name, $value);
+		}
+	}
+
+	public function offsetExists($name)
+	{
+		return ($name == 'content') ? isset($this->content['filteredContent']) : parent::offsetExists($name);
+	}
 }
 
 
