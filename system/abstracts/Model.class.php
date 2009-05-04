@@ -291,7 +291,7 @@ class AbstractModel implements Model
 	// array functions define content and the actual substance of the class
 	public function offsetGet($name)
 	{
-		return $this->content[$name];
+		return isset($this->content[$name]) ? $this->content[$name] : null;
 	}
 
 	public function offsetSet($name, $value)
