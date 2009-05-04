@@ -64,9 +64,9 @@ require('system/abstracts/action.class.php');
 require('system/classes/Site.class.php');
 
 require('system/classes/modelSupport/actions/Base.class.php');
-require('system/classes/modelSupport/actions/Edit.class.php');
 require('system/classes/modelSupport/actions/Delete.class.php');
 require('system/classes/modelSupport/actions/Add.class.php');
+require('system/classes/modelSupport/actions/Edit.class.php');
 require('system/classes/modelSupport/actions/Read.class.php');
 require('system/interfaces/Model.interface.php');
 require('system/abstracts/Model.class.php');
