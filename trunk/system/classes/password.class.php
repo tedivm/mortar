@@ -12,6 +12,7 @@ class Password
 	// ((salt_length * 2) + 4 + algorithm hash length) <= 192
 	protected $salt_length = 30;
 	protected $cryptoAlgorithm = 'whirlpool';
+	protected $hashDepth = 10000;
 	// whirlpool length is 128
 	// whirlpool is really slow, which is good for a password hash as it makes generating rainbow tables more consuming
 
@@ -65,7 +66,16 @@ class NewPassword extends Password
 		$this->salt_start = ($start) ? $start : substr(md5(uniqid(rand(), true)), 0, $this->salt_length);
 		$this->salt_end =  ($end) ? $end : substr(md5(uniqid(rand(), true)), 0, $this->salt_length);
 
-		$this->hash = hash($this->cryptoAlgorithm, $this->salt_start . $password . $this->salt_end);
+		$hash = $this->salt_start . $password . $this->salt_end;
+
+		if($this->hashDepth < 1)
+			$this->hashDepth = 1;
+
+		for($x = 0; $x < $this->hashDepth; $x++)
+			$hash = hash($this->cryptoAlgorithm, $hash);
+
+		$this->hash = $hash;
+
 		$this->stored = $this->salt_start . '::' . $this->salt_end . '::' . $this->hash;
 	}
 
