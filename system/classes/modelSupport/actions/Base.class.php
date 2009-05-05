@@ -4,6 +4,7 @@ abstract class ModelActionBase implements ActionInterface
 {
 	protected $model;
 	protected $ioHandler;
+	protected $type;
 
 	protected $permissionObject;
 
@@ -19,6 +20,10 @@ abstract class ModelActionBase implements ActionInterface
 
 		$this->model = $identifier;
 		$this->ioHandler = $handler;
+		$this->type = $this->model->getType();
+		$namingInfo = explode('Action', get_class($this));
+		$this->actionName = array_pop($namingInfo);
+		$this->package = array_shift($namingInfo);
 	}
 
 
@@ -46,16 +51,19 @@ abstract class ModelActionBase implements ActionInterface
 	public function checkAuth($action = NULL)
 	{
 		if(!isset($this->permissionObject))
-		{
-			$user = ActiveUser::getInstance();
-			$this->permissionObject = new Permissions($this->model->getLocation(), $user);
-		}
+			$this->setPermissionObject();
 
 		if(!$action)
 			$action = staticHack(get_class($this), 'requiredPermission');
 
 
 		return $this->permissionObject->isAllowed($action, $this->model->getType());
+	}
+
+	protected function setPermissionObject()
+	{
+		$user = ActiveUser::getInstance();
+		$this->permissionObject = new Permissions($this->model->getLocation(), $user);
 	}
 
 	/*

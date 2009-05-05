@@ -1,22 +1,11 @@
 <?php
 
-class ModelActionAdd extends FormActionBase
+class ModelActionAdd  extends ModelActionBase// implements ActionInterface //extends FormActionBase
 {
 	protected $parentModel;
 	protected $model;
-	protected $type;
 
-	public function __construct($argument, $handler)
-	{
-		if(!($argument instanceof Model)){
-			throw new BentoError('No model defined in action.');
-		}
-
-		parent::__construct($argument, $handler);
-		$this->model = $this->argument;
-		$this->type = $this->model->getType();
-		unset($this->argument);
-	}
+	protected $formStatus = false;
 
 	public function logic()
 	{
@@ -32,7 +21,6 @@ class ModelActionAdd extends FormActionBase
 			{
 				$this->formStatus = true;
 			}else{
-				$this->formStatus = false;
 				$this->ioHandler->setStatusCode(400);
 			}
 		}
@@ -69,7 +57,6 @@ class ModelActionAdd extends FormActionBase
 		return $form;
 	}
 
-
 	protected function processInput($input)
 	{
 		$inputNames = array_keys($input);
@@ -97,7 +84,6 @@ class ModelActionAdd extends FormActionBase
 		return $this->model->save();
 	}
 
-
 	protected function getInputGroups($inputNames)
 	{
 		foreach($inputNames as $name)
@@ -114,9 +100,49 @@ class ModelActionAdd extends FormActionBase
 		return $inputGroups;
 	}
 
+	protected function setPermissionObject()
+	{
+		$user = ActiveUser::getInstance();
+		$this->permissionObject = new Permissions($this->model->getLocation()->getParent(), $user);
+	}
+
+	protected function setHeaders()
+	{
+
+	}
+
 	public function viewAdmin()
 	{
-		return $this->form->makeDisplay();
+		if($this->form->wasSubmitted())
+		{
+			if($this->formStatus === true)
+			{
+
+				/*
+				 where should i go after post? I need to redirect somewhere to prevent duplicate form submissions
+				 when people use the back button.
+
+				 Current options-
+
+				 	1. back to this page, with a success message
+				 	2. to the edit page, also with a success message
+				 	*3. to the 'read' page, which isn't really defined yet for the admin side of things
+				*/
+
+				$locationId = $this->model->getLocation()->getId();
+				$url = new Url();
+				$url->locationId = $locationId;
+				$url->format = 'Admin';
+				$url->action = 'Read';
+				$this->ioHandler->addHeader('Location', (string) $url);
+
+
+			}else{
+				return $this->makeDisplay();
+			}
+		}else{
+			return $this->form->makeDisplay();
+		}
 	}
 
 }
