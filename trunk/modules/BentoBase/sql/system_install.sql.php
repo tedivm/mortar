@@ -89,7 +89,8 @@ CREATE TABLE locations
 
 /* Add Indexes for: locations */
 
-CREATE INDEX locations_parent_name_Idx ON locations (parent, name, location_id);
+CREATE UNIQUE INDEX locations_parent_name_Idx ON locations (parent, name);
+CREATE INDEX locations_parent_name_id__Idx ON locations (parent, name, location_id);
 CREATE INDEX locations_parent_resourceType_Idx ON locations (parent, resourceType, location_id);
 CREATE INDEX locations_resourceType_resourceId ON locations (resourceType, resourceId, location_id);
 CREATE INDEX locations_creationDate ON locations (creationDate, location_id);
