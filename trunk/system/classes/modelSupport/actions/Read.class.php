@@ -11,7 +11,7 @@ class ModelActionRead extends ModelActionBase
 
 	public function viewAdmin()
 	{
-
+		return 'Model Title: ' . $this->model['title'];
 	}
 
 	public function viewHtml()
