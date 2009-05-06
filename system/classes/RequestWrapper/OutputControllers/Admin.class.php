@@ -216,7 +216,7 @@ class AdminControllerResourceFilterNavigation
 				$newLinks = array();
 				foreach($links as $link)
 				{
-					if($this->checkLinkPermission($link['url'], $userId))
+					if($link['url']->checkPermission($userId))
 						$newLinks[] = $link;
 				}
 				if(count($newLinks) > 0)
@@ -228,7 +228,7 @@ class AdminControllerResourceFilterNavigation
 
 	protected function checkLinkPermission($url, $userId)
 	{
-
+		return $url->checkLinkPermission($userId);
 		if(isset($url->locationId))
 		{
 			$action = (isset($url->action)) ? $url->action : 'Read';
@@ -262,6 +262,7 @@ class AdminControllerResourceFilterNavigation
 		}
 
 		// check permissions
+		/*
 		if(isset($link['permissionSet']))
 		{
 			if(isset($link['location']))
@@ -281,7 +282,9 @@ class AdminControllerResourceFilterNavigation
 				}
 			}
 		}
+		*/
 		return true;
+
 	}
 
 }
