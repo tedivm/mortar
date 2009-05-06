@@ -169,7 +169,7 @@ class Url
 
 	public function __get($name)
 	{
-		return $this->attributes[$name];
+		return isset($this->attributes[$name]) ? $this->attributes[$name] : null;
 	}
 
 	public function __set($name, $value)
@@ -204,6 +204,43 @@ class Url
 	{
 		return array('attributes');
 	}
+
+	public function checkPermission($userId)
+	{
+		if(isset($this->attributes['locationId']))
+		{
+			$action = (isset($this->attributes['action'])) ? $this->attributes['action'] : 'Read';
+
+			$location = new Location($this->attributes['locationId']);
+			$resource = $location->getResource();
+			$actionName = $resource->getAction($action);
+			$requiredPermission = staticHack($actionName, 'requiredPermission');
+
+			$permission = new Permissions($this->attributes['locationId'], $userId);
+			return $permission->isAllowed($requiredPermission);
+
+		}elseif(isset($this->attributes['module'])){
+
+			$permissionList = new PermissionLists($userId);
+			$actionName = importFromModule($this->attributes['action'], $this->attributes['module'], 'action');
+			$permission = staticHack($actionName, 'requiredPermission');
+			$permissionType = staticHack($actionName, 'requiredPermissionType');
+
+			if(!$permission)
+				$permission = 'execute';
+
+			if(!$permissionType)
+				$permissionType = 'base';
+
+			if(!$permissionList->checkAction($permissionType, $permission))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+
 }
 
 ?>
