@@ -9,11 +9,14 @@ class BentoBaseActionInstall implements ActionInterface //extends Action
 	protected $error = array();
 	protected $installed = false;
 	protected $dbConnection;
+
+	protected $ioHandler;
+
 	public $subtitle = '';
 
 	public function __construct($identifier, $handler)
 	{
-
+		$this->ioHandler = $handler;
 	}
 
 	public function start()
@@ -72,8 +75,11 @@ class BentoBaseActionInstall implements ActionInterface //extends Action
 		{
 			$output .= file_get_contents($modulePath . 'templates/installationComplete.template.php');
 			$this->subtitle = 'Installation Complete';
-		}elseif($this->form){
+			$url = new Url();
+			$url->format = 'admin';
+			$this->ioHandler->addHeader('Location', (string) $url);
 
+		}elseif($this->form){
 			$output .= $this->form->makeDisplay();
 		}
 
