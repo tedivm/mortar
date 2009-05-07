@@ -85,8 +85,8 @@ class AdminControllerResourceFilterNavigation
 		$tabs = $this->loadLinks();
 		$activeTab = isset($action->adminSettings['tab']) ? $action->adminSettings['tab'] : 'Main';
 		$sidebar = new HtmlObject('div');
-		$sidebar->id = 'BB_left_sidebar';
-		$sidebar->addClass('BB_sidebar');
+		$sidebar->id = 'left_sidebar';
+		$sidebar->addClass('sidebar');
 		$activeNav = $tabs[$activeTab];
 		if(is_array($activeNav))
 			foreach($activeNav as $container => $links)
@@ -94,7 +94,7 @@ class AdminControllerResourceFilterNavigation
 			if(count($links) > 0)
 			{
 				$div = $sidebar->insertNewHtmlObject('div');
-				$div->addClass('BB_sidebar_menu');
+				$div->addClass('sidebar_menu');
 
 
 				if($container != 'StandAlone')
@@ -107,7 +107,7 @@ class AdminControllerResourceFilterNavigation
 				{
 					$a = $link['url']->getLink($link['label']);
 					$li = $ul->insertNewHtmlObject('li')
-						->addClass('BB_sidebar_menu')->
+						->addClass('sidebar_menu')->
 						wrapAround($a);
 				}
 				$li->addClass('last');
