@@ -55,6 +55,8 @@ class Location
 	protected $owner;
 	protected $group;
 
+	protected $reservedNames = array('admin', 'modules', 'rest', 'users', 'system', 'resources', 'xml', 'json', 'html');
+
 	public function __construct($id = null)
 	{
 		if(!is_null($id) && !is_numeric($id))
@@ -202,6 +204,10 @@ class Location
 
 	public function setName($name)
 	{
+		if(in_array(strtolower($name), $this->reservedNames))
+			throw new BentoError('Attempted to name location a reserved name: ' . $name);
+
+
 		$this->name = str_replace(' ', '_', $name);
 	}
 
