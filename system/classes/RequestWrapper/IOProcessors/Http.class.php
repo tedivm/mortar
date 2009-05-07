@@ -266,7 +266,7 @@ class SessionObserver implements SplObserver
 			$_SESSION['userAgent'] = $_SERVER['HTTP_USER_AGENT'];
 
 		// there's a one percent of the session id changing to help prevent session theft
-		if(($_SESSION['idExpiration'] < time()) || mt_rand(1, 100) == 1)
+		if((isset($_SESSION['idExpiration']) < time()) || mt_rand(1, 100) == 1)
 		{
 			//echo 1112;
 			//unset($_SESSION['user_id']);
