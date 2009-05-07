@@ -60,13 +60,13 @@ border-right: solid 3px #659EC7;
 text-align: center;
 }
 
-.BB_sidebar {
+.sidebar {
 width: 140px;
 border: solid 3px #659EC7;
 margin: 0 7px;
 }
 
-.BB_sidebar_menu h2 {
+.sidebar_menu h2 {
 width: 100%;
 background: #659EC7;
 color: #fff;
@@ -75,13 +75,13 @@ margin: 0;
 padding; 0;
 }
 
-.BB_sidebar_menu ul {
+.sidebar_menu ul {
 list-style: none;
 margin: 0;
 padding: 0;
 }
 
-.BB_sidebar_menu ul li {
+.sidebar_menu ul li {
 height: 1.5em;
 border-top: solid 3px #659EC7;
 text-align: center;
@@ -92,7 +92,7 @@ background: #659EC7;
 color: #fff;
 }
 
-#BB_left_sidebar {
+#left_sidebar {
 float: left;
 }
 
