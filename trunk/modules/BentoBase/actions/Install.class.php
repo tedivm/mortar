@@ -73,10 +73,26 @@ class BentoBaseActionInstall implements ActionInterface //extends Action
 
 		if($this->installed)
 		{
+
+			$input = Input::getInput();
+			$cookieName = $input['siteName'] . 'Session';
+			session_name($cookieName);
+			session_set_cookie_params(0, '/', null, isset($_SERVER["HTTPS"]), true);
+			session_start();
+			$_SESSION['user_id'] = 1;
+			$_SESSION['IPaddress'] = $_SERVER['REMOTE_ADDR'];
+			$_SESSION['userAgent'] = $_SERVER['HTTP_USER_AGENT'];
+			$_SESSION['idExpiration'] = time() + (300);
+			$_SESSION['nonce'] = md5(1 . START_TIME);
+
+
 			$output .= file_get_contents($modulePath . 'templates/installationComplete.template.php');
 			$this->subtitle = 'Installation Complete';
 			$url = new Url();
 			$url->format = 'admin';
+
+
+
 			$this->ioHandler->addHeader('Location', (string) $url);
 
 		}elseif($this->form){
