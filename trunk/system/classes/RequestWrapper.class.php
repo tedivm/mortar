@@ -217,16 +217,9 @@ class RequestWrapper
 					throw new BentoError('Unable to load action for module ' . $query['module']);
 
 
-				$className = $actionInfo['className'];
-				$path = $actionInfo['path'];
 				$argument = '';
+				$className = importFromModule($actionInfo['name'], $query['module'], 'action', true);
 
-				if(!class_exists($className, false))
-				{
-					if(!include($actionInfo['path']) || !class_exists($className, false))
-						throw new ResourceNotFoundError('Unable to load action class ' . $className
-															. ' from file: ' . $actionInfo['path']);
-				}
 
 				return array('className' => $className, 'argument' => $argument);
 			}
