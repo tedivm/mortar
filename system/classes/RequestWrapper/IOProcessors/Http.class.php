@@ -12,6 +12,7 @@ class IOProcessorHttp extends IOProcessorCli
 	static $compressionLevel = 6;
 	static $compressionMinimum = 128; // minumum number of charactors for deflate/gzip to run
 
+	static $cookieTimeLimit = 0;
 
 	protected function setEnvironment()
 	{
@@ -40,7 +41,7 @@ class IOProcessorHttp extends IOProcessorCli
 			$cookieName = $siteLocation->getName() . 'Session';
 
 			session_name($cookieName);
-			session_set_cookie_params(0, '/', null, isset($_SERVER["HTTPS"]), true);
+			session_set_cookie_params(self::$cookieTimeLimit, '/', null, isset($_SERVER["HTTPS"]), true);
 			session_start();
 			$sessionObserver = new SessionObserver();
 			$user = ActiveUser::getInstance();
@@ -257,8 +258,9 @@ class SessionObserver implements SplObserver
 		$_SESSION['user_id'] = $this->userId;
 		// This token is used by forms to prevent cross site forgery attempts
 		if(!isset($_SESSION['nonce']))
+		{
 			$_SESSION['nonce'] = md5($this->userId . START_TIME);
-
+		}
 		if(!isset($_SESSION['IPaddress']) || $_SESSION['IPaddress'] != $_SERVER['REMOTE_ADDR'])
 			$_SESSION['IPaddress'] = $_SERVER['REMOTE_ADDR'];
 
@@ -266,44 +268,36 @@ class SessionObserver implements SplObserver
 			$_SESSION['userAgent'] = $_SERVER['HTTP_USER_AGENT'];
 
 		// there's a one percent of the session id changing to help prevent session theft
-		if((isset($_SESSION['idExpiration']) < time()) || mt_rand(1, 100) == 1)
+
+		if(isset($_SESSION['OBSOLETE']))
 		{
-			//echo 1112;
-			//unset($_SESSION['user_id']);
+			if(!isset($_SESSION['idExpiration']) || $_SESSION['idExpiration'] < time())
+			{
+				$_SESSION = array();
+				session_destroy();
+			}
+		}elseif((!isset($_SESSION['idExpiration']) || $_SESSION['idExpiration'] < time()) || mt_rand(1, 100) == 1){
 
-
-			$_SESSION['user_id'] = $this->userId;
-			$_SESSION['idExpiration'] = time() + (300);
-			session_regenerate_id(true);
-
-
-		//	session_write_close(); // save stale session (just changing its id without saving would keep the old user id
-		//	session_start();
 			// Set current session to expire in x seconds
-		//	$_SESSION['OBSOLETE'] = true;
-		//	$_SESSION['EXPIRES'] = time() + $this->obsoleteTime;
+			$_SESSION['OBSOLETE'] = true;
+			$_SESSION['EXPIRES'] = time() + $this->obsoleteTime;
 
-
-			//$oldSession = session_id(); // get stale session id
-		//	session_write_close(); // save stale session (just changing its id without saving would keep the old user id
-			// session_id($oldSession); // reopen old session
-			//session_set_cookie_params( 0, null, null, $_SERVER["HTTPS"]);
-		//	session_start();
 
 			// Create new session without destroying the old one
-		//	session_regenerate_id(true);
+			session_regenerate_id(false);
 
 			// Grab current session ID and close both sessions to allow other scripts to use them
-//			$newSession = session_id();
-//			session_write_close();
+			$newSession = session_id();
+			session_write_close();
 
 			// Set session ID to the new one, and start it back up again
-//			session_id($newSession);
-//			session_start();
+			session_id($newSession);
+			session_start();
 
+			$_SESSION['idExpiration'] = time() + (300);
 			// Don't want this one to expire
-			//unset($_SESSION['OBSOLETE']);
-			//unset($_SESSION['EXPIRES']);
+			unset($_SESSION['OBSOLETE']);
+			unset($_SESSION['EXPIRES']);
 		}
 	}
 
