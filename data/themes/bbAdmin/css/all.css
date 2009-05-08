@@ -68,6 +68,7 @@ margin: 0 7px;
 
 .sidebar_menu h2 {
 width: 100%;
+font-size: 1.2em;
 background: #659EC7;
 color: #fff;
 text-align: center;
@@ -92,7 +93,7 @@ background: #659EC7;
 color: #fff;
 }
 
-#left_sidebar {
+#left_sidebar_menu {
 float: left;
 }
 
