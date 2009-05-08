@@ -4,8 +4,6 @@ class AdminOutputController extends AbstractOutputController
 {
 	protected function start()
 	{
-
-
 		$page = ActivePage::getInstance();
 		$page->addRegion('title', 'BentoBase Admin');
 
@@ -84,43 +82,37 @@ class AdminControllerResourceFilterNavigation
 		$action = $adminController->getAction();
 		$tabs = $this->loadLinks();
 		$activeTab = isset($action->adminSettings['tab']) ? $action->adminSettings['tab'] : 'Main';
-		$sidebar = new HtmlObject('div');
-		$sidebar->id = 'left_sidebar';
-		$sidebar->addClass('sidebar');
-		$activeNav = $tabs[$activeTab];
+
+
+		$newNav = new NavigationMenu('left');
+
+
+
+		$newNav->setMenu('menuName');
+		$newNav->setMenuLabel('menuLabel');
+		$newNav->addItem('name', 'url', 'label');
+
+
+		$activeNav = isset($tabs[$activeTab]) ? $tabs[$activeTab] : 'main';
+
+		$navbar = new NavigationMenu('left');
 		if(is_array($activeNav))
 			foreach($activeNav as $container => $links)
 		{
 			if(count($links) > 0)
 			{
-				$div = $sidebar->insertNewHtmlObject('div');
-				$div->addClass('sidebar_menu');
-
-
-				if($container != 'StandAlone')
-					$div->insertNewHtmlObject('h2')->
-						wrapAround($container);
-
-				$ul = $div->insertNewHtmlObject('ul');
+				$navbar->setMenu($container);
+				$navbar->setMenuLabel($container);
 
 				foreach($links as $link)
 				{
-					$a = $link['url']->getLink($link['label']);
-					$li = $ul->insertNewHtmlObject('li')
-						->addClass('sidebar_menu')->
-						wrapAround($a);
+					$navbar->addItem(preg_replace('[^A-Za-z0-9]', '', $link['label']), $link['url'], $link['label']);
 				}
-				$li->addClass('last');
 			}
 		}
+
 		$page = $adminController->getResource();
-		$page['navbar'] = (string) $sidebar;
-
-
-
-
-
-
+		$page['navbar'] = $navbar->makeDisplay();
 
 
 		$tabUl = new HtmlObject('ul');
@@ -225,68 +217,6 @@ class AdminControllerResourceFilterNavigation
 		}
 		return $processedLinks;
 	}
-
-	protected function checkLinkPermission($url, $userId)
-	{
-		return $url->checkLinkPermission($userId);
-		if(isset($url->locationId))
-		{
-			$action = (isset($url->action)) ? $url->action : 'Read';
-
-			$location = new Location($url->locationId);
-			$resource = $location->getResource();
-			$actionName = $resource->getAction($action);
-			$requiredPermission = staticHack($actionName, 'requiredPermission');
-
-			$permission = new Permissions($url->locationId, $userId);
-			return $permission->isAllowed($requiredPermission);
-
-		}elseif(isset($url->module)){
-			$permissionList = new PermissionLists($userId);
-
-			$actionName = importFromModule($url->action, $url->module, 'action');
-
-			$permission = staticHack($actionName, 'requiredPermission');
-			$permissionType = staticHack($actionName, 'requiredPermissionType');
-
-			if(!$permission)
-				$permission = 'execute';
-
-			if(!$permissionType)
-				$permissionType = 'base';
-
-			if(!$permissionList->checkAction($permissionType, $permission))
-			{
-				return false;
-			}
-		}
-
-		// check permissions
-		/*
-		if(isset($link['permissionSet']))
-		{
-			if(isset($link['location']))
-			{
-				$permission = new Permissions($link['location'], $userId);
-				if(!$permission->isAllowed($link['permissionSet']['action'],
-												$link['permissionSet']['type']))
-				{
-					return false;
-				}
-			}else{
-				$permissionList = new PermissionLists($userId);
-				if(!$permissionList->checkAction($link['permissionSet']['type'],
-												$link['permissionSet']['action']))
-				{
-					return false;
-				}
-			}
-		}
-		*/
-		return true;
-
-	}
-
 }
 
 
