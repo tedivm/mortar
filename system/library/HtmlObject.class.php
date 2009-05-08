@@ -8,6 +8,7 @@ class HtmlObject
 	public $id;
 	public $classes = array();
 	public $tabLevel = 1;
+	public $tabSpace = '  ';
 
 	protected $close = true;
 	protected $encloses = array();
@@ -98,11 +99,14 @@ class HtmlObject
 
 	public function __toString()
 	{
-		$tabSpaces = '   ';
-		$tab = str_repeat($tabSpaces, $this->tabLevel);
+		$tab = str_repeat($this->tabSpace, $this->tabLevel);
+
 		$string = PHP_EOL . $tab .'<' . $this->type;
 
-		$string .= ($this->id) ? ' id="' . $this->id . '"': '';
+		if($this->type == 'div')
+			$string = PHP_EOL . $string;
+
+	//	$string .= ($this->id) ? ' id="' . $this->id . '"': '';
 		$classString = '';
 		foreach($this->classes as $class)
 		{
@@ -143,6 +147,8 @@ class HtmlObject
 				$string .= $tab;
 
 			$string .= '</' . $this->type . '>';
+			if($this->type == 'div')
+				$string .= '<!-- #'. $this->properties['id'] .' -->';
 
 		}
 		$string .= PHP_EOL;
