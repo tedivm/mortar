@@ -458,8 +458,10 @@ class Form
 
 				switch ($input->type)
 				{
-
 					case 'hidden':
+						if($input->name == 'nonce')
+							continue;
+
 					case 'password':
 						$processedInput[$input->name] = $input->filter($inputHandler[$input->name]);
 						continue;
