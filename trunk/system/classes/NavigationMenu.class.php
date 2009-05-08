@@ -47,7 +47,7 @@ class NavigationMenu
 		foreach($this->subMenus as $menuName => $menuItems)
 		{
 			$wrapperDiv = new HtmlObject('div');
-			$wrapperId = $baseId . $menuName;
+			$wrapperId = $baseId . '_' . $menuName;
 			$wrapperDiv->property('id', $wrapperId);
 			$wrapperDiv->addClass('sidebar_menu');
 			if(isset($this->subMenuLabels[$menuName]))
@@ -58,6 +58,8 @@ class NavigationMenu
 			}
 
 			$menuList = $wrapperDiv->insertNewHtmlObject('ul');
+			$menuListId = $wrapperId . '_list';
+			$menuList->property('id', $menuListId);
 			$containsItem = false;
 			foreach($menuItems as $name => $item)
 			{
@@ -73,7 +75,7 @@ class NavigationMenu
 
 					$menuItem = $menuList->insertNewHtmlObject('li');
 
-					$menuItem->property('id', $wrapperId . '_' . $name)->
+					$menuItem->property('id', $menuListId . '_' . $name)->
 											addClass('sidebar_menu');
 
 					$menuItem->insertNewHtmlObject('a')->
