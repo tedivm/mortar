@@ -62,8 +62,8 @@ class Cache
 			if(self::$handlerClass == '')
 			{
 				$config = Config::getInstance();
-				self::$handlerClass = (isset(self::$handlers[$config['system']['cache']]))
-										? self::$handlers[$config['system']['cache']]
+				self::$handlerClass = (isset(self::$handlers[$config['system']['cacheHandler']]))
+										? self::$handlers[$config['system']['cacheHandler']]
 										: self::$handlers['FileSystem'];
 			}
 
@@ -211,7 +211,7 @@ interface cacheHandler
 
 	public function storeData($data, $expiration);
 
-	static function clear($key = '');
+	static function clear($key = null);
 
 }
 
@@ -344,8 +344,10 @@ class cacheHandlerFilesystem implements cacheHandler
 		return $path;
 	}
 
-	static public function clear($key = '')
+	static public function clear($key = null)
 	{
+		if(is_null($key))
+			$key = '';
 
 		$path = self::makePath($key);
 
@@ -428,7 +430,7 @@ class cacheHandlerSqlite implements cacheHandler
 
 	static function clear($key = null)
 	{
-		if(is_null($key))
+		if(is_null($key) || (is_array($key) && count($key) == 0))
 		{
 			$info = InfoRegistry::getInstance();
 			$filePath = $info->Configuration['path']['temp'] . 'cacheDatabase.sqlite';
@@ -482,6 +484,7 @@ class cacheHandlerSqlite implements cacheHandler
 
 	static function makeSqlKey($key)
 	{
+		$pathPiece = '';
 		foreach($key as $rawPathPiece)
 		{
 			$pathPiece .= sqlite_escape_string($rawPathPiece) . ':::';

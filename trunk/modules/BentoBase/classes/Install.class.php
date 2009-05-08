@@ -152,7 +152,7 @@ class BentoBaseInstaller
 
 				$configFile->set('url', 'modRewrite', $url['modRewrite']);
 
-				$configFile->set('system', 'handler', $cache);
+				$configFile->set('system', 'cacheHandler', $cache);
 				$configFile->set('system', 'timezone', $imezone);
 				$configFile->write();
 
