@@ -176,8 +176,9 @@ class BentoBaseInstaller
 			$directory = $config['path']['base'] . 'data/configuration/';
 			$dbIniFile = new IniFile($directory . 'databases.php');
 
-			if(!$input['DBhost'] || !$input['DBusername'] || !$input['DBpassword'] || !$input['DBname'])
-				throw new Exception('No Database information', 1);
+			if(!isset($input['DBhost']) || !isset($input['DBusername']) || !isset($input['DBpassword'])
+				|| !isset($input['DBname']))
+					throw new Exception('No Database information', 1);
 
 			if($connection = new mysqli($input['DBhost'], $input['DBusername'],
 											$input['DBpassword'], $input['DBname']))
@@ -188,18 +189,22 @@ class BentoBaseInstaller
 				$dbIniFile->set('default', 'dbname', $input['DBname']);
 				$this->dbConnection = $connection;
 			}else{
-				throw new Exception('Unable to select database', 2);
+				throw new Exception('Unable to select database with main user', 2);
 			}
 
-			if(($input['DBROhost'] && $input['DBROusername'] && $input['DBROpassword'] && $input['DBROname'])
-				&& ($ROconnection = mysqli_connect($input['DBROhost'], $input['DBROusername'],
-												 $input['DBROpassword'], $input['DBROname'])))
+			if((isset($input['DBROhost']) && isset($input['DBROusername']) && isset($input['DBROpassword'])
+							&& isset($input['DBROname'])))
 			{
-				$dbIniFile->set('default_read_only', 'username', $input['DBROusername']);
-				$dbIniFile->set('default_read_only', 'password', $input['DBROpassword']);
-				$dbIniFile->set('default_read_only', 'host', $input['DBROhost']);
-				$dbIniFile->set('default_read_only', 'dbname', $input['DBROname']);
-
+				if($ROconnection = mysqli_connect($input['DBROhost'], $input['DBROusername'],
+									 $input['DBROpassword'], $input['DBROname']))
+				{
+					$dbIniFile->set('default_read_only', 'username', $input['DBROusername']);
+					$dbIniFile->set('default_read_only', 'password', $input['DBROpassword']);
+					$dbIniFile->set('default_read_only', 'host', $input['DBROhost']);
+					$dbIniFile->set('default_read_only', 'dbname', $input['DBROname']);
+				}else{
+					throw new Exception('Unable to select database with read only user', 4);
+				}
 			}else{
 				$dbIniFile->set('default_read_only', 'username', $input['DBusername']);
 				$dbIniFile->set('default_read_only', 'password', $input['DBpassword']);
@@ -216,8 +221,14 @@ class BentoBaseInstaller
 					$message = 'Please fill out all of the database information.';
 					break;
 				case 2:
-					$message = 'Please make sure your database name is correct.';
+					$message = 'There was an error with the primary database credentials supplied.';
 					break;
+
+				case 4:
+					$message = 'There was an error with the read only database credentials supplied.';
+					break;
+
+
 				case 3:
 					$message = 'Please make sure your database credentials and server are correct.';
 					break;

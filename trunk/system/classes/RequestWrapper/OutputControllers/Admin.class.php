@@ -227,17 +227,16 @@ class AdminControllerResourceFilterInstallerNavigation
 	{
 		$page = $adminController->getResource();
 		$page['navbar'] = '
-   <div id="BB_left_sidebar" class="BB_sidebar">
-      <div class="BB_sidebar_menu">
+   <div id="left_sidebar_menu" class="sidebar">
+      <div class="sidebar_menu">
          <h2>Menu</h2>
          <ul>
-            <li class="BB_sidebar_menu last">
+            <li class="sidebar_menu last">
                <a href="#">Menu Item</a>
             </li>
          </ul>
       </div>
    </div>
-
 '; // $adminNav->getLinks($tab);
 
 
