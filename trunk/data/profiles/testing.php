@@ -7,4 +7,5 @@ define('DISABLECACHE', false);
 define('DEPRECIATION_WARNINGS', false);
 define('OUTPUT_COMPRESSION', true);
 define('OUTPUT_COMPRESSION_HEADERS', true);
+define('CONCISE_HTML', false);
 ?>
