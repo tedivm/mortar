@@ -1,38 +1,89 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
 
-/*
-
-This autoloader is full of fail, and will be replaced when php 5.3 comes out and we finally get namespaces
-
-*/
-
+/**
+ * This autoloader sucks. This is the first thing against the wall when php 5.3 comes out
+ *
+ * @package MainClasses
+ */
 class AutoLoader
 {
-	static protected $config;
-	static protected $activeModule;
+	/**
+	 * List of modules to check for classes
+	 *
+	 * @access protected
+	 * @see import()
+	 * @static
+	 * @var array
+	 */
 	static protected $packages = array();
 
-	static function import($package)
+	/**
+	 * Add a new module to the list of modules checked when the autoloader hits
+	 *
+	 * @access public
+	 * @see $packages, loadBentoConfigPath()
+	 * @static
+	 * @param $string $module
+	 */
+	static public function import($module)
 	{
-		if(!in_array($package, self::$packages))
-			self::$packages[] = $package;
+		if(!in_array($module, self::$packages))
+			self::$packages[] = $module;
 	}
 
+	/**
+	 * Attempt to load the class from the library.
+	 *
+	 * @access public
+	 * @see loadBentoConfigPath()
+	 * @static
+	 * @param string $className
+	 */
 	static public function loadBentoLibrary($className)
 	{
 		self::loadBentoConfigPath('library', $className);
 	}
 
+	/**
+	 * Attempt to load the class from the abstract classes.
+	 *
+	 * @access public
+	 * @see loadBentoConfigPath()
+	 * @static
+	 * @param string $className
+	 */
 	static public function loadBentoAbstract($className)
 	{
 		self::loadBentoConfigPath('abstracts', $className);
 	}
 
+	/**
+	 * Attempt to load the class from the MainClasses group.
+	 *
+	 * @access public
+	 * @see loadBentoConfigPath()
+	 * @static
+	 * @param string $className
+	 */
 	static public function loadBentoClasses($className)
 	{
 		self::loadBentoConfigPath('mainclasses', $className);
 	}
 
+	/**
+	 * Attempt to load the class from the library.
+	 *
+	 * @access public
+	 * @see import, loadBentoConfigPath(), self::packages
+	 * @static
+	 * @param string $className
+	 */
 	static public function loadActiveModule($className)
 	{
 		$packages = self::$packages;
@@ -71,6 +122,27 @@ class AutoLoader
 		}//foreach(self::$packages as $package)
 	}
 
+	/**
+	 * Attempt to load the interface from the interface group.
+	 *
+	 * @access public
+	 * @see import, loadBentoConfigPath(), self::packages
+	 * @static
+	 * @param string $className
+	 */
+	static public function loadBentoInterface($className)
+	{
+		$config = Config::getInstance();
+		self::checkDirectory($config['path']['interfaces'] . $className . '.interface.php', $className);
+	}
+
+	/**
+	 * This method is called last by the autoloader to throw an error using the system exceptions.
+	 *
+	 * @access public
+	 * @static
+	 * @param string $className
+	 */
 	static public function loadError($className)
 	{
 		try{
@@ -80,28 +152,32 @@ class AutoLoader
 		}
 	}
 
+	/**
+	 * This method passes requests from the various 'loadBento' classes to the checkDirectory method
+	 *
+	 * @access protected
+	 * @static
+	 * @param string $type
+	 * @param string $className
+	 */
 	static protected function loadBentoConfigPath($type, $className)
 	{
-		if(!isset(self::$config))
-			self::$config = Config::getInstance();
-
-		self::checkDirectory(self::$config['path'][$type] . $className . '.class.php', $className);
-	}
-
-	static public function loadBentoInterface($className)
-	{
-		if(!isset(self::$config))
-			self::$config = Config::getInstance();
-
-
-		self::checkDirectory(self::$config['path']['interfaces'] . $className . '.interface.php', $className);
+		$config = Config::getInstance();
+		self::checkDirectory($config['path'][$type] . $className . '.class.php', $className);
 	}
 
 
-
+	/**
+	 * Checks a directory to see if it contains a class
+	 *
+	 * @access protected
+	 * @static
+	 * @param string $directory
+	 * @param string $classname
+	 * @return bool
+	 */
 	static protected function checkDirectory($directory, $classname)
 	{
-
 		try{
 			if(is_readable($directory))
 			{

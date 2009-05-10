@@ -2,48 +2,61 @@
 /**
  * BentoBase
  *
- * A framework for developing modular applications.
- *
- * @package		BentoBase
- * @author		Robert Hafner
- * @copyright	Copyright (c) 2007, Robert Hafner
- * @license		http://www.mozilla.org/MPL/
- * @link		http://www.bentobase.com
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
  */
 
-
-
 /**
- * Config Class
+ * System configuration class
  *
- * This class stores all of the configuation variables from main_config.php
- * and also loads the variables from the URL. This class is a singleton, so
- * it needs to be initialized through GetInstance. It can be accessed as an array,
- * with the array key corrosponding to a config variable.
+ * This class loads various system configuration values from configuration.ini file. Its also a singleton
  *
- * @package		Bento Base
- * @subpackage	Main_Classes
- * @category	Configuration
- * @author		Robert Hafner
+ * @package MainClasses
  */
 class Config implements ArrayAccess
 {
-	// $instance holds a single instance of the object
 
+	/**
+	 * Contains the primary instance of the config class
+	 *
+	 * @access public
+	 * @static
+	 * @var Config
+	 */
 	static $instance;
+
+	/**
+	 * This associative, multidemensional array contains the values from the configuration.ini file
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $config = array();
+
+	/**
+	 * In the event of an error loading the config file, this value is set to true
+	 *
+	 * @access public
+	 * @var bool
+	 */
 	public $error = false;
 
 
 	/**
-	 * Private constuctor, can only be called through GetInstance
+	 * The constructor has to be locked down to keep this a singleton
 	 *
+	 * @access private
 	 */
 	private function __construct()
 	{
 		$this->reset();
 	}
 
+	/**
+	 * This method resets the configuration variables and reloads the configuration.ini file
+	 *
+	 * @access public
+	 */
 	public function reset()
 	{
 		$this->config = array();
@@ -78,6 +91,8 @@ class Config implements ArrayAccess
 	/**
 	 * Returns the stored instance of the Config object. If no object is stored, it will create it
 	 *
+	 * @access public
+	 * @static
 	 * @return Config
 	 */
 	public static function getInstance()
@@ -89,12 +104,11 @@ class Config implements ArrayAccess
 		return self::$instance;
 	}
 
-
 	/**
 	 * Takes in a key and returns the associated value.
 	 *
-	 * @param mixed $key
-	 * @return mixed result can be any type of variable.
+	 * @param string $key
+	 * @return string|array
 	 */
 	public function setting($key)
 	{
@@ -105,24 +119,27 @@ class Config implements ArrayAccess
 	/**
 	 * Allows you to change a setting in the Config Object
 	 *
+	 * This class is primarily needed due to a quirk in the way php handles (or doesn't handle) the ArrayAccess object
+	 *
 	 * @param string $key
-	 * @param mixed $value
-	 * @return true
+	 * @param string $value
 	 */
-	public function change_setting($key, $value)
+	public function changeSetting($key, $value)
 	{
 		$this->config[(string) $key] = $value;
-		return true;
 	}
 
 
+	/**
+	 * This function is primarily for the installer. It sets default values to bootstrap the system
+	 *
+	 * @access public
+	 * @internal
+	 */
 	public function buildFromBase()
 	{
-
-
 		if(is_dir(BASE_PATH))
 			$this->config['path']['base'] = BASE_PATH ;
-
 
 		if(is_dir(BASE_PATH . 'system/engines/'))
 			$this->config['path']['engines'] = BASE_PATH . 'system/engines/';
@@ -136,14 +153,8 @@ class Config implements ArrayAccess
 		if(is_dir(BASE_PATH . 'modules/'))
 			$this->config['path']['modules'] = BASE_PATH . 'modules/';
 
-
 		if(is_dir(BASE_PATH . 'javascript/'))
 			$this->config['path']['javascript'] = BASE_PATH . 'javascript/';
-
-
-
-
-
 
 		$this->config['url']['modules'] = 'modules/';
 
@@ -156,8 +167,6 @@ class Config implements ArrayAccess
 		$this->config['url']['theme'] = 'data/themes/';
 
 		$this->config['url']['javascript'] = 'javascript/';
-
-
 	}
 
 
@@ -167,9 +176,7 @@ class Config implements ArrayAccess
 		{
 			return true;
 		}
-
 		return false;
-
 	}
 
 	public function offsetGet($offset)
@@ -177,7 +184,6 @@ class Config implements ArrayAccess
 		if(isset($this->config[$offset]))
 			return $this->config[$offset];
 	}
-
 
 	public function offsetSet($key, $value)
 	{
