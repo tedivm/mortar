@@ -149,7 +149,10 @@ class AdminControllerResourceFilterNavigation
 		$cache = new Cache('admin', 'navigation', 'rawLinks');
 		$links = $cache->getData();
 
-		$hook = new Hook('system', 'adminInterface', 'navigation');
+
+		$hook = new Hook();
+		$hook->loadPlugins('system', 'adminInterface', 'navigation');
+//		$hook = new Hook('system', 'adminInterface', 'navigation');
 		$tabResults = $hook->getTabs();
 
 		$tabs = call_user_func_array('array_merge_recursive', $tabResults);

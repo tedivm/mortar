@@ -2,28 +2,8 @@
 
 class Hook
 {
-	protected $realm;
-	protected $category;
-	protected $name;
 	protected $plugins;
-
 	protected $interfaces = array();
-
-	public function __construct($realm, $category, $name)
-	{
-		if(!isset($realm))
-			throw new TypeMismatch(array('String or Location', $realm));
-
-		if(!isset($category))
-			throw new TypeMismatch(array('String', $category));
-
-		if(!isset($name))
-			throw new TypeMismatch(array('String', $name));
-
-		$this->realm = $realm;
-		$this->category = $category;
-		$this->name = $name;
-	}
 
 	public function enforceInterface($interface)
 	{
@@ -41,11 +21,20 @@ class Hook
 		return $this->plugins;
 	}
 
-	protected function load()
+	public  function loadPlugins($realm, $category, $name)
 	{
-		$realm = ($this->realm instanceof Location) ? 'Resource' . $this->realm->getType() : $this->realm;
+		if(!isset($realm))
+			throw new TypeMismatch(array('String or Location', $realm));
 
-		$cache = new Cache('plugins', $realm, $this->category, $this->name, 'list');
+		if(!isset($category))
+			throw new TypeMismatch(array('String', $category));
+
+		if(!isset($name))
+			throw new TypeMismatch(array('String', $name));
+
+		$realm = ($realm instanceof Location) ? 'Resource' . $this->realm->getType() : $realm;
+
+		$cache = new Cache('plugins', $realm, $category, $name, 'list');
 		$pluginList = $cache->getData();
 
 		if(!$cache->cacheReturned)
@@ -55,20 +44,22 @@ class Hook
 			$stmt = $db->stmt_init();
 			$stmt->prepare('SELECT module, plugin FROM plugins WHERE realm = ? AND category = ? AND name = ?');
 
-			if($stmt->bindAndExecute('sss', $realm, $this->category, $this->name))
+			if($stmt->bindAndExecute('sss', $realm, $category, $name))
 			{
 				while($row = $stmt->fetch_array())
 				{
-					$className = importFromModule($row['plugin'], $row['module'], 'plugin');
+					try{
+						$className = importFromModule($row['plugin'], $row['module'], 'plugin');
 
-					$classReflection = new ReflectionClass($className);
-					foreach($this->interfaces as $interface)
-					{
-						if(!$classReflection->implementsInterface($interface))
-							continue 2;
-					}
+						$classReflection = new ReflectionClass($className);
+						foreach($this->interfaces as $interface)
+						{
+							if(!$classReflection->implementsInterface($interface))
+								continue 2;
+						}
 
-					$pluginList[] = $row;
+						$pluginList[] = $row;
+					}catch(Exception $e){}
 				}
 			}else{
 				$pluginList = false;
@@ -89,7 +80,9 @@ class Hook
 				$pluginObjects[] = $newPlugin;
 			}catch(Exception $e){}
 		}
-		$this->plugins = $pluginObjects;
+
+		$this->plugins = (is_array($this->plugins)) ? array_merge($this->plugins, $pluginObjects) : $pluginObjects;
+		return (is_array($this->plugins));
 	}
 
 	public function __call($name, $arguments)
