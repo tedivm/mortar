@@ -1,18 +1,69 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
 
+/**
+ * This class creates navigation menus
+ *
+ * @package MainClasses
+ */
 class NavigationMenu
 {
 
+	/**
+	 * This is the name of the menu being built
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $menuName;
+
+	/**
+	 * An array of labels for the sub menus
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $subMenuLabels = array();
+
+	/**
+	 * This is the current active sub menu
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $activeSubMenu;
+
+	/**
+	 * This is where all the information for each sub menu is stored
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $subMenus;
 
+	/**
+	 * Constructor takes a name as its argument
+	 *
+	 * @param string $name
+	 */
 	public function __construct($name)
 	{
 		$this->menuName = $name;
 	}
 
+	/**
+	 * Add an item to the current sub menu
+	 *
+	 * @param string $name
+	 * @param string|Url $url
+	 * @param string $label
+	 * @return NavigationMenu
+	 */
 	public function addItem($name, $url, $label)
 	{
 		$item['url'] = $url;
@@ -21,18 +72,35 @@ class NavigationMenu
 		return $this;
 	}
 
+	/**
+	 * Change the current active sub menu
+	 *
+	 * @param string $menuName
+	 * @return NavigationMenu
+	 */
 	public function setMenu($menuName)
 	{
 		$this->activeSubMenu = $menuName;
 		return $this;
 	}
 
+	/**
+	 * Set the label for the current active sub menu
+	 *
+	 * @param string $label
+	 * @return NavigationMenu
+	 */
 	public function setMenuLabel($label)
 	{
 		$this->subMenuLabels[$this->activeSubMenu] = $label;
 		return $this;
 	}
 
+	/**
+	 * Created an HTML menu to display
+	 *
+	 * @return string
+	 */
 	public function makeDisplay()
 	{
 		$userId = ActiveUser::getInstance()->getId();
@@ -102,26 +170,6 @@ class NavigationMenu
 
 		return ($menuContainsItem === true) ? (string) $menuDiv : false;
 	}
-
-
-
-
 }
 
-/*
-				<div id="BB_main_right" class="BB_sidebar">
-
-					<div class="BB_sidebar_menu" id="BB_sidebar_menu_5">
-						<h2>Wiki Manager Options</h2>
-						<ul>
-							<li id="BB_menu_item_1" class="BB_menu_item">Option</li>
-							<li id="BB_menu_item_2" class="BB_menu_item">Option</li>
-							<li id="BB_menu_item_3" class="BB_menu_item">Flappy Apples</li>
-
-							<li id="BB_menu_item_4" class="BB_menu_item">Ineffectiual Option</li>
-						</ul>
-					</div> <!-- BB_sidebar_menu_1 -->
-
-				</div>
-*/
 ?>
