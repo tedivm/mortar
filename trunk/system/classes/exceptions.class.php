@@ -9,32 +9,48 @@
 
 
 /**
- * Main Module Error Class
+ * Base Errer Handler
  *
- * responds to errors in the main modules.
+ * This class acts as the base for all the other exception classes. It outputs errors and a stack trace when the
+ * debugging level is high enough. This class itself is reserved for errors
  *
- * @package		Bento Base
- * @subpackage	Main_Classes
- * @category	Exception
- * @author		Robert Hafner
+ * @package		MainClasses
  */
 class BentoError extends Exception
 {
+	/**
+	 * This is the minimal debug level that this exception class will output with. For this class it is 1.
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $debugLevel = 1;
 
+	/**
+	 * This is a replacement __construct function that allows us to decide whether or not to display an error
+	 * when an exception is thrown
+	 *
+	 * @access public
+	 * @param string $message
+	 * @param int $code This should be left blank or replaced with http error codes
+	 */
 	public function __construct($message = '', $code = 0)
 	{
 		parent::__construct($message, $code);
-
 
 		if(method_exists($this, 'runAction'))
 			$this->runAction();
 
 		if(DEBUG >= $this->debugLevel)
 			$this->debugAction();
-
 	}
 
+	/**
+	 * This magic method turns the current exception into a string, allowing it to be outputted to a browser
+	 *
+	 * @access public
+	 * @return string
+	 */
 	public function __toString()
 	{
 		$runtimeConfig = Query::getQuery();
@@ -158,6 +174,11 @@ class BentoError extends Exception
 		return $output;
 	}
 
+	/**
+	 * This function describes what happens when the debug level is high enough to output debug information
+	 *
+	 * @access public
+	 */
 	public function debugAction()
 	{
 		echo $this;
@@ -165,18 +186,57 @@ class BentoError extends Exception
 
 }
 
+/**
+ * BentoWarning exception handler
+ *
+ * This is an exception handler that deals with Warning-level errors
+ *
+ * @package		MainClasses
+ */
 class BentoWarning extends BentoError
 {
+	/**
+	 * This is the minimal debug level that this exception class will output with. For this class it is 2.
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $debugLevel = 2;
 }
 
+/**
+ * BentoNotice exception handler
+ *
+ * This is an exception handler that deals with Notice-level errors
+ *
+ * @package		MainClasses
+ */
 class BentoNotice extends BentoError
 {
+	/**
+	 * This is the minimal debug level that this exception class will output with. For this class it is 3.
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $debugLevel = 3;
 }
 
+/**
+ * Depreciation exception handler
+ *
+ * This exception is thrown to notify developers they are using depreciated, but available, functions
+ *
+ * @package		MainClasses
+ */
 class BentoDepreciated extends BentoError
 {
+	/**
+	 * This needs to be set to a high value to let the DEPRECIATION_WARNINGS constant control its display.
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $debugLevel = 9;
 
 	public function __construct($message = '', $code = 0)
@@ -189,14 +249,39 @@ class BentoDepreciated extends BentoError
 
 }
 
+/**
+ * Depreciation exception handler
+ *
+ * This exception is thrown to notify developers they are using depreciated functions that are no longer usable
+ *
+ * @package		MainClasses
+ */
 class BentoDepreciatedError extends BentoDepreciated
 {
-	protected $debugLevel = 2;
+	/**
+	 * This is the minimal debug level that this exception class will output with. For this class it is 1.
+	 *
+	 * @access protected
+	 * @var int
+	 */
+	protected $debugLevel = 1;
 }
 
+/**
+ * TypeMismatch exception handler
+ *
+ * This is thrown when arguments of the wrong type are passed to a method or function
+ *
+ * @package		MainClasses
+ */
 class TypeMismatch extends BentoError
 {
-	// type, object, message
+	/**
+	 * Exception-specific constructor to allow additional information to be passed to the thrown exception.
+	 *
+	 * @param array $message [0] should be the expected type, [1] should be the received object, and [3] is an optional message
+	 * @param int $code
+	 */
 	public function __construct($message = '', $code = 0)
 	{
 		if(is_array($message))
@@ -225,13 +310,39 @@ class TypeMismatch extends BentoError
 	}
 }
 
+/**
+ * AuthenticationError exception handler
+ *
+ * This exception is thrown when someone tries to access an area they do not have permission to access
+ *
+ * @package		MainClasses
+ */
 class AuthenticationError extends BentoError
 {
+	/**
+	 * This is the minimal debug level that this exception class will output with. For this class it is 4.
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $debugLevel = 4;
 }
 
+/**
+ * ResourceNotFoundError exception handler
+ *
+ * This is thrown when a resource is unable to be found
+ *
+ * @package		MainClasses
+ */
 class ResourceNotFoundError extends BentoError
 {
+	/**
+	 * This is the minimal debug level that this exception class will output with. For this class it is 4.
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $debugLevel = 4;
 }
 
