@@ -1,14 +1,9 @@
 <?php
 /**
- * Bento Base
+ * BentoBase
  *
- * A framework for developing modular applications.
- *
- * @package		Bento Base
- * @author		Robert Hafner
- * @copyright	Copyright (c) 2007, Robert Hafner
- * @license		http://www.mozilla.org/MPL/
- * @link		http://www.bentobase.org
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
  */
 
 

@@ -109,9 +109,9 @@ class RuntimeConfig implements ArrayAccess
 			$get = Get::getInstance();
 			$template = new DisplayMaker();
 
-			if(!(isset($pathReturn['package']) && $template->load_template('url', $pathReturn['package'])))
+			if(!(isset($pathReturn['package']) && $template->loadTemplate('url', $pathReturn['package'])))
 			{
-				$template->set_display_template('{# action #}/{# id #}/');
+				$template->setDisplayTemplate('{# action #}/{# id #}/');
 			}
 
 			$tags = $template->tagsUsed();
