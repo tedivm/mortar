@@ -6,11 +6,35 @@
  * @license http://www.mozilla.org/MPL/
  */
 
+/**
+ * This class allows developers to easily load plugins into their own code
+ *
+ * @package MainClasses
+ */
 class Hook
 {
+	/**
+	 * This is an array of loaded plugins (which are objects)
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $plugins;
+
+	/**
+	 * This is an array of interfaces that plugins must implement
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $interfaces = array();
 
+	/**
+	 * This method allows developers force plugins to implement an interface.
+	 *
+	 * @access public
+	 * @param string $interface
+	 */
 	public function enforceInterface($interface)
 	{
 		if(!class_exists($interface, false))
@@ -19,14 +43,26 @@ class Hook
 		$this->interfaces[] = $interface;
 	}
 
+	/**
+	 * Returns all the currently active plugins.
+	 *
+	 * @access public
+	 * @return array
+	 */
 	public function getPlugins()
 	{
-		if(!$this->plugins)
-			$this->load();
-
-		return $this->plugins;
+		return (isset($this->plugins)) ? $this->plugins : array();
 	}
 
+	/**
+	 * When called this method will pull plugins from the database and load them for use.
+	 *
+	 * @access public
+	 * @param string $realm This is a broad category used to describe a plugin and can be anything the author chooses
+	 * @param string $category This is a subdivision of the $realm and can be anything the author chooses
+	 * @param string $name This is the name of the specific hook you are calling and can be anything the author chooses
+	 * @return bool true if new plugins are loaded and added to the system, false otherwise
+	 */
 	public  function loadPlugins($realm, $category, $name)
 	{
 		if(!isset($realm))
@@ -87,10 +123,24 @@ class Hook
 			}catch(Exception $e){}
 		}
 
-		$this->plugins = (is_array($this->plugins)) ? array_merge($this->plugins, $pluginObjects) : $pluginObjects;
-		return (is_array($this->plugins));
+		if(count($pluginObjects > 0))
+		{
+			$this->plugins = (is_array($this->plugins)) ? array_merge($this->plugins, $pluginObjects) : $pluginObjects;
+			return true;
+		}else{
+			return false;
+		}
 	}
 
+	/**
+	 * This magic method allows developers to run functions across all of the plugins at once by calling them on the
+	 * hook object.
+	 *
+	 * @access public
+	 * @param string $name this is the name of the function
+	 * @param array $arguments this is the array of arguments passed
+	 * @return unknown
+	 */
 	public function __call($name, $arguments)
 	{
 		$responses = array();
@@ -100,7 +150,9 @@ class Hook
 			try{
 				if(method_exists($plugin, $name))
 				{
-					$response= call_user_func_array(array($plugin, $name), $arguments);
+					// we seperate the function call from the assignment to the response array in order to deal with
+					// any errors.
+					$response = call_user_func_array(array($plugin, $name), $arguments);
 					$responses[] = $response;
 				}
 			}catch(Exception $e){
@@ -110,7 +162,16 @@ class Hook
 		return $responses;
 	}
 
-
+	/**
+	 * This static function is used to register new plugins into the system. The realm, category and name parameters
+	 * should match up to a Hook->loadPlugins call somewhere in the system.
+	 *
+	 * @param string $realm
+	 * @param string $category
+	 * @param string $name
+	 * @param int $module
+	 * @param string $plugin
+	 */
 	static public function registerPlugin($realm, $category, $name, $module, $plugin)
 	{
 		$db = DatabaseConnection::getConnection('default');
