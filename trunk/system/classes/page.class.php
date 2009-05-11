@@ -1,27 +1,120 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
 
+/**
+ * This class builds HTML pages for display to the browsers
+ *
+ * @package MainClasses
+ */
 class Page implements ArrayAccess
 {
+	/**
+	 * This is an array of meta tags
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $meta = array();
+
+	/**
+	 * This is an array of javascript that will be placed in the header
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $script = array();
+
+	/**
+	 * This is an array of javascript that will be run on startup
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $scriptStartup = array();
+
+	/**
+	 * These are the template tags which are being replaced and their replacements
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $regions = array();
+
+	/**
+	 * This is the current theme being used
+	 *
+	 * @var string
+	 */
 	public $theme = 'default';
 
-
+	/**
+	 * The template processor for the page
+	 *
+	 * @access protected
+	 * @var DisplayMaker
+	 */
 	protected $display;
 
-	// plugins
+	/**
+	 * An array of CSS libraries to include
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $css = array();
+
+	/**
+	 * An array containing the javascript libraries and scripts to include
+	 *
+	 * @access protected
+	 * @var unknown_type
+	 */
 	protected $javascript = array();
 
 	// actual paths
+
+	/**
+	 * A list of javascript paths to include
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $jsIncludes = array();
+
+	/**
+	 * A list of css paths to include
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $cssIncludes = array();
+
+	/**
+	 * Javescript code that needs to be run before the jQuery statup code
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $preStartupJs = array();
 
+	/**
+	 * The current theme file to use (out of the files in the root of the theme's directory)
+	 *
+	 * @var string
+	 */
 	protected $templateFile = 'index.html';
 
+	/**
+	 * This is a subtemplate containing technical headers for the html
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $headerTemplate = '
 	<title>{# title #}</title>
 	<script type="text/javascript">
@@ -42,6 +135,12 @@ class Page implements ArrayAccess
 
 	</script>';
 
+	/**
+	 * This function changes the current theme and template
+	 *
+	 * @param string $file
+	 * @param string $theme
+	 */
 	public function setTemplate($file = 'index.html', $theme = 'default')
 	{
 		$config = Config::getInstance();
@@ -76,27 +175,53 @@ class Page implements ArrayAccess
 		$this->display->setDisplayTemplate($template);
 	}
 
+	/**
+	 * Returns the URL to the current theme
+	 *
+	 * @return string
+	 */
 	public function getThemeUrl()
 	{
 		return ActiveSite::getLink('theme') . $this->theme . '/';
 	}
 
+	/**
+	 * Returns the path to the current theme
+	 *
+	 * @return string
+	 */
 	public function getThemePath()
 	{
 		$config = Config::getInstance();
 		return $config['path']['theme'] . $this->theme . '/';
 	}
 
+	/**
+	 * Adds a meta tag to the page
+	 *
+	 * @param string $name
+	 * @param string $content
+	 */
 	public function addMeta($name, $content)
 	{
-		$this->meta[$name] = '<META name="' . $name . '" content="'. $content .'">' . "\n";
+		$this->meta[$name] = '<META name="' . $name . '" content="'. $content .'">' . PHP_EOL;
 	}
 
+	/**
+	 * Adds javascript to the header
+	 *
+	 * @param string $javascript
+	 */
 	public function addScript($javascript)
 	{
 		$this->script[] = $javascript;
 	}
 
+	/**
+	 * Adds javascript to the jQuery startup function
+	 *
+	 * @param string $javascript
+	 */
 	public function addStartupScript($javascript)
 	{
 		if(is_array($javascript))
@@ -107,6 +232,12 @@ class Page implements ArrayAccess
 		}
 	}
 
+	/**
+	 * Adds a javascript library file to be loaded
+	 *
+	 * @param string $name
+	 * @param string $library
+	 */
 	public function addJavaScript($name, $library = 'none')
 	{
 		if(!is_array($name))
@@ -123,6 +254,12 @@ class Page implements ArrayAccess
 		}
 	}
 
+	/**
+	 * Adds a CSS library file to be included
+	 *
+	 * @param string $name
+	 * @param string $library
+	 */
 	public function addCss($name, $library = 'none')
 	{
 		if(!is_array($name))
@@ -134,6 +271,12 @@ class Page implements ArrayAccess
 		}
 	}
 
+	/**
+	 * Adds script include tags to the template for these javascript urls
+	 *
+	 * @access protected
+	 * @param string|array $jsfiles
+	 */
 	protected function addJSInclude($jsfiles)
 	{
 		if(is_string($jsfiles))
@@ -146,6 +289,12 @@ class Page implements ArrayAccess
  		}
 	}
 
+	/**
+	 * Adds css include tags to the template for these css urls
+	 *
+	 * @access protected
+	 * @param string|array $cssfiles
+	 */
 	protected function addCssInclude($cssfiles)
 	{
 		if(is_string($cssfiles))
@@ -158,11 +307,11 @@ class Page implements ArrayAccess
  		}
 	}
 
-	public function addJQueryInclude($plugin)
-	{
-		$this->addJavaScript($plugin, 'jquery');
-	}
-
+	/**
+	 * Creates and returns the final page
+	 *
+	 * @return string
+	 */
 	public function makeDisplay()
 	{
 		$config = Config::getInstance();
@@ -202,23 +351,53 @@ class Page implements ArrayAccess
 		return $this->postProcessTemplate($display->makeDisplay(false));
 	}
 
+	/**
+	 * Add content to the page at the specified tag
+	 *
+	 * @param string $tag
+	 * @param string $content
+	 */
 	public function addRegion($tag, $content)
 	{
 		$this->regions[$tag] = $content;
 	}
 
+	/**
+	 * Append content to a region
+	 *
+	 * @param string $tag
+	 * @param string $content
+	 */
 	public function appendToRegion($tag, $content)
 	{
+		if(!isset($this->regions['tag']))
+			$this->regions[$tag] = '';
+
 		$this->regions[$tag] .= $content;
 	}
 
+	/**
+	 * Prepend content to a region
+	 *
+	 * @param string $tag
+	 * @param string $content
+	 */
 	public function prependToRegion($tag, $content)
 	{
+		if(!isset($this->regions['tag']))
+			$this->regions[$tag] = '';
+
 		$this->regions[$tag] = $content . $this->regions[$tag];
 	}
 
-	// processes the raw template from the theme folder
-	// used to add information that stays mostly static (current year, for instance)
+	/**
+	 * Prepares a template from the theme by populating it with information that does not change that often.
+	 * allow some of the processing to be cached
+	 *
+	 * @access protected
+	 * @param string $templateString
+	 * @return string
+	 */
 	protected function preProcessTemplate($templateString)
 	{
 		$template = new DisplayMaker();
@@ -229,9 +408,12 @@ class Page implements ArrayAccess
 		return $template->makeDisplay(false);
 	}
 
-	// This function adds any dynamic, runtime tags
-	// can include user-specific information
-	// run every time page is loaded
+	/**
+	 * This is a runtime preprocessor (as opposed to the preProcessTemplate function, which runs and gets cached)
+	 * allow some preprocessing before running all the tag replacement code
+	 *
+	 * @access protected
+	 */
 	protected function runtimeProcessTemplate()
 	{
 		$this->addJavaScript('defaults', 'jquery');
@@ -267,7 +449,13 @@ class Page implements ArrayAccess
 		$this->preStartupJs[] = 'var baseUrl = ' . json_encode(ActiveSite::getLink()) . ';';
 	}
 
-	// doesn't do much yet
+	/**
+	 * This acts as a final processing point, allow some tags to 'float' to the top through other replacement cycles
+	 * before being processed. This function also takes care of the final cleanup of tags (assuming debugging is off)
+	 *
+	 * @param string $templateString
+	 * @return string
+	 */
 	protected function postProcessTemplate($templateString)
 	{
 		$template = new DisplayMaker();
@@ -277,8 +465,6 @@ class Page implements ArrayAccess
 		$jsInclude = ActiveSite::getLink() . 'javascript/';
 
 		$template->addContent('js_path', $jsInclude);
-
-		//(DEBUG>1)
 
 		return $template->makeDisplay(!(DEBUG>2));
 	}
@@ -301,6 +487,12 @@ class Page implements ArrayAccess
 	}
 }
 
+/**
+ * This class is a singleton containing the current running page. I hate this with a fiery passion and will be
+ * reworking it at some point
+ *
+ * @package MainClasses
+ */
 class ActivePage extends Page
 {
 	public $template;
@@ -317,10 +509,8 @@ class ActivePage extends Page
 	 */
 	private function __construct()
 	{
-		$this->addJQueryInclude(array('1_2_6', 'ui-1_6b', 'metadata', 'dimensions', 'bentoSettings'));
+		$this->addJavaScript(array('1_2_6', 'ui-1_6b', 'metadata', 'dimensions', 'bentoSettings'), 'jquery');
 		$this->addCss(array('none' => array('all')));
-//		$this->addJQueryInclude(array('1_2_6', 'ui-1_6b', 'metadata', 'demensions'));
-
 	}
 
 	/**

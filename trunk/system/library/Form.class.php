@@ -222,7 +222,7 @@ class Form
 		{
 			$page = ActivePage::getInstance();
 			$page->addStartupScript($jsStartup);
-			$page->addJQueryInclude($jqueryPlugins);
+			$page->addJavaScript($jqueryPlugins, 'jquery');
 
 			foreach ($jsIncludes as $library => $plugin)
 			{

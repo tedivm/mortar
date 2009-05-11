@@ -1,16 +1,80 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
 
+/**
+ * This class contains information about a package (the files that make up a module)
+ *
+ * @package MainClasses
+ */
 class PackageInfo
 {
+	/**
+	 * If installed, this is the current module id
+	 *
+	 * @var int
+	 */
 	public $id;
+
+	/**
+	 * This is the name of the package
+	 *
+	 * @var string
+	 */
 	public $name;
+
+	/**
+	 * Path to the package
+	 *
+	 * @var string
+	 */
 	public $path;
+
+	/**
+	 * An array of actions the module contains
+	 *
+	 * @var array
+	 */
 	public $actions;
+
+	/**
+	 * The current status of a package
+	 *
+	 * @var string
+	 */
 	public $status;
+
+	/**
+	 * Current version of a package
+	 *
+	 * @var Version
+	 */
 	public $version;
+
+	/**
+	 * A list of models the package contains
+	 *
+	 * @var unknown_type
+	 */
 	public $models;
+
+	/**
+	 * Meta data about the package, as found in its information file
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $meta;
 
+	/**
+	 * Constructor takes the name of id of the package
+	 *
+	 * @param id|string $package
+	 */
 	public function __construct($package)
 	{
 		if(is_numeric($package))
@@ -23,7 +87,14 @@ class PackageInfo
 		}
 	}
 
-	public function loadById($id)
+	/**
+	 * Loads the module name by id then returns the results of loadByName
+	 *
+	 * @access protected
+	 * @see loadByName
+	 * @param int $id
+	 */
+	protected function loadById($id)
 	{
 		$cache = new Cache('packages', 'moduleLookup', $id);
 		$package = $cache->getData();
@@ -48,6 +119,12 @@ class PackageInfo
 		$this->loadByName($package);
 	}
 
+	/**
+	 * Loads the package by name
+	 *
+	 * @access protected
+	 * @param string $packageName
+	 */
 	public function loadByName($packageName)
 	{
 		if(is_null($packageName) || strlen($packageName) < 1)
@@ -120,27 +197,52 @@ class PackageInfo
 
 	}
 
+	/**
+	 * Returns the path to the package
+	 *
+	 * @return string
+	 */
 	public function getPath()
 	{
 		return $this->path;
 	}
 
+	/**
+	 * Returns the id of the installed module, or false if it is not installed
+	 *
+	 * @return int|bool
+	 */
 	public function getId()
 	{
-		return $this->id;
+		return isset($this->id) ? $this->id : false;
 	}
 
+	/**
+	 * Returns the current status of the package, or false if its not found
+	 *
+	 * @return string|bool
+	 */
 	public function getStatus()
 	{
 		return ($this->status) ? $this->status : false;
 	}
 
-
+	/**
+	 * Returns the name of the package
+	 *
+	 * @return string
+	 */
 	public function getName()
 	{
 		return $this->name;
 	}
 
+	/**
+	 * Returns a specific action or the entire action array
+	 *
+	 * @param string|null $actionName
+	 * @return array
+	 */
 	public function getActions($actionName = null)
 	{
 		if($actionName)
@@ -153,21 +255,43 @@ class PackageInfo
 		return $this->actions;
 	}
 
+	/**
+	 * Returns all of the models the package contains
+	 *
+	 * @return array
+	 */
 	public function getModels()
 	{
 		return $this->models;
 	}
 
+	/**
+	 * Checks to see if a package contains an action
+	 *
+	 * @param string $name
+	 * @return bool
+	 */
 	public function packageHasAction($name)
 	{
 		return isset($this->actions[$name]);
 	}
 
+	/**
+	 * Returns the meta value about the package
+	 *
+	 * @param string $name
+	 * @return string
+	 */
 	public function getMeta($name)
 	{
 		return $this->meta[$name];
 	}
 
+	/**
+	 * Loads the meta data from the package
+	 *
+	 * @access protected
+	 */
 	protected function loadMeta()
 	{
 		$metaPath = $this->path . 'meta.php';
@@ -184,6 +308,12 @@ class PackageInfo
 		}
 	}
 
+	/**
+	 * Loads the actions from the package
+	 *
+	 * @access protected
+	 * @return array
+	 */
 	protected function loadActions()
 	{
 		$cache = new Cache('packages', $this->name, 'actions');
@@ -228,6 +358,12 @@ class PackageInfo
 		return $actions;
 	}
 
+	/**
+	 * Loads the plugins the package contains
+	 *
+	 * @access protected
+	 * @return array
+	 */
 	protected function loadPlugins()
 	{
 		$cache = new Cache('packages', $this->packageName, 'plugins');
@@ -247,6 +383,12 @@ class PackageInfo
 		return $plugins;
 	}
 
+	/**
+	 * Loads the models from the package
+	 *
+	 * @access protected
+	 * @return array
+	 */
 	protected function loadModels()
 	{
 		$cache = new Cache('packages', $this->name, 'models');
@@ -269,8 +411,12 @@ class PackageInfo
 		return $models;
 	}
 
-
-
+	/**
+	 * This is a utility method called by the load* functions to iterate through a directory for classes
+	 *
+	 * @param string $type Type of class to look for (action, plugin, model, etc)
+	 * @return array
+	 */
 	protected function loadClasses($type)
 	{
 		$filePaths =  glob($this->path . $type  . 's/*.class.php');
