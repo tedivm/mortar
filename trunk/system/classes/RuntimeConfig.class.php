@@ -49,7 +49,7 @@ class RuntimeConfig implements ArrayAccess
 		$location = new Location($data['currentLocation']);
 		if(!isset($data['package']))
 		{
-			$data['package'] = $location->meta('default');
+			$data['package'] = $location->getMeta('default');
 		}
 
 		return $data;
@@ -89,7 +89,7 @@ class RuntimeConfig implements ArrayAccess
 	 	switch ($currentLocation->getResource()) {
 			case 'directory':
 			case 'site':
-				$moduleId = $currentLocation->meta('default');
+				$moduleId = $currentLocation->getMeta('default');
 				break;
 
 			default:
@@ -99,7 +99,7 @@ class RuntimeConfig implements ArrayAccess
 
 		if(!isset($data['package']))
 		{
-			$pathReturn['package'] = $currentLocation->meta('default');
+			$pathReturn['package'] = $currentLocation->getMeta('default');
 		}
 
 

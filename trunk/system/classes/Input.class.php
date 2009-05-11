@@ -1,8 +1,23 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
 
+/**
+ * This class figures how the system has been called and pulls in inputs based off of that
+ *
+ * @package MainClasses
+ */
 class Input
 {
-
+	/**
+	 * This method chooses wether to return a PUT or POST array as a FilteredArray, and processes out any magic quotes
+	 *
+	 * @return array
+	 */
 	static function getInput()
 	{
 

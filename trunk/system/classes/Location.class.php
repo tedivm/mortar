@@ -1,62 +1,118 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
 
-interface intlocation
-{
-	public function parent_location();
-
-	public function location_id();
-
-	public function resource_type();
-}
-
-/*
-interface Location
-{
-	public function __construct($id = null);
-
-	public function getId();
-
-	public function parent($id = null);
-
-	public function name($name = null);
-
-	public function resource();
-
-	public function resourceId();
-
-	public function setResource($model);
-
-	public function getCreationDate();
-
-	public function getLastModified();
-
-	public function owner();
-
-	public function save();
-
-	public function delete();
-
-}
-
-*/
-
+/**
+ * This object represents the location of an resource in the system
+ *
+ * @package MainClasses
+ */
 class Location
 {
+	/**
+	 * This corresponds with the location id in the database
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $id;
+
+	/**
+	 * This is the parent location id
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $parent;
+
+	/**
+	 * This is the name of the object's saved location
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $name;
+
+	/**
+	 * The resource type is used to find the resource that is saved at this location
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $resourceType;
+
+	/**
+	 * This is a unique id assigned to a resource in order to assist in lookup
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $resourceId;
+
+	/**
+	 * This is a timestamp representing the date the location was created
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $createdOn;
+
+	/**
+	 * This is a timestampe representing the date the location was last saved
+	 *
+	 * @access protected
+	 * @var ing
+	 */
 	protected $lastModified;
+
+	/**
+	 * This value contains meta data about the location
+	 *
+	 * @var array
+	 */
 	protected $meta = array();
+
+	/**
+	 * This value tells the location whether to inherit permissions and values from its parent
+	 *
+	 * @var bool
+	 */
 	protected $inherit = true;
 
+	/**
+	 * This is the user id representing the owner of the location
+	 *
+	 * @access protected
+	 * @var null|int
+	 */
 	protected $owner;
+
+	/**
+	 * This is the membergroup id representing the group that owns a location
+	 *
+	 * @access protected
+	 * @var null|int
+	 */
 	protected $group;
 
+	/**
+	 * This is a list of names that locations can not use, because they have some special meaning to the system
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $reservedNames = array('admin', 'modules', 'rest', 'users', 'system', 'resources', 'xml', 'json', 'html');
 
+	/**
+	 * If passed an int the constructor will load the information for that location
+	 *
+	 * @access public
+	 * @param null|int $id
+	 */
 	public function __construct($id = null)
 	{
 		if(!is_null($id) && !is_numeric($id))
@@ -67,27 +123,50 @@ class Location
 		}
 	}
 
+	/**
+	 * This method places a resource at this location
+	 *
+	 * @param Model $object
+	 */
 	public function attachResource(Model $object)
 	{
 		$this->resourceType = $object->getType();
 		$this->resourceId = $object->getId();
 	}
 
+	/**
+	 * This method lets the developer manually attach a resource to a location, and is only recommended for special
+	 * situations
+	 *
+	 * @param string $type
+	 * @param int $id
+	 */
 	public function setResource($type, $id)
 	{
 		$this->resourceId = $id;
 		$this->resourceType = $type;
 	}
 
+	/**
+	 * This returns the current resource type
+	 *
+	 * @return false|string
+	 */
 	public function getType()
 	{
-		return $this->resourceType;
+		return isset($this->resourceType) ? $this->resourceType : false;
 	}
 
-	public function getResource($id = false)
+	/**
+	 * This method returns the model/resource that this location represents, or its resource type and id in an array
+	 *
+	 * @param bool $details
+	 * @return Model|mixed|array
+	 */
+	public function getResource($details = false)
 	{
 
-		if($id)
+		if($details)
 		{
 			return array('id' => $this->resourceId, 'type' => $this->resourceType);
 		}else{
@@ -98,16 +177,31 @@ class Location
 
 	}
 
+	/**
+	 * Returns the timestampe of the time the location was first saved on
+	 *
+	 * @return int
+	 */
 	public function getCreationDate()
 	{
 		return $this->createdOn;
 	}
 
+	/**
+	 * Returns the timestampe of the time the location was last modified
+	 *
+	 * @return int
+	 */
 	public function getLastModified()
 	{
 		return $this->lastModified;
 	}
 
+	/**
+	 * Returns the parent location
+	 *
+	 * @return unknown
+	 */
 	public function getParent()
 	{
 		if(is_numeric($this->parent))
@@ -117,20 +211,35 @@ class Location
 			return $this->parent;
 		}
 
-
 		return false;
 	}
 
+	/**
+	 * This function returns the location id, or false if the location hasn't been saved
+	 *
+	 * @return int|false
+	 */
 	public function getId()
 	{
-		return $this->id;
+		return isset($this->id) ? $this->id : false;
 	}
 
+	/**
+	 * This function returns the name, or false if it hasn't been set yet
+	 *
+	 * @return unknown
+	 */
 	public function getName()
 	{
-		return $this->name;
+		return isset($this->name) ? $this->name : false;
 	}
 
+	/**
+	 * This function returns the asked for meta setting, or the entire meta array
+	 *
+	 * @param null|string $name
+	 * @return string|array
+	 */
 	public function getMeta($name = null)
 	{
 		if($name)
@@ -141,36 +250,32 @@ class Location
 		}
 	}
 
+	/**
+	 * This function sets a meta value
+	 *
+	 * @param string $name
+	 * @param string $value
+	 */
 	public function setMeta($name, $value)
 	{
 		$this->meta[$name] = $value;
 	}
 
-	public function getLink()
-	{
-		 switch(strtolower($this->resourceType))
-		 {
-		 	case 'site':
-
-		 		break;
-
-		 	case 'root':
-
-		 		break;
-
-		 	default:
-		 		$parent = $this->getParent();
-		 		$url = $parent->getLink();
-		 		$url .= $this->getName() . '/';
-		 		break;
-		 }
-	}
-
+	/**
+	 * This allows you to change the owner
+	 *
+	 * @param User $user
+	 */
 	public function setOwner(User $user)
 	{
 		$this->owner = $user->getId();
 	}
 
+	/**
+	 * This returns the current owner, or false is one isn't set
+	 *
+	 * @return User|false
+	 */
 	public function getOwner()
 	{
 		if(isset($this->owner))
@@ -179,11 +284,21 @@ class Location
 		return false;
 	}
 
+	/**
+	 * This allows you to set the owning group of the object
+	 *
+	 * @param MemberGroup $memberGroup
+	 */
 	public function setOwnerGroup(MemberGroup $memberGroup)
 	{
 		$this->group = $memberGroup->getId();
 	}
 
+	/**
+	 * This returns the group that owns the location, or false if one isn't set
+	 *
+	 * @return MemberGroup|false
+	 */
 	public function getOwnerGroup()
 	{
 		if(isset($this->group))
@@ -192,16 +307,31 @@ class Location
 		return false;
 	}
 
+	/**
+	 * Tells you if permissions are inherited or not
+	 *
+	 * @return bool
+	 */
 	public function inheritsPermission()
 	{
 		return ($this->inherits == 1);
 	}
 
+	/**
+	 * Enable or disable parental inheritence
+	 *
+	 * @param bool $on
+	 */
 	public function setInherit($on = true)
 	{
 		$this->inherits = $on ? 1 : 0;
 	}
 
+	/**
+	 * Set the name for the location
+	 *
+	 * @param string $name
+	 */
 	public function setName($name)
 	{
 		if(in_array(strtolower($name), $this->reservedNames))
@@ -211,11 +341,23 @@ class Location
 		$this->name = str_replace(' ', '_', $name);
 	}
 
+	/**
+	 * Set the parent location
+	 *
+	 * @param Location $parent
+	 */
 	public function setParent(Location $parent)
 	{
 		$this->parent = $parent->getId();
 	}
 
+	/**
+	 * This function loads the location information from the database, or cache
+	 *
+	 * @access protected
+	 * @param int $id
+	 * @return bool
+	 */
 	protected function loadLocation($id = null)
 	{
 		if($id != null)
@@ -282,6 +424,11 @@ class Location
 		}
 	}
 
+	/**
+	 * This method saves the location to the database
+	 *
+	 * @return bool
+	 */
 	public function save()
 	{
 		$db_location = new ObjectRelationshipMapper('locations');
@@ -353,6 +500,12 @@ class Location
 		return true;
 	}
 
+	/**
+	 * This method returns the child location with the specified name, or false if it doesn't exist
+	 *
+	 * @param string $name
+	 * @return Location|false
+	 */
 	public function getChildByName($name)
 	{
 		$cache = new Cache('locations', $this->id, 'child', $name);
@@ -360,37 +513,36 @@ class Location
 		if(!$cache->cacheReturned)
 		{
 			$db = db_connect('default_read_only');
-
 			$stmt = $db->stmt_init();
-
 			$stmt->prepare('SELECT location_id FROM locations WHERE parent = ? AND name = ?');
 			$stmt->bindAndExecute('is', $this->getId(), $name);
 
-			$childLocation = $stmt->fetch_array();
-
-			$childId = $childLocation['location_id'];
+			if($childLocation = $stmt->fetch_array())
+			{
+				$childId = $childLocation['location_id'];
+			}else{
+				$childId = false;
+			}
 
 			$cache->store_data($childId);
 		}
 
-		if(is_int($childId))
-		{
-			return new Location($childId);
-		}else{
-			return false;
-		}
-
+		return (is_int($childId)) ? new Location($childId) : false;
 	}
 
+	/**
+	 * Returns the children locations as an array
+	 *
+	 * @param string $type This value can limit the results to a specific resource type
+	 * @return array|false
+	 */
 	public function getChildren($type = 'all')
 	{
-
 		$cache = new Cache('locations', $this->id, 'children', $type);
 
 		if(!$childrenIds = $cache->get_data())
 		{
 			$db = db_connect('default_read_only');
-
 			$stmt = $db->stmt_init();
 
 			if($type != 'all')
@@ -402,38 +554,26 @@ class Location
 				$stmt->bindAndExecute('i', $this->id);
 			}
 
-
 			while($childLocation = $stmt->fetch_array())
-			{
 				$childrenIds[] = $childLocation['location_id'];
 
-			}
-
-
 			$cache->store_data($childrenIds);
-
 		}
-
 
 		if(!$childrenIds || count($childrenIds) < 1)
-		{
 			return false;
-		}
 
 		foreach($childrenIds as $id)
-		{
 			$locations[] = new Location($id);
-		}
 
 		return $locations;
-
 	}
 
-	public function meta($name)
-	{
-		return (isset($this->meta[$name])) ? $this->meta[$name] : false;
-	}
-
+	/**
+	 * Magic method to convert location into string
+	 *
+	 * @return string
+	 */
 	public function __toString()
 	{
 		if(isset($this->parent))
@@ -453,6 +593,11 @@ class Location
 		return $output;
 	}
 
+	/**
+	 * Returns the site id this location descends from
+	 *
+	 * @return int|false
+	 */
 	public function getSite()
 	{
 		$tempLoc = $this;
@@ -474,6 +619,13 @@ class Location
 		}
 	}
 
+	/**
+	 * Returns a multidemensional tree of locations
+	 *
+	 * @param string $types
+	 * @param bool $isFirst
+	 * @return array
+	 */
 	public function getTreeArray($types = '', $isFirst = true)
 	{
 		if(is_string($types) && strlen($types) > 0)

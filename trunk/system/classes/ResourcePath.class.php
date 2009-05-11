@@ -23,7 +23,7 @@ class ResourcePath
 	 	switch ($currentLocation->getResource()) {
 			case 'directory':
 			case 'site':
-				$moduleId = $currentLocation->meta('default');
+				$moduleId = $currentLocation->getMeta('default');
 				break;
 
 			default:
@@ -33,7 +33,7 @@ class ResourcePath
 
 		if(!isset($data['package']))
 		{
-			$pathReturn['package'] = $currentLocation->meta('default');
+			$pathReturn['package'] = $currentLocation->getMeta('default');
 		}
 
 
