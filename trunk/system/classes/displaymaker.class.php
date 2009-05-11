@@ -1,35 +1,43 @@
 <?php
 /**
- * Bento Base
+ * BentoBase
  *
- * A framework for developing modular applications.
- *
- * @package		Bento Base
- * @author		Robert Hafner
- * @copyright	Copyright (c) 2007, Robert Hafner
- * @license		http://www.mozilla.org/MPL/
- * @link		http://www.bentobase.org
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
  */
-
 
 
 /**
  * DisplayMaker
  *
- * The main template class
+ * The main template class. This class processes templates with using a special tagging system
  *
- * @package		Bento Base
- * @subpackage	Main_Classes
- * @category	Display
- * @author		Robert Hafner
+ * @package		MainClasses
  */
 class DisplayMaker
 {
-	private $main_string = '';
-	public $cleanup = false;
+	/**
+	 * This string contains the template content
+	 *
+	 * @access private
+	 * @var string
+	 */
+	private $mainString = '';
 
+	/**
+	 * This array contains all of the tags found in the template as well as their arguments
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $tags = array();
 
+	/**
+	 * This array is used to map datetime formats in templates to their php constants
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $dateConstants = array('date_atom' => DATE_ATOM,
 'cookie' => DATE_COOKIE,
 'iso8601' => DATE_ISO8601,
@@ -42,10 +50,22 @@ class DisplayMaker
 'rss' => DATE_RSS,
 'w3c' => DATE_W3C  );
 
-	// strings
-	protected $replacement_array = array();
+	/**
+	 * This array contains the replacements for the template tags
+	 *
+	 * @access protected
+	 * @var array
+	 */
+	protected $replacementContent = array();
 
-
+	/**
+	 * Returns either a simple array containing the names of all tags used, or a more details array
+	 * containing the tags arguments
+	 *
+	 * @access public
+	 * @param bool $withAttributes
+	 * @return array
+	 */
 	public function tagsUsed($withAttributes = false)
 	{
 		if(!is_array($this->tags))
@@ -55,22 +75,27 @@ class DisplayMaker
 		return $tags;
 	}
 
-	// Any template setting functions should ultimately pass the text to this function
-	// This way all tag processing will get called whenever the text is changed
+	/**
+	 * This function takes in a string, processes it for tags (or retrieves the information from cache)
+	 * and initializes this class
+	 *
+	 * @access public
+	 * @param string $text
+	 */
 	public function setDisplayTemplate($text)
 	{
 		if(!is_string($text))
 			throw new TypeMismatch(array('String', $text));
 
-
-		$this->main_string = $text;
-		$cache = new Cache('templates', 'schema', md5($this->main_string));
-		$cache->cache_time = '86400';
+		$this->mainString = $text;
+		$cache = new Cache('templates', 'schema', md5($this->mainString));
+		$cache->cache_time = '86400'; // this can be ridiculously high because the keyname changes when the string does
 
 		if(!($tags = $cache->get_data()))
 		{
-			preg_match_all('{\{# (.*?) #\}}', $this->main_string, $matches, PREG_SET_ORDER);
+			preg_match_all('{\{# (.*?) #\}}', $this->mainString, $matches, PREG_SET_ORDER);
 
+			// go through each found tag and process it
 			foreach($matches as $unprocessed_tag)
 			{
 				$tagChars = str_split($unprocessed_tag[1]);
@@ -81,19 +106,35 @@ class DisplayMaker
 				$curString = '';
 				$args = array();
 
+
+				/*
+					Here we are going to go through each tag, charactor by charactor,in order to pull out arguements
+
+					Arguement types:
+						standalone
+						key=value
+						key="continious string"
+
+					My first approach was to try to split the string into chunks, by spaces. This failed miserably
+					when I added in the date format code, which needs to contain spaces, so now we go charactor by
+					charactor to figure out arguments.
+
+				*/
+
+
+				// unfortunately the easiest way to do this seems to be charactor by charactor through each tag
+				// yay caching!
 				foreach($tagChars as $char)
 				{
 					switch($char)
 					{
 						case ' ':
-							if($enclosed)
+							if($enclosed) // inside quotes, charactors are just part of the string
 							{
 								$curString .= $char;
 								break;
-							}
 
-							if(isset($curName))
-							{
+							}elseif(isset($curName)){ // outside of quotes a space means its time for a new value
 
 								if(!isset($curValue))
 									$curValue = true;
@@ -106,29 +147,37 @@ class DisplayMaker
 							break;
 
 						case '"':
-							if($enclosed)
+
+							if($enclosed) // if its already enclosed, this marks the end of a string
 							{
 								if(!isset($curName))
 								{
+									// since no name is set, this string must be the name
 									$curName = $curString;
-								}elseif(!isset($curValue)){
-									$curValue = $curString;
+
 								}else{
-									$args[$curName] = $curValue;
-									unset($curName);
-									unset($curValue);
+									// since a name is set but a value isn't, this must be that
+									$curValue = $curString;
 								}
+
 								$curString = '';
 								$enclosed = false;
 							}else{
+								// if not enclosed in quotes already, mark it as such
 								$enclosed = true;
 							}
 
 							break;
 
 						case '=':
-							$curName = $curString;
-							$curString = '';
+							if(!$enclosed)
+							{
+								// if not wrapped in a string, this marks the switch between name and value
+								$curName = $curString;
+								$curString = '';
+							}else{
+								$curString .= $char;
+							}
 							break;
 
 						default:
@@ -140,7 +189,7 @@ class DisplayMaker
 				if(!isset($curName))
 				{
 					$curName = $curString;
-				}elseif(!isset($curValue)){
+				}elseif(!isset($curValue) && strlen($curString) > 0){
 					$curValue = $curString;
 				}
 
@@ -152,14 +201,10 @@ class DisplayMaker
 				$tag_chunks = explode(' ', $unprocessed_tag[1]);
 				$tag_name = array_shift($tag_chunks);
 
-
 				$tags[$tag_name] = array('original' => $unprocessed_tag[0]);
-
 
 				foreach($args as $name => $value)
 				{
-
-
 					$tags[$tag_name][$name] = trim($value, ' \'"');
 				}
 			}
@@ -170,13 +215,15 @@ class DisplayMaker
 		$this->tags = $tags;
 	}
 
-	public function set_display_template($text)
-	{
-		return $this->setDisplayTemplate($text);
-	}
-
-
-	public function loadTemplate($template, $package = null)
+	/**
+	 * This will load a template from a modules package
+	 *
+	 * @access public
+	 * @param string $template
+	 * @param int|string $package A package identifier
+	 * @return bool Whether the template was able to load or not
+	 */
+	public function loadTemplate($template, $package)
 	{
 		$config = Config::getInstance();
 		$path_to_theme = $config['url']['theme'];
@@ -193,13 +240,13 @@ class DisplayMaker
 
 		$path_to_theme .= $template . '.template.php';
 
-		if($this->set_display_template_byfile($path_to_theme))
+		if($this->setDisplayTemplateByFile($path_to_theme))
 			return true;
 
 		if(isset($package))
 		{
 			$path_to_package = $config['path']['modules'] . $package . '/templates/' . $template . '.template.php';
-			if($this->set_display_template_byfile($path_to_package))
+			if($this->setDisplayTemplateByFile($path_to_package))
 				return true;
 		}
 
@@ -207,23 +254,22 @@ class DisplayMaker
 
 	}
 
-	public function load_template($template, $package = '')
-	{
-		$this->loadTemplate($template, $package);
-	}
-
-
-
+	/**
+	 * Attempts to load a template from the specified path
+	 *
+	 * @access public
+	 * @param string $filepath
+	 * @return bool True on success
+	 */
 	public function setDisplayTemplateByFile($filepath)
 	{
 		try{
 			if(!file_exists($filepath))
 			{
-				//throw new BentoError('Unable to load template file ' . $filepath, 0);
 				return false;
 			}
 
-			$this->set_display_template(file_get_contents($filepath));
+			$this->setDisplayTemplate(file_get_contents($filepath));
 			return true;
 
 		}catch(Exception $e){
@@ -231,32 +277,28 @@ class DisplayMaker
 		}
 	}
 
-	public function set_display_template_byfile($filepath)
-	{
-		return $this->setDisplayTemplateByFile($filepath);
-	}
-
-
-
-	// Depreciated in favor of ::addContent
-	public function add_replacement($tag, $replacement)
-	{
-		$this->addContent($tag, $content);
-	}
-
-
+	/**
+	 * Adds content to be added to the template
+	 *
+	 * @access public
+	 * @param string $tag
+	 * @param string $content
+	 */
 	public function addContent($tag, $content)
 	{
-		if(is_array($this->tags) && key_exists($tag, $this->tags)) // This will keep us from looking for tags that aren't there
-			$this->replacement_array[$tag] = $content;
+		// This will keep us from looking for tags that aren't there
+		if(is_array($this->tags) && key_exists($tag, $this->tags))
+			$this->replacementContent[$tag] = $content;
 	}
 
-	public function add_content($tag, $content)
-	{
-		$this->addContent($tag, $content);
-	}
-
-
+	/**
+	 * This adds a timestamp (or string that can be converted to one) to the template, which is then formatted
+	 * according to the tag argument in the template
+	 *
+	 * @access public
+	 * @param string $name
+	 * @param string|int $timestamp
+	 */
 	public function addDate($name, $timestamp)
 	{
 		if(!key_exists($name, $this->tags))
@@ -277,29 +319,28 @@ class DisplayMaker
 			$format = DATE_RFC850;
 		}
 
-		//$format = (isset($this->tags[$name]['format'])) ? $this->tags[$name]['format'] : DATE_RFC850;
-		return $this->add_content($name, date($format, $timestamp));
+		$this->addContent($name, date($format, $timestamp));
 	}
 
-
-	public function add_date($name, $timestamp)
-	{
-		return $this->addDate($name, $timestamp);
-	}
-
+	/**
+	 * This method takes the content added and places it into the main string, replacing the tag
+	 *
+	 * @access public
+	 * @param bool $cleanup If set to true, all left over tags (those without content) are removed
+	 * @return string the final processed template
+	 */
 	public function makeDisplay($cleanup = false)
 	{
-
 		$processTags = array();
 		$processContent = array();
 
 		if(is_array($this->tags))
 			foreach($this->tags as $tagName => $tagArray)
 		{
-			if(isset($this->replacement_array[$tagName]))
+			if(isset($this->replacementContent[$tagName]))
 			{
 				$processTags[] = $tagArray['original'];
-				$processContent[] = $this->replacement_array[$tagName];
+				$processContent[] = $this->replacementContent[$tagName];
 
 			}elseif($cleanup){
 				$processTags[] = $tagArray['original'];
@@ -307,420 +348,7 @@ class DisplayMaker
 			}
 		}
 
-		return str_replace($processTags, $processContent, $this->main_string);
-	}
-
-	public function make_display($cleanup = false)
-	{
-		return $this->makeDisplay($cleanup);
-	}
-
-}
-
-
-/**
- * PageMaker
- *
- * A singleton which prepares the final output of the engine
- *
- * @package		Bento Base
- * @subpackage	Main_Classes
- * @category	Display
- * @author		Robert Hafner
- */
-class PageMaker
-{
-	protected $css = array();
-	protected $meta = array();
-	protected $DisplayMaker;
-	protected $template = '';
-	static $instance;
-
-
-	/**
-	 * Protected Constructor
-	 *
-	 */
-	private function __construct()
-	{
-		$this->DisplayMaker = new DisplayMaker();
-	}
-
-	/**
-	 * Returns the stored instance of the Page object. If no object
-	 * is stored, it will create it
-	 *
-	 * @return Config allows
-	 */
-	public static function getInstance()
-	{
-		if(!isset(self::$instance)){
-			$object = __CLASS__;
-			self::$instance = new $object;
-		}
-		return self::$instance;
-	}
-
-	/**
-	 * Set the template initial value
-	 *
-	 * @param string $string
-	 */
-	public function set_template($string)
-	{
-		$this->template = $string;
-	}
-
-	/**
-	 * Set the template initial value from a file
-	 *
-	 * @param string $path The path to the template file
-	 */
-	public function set_template_file($path)
-	{
-		$this->set_template(file_get_contents($path));
-	}
-
-	public function set_theme_file($file)
-	{
-		$config = Config::getInstance();
-		$path = $config['path']['theme'] . '$file';
-		$this->set_template_file($path);
-	}
-
-	/**
-	 * Set the page title
-	 *
-	 * @param string $replacement
-	 */
-	public function set_title($replacement)
-	{
-		$this->DisplayMaker->add_replacement('title', $replacement);
-	}
-
-	/**
-	 * Set the main content of the page
-	 *
-	 * @param string $replacement
-	 */
-	public function set_main($replacement)
-	{
-		$this->DisplayMaker->add_replacement('main content', $replacement);
-	}
-
-	/**
-	 * Add a metatag to the site
-	 *
-	 * @param string $name
-	 * @param string $content
-	 */
-	public function set_meta($name, $content)
-	{
-		$this->meta[$name] = $content;
-	}
-
-	/**
-	 * Add a custom tag and content to the site
-	 *
-	 * @param string $tag
-	 * @param string $content
-	 */
-	public function add_custom_tag($tag, $content)
-	{
-		$this->DisplayMaker->add_replacement($tag, $content);
-	}
-
-	/**
-	 * Add a stylesheet
-	 *
-	 * @param string $stylelink path to the stylesheet
-	 */
-	public function add_css($stylelink)
-	{
-		if(!in_array($stylelink, $this->css))
-			$this->css[] = $stylelink;
-	}
-
-	/**
-	 * Creates the final page and returns it as a string
-	 *
-	 * @return string final page
-	 */
-	public function make_display()
-	{
-		$this->add_css_to_rest();
-		$this->add_meta_to_rest();
-
-		if($this->template == '')
-		{
-			$config = Config::getInstance();
-			$path = $config['path']['theme'] . 'index.html';
-			$this->set_template_file($path);
-		}
-
-		$this->DisplayMaker->set_display_template($this->template);
-
-		return $this->DisplayMaker->make_display(true);
-	}
-
-	/**
-	 * Parses the CSS array to add the tags to the page
-	 *
-	 */
-	protected function add_css_to_rest()
-	{
-		foreach ($this->css as $key -> $value)
-		{
-			$css_tags .= '<link href="' . $value . '" rel="stylesheet" type="text/css">' . "\n";
-		}
-
-		$this->DisplayMaker->add_replacement('css', $css_tags);
-
-	}
-
-	/**
-	 * Parses the meta array to add the tags to the page
-	 *
-	 */
-	protected function add_meta_to_rest()
-	{
-
-		foreach ($this->meta as $name => $content)
-		{
-			$meta_tags .= '<META name="' . $value . '" content="'. $content .'">' . "\n";
-		}
-		$this->DisplayMaker->add_replacement('metatags', $meta_tags);
-	}
-
-}
-
-
-
-class Page2
-{
-	public $title;
-
-	protected $meta = array();
-	protected $script = array();
-	protected $scriptStartup = array();
-	protected $scriptIncludes = array();
-
-	public $template;
-	public $headTemplate;
-
-	protected $templateTags = array();
-	protected $displayMaker;
-	protected $replacements;
-	protected $replacementDates;
-
-	protected $css = array();
-
-	public function __construct()
-	{
-		$this->displayMaker = new DisplayMaker();
-	}
-
-	public function addContent($name, $content)
-	{
-		$this->replacements[$name] = $content;
-	}
-
-	public function setTemplate($string)
-	{
-		$this->displayMaker->set_display_template($string);
-	}
-
-	public function getTags($withAttributes = false)
-	{
-		$this->displayMaker->tagsUsed($withAttributes);
-	}
-
-	public function addMeta($name, $content)
-	{
-		$this->meta[] = '<META name="' . $name . '" content="'. $content .'">' . "\n";
-	}
-
-	public function addScript($javascript)
-	{
-		$this->script[] = $javascript;
-	}
-
-	public function addStartupScript($javascript)
-	{
-		$this->scriptStartup[] = $javascript;
-	}
-
-
-	public function addCss($path)
-	{
-		$this->css[] = $path;
-	}
-
-	public function addScriptInclude($path)
-	{
-		$this->scriptIncludes[] = $path;
-	}
-
-	public function buildPage()
-	{
-		$displayMaker = new DisplayMaker();
-
-		$tags = $this->displayMaker->tagsUsed();
-
-		if(in_array('header', $tags))
-		{
-			$this->displayMaker->addContent('head', $this->getHead());
-		}
-
-		foreach($this->replacements as $tag => $content)
-		{
-			$this->displayMaker->addContent($tag, $content);
-		}
-
-		foreach($this->replacementDates as $tag => $content)
-		{
-			$this->displayMaker->add_date($tag, $content);
-		}
-
-		$cleanup = (DEBUG == 1);
-		return $this->displayMaker->make_display($cleanup);
-	}
-
-	protected function getCss()
-	{
-		$css_tags = '';
-		$cssArray = array_unique($this->css);
-		foreach ($cssArray as $path)
-		{
-			$css_tags .= '<link href="' . $path . '" rel="stylesheet" type="text/css">' . "\n";
-		}
-		return $css_tags;
-	}
-
-
-	protected function getScriptIncludes()
-	{
-		$output = '';
-		$scriptArray = array_unique($this->scriptIncludes);
-		foreach ($scriptArray as $path)
-		{
-			$output .= '<script src="' . $path . '" type="text/javascript"></script>' . "\n";
-		}
-		return $output;
-	}
-
-	protected function getHead()
-	{
-		$headerTemplate = new DisplayMaker();
-		$headerTemplate->set_display_template($this->headTemplate);
-		$headerTags = $headerTemplate->tagsUsed();
-
-		if(in_array('meta', $headerTags))
-		{
-			$meta = array_unique($this->meta);
-			$headerTemplate->addContent('meta', $meta);
-		}
-
-		if(in_array('script', $headerTags))
-		{
-			$script = $this->script;
-
-			$startupScript = '$(' . "/n/n";
-			foreach($this->scriptStartup as $startupAddition)
-			{
-				$startupScript .= $startupAddition . "/n/n/n";
-			}
-			$startupScript .= ');' . "/n/n";
-
-			$script[] = $startupScript;
-
-			$scriptOutput = '<script>' . "/n/n";
-			foreach($script as $scriptAddition)
-			{
-				$scriptOutput .= $scriptAddition . "/n/n/n";
-			}
-
-			$scriptOutput .= '</script>' . "/n/n";
-		}
-
-		if(in_array('title', $headerTags))
-		{
-			$headerTemplate->addContent('title', $this->title);
-		}
-
-		if(in_array('script_includes', $headerTags))
-		{
-			$headerTemplate->addContent('title', $this->getScriptIncludes());
-		}
-
-		if(in_array('css', $headerTags))
-		{
-			$headerTemplate->addContent('css', $this->getCss());
-		}
-
-
-		return $headerTemplate->make_display();
-	}
-
-}
-
-class HtmlPage extends Page2
-{
-	protected $modId;
-	protected $pageId;
-	protected $pageName;
-
-	public function loadCmsData($id)
-	{
-		$cms = new CMSPage();
-
-		if($this->pageId > 0)
-		{
-			$cms->load_by_pageid($id);
-		}elseif($this->modId > 0 && strlen($this->pageName) > 0){
-			$cms->load_by_pagename($name, $modId);
-		}
-
-	}
-
-	public function setPageByName($name, $modId)
-	{
-		$this->modId = $modId;
-		$this->pageName = $name;
-		$this->pageId = 0;
-	}
-
-	public function setPageById($id)
-	{
-		$this->modId = 0;
-		$this->pageName = '';
-		$this->pageId = $id;
-	}
-
-
-	public function buildPage()
-	{
-		$cms = new CMSPage();
-
-		if($this->pageId > 0)
-		{
-			$cms->load_by_pageid($id);
-		}elseif($this->modId > 0 && strlen($this->pageName) > 0){
-			$cms->load_by_pagename($name, $modId);
-		}
-
-
-		$this->addMeta('Keywords', $cms->keywords);
-		$this->addMeta('Description', $cms->description);
-
-		$this->title = $cms->title;
-
-		$cms->createdon;
-		$cms->regions;
-
-
-
-		return parent::buildPage();
+		return str_replace($processTags, $processContent, $this->mainString);
 	}
 
 }

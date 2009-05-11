@@ -44,7 +44,7 @@ class AdminEngine extends Engine
 		$themePath = $page->getThemePath();
 		$themePath .= 'adminContent.html';
 		$text = file_get_contents($themePath);
-		$processedOutput->set_display_template($text);
+		$processedOutput->setDisplayTemplate($text);
 
 		$title = (isset($this->main_action->AdminSettings['headerTitle']))
 					? $this->main_action->AdminSettings['headerTitle'] : '';
@@ -57,7 +57,7 @@ class AdminEngine extends Engine
 		$processedOutput->addContent('subtitle', $subTitle);
 
 		$page = ActivePage::getInstance();
-		$page->addRegion('content', $processedOutput->make_display(false));
+		$page->addRegion('content', $processedOutput->makeDisplay(false));
 	}
 
 

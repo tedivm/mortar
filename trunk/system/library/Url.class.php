@@ -81,7 +81,7 @@ class Url
 				$pathCacheDisplay = new DisplayMaker();
 				if(!$pathCacheDisplay->loadTemplate('UrlPath', $handler['module']))
 					if(!$pathCacheDisplay->loadTemplate('UrlPath' . $location->getType() , $handler['module']))
-						$pathCacheDisplay->set_display_template('{# action #}/{# id #}/');
+						$pathCacheDisplay->setDisplayTemplate('{# action #}/{# id #}/');
 
 				$pathTemplate = $pathCacheDisplay->makeDisplay(false);
 				$pathCache->storeData($pathTemplate);
@@ -95,13 +95,13 @@ class Url
 				$string = (isset($attributes[$tag])) ? $attributes[$tag] : '_';
 				if(isset($attributes[$tag]))
 				{
-					$parameters->add_content($tag, htmlentities($attributes[$tag]));
+					$parameters->addContent($tag, htmlentities($attributes[$tag]));
 					unset($attributes[$tag]);
 				}else{
-					$parameters->add_content($tag, '_');
+					$parameters->addContent($tag, '_');
 				}
 			}
-			$urlString .= $parameters->make_display(true);
+			$urlString .= $parameters->makeDisplay(true);
 			$urlString = rtrim(trim($urlString), '_/');
 		}
 

@@ -11,7 +11,7 @@ class BentoBlogActionViewPost extends BentoCMSActionViewPage
 	protected function htmlContentArea()
 	{
 		$post = new DisplayMaker();
-		$post->set_display_template($this->loadTemplate('ViewPost'));
+		$post->setDisplayTemplate($this->loadTemplate('ViewPost'));
 		$entry = $this->page;
 
 
@@ -40,7 +40,7 @@ class BentoBlogActionViewPost extends BentoCMSActionViewPage
 
 		$post->addContent('entry', $revision->property('content'));
 
-		return $post->make_display();
+		return $post->makeDisplay();
 	}
 
 }

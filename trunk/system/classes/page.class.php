@@ -73,7 +73,7 @@ class Page implements ArrayAccess
 		}
 
 		$this->display = new DisplayMaker();
-		$this->display->set_display_template($template);
+		$this->display->setDisplayTemplate($template);
 	}
 
 	public function getThemeUrl()
@@ -199,7 +199,7 @@ class Page implements ArrayAccess
 			$display->addContent($name, $content);
 		}
 
-		return $this->postProcessTemplate($display->make_display(false));
+		return $this->postProcessTemplate($display->makeDisplay(false));
 	}
 
 	public function addRegion($tag, $content)
@@ -222,11 +222,11 @@ class Page implements ArrayAccess
 	protected function preProcessTemplate($templateString)
 	{
 		$template = new DisplayMaker();
-		$template->set_display_template($templateString);
+		$template->setDisplayTemplate($templateString);
 
-		$template->add_content('currentYear', date('y'));
-		$template->add_content('head', $this->headerTemplate);
-		return $template->make_display(false);
+		$template->addContent('currentYear', date('y'));
+		$template->addContent('head', $this->headerTemplate);
+		return $template->makeDisplay(false);
 	}
 
 	// This function adds any dynamic, runtime tags
@@ -271,16 +271,16 @@ class Page implements ArrayAccess
 	protected function postProcessTemplate($templateString)
 	{
 		$template = new DisplayMaker();
-		$template->set_display_template($templateString);
-		$template->add_content('theme_path', $this->getThemeUrl());
+		$template->setDisplayTemplate($templateString);
+		$template->addContent('theme_path', $this->getThemeUrl());
 
 		$jsInclude = ActiveSite::getLink() . 'javascript/';
 
-		$template->add_content('js_path', $jsInclude);
+		$template->addContent('js_path', $jsInclude);
 
 		//(DEBUG>1)
 
-		return $template->make_display(!(DEBUG>2));
+		return $template->makeDisplay(!(DEBUG>2));
 	}
 
 	public function offsetGet($offset)
