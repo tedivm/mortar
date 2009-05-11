@@ -1,11 +1,46 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
 
+/**
+ * This class installs a module from its package
+ *
+ * @package MainClasses
+ */
 class ModuleInstaller
 {
+	/**
+	 * This is a path to the package being installed
+	 *
+	 * @access protected
+	 * @var unknown_type
+	 */
 	protected $pathToPackage;
+
+	/**
+	 * This is the name of the package being installed
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $package;
+
+	/**
+	 * This is the package info file for the package being installed
+	 *
+	 * @var PackageInfo
+	 */
 	public $packageInfo;
 
+	/**
+	 * This constructor sets up the information needed for installation
+	 *
+	 * @param string $package
+	 */
 	public function __construct($package)
 	{
 		if(!is_string($package))
@@ -15,6 +50,11 @@ class ModuleInstaller
 		$this->loadSettings();
 	}
 
+	/**
+	 * This function loads the settings for the module from its package
+	 *
+	 * @access protected
+	 */
 	protected function loadSettings()
 	{
 		$info = InfoRegistry::getInstance();
@@ -28,6 +68,11 @@ class ModuleInstaller
 		$this->changeStatus('fileSystem');
 	}
 
+	/**
+	 * This function attempts a full installation of the module
+	 *
+	 * @return bool
+	 */
 	public function fullInstall()
 	{
 		try{
@@ -75,11 +120,21 @@ class ModuleInstaller
 		return true;
 	}
 
+	/**
+	 * This function checks to make sure requirements are met for the package
+	 *
+	 * @todo write this
+	 * @return bool
+	 */
 	public function checkRequirements()
 	{
 		return true;
 	}
 
+	/**
+	 * This sets up the database structure by checking the package for an installation.sql.php file.
+	 *
+	 */
 	public function installDatabaseStructure()
 	{
 		$sqlPath = $this->packageInfo->getPath() . 'sql/install.sql.php';
@@ -91,6 +146,10 @@ class ModuleInstaller
 		}
 	}
 
+	/**
+	 * Here we add the data to the database, if the install_data.sql.php file is present
+	 *
+	 */
 	public function installDatabaseData()
 	{
 		$sqlPath = $this->pathToPackage . 'sql/install_data.sql.php';
@@ -102,6 +161,10 @@ class ModuleInstaller
 		}
 	}
 
+	/**
+	 * Here we register any models this module has
+	 *
+	 */
 	public function installModels()
 	{
 		$models = $this->packageInfo->getModels();
@@ -111,6 +174,10 @@ class ModuleInstaller
 		}
 	}
 
+	/**
+	 * If the package has a custom installer we open it up and run its code.
+	 *
+	 */
 	public function installCustom()
 	{
 		if($className = importFromModule('CustomInstall', $this->package, 'plugin'))
@@ -120,6 +187,11 @@ class ModuleInstaller
 		}
 	}
 
+	/**
+	 * Here we add all of the new permission types into the system
+	 *
+	 * @return bool
+	 */
 	public function addPermissions()
 	{
 		$actions = $this->packageInfo->getActions();
@@ -138,6 +210,12 @@ class ModuleInstaller
 		return true;
 	}
 
+	/**
+	 * This function changes the status of the package so that installations can be resumed
+	 *
+	 * @param string $status
+	 * @return bool
+	 */
 	public function changeStatus($status)
 	{
 		$moduleRecord = new ObjectRelationshipMapper('modules');
