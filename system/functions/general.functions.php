@@ -74,13 +74,6 @@ function deltree($file)
 	}
 }
 
-function loadHook($LocationId, $name)
-{
-	$hook = new Hook($id, $name);
-	return $hook->plugins;
-}
-
-
 function importClass($classname, $path, $basePath = null, $require = false)
 {
 

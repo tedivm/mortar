@@ -4,4 +4,4 @@
 <br>
 {# permalink #}
 <br>
-{# createdOn format="iso8601" #}
+{# createdOn format="l jS \of F Y h:i:s A" #}

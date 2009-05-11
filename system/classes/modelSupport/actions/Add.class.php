@@ -134,6 +134,9 @@ class ModelActionAdd  extends ModelActionBase// implements ActionInterface //ext
 				$url->locationId = $locationId;
 				$url->format = 'Admin';
 				$url->action = 'Read';
+
+				//add some sort of message variable so the read page can add a 'you saved' or 'you edited' thing
+
 				$this->ioHandler->addHeader('Location', (string) $url);
 
 

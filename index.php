@@ -192,7 +192,7 @@ if(BENCHMARK)
 
 	}
 	$queryCount = 0;
-	$queryArray = Mysql_Base::$query_array;
+	$queryArray = MysqlBase::$queryArray;
 
 	if(is_array($queryArray))
 	{
@@ -201,10 +201,9 @@ if(BENCHMARK)
 		foreach($queryArray as $queryString => $count)
 		{
 			$queryList .= $count . ' ' . $queryString . PHP_EOL;
-			$queryCount += $count;
 		}
 	}
-	$benchmarkString .= 'Query Count: ' . $queryCount . PHP_EOL;
+	$benchmarkString .= 'Query Count: ' . MysqlBase::$queryCount . PHP_EOL;
 	$benchmarkString .= $queryList;
 
 	$config = Config::getInstance();

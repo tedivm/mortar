@@ -280,7 +280,7 @@ class ActiveUser implements SplSubject
 		$db = db_connect('default_read_only');
 		$stmt = $db->stmt_init();
 		$stmt->prepare("SELECT * FROM users WHERE user_name=?");
-		$stmt->bind_param_and_execute('s', $userName);
+		$stmt->bindAndExecute('s', $userName);
 		$numRows = $stmt->num_rows;
 		$user_array = $stmt->fetch_array();
 
@@ -359,7 +359,7 @@ class ActiveUser implements SplSubject
 			$db = db_connect('default_read_only');
 			$stmt = $db->stmt_init();
 			$stmt->prepare("SELECT * FROM users WHERE user_name=? LIMIT 1");
-			$stmt->bind_param_and_execute('s', $user);
+			$stmt->bindAndExecute('s', $user);
 
 			if($stmt->num_rows == 1)
 			{

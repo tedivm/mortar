@@ -20,7 +20,7 @@ class BentoBlogPost extends BentoCMSCmsPage
 			$db = dbConnect('default_read_only');
 			$tagRows = $db->stmt_init();
 			$tagRows->prepare('SELECT tag FROM BentoBlog_BlogHasTags WHERE location_id = ?');
-			$tagRows->bind_param_and_execute('i', $this->id);
+			$tagRows->bindAndExecute('i', $this->id);
 
 			while($tagResults = $tagRows->fetch_array())
 			{
@@ -30,7 +30,7 @@ class BentoBlogPost extends BentoCMSCmsPage
 
 			$postRow = $db->stmt_init();
 			$postRow->prepare('SELECT user_id FROM BentoBlog_postDetail WHERE location_id = ?');
-			$postRow->bind_param_and_execute('i', $this->id);
+			$postRow->bindAndExecute('i', $this->id);
 
 			if($postRow->num_rows == 1)
 			{
@@ -51,19 +51,19 @@ class BentoBlogPost extends BentoCMSCmsPage
 		$db = dbConnect('default');
 		$removalQuery = $db->stmt_init();
 		$removalQuery->prepare('DELETE FROM BentoBlog_BlogHasTags WHERE location_id = ?');
-		$removalQuery->bind_param_and_execute('i', $this->id);
+		$removalQuery->bindAndExecute('i', $this->id);
 
 		if(is_array($this->tags))
 			foreach($this->tags as $tag)
 		{
 			$insertQuery = $db->stmt_init();
 			$insertQuery->prepare('INSERT INTO BentoBlog_BlogHasTags (location_id, tag) VALUES (?, ?)');
-			$insertQuery->bind_param_and_execute('is', $this->id, trim($tag));
+			$insertQuery->bindAndExecute('is', $this->id, trim($tag));
 		}
 
 		$postInfoQuery = $db->stmt_init();
 		$postInfoQuery->prepare('REPLACE INTO BentoBlog_postDetail (location_id, user_id) VALUES (?, ?)');
-		$postInfoQuery->bind_param_and_execute('ii', $this->id, $this->author);
+		$postInfoQuery->bindAndExecute('ii', $this->id, $this->author);
 
 		Cache::clear('modules', 'cms', $id, 'blogInfo');
 		return true;
