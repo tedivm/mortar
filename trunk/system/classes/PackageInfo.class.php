@@ -33,7 +33,7 @@ class PackageInfo
 			$db = DatabaseConnection::getConnection('default_read_only');
 			$packageStmt = $db->stmt_init();
 			$packageStmt->prepare('SELECT * FROM modules WHERE mod_id = ?');
-			$packageStmt->bind_param_and_execute('i', $id);
+			$packageStmt->bindAndExecute('i', $id);
 
 			if($packageStmt->num_rows == 1)
 			{
@@ -77,7 +77,7 @@ class PackageInfo
 
 				$packageStmt = $db->stmt_init();
 				$packageStmt->prepare('SELECT * FROM modules WHERE package = ?');
-				$packageStmt->bind_param_and_execute('s', $packageName);
+				$packageStmt->bindAndExecute('s', $packageName);
 
 				if($moduleInfo = $packageStmt->fetch_array())
 				{

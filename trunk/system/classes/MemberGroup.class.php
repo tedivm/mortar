@@ -36,7 +36,7 @@ class MemberGroup
 		$db = db_connect('default_read_only');
 		$stmt = $db->stmt_init();
 		$stmt->prepare('SELECT user_id FROM userInMemberGroup WHERE user_id = ? AND memgroup_id = ?');
-		$stmt->bind_param_and_execute('ii', $userId, $this->id);
+		$stmt->bindAndExecute('ii', $userId, $this->id);
 		return ($stmt->num_rows == 1);
 	}
 
@@ -54,7 +54,7 @@ class MemberGroup
 		$dbWrite = db_connect('default');
 		$insertStmt = $dbWrite->stmt_init();
 		$insertStmt->prepare('INSERT INTO userInMemberGroup (user_id, memgroup_id) VALUES (?, ?)');
-		return $insertStmt->bind_param_and_execute('ii', $userId, $this->id);
+		return $insertStmt->bindAndExecute('ii', $userId, $this->id);
 	}
 
 	public function removeUser($user)
@@ -68,7 +68,7 @@ class MemberGroup
 		$dbWrite = db_connect('default');
 		$deleteStmt = $dbWrite->stmt_init();
 		$deleteStmt->prepare('DELETE FROM userInMemberGroup WHERE user_id = ? AND memgroup_id = ?');
-		return $deleteStmt->bind_param_and_execute('ii', $userId, $this->id);
+		return $deleteStmt->bindAndExecute('ii', $userId, $this->id);
 	}
 
 	public function isSystem()

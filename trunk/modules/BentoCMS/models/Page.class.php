@@ -163,7 +163,7 @@ class PageRevision
 				$db = dbConnect('default_read_only');
 				$contentStmt = $db->stmt_init();
 				$contentStmt->prepare('SELECT * FROM BentoCMS_Content WHERE pageId = ? AND revisionId = ?');
-				$contentStmt->bind_param_and_execute('ii', $this->pageId, $revisionId);
+				$contentStmt->bindAndExecute('ii', $this->pageId, $revisionId);
 
 
 				$contentData = ($contentStmt->num_rows == 1) ? $contentStmt->fetch_array() : false;
@@ -218,7 +218,7 @@ class PageRevision
 										?, NOW(),
 										?, ?, ?)');
 
-		$insertStmt->bind_param_and_execute('iiisss', $this->pageId, $this->pageId, $this->author, $this->title,
+		$insertStmt->bindAndExecute('iiisss', $this->pageId, $this->pageId, $this->author, $this->title,
 														$this->filteredContent,
 														$this->rawContent);
 
@@ -226,7 +226,7 @@ class PageRevision
 		$getStmt->prepare('SELECT revisionId FROM BentoCMS_Content
 								WHERE pageId = ? AND author = ? AND title = ?
 								ORDER BY revisionId DESC LIMIT 1');
-		$getStmt->bind_param_and_execute('iis', $this->pageId, $this->author, $this->title);
+		$getStmt->bindAndExecute('iis', $this->pageId, $this->author, $this->title);
 		$newRow = $getStmt->fetch_array();
 		$this->revisionId = $newRow['revisionId'];
 

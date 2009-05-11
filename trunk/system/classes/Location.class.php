@@ -364,7 +364,7 @@ class Location
 			$stmt = $db->stmt_init();
 
 			$stmt->prepare('SELECT location_id FROM locations WHERE parent = ? AND name = ?');
-			$stmt->bind_param_and_execute('is', $this->getId(), $name);
+			$stmt->bindAndExecute('is', $this->getId(), $name);
 
 			$childLocation = $stmt->fetch_array();
 
@@ -396,10 +396,10 @@ class Location
 			if($type != 'all')
 			{
 				$stmt->prepare('SELECT location_id FROM locations WHERE parent = ? AND resource = ?');
-				$stmt->bind_param_and_execute('is', $this->id, $type);
+				$stmt->bindAndExecute('is', $this->id, $type);
 			}else{
 				$stmt->prepare('SELECT location_id FROM locations WHERE parent = ?');
-				$stmt->bind_param_and_execute('i', $this->id);
+				$stmt->bindAndExecute('i', $this->id);
 			}
 
 

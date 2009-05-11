@@ -115,7 +115,6 @@ class Config implements ArrayAccess
 		return $this->config[$key];
 	}
 
-
 	/**
 	 * Allows you to change a setting in the Config Object
 	 *
@@ -128,7 +127,6 @@ class Config implements ArrayAccess
 	{
 		$this->config[(string) $key] = $value;
 	}
-
 
 	/**
 	 * This function is primarily for the installer. It sets default values to bootstrap the system
@@ -168,7 +166,6 @@ class Config implements ArrayAccess
 
 		$this->config['url']['javascript'] = 'javascript/';
 	}
-
 
 	public function offsetExists($offset)
 	{

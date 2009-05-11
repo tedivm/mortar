@@ -30,7 +30,7 @@ class ModelRegistry
 		$db = db_connect('default');
 		$insertStmt = $db->stmt_init();
 		$insertStmt->prepare('REPLACE INTO modelsRegistered (name, resource, mod_id) VALUES (?, ?, ?)');
-		$insertStmt->bind_param_and_execute('ssi', $name, $resource, $moduleInfo->getId());
+		$insertStmt->bindAndExecute('ssi', $name, $resource, $moduleInfo->getId());
 
 		Cache::clear('system', 'models', 'handlers');
 		self::loadHandlers();

@@ -248,7 +248,7 @@ class UserPermission
 							WHERE (actions.action_id = ' . $type . 'Permissions.action_id)
 								AND ' . $type . 'Permissions.location_id = ?
 								AND ' . $type . 'Permissions.' . $typeId . ' = ?');
-			$stmt->bind_param_and_execute('ii', $this->location, $id);
+			$stmt->bindAndExecute('ii', $this->location, $id);
 			if($stmt->num_rows > 0)
 			{
 				$tmp_array = array();
@@ -464,7 +464,7 @@ class PermissionActionList
 		$stmt = $db->stmt_init();
 		$stmt->prepare('INSERT INTO actions (action_name) VALUES (?)');
 
-		if($stmt->bind_param_and_execute('s', $action))
+		if($stmt->bindAndExecute('s', $action))
 		{
 
 			$id = $stmt->insert_id;

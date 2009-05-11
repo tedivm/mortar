@@ -1,14 +1,9 @@
 <?php
 /**
- * Bento Base
+ * BentoBase
  *
- * A framework for developing modular applications.
- *
- * @package		Bento Base
- * @author		Robert Hafner
- * @copyright	Copyright (c) 2007, Robert Hafner
- * @license		http://www.mozilla.org/MPL/
- * @link		http://www.bantobase.org
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
  */
 
 
@@ -20,87 +15,126 @@
  * exists, otherwise it will establish the connection, store it for future use
  * and then return it.
  *
- * @package		BentoBase
- * @subpackage	Main_Classes
- * @category	Database
- * @author		Robert Hafner
+ * @package		MainClasses
  */
 class DatabaseConnection
 {
-//	private static $instance;
-	static private $db_connections = array();
-	static private $iniFile;
-
-
 
 	/**
-	 * Returns a database connection based off of the database config array
+	 * Everytime a connection is opened it gets stored in this array
 	 *
-	 * @param string $param
-	 * @return Mysql_Base|false
+	 * @access private
+	 * @static
+	 * @var array
+	 */
+	static private $dbConnections = array();
+
+	/**
+	 * Connections that aren't 'saved', so that we can still close them properly when the script closes
+	 *
+	 * @access private
+	 * @static
+	 * @var array
+	 */
+	static private $extraConnections = array();
+
+	/**
+	 * This is the database.ini file containing the login information for the databases
+	 *
+	 * @access private
+	 * @static
+	 * @var IniFile
+	 */
+	static private $iniFile;
+
+	/**
+	 * Returns the connection saved in the database.ini file
+	 *
+	 * @access public
+	 * @static
+	 * @param string $database
+	 * @param bool $useSaved if set to false this will return a new connection
+	 * @return MysqlBase
 	 */
 	static public function getConnection($database = 'default_read_only', $useSaved = true)
 	{
-		if($useSaved && isset(self::$db_connections[$database]))
+		if($useSaved && isset(self::$dbConnections[$database]))
 		{
-			return self::$db_connections[$database];
+			return self::$dbConnections[$database];
 		}else{
-
-
 			try
 			{
-
 				if(!self::$iniFile)
 				{
 					$config = Config::getInstance();
 					$path_to_dbfile = $config['path']['config'] . 'databases.php';
-
 					$iniFile = new IniFile($path_to_dbfile);
-
 					self::$iniFile = $iniFile;
 				}
 
 				$connectionInfo = self::$iniFile->getArray($database);
 
-				$db_connection = new Mysql_Base(
+				$dbConnection = new MysqlBase(
 				$connectionInfo['host'],
 				$connectionInfo['username'],
 				$connectionInfo['password'],
 				$connectionInfo['dbname']);
 
-				if($db_connection->connect_errno)
-					throw new BentoError('Could not connect to database ' . $db_name . ': ' . $db_connection->error);
+				if($dbConnection->connect_errno)
+					throw new BentoError('Could not connect to database ' . $db_name . ': ' . $dbConnection->error);
 
 				$charset = (isset($connectionInfo['charset'])) ? $connectionInfo['charset'] : 'utf8';
 
-				if(!$db_connection->set_charset($charset))
-					throw new BentoError('Unable to switch db connection to utf8 charset.');
+				if(!$dbConnection->set_charset($charset))
+					throw new BentoError('Unable to switch db connection charset to ' . $charset . ' c.');
 
-				if(!isset(self::$db_connections[$database]))
-					self::$db_connections[$database] = $db_connection;
+				if(($useSaved && !isset(self::$dbConnections[$database])))
+				{
+					self::$dbConnections[$database] = $dbConnection;
+				}else{
+					self::$extraConnections[] = $dbConnection;
+				}
 
-				return $db_connection;
-
+				return $dbConnection;
 			}catch(BentoError $e){
-
 				return false;
 			}
 		}
 	}
 
+	/**
+	 * Returns an enhanced version of the mysqli_stmt class using the specified connection
+	 *
+	 * @access public
+	 * @static
+	 * @param string $database
+	 * @param bool $useSaved if set to false this will return a new connection
+	 * @return Mystmt
+	 */
 	static public function getStatement($database = 'default_read_only', $useSaved = true)
 	{
 		$db = DatabaseConnection::getConnection($database, $useSaved);
 		return $db->stmt_init();
 	}
 
-
+	/**
+	 * Closes all of the database connections
+	 *
+	 * @access public
+	 * @static
+	 */
 	static function close()
 	{
-		foreach (self::$db_connections as $dbName => $db)
+		foreach (self::$dbConnections as $dbName => $db)
 		{
 			$db->close();
-			unset(self::$db_connections[$dbName]);
+			unset(self::$dbConnections[$dbName]);
+		}
+
+		foreach(self::$extraConnections as $index => $db)
+		{
+			$db->close();
+			unset(self::$extraConnections[$index]);
 		}
 	}
 }
@@ -113,39 +147,70 @@ class DatabaseConnection
  * An extention of the MySQLi class, this returns a modified Statement class
  * when called to do so.
  *
- * @package		Bento Base
- * @subpackage	Main_Classes
- * @category	Database
- * @author		Robert Hafner
+ * @package		MainClasses
  */
-class Mysql_Base extends mysqli
+class MysqlBase extends mysqli
 {
-	static $query_count = 0;
-	static $query_array = array();
+	/**
+	 * This is a running count of all queries (including those statement calls)
+	 *
+	 * @access public
+	 * @static
+	 * @var int
+	 */
+	static $queryCount = 0;
 
+	/**
+	 * This is a record of all queries run.
+	 *
+	 * @access public
+	 * @static
+	 * @var array The index is the query and the value is an integer representing the number of times it was called
+	 */
+	static $queryArray = array();
+
+	/**
+	 * When this value is one autocommit is on. Each time autocommit is turned off this number is decremented
+	 * and each time its turned on its incremented, making it so the outer most layer of code controls the
+	 * autocommit
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $autocommitCounter = 1;
 
     /**
-     * This function overloads the original to return the new Mystmt class
+     * This function overloads the mysqli stmt_init() function to return the new Mystmt class
      *
+     * @access public
      * @return Mystmt
      */
 	public function stmt_init()
 	{
-		self::$query_count++;
+		self::$queryCount++;
 		return new Mystmt($this);
 	}
 
+	/**
+	 * This function is identical to the Mysli::query, except it uses our exceptions and logs to queryCount
+	 * and queryArray
+	 *
+	 * @access public
+	 * @see $queryArray, $queryCount
+	 * @param string $query mysql query
+	 * @param int $resultmode
+	 * @return MySQLi_Result
+	 */
 	public function query($query, $resultmode = 0)
 	{
 		try{
-			Mysql_Base::$query_count++;
+			MysqlBase::$queryCount++;
 
-			if(isset(Mysql_Base::$query_array[$query]))
+			if(isset(MysqlBase::$queryArray[$query]))
 			{
-				Mysql_Base::$query_array[$query]++;
+				MysqlBase::$queryArray[$query]++;
 			}else{
-				Mysql_Base::$query_array[$query] = 1;
+				MysqlBase::$queryArray[$query] = 1;
 			}
 
 			if(!($result = parent::query($query, $resultmode)))
@@ -160,6 +225,13 @@ class Mysql_Base extends mysqli
 		return $result;
 	}
 
+	/**
+	 * This function will run all the sql located in a file
+	 *
+	 * @access public
+	 * @param string $path Path to the file
+	 * @return bool status of query
+	 */
 	public function runFile($path)
 	{
 		try{
@@ -182,7 +254,13 @@ class Mysql_Base extends mysqli
 		}
 	}
 
-	public function throwError()
+
+	/**
+	 * This throws a Bento error or notice, depending on the circumstances
+	 *
+	 * @access protected
+	 */
+	protected function throwError()
 	{
 		if($this->errno !== 0)
 		{
@@ -192,8 +270,12 @@ class Mysql_Base extends mysqli
 		}
 	}
 
-
-
+	/**
+	 * Enables or disables autocommit
+	 *
+	 * @access public
+	 * @param bool $mode
+	 */
 	public function autocommit($mode)
 	{
 		if($mode) //enable
@@ -218,15 +300,24 @@ class Mysql_Base extends mysqli
  * An extention of the MySQLi STMT class, this adds the "fetch_array loop"
  * functionality as well as some other enhancements.
  *
- * @package		Bento Base
- * @subpackage	Main_Classes
- * @category	Database
- * @author		Robert Hafner
+ * @package		MainClasses
  */
 class Mystmt extends mysqli_stmt
 {
+	/**
+	 * This is a stored version of the prepared query
+	 *
+	 * @access public
+	 * @var string sql
+	 */
 	public $myQuery;
 
+	/**
+	 * This is an extension of the Mysqli_stmt function
+	 *
+	 * @param unknown_type $query
+	 * @return unknown
+	 */
 	public function prepare($query)
 	{
 		$this->myQuery = $query;
@@ -235,14 +326,15 @@ class Mystmt extends mysqli_stmt
 		if(!$result)
 			$this->throwError('Unable to prepare statement');
 
-		return parent::prepare($query);
+		return $result;
 	}
 
 	/**
 	 * After executing a statement, you can use this function to return each
 	 * result set one row at a time as an associative array. You can use it to
-	 * loop through your results
+	 * iterate through your results
 	 *
+	 * @access public
 	 * @return array An associative array of the current result set
 	 */
 	public function fetch_array()
@@ -262,41 +354,29 @@ class Mystmt extends mysqli_stmt
 			$count++;
 		}
 
-		//call_user_func_array(array('Mystmt', 'bind_result'), $fields);
 		call_user_func_array(array($this, 'bind_result'), $fields);
-		if($this->fetch())
-		{
-			return $out;
-		}else{
-			return false;
-		}
 
+		return ($this->fetch()) ? $out : false;
     }
 
-    public function bind_param_and_execute()
-    {
-    	depreciationWarning();
-    	$args = func_get_args();
-    	return call_user_func_array(array($this, 'bindAndExecute'), $args);
-    }
 
     /**
      * Combines the bind_param, execute, and store_results into a single function
      *
-     *
+     * @access public
      * @param string $types
-     * @param mixed $var
+     * @param,... mixed $var
      */
 	public function bindAndExecute()
 	{
 		$params = func_get_args();
-		Mysql_Base::$query_count++;
+		MysqlBase::$queryCount++;
 
-		if(isset(Mysql_Base::$query_array[$this->myQuery]))
+		if(isset(MysqlBase::$queryArray[$this->myQuery]))
 		{
-			Mysql_Base::$query_array[$this->myQuery]++;
+			MysqlBase::$queryArray[$this->myQuery]++;
 		}else{
-			Mysql_Base::$query_array[$this->myQuery] = 1;
+			MysqlBase::$queryArray[$this->myQuery] = 1;
 		}
 
 		if(!call_user_func_array(array($this, 'bind_param'), $params))
@@ -314,6 +394,11 @@ class Mystmt extends mysqli_stmt
 
 	}
 
+	/**
+	 * This throws a Bento error or notice, depending on the circumstances
+	 *
+	 * @access protected
+	 */
 	public function throwError($message = '')
 	{
 		$message .= ' MySQL Error-' .$this->error;
