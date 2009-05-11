@@ -1,10 +1,36 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
 
+/**
+ * This class createds a list of installed and installable packages
+ *
+ * @package MainClasses
+ */
 class PackageList
 {
+	/**
+	 * This is an array of all the installed packages
+	 *
+	 * @var array
+	 */
 	protected $installedPackages = array();
+
+	/**
+	 * This is a list of all packages that can be installed
+	 *
+	 * @var array
+	 */
 	protected $installablePackages = array();
 
+	/**
+	 * The constructor calls the functions to load the installedPackages and installablePackages lists
+	 *
+	 */
 	public function __construct()
 	{
 		$this->installedPackages = $this->loadInstalledPackages();
@@ -14,6 +40,12 @@ class PackageList
 			sort($this->installablePackages, SORT_STRING);
 	}
 
+	/**
+	 * This function loads a list of installable packages
+	 *
+	 * @access protected
+	 * @return array
+	 */
 	protected function loadInstallablePackages()
 	{
 		$info = InfoRegistry::getInstance();
@@ -34,6 +66,12 @@ class PackageList
 		return $packageList;
 	}
 
+	/**
+	 * This function returns a list of installed packages
+	 *
+	 * @access protected
+	 * @return array
+	 */
 	protected function loadInstalledPackages()
 	{
 		if(INSTALLMODE)
@@ -50,6 +88,11 @@ class PackageList
 		return $packageList;
 	}
 
+	/**
+	 * Returns a full list of packages, both installed and not
+	 *
+	 * @return array
+	 */
 	public function getPackageList()
 	{
 		$fullSet = array_merge($this->installedPackages, $this->installablePackages);
@@ -57,11 +100,21 @@ class PackageList
 		return $fullSet;
 	}
 
+	/**
+	 * Returns an array of installed packages
+	 *
+	 * @return array
+	 */
 	public function getInstalledPackages()
 	{
 		return $this->installedPackages;
 	}
 
+	/**
+	 * Returns an array of installable packages
+	 *
+	 * @return array
+	 */
 	public function getInstallablePackages()
 	{
 		return $this->installablePackages;

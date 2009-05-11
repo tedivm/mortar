@@ -55,7 +55,7 @@ class HtmlTable implements ArrayAccess
 		{
 			$page = ActivePage::getInstance();
 			$page->addStartupScript($javascript);
-			$page->addJQueryInclude($jqueryPlugins);
+			$page->addJavaScript($jqueryPlugins, 'jquery');
 			$page->addCss($this->name, 'tables');
 			//$page->
 
