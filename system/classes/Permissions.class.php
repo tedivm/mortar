@@ -2,25 +2,48 @@
 /**
  * BentoBase
  *
- * A framework for developing modular applications.
- *
- * @package		BentoBase
- * @author		Robert Hafner
- * @copyright		Copyright (c) 2007, Robert Hafner
- * @license		http://www.mozilla.org/MPL/
- * @link		http://www.bentobase.org
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
  */
 
-
+/**
+ * This class handles user permissions
+ *
+ * @package MainClasses
+ */
 class Permissions
 {
+	/**
+	 * This is the user the object is checking against
+	 *
+	 * @access protected
+	 * @var User
+	 */
 	protected $user;
+
+	/**
+	 * Location that is being checked
+	 *
+	 * @access protected
+	 * @var Location
+	 */
 	protected $location;
 
-	// $permission[type][action] = permissions
+	/**
+	 * An array of allowed permissions and actions
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $permissions = array();
 
 
+	/**
+	 * Constructor takes a location and user
+	 *
+	 * @param Location|int $location
+	 * @param User|int $userId
+	 */
 	public function __construct($location, $userId)
 	{
 
@@ -54,6 +77,12 @@ class Permissions
 
 	}
 
+	/**
+	 * This loads the permmissions fromt he database and, if allowed, the parent class
+	 *
+	 * @access protected
+	 * @return array
+	 */
 	protected function loadPermissions()
 	{
 		$memberGroupPermissionsArray = array();
@@ -81,6 +110,13 @@ class Permissions
 		return $this->mergePermissions($memberGroupPermissionsArray, $userPermissionsArray);
 	}
 
+	/**
+	 * Merges two permission arrays
+	 *
+	 * @param array $current
+	 * @param array $new
+	 * @return array
+	 */
 	protected function mergePermissions($current, $new)
 	{
 		if(!is_array($current))
@@ -125,6 +161,13 @@ class Permissions
 		return $current;
 	}
 
+	/**
+	 * Checks to see if an action is allowed to be performed by the user at this location
+	 *
+	 * @param string $action
+	 * @param string|null $type this represents a resource type
+	 * @return unknown
+	 */
 	public function isAllowed($action, $type = null)
 	{
 		// This should only be used when testing the permissions system, particularly when breaking it but needing
@@ -166,6 +209,13 @@ class Permissions
 		}
 	}
 
+	/**
+	 * This is depreciated. Use isAllowed.
+	 *
+	 * @deprecated
+	 * @param unknown_type $action
+	 * @return bool
+	 */
 	public function checkAuth($action)
 	{
 		depreciationError();
@@ -174,16 +224,58 @@ class Permissions
 
 }
 
+/**
+ * This class helps the Permissions class by loading the user specific permissions from the database
+ *
+ * @package MainClasses
+ */
 class UserPermission
 {
+	/**
+	 * This is the permission type, used for some sql
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $type = 'user';
+
+	/**
+	 * This is the column that contains the id needed for the sql
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $typeId = 'user_id';
+
+	/**
+	 * This is the location being checked
+	 *
+	 * @var Location
+	 */
 	protected $location;
+
+	/**
+	 * This is the id of the user being checked
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $id;
 
-	// $permission[type][action] = permissions
+	/**
+	 * An array of allowed permissions and actions
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $permissions = array();
 
+	/**
+	 * Constructor takes the ID and location
+	 *
+	 * @param int $id
+	 * @param Location|int $location
+	 */
 	public function __construct($id, $location)
 	{
 		if(!is_numeric($id))
@@ -198,11 +290,17 @@ class UserPermission
 			throw new TypeMismatch(array('Integer', $location));
 
 		$this->location = $location;
-
 		$this->permissions = $this->loadPermissionsFromDatabase();
 	}
 
-	public function setPermission($resource, $action, $permission)
+	/**
+	 * This method is used to change the permission of an object
+	 *
+	 * @param string $resource
+	 * @param string $action
+	 * @param bool $permission
+	 */
+	public function setPermission($resource, $action, $permission = true)
 	{
 		if(!is_numeric($action))
 			$action = PermissionActionList::getAction($action);
@@ -224,11 +322,22 @@ class UserPermission
 		}
 	}
 
+	/**
+	 * Returns the permission array
+	 *
+	 * @return array
+	 */
 	public function getPermissions()
 	{
 		return $this->permissions;
 	}
 
+	/**
+	 * This loads the permissions from the database and returns them as an array
+	 *
+	 * @access protected
+	 * @return array
+	 */
 	protected function loadPermissionsFromDatabase()
 	{
 		$type = $this->type;
@@ -271,6 +380,11 @@ class UserPermission
 		return $permissions;
 	}
 
+	/**
+	 * This function saves the current permission to the database
+	 *
+	 * @return success status
+	 */
 	public function save()
 	{
 		$tableName = $this->type . 'Permissions';
@@ -330,17 +444,58 @@ class UserPermission
 
 }
 
+/**
+ * This class helps the Permissions class by loading the MemberGroup specific permissions from the database
+ *
+ * @package MainClasses
+ */
 class GroupPermission extends UserPermission
 {
+	/**
+	 * This is the permission type, used for some sql
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $type = 'group';
+
+	/**
+	 * This is the column that contains the id needed for the sql
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $typeId = 'memgroup_id';
 }
 
+/**
+ * This class creates a general list (not attached to locations) of actions the user is allowed to perform
+ *
+ * @package MainClasses
+ */
 class PermissionLists
 {
+	/**
+	 * This is the user id that is being checked
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $userId;
+
+	/**
+	 * This is the array of permission actions
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $permissions;
 
+	/**
+	 * This constructor takes a user id as its argument and loads the permissions
+	 *
+	 * @param int $userId
+	 */
 	public function __construct($userId)
 	{
 		$this->userId = $userId;
@@ -349,6 +504,13 @@ class PermissionLists
 			$this->load();
 	}
 
+	/**
+	 * Checks to see if the permission can be run by this user
+	 *
+	 * @param string $type
+	 * @param string $action
+	 * @return bool
+	 */
 	public function checkAction($type, $action)
 	{
 		$type = strtolower($type);
@@ -359,6 +521,11 @@ class PermissionLists
 		return (isset($this->permissions[$type]) && in_array($action, $this->permissions[$type]));
 	}
 
+	/**
+	 * Loads the permissions
+	 *
+	 * @access protected
+	 */
 	protected function load()
 	{
 		$user = new User($this->userId);
@@ -374,6 +541,12 @@ class PermissionLists
 		$this->permissions = call_user_func_array('array_merge_recursive', $permissions);
 	}
 
+	/**
+	 * Loads user table permissions and returns them as an array
+	 *
+	 * @param int $userId
+	 * @return array
+	 */
 	protected function loadUserPermissions($userId)
 	{
 		$cache = new Cache('permissions', 'user', $userId, 'allowedActions');
@@ -403,6 +576,13 @@ class PermissionLists
 		return $allowedPermissions;
 	}
 
+	/**
+	 * Loads group permissions and returns them as an array
+	 *
+	 * @access protected
+	 * @param id $groupId
+	 * @return array
+	 */
 	protected function loadGroupPermissions($groupId)
 	{
 		$cache = new Cache('permissions', 'group', $groupId, 'allowedActions');
@@ -433,25 +613,54 @@ class PermissionLists
 	}
 }
 
+/**
+ * This class is used to access the list of actions
+ *
+ * @package MainClasses
+ */
 class PermissionActionList
 {
+	/**
+	 * An array of actions in the system
+	 *
+	 * @access protected
+	 * @static
+	 * @var array
+	 */
 	static protected $actionList = false;
 
+	/**
+	 * This function clears the action list
+	 *
+	 * @static
+	 */
 	static public function clear()
 	{
 		self::$actionList = false;
 	}
 
+	/**
+	 * Returns the id of the action
+	 *
+	 * @static
+	 * @param string $action
+	 * @return int
+	 */
 	static public function getAction($action)
 	{
 		if(self::$actionList === false)
 			self::loadActionList();
 
-		$output = (isset(self::$actionList[$action])) ? self::$actionList[$action] : false;
-
-		return $output;
+		return (isset(self::$actionList[$action])) ? self::$actionList[$action] : false;
 	}
 
+	/**
+	 * Adds an action to the system
+	 *
+	 * @static
+	 * @param string $action
+	 * @return bool
+	 */
 	static public function addAction($action)
 	{
 		if(self::$actionList === false)
@@ -481,6 +690,12 @@ class PermissionActionList
 		}
 	}
 
+	/**
+	 * Loads the list of actions from the database
+	 *
+	 * @access protected
+	 * @static
+	 */
 	static protected function loadActionList()
 	{
 		$db = db_connect('default_read_only');
