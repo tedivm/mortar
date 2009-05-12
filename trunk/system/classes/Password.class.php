@@ -73,6 +73,14 @@ class Password
 	protected $hashDepth = 10000;
 
 	/**
+	 * This array tells the storage functions which values to save in the storage string
+	 *
+	 * @var unknown_type
+	 */
+	protected $storeValues = array('version', 'cryptoAlgorithm', 'hashDepth', 'saltStart', 'saltEnd', 'hash');
+
+
+	/**
 	 * Builds the password object up from a stored password string
 	 *
 	 * @param string $storedHash
@@ -81,12 +89,10 @@ class Password
 	{
 		$split = explode('::', $storedHash);
 
-		$this->version = array_shift($split);
-		$this->cryptoAlgorithm = array_shift($split);
-		$this->hashDepth = array_shift($split);
-		$this->saltStart = array_shift($split);
-		$this->saltEnd = array_shift($split);
-		$this->hash = array_shift($split);
+		foreach($this->storeValues as $name)
+		{
+			$this->$name = array_shift($split);
+		}
 	}
 
 	/**
@@ -96,9 +102,8 @@ class Password
 	 */
 	public function getStored()
 	{
-		$store = array('version', 'cryptoAlgorithm', 'hashDepth', 'saltStart', 'saltEnd', 'hash');
 		$output = '';
-		foreach($store as $name)
+		foreach($this->storeValues as $name)
 		{
 			$output .= $this->$name;
 
