@@ -144,9 +144,9 @@ class User
 
 	public function setPassword($password)
 	{
-		$passwordString = $password;
-		$passwordObject = new NewPassword($password);
-		$this->password = $passwordObject->stored;
+		$passwordObject = new Password();
+		$passwordObject->fromString($password);
+		$this->password = $passwordObject->getStored();
 	}
 
 	public function getId()
@@ -285,10 +285,10 @@ class ActiveUser implements SplSubject
 		$user_array = $stmt->fetch_array();
 
 		$stmt->close();
-		$storedPassword = new StoredPassword($user_array['user_password']);
+		$storedPassword = new Password();
+		$storedPassword->fromStored($user_array['user_password']);
 
-
-		if($numRows == 1 && $storedPassword->is_match($password))
+		if($numRows == 1 && $storedPassword->isMatch($password))
 		{
 			if($this->loadUser($user_array['user_id']))
 			{

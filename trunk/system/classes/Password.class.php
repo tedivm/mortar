@@ -1,72 +1,128 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
 
-
+/**
+ * This class handles password hashing and matching
+ *
+ * @package MainClasses
+ */
 class Password
 {
-	public $hash;
-	public $stored;
-	public $salt_start;
-	public $salt_end;
+	/**
+	 * This is the processed hash
+	 *
+	 * @access protected
+	 * @var string
+	 */
+	protected $hash;
+
+	/**
+	 * This is the salt that was appended to the start of the password hashing
+	 *
+	 * @access protected
+	 * @var string
+	 */
+	protected $saltStart;
+
+	/**
+	 * This is the salt that was appended to the end of the password before hashing
+	 *
+	 * @access protected
+	 * @var unknown_type
+	 */
+	protected $saltEnd;
+
+	/**
+	 * This doesn't do much now, but if we change the password mechinism later this will be useful
+	 *
+	 * @access protected
+	 * @var int
+	 */
+	protected $version = 1;
 
 	// The stored result needs to fit in the database, which currently has a length of 192
-	// ((salt_length * 2) + 4 + algorithm hash length) <= 192
-	protected $salt_length = 30;
+	// ((saltLength * 2) + 4 + algorithm hash length) <= 192
+
+	/**
+	 * This is the length of each salt (so the total salt length ends up as twice this number
+	 *
+	 * @access protected
+	 * @var int
+	 */
+	protected $saltLength = 30;
+
+	/**
+	 * This is the algorithm used to hash the password
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $cryptoAlgorithm = 'whirlpool';
+
+	/**
+	 * This is how many times we hash the string. This makes the hashing slower, but doesn't add any additional security
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $hashDepth = 10000;
-	// whirlpool length is 128
-	// whirlpool is really slow, which is good for a password hash as it makes generating rainbow tables more consuming
 
-	/*
-
-	stored = salt::password::salt
-
-	*/
-
-}
-
-
-class StoredPassword extends Password
-{
-
-	public function __construct($password)
+	/**
+	 * Builds the password object up from a stored password string
+	 *
+	 * @param string $storedHash
+	 */
+	public function fromStored($storedHash)
 	{
-		$this->stored = $password;
-		$this->get_salts();
+		$split = explode('::', $storedHash);
+
+		$this->version = array_shift($split);
+		$this->cryptoAlgorithm = array_shift($split);
+		$this->hashDepth = array_shift($split);
+		$this->saltStart = array_shift($split);
+		$this->saltEnd = array_shift($split);
+		$this->hash = array_shift($split);
 	}
 
-	public function is_match($password)
+	/**
+	 * Returns a storable version of the password
+	 *
+	 * @return string
+	 */
+	public function getStored()
 	{
-		$test_password = new NewPassword($password, $this->salt_start, $this->salt_end);
-
-		if($test_password->hash == $this->hash)
+		$store = array('version', 'cryptoAlgorithm', 'hashDepth', 'saltStart', 'saltEnd', 'hash');
+		$output = '';
+		foreach($store as $name)
 		{
-			return true;
-		}else{
-			return false;
+			$output .= $this->$name;
+
+			if($name != 'hash')
+				$output .= '::';
 		}
 
+		return $output;
 	}
 
-	protected function get_salts()
+	/**
+	 * Builds the password object up from a cleartext string. The optional arguments are needed for password matching
+	 * and shouldn't be used.
+	 *
+	 * @param string $passwordString
+	 * @param null|string $start
+	 * @param null|string $end
+	 */
+	public function fromString($passwordString, $start = null, $end = null)
 	{
-		$split = explode('::', $this->stored);
-		$this->salt_start = $split[0];
-		$this->salt_end = $split[1];
-		$this->hash = $split[2];
-	}
+		$this->saltStart = isset($start) ? $start : substr(md5(uniqid(rand(), true)), 0, $this->saltLength);
+		$this->saltEnd =  isset($end) ? $end : substr(md5(uniqid(rand(), true)), 0, $this->saltLength);
 
-
-}
-
-class NewPassword extends Password
-{
-
-	public function __construct($password, $start = false, $end = false)
-	{
-		$this->salt_start = ($start) ? $start : substr(md5(uniqid(rand(), true)), 0, $this->salt_length);
-		$this->salt_end =  ($end) ? $end : substr(md5(uniqid(rand(), true)), 0, $this->salt_length);
-
-		$hash = $this->salt_start . $password . $this->salt_end;
+		$hash = $this->saltStart . $passwordString . $this->saltEnd;
 
 		if($this->hashDepth < 1)
 			$this->hashDepth = 1;
@@ -75,8 +131,29 @@ class NewPassword extends Password
 			$hash = hash($this->cryptoAlgorithm, $hash);
 
 		$this->hash = $hash;
+	}
 
-		$this->stored = $this->salt_start . '::' . $this->salt_end . '::' . $this->hash;
+	/**
+	 * Returns the hash value
+	 *
+	 * @return string
+	 */
+	public function getHash()
+	{
+		return $this->hash;
+	}
+
+	/**
+	 * Takes a string and checks to see if it is a match for the password
+	 *
+	 * @param string $passwordString
+	 * @return bool
+	 */
+	public function isMatch($passwordString)
+	{
+		$password = new Password();
+		$password->fromString($passwordString, $this->saltStart, $this->saltEnd);
+		return ($this->hash == $password->getHash());
 	}
 
 }
