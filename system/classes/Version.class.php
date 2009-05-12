@@ -1,16 +1,60 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
 
-
+/**
+ * This class turns a version into a string and back, and compares to versions
+ *
+ * @package MainClasses
+ */
 class Version
 {
+	/**
+	 * Major version number
+	 *
+	 * @var int
+	 */
 	public $major;
+
+	/**
+	 * Minor version number
+	 *
+	 * @var int
+	 */
 	public $minor;
+
+	/**
+	 * Micro version number
+	 *
+	 * @var int
+	 */
 	public $micro;
+
+	/**
+	 * Release type (alpha, beta, release candidate, release)
+	 *
+	 * @var string
+	 */
 	public $releaseType;
+
+	/**
+	 * Release version number
+	 *
+	 * @var int
+	 */
 	public $releaseVersion;
 
 
-
+	/**
+	 * Compares to versions
+	 *
+	 * @param Version $version
+	 * @return int If the passed version is newer, we return 1, the same 0 and older -1
+	 */
 	public function compare(Version $version)
 	{
 		// if this is older, -1
@@ -112,6 +156,11 @@ class Version
 		return 0;
 	}
 
+	/**
+	 * Returns a string representation of the version
+	 *
+	 * @return string
+	 */
 	public function __toString()
 	{
 		if($this->micro > 0)
@@ -139,6 +188,11 @@ class Version
 		return $output;
 	}
 
+	/**
+	 * Takes a string and populates this information
+	 *
+	 * @param string $version
+	 */
 	public function fromString($version)
 	{
 

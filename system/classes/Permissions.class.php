@@ -55,10 +55,10 @@ class Permissions
 			$userId = $this->user->getId();
 		}elseif(is_numeric($userId)){
 			$this->user = new User();
-			$this->user->load_user($userId);
+			$this->user->loadUser($userId);
 		}elseif($userId instanceof ActiveUser){
 			$this->user = new User();
-			$this->user->load_user($userId->getId());
+			$this->user->loadUser($userId->getId());
 			$userId = $this->user->getId();
 		}else{
 			throw new TypeMismatch(array('User', $userId));

@@ -1,4 +1,17 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
+
+/**
+ * This defunct class has all sorts of information that can easily be gotten without it
+ *
+ * @deprecated
+ * @package MainClasses
+ */
 class RuntimeConfig implements ArrayAccess
 {
 	protected $config = array();
@@ -6,6 +19,7 @@ class RuntimeConfig implements ArrayAccess
 
 	private function __construct()
 	{
+		depreciationWarning();
 		$this->config = $this->setData();
 	}
 

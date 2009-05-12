@@ -1,15 +1,66 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
 
+/**
+ * This class provides information, including a lot of urls, about the current theme
+ *
+ * Themes work by overwritting defaults that are set in modules or by the system. This way themes can get as customized
+ * as the designer wants, or as close to the original. The other benefit is that themes don't need to be all
+ * encompassing, since the defaults will get installed with new modules, making the modules fit right into the system
+ *
+ * @package MainClasses
+ */
 class Theme
 {
+	/**
+	 * name of the current theme
+	 *
+	 * @var string
+	 */
 	public $name;
 
+	/**
+	 * Urls for all of the CSS files
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $cssUrls;
+
+	/**
+	 * Urls for all of the javascript files
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $jsUrls;
 
+	/**
+	 * Url for the active website
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $url;
+
+	/**
+	 * Whether js and css minification is enabled
+	 *
+	 * @access protected
+	 * @var bool
+	 */
 	protected $allowMin = true;
 
+	/**
+	 * Constructor takes the name of the theme and loads the initial information
+	 *
+	 * @param string $name
+	 */
 	public function __construct($name)
 	{
 		$config = Config::getInstance();
@@ -105,21 +156,49 @@ class Theme
 		$this->cssUrls = $data['cssLinks'];
 	}
 
+	/**
+	 * Returns the matching url
+	 *
+	 * @param string $name
+	 * @param string $library
+	 * @return string
+	 */
 	public function jsUrl($name, $library = 'none')
 	{
 		return $this->loadUrl('js', $name, $library);
 	}
 
+	/**
+	 * Returns the matching url
+	 *
+	 * @param string $name
+	 * @param string $library
+	 * @return string
+	 */
 	public function cssUrl($name, $library = 'none')
 	{
 		return $this->loadUrl('css', $name, $library);
 	}
 
+	/**
+	 * Returns the base url for the theme
+	 *
+	 * @return string
+	 */
 	public function getUrl()
 	{
 		return $this->url;
 	}
 
+	/**
+	 * Returns all of the urls for the files in the requested directory
+	 *
+	 * @access protected
+	 * @param string $path
+	 * @param string $url This is the base url that the files are called from
+	 * @param string $extention
+	 * @return array
+	 */
 	protected function getFiles($path, $url, $extention = '.*')
 	{
 
