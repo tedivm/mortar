@@ -2,8 +2,19 @@
 
 class IOProcessorRest extends IOProcessorCli
 {
+	/**
+	 * These methods can be triggered using a post request with the input "methodOverride" set
+	 *
+	 * @static
+	 * @var array
+	 */
 	static public $postOverrides = array('put', 'delete', 'options');
 
+	/**
+	 * This function sets the programming environment to match that of the system and method calling it
+	 *
+	 * @access protected
+	 */
 	protected function setEnvironment()
 	{
 		$query = Query::getQuery();
