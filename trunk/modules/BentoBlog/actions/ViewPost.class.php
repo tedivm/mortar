@@ -16,7 +16,7 @@ class BentoBlogActionViewPost extends BentoCMSActionViewPage
 
 
 		$user = new User();
-		$user->load_user($entry->property('author'));
+		$user->loadUser($entry->property('author'));
 		$post->addContent('author', $user->getName());
 
 		$tagArray = $entry->property('tags');

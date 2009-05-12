@@ -2,40 +2,74 @@
 /**
  * BentoBase
  *
- * A framework for developing modular applications.
- *
- * @package		BentoBase
- * @author		Robert Hafner
- * @copyright	Copyright (c) 2007, Robert Hafner
- * @license		http://www.mozilla.org/MPL/
- * @link		http://www.bentobase.org
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
  */
 
 /**
- * User Class
+ * This class contains all the data about a user
  *
- * Very basic user class, meant to be extended for specific purposes
- *
- * @package		BentoBase
- * @subpackage	Main_Classes
- * @category	User
- * @author		Robert Hafner
+ * @package MainClasses
  */
 class User
 {
-//	protected $user_info;
+
+	/**
+	 * The user's unique id
+	 *
+	 * @var int
+	 */
 	public $id;
 
+	/**
+	 * Stored password string
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $password;
+
+	/**
+	 * user name
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $username;
+
+	/**
+	 * user's email address
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $email;
+
+	/**
+	 * flag deciding if user can log in or not
+	 *
+	 * @access protected
+	 * @var bool
+	 */
 	protected $allowLogin;
+
+	/**
+	 * List of membergroups the user belongs to
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $memberGroups = array();
 
+	/**
+	 * Constuctor takes the user id as an optional argument, and if passed it loads the user info
+	 *
+	 * @param int $userId
+	 */
 	public function __construct($userId = null)
 	{
 		if($userId)
-			$this->load_user($userId);
+			$this->loadUser($userId);
 	}
 
 	/**
@@ -43,7 +77,7 @@ class User
 	 *
 	 * @param int $id
 	 */
-	public function load_user($userId)
+	public function loadUser($userId)
 	{
 		$this->id = false;
 		$this->user_info = array();
@@ -106,16 +140,31 @@ class User
 		return false;
 	}
 
+	/**
+	 * Returns the username
+	 *
+	 * @return string
+	 */
 	public function getName()
 	{
 		return $this->username;
 	}
 
+	/**
+	 * Checks to see if the user is allowed to log in
+	 *
+	 * @return bool
+	 */
 	public function isAllowedLogin()
 	{
 		return ($this->allowLogin == true);
 	}
 
+	/**
+	 * Changes the users name
+	 *
+	 * @param string $name
+	 */
 	public function setName($name)
 	{
 		if(!is_string($name))
@@ -128,11 +177,21 @@ class User
 
 	}
 
+	/**
+	 * Returns the users email address
+	 *
+	 * @return string
+	 */
 	public function getEmail()
 	{
 		return $this->email;
 	}
 
+	/**
+	 * Sets the users email address
+	 *
+	 * @param unknown_type $email
+	 */
 	public function setEmail($email)
 	{
 		if(!is_string($email))
@@ -142,6 +201,11 @@ class User
 		$this->email = $email;
 	}
 
+	/**
+	 * Changes the users password
+	 *
+	 * @param string $password
+	 */
 	public function setPassword($password)
 	{
 		$passwordObject = new Password();
@@ -149,26 +213,52 @@ class User
 		$this->password = $passwordObject->getStored();
 	}
 
+	/**
+	 * Returns the users id
+	 *
+	 * @return int
+	 */
 	public function getId()
 	{
 		return $this->id;
 	}
 
+	/**
+	 * Returns an array with the users membergroups
+	 *
+	 * @return unknown
+	 */
 	public function getMemberGroups()
 	{
 		return $this->memberGroups;
 	}
 
+	/**
+	 * Replaces the current list of membergroups with the passed array
+	 *
+	 * @param array $groups
+	 */
 	public function setMemberGroups($groups)
 	{
+		depreciationWarning();
 		$this->memberGroups = $groups;
 	}
 
-	public function setAllowLogin($input)
+	/**
+	 * Toggles the permission for the user to log in
+	 *
+	 * @param bool $isAllowed
+	 */
+	public function setAllowLogin($isAllowed)
 	{
-		$this->allowLogin = ($input === true);
+		$this->allowLogin = ($isAllowed === true);
 	}
 
+	/**
+	 * Saved the User information to the database
+	 *
+	 * @return bool
+	 */
 	public function save()
 	{
 		$db = DatabaseConnection::getConnection('default');
@@ -176,10 +266,8 @@ class User
 		try{
 
 			$stmt = $db->stmt_init();
-
 			if(!is_numeric($this->id))
 			{
-
 				$stmt->prepare('INSERT INTO users (user_id, user_name, user_password, user_email, user_allowlogin)
 												VALUES (NULL, ?, ?, ?, ?)');
 				if(!$stmt->bindAndExecute('sssi', $this->username, $this->password,
@@ -189,9 +277,7 @@ class User
 				}
 
 				$this->id = $stmt->insert_id;
-
 			}else{
-
 				$stmt->prepare('UPDATE users SET user_name = ?, user_password = ?, user_email = ?, user_allowlogin = ?
 										WHERE user_id = ?');
 
@@ -202,11 +288,9 @@ class User
 				}
 			}
 
-
 			$deleteStmt = $db->stmt_init();
 			$deleteStmt->prepare('DELETE FROM userInMemberGroup WHERE user_id = ?');
 			$deleteStmt->bindAndExecute('i', $this->id);
-
 
 			foreach($this->memberGroups as $id)
 			{
@@ -233,24 +317,43 @@ class User
 
 
 /**
- * Active User Class
+ * This needs to be cleaned up. Its a singleton containing the active user, as well as some wrapper functions around
+ * said user
  *
- * Controls the properties of the active user
- *
- * @package		BentoBase
- * @subpackage	Main_Classes
- * @category	User
- * @author		Robert Hafner
+ * @package MainClasses
  */
 class ActiveUser implements SplSubject
 {
+	/**
+	 * Instance of active user
+	 *
+	 * @access private
+	 * @static
+	 * @var ActiveUser
+	 */
 	private static $instance;
+
+	/**
+	 * These objects get notified during certain events, such as the changing of the active user
+	 *
+	 * @access private
+	 * @var array
+	 */
 	private $observers = array();
+
+	/**
+	 * This is the current user
+	 *
+	 * @access protected
+	 * @var User
+	 */
 	protected $user;
 
 
 	/**
-	 * Constructor - private, call by get_instance
+	 * Constructor loads the "guest" user to start
+	 *
+	 * @access protected
 	 */
 	private function __construct()
 	{
@@ -258,13 +361,19 @@ class ActiveUser implements SplSubject
 		$this->loadUserByName('guest');
 	}
 
+	/**
+	 * Load a user by its id
+	 *
+	 * @param int $id
+	 * @return bool
+	 */
 	public function loadUser($id)
 	{
 		if(!is_numeric($id))
 			throw new TypeMismatch(array('int', $id));
 
 		$user = new User();
-		if($user->load_user($id))
+		if($user->loadUser($id))
 		{
 			$this->user = $user;
 			$this->notify();
@@ -275,6 +384,13 @@ class ActiveUser implements SplSubject
 
 	}
 
+	/**
+	 * Change the user, if the password matches, otherwise load the guest user
+	 *
+	 * @param string $userName
+	 * @param string $password
+	 * @return bool
+	 */
 	public function changeUser($userName, $password)
 	{
 		$db = db_connect('default_read_only');
@@ -305,6 +421,12 @@ class ActiveUser implements SplSubject
 	}
 
 
+	/**
+	 * This function checks to see if the user is logged in or is using a guest account
+	 *
+	 * @static
+	 * @return bool
+	 */
 	static public function isLoggedIn()
 	{
 		$user = self::getInstance();
@@ -312,6 +434,12 @@ class ActiveUser implements SplSubject
 	}
 
 
+	/**
+	 * Returns the current user object
+	 *
+	 * @static
+	 * @return User
+	 */
 	public static function getCurrentUser()
 	{
 		$self = self::getInstance();
@@ -322,6 +450,7 @@ class ActiveUser implements SplSubject
 	 * Returns the stored instance of the ActiveUser. If no object
 	 * is stored, it will create it
 	 *
+	 * @static
 	 * @return ActiveUser
 	 */
 	public static function getInstance()
@@ -333,21 +462,36 @@ class ActiveUser implements SplSubject
 		return self::$instance;
 	}
 
+	/**
+	 * Returns the current ActiveUser instance
+	 *
+	 * @deprecated
+	 * @see getInstance()
+	 * @static
+	 * @return unknown
+	 */
 	public static function get_instance()
 	{
 		return self::getInstance();
 	}
 
+	/**
+	 * Returns the current user (non-static version)
+	 *
+	 * @return User
+	 */
 	public function getUser()
 	{
 		return $this->user;
 	}
 
-	public function __destruct()
-	{
 
-	}
-
+	/**
+	 * Loads user by username
+	 *
+	 * @param string $user
+	 * @return bool
+	 */
 	public function loadUserByName($user)
 	{
 		$cache = new Cache('usersname', $user, 'id');
@@ -377,30 +521,52 @@ class ActiveUser implements SplSubject
 		return $this->loadUser($id);
 	}
 
+	/**
+	 * Returns the username
+	 *
+	 * @return string
+	 */
 	public function getName()
 	{
 		return $this->user->getName();
 	}
 
+	/**
+	 * Returns the user id
+	 *
+	 * @return int
+	 */
 	public function getId()
 	{
 		return $this->user->getId();
 	}
 
+	/**
+	 * Returns an array of membergroups that the user belongs to
+	 *
+	 * @return array
+	 */
 	public function getMemberGroups()
 	{
 		return $this->user->getMemberGroups();
 	}
 
-
-
-
+	/**
+	 * Attachs an observer to monitor the active user
+	 *
+	 * @param SplObserver $class
+	 */
 	public function attach(SplObserver $class)
 	{
 		$this->observers[] = $class;
 		$class->update($this);
 	}
 
+	/**
+	 * Reomoves an observer from watching the actuve user
+	 *
+	 * @param SplObserver $obj
+	 */
 	public function detach(SplObserver $obj)
 	{
 		foreach ($this->observers as $index => $class)
@@ -411,6 +577,10 @@ class ActiveUser implements SplSubject
 		}
 	}
 
+	/**
+	 * Notifies each observer (by sending a copy of this class to it) of changes in the system
+	 *
+	 */
 	public function notify()
 	{
 		foreach ($this->observers as $observers)
