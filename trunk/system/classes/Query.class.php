@@ -1,14 +1,37 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
 
+/**
+ * This class returns the arguments or query (get) values sent by the system
+ *
+ * @package MainClasses
+ */
 class Query
 {
-	static protected $input;
+	/**
+	 * This is a copy of the array used in order to save changes
+	 *
+	 * @access protected
+	 * @static
+	 * @var FilteredArray
+	 */
+	static protected $query;
 
+	/**
+	 * This function returns the current Query (Arguments or Get values)
+	 *
+	 * @static
+	 * @return FilteredArray
+	 */
 	static function getQuery()
 	{
-		if(!self::$input)
+		if(!self::$query)
 		{
-
 			if(defined('STDIN'))
 			{
 				$input = Argv::getArray();
@@ -17,12 +40,18 @@ class Query
 			}
 
 			$inputArray = self::processInput($input);
-			self::$input = new FilteredArray($inputArray);
+			self::$query = new FilteredArray($inputArray);
 		}
 
-		return self::$input;
+		return self::$query;
 	}
 
+	/**
+	 * Returns a Url using the current arguments (think $_SERVER['PHP_SELF'] without the XSS)
+	 *
+	 * @static
+	 * @return Url
+	 */
 	static function getUrl()
 	{
 		$query = self::getQuery();
@@ -49,6 +78,13 @@ class Query
 		return $url;
 	}
 
+	/**
+	 * This function filters the Query before outputting it, allowing for mod_rewrite tricks
+	 *
+	 * @static
+	 * @param array $inputArray
+	 * @return array
+	 */
 	static protected function processInput($inputArray)
 	{
 
@@ -114,7 +150,6 @@ class Query
 				// if the current location has a child with the next path pieces name, we descend
 				$currentLocation = $childLocation;
 				array_shift($pathArray);
-
 			}
 
 			$inputArray['location'] = $currentLocation->getId();
@@ -171,13 +206,10 @@ class Query
 		}
 
 		if(isset($inputArray['action']))
-		{
 			$inputArray['action'] = preg_replace("/[^a-zA-Z0-9s]/", "", $inputArray['action']);
-		}
 
 		return $inputArray;
 	}
-
 }
 
 ?>
