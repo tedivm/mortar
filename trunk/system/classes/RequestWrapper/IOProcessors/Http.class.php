@@ -1,19 +1,79 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
 
+/**
+ * This class processes HTTP line input and output
+ *
+ * @package MainClasses
+ */
 class IOProcessorHttp extends IOProcessorCli
 {
 
+	/**
+	 * This is a list of http headers to be sent out
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $headers = array();
+
+	/**
+	 * The amount of time, in seconds, to give as the max age and expiration for a resource
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $cacheExpirationOffset;
 
+	/**
+	 * Time, in seconds, to allow multiple sessions to remain active
+	 *
+	 * @var int
+	 */
 	public $obsoleteTime = 5;
+
+	/**
+	 * Max time, in seconds, that the cacheExpirationOffset can be
+	 *
+	 * @var int
+	 */
 	public $maxClientCache = 21600;
 
+	/**
+	 * The current compression level (gzip and deflate) used for compression the page.
+	 *
+	 * @static
+	 * @var int Must be between 1 and 9
+	 */
 	static $compressionLevel = 6;
-	static $compressionMinimum = 128; // minumum number of charactors for deflate/gzip to run
 
+	/**
+	 * The smallest length the output should be if its going to be compressed
+	 *
+	 * @static
+	 * @var int
+	 */
+	static $compressionMinimum = 128;
+
+	/**
+	 * Session cookie expiration time (0 makes it a session only cookie)
+	 *
+	 * @static
+	 * @var int
+	 */
 	static $cookieTimeLimit = 0;
 
+
+	/**
+	 * This function sets the programming environment to match that of the system and method calling it
+	 *
+	 * @access protected
+	 */
 	protected function setEnvironment()
 	{
 		$query = Query::getQuery();
@@ -27,6 +87,11 @@ class IOProcessorHttp extends IOProcessorCli
 		$query->save();
 	}
 
+	/**
+	 * This function is called by the initialization function on load
+	 *
+	 * @access protected
+	 */
 	protected function start()
 	{
 		ignore_user_abort(true);
@@ -49,6 +114,13 @@ class IOProcessorHttp extends IOProcessorCli
 		}
 	}
 
+	/**
+	 * Adds a new http header to be sent out
+	 *
+	 * @param string $name
+	 * @param string $value
+	 * @return bool
+	 */
 	public function addHeader($name, $value)
 	{
 		$name = (string) $name;
@@ -58,10 +130,17 @@ class IOProcessorHttp extends IOProcessorCli
 			return false;
 
 		$this->headers[$name] = $value;
+		return true;
 	}
 
+	/**
+	 * This function outputs any values its sent to the system
+	 *
+	 * @param string $output
+	 */
 	public function output($output)
 	{
+		// this frees up the session for any other scripts or requests calling it
 		if(session_id() != '')
 			session_commit();
 
@@ -160,6 +239,11 @@ class IOProcessorHttp extends IOProcessorCli
 	}
 
 
+	/**
+	 * Outputs the stored http headers, as well as some extra caching related headers
+	 *
+	 * @access protected
+	 */
 	protected function sendHeaders()
 	{
 		// basic clickjacking protection
@@ -215,23 +299,30 @@ class IOProcessorHttp extends IOProcessorCli
 			header($name . ':' . $value);
 	}
 
-	public function close()
-	{
-
-	}
 }
 
-
+/**
+ * This class attaches to the active user as an observer to keep the user active across requests
+ *
+ */
 class SessionObserver implements SplObserver
 {
 	protected $userId;
 
-	// this is the delay between marking a session as expired and actually killing it
-	// this is needed because quick concurrent connections (ajax) doesn't handle immediate
-	// session changes well
+	/**
+	 * This is the delay between marking a session as expired and actually killing it this is needed because quick
+	 * concurrent connections (ajax) doesn't handle immediate session changes well
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $obsoleteTime = 15;
 
-
+	/**
+	 * This function gets called whenever the activeuser gets changed
+	 *
+	 * @param ActiveUser $object
+	 */
 	public function update(SplSubject $object)
 	{
 		if($object instanceof ActiveUser)
@@ -248,6 +339,12 @@ class SessionObserver implements SplObserver
 		}
 	}
 
+	/**
+	 * This function stores certain data in the session for security purposes and handles regenerating the session id
+	 * in a secure manner.
+	 *
+	 * @access protected
+	 */
 	protected function regenerateSession()
 	{
 		// This forces the system to reload certain variables when the user changes.
@@ -301,6 +398,12 @@ class SessionObserver implements SplObserver
 		}
 	}
 
+	/**
+	 * This function checks certain values besides the session id, such as the ip address and user agent, of a session
+	 * to prevent session hijacking attempts
+	 *
+	 * @return bool
+	 */
 	protected function checkSession()
 	{
 		try{
@@ -326,9 +429,19 @@ class SessionObserver implements SplObserver
 
 }
 
-
+/**
+ * This class acts as a lookup for http status strings
+ *
+ * @package MainClasses
+ */
 class ResponseCodeLookup
 {
+	/**
+	 * This is an array with the http code as the index and its detailed string as the value
+	 *
+	 * @static
+	 * @var array
+	 */
 	static $lookupArray = array(
 					100 => 'Continue',
 					101 => 'Switching Protocols',
@@ -376,8 +489,13 @@ class ResponseCodeLookup
 					504 => 'Gateway Timeout',
 					505 => 'HTTP Version not Supported');
 
-
-
+	/**
+	 * Returns the full status string from a status code
+	 *
+	 * @static
+	 * @param int $code
+	 * @return string
+	 */
 	static public function stringFromCode($code)
 	{
 		if(isset(self::$lookupArray[$code]))
