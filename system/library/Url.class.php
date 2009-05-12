@@ -1,14 +1,31 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
 
+/**
+ * This class creates urls
+ *
+ * @package MainClasses
+ */
 class Url
 {
+	/**
+	 * This array contains the values that need to be passed via the url
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $attributes = array();
 
-	public function fromString()
-	{
-
-	}
-
+	/**
+	 * This function returns a string, the Url
+	 *
+	 * @return string
+	 */
 	public function __toString()
 	{
 		$config = Config::getInstance();
@@ -141,6 +158,12 @@ class Url
 		return $urlString;
 	}
 
+	/**
+	 * This is one way to add attributes to the url
+	 *
+	 * @param string $name
+	 * @param string $value
+	 */
 	public function property($name, $value = false)
 	{
 		if($value !== false)
@@ -153,6 +176,12 @@ class Url
 
 	}
 
+	/**
+	 * This returns an HtmlObject of the 'a' type
+	 *
+	 * @param string $text
+	 * @return HtmlObject
+	 */
 	public function getLink($text)
 	{
 		$link = new HtmlObject('a');
@@ -161,6 +190,11 @@ class Url
 		return $link;
 	}
 
+	/**
+	 * Sets attributes from an array
+	 *
+	 * @param array $attributes
+	 */
 	public function attributesFromArray($attributes)
 	{
 		foreach($attributes as $name => $value)
@@ -205,6 +239,12 @@ class Url
 		return array('attributes');
 	}
 
+	/**
+	 * This function checks to see if a user has permission to access the resource the Url is pointing to
+	 *
+	 * @param int $userId
+	 * @return bool
+	 */
 	public function checkPermission($userId)
 	{
 		if(isset($this->attributes['locationId']))

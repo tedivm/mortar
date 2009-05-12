@@ -1,12 +1,33 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
 
+/**
+ * This class returns the arguments or query (get) values sent by the system
+ *
+ * @package MainClasses
+ */
 class RequestWrapperInstaller extends RequestWrapper
 {
+	/**
+	 * Same as parent, but we have to put this there to prevent an error due to php's static handling
+	 *
+	 * @static
+	 * @var string
+	 */
 	public static $ioHandlerType = 'Http';
-	protected $ioHandler;
 
-	protected $currentLocation;
-
+	/**
+	 * Returns the installer actions
+	 *
+	 * @param string $className
+	 * @param string $argument
+	 * @return Action
+	 */
 	protected function getAction($className = null, $argument = null)
 	{
 		// if we aren't given the classname and argument, we load them up
@@ -31,13 +52,22 @@ class RequestWrapperInstaller extends RequestWrapper
 		return $action;
 	}
 
+	/**
+	 * Handles errors for the installer
+	 *
+	 * @access protected
+	 * @param exception $e
+	 */
 	protected function handleError($e)
 	{
 
 	}
 
-
-
+	/**
+	 * Final code run for the request
+	 *
+	 * @access protected
+	 */
 	protected function close()
 	{
 		$this->requestHandler->close();
@@ -45,6 +75,12 @@ class RequestWrapperInstaller extends RequestWrapper
 
 	}
 
+	/**
+	 * This class makes sure the action class is loaded into the system and returns its name
+	 *
+	 * @access protected
+	 * @return array
+	 */
 	protected function loadActionClass()
 	{
 		$classname = 'BentoBaseActionInstall';
@@ -62,18 +98,6 @@ class RequestWrapperInstaller extends RequestWrapper
 		return array('className' => $classname, 'argument' => null);
 	}
 
-
-
 }
-
-
-
-
-
-
-
-
-
-
 
 ?>
