@@ -155,7 +155,7 @@ class MemberGroup
 	 */
 	public function makeSystem($flag = true)
 	{
-		$this->isSystem = bool ($flag);
+		$this->isSystem = (bool) $flag;
 	}
 
 	/**
