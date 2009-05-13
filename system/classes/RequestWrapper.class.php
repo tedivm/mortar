@@ -70,10 +70,8 @@ class RequestWrapper
 
 
 		try{
-
-		}catch(Exception $e){
-			$this->ioHandler->close();
 			$this->close();
+		}catch(Exception $e){
 		}
 
 	}
@@ -368,7 +366,16 @@ class RequestWrapper
 	 */
 	protected function close()
 	{
-		$this->requestHandler->close();
+		$this->ioHandler->close();
+
+
+
+		if(BENCHMARK)
+		{
+			$requestInfo = new RequestStatistics();
+			$requestInfo->saveToFile();
+		}
+
 
 		//no more database access after this point!
 		DatabaseConnection::close();
