@@ -67,19 +67,25 @@ class BentoBaseModelSite extends AbstractModel
 
 	public function getUrl($ssl = false)
 	{
-		$row = new ObjectRelationshipMapper('urls');
-		$row->path = $this->content['primaryUrl'];
-		$row->site_id = $this->getId();
+		$cache = new Cache('models', 'site', $this->id, 'url', ($ssl) ? 1:0);
+		$url = $cache->getData();
 
-		if($row->select(1))
+		if(!$cache->cacheReturned)
 		{
-			$url = ($ssl && $row->sslEnabled == 1) ? 'https://' : 'http://';
-			$url .= rtrim($row->path, '/') . '/';
-			return $url;
+			$row = new ObjectRelationshipMapper('urls');
+			$row->path = $this->content['primaryUrl'];
+			$row->site_id = $this->getId();
 
-		}else{
-			return false;
+			if($row->select(1))
+			{
+				$url = ($ssl && $row->sslEnabled == 1) ? 'https://' : 'http://';
+				$url .= rtrim($row->path, '/') . '/';
+			}else{
+				$url = false;
+			}
+			$cache->storeData($url);
 		}
+		return $url;
 	}
 
 	public function save($parent = null)
