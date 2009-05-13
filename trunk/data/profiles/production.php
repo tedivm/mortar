@@ -31,6 +31,9 @@ define('DEPRECIATION_WARNINGS', false);
 
 define('OUTPUT_COMPRESSION', true);
 // This enabled output compression for HTTP connections, using the deflate and gzip methods
+// DO NOT ENABLE WITH DEBUGGING > 0! Debugging information is not compressed, and the combination of compressed
+// and not compressed text makes it impossible to uncompress
+
 
 define('OUTPUT_COMPRESSION_HEADERS', false);
 // When enabled the system will send out headers showing the compression results, so you can see how much
