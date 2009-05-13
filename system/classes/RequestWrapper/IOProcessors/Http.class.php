@@ -103,7 +103,7 @@ class IOProcessorHttp extends IOProcessorCli
 		{
 			$site = ActiveSite::getSite();
 			$siteLocation = $site->getLocation();
-			$cookieName = $siteLocation->getName() . 'Session';
+			$cookieName = $siteLocation->getName() . '_Session';
 
 			session_name($cookieName);
 			session_set_cookie_params(self::$cookieTimeLimit, '/', null, isset($_SERVER["HTTPS"]), true);
@@ -204,6 +204,15 @@ class IOProcessorHttp extends IOProcessorCli
 
 		$method = strtolower($_SERVER['REQUEST_METHOD']);
 
+
+		if(!headers_sent())
+		{
+			$this->sendHeaders();
+
+			if($this->responseCode != 200 && $codeString = ResponseCodeLookup::stringFromCode($this->responseCode))
+				header('HTTP/1.1 ' . $this->responseCode . ' ' . $codeString);
+		}
+
 		if(!isset($this->responseCode))
 			$this->responseCode = 200;
 
@@ -224,15 +233,7 @@ class IOProcessorHttp extends IOProcessorCli
 		}
 
 		if($method == 'head')
-			$output = false;
-
-		if(!headers_sent())
-		{
-			$this->sendHeaders();
-
-			if($this->responseCode != 200 && $codeString = ResponseCodeLookup::stringFromCode($this->responseCode))
-				header('HTTP/1.1 ' . $this->responseCode . ' ' . $codeString);
-		}
+			$sendOutput = false;
 
 		if($sendOutput)
 			echo $output;
@@ -255,12 +256,12 @@ class IOProcessorHttp extends IOProcessorCli
 
 		// if the request is read-only we'll return some caching headers
 		$requestMethod = strtolower($_SERVER['REQUEST_METHOD']);
+
 		if(($requestMethod == 'head' || $requestMethod == 'get') &&
 					(!defined('DISABLECLIENTCACHE') || DISABLECLIENTCACHE !== true) &&
 					(!isset($this->responseCode)))
 		{
 
-			$cacheControl = 'must-revalidate';
 			if(isset($this->headers['Last-Modified']))
 			{
 				$lastModified = $this->headers['Last-Modified'];
@@ -281,6 +282,7 @@ class IOProcessorHttp extends IOProcessorCli
 			}
 
 			$this->addHeader('Pragma', 'Asparagus'); // if something isn't sent out, apache sends no-cache
+			$cacheControl = 'must-revalidate';
 			$this->addHeader('Cache-Control', $cacheControl);
 
 			if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || isset($_SERVER['HTTP_IF_NONE_MATCH']))
