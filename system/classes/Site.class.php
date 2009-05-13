@@ -41,26 +41,27 @@ class ActiveSite
 	{
 		if(is_null(self::$site))
 		{
+
+			if(INSTALLMODE)
+				return false;
+
 			$ssl = isset($_SERVER['HTTPS']);
 			$url = $_SERVER['SERVER_NAME'] . substr($_SERVER['PHP_SELF'], 0, strpos($_SERVER['PHP_SELF'], DISPATCHER));
 
 			$url = rtrim($url, '/');
 
-			if(INSTALLMODE)
-				return false;
+			$cache = new Cache('urlLookup', $url);
+			$siteId = $cache->getData();
 
-			$urlRecord = new ObjectRelationshipMapper('urls');
-			$urlRecord->path = $url;
-
-
-			if($urlRecord->select(1))
+			if(!$cache->cacheReturned)
 			{
-				$siteHandler = importModel('Site');
-				$site = new $siteHandler($urlRecord->site_id);
-				self::$site = $site;
-			}else{
-				self::$site = false;
+				$urlRecord = new ObjectRelationshipMapper('urls');
+				$urlRecord->path = $url;
+				$siteId = ($urlRecord->select(1)) ? $urlRecord->site_id : false;
+				$cache->storeData($siteId);
 			}
+
+			self::$site = $siteId ? ModelRegistry::loadModel('Site', $siteId) : false;
 		}
 
 		return self::$site;

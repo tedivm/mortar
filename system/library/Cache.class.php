@@ -25,6 +25,8 @@ class Cache
 	public $cache_time = 1800; //seconds
 
 	public $cacheReturned = false;
+	public $storeMemory = true;
+
 	protected $cache_enabled = true;
 
 	protected $key;
@@ -137,7 +139,7 @@ class Cache
 			$record = self::$memStore[$this->keyString];
 		}else{
 			$record = $this->handler->getData();
-			self::$memStore[$this->keyString] = $record;
+			self::$memStore[$this->keyString] =  ($this->storeMemory) ? $record : false;
 		}
 
 		if($record['expiration'] - START_TIME < 0)
@@ -162,7 +164,9 @@ class Cache
 			$random = $this->cache_time * .1 ;
 			$expiration = (microtime(true) + ($this->cache_time + rand(-1 * $random , $random)));
 
-			self::$memStore[$this->keyString] = array('expiration' => $expiration, 'data' => $store);
+			if($this->storeMemory)
+				self::$memStore[$this->keyString] = array('expiration' => $expiration, 'data' => $store);
+
 
 			$this->handler->storeData($store, $expiration);
 		}catch(Exception $e){

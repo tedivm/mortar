@@ -88,11 +88,21 @@ class MemberGroup
 	 */
 	public function containsUser($userId)
 	{
-		$db = db_connect('default_read_only');
-		$stmt = $db->stmt_init();
-		$stmt->prepare('SELECT user_id FROM userInMemberGroup WHERE user_id = ? AND memgroup_id = ?');
-		$stmt->bindAndExecute('ii', $userId, $this->id);
-		return ($stmt->num_rows == 1);
+		$cache = new Cache('membergroups', $this->id, 'containsUser', $userId);
+		$inGroup = $cache->getData();
+
+		if(!$cache->cacheReturned)
+		{
+			$db = db_connect('default_read_only');
+			$stmt = $db->stmt_init();
+			$stmt->prepare('SELECT user_id FROM userInMemberGroup WHERE user_id = ? AND memgroup_id = ?');
+			$stmt->bindAndExecute('ii', $userId, $this->id);
+
+			$inGroup = ($stmt->num_rows == 1);
+			$cache->storeData($inGroup);
+		}
+
+		return $inGroup;
 	}
 
 	/**

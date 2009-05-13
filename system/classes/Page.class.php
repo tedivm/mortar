@@ -153,7 +153,7 @@ class Page implements ArrayAccess
 			}
 		}
 
-		$cache = new Cache('themes', $this->theme, $file);
+		$cache = new Cache('theme', $this->theme, $file);
 		$template = $cache->get_data();
 
 		if(!$cache->cacheReturned)

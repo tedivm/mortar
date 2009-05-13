@@ -89,9 +89,11 @@ class DisplayMaker
 
 		$this->mainString = $text;
 		$cache = new Cache('templates', 'schema', md5($this->mainString));
+		$cache->storeMemory = false;
 		$cache->cache_time = '86400'; // this can be ridiculously high because the keyname changes when the string does
+		$tags = $cache->getData();
 
-		if(!($tags = $cache->get_data()))
+		if(!$cache->cacheReturned)
 		{
 			preg_match_all('{\{# (.*?) #\}}', $this->mainString, $matches, PREG_SET_ORDER);
 
