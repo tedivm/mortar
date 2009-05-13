@@ -698,12 +698,20 @@ class PermissionActionList
 	 */
 	static protected function loadActionList()
 	{
-		$db = db_connect('default_read_only');
-		$result = $db->query('SELECT action_id, action_name FROM actions');
-		$actions = array();
-		while($row = $result->fetch_array())
+
+		$cache = new Cache('permissions', 'actionLookup');
+		$actions = $cache->getData();
+
+		if(!$cache->cacheReturned)
 		{
-			$actions[$row['action_name']] = $row['action_id'];
+			$db = db_connect('default_read_only');
+			$result = $db->query('SELECT action_id, action_name FROM actions');
+			$actions = array();
+			while($row = $result->fetch_array())
+			{
+				$actions[$row['action_name']] = $row['action_id'];
+			}
+			$cache->storeData($actions);
 		}
 		self::$actionList = $actions;
 	}
