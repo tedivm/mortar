@@ -187,7 +187,6 @@ class MysqlBase extends mysqli
      */
 	public function stmt_init()
 	{
-		self::$queryCount++;
 		return new Mystmt($this);
 	}
 
@@ -372,11 +371,12 @@ class Mystmt extends mysqli_stmt
 		$params = func_get_args();
 		MysqlBase::$queryCount++;
 
-		if(isset(MysqlBase::$queryArray[$this->myQuery]))
+		$arrayIndex = $this->myQuery . '  ' . implode('::', $params);
+		if(isset(MysqlBase::$queryArray[$arrayIndex]))
 		{
-			MysqlBase::$queryArray[$this->myQuery]++;
+			MysqlBase::$queryArray[$arrayIndex]++;
 		}else{
-			MysqlBase::$queryArray[$this->myQuery] = 1;
+			MysqlBase::$queryArray[$arrayIndex] = 1;
 		}
 
 		if(!call_user_func_array(array($this, 'bind_param'), $params))
