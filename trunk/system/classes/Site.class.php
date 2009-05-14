@@ -4,12 +4,15 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage Environment
  */
 
 /**
  * This class returns the current active site
  *
- * @package MainClasses
+ * @package System
+ * @subpackage Environment
  */
 class ActiveSite
 {

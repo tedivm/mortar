@@ -4,6 +4,8 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage Environment
  */
 
 /**
@@ -11,7 +13,8 @@
  *
  * This class loads various system configuration values from configuration.ini file. Its also a singleton
  *
- * @package MainClasses
+ * @package System
+ * @subpackage Environment
  */
 class Config implements ArrayAccess
 {

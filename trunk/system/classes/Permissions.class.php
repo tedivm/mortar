@@ -4,12 +4,15 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage User
  */
 
 /**
  * This class handles user permissions
  *
- * @package MainClasses
+ * @package System
+ * @subpackage User
  */
 class Permissions
 {
@@ -227,7 +230,8 @@ class Permissions
 /**
  * This class helps the Permissions class by loading the user specific permissions from the database
  *
- * @package MainClasses
+ * @package System
+ * @subpackage User
  */
 class UserPermission
 {
@@ -447,7 +451,8 @@ class UserPermission
 /**
  * This class helps the Permissions class by loading the MemberGroup specific permissions from the database
  *
- * @package MainClasses
+ * @package System
+ * @subpackage User
  */
 class GroupPermission extends UserPermission
 {
@@ -471,7 +476,8 @@ class GroupPermission extends UserPermission
 /**
  * This class creates a general list (not attached to locations) of actions the user is allowed to perform
  *
- * @package MainClasses
+ * @package System
+ * @subpackage User
  */
 class PermissionLists
 {
@@ -616,7 +622,8 @@ class PermissionLists
 /**
  * This class is used to access the list of actions
  *
- * @package MainClasses
+ * @package System
+ * @subpackage User
  */
 class PermissionActionList
 {

@@ -1,12 +1,43 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage ModelSupport
+ */
 
-class ModelActionAdd  extends ModelActionBase// implements ActionInterface //extends FormActionBase
+/**
+ * This class is called if a model needs to be created but does not have an action class to do so.
+ *
+ * @package System
+ * @subpackage ModelSupport
+ * @todo Look into moving most of this to the ModelActionEdit class and have this inherit from that.
+ */
+class ModelActionAdd extends ModelActionBase
 {
+	/**
+	 * This is the model that the new model is going to be attached to
+	 *
+	 * @access protected
+	 * @var Model
+	 */
 	protected $parentModel;
-	protected $model;
 
+	/**
+	 * This tracks the status of the user request
+	 *
+	 * @access protected
+	 * @var bool
+	 */
 	protected $formStatus = false;
 
+	/**
+	 * This method checks to see if input was sent, validates that input through a subordinate class,
+	 * passes it to the processInput class to save, and then sets the formStatus to the appropriate value.
+	 *
+	 */
 	public function logic()
 	{
 		$query = Query::getQuery();
@@ -26,6 +57,13 @@ class ModelActionAdd  extends ModelActionBase// implements ActionInterface //ext
 		}
 	}
 
+	/**
+	 * This function returns the Form class that defines our input requirements. It also merges in any format specific
+	 * sub forms.
+	 *
+	 * @access protected
+	 * @return Form
+	 */
 	protected function getForm()
 	{
 		$query = Query::getQuery();
@@ -57,6 +95,14 @@ class ModelActionAdd  extends ModelActionBase// implements ActionInterface //ext
 		return $form;
 	}
 
+	/**
+	 * This function seperates out the specific input groups (specified by groupname_) and adds them to the object
+	 * that uses them.
+	 *
+	 * @access protected
+	 * @param array $input
+	 * @return bool This is the status on whether the model was successfully saved
+	 */
 	protected function processInput($input)
 	{
 		$inputNames = array_keys($input);
@@ -84,6 +130,14 @@ class ModelActionAdd  extends ModelActionBase// implements ActionInterface //ext
 		return $this->model->save();
 	}
 
+	/**
+	 * This takes in an array of input names and seperates them into groups, using the underscore as the group_name
+	 * delimiter. model_name ends up being a value in $array['model'].
+	 *
+	 * @access protected
+	 * @param array $inputNames
+	 * @return array $array[groupName] = array(item, item, item).
+	 */
 	protected function getInputGroups($inputNames)
 	{
 		foreach($inputNames as $name)
@@ -100,17 +154,36 @@ class ModelActionAdd  extends ModelActionBase// implements ActionInterface //ext
 		return $inputGroups;
 	}
 
+	/**
+	 * Because the new model we want to create doesn't have a location yet, we have to check the location we are trying
+	 * to save it to for the appropriate permissions. As such we are overloading the parent classes
+	 * setPermissionObject() function to use the parent instead of the model when creating the permission object.
+	 *
+	 * @access protected
+	 */
 	protected function setPermissionObject()
 	{
 		$user = ActiveUser::getInstance();
 		$this->permissionObject = new Permissions($this->model->getLocation()->getParent(), $user);
 	}
 
+	/**
+	 * Here we are overloading the parent class to prevent certain headers from being sent to the http views.
+	 *
+	 * @access protected
+	 */
 	protected function setHeaders()
 	{
 
 	}
 
+	/**
+	 * This function handles the view for the admin format. If the form was not submitted, or if there is an error, it
+	 * gets displayed. Otherwise we redirect the output to the newly saved resource (as a way to prevent the backspace
+	 * duplicate issue).
+	 *
+	 * @return string
+	 */
 	public function viewAdmin()
 	{
 		if($this->form->wasSubmitted())

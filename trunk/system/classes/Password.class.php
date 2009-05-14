@@ -4,12 +4,15 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage User
  */
 
 /**
  * This class handles password hashing and matching
  *
- * @package MainClasses
+ * @package System
+ * @subpackage User
  */
 class Password
 {

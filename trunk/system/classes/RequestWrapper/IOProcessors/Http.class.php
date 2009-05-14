@@ -4,12 +4,15 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage RequestWrapper
  */
 
 /**
- * This class processes HTTP line input and output
+ * This class processes HTTP input and output
  *
- * @package MainClasses
+ * @package System
+ * @subpackage RequestWrapper
  */
 class IOProcessorHttp extends IOProcessorCli
 {
@@ -434,7 +437,8 @@ class SessionObserver implements SplObserver
 /**
  * This class acts as a lookup for http status strings
  *
- * @package MainClasses
+ * @package System
+ * @subpackage RequestWrapper
  */
 class ResponseCodeLookup
 {

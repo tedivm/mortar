@@ -4,12 +4,15 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage RequestWrapper
  */
 
 /**
  * This class returns the arguments or query (get) values sent by the system
  *
- * @package MainClasses
+ * @package System
+ * @subpackage RequestWrapper
  */
 class RequestWrapper
 {

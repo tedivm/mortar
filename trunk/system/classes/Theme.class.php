@@ -4,6 +4,8 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage Display
  */
 
 /**
@@ -13,7 +15,8 @@
  * as the designer wants, or as close to the original. The other benefit is that themes don't need to be all
  * encompassing, since the defaults will get installed with new modules, making the modules fit right into the system
  *
- * @package MainClasses
+ * @package System
+ * @subpackage Display
  */
 class Theme
 {

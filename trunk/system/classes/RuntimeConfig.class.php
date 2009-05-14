@@ -4,13 +4,15 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @deprecated
  */
 
 /**
  * This defunct class has all sorts of information that can easily be gotten without it
  *
  * @deprecated
- * @package MainClasses
+ * @package System
  */
 class RuntimeConfig implements ArrayAccess
 {
