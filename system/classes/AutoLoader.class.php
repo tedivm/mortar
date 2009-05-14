@@ -4,12 +4,13 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
  */
 
 /**
  * This autoloader sucks. This is the first thing against the wall when php 5.3 comes out
  *
- * @package MainClasses
+ * @package System
  */
 class AutoLoader
 {

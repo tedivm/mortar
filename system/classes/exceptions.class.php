@@ -4,9 +4,9 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage ErrorHandling
  */
-
-
 
 /**
  * Base Errer Handler
@@ -14,7 +14,8 @@
  * This class acts as the base for all the other exception classes. It outputs errors and a stack trace when the
  * debugging level is high enough. This class itself is reserved for errors
  *
- * @package		MainClasses
+ * @package System
+ * @subpackage ErrorHandling
  */
 class BentoError extends Exception
 {
@@ -191,7 +192,8 @@ class BentoError extends Exception
  *
  * This is an exception handler that deals with Warning-level errors
  *
- * @package		MainClasses
+ * @package System
+ * @subpackage ErrorHandling
  */
 class BentoWarning extends BentoError
 {
@@ -209,7 +211,8 @@ class BentoWarning extends BentoError
  *
  * This is an exception handler that deals with Notice-level errors
  *
- * @package		MainClasses
+ * @package System
+ * @subpackage ErrorHandling
  */
 class BentoNotice extends BentoError
 {
@@ -227,7 +230,8 @@ class BentoNotice extends BentoError
  *
  * This exception is thrown to notify developers they are using depreciated, but available, functions
  *
- * @package		MainClasses
+ * @package System
+ * @subpackage ErrorHandling
  */
 class BentoDepreciated extends BentoError
 {
@@ -254,7 +258,8 @@ class BentoDepreciated extends BentoError
  *
  * This exception is thrown to notify developers they are using depreciated functions that are no longer usable
  *
- * @package		MainClasses
+ * @package System
+ * @subpackage ErrorHandling
  */
 class BentoDepreciatedError extends BentoDepreciated
 {
@@ -272,7 +277,8 @@ class BentoDepreciatedError extends BentoDepreciated
  *
  * This is thrown when arguments of the wrong type are passed to a method or function
  *
- * @package		MainClasses
+ * @package System
+ * @subpackage ErrorHandling
  */
 class TypeMismatch extends BentoError
 {
@@ -315,7 +321,8 @@ class TypeMismatch extends BentoError
  *
  * This exception is thrown when someone tries to access an area they do not have permission to access
  *
- * @package		MainClasses
+ * @package System
+ * @subpackage ErrorHandling
  */
 class AuthenticationError extends BentoError
 {
@@ -333,7 +340,8 @@ class AuthenticationError extends BentoError
  *
  * This is thrown when a resource is unable to be found
  *
- * @package		MainClasses
+ * @package System
+ * @subpackage ErrorHandling
  */
 class ResourceNotFoundError extends BentoError
 {

@@ -4,12 +4,15 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage Plugins
  */
 
 /**
  * This class allows developers to easily load plugins into their own code
  *
- * @package MainClasses
+ * @package System
+ * @subpackage Plugins
  */
 class Hook
 {
@@ -139,7 +142,7 @@ class Hook
 	 * @access public
 	 * @param string $name this is the name of the function
 	 * @param array $arguments this is the array of arguments passed
-	 * @return unknown
+	 * @return array Each element will be a plugin result
 	 */
 	public function __call($name, $arguments)
 	{

@@ -4,12 +4,15 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage Module
  */
 
 /**
  * This class contains information about a package (the files that make up a module)
  *
- * @package MainClasses
+ * @package System
+ * @subpackage Module
  */
 class PackageInfo
 {

@@ -4,12 +4,15 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage Display
  */
 
 /**
  * This class builds HTML pages for display to the browsers
  *
- * @package MainClasses
+ * @package System
+ * @subpackage Display
  */
 class Page implements ArrayAccess
 {
@@ -491,7 +494,8 @@ class Page implements ArrayAccess
  * This class is a singleton containing the current running page. I hate this with a fiery passion and will be
  * reworking it at some point
  *
- * @package MainClasses
+ * @package System
+ * @subpackage Display
  */
 class ActivePage extends Page
 {

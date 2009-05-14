@@ -4,12 +4,15 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage User
  */
 
 /**
  * This class contains all the data about a user
  *
- * @package MainClasses
+ * @package System
+ * @subpackage User
  */
 class User
 {
@@ -320,7 +323,8 @@ class User
  * This needs to be cleaned up. Its a singleton containing the active user, as well as some wrapper functions around
  * said user
  *
- * @package MainClasses
+ * @package System
+ * @subpackage Environment
  */
 class ActiveUser implements SplSubject
 {

@@ -4,12 +4,15 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage RequestWrapper
  */
 
 /**
  * This class processes command line input and output
  *
- * @package MainClasses
+ * @package System
+ * @subpackage RequestWrapper
  */
 class IOProcessorCli
 {

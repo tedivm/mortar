@@ -1,5 +1,20 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage RequestWrapper
+ */
 
+/**
+ * This class processes REST based (http) input and output
+ *
+ * @abstract
+ * @package System
+ * @subpackage RequestWrapper
+ */
 abstract class AbstractOutputController
 {
 	protected $action;

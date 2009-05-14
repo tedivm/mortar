@@ -1,6 +1,20 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage RequestWrapper
+ */
 
-class IOProcessorRest extends IOProcessorCli
+/**
+ * This class processes REST based (http) input and output
+ *
+ * @package System
+ * @subpackage RequestWrapper
+ */
+class IOProcessorRest extends IOProcessorHttp
 {
 	/**
 	 * These methods can be triggered using a post request with the input "methodOverride" set

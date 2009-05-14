@@ -4,6 +4,8 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage Database
  */
 
 
@@ -15,7 +17,8 @@
  * exists, otherwise it will establish the connection, store it for future use
  * and then return it.
  *
- * @package		MainClasses
+ * @package System
+ * @subpackage Database
  */
 class DatabaseConnection
 {
@@ -147,7 +150,8 @@ class DatabaseConnection
  * An extention of the MySQLi class, this returns a modified Statement class
  * when called to do so.
  *
- * @package		MainClasses
+ * @package System
+ * @subpackage Database
  */
 class MysqlBase extends mysqli
 {
@@ -299,7 +303,8 @@ class MysqlBase extends mysqli
  * An extention of the MySQLi STMT class, this adds the "fetch_array loop"
  * functionality as well as some other enhancements.
  *
- * @package		MainClasses
+ * @package System
+ * @subpackage Database
  */
 class Mystmt extends mysqli_stmt
 {
@@ -364,7 +369,7 @@ class Mystmt extends mysqli_stmt
      *
      * @access public
      * @param string $types
-     * @param,... mixed $var
+     * @param mixed $var,...
      */
 	public function bindAndExecute()
 	{

@@ -4,12 +4,15 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage UserInputs
  */
 
 /**
  * This class figures how the system has been called and pulls in inputs based off of that
  *
- * @package MainClasses
+ * @package System
+ * @subpackage UserInputs
  */
 class Input
 {

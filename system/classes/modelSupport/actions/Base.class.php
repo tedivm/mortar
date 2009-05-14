@@ -1,5 +1,20 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage ModelSupport
+ */
 
+/**
+ * This class tracks the handlers for all of the models in the system
+ *
+ * @abstract
+ * @package System
+ * @subpackage ModelSupport
+ */
 abstract class ModelActionBase implements ActionInterface
 {
 	protected $model;

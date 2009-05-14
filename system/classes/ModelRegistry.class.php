@@ -4,12 +4,15 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage ModelSupport
  */
 
 /**
  * This class tracks the handlers for all of the models in the system
  *
- * @package MainClasses
+ * @package System
+ * @subpackage ModelSupport
  */
 class ModelRegistry
 {

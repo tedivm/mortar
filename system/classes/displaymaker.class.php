@@ -4,6 +4,8 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage Display
  */
 
 
@@ -12,7 +14,8 @@
  *
  * The main template class. This class processes templates with using a special tagging system
  *
- * @package		MainClasses
+ * @package System
+ * @subpackage Display
  */
 class DisplayMaker
 {

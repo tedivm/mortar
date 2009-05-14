@@ -4,14 +4,15 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage RequestWrapper
  */
-
-
 
 /**
  * This class generates some statistics about the current request and saves it to a file
  *
- * @package		MainClasses
+ * @package System
+ * @subpackage RequestWrapper
  */
 class RequestStatistics
 {

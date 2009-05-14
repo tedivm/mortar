@@ -4,12 +4,15 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage ModelSupport
  */
 
 /**
  * This object represents the location of an resource in the system
  *
- * @package MainClasses
+ * @package System
+ * @subpackage ModelSupport
  */
 class Location
 {
