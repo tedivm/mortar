@@ -59,19 +59,6 @@ class BentoBaseActionLogIn extends ActionBase
 		$output = '';
 		if($this->loginSuccessful)
 		{
-			$url = new Url();
-			//$url->fromString();
-			$post = Post::getInstance();
-
-			$info = InfoRegistry::getInstance();
-
-			$url->engine =$info->Configuration['engine'];
-
-			if(strlen($post['redirect']))
-			{
-
-			}
-
 		//	$this->engineHelper->page->addMeta('refresh', '5;url=' . $url);
 			return 'You have successfully logged in.';
 
