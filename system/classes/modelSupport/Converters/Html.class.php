@@ -1,8 +1,28 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage ModelSupport
+ */
 
+/**
+ * This class returns an HTML representation of the model
+ *
+ * @package System
+ * @subpackage ModelSupport
+ */
 class ModelToHtml
 {
-
+	/**
+	 * This function converts a model into an HTML string
+	 *
+	 * @static
+	 * @param Model $model
+	 * @return string
+	 */
 	static public function convert($model, $handler)
 	{
 		$display = new DisplayMaker();
