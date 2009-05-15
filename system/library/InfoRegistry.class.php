@@ -26,11 +26,8 @@ class InfoRegistry
 		return self::$instance;
 	}
 
-
-
 	protected function __get($offset)
 	{
-
 		if(!isset($this->$offset))
 		{
 			switch ($offset) {
@@ -43,22 +40,21 @@ class InfoRegistry
 				case 'Site':
 					$this->Site = ActiveSite::getSite();
 					break;
-				case 'Post':
-					$this->Post = Post::getInstance();
+				case 'Input':
+					$this->Post = Input::getInput();
 					break;
 				case 'Query':
 					$this->Query = Query::getQuery();
 					break;
-				case 'Runtime':
-					$this->Runtime = RuntimeConfig::getInstance();
-					break;
+			//	case 'Runtime':
+			//		$this->Runtime = RuntimeConfig::getInstance();
+			//		break;
 				default:
 					break;
 			}
 		}
 
-
-		return $this->$offset;
+		return (isset($this->$offset)) ? $this->$offset : false;
 	}
 }
 
