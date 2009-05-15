@@ -1,13 +1,34 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage RequestWrapper
+ */
 
-
+/**
+ * This class takes an action, runs it, and then formats the output for the general user side of the website.
+ *
+ * @package System
+ * @subpackage RequestWrapper
+ */
 class HtmlOutputController extends AbstractOutputController
 {
+	/**
+	 * This sets the mime type to text/html.
+	 *
+	 * @var string
+	 */
+	public $mimeType = 'text/html';
+
+	/**
+	 * This function sets the template, the active page, and adds the HtmlControllerContentFilter content filter.
+	 *
+	 */
 	protected function start()
 	{
-		$this->ioHandler->addHeader('Content-Type', 'text/html');
-
-
 		$page = ActivePage::getInstance();
 		$page->addRegion('title', 'BentoBase');
 		$page->setTemplate('index.html', 'default');
@@ -20,11 +41,22 @@ class HtmlOutputController extends AbstractOutputController
 
 	}
 
+	/**
+	 * This takes the text (in this case the output of the action) and adds it to the content area of the current
+	 * active page.
+	 *
+	 * @param string $output
+	 */
 	protected function bundleOutput($output)
 	{
 		$this->activeResource->addRegion('content', $output);
 	}
 
+	/**
+	 * This takes the activeResource (in this case the ActivePage) and returns the display of that page.
+	 *
+	 * @return string Html formatted
+	 */
 	protected function makeDisplayFromResource()
 	{
 		return $this->activeResource->makeDisplay();
@@ -32,6 +64,13 @@ class HtmlOutputController extends AbstractOutputController
 
 }
 
+/**
+ * This class expands and allows for customization of the content that gets sent back by the running action. It
+ * currently doesn't do anything.
+ *
+ * @package System
+ * @subpackage RequestWrapper
+ */
 class HtmlControllerContentFilter
 {
 	public function update($htmlController, $output)
