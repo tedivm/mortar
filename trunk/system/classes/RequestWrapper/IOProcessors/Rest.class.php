@@ -58,18 +58,13 @@ class IOProcessorRest extends IOProcessorHttp
 
 		if($method == 'post')
 		{
-			Form::$userInput = Post::getInstance();
-
 			// This will allow clients that can't access the put/delete methods
 			// (such as forms) to use a post override
-			$post = Post::getInstance();
+			$post = input::getInput();
 			$override = strtolower($post['methodOverride']);
 
 			if(in_array($override, self::$postOverrides))
 				$method = $override;
-
-		}elseif($method == 'put'){
-			Form::$userInput = Put::getInstance();
 		}
 
 		switch($method)
