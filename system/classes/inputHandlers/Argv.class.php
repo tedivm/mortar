@@ -1,7 +1,26 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage RequestWrapper
+ */
 
-class Argv extends Get
+/**
+ * This class is used to retrieve command line inputs.
+ *
+ * @package System
+ * @subpackage UserInputs
+ */
+class Argv
 {
+	/**
+	 * This is an array used to take one letter flags and expand them into the appropriate variable name.
+	 *
+	 * @var array
+	 */
 	static public $flags = array(	'p' => 'path',
 									'f' => 'format',
 									'm' => 'module',
@@ -10,6 +29,12 @@ class Argv extends Get
 									'u' => 'username',
 									'p' => 'password');
 
+	/**
+	 * This function processes command line inputs and returns those inputs as an array. As part of the processing it
+	 * replaces command line flags with the full input name
+	 *
+	 * @return array
+	 */
 	static public function getArray()
 	{
 
