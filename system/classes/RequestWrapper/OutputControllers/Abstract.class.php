@@ -9,7 +9,7 @@
  */
 
 /**
- * This class processes REST based (http) input and output
+ * This class takes an action, runs it, and then formats the output.
  *
  * @abstract
  * @package System

@@ -1,7 +1,25 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage RequestWrapper
+ */
 
+/**
+ * This class takes an action, runs it, and then formats the output for the admin side of the website.
+ *
+ * @package System
+ * @subpackage RequestWrapper
+ */
 class AdminOutputController extends AbstractOutputController
 {
+	/**
+	 * On start set the active resource to the ActivePage, set the theme, and add the navigation filters.
+	 *
+	 */
 	protected function start()
 	{
 		$page = ActivePage::getInstance();
@@ -32,11 +50,22 @@ class AdminOutputController extends AbstractOutputController
 		}
 	}
 
+	/**
+	 * This function takes a string (the output of the action) and gives it to the ActivePage as a replacement for the
+	 * 'content' section of the theme template.
+	 *
+	 * @param string $output
+	 */
 	protected function bundleOutput($output)
 	{
 		$this->activeResource->addRegion('content', $output);
 	}
 
+	/**
+	 * This takes the activeResource (in this case the ActivePage) and returns the display of that page.
+	 *
+	 * @return string Html formatted
+	 */
 	protected function makeDisplayFromResource()
 	{
 		return $this->activeResource->makeDisplay();
@@ -46,8 +75,22 @@ class AdminOutputController extends AbstractOutputController
 
 // content filters
 
+/**
+ * This class expands and allows for customization of the content that gets sent back by the running action.
+ *
+ * @package System
+ * @subpackage RequestWrapper
+ */
 class AdminControllerContentFilter
 {
+	/**
+	 * This takes the content area and expands it to include more information, such as the title and subtitle, of
+	 * the action. The structure for that expanded display is written to the 'adminContent.html' theme file.
+	 *
+	 * @param OutputController $adminController
+	 * @param string $output
+	 * @return string
+	 */
 	public function update($adminController, $output)
 	{
 		$action = $adminController->getAction();
@@ -73,8 +116,20 @@ class AdminControllerContentFilter
 
 // resource filters
 
+/**
+ * This class handles the admin interface's navigation.
+ *
+ * @package System
+ * @subpackage RequestWrapper
+ */
 class AdminControllerResourceFilterNavigation
 {
+	/**
+	 * This function takes the adminController, uses it to get the active resource and other information, and uses that
+	 * to build nagivation menus.
+	 *
+	 * @param ouputController $adminController
+	 */
 	public function update($adminController)
 	{
 		$user = ActiveUser::getInstance();
@@ -83,19 +138,14 @@ class AdminControllerResourceFilterNavigation
 		$tabs = $this->loadLinks();
 		$activeTab = isset($action->adminSettings['tab']) ? $action->adminSettings['tab'] : 'Main';
 
-
 		$newNav = new NavigationMenu('left');
-
-
-
 		$newNav->setMenu('menuName');
 		$newNav->setMenuLabel('menuLabel');
 		$newNav->addItem('name', 'url', 'label');
 
-
 		$activeNav = isset($tabs[$activeTab]) ? $tabs[$activeTab] : 'main';
-
 		$navbar = new NavigationMenu('left');
+
 		if(is_array($activeNav))
 			foreach($activeNav as $container => $links)
 		{
@@ -113,7 +163,6 @@ class AdminControllerResourceFilterNavigation
 
 		$page = $adminController->getResource();
 		$page['navbar'] = $navbar->makeDisplay();
-
 
 		$tabUl = new HtmlObject('ul');
 		$tabUl->id = 'top-navigation';
@@ -144,11 +193,18 @@ class AdminControllerResourceFilterNavigation
 		$page['navtabs'] = (string) $tabUl;
 	}
 
+	/**
+	 * This function loads all of the possible links the admin navigation could use. It accomplishes this through the
+	 * use of the Hook/Plugin system. The results are cached for performance.
+	 *
+	 * @hook system adminInterface navigation
+	 * @cache admin navigation rawLinks
+	 * @return array Links that can be used in the navigation menu
+	 */
 	protected function loadLinks()
 	{
 		$cache = new Cache('admin', 'navigation', 'rawLinks');
 		$links = $cache->getData();
-
 
 		$hook = new Hook();
 		$hook->loadPlugins('system', 'adminInterface', 'navigation');
@@ -173,7 +229,6 @@ class AdminControllerResourceFilterNavigation
 					}
 				}
 			}
-
 			$cache->storeData($links);
 		}
 
@@ -195,10 +250,15 @@ class AdminControllerResourceFilterNavigation
 
 			$processedLinks = array_merge_recursive($processedLinks, $this->processLinks($links));
 		}
-
 		return $processedLinks;
 	}
 
+	/**
+	 * This function filters out links that point to an action the user can not perform.
+	 *
+	 * @param array $unprocessedLinks
+	 * @return array
+	 */
 	protected function processLinks($unprocessedLinks)
 	{
 		$user = ActiveUser::getInstance();
@@ -222,10 +282,20 @@ class AdminControllerResourceFilterNavigation
 	}
 }
 
-
+/**
+ * This class handles the installer interface's navigation. Currently it is pretty damn useless.
+ *
+ * @package System
+ * @subpackage RequestWrapper
+ * @todo Make this not useless.
+ */
 class AdminControllerResourceFilterInstallerNavigation
 {
-
+	/**
+	 * This takes in the adminController and adds navigation to the installer. This current navigation sucks.
+	 *
+	 * @param ouputController $adminController
+	 */
 	public function update($adminController)
 	{
 		$page = $adminController->getResource();
