@@ -28,10 +28,10 @@ class IOProcessorHttp extends IOProcessorCli
 	/**
 	 * The amount of time, in seconds, to give as the max age and expiration for a resource
 	 *
-	 * @access protected
+	 * @access public
 	 * @var int
 	 */
-	protected $cacheExpirationOffset;
+	public $cacheExpirationOffset;
 
 	/**
 	 * Time, in seconds, to allow multiple sessions to remain active
@@ -242,7 +242,6 @@ class IOProcessorHttp extends IOProcessorCli
 			echo $output;
 	}
 
-
 	/**
 	 * Outputs the stored http headers, as well as some extra caching related headers
 	 *
@@ -265,8 +264,10 @@ class IOProcessorHttp extends IOProcessorCli
 					(!isset($this->responseCode)))
 		{
 
+
 			if(isset($this->headers['Last-Modified']))
 			{
+				$cacheControl = 'must-revalidate';
 				$lastModified = $this->headers['Last-Modified'];
 				$lastModifiedAsTime = strtotime($lastModified);
 				$time = time();
@@ -281,12 +282,12 @@ class IOProcessorHttp extends IOProcessorCli
 				$etag .= $lastModifiedAsTime;
 
 				$this->addHeader('Expires', gmdate('D, d M y H:i:s T', $time + $offset ));
-				$cacheControl .= ',max-age=' . $offset;
+				$cacheControl = 'must-revalidate,max-age=' . $offset;
+				$this->addHeader('Cache-Control', $cacheControl);
 			}
 
 			$this->addHeader('Pragma', 'Asparagus'); // if something isn't sent out, apache sends no-cache
-			$cacheControl = 'must-revalidate';
-			$this->addHeader('Cache-Control', $cacheControl);
+
 
 			if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || isset($_SERVER['HTTP_IF_NONE_MATCH']))
 			{

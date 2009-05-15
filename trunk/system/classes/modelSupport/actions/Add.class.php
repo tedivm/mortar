@@ -13,7 +13,6 @@
  *
  * @package System
  * @subpackage ModelSupport
- * @todo Look into moving most of this to the ModelActionEdit class and have this inherit from that.
  */
 class ModelActionAdd extends ModelActionBase
 {

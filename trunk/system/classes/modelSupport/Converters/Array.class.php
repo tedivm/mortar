@@ -1,7 +1,28 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage ModelSupport
+ */
 
+/**
+ * This class returns an array representation of the model
+ *
+ * @package System
+ * @subpackage ModelSupport
+ */
 class ModelToArray
 {
+	/**
+	 * This function converts a model into an array
+	 *
+	 * @static
+	 * @param Model $model
+	 * @return array
+	 */
 	static function convert($model)
 	{
 		$finalArray = array();
