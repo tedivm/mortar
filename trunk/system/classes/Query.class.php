@@ -35,12 +35,16 @@ class Query
 	{
 		if(!self::$query)
 		{
-			if(defined('STDIN'))
+			$type = (defined('STDIN')) ? 'Argv' : 'Get';
+
+			if(!class_exists($type, false))
 			{
-				$input = Argv::getArray();
-			}else{
-				$input = Get::getArray();
+				if(!(include('inputHandlers/' . $type . '.class.php')))
+					throw new BentoError('Unable to load input handler ' . $type);
 			}
+
+			$input = staticFunctionHack($type, 'getArray');
+
 
 			$inputArray = self::processInput($input);
 			self::$query = new FilteredArray($inputArray);
