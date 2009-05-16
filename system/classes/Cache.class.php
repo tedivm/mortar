@@ -1,49 +1,138 @@
 <?php
-/*
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
 
-very simple cache class.
-
-$cache = new Cache(unique-name);
-
-if(!$stuff = $cache->get_data())
-{
-	// Do the stuff you were hoping to skip, that dumps things into $data
-
-	$config->store_data($stuff);
-}
-
-echo $stuff;
-
-*/
-
-
-
+/**
+ * This class is used to cache data that has a high generation cost, such as template preprocessing or code that
+ * requires a database query. This class can store any native php datatype, as long as it can be serialized (so
+ * when creating classes that you wish to store instances of, remember the __sleep and __wake magic functions).
+ *
+ * @package System
+ * @subpackage Caching
+ */
 class Cache
 {
-	public $name;
-	public $path;
-	public $cache_time = 1800; //seconds
+	/**
+	 * This is how long, in seconds, the cache will last for
+	 *
+	 * @var int seconds
+	 */
+	public $cacheTime = 1800;
 
+	/**
+	 * This is a flag to see if a valid response is returned.
+	 *
+	 * @var bool
+	 */
 	public $cacheReturned = false;
+
+	/**
+	 * If set to true, the system stores a copy of the current cache data (key, data and expiration) is stored to a
+	 * static variable. This allows future requests to that object to bypass retriving it from the cachehandler, but the
+	 * trade off is that scripts use a bit more memory. For large pieces of data not likely to be called multiple times
+	 * in a script (template data, for instance) this should be set to false.
+	 *
+	 * @var bool
+	 */
 	public $storeMemory = true;
 
+	/**
+	 * This is used internally to mark the class as disabled. This is effective only for the current request.
+	 *
+	 * @var bool
+	 */
 	protected $cache_enabled = true;
 
+	/**
+	 * This is the identifier for the item being cached. It is set by passing values to the constructor.
+	 *
+	 * @var array of strings
+	 */
 	protected $key;
+
+	/**
+	 * This is the key, but as a string instead of an array. This is primarily used as the index in various arrays.
+	 *
+	 * @var string
+	 */
 	protected $keyString;
 
+	/**
+	 * This is the cacheHandler being used by the system. This class handles all of the data processing, but the actual
+	 * storage is done by a seperate handler, allowing different options for caching.
+	 *
+	 * @var cacheHandler
+	 */
 	protected $handler;
+
+	/**
+	 * This is the name of the cache handler the system is using to store data.
+	 *
+	 * @var string
+	 */
 	protected static $handlerClass = '';
+
+	/**
+	 * This is an array of possible cache storage data methods, with the handler class as the array value.
+	 *
+	 * @var array
+	 */
 	protected static $handlers = array('FileSystem' => 'cacheHandlerFilesystem',
 										'SQLite' => 'cacheHandlerSqlite');
-
+	/**
+	 * This variable can be used to disable the cache system wide. It is used when the storage engine fails or if the
+	 * cache is being cleared.
+	 *
+	 * @var bool
+	 */
 	static $runtimeDisable = false;
+
+	/**
+	 * This is a running count of how many times the cache has been called
+	 *
+	 * @var int
+	 */
 	static $cacheCalls = 0;
+
+	/**
+	 * This is a running count of how many times the cache was able to successfully retrieve current data from the
+	 * cache.
+	 *
+	 * @var int
+	 */
 	static $cacheReturns = 0;
+
+	/**
+	 * This array holds a copy of all valid data (whether retrieved from or stored to the cacheHandler) in order to
+	 * avoid unnecessary calls to the storage handler. The index of this array is the string version of the key, and
+	 * the value is an exact copy of the data stored by the handlers.
+	 *
+	 * @var string
+	 */
 	static $memStore = array();
 
-	static private $queryRecord;// = array();
+	/**
+	 * This keeps track of how many times a specific cache item is called. The array is the string version of the key
+	 * and the value is the number of times it has been called.
+	 *
+	 * @var array
+	 */
+	static $queryRecord;
 
+	/**
+	 * This constructor takes an unlimited number of arguments. These strings should be unique to the data you are
+	 * trying to store. These keys should be considered hierarchical- that is, each additional argument passed is
+	 * considered a child of the one before it by the system. This function stores that key and sets up the cacheHandler
+	 * object to work with the data, although it does not retrieve it yet.
+	 *
+	 * @example $cache = new Cache('permissions', 'user', '4', '2'); where 4 is the user id and 2 is the location id.
+	 *
+	 * @param string $key...
+	 */
 	public function __construct()
 	{
 		self::$cacheCalls++;
@@ -55,18 +144,31 @@ class Cache
 
 		try {
 
-			if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable)
-				throw new BentoNotice('Cache disabled.');
-
 			if(func_num_args() == 0)
-				throw new BentoError('no cache argument');
+				throw new BentoError('No key sent to the cache constructor.');
 
 			if(self::$handlerClass == '')
 			{
 				$config = Config::getInstance();
-				self::$handlerClass = (isset(self::$handlers[$config['system']['cacheHandler']]))
-										? self::$handlers[$config['system']['cacheHandler']]
-										: self::$handlers['FileSystem'];
+
+				$handlerType = (isset($config['system']['cacheHandler'])
+									&& isset(self::$handlers[$config['system']['cacheHandler']]))
+											? $config['system']['cacheHandler']
+											: 'FileSystem';
+
+				$handlerClass = self::$handlers[$handlerType];
+
+				if(!class_exists($handlerClass, false))
+				{
+					$path = $config['path']['mainclasses'] .'cacheHandlers/' . $handlerType . '.class.php';
+					if(file_exists($path))
+					{
+						include($path);
+					}else{
+						throw new BentoError('Unable to load cache handler ' . $handlerType . ' at ' . $path);
+					}
+				}
+				self::$handlerClass = $handlerClass;
 			}
 
 			$key = func_get_args();
@@ -79,6 +181,7 @@ class Cache
 			$this->key =array_map('strtolower', $key);
 
 			$this->keyString = implode(':::', $this->key);
+
 			$this->handler = new self::$handlerClass();
 			if(!$this->handler->setup($this->key))
 				throw new BentoError('Unable to setup cache handler.');
@@ -104,11 +207,21 @@ class Cache
 
 	}
 
-	static public function getCalls()
-	{
-		return self::$queryRecord;
-	}
-
+	/**
+	 * This takes the same argument as the constructor, specifically an unlimited number of strings that are used to
+	 * define the key. Unlike the constructor, this function affects multiple items- the key used used hierarchical and
+	 * the less arguments passed, the more data that will be cleared. No arguments passed clears the cache complete.
+	 * This function works by passing the request to the cacheHandler.
+	 *
+	 * @example cache::clear('permissions', 'user', '4', '2'); will clear the permissions for the user with the id of 4,
+	 * at the location with the id 2.
+	 * @example cache::clear('permissions', 'user', '4'); will clear the permissions of the user with the id of 4 at all
+	 * locations.
+	 * @example cache::clear('permissions', 'user'); will clear the permissions for all users, at all locations.
+	 *
+	 * @param null|string $key...
+	 * @return bool
+	 */
 	static public function clear()
 	{
 		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable)
@@ -129,6 +242,13 @@ class Cache
 		}
 	}
 
+	/**
+	 * This function returns the data retrieved from the cache. This can be any php datatype that is able to be
+	 * serialized. Because this can return false as a correct, cached value, the return value should not be used to
+	 * determine successful retrieval of data.
+	 *
+	 * @return mixed
+	 */
 	public function getData()
 	{
 		if(!$this->cache_enabled)
@@ -152,6 +272,14 @@ class Cache
 		return $record['data']['return'];
 	}
 
+	/**
+	 * This function takes in any php datatype, including properly defined classes (must be able to serialize), and
+	 * stores it for later retrieval. It adds an expiration date (current time plus the cacheTime value, with a small
+	 * random addition or subtraction from that value to better randomize, and distribute, failed hits and thus
+	 * heavier code).
+	 *
+	 * @param mixed bool
+	 */
 	public function storeData($data)
 	{
 		if(!$this->cache_enabled)
@@ -161,8 +289,8 @@ class Cache
 		$store['createdOn'] = START_TIME;
 
 		try{
-			$random = $this->cache_time * .1 ;
-			$expiration = (microtime(true) + ($this->cache_time + rand(-1 * $random , $random)));
+			$random = $this->cacheTime * .1 ;
+			$expiration = (microtime(true) + ($this->cacheTime + rand(-1 * $random , $random)));
 
 			if($this->storeMemory)
 				self::$memStore[$this->keyString] = array('expiration' => $expiration, 'data' => $store);
@@ -174,6 +302,11 @@ class Cache
 		}
 	}
 
+	/**
+	 * This function extends the expiration on the current cached item.
+	 *
+	 * @return bool
+	 */
 	public function extendCache()
 	{
 		if(!$this->cache_enabled)
@@ -182,10 +315,27 @@ class Cache
 		return $this->storeData(self::$memStore[$this->keyString]['data']['return']);
 	}
 
+	/**
+	 * This returns a list of available cache handlers that can currently be enabled.
+	 *
+	 * @return unknown
+	 */
 	static function getHandlers()
 	{
+
 		foreach(self::$handlers as $name => $class)
 		{
+			if(!class_exists($class, false))
+			{
+				$path = 'cacheHandlers/' . $name . 'class.php';
+				if(file_exists($path))
+				{
+					include($path);
+				}else{
+					continue;
+				}
+			}
+
 			if(staticFunctionHack($class, 'canEnable'))
 				$availableHandlers[$name] = $class;
 		}
@@ -193,313 +343,58 @@ class Cache
 		return $availableHandlers;
 	}
 
-
-	// alias functions
-	public function get_data()
-	{
-		return $this->getData();
-	}
-
-	public function store_data($data)
-	{
-		return $this->storeData($data);
-	}
-
 }
 
+/**
+ * This interface defines the standard for cacheHandlers. When writing new cache storage engines, this is the place to
+ * start.
+ *
+ * @package System
+ * @subpackage Caching
+ */
 interface cacheHandler
 {
+	/**
+	 * This function gets the key, as an array. It should save it and make sure that it is able to run. If this function
+	 * returns anything but true the cache will be disabled for that request.
+	 *
+	 * @param array $key
+	 * @return bool
+	 */
 	public function setup($key); // return boolean
 
+	/**
+	 * This function should return the data array, exactly as it was received by the storeData function, or false if it
+	 * is not present. This array should have a value for "createdOn" and for "return", which should be the data the
+	 * main script is trying to store.
+	 *
+	 * @return array
+	 */
 	public function getData();
 
+	/**
+	 * This function takes an array as its first argument and the expiration time as the second. This array contains two
+	 * items, "createdOn" describing the first time the item was called and "return", which is the data that needs to be
+	 * stored. This function needs to store that data in such a way that it can be retrieced exactly as it was sent. The
+	 * expiration time needs to be stored with this data.
+	 *
+	 * @param array $data
+	 * @param int $expiration
+	 * @return bool
+	 */
 	public function storeData($data, $expiration);
 
+	/**
+	 * This function should clear the cache tree using the key array provided. If called with no arguments the entire
+	 * cache needs to be cleared.
+	 *
+	 * @param null|array $key
+	 * @return bool
+	 */
 	static function clear($key = null);
 
 }
 
-class cacheHandlerFilesystem implements cacheHandler
-{
-	protected $path;
-	protected $data;
-	protected $cache_enabled = false;
-	public $cacheReturned = false;
-	public $cache_time = 30;
 
-	protected static $memStore = array();
 
-	protected static $cachePath;
-
-	public function setup($key)
-	{
-		$this->path = self::makePath($key);
-		return ($this->path !== false);
-	}
-
-	public function getData()
-	{
-		if(file_exists($this->path))
-		{
-			$file = fopen($this->path, 'r');
-			$filesize = filesize($this->path);
-			if(flock($file, LOCK_SH | LOCK_NB))
-			{
-				$data = fread($file, $filesize);
-				flock($file, LOCK_UN);
-				$store = unserialize($data);
-				return $store;
-
-			}else{
-				$this->cache_enabled = false;
-				// the only way to get here is if there is a write lock already in place
-				// so we disable caching to make sure this one doesn't attempt to write to the file
-			}
-
-		}
-		return false;
-
-	}
-
-	public function storeData($data, $expiration)
-	{
-		if(!is_dir(dirname($this->path)))
-		{
-			if(!mkdir(dirname($this->path), 0755, true))
-				return false;
-		}
-
-		$store['expiration'] = $expiration; // (microtime(true) + ($this->cache_time + rand(-1 * $random , $random)));
-		$store['data'] = $data;
-
-
-		$file = fopen($this->path, 'w+');
-		if(flock($file, LOCK_EX))
-		{
-			if(!fwrite($file, serialize($store)))
-			{
-
-			}
-			flock($file, LOCK_UN);
-		}
-
-
-
-	}
-
-	static protected function makePath($key)
-	{
-		if(!isset(self::$cachePath))
-		{
-			$config = Config::getInstance();
-			self::$cachePath = $config['path']['temp'] . 'cache/';
-		}
-
-		$path = self::$cachePath;
-
-		// When I profiled this compared to the "implode" function, this was much faster
-		// This is probably due to the small size of the arrays and the overhead from function calls
-		$memkey = '';
-		foreach($key as $group)
-		{
-			$memkey .= $group . '/' ;
-		}
-
-		if(isset(self::$memStore['keys'][$memkey]))
-		{
-			$path = self::$memStore['keys'][$memkey];
-		}else{
-
-			foreach($key as $index => $value)
-			{
-				$key[$index] = md5($value);
-			}
-
-			switch (count($key)) {
-				case 0:
-					return $path;
-					break;
-
-				case 1:
-					$path .= $key[0] . '.php';//(ctype_alnum($key[0])) ? $key[0] : preg_replace('/[^a-zA-Z0-9]/u', '', $key[0]);
-					break;
-
-				default:
-					$name = array_pop($key);
-//					$path .= implode('/', $key);
-
-					foreach($key as $group)
-					{
-						$path .= ($group[0]) ? $group . '/' : '';
-					}
-
-
-
-					$path .= $name . '.php';
-					break;
-			}
-
-			self::$memStore['keys'][$memkey] = $path;
-
-		}
-
-
-
-		return $path;
-	}
-
-	static public function clear($key = null)
-	{
-		if(is_null($key))
-			$key = '';
-
-		$path = self::makePath($key);
-
-		if($path)
-		{
-
-			if(is_file($path))
-			{
-
-				unlink($path);
-			}
-
-			if(strpos($path, '.php') !== false)
-			{
-				$dir = dirname($path);
-
-			}elseif(is_dir($path)){
-				$dir = $path;
-			}
-
-			if($dir)
-			{
-				deltree($path);
-			}
-
-		}else{
-			return false;
-		}
-
-		return true;
-	}
-
-	static function canEnable()
-	{
-		return true;
-	}
-
-}
-
-class cacheHandlerSqlite implements cacheHandler
-{
-	protected $key;
-	protected $data;
-
-	static protected $sqlObject = false;
-
-
-	public function setup($key)
-	{
-		$this->key = self::makeSqlKey($key);
-
-		if(get_class(self::$sqlObject) == 'SQLiteDatabase')
-			return true;
-
-		return (self::setSqliteHandler());
-	}
-
-	public function getData()
-	{
-
-		$query = self::$sqlObject->query("SELECT * FROM cacheStore WHERE key LIKE '{$this->key}'");
-
-		if($resultArray = $query->fetch(SQLITE_ASSOC))
-		{
-			$results = array('expiration' => $resultArray['expires'], 'data' => unserialize($resultArray['data']));
-		}else{
-			$results = false;
-		}
-
-		return $results;
-	}
-
-	public function storeData($data, $expiration)
-	{
-		$data = sqlite_escape_string(serialize($data));
-
-		$query = self::$sqlObject->query("INSERT INTO cacheStore (key, expires, data)
-											VALUES ('{$this->key}', '{$expiration}', '{$data}')");
-	}
-
-	static function clear($key = null)
-	{
-		if(is_null($key) || (is_array($key) && count($key) == 0))
-		{
-			$info = InfoRegistry::getInstance();
-			$filePath = $info->Configuration['path']['temp'] . 'cacheDatabase.sqlite';
-			unlink($filePath);
-		}else{
-			if(!self::$sqlObject)
-			{
-				self::setSqliteHandler();
-			}
-			$key = self::makeSqlKey($key) . '%';
-			$query = self::$sqlObject->queryExec("DELETE FROM cacheStore WHERE key LIKE '{$key}'");
-		}
-	}
-
-	static function setSqliteHandler()
-	{
-		try{
-			if(get_class(self::$sqlObject) != 'SQLiteDatabase')
-			{
-				$info = InfoRegistry::getInstance();
-				$filePath = $info->Configuration['path']['temp'] . 'cacheDatabase.sqlite';
-
-				$isSetup = file_exists($filePath);
-
-				$db = new SQLiteDatabase($filePath, '0666', $errorMessage);
-
-				if(!$db)
-					throw new BentoWarning('Unable to open SQLite Database: '. $errorMessage);
-
-				if(!$isSetup)
-				{
-					$db->queryExec('
-					CREATE TABLE cacheStore (
-						key TEXT UNIQUE ON CONFLICT REPLACE,
-						expires FLOAT,
-						data BLOB
-					);
-					CREATE INDEX keyIndex ON cacheStore (key);');
-
-				}
-
-				self::$sqlObject = $db;
-			}
-
-		}catch(Exception $e){
-			return false;
-		}
-
-		return true;
-	}
-
-	static function makeSqlKey($key)
-	{
-		$pathPiece = '';
-		foreach($key as $rawPathPiece)
-		{
-			$pathPiece .= sqlite_escape_string($rawPathPiece) . ':::';
-		}
-
-		return $pathPiece;
-	}
-
-	static function canEnable()
-	{
-		return class_exists('SQLiteDatabase', false);
-	}
-}
 ?>
