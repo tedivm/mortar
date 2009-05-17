@@ -54,11 +54,11 @@ if(STRICT)
 }
 error_reporting($errorLevel);
 
-require('system/classes/exceptions.class.php');
-require('system/classes/config.class.php');
+require('system/classes/Exceptions.class.php');
+require('system/classes/Config.class.php');
 require('system/library/IniFile.class.php');
-require('system/classes/displaymaker.class.php');
-require('system/classes/database.class.php');
+require('system/classes/DisplayMaker.class.php');
+require('system/classes/Database.class.php');
 require('system/functions/general.functions.php');
 require('system/engines/Engine.class.php');
 require('system/classes/Password.class.php');
