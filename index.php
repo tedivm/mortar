@@ -60,7 +60,6 @@ require('system/library/IniFile.class.php');
 require('system/classes/DisplayMaker.class.php');
 require('system/classes/Database.class.php');
 require('system/functions/general.functions.php');
-require('system/engines/Engine.class.php');
 require('system/classes/Password.class.php');
 require('system/classes/User.class.php');
 require('system/interfaces/ActionInterface.interface.php');
