@@ -94,6 +94,7 @@ class PackageInfo
 	 * Loads the module name by id then returns the results of loadByName
 	 *
 	 * @access protected
+	 * @cache packages moduleLookup *id
 	 * @see loadByName
 	 * @param int $id
 	 */
@@ -126,6 +127,7 @@ class PackageInfo
 	 * Loads the package by name
 	 *
 	 * @access protected
+	 * @cache packages *packageName info
 	 * @param string $packageName
 	 */
 	public function loadByName($packageName)
@@ -315,6 +317,7 @@ class PackageInfo
 	 * Loads the actions from the package
 	 *
 	 * @access protected
+	 * @cache packages *packageName actions
 	 * @return array
 	 */
 	protected function loadActions()
@@ -365,6 +368,7 @@ class PackageInfo
 	 * Loads the plugins the package contains
 	 *
 	 * @access protected
+	 * @cache packages *packageName plugins
 	 * @return array
 	 */
 	protected function loadPlugins()
@@ -390,6 +394,7 @@ class PackageInfo
 	 * Loads the models from the package
 	 *
 	 * @access protected
+	 * @cache packages *packageName models
 	 * @return array
 	 */
 	protected function loadModels()

@@ -116,6 +116,7 @@ class ModelRegistry
 	 * Loads the handlers from the database or cache
 	 *
 	 * @access protected
+	 * @cache system models handlers
 	 * @static
 	 */
 	static protected function loadHandlers()

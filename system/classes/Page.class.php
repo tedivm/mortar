@@ -141,6 +141,7 @@ class Page implements ArrayAccess
 	/**
 	 * This function changes the current theme and template
 	 *
+	 * @cache theme *name *file
 	 * @param string $file
 	 * @param string $theme
 	 */

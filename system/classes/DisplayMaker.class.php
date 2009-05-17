@@ -82,6 +82,7 @@ class DisplayMaker
 	 * and initializes this class
 	 *
 	 * @access public
+	 * @cache template scheme *md5(string)
 	 * @param string $text
 	 */
 	public function setDisplayTemplate($text)
