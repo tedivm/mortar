@@ -157,7 +157,7 @@ class Page implements ArrayAccess
 		}
 
 		$cache = new Cache('theme', $this->theme, $file);
-		$template = $cache->get_data();
+		$template = $cache->getData();
 
 		if(!$cache->cacheReturned)
 		{
@@ -171,7 +171,7 @@ class Page implements ArrayAccess
 
 			$template = file_get_contents($path);
 			$template = $this->preProcessTemplate($template);
-			$cache->store_data($template);
+			$cache->storeData($template);
 		}
 
 		$this->display = new DisplayMaker();

@@ -405,7 +405,7 @@ class Location
 					$locationInfo = false;
 				}
 
-				$cache->store_data($locationInfo);
+				$cache->storeData($locationInfo);
 			}
 
 			if($locationInfo != false)
@@ -443,10 +443,10 @@ class Location
 
 		}else{
 			// should only run when id isn't set (so new objects only)
-			$db_location->query_set('creationDate', 'NOW()');
+			$db_location->querySet('creationDate', 'NOW()');
 		}
 
-		$db_location->query_set('lastModified', 'NOW()');
+		$db_location->querySet('lastModified', 'NOW()');
 
 		if($parent = $this->getParent())
 		{
@@ -466,14 +466,14 @@ class Location
 		{
 			$db_location->owner = $this->owner;
 		}else{
-			$db_location->query_set('owner', 'NULL');
+			$db_location->querySet('owner', 'NULL');
 		}
 
 		if(is_numeric($this->group))
 		{
 			$db_location->groupOwner = $this->group;
 		}else{
-			$db_location->query_set('groupOwner', 'NULL');
+			$db_location->querySet('groupOwner', 'NULL');
 		}
 
 
@@ -512,7 +512,7 @@ class Location
 	public function getChildByName($name)
 	{
 		$cache = new Cache('locations', $this->id, 'child', $name);
-		$childId = $cache->get_data();
+		$childId = $cache->getData();
 		if(!$cache->cacheReturned)
 		{
 			$db = db_connect('default_read_only');
@@ -527,7 +527,7 @@ class Location
 				$childId = false;
 			}
 
-			$cache->store_data($childId);
+			$cache->storeData($childId);
 		}
 
 		return (is_int($childId)) ? new Location($childId) : false;
@@ -543,7 +543,7 @@ class Location
 	{
 		$cache = new Cache('locations', $this->id, 'children', $type);
 
-		if(!$childrenIds = $cache->get_data())
+		if(!$childrenIds = $cache->getData())
 		{
 			$db = db_connect('default_read_only');
 			$stmt = $db->stmt_init();
@@ -560,7 +560,7 @@ class Location
 			while($childLocation = $stmt->fetch_array())
 				$childrenIds[] = $childLocation['location_id'];
 
-			$cache->store_data($childrenIds);
+			$cache->storeData($childrenIds);
 		}
 
 		if(!$childrenIds || count($childrenIds) < 1)

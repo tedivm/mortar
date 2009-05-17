@@ -1,21 +1,81 @@
 <?
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ */
 
-// Copyright Robert Hafner
-
+/**
+ * This class acts as a wrapper to easily call rows from database tables.
+ *
+ * All properties of this class should correspond to database tables, with the exception of those listed below.
+ *
+ * @property mixed primaryKey
+ * @property-read int errno
+ * @property-read int num_rows
+ * @package System
+ * @subpackage Database
+ */
 class ObjectRelationshipMapper
 {
-
-	// all the variables are 'protect' as a reminder that get/set has been overridden
-
+	/**
+	 * This is the table this instance is mapped to
+	 *
+	 * @var string
+	 */
 	protected $table;
+
+	/**
+	 * These are the values of the current object. The index corresponds to a column.
+	 *
+	 * @var array
+	 */
 	protected $values = array();
+
+	/**
+	 * This is an array of values that bypass the all the internal security checking and parameterization to get placed
+	 * directly into the SQL statement itself. This should be used for things like MySQL functions, not for user input.
+	 *
+	 * @var array The index is the column
+	 */
 	protected $direct_values = array();
+
+	/**
+	 * This is an array of columns that the current table has, with information about each of those columns.
+	 *
+	 * @var array
+	 */
 	protected $columns = array();
-	private $primary_keys = array();
+
+	/**
+	 * This is an array of columns that act as primary keys.
+	 *
+	 * @var array
+	 */
+	protected $primary_keys = array();
+
+	/**
+	 * This is a flag to see if the item has been synced with the database
+	 *
+	 * @var bool
+	 */
 	private $selected = false;
 
-	public static $cacheTime = 3600;
-	protected $data_types = array(
+	/**
+	 * This item defines how long the table meta data is stored in the cache.
+	 *
+	 * @var int
+	 */
+	public static $cacheTime = 43200;
+
+	/**
+	 * This array is used to define the datatype that is required for each column type. This is used when sending the
+	 * arguments along to prevent sql injection.
+	 *
+	 * @var array column_type => data_type
+	 */
+	static protected $data_types = array(
 	'tinyint' => 'i',
 	'smallint' => 'i',
 	'mediumint' => 'i',
@@ -35,56 +95,118 @@ class ObjectRelationshipMapper
 	'longblob' => 'b'
 	);
 
+	/**
+	 * This is the name of the database connection used for read operations. This should correlate to a connection in
+	 * the database.ini file.
+	 *
+	 * @var string
+	 */
 	protected $db_read = 'default_read_only';
+
+	/**
+	 * This is the name of the database connection used for write operations. This should correlate to a connection in
+	 * the database.ini file.
+	 *
+	 * @var string
+	 */
 	protected $db_write = 'default';
 
-	private $next_results = array();
-	private $previous_results = array();
-	private $select_stmt;
+	/**
+	 * In the case where there are multiple rows, this is an array of results that have already been itereated through.
+	 *
+	 * @var array
+	 */
+	protected $previous_results = array();
+
+	/**
+	 * In the case where there are multiple rows, this is an array of results that have been retrieved from the database
+	 * and are next in line to be iterated through.
+	 *
+	 * @var array
+	 */
+	protected $next_results = array();
+
+	/**
+	 * This is the copy of the Mystmt class used to retrieve the row(s) from the database.
+	 *
+	 * @var Mystmt
+	 */
+	protected $select_stmt;
+
+	/**
+	 * This is the number of rows retrieved or affected.
+	 *
+	 * @var int
+	 */
 	protected $num_rows = 0;
+
+	/**
+	 * In the event of a mysql error, this is changed to the error number. If 0 there is no error.
+	 *
+	 * @var int
+	 */
 	public $sql_errno = 0;
+
+	/**
+	 * In the event of a mysql error, this is changed to the error string.
+	 *
+	 * @var string
+	 */
 	public $errorString;
 
 
-
-	public function __construct($table, $db_write = '', $db_read = '')
+	/**
+	 * This constructor takes the table name that the object should be mapped to, and two optional arguments identifying
+	 * the database connections to use. This function calls load_schema, which loads the meta data needed for the class
+	 * from the database.
+	 *
+	 * @param string $table
+	 * @param null|string $db_write should correlate to a connection in the database.ini file with full permissions.
+	 * @param null|string $db_read should correlate to a connection in the database.ini file read permissions.
+	 */
+	public function __construct($table, $db_write = null, $db_read = null)
 	{
 		$this->table = $table;
 
-		if($db_read != '')
+		if(isset($db_read))
 			$this->db_read =  $db_read;
 
-		if($db_write != '')
+		if(isset($db_write))
 			$this->db_write =  $db_write;
 
 		$this->load_schema();
 	}
 
-
 	// create, record, update, delete
 
+	/**
+	 * This function selects a number of rows from the database that match the attributes set with the set/get magic
+	 * functions.
+	 *
+	 * @param int $limit This is the number of rows to return- the default, 0, means no limit.
+	 * @param int $position If set, this is the starting position of rows retrieved from the database
+	 * @param string $orderby This defines the column to order results by
+	 * @param string $order If orderby is set, this defines whether it ASC or DESC (asceneds or descends)
+	 * @return bool returns true if successful and rows return
+	 */
 	public function select($limit = 0, $position = 0, $orderby = '', $order = 'ASC')
 	{
 
-		// retreive database connection
+	// retreive database connection
 		$db = DatabaseConnection::getConnection($this->db_read);
-		// setup SELECT
 
+	// setup SELECT
 		$sql_select = 'SELECT * FROM ' . $this->table;
+	// END setup SELECT
 
-		// END setup SELECT
-
-		// setup WHERE
-
+	// setup WHERE
 		$sql_where = 'WHERE ';
 		$sql_typestring = '';
 		$where_loop = 0;
 		foreach($this->values as $column => $value)
 		{
 			if($where_loop > 0)
-			{
 				$sql_where .= 'AND ';
-			}
 
 			$sql_input[] = $value;
 			$sql_where .= $column . ' = ? ';
@@ -92,28 +214,23 @@ class ObjectRelationshipMapper
 			if(!isset($this->columns[$column]['Type']))
 				throw new BentoError('Column ' . $column . ' not found in table ' . $this->table);
 
-			$sql_typestring .= $this->get_type($this->columns[$column]['Type']);
+			$sql_typestring .= self::getType($this->columns[$column]['Type']);
 			$where_loop++;
 		}
 
 		if($where_loop < 1)
 			$sql_where = '';
+	// END setup WHERE
 
-		// END setup WHERE
-
-		// setup ORDER BY
-
-
+	// setup ORDER BY
 		if(is_array($orderby))
 		{
 			$sql_orderby = 'ORDER BY ';
-
 			$orderby_loop = 0;
 			foreach($orderby as $column_name)
 			{
 				if($this->columns[$column_name])
 				{
-
 					if($orderby_loop > 0)
 						$sql_orderby .= ', ';
 
@@ -134,9 +251,9 @@ class ObjectRelationshipMapper
 		}else{
 			$sql_orderby = '';
 		}
-		// END setup ORDER BY
+	// END setup ORDER BY
 
-		// setup LIMIT
+	// setup LIMIT
 
 		if($limit > 0)
 		{
@@ -147,35 +264,31 @@ class ObjectRelationshipMapper
 			$sql_limit = '';
 		}
 
-		// END setup LIMIT
+	// END setup LIMIT
 
-
-		// create query
+	// create query
 		$query = rtrim($sql_select, ' ,') . ' ' . rtrim($sql_where, ' ,') . ' ' . rtrim($sql_orderby, ' ,') . ' ' . rtrim($sql_limit, ' ,');
 
+	// run query
 		if(count($sql_input) < 1)
 		{
 			$db->query($query);
 			$results = $db->query($query);
-
 		}else{
 			array_unshift($sql_input, $sql_typestring);
 			$select_stmt = $db->stmt_init();
 			$select_stmt->prepare($query);
-
 			call_user_func_array(array($select_stmt, 'bindAndExecute'), $sql_input);
 			$results = $select_stmt;
 		}
 
-
+	// process results
 		if($select_stmt->errno > 0)
 		{
 			$this->sql_errno = $select_stmt->errno;
+			$this->errorString = $select_stmt->error;
 			return false;
 		}
-
-
-
 
 		$this->num_rows = $results->num_rows;
 
@@ -199,22 +312,27 @@ class ObjectRelationshipMapper
 				return true;
 				break; // I know it will never be reached, but I can't remove it for OCD reasons
 		}
-
 	}
 
+	/**
+	 * This function deletes rows based on the current attributes set (either via the set/get functions or from a
+	 * previous database call). Be careful. As a safegaurd this requires that at least one attribute be set, it will not
+	 * just delete all- for that use a query.
+	 *
+	 * @param int $limit Defaults to one row. If set to 0, there will be no limit and all matching rows will be removed
+	 * @return bool
+	 */
 	public function delete($limit = 1)
 	{
 
 		// retreive database connection
 		$db = DatabaseConnection::getConnection($this->db_write);
-		// setup SELECT
 
+	// setup DELETE
 		$sql_delete = 'DELETE FROM ' . $this->table;
+	// END setup DELETE
 
-		// END setup SELECT
-
-		// setup WHERE
-
+	// setup WHERE
 		$sql_where = 'WHERE ';
 		$sql_typestring = '';
 		$sql_input = array();
@@ -231,22 +349,18 @@ class ObjectRelationshipMapper
 
 				$sql_input[] = $value;
 				$sql_where .= $column . ' = ? ';
-				$sql_typestring .= $this->get_type($this->columns[$column]['Type']);
+				$sql_typestring .= self::getType($this->columns[$column]['Type']);
 				$loop++;
 			}
 
 		}
-		// END setup WHERE
+	// END setup WHERE
 
-		// setup LIMIT
+	// setup LIMIT
+		$sql_limit = ($limit > 0) ? 'LIMIT ' . $limit : '';
+	// END setup LIMIT
 
-		$sql_limit = ($limit > 0) ? $limit : '';
-
-		// END setup LIMIT
-
-
-		// create query
-
+	// create query
 		if(strlen($sql_where) <= 6)
 		{
 			// this prevents the query from emptying a table
@@ -254,7 +368,9 @@ class ObjectRelationshipMapper
 		}
 
 		$query = rtrim($sql_delete, ' ,') . ' ' . rtrim($sql_where, ' ,') . ' ' . rtrim($sql_limit, ' ,');
+	// END create query
 
+	// run query
 		if(count($sql_input) < 1)
 		{
 			$db->query($query);
@@ -268,8 +384,9 @@ class ObjectRelationshipMapper
 			call_user_func_array(array($delete_stmt, 'bindAndExecute'), $sql_input);
 			$results = $delete_stmt;
 		}
+	// END run query
 
-
+	// process results
 		if($results->errno > 0)
 		{
 			$this->sql_errno = $results->errno;
@@ -283,6 +400,11 @@ class ObjectRelationshipMapper
 
 	}
 
+	/**
+	 * This saved the current current attributes to the database. It relies on two helper functions, update and insert.
+	 *
+	 * @return bool
+	 */
 	public function save()
 	{
 		try{
@@ -326,6 +448,13 @@ class ObjectRelationshipMapper
 	}
 
 
+	/**
+	 * When iterating through results, this moved to the next set of values. This stores the current results on the
+	 * previous_results stack, checks to see if the next results are already retrieved, and if not retrieves them from
+	 * the database.
+	 *
+	 * @return bool Returns false when there are no more values.
+	 */
 	public function next()
 	{
 		if(count($this->next_result) > 0)
@@ -348,6 +477,11 @@ class ObjectRelationshipMapper
 		return false;
 	}
 
+	/**
+	 * When iterating, this rewinds back to the previous results. When doing so it stores the current results in the
+	 * 'next_results' stack.
+	 *
+	 */
 	public function previous()
 	{
 		if(count($this->previous) > 0)
@@ -358,6 +492,10 @@ class ObjectRelationshipMapper
 		}
 	}
 
+	/**
+	 * This resets the iteration. It works by shuffling around the values, previous_results, and next_results arrays.
+	 *
+	 */
 	public function reset()
 	{
 		$this->direct_values = array();
@@ -366,16 +504,34 @@ class ObjectRelationshipMapper
 		array_push($this->previous_results, $this->next_results);
 	}
 
-	public function total_rows()
+	/**
+	 * This returns the number of rows affected by the last database action.
+	 *
+	 * @return unknown
+	 */
+	public function totalRows()
 	{
 		return $this->num_rows;
 	}
 
-	public function query_set($column, $string)
+	/**
+	 * This function lets you inject any string into the sql query instead of using the normal attribute/value method.
+	 * The purpose behind this is to allow you to use mysql functions directly in the query.
+	 *
+	 * @param string $column
+	 * @param string $string
+	 */
+	public function querySet($column, $string)
 	{
 		$this->direct_values[$column] = $string;
 	}
 
+	/**
+	 * This returns the value from the column name passed for the current active row.
+	 *
+	 * @param string $name
+	 * @return mixed This is the value stored in the database.
+	 */
 	public function __get($name)
 	{
 
@@ -403,6 +559,13 @@ class ObjectRelationshipMapper
 		return $value;
 	}
 
+	/**
+	 * This is used to set the value corresponding to a specific column.
+	 *
+	 * @param string $name
+	 * @param string|int $value
+	 * @return unknown
+	 */
 	public function __set($name, $value)
 	{
 		if(strtolower($name) == 'primarykey' && count($this->primary_keys) == 1)
@@ -411,11 +574,21 @@ class ObjectRelationshipMapper
 		return ($this->values[$name] = $value);
 	}
 
-	public function to_array()
+	/**
+	 * Returns all of the current values as an array
+	 *
+	 * @return array
+	 */
+	public function toArray()
 	{
 		return $this->values;
 	}
 
+	/**
+	 * This returns not just the current results, but all of the results, as an array.
+	 *
+	 * @return array
+	 */
 	public function resultsToArray()
 	{
 		$temp = array();
@@ -439,6 +612,14 @@ class ObjectRelationshipMapper
 		return $temp;
 	}
 
+	/**
+	 * This returns an array of columns. The default is to return just an array of column names, however if the
+	 * withAttributes argument true it will return various metadata about the column as well.
+	 *
+	 * @param bool $withAttributes
+	 * @param bool $includePrimaryKey
+	 * @return array
+	 */
 	public function getColumns($withAttributes = false, $includePrimaryKey = true)
 	{
 		$output = $this->columns;
@@ -452,13 +633,19 @@ class ObjectRelationshipMapper
 
 	// internal stuff
 
+	/**
+	 * This function loads the meta data (columns, types and keys) from the database so we don't need to manage
+	 * configuration files. This metadata is cached for performance.
+	 *
+	 * @cache orm scheme $tableName
+	 */
 	protected function load_schema()
 	{
 
 		$cache = new Cache('orm', 'schema', $this->table);
-		$cache->cache_time = self::$cacheTime;
+		$cache->cacheTime = self::$cacheTime;
 
-		if(!($schema = $cache->get_data()))
+		if(!($schema = $cache->getData()))
 		{
 			$db = DatabaseConnection::getConnection($this->db_write);
 			$result = $db->query('SHOW FIELDS FROM ' . $this->table);
@@ -498,19 +685,29 @@ class ObjectRelationshipMapper
 			$schema['columns'] = $columns;
 			$schema['primarykey'] = $primarykey;
 
-			$cache->store_data($schema);
+			$cache->storeData($schema);
 		} // end cache code
 
 		$this->columns = $schema['columns'];
 		$this->primary_keys = $schema['primarykey'];
 	}
 
-	protected function get_type($datatype)
+	/**
+	 * This function takes in a column type and returns the flag needed for binding data using an stmt object.
+	 *
+	 * @param string $datatype
+	 * @return string
+	 */
+	static protected function getType($datatype)
 	{
-
-		return isset($this->data_types[$datatype]) ? $this->data_types[$datatype] : 's';
+		return isset(self::$data_types[$datatype]) ? self::$data_types[$datatype] : 's';
 	}
 
+	/**
+	 * This inserts information as a new row. Called by the save function.
+	 *
+	 * @return bool
+	 */
 	protected function insert()
 	{
 
@@ -533,7 +730,7 @@ class ObjectRelationshipMapper
 				if(isset($this->values[$column_name]))
 				{
 					$sql_columns .= $column_name . ', ';
-					$sql_typestring .= $this->get_type($column_info['Type']);
+					$sql_typestring .= self::getType($column_info['Type']);
 					$sql_input[] = $this->values[$column_name];
 					$sql_values .= '?, ';
 				}else{
@@ -603,6 +800,11 @@ class ObjectRelationshipMapper
 
 	}
 
+	/**
+	 * This updates a row in the table. Called by the 'save' function.
+	 *
+	 * @return bool
+	 */
 	protected function update()
 	{
 
@@ -624,7 +826,7 @@ class ObjectRelationshipMapper
 
 				if(isset($this->values[$column_name]))
 				{
-					$sql_typestring .= $this->get_type($column_info['Type']);
+					$sql_typestring .= self::getType($column_info['Type']);
 					$sql_input[] = $this->values[$column_name];
 					$sql_set .= $column_name . ' = ?, ';
 				}else{
@@ -661,7 +863,7 @@ class ObjectRelationshipMapper
 
 			$sql_where .= $primary_key . '= ? ';
 			$sql_input[] = $this->values[$primary_key];
-			$sql_typestring .= $this->get_type($this->columns[$primary_key]['Type']);
+			$sql_typestring .= self::getType($this->columns[$primary_key]['Type']);
 		}
 
 		$sql_where = rtrim($sql_where, ' ,');
@@ -677,14 +879,6 @@ class ObjectRelationshipMapper
 		$results = call_user_func_array(array($update_stmt, 'bindAndExecute'), $sql_input);
 		return $results;
 	}
-
-	protected function createColumnString()
-	{
-
-	}
-
-
-
 }
 
 ?>

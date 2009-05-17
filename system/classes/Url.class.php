@@ -7,9 +7,10 @@
  */
 
 /**
- * This class creates urls
+ * This class creates urls and links for use by the system. The goal is to make the Urls as SEO and user friendly as
+ * possible, so various mod_rewrite and path tricks are enabled.
  *
- * @package MainClasses
+ * @package System
  */
 class Url
 {

@@ -177,7 +177,7 @@ class PackageInfo
 				$info = false;
 			}
 
-			$cache->store_data($info);
+			$cache->storeData($info);
 		}
 
 		$this->actions = $this->loadActions();
