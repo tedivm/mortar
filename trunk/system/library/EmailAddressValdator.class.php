@@ -1,4 +1,11 @@
 <?php
+/**
+ * AddedBytes email validation
+ *
+ * @copyright
+ * @license http://www.opensource.org/licenses/bsd-license.php
+ * @link http://code.google.com/p/php-email-address-validation/
+ */
 
     /*
 
@@ -17,6 +24,12 @@
 
     */
 
+	/**
+	 * This class is used to validate email addresses.
+	 *
+	 * @package		Library
+	 * @subpackage	Email
+	 */
     class EmailAddressValidator {
 
         /**
@@ -38,6 +51,11 @@
                 return false;
             }
 
+            // Check email length - min 3 (a@a), max 256
+            if (!$this->check_text_length($strEmailAddress, 3, 256)) {
+                return false;
+            }
+
             // Split it into sections using last instance of "@"
             $intAtSymbol = strrpos($strEmailAddress, '@');
             if ($intAtSymbol === false) {
@@ -49,10 +67,15 @@
 
             // Count the "@" symbols. Only one is allowed, except where
             // contained in quote marks in the local part. Quickest way to
-            // check this is to remove anything in quotes.
-            $arrTempAddress[0] = preg_replace('/"[^"]+"/'
+            // check this is to remove anything in quotes. We also remove
+            // characters escaped with backslash, and the backslash
+            // character.
+            $arrTempAddress[0] = preg_replace('/\./'
                                              ,''
                                              ,$arrEmailAddress[0]);
+            $arrTempAddress[0] = preg_replace('/"[^"]+"/'
+                                             ,''
+                                             ,$arrTempAddress[0]);
             $arrTempAddress[1] = $arrEmailAddress[1];
             $strTempAddress = $arrTempAddress[0] . $arrTempAddress[1];
             // Then check - should be no "@" symbols.
@@ -139,6 +162,11 @@
                        .'([A-Za-z0-9]+))$/', $arrDomainPortion[$i])) {
                         return false;
                     }
+                    if ($i == $max - 1) { // TLD cannot be only numbers
+                        if (strlen(preg_replace('/[0-9]/', '', $arrDomainPortion[$i])) <= 0) {
+                            return false;
+                        }
+                    }
                 }
             }
             return true;
@@ -160,7 +188,6 @@
                 return true;
             }
         }
-
     }
 
 ?>
