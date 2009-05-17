@@ -58,7 +58,7 @@ class BentoBaseActionConfiguration extends FormActionBase
 
 		}
 
-		$output .= $this->form->makeDisplay();
+		$output .= $this->form->makeHtml();
 		return $output;
 	}
 

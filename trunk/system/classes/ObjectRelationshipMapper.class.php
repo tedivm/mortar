@@ -4,6 +4,8 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage Database
  */
 
 /**
@@ -637,7 +639,7 @@ class ObjectRelationshipMapper
 	 * This function loads the meta data (columns, types and keys) from the database so we don't need to manage
 	 * configuration files. This metadata is cached for performance.
 	 *
-	 * @cache orm scheme $tableName
+	 * @cache orm scheme *tableName
 	 */
 	protected function load_schema()
 	{

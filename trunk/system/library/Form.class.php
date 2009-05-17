@@ -1,30 +1,135 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package		Library
+ * @subpackage	Form
+ */
+
+
 require('Form/Input.class.php');
 
-
+/**
+ * This is used to generate forms. This is different than just HTML forms (although that is an option for output), as
+ * this class is used to define which inputs should be accepted and what rules they need to follow regardless of engine.
+ *
+ * @package		Library
+ * @subpackage	Form
+ */
 class Form
 {
+	/**
+	 * This is the name of the form, used to generate unique ids for each element.
+	 *
+	 * @var string
+	 */
 	public $name;
-	static public $userInput = false;
 
+	/**
+	 * This stores the current input being used for this form. If this isn't set, it defaults to the output of the
+	 * Input::getInput() static function.
+	 *
+	 * @var array
+	 */
+	public $userInput;
+
+	/**
+	 * This string identifies the current active section being worked on.
+	 *
+	 * @var string
+	 */
 	protected $activeSection = 'main';
+
+	/**
+	 * This is an array of an araay of input objects. The index of the first part of the array corresponds to the
+	 * input's section
+	 *
+	 * @var array
+	 */
 	protected $inputs = array();
+
+	/**
+	 * This is the location the form sends to, if its generated as html.
+	 *
+	 * @var string
+	 */
 	protected $action = false;
+
+	/**
+	 * This is an array of legend text to use for each section of the form.
+	 *
+	 * @var array
+	 */
 	protected $sectionLegends = array();
+
+	/**
+	 * This is an array of introduction text for each section.
+	 *
+	 * @var array
+	 */
 	protected $sectionIntro = array();
 
-	//protected $handlerClass = 'FormHandlerHtml';
+	/**
+	 * This is the method used to send forms back from html. It defaults to post, get being the other reasonable item.
+	 *
+	 * @var string post or get
+	 */
 	protected $method = 'post';
-	protected $submitButton = false;
 
+	/**
+	 * This is just an internal tracker for generating the form html to see a submit button has been added, otherwise
+	 * it makes sure to add one at the end of the form.
+	 *
+	 * @var bool
+	 */
+	private $submitButton = false;
+
+	/**
+	 * This is a form setting to enable or disable cross site request forgery protection. This should be disabled for
+	 * non-session aware scripts (such as when the system is run with the REST or CLI iohandler).
+	 *
+	 * @var bool
+	 */
 	static protected $xsfrProtection = true;
+
+	/**
+	 * This is an internal flag to see if a form has been submitted. It is set by the checkSubmit function.
+	 *
+	 * @var bool
+	 */
 	protected $wasSubmitted = false;
-	protected $error = array();
+
+	/**
+	 * There is some basic cache handling on the form html generation, as that code can take a lot of time for more
+	 * comprehensive forms. This still needs work, so its disabled by default.
+	 *
+	 * @var bool
+	 */
 	protected $cacheEnabled = false;
+
+	/**
+	 * This is an array of keys used for caching
+	 *
+	 * @var array
+	 */
 	protected $cacheKey = array();
 	// These types of inputs do not get the user input resent out
+
+	/**
+	 * These input types do not get their values changed to the user input in the event of the form being resent out.
+	 *
+	 * @var array
+	 */
 	protected $discardInput = array('password', 'hidden');
 
+	/**
+	 * This takes in the name of the form and runs the 'define' method, if it exists (this gives a way for subclasses
+	 * to easily set up form inputs that exist by default).
+	 *
+	 * @param string $name
+	 */
 	public function __construct($name)
 	{
 		$this->name = $name;
@@ -32,6 +137,12 @@ class Form
 			$this->define();
 	}
 
+	/**
+	 * This creates a new input under the currently active section.
+	 *
+	 * @param string $name
+	 * @return FormInput
+	 */
 	public function createInput($name)
 	{
 		$input = new FormInput($name);
@@ -39,18 +150,38 @@ class Form
 		return $input;
 	}
 
+	/**
+	 * This changes the section for adding new inputs, legends and section text. It returns the form to allow method
+	 * chaining.
+	 *
+	 * @param string $name
+	 * @return Form
+	 */
 	public function changeSection($name)
 	{
 		$this->activeSection = $name;
 		return $this;
 	}
 
-	public function attachInput($input)
+	/**
+	 * This function is primarily used for merging forms, but can be used to independently create an input object
+	 * and attach it to the form.
+	 *
+	 * @param FormInput $input
+	 * @return bool
+	 */
+	public function attachInput(FormInput $input)
 	{
 		$this->inputs[$this->activeSection][] = $input;
 		return true;
 	}
 
+	/**
+	 * This fuction sets the action url for html forms. Returns the Form object for method chaining.
+	 *
+	 * @param Url|string $action
+	 * @return Form
+	 */
 	public function setAction($action)
 	{
 		if($action instanceof Url)
@@ -60,6 +191,12 @@ class Form
 		return $this;
 	}
 
+	/**
+	 * This function sets the method, post or get, of the form. It returns the Form object form method chaining.
+	 *
+	 * @param string $method Port or Get
+	 * @return Form
+	 */
 	public function setMethod($method)
 	{
 		if(in_array($method, array('post', 'get')))
@@ -68,18 +205,36 @@ class Form
 		return $this;
 	}
 
+	/**
+	 * This function sets the legend text of the current section. It returns the Form object form method chaining.
+	 *
+	 * @param string $text
+	 * @return Form
+	 */
 	public function setLegend($text)
 	{
 		$this->sectionLegends[$this->activeSection] = $text;
 		return $this;
 	}
 
+	/**
+	 * This sets the section introduction text. It returns the Form object form method chaining.
+	 *
+	 * @param string $text
+	 * @return Form
+	 */
 	public function setSectionIntro($text)
 	{
 		$this->sectionIntro[$this->activeSection] = $text;
 		return $this;
 	}
 
+	/**
+	 * This enables caching and sets an array for the cacheKey. Caching is still being tested, its not ready for
+	 * production.
+	 *
+	 * @param array|string|false $cacheKey
+	 */
 	public function enableCache($cacheKey = false)
 	{
 		$this->cacheEnabled = true;
@@ -93,33 +248,36 @@ class Form
 
 	}
 
-	public function makeDisplay($resource = null)
+	/**
+	 * This function returns the current form as html.
+	 *
+	 * @return string
+	 */
+	public function getHtml()
 	{
-		// $resource isn't used yet
-
-
 		$cacheKey = array_merge(array('forms', $this->name), $this->cacheKey);
 		$cache = new Cache($cacheKey);
 
 		$formHtml = $cache->getData();
-
 		if(!$cache->cacheReturned || !$this->cacheEnabled)
 		{
-			if(self::$xsfrProtection)
+			if(self::$xsfrProtection && $nonce = $this->getNonce())
 			{
-				$nonce = $this->getNonce();
-				if(isset($nonce))
-				{
-					$this->createInput('nonce')->
-						setType('hidden')->
-						property('value', $this->getNonce());
-				}
+				$this->createInput('nonce')->
+					setType('hidden')->
+					property('value', $this->getNonce());
+			}
+
+			// if the action isn't set, use the current link
+			if(!isset($this->action))
+			{
+				$this->setAction(Query::getUrl());
 			}
 
 			$formHtml = new HtmlObject('form');
 			$formHtml->property('method', $this->method)->
 						property('id', $this->name)->
-						property('action', (($this->action) ? $this->action : Query::getUrl()));
+						property('action', $this->action);
 
 			$jsIncludes = array();
 			$jsStartup = array();
@@ -163,7 +321,6 @@ class Form
 					}else{
 
 						$labelHtml = new HtmlObject('label');
-
 						$labelHtml->property('for', $input->property('id'))->
 							property('id', $input->property('id') . '_label');
 
@@ -183,9 +340,6 @@ class Form
 							wrapAround($br);
 
 					}
-
-
-
 				}//foreach($this->inputs as $section => $inputs)
 
 				$formHtml->wrapAround($sectionHtml);
@@ -238,79 +392,25 @@ class Form
 		return $output;
 	}
 
-
+	/**
+	 * This function acts a preprocessor for special input types. Currently its empty, as the last special types were
+	 * depreciated out, but that could change.
+	 *
+	 * @param FormInput $input
+	 */
 	protected function processSpecialInputFields(FormInput $input)
 	{
 
-		// preprocess special types
-		switch ($input->type) {
-			case 'location':
-				$input->type = 'select';
-				// check property for base location
-				// check for array of location types
-				if(is_array($input->property('types')))
-				{
-					$types = $input->property('types');
-					unset($input->properties['types']);
-				}elseif(is_string($input->property('types'))){
-					$types = $input->property('types');
-				}else{
-					$types = '';
-				}
-
-				if(is_numeric($input->property('baseLocation')))
-				{
-					$locationId = $input->property('baseLocation');
-					unset($input->properties['baseLocation']);
-				}else{
-					$locationId = 1; // If no location is set, default toroot
-				}
-
-				if(is_numeric($input->property('value')))
-				{
-					$value = $input->property('value');
-					unset($input->properties['value']);
-				}else{
-					$value = 1;
-				}
-
-				$baseLocation = new Location($locationId);
-				$locationList = $baseLocation->getTreeArray($types);
-
-				foreach($locationList as $id => $string)
-				{
-					$attributes = array();
-					if($value == $id)
-						$attributes = array('selected' => 'selected');
-					$input->setOptions($id, $string, $attributes);
-				}
-				break;
-
-			case 'module':
-				if(!isset($input->properties['moduleName']))
-					throw new BentoError('Module type required for input type module.');
-
-				$packageInfo = new PackageInfo($input->properties['moduleName']);
-				$permission = ($input->properties['permission']) ? $input->properties['permission'] : '';
-				$moduleList = $packageInfo->getModules($permission);
-				$input->type = 'select';
-
-				foreach($moduleList as $module)
-				{
-					$location = new Location($module['locationId']);
-					$input->setOptions($module['modId'], (string) $location);
-				}
-				break;
-
-			default:
-				break;
-		}
-
 	}
 
+	/**
+	 * Takes an input item and outputs html.
+	 *
+	 * @param FormInput $input
+	 * @return string
+	 */
 	protected function getInputHtmlByType(FormInput $input)
 	{
-
 		$tagByType = array(
 		'html' => 'textarea',
 		'textarea' => 'textarea',
@@ -365,7 +465,6 @@ class Form
 				}
 				break;
 
-
 			// Checkboxes need to be arrays if they have multiple items, but we'll just make them all arrays
 			// If only one checkbox item exists with a single name, we'll take care of it in 'checkSubmit'
 			case 'checkbox':
@@ -377,7 +476,6 @@ class Form
 		}//switch ($input->type)
 
 		$inputHtml->property($input->properties);
-
 		$validationRules = $input->getRules();
 
 		if(!is_null($validationRules) && count($validationRules) > 0)
@@ -386,11 +484,16 @@ class Form
 			$inputHtml->addClass($validationClasses);
 		}
 
-
 		return $inputHtml;
-
 	}
 
+	/**
+	 * This function takes in a FormInput and returns any javascript that needs to be included or put into the startup
+	 * script.
+	 *
+	 * @param FormInput $input
+	 * @return bool
+	 */
 	protected function getInputJavascript(FormInput $input)
 	{
 
@@ -414,21 +517,37 @@ class Form
 		return false;
 	}
 
-
+	/**
+	 * This function checks to see if the form was submitted or not.
+	 *
+	 * @return bool
+	 */
 	public function wasSubmitted()
 	{
 		$inputHandler = $this->getInputhandler();
 		return (count($inputHandler) > 0);
 	}
 
+	/**
+	 * This function returns the current user inputs corresponding to the output.
+	 *
+	 * @return array
+	 */
 	public function getInputhandler()
 	{
-		if(isset(self::$userInput))
-			self::$userInput = Input::getInput();
+		if(!isset($this->userInput))
+			$this->userInput = Input::getInput();
 
-		return self::$userInput;
+		return $this->userInput;
 	}
 
+	/**
+	 * This function checks to ensure the form was not just submitted but submitted properly. This function checks
+	 * validation rules and security features, and in the event of failure sets the user inputs as the values so the
+	 * form doesn't need to be completely filled out again.
+	 *
+	 * @return bool|array Returns either false (if the form doesn't validate) or an array of processed inputs.
+	 */
 	public function checkSubmit()
 	{
 		try
@@ -436,12 +555,10 @@ class Form
 			$inputHandler = $this->getInputhandler();
 			$processedInput = array();
 
-
 			if(!$this->wasSubmitted())
 				return false;
 
 			$success = true;
-
 
 			foreach($this->inputs as $section => $inputs)
 				foreach($inputs as $input)
@@ -455,7 +572,6 @@ class Form
 
 				// Is the input allows it, place the user value in as the default this way if the form isn't
 				// validated, the user doesn't need to re-enter it
-
 				switch ($input->type)
 				{
 					case 'hidden':
@@ -503,7 +619,6 @@ class Form
 
 			} // foreach($inputs as $input) / foreach($this->inputs as $section => $inputs)
 
-
 			// we place this here on the off chance someone is submitting a stale form, so things get filled again
 			if(self::$xsfrProtection && $inputHandler['nonce'] != $this->getNonce())
 			{
@@ -511,7 +626,6 @@ class Form
 			}
 
 		}catch(Exception $e){
-
 			$success = false;
 		}
 
@@ -521,21 +635,35 @@ class Form
 		return $processedInput;
 	}
 
+	/**
+	 * This returns a nonce, which is a token unique to the user.
+	 *
+	 * @return unknown
+	 */
 	protected function getNonce()
 	{
-		if(self::$xsfrProtection)
+		if(self::$xsfrProtection && isset($_SESSION['none']))
 		{
-			return $_SESSION['nonce'];
+			return md5($_SESSION['nonce'] . $this->name);
 		}
 
-		return null;
+		return false;
 	}
 
+	/**
+	 * This function disables cross site forgery protection for all uses of this class.
+	 *
+	 */
 	static public function disableXsfrProtection()
 	{
 		self::$xsfrProtection = false;
 	}
 
+	/**
+	 * This merges another forms sections and inputs into this form.
+	 *
+	 * @param Form $form
+	 */
 	public function merge($form)
 	{
 		$package = $form->getMergePackage();
@@ -545,6 +673,11 @@ class Form
 		$this->sectionLegends = array_merge_recursive($this->sectionLegends, $package['legends']);
 	}
 
+	/**
+	 * This returns an array for other packages to use when merging.
+	 *
+	 * @return array
+	 */
 	public function getMergePackage()
 	{
 		$package['inputs'] = $this->inputs;
@@ -553,6 +686,11 @@ class Form
 		return $package;
 	}
 
+	/**
+	 * This returns an array of input names.
+	 *
+	 * @return array
+	 */
 	public function getInputList()
 	{
 		$inputList = array();
@@ -566,16 +704,29 @@ class Form
 		return $inputList;
 	}
 
-	public function getInput($name, $section = false)
+	/**
+	 * This returns a FormInput from the list of stored inputs. The second argument, section, is optional but makes
+	 * things much faster. If multiple inputs match (common with checkboxes) they are all returned.
+	 *
+	 * @param string $name
+	 * @param string $section
+	 * @return FormInput|array
+	 */
+	public function getInput($name, $section = null)
 	{
-		$inputList = (!$section) ? $this->inputs : array($this->inputs[$section]);
+		$inputList = !isset($section) ? $this->inputs : array($this->inputs[$section]);
 		$matchedInputs = array();
 		foreach($inputList as $inputs)
 		{
-			foreach($inputs as $input)
+			if(is_array($this->inputs))
 			{
-				if($input->name == $name)
-					$matchedInputs[] = $input;
+				foreach($inputs as $input)
+				{
+					if($input->name == $name)
+						$matchedInputs[] = $input;
+				}
+			}elseif($inputs instanceof FormInput && $inputs->name == $name){
+				$matchedInputs[] = $inputs;
 			}
 		}
 

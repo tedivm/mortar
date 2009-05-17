@@ -5,6 +5,8 @@
  * @copyright
  * @license http://www.opensource.org/licenses/bsd-license.php
  * @link http://code.google.com/p/php-email-address-validation/
+ * @package		Library
+ * @subpackage	Email
  */
 
     /*

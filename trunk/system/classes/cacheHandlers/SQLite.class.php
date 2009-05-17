@@ -1,5 +1,14 @@
 <?php
 /**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage Caching
+ */
+
+/**
  * This class is used by the Cache class for persistent storage of cached objects using an sqlite file.
  *
  * @package System

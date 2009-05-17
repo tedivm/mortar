@@ -4,6 +4,7 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
+ * @package System
  */
 
 /**
@@ -25,6 +26,7 @@ class Url
 	/**
 	 * This function returns a string, the Url
 	 *
+	 * @cache *type *odule url pathCache
 	 * @return string
 	 */
 	public function __toString()

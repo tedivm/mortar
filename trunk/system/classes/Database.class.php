@@ -8,8 +8,6 @@
  * @subpackage Database
  */
 
-
-
 /**
  * Database Conntection Class
  *
@@ -141,8 +139,6 @@ class DatabaseConnection
 		}
 	}
 }
-
-
 
 /**
  * Database Class
@@ -415,7 +411,5 @@ class Mystmt extends mysqli_stmt
 		}
 	}
 }
-
-
 
 ?>

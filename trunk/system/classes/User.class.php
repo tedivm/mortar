@@ -78,6 +78,7 @@ class User
 	/**
 	 * Load user by ID
 	 *
+	 * @cache users *userId lookup
 	 * @param int $id
 	 */
 	public function loadUser($userId)
@@ -493,12 +494,13 @@ class ActiveUser implements SplSubject
 	/**
 	 * Loads user by username
 	 *
+	 * @cache username *user id
 	 * @param string $user
 	 * @return bool
 	 */
 	public function loadUserByName($user)
 	{
-		$cache = new Cache('usersname', $user, 'id');
+		$cache = new Cache('username', $user, 'id');
 
 		$id = $cache->getData();
 

@@ -125,7 +125,7 @@ abstract class FormActionBase extends ActionBase
 		}
 
 
-		$output .= $this->form->makeDisplay();
+		$output .= $this->form->makeHtml();
 		return $output;
 	}
 

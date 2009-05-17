@@ -47,7 +47,7 @@ abstract class FormPackageAction// extends PackageAction
 		}
 
 
-		$output .= $this->form->makeDisplay();
+		$output .= $this->form->makeHtml();
 		return $output;
 	}
 

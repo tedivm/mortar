@@ -50,7 +50,7 @@ class BentoCMSActionRemovePage extends ActionBase
 		{
 			return  $this->resourceType . ' successfully deleted.';
 		}else{
-			return $this->form->makeDisplay();
+			return $this->form->makeHtml();
 		}
 	}
 }

@@ -96,7 +96,7 @@ class BentoBaseActionInstall implements ActionInterface //extends Action
 			$this->ioHandler->addHeader('Location', (string) $url);
 
 		}elseif($this->form){
-			$output .= $this->form->makeDisplay();
+			$output .= $this->form->makeHtml();
 		}
 
 		return $output;

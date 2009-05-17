@@ -52,7 +52,7 @@ class BentoCMSActionAddPage //extends FormAction
 
 		}
 
-		$output .= $this->form->makeDisplay();
+		$output .= $this->form->makeHtml();
 		return $output;
 	}
 

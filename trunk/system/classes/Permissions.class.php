@@ -340,6 +340,7 @@ class UserPermission
 	 * This loads the permissions from the database and returns them as an array
 	 *
 	 * @access protected
+	 * @cache permissions *type *id *location
 	 * @return array
 	 */
 	protected function loadPermissionsFromDatabase()
@@ -550,6 +551,7 @@ class PermissionLists
 	/**
 	 * Loads user table permissions and returns them as an array
 	 *
+	 * @cache permissions user *userId allowedActions
 	 * @param int $userId
 	 * @return array
 	 */
@@ -586,6 +588,7 @@ class PermissionLists
 	 * Loads group permissions and returns them as an array
 	 *
 	 * @access protected
+	 * @cache permissions group *groupId allowedActions
 	 * @param id $groupId
 	 * @return array
 	 */
@@ -701,6 +704,7 @@ class PermissionActionList
 	 * Loads the list of actions from the database
 	 *
 	 * @access protected
+	 * @cache permissions actionLookup
 	 * @static
 	 */
 	static protected function loadActionList()
