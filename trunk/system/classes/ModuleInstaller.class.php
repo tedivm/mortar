@@ -241,7 +241,7 @@ class ModuleInstaller
 		$moduleRecord->releaseType = $version->releaseType;
 		$moduleRecord->releaseVersion = $version->releaseVersion;
 
-		$moduleRecord->query_set('lastupdated', 'NOW()');
+		$moduleRecord->querySet('lastupdated', 'NOW()');
 
 		if(!$moduleRecord->save())
 		{

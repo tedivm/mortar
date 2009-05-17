@@ -90,7 +90,7 @@ class User
 
 		$cache = new Cache('users', $userId, 'lookup');
 
-		$info = $cache->get_data();
+		$info = $cache->getData();
 
 		if(!$cache->cacheReturned)
 		{
@@ -124,7 +124,7 @@ class User
 				$info = false;
 			}
 
-			$cache->store_data($info);
+			$cache->storeData($info);
 		}
 
 		if($info != false)
@@ -500,7 +500,7 @@ class ActiveUser implements SplSubject
 	{
 		$cache = new Cache('usersname', $user, 'id');
 
-		$id = $cache->get_data();
+		$id = $cache->getData();
 
 		if(!$cache->cacheReturned)
 		{
@@ -516,7 +516,7 @@ class ActiveUser implements SplSubject
 			}else{
 				$id = false;
 			}
-			$cache->store_data($id);
+			$cache->storeData($id);
 		}
 
 		if($id === false)

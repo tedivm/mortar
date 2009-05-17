@@ -8,7 +8,6 @@
  * @subpackage Display
  */
 
-
 /**
  * DisplayMaker
  *
@@ -42,16 +41,16 @@ class DisplayMaker
 	 * @var array
 	 */
 	protected $dateConstants = array('date_atom' => DATE_ATOM,
-'cookie' => DATE_COOKIE,
-'iso8601' => DATE_ISO8601,
-'rfc822' => DATE_RFC822,
-'rfc850' => DATE_RFC850,
-'rfc1036' => DATE_RFC1036,
-'rfc1123' => DATE_RFC1123,
-'rfc2822' => DATE_RFC2822,
-'rfc3339' => DATE_RFC3339,
-'rss' => DATE_RSS,
-'w3c' => DATE_W3C  );
+'cookie' 	=> DATE_COOKIE,
+'iso8601' 	=> DATE_ISO8601,
+'rfc822' 	=> DATE_RFC822,
+'rfc850' 	=> DATE_RFC850,
+'rfc1036' 	=> DATE_RFC1036,
+'rfc1123' 	=> DATE_RFC1123,
+'rfc2822' 	=> DATE_RFC2822,
+'rfc3339' 	=> DATE_RFC3339,
+'rss' 		=> DATE_RSS,
+'w3c' 		=> DATE_W3C  );
 
 	/**
 	 * This array contains the replacements for the template tags
@@ -93,7 +92,7 @@ class DisplayMaker
 		$this->mainString = $text;
 		$cache = new Cache('templates', 'schema', md5($this->mainString));
 		$cache->storeMemory = false;
-		$cache->cache_time = '86400'; // this can be ridiculously high because the keyname changes when the string does
+		$cache->cacheTime = 86400; // this can be ridiculously high because the keyname changes when the string does
 		$tags = $cache->getData();
 
 		if(!$cache->cacheReturned)
@@ -214,7 +213,7 @@ class DisplayMaker
 				}
 			}
 
-			$cache->store_data($tags);
+			$cache->storeData($tags);
 		}
 
 		$this->tags = $tags;
