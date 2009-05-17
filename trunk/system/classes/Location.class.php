@@ -358,6 +358,7 @@ class Location
 	 * This function loads the location information from the database, or cache
 	 *
 	 * @access protected
+	 * @cache locations *id info
 	 * @param int $id
 	 * @return bool
 	 */
@@ -506,12 +507,13 @@ class Location
 	/**
 	 * This method returns the child location with the specified name, or false if it doesn't exist
 	 *
+	 * @cache locations *id child *name
 	 * @param string $name
 	 * @return Location|false
 	 */
 	public function getChildByName($name)
 	{
-		$cache = new Cache('locations', $this->id, 'child', $name);
+		$cache = new Cache('locations', $this->id, 'children', $name);
 		$childId = $cache->getData();
 		if(!$cache->cacheReturned)
 		{
@@ -536,6 +538,7 @@ class Location
 	/**
 	 * Returns the children locations as an array
 	 *
+	 * @cache locations *id children *type
 	 * @param string $type This value can limit the results to a specific resource type
 	 * @return array|false
 	 */

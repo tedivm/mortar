@@ -86,6 +86,7 @@ class MemberGroup
 	/**
 	 * Checks to see if a membergroup contains the specified user
 	 *
+	 * @cache membergroups *id containsUser *userId
 	 * @param int $userId
 	 * @return bool
 	 */
@@ -202,6 +203,7 @@ class MemberGroup
 	 * Loads the membergroup from the database or cache
 	 *
 	 * @access protected
+	 * @cache membergroups *id
 	 * @param int $id
 	 * @return bool
 	 */
@@ -244,6 +246,7 @@ class MemberGroup
 	/**
 	 * Returns the ID of a membergroup based on its name
 	 *
+	 * @cache membergroups lookup name *name id
 	 * @static
 	 * @param string $name
 	 * @return int|false

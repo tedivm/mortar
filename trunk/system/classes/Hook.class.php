@@ -61,6 +61,7 @@ class Hook
 	 * When called this method will pull plugins from the database and load them for use.
 	 *
 	 * @access public
+	 * @cache plugins *realm *category *name list
 	 * @param string $realm This is a broad category used to describe a plugin and can be anything the author chooses
 	 * @param string $category This is a subdivision of the $realm and can be anything the author chooses
 	 * @param string $name This is the name of the specific hook you are calling and can be anything the author chooses
