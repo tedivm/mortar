@@ -37,6 +37,7 @@ class ActiveSite
 	/**
 	 * Returns the current active site
 	 *
+	 * @cache urlLookup *url
 	 * @static
 	 * @return Model
 	 */

@@ -216,7 +216,7 @@ class ModelActionAdd extends ModelActionBase
 				return $this->makeDisplay();
 			}
 		}else{
-			return $this->form->makeDisplay();
+			return $this->form->makeHtml();
 		}
 	}
 

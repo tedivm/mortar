@@ -69,7 +69,7 @@ class BentoBaseActionLogIn extends ActionBase
 				$this->AdminSettings['headerSubTitle'] = 'Invalid login';
 			}
 
-			$output .= $this->form->makeDisplay();
+			$output .= $this->form->makeHtml();
 
 		}
 

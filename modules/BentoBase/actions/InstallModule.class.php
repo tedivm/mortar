@@ -85,7 +85,7 @@ class BentoBaseActionInstallModule extends ActionBase
 			{
 				$output = 'Module successfully installed';
 			}else{
-				$output = $this->form->makeDisplay();
+				$output = $this->form->makeHtml();
 			}
 		}
 

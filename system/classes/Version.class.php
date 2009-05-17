@@ -51,7 +51,6 @@ class Version
 	 */
 	public $releaseVersion;
 
-
 	/**
 	 * Compares to versions
 	 *

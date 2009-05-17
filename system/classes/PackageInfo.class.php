@@ -76,6 +76,7 @@ class PackageInfo
 	/**
 	 * Constructor takes the name of id of the package
 	 *
+	 * @cache packages moduleLookup *id
 	 * @param id|string $package
 	 */
 	public function __construct($package)

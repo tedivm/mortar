@@ -62,6 +62,7 @@ class Theme
 	/**
 	 * Constructor takes the name of the theme and loads the initial information
 	 *
+	 * @cache theme *name *link
 	 * @param string $name
 	 */
 	public function __construct($name)

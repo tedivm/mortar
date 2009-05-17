@@ -9,17 +9,17 @@
  * @copyright	Copyright (C) 2003-2007 Frederico Caldeira Knabben
  * @license		http://www.mozilla.org/MPL/MPL-1.1.html, http://www.gnu.org/licenses/gpl.html, http://www.gnu.org/licenses/lgpl.html
  * @link		http://www.fckeditor.net
+ * @subpackage	Library
+ * @category	Form
  */
-
-
 
 /**
  * FKCEditor Class
  *
  * Originally from the FCKeditor package, modified to better fit BentoBase
  *
- * @subpackage	Main_Classes
- * @category	Email
+ * @subpackage	Library
+ * @category	Form
  * @author		Frederico Caldeira Knabben, Robert Hafner
  * @link		http://www.fckeditor.net
  */

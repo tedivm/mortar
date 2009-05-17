@@ -39,7 +39,7 @@ abstract class ModelActionEdit extends ModelAction
 			$this->adminMessage($info->Get['message']);
 		}
 
-		$output .= $this->form->makeDisplay();
+		$output .= $this->form->makeHtml();
 		return $output;
 	}
 
