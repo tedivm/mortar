@@ -16,13 +16,26 @@
  */
 class RequestStatistics
 {
+	/**
+	 * This is the information to be stored about the current request.
+	 *
+	 * @var array
+	 */
 	protected $requestValues = array();
 
+	/**
+	 * Calls the loadInformation function.
+	 *
+	 */
 	public function __construct()
 	{
 		$this->loadInformation();
 	}
 
+	/**
+	 * This function sets up all of the information to be stored.
+	 *
+	 */
 	protected function loadInformation()
 	{
 		$runTime = microtime(true) - START_TIME;
@@ -66,6 +79,11 @@ class RequestStatistics
 		$this->requestValues = $info;
 	}
 
+	/**
+	 * This stores the information into a file in the tmp directory
+	 *
+	 * @return bool
+	 */
 	public function saveToFile()
 	{
 		$config = Config::getInstance();
@@ -82,14 +100,24 @@ class RequestStatistics
 		return false;
 	}
 
-
+	/**
+	 * This takes the statistics and turns them into a string.
+	 *
+	 * @return string
+	 */
 	public function __toString()
 	{
 		return $this->arrayToString($this->requestValues);
 	}
 
-
-
+	/**
+	 * This takes an array and returns it as a string. It recursively turns element arrays into strings, increasing the
+	 * indentation at each level.
+	 *
+	 * @param array $array
+	 * @param int $level
+	 * @return string
+	 */
 	public function arrayToString($array, $level = 0)
 	{
 		$tab = str_repeat('   ', $level);
@@ -107,9 +135,6 @@ class RequestStatistics
 		}
 		return $string;
 	}
-
-
-
 }
 
 ?>
