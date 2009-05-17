@@ -17,15 +17,15 @@
  * FKCEditor Class
  *
  * Originally from the FCKeditor package, modified to better fit BentoBase
- * 
+ *
  * @subpackage	Main_Classes
  * @category	Email
  * @author		Frederico Caldeira Knabben, Robert Hafner
  * @link		http://www.fckeditor.net
  */
 class FCKeditor
-{	
-	
+{
+
 	protected $InstanceName ;
 	public $BasePath ;
 	public $Width ;
@@ -34,8 +34,14 @@ class FCKeditor
 	public $Value ;
 	public $Config = array();
 	public $id;
-	
+
 	// PHP 5 Constructor (by Marcus Bointon <coolbru@users.sourceforge.net>)
+
+	/**
+	 * The constructor takes a name as its argument.
+	 *
+	 * @param string $instanceName
+	 */
 	public function __construct( $instanceName )
  	{
  		$config = Config::getInstance();
@@ -48,6 +54,11 @@ class FCKeditor
 		$this->id			= '' ;
 	}
 
+	/**
+	 * This function returns the html needed to make the fckeditor.
+	 *
+	 * @return string
+	 */
 	public function CreateHtml()
 	{
 		$HtmlValue = htmlspecialchars( $this->Value ) ;
@@ -56,14 +67,14 @@ class FCKeditor
 
 		if ( $this->IsCompatible() )
 		{
-			
+
 			$File = ($_GET['fcksource'] == true) ? 'fckeditor.original.html' : 'fckeditor.html';
 
 			$Link = $this->BasePath . 'editor/' .$File . '?InstanceName=' . $this->InstanceName ;
 
 			if ( $this->ToolbarSet != '' )
 				$Link .= '&amp;Toolbar=' . $this->ToolbarSet;
-				
+
 			if ( $this->id == '' )
 				$this->id = $this->InstanceName . '_fck';
 
@@ -78,7 +89,7 @@ class FCKeditor
 		}
 		else
 		{
-			
+
 			$WidthCSS = ( strpos( $this->Width, '%' ) === false ) ? $this->Width . 'px' : $this->Width ;
 			$HeightCSS = ( strpos( $this->Height, '%' ) === false ) ?  $this->Height . 'px' : $this->Height ;
 
@@ -115,7 +126,7 @@ class FCKeditor
 			return ( $matches[1] >= 522 ) ;
 		}
 		else
-			return false ;			
+			return false ;
 	}
 
 	protected function GetConfigFieldString()
@@ -127,9 +138,9 @@ class FCKeditor
 			if ( $sParams != '' )
 				$sParams .= '&amp;' ;
 
-				
+
 			$sParams .= urlencode($sKey );
-			
+
 			if ( $sValue === true )
 			{
 				$sParams .= '=true' ;
