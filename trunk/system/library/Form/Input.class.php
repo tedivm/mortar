@@ -1,53 +1,157 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package		Library
+ * @subpackage	Form
+ */
 
 if(!class_exists('ValidationLookup', false))
 	include('ValidationLookup.class.php');
 
+/**
+ * This class stores the data for individual inputs in the Form class.
+ *
+ * @package		Library
+ * @subpackage	Form
+ */
 class FormInput
 {
+	/**
+	 * This is the name of the input
+	 *
+	 * @var string
+	 */
 	public $name;
+
+	/**
+	 * This is the label text for the input.
+	 *
+	 * @var string
+	 */
 	public $label;
+
+	/**
+	 * This is an array of properties about the input. Examples include the value of the input, although any html tag
+	 * can be here.
+	 *
+	 * @var array
+	 */
 	public $properties = array();
+
+	/**
+	 * This is the type of input.
+	 *
+	 * @var string
+	 */
 	public $type = 'input';
-	//public $value;
+
+	/**
+	 * For menus this array is filled with the various options that can be choosen.
+	 *
+	 * @var array
+	 */
 	public $options;
 
+	/**
+	 * This is a flag to see if the value is required by the form.
+	 *
+	 * @var bool
+	 */
 	protected $required = false;
+
+	/**
+	 * This is a reference back to the parent form.
+	 *
+	 * @var Form
+	 */
 	protected $form;
+
+	/**
+	 * This is an array of validation information that is used to validate the input.
+	 *
+	 * @var array
+	 */
 	protected $validationRules = array();
+
+	/**
+	 * This is an array of error messages to match failed validation checks.
+	 *
+	 * @var array
+	 */
 	protected $validationMessages = array();
 
+	/**
+	 * This is an array of Filters that the input is run through before being returned.
+	 *
+	 * @var array
+	 */
 	protected $filters = array();
 
+	/**
+	 * The constructor takes the name of the input.
+	 *
+	 * @param string $name
+	 */
 	public function __construct($name)
 	{
 		$this->name = $name;
 	}
 
-
+	/**
+	 * This function sets the type of input. Returns itself for method chaining.
+	 *
+	 * @param string $type
+	 * @return FormInput
+	 */
 	public function setType($type)
 	{
 		$this->type = $type;
 		return $this;
 	}
 
+	/**
+	 * This function sets the label of input. Returns itself for method chaining.
+	 *
+	 * @param string $abel
+	 * @return FormInput
+	 */
 	public function setLabel($label)
 	{
 		$this->label = $label;
 		return $this;
 	}
 
+	/**
+	 * Returns the input's label.
+	 *
+	 * @return unknown
+	 */
 	public function getLabel()
 	{
 		return $this->label;
 	}
 
+	/**
+	 * This function sets the value of input. Returns itself for method chaining.
+	 *
+	 * @param string $value
+	 * @return FormInput
+	 */
 	public function setValue($value)
 	{
 		$this->property('value', $value);
 		return $this;
 	}
 
+	/**
+	 * This function attaches the input to a form. Returns itself for the Form counterpart function.
+	 *
+	 * @param Form $form
+	 * @return FormInput
+	 */
 	public function attachToForm($form)
 	{
 		if($form instanceof Form && $form->attachInput($this))
@@ -57,17 +161,36 @@ class FormInput
 		return $this;
 	}
 
-	public function isRequired($bool = '')
+	/**
+	 * Sets the input as required. Returns itself for method chaining.
+	 *
+	 * @param bool $bool
+	 * @return FormInput
+	 */
+	public function isRequired($bool = true)
 	{
-		$this->required = ($bool === false);
+		$this->required = ($bool === true);
 		return $this;
 	}
 
+	/**
+	 * This function returns the form the input is attached to or false if its not attached to anything.
+	 *
+	 * @return Form|bool
+	 */
 	public function getForm()
 	{
-		return $this->form;
+		return isset($this->form) ? $this->form : false;
 	}
 
+	/**
+	 * This function sets the value of one of the inputs properties, or it can receive an array to add multiple
+	 * properties at once.
+	 *
+	 * @param string|array $property
+	 * @param string|null $value If the first argument is sent an array this argument is discarded.
+	 * @return unknown
+	 */
 	public function property($property, $value = null)
 	{
 		if(is_array($property))
@@ -87,15 +210,28 @@ class FormInput
 		return (isset($this->properties[$property])) ? $this->properties[$property] : null;
 	}
 
-	public function addRule($rule, $params = false, $errorMessage = false)
+	/**
+	 * Adds a validation rule to the the input. Returns itself for method chaining.
+	 *
+	 * @param string $rule
+	 * @param null|mixed $params The arguments to be passed to the validation class on creation
+	 * @param null|string $errorMessage An optional error message if the validation fails
+	 * @return FormInput
+	 */
+	public function addRule($rule, $params = null, $errorMessage = null)
 	{
-		$this->validationRules[$rule] = (!$params) ? true : $params;
-		if($errorMessage !== false)
+		$this->validationRules[$rule] = isset($params) ? $params : true;
+		if(isset($errorMessage))
 			$this->validationMessages[$rule] = $errorMessage;
 
 		return $this;
 	}
 
+	/**
+	 * This function returns the rules for this input as an array.
+	 *
+	 * @return array
+	 */
 	public function getRules()
 	{
 		if(count($this->validationRules) > 0)
@@ -111,6 +247,12 @@ class FormInput
 		return array();
 	}
 
+	/**
+	 * This function validates a user input against the validation rules.
+	 *
+	 * @param string|null $value Passing nothing is an option.
+	 * @return bool
+	 */
 	public function validate($value = null)
 	{
 		$success = true;
@@ -138,34 +280,47 @@ class FormInput
 		return $success;
 	}
 
+	/**
+	 * Filters a user input through an array of filter objects.
+	 *
+	 * @param mixed $userInput
+	 * @return mixed
+	 */
 	public function filter($userInput)
 	{
 		foreach($this->filters as $filter)
-		{
-			if(!($filter instanceof $filter))
-			{
-				if($filterClass = importClass($filter, 'Filters', 'library'))
-				{
-					$filter = new $filterClass();
-				}
-			}
-
 			$userInput = $filter->filter($userInput);
-		}
+
 		return $userInput;
 	}
 
-	public function addFilter($filter)
+	/**
+	 * Adds a filter on the user input. Returns itself for method chaining.
+	 *
+	 * @param Filter $filter
+	 * @return FormInput
+	 */
+	public function addFilter(Filter $filter)
 	{
 		$this->filters[] = $filter;
 		return $this;
 	}
 
+	/**
+	 * This clears out all the filters on the input.
+	 *
+	 */
 	public function clearFilters()
 	{
 		$this->filters = array();
 	}
 
+	/**
+	 * Checks or unchecks the current input (assuming its a checkbox). Returns itself for method chaining.
+	 *
+	 * @param bool $isChecked
+	 * @return FormInput
+	 */
 	public function check($isChecked)
 	{
 		if($isChecked == true)
@@ -177,15 +332,24 @@ class FormInput
 		return $this;
 	}
 
-	public function setOptions($value, $label = false, $properties = false)
+	/**
+	 * Adds an option, or an array of options, to the form input. These are only used for select-style inputs. Returns
+	 * itself for method chaining.
+	 *
+	 * @param string|array $value Either a value name or an array of arrays (using indexes value, label and properties)
+	 * @param string|null $label If value is an array, this is discarded.
+	 * @param array|null $properties If value is an array, this is discarded.
+	 * @return FormInput
+	 */
+	public function setOptions($value, $label = null, $properties = null)
 	{
 		if(is_array($value))
 		{
 			$this->options = array_merge($this->options, $value);
 		}else{
 			$option['value'] = $value;
-			$option['label'] = ($label) ? $label : $value;
-			$option['properties'] = (is_array($properties) && count($properties)) ? $properties : false;
+			$option['label'] = isset($label) ? $label : $value;
+			$option['properties'] = (isset($properties) && is_array($properties)) ? $properties : false;
 			$this->options[] = $option;
 		}
 

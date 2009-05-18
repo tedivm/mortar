@@ -1,14 +1,28 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @deprecated
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package		Library
+ * @subpackage	Environment
+ */
 
-
+/**
+ * This class is used to created Html structures that are organized and easy to read.
+ *
+ * @deprecated
+ * @package		Library
+ * @subpackage	Environment
+ * @property-read ActiveUser $User
+ * @property-read Config $Configuration
+ * @property-read ActiveSite $Site
+ * @property-read Array $Input
+ * @property-read Array $Query
+ */
 class InfoRegistry
 {
-	protected $User;
-	protected $Configuration;
-	protected $Site;
-	protected $Post;
-	protected $Get;
-	protected $Runtime;
 
 	static $instance;
 
@@ -28,33 +42,29 @@ class InfoRegistry
 
 	protected function __get($offset)
 	{
-		if(!isset($this->$offset))
-		{
-			switch ($offset) {
-				case 'User':
-					$this->User = ActiveUser::getInstance();
-					break;
-				case 'Configuration':
-					$this->Configuration = Config::getInstance();
-					break;
-				case 'Site':
-					$this->Site = ActiveSite::getSite();
-					break;
-				case 'Input':
-					$this->Post = Input::getInput();
-					break;
-				case 'Query':
-					$this->Query = Query::getQuery();
-					break;
-			//	case 'Runtime':
-			//		$this->Runtime = RuntimeConfig::getInstance();
-			//		break;
-				default:
-					break;
-			}
+		switch ($offset) {
+			case 'User':
+				return ActiveUser::getInstance();
+				break;
+			case 'Configuration':
+				return Config::getInstance();
+				break;
+			case 'Site':
+				return ActiveSite::getSite();
+				break;
+			case 'Input':
+				return Input::getInput();
+				break;
+			case 'Query':
+				return Query::getQuery();
+				break;
+		//	case 'Runtime':
+		//		$this->Runtime = RuntimeConfig::getInstance();
+		//		break;
+			default:
+				return null;
+				break;
 		}
-
-		return (isset($this->$offset)) ? $this->$offset : false;
 	}
 }
 

@@ -1,11 +1,41 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package		Library
+ * @subpackage	Filesystem
+ */
 
+/**
+ * This class is used to read from and write data to ini files. The data is accessed through the get/set magic
+ * functions.
+ *
+ * @package		Library
+ * @subpackage	Filesystem
+ */
 class IniFile
 {
+	/**
+	 * This is the path to the file bring worked with.
+	 *
+	 * @var string
+	 */
 	protected $path;
 
+	/**
+	 * This is the array of data being worked with.
+	 *
+	 * @var array
+	 */
 	protected $content = array();
 
+	/**
+	 * If passed a readable path as an argument, the initial data is loaded from that file.
+	 *
+	 * @param string $path
+	 */
 	public function __construct($path)
 	{
 		$this->path = $path;
@@ -15,11 +45,20 @@ class IniFile
 		}
 	}
 
+	/**
+	 * This function reads the data from the ini file. Its a wrapper around parse_ini_file, with sections enabled.
+	 *
+	 */
 	public function read()
 	{
 		$this->content = parse_ini_file($this->path, true);
 	}
 
+	/**
+	 * This function saves back the current data to the iniFile, if that data has changed.
+	 *
+	 * @return bool
+	 */
 	public function write()
 	{
 		if(file_exists($this->path))
@@ -45,6 +84,12 @@ class IniFile
 		return file_put_contents($this->path, $string);
 	}
 
+	/**
+	 * This function takes a value and returns a string to represent that value.
+	 *
+	 * @param mixed $value
+	 * @return string
+	 */
 	protected function writeValue($value)
 	{
 		if($value === true)
@@ -59,28 +104,53 @@ class IniFile
 
 			return $value;
 
-		}else{
+		}elseif(is_scalar($value)){
 
 			return '"' . str_replace("\n", "\\\n", $value) . '"';
-
 		}
 	}
 
-	public function getArray($section = false)
+	/**
+	 * Returns an array of saved values.
+	 *
+	 * @param null|string $section If set, only the values for that section are returned.
+	 * @return array
+	 */
+	public function getArray($section = null)
 	{
-		return ($section) ? $this->content[$section] : $this->content;
+		return isset($section)
+						? (isset($this->content[$section]) ? $this->content[$section] : false)
+						: $this->content;
 	}
 
-	public function get($section, $name)
+	/**
+	 * Returns an item from the Ini file. Can returns either a full section or a specific item.
+	 *
+	 * @param string $section
+	 * @param null|string $name
+	 * @return mixed
+	 */
+	public function get($section, $name = null)
 	{
-		return $this->content[$section][$name];
+		return isset($name) ? $this->content[$section][$name] : $this->content[$section];
 	}
 
+	/**
+	 * Sets a value for a specific section and item in the form.
+	 *
+	 * @param string $section
+	 * @param string $name
+	 * @param bool|int|string $value
+	 */
 	public function set($section, $name, $value)
 	{
 		$this->content[$section][$name] = $value;
 	}
 
+	/**
+	 * This function clears out any set values.
+	 *
+	 */
 	public function clear()
 	{
 		$this->content = array();
