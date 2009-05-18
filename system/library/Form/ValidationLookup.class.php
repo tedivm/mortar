@@ -1,4 +1,14 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package		Library
+ * @subpackage	Form
+ */
+
+
 if(!class_exists('FormValidationAbstract', false))
 {
 	$config = Config::getInstance();
@@ -9,8 +19,19 @@ if(!class_exists('FormValidationAbstract', false))
 	unset($path);
 }
 
+/**
+ * This class retrieves class names, and makes sure they're loaded in the system.
+ *
+ * @package		Library
+ * @subpackage	Form
+ */
 class ValidationLookup
 {
+	/**
+	 * This is a list of validators in the Form/ValidationRules folder, with the shortname for looking them up.
+	 *
+	 * @var array
+	 */
 	static protected $validators = array('required' => 'FormValidationRequired',
 									'minlength' => 'FormValidationMinimumLength',
 									'maxlength' => 'FormValidationMaximumLength',
@@ -27,7 +48,12 @@ class ValidationLookup
 									'lettersonly' => 'FormValidationLettersOnly',
 									'nowhitespace' => 'FormValidationNoWhiteSpace');
 
-
+	/**
+	 * This function makes sure a class is loaded into the system and returns its name.
+	 *
+	 * @param string $validationRule
+	 * @return string
+	 */
 	static public function getClass($validationRule)
 	{
 		$classname = self::$validators[$validationRule];
