@@ -253,7 +253,7 @@ class Form
 	 *
 	 * @return string
 	 */
-	public function getHtml()
+	public function makeHtml()
 	{
 		$cacheKey = array_merge(array('forms', $this->name), $this->cacheKey);
 		$cache = new Cache($cacheKey);
