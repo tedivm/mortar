@@ -61,6 +61,14 @@ class DisplayMaker
 	protected $replacementContent = array();
 
 	/**
+	 * This array contains timestamps to be added to the template
+	 *
+	 * @access protected
+	 * @var array
+	 */
+	protected $replacementDates = array();
+
+	/**
 	 * Returns either a simple array containing the names of all tags used, or a more details array
 	 * containing the tags arguments
 	 *
@@ -73,8 +81,16 @@ class DisplayMaker
 		if(!is_array($this->tags))
 			return false;
 
-		$tags = ($withAttributes) ? $this->tags : array_keys($this->tags);
-		return $tags;
+		if(!$withAttributes)
+		{
+			$tagNames = array();
+			foreach($this->tags as $tag)
+				$tagNames[] = $tag['name'];
+
+			return $tagNames;
+		}
+
+		return $this->tags;
 	}
 
 	/**
@@ -206,17 +222,19 @@ class DisplayMaker
 				$tag_chunks = explode(' ', $unprocessed_tag[1]);
 				$tag_name = array_shift($tag_chunks);
 
-				$tags[$tag_name] = array('original' => $unprocessed_tag[0]);
+				$tagArray = array('original' => $unprocessed_tag[0], 'name' => $tag_name);
+
+				if(isset($args['name']))
+					unset($args['name']);
 
 				foreach($args as $name => $value)
 				{
-					$tags[$tag_name][$name] = trim($value, ' \'"');
+					$tagArray[$name] = trim($value, ' \'"');
 				}
+				$tags[] = $tagArray;
 			}
-
 			$cache->storeData($tags);
 		}
-
 		$this->tags = $tags;
 	}
 
@@ -291,14 +309,13 @@ class DisplayMaker
 	 */
 	public function addContent($tag, $content)
 	{
-		// This will keep us from looking for tags that aren't there
-		if(is_array($this->tags) && key_exists($tag, $this->tags))
-			$this->replacementContent[$tag] = $content;
+		$this->replacementContent[$tag] = $content;
 	}
 
 	/**
 	 * This adds a timestamp (or string that can be converted to one) to the template, which is then formatted
-	 * according to the tag argument in the template
+	 * according to the tag argument in the template. This class takes in a UTC/GMT time and converts it to the system
+	 * time, as all saved data in this project is saved in GMT.
 	 *
 	 * @access public
 	 * @param string $name
@@ -306,25 +323,10 @@ class DisplayMaker
 	 */
 	public function addDate($name, $timestamp)
 	{
-		if(!key_exists($name, $this->tags))
-			return;
+		if(is_numeric($timestamp))
+			$timestamp = date("Y-m-d H:i:s", $timestamp);
 
-		if(!is_numeric($timestamp))
-			$timestamp = strtotime($timestamp);
-
-		if(isset($this->tags[$name]['format']))
-		{
-			$templateFormat = $this->tags[$name]['format'];
-
-			$format = (isset($this->dateConstants[$templateFormat]))
-						? $this->dateConstants[$templateFormat]
-						: $templateFormat;
-
-		}else{
-			$format = DATE_RFC850;
-		}
-
-		$this->addContent($name, date($format, $timestamp));
+		$this->replacementDates[$name] = $timestamp;
 	}
 
 	/**
@@ -339,13 +341,35 @@ class DisplayMaker
 		$processTags = array();
 		$processContent = array();
 
-		if(is_array($this->tags))
-			foreach($this->tags as $tagName => $tagArray)
+		if(!is_array($this->tags))
+			return $this->mainString;
+
+		foreach($this->tags as $tagArray)
 		{
-			if(isset($this->replacementContent[$tagName]))
+			if(isset($this->replacementContent[$tagArray['name']]))
 			{
 				$processTags[] = $tagArray['original'];
-				$processContent[] = $this->replacementContent[$tagName];
+				$processContent[] = $this->replacementContent[$tagArray['name']];
+
+			}elseif(isset($this->replacementDates[$tagArray['name']])){
+
+				if(isset($tagArray['format']))
+				{
+					$templateFormat = $tagArray['format'];
+
+					$format = (isset($this->dateConstants[$templateFormat]))
+								? $this->dateConstants[$templateFormat]
+								: $templateFormat;
+
+				}else{
+					$format = DATE_RFC850;
+				}
+
+				$dateTime = new DateTime($this->replacementDates[$tagArray['name']], new DateTimeZone('UTC'));
+				$dateTime->setTimezone(new DateTimeZone(date_default_timezone_get()));
+
+				$processTags[] = $tagArray['original'];
+				$processContent[] = $dateTime->format($format);;
 
 			}elseif($cleanup){
 				$processTags[] = $tagArray['original'];
