@@ -218,9 +218,9 @@ class PageRevision
 										?, NOW(),
 										?, ?, ?)');
 
-		$insertStmt->bindAndExecute('iiisss', $this->pageId, $this->pageId, $this->author, $this->title,
-														$this->filteredContent,
-														$this->rawContent);
+		$insertStmt->bindAndExecute('iiissss', $this->pageId, $this->pageId,
+														$this->author, gmdate('Y-m-d H:i:s'),
+														$this->title, $this->filteredContent, $this->rawContent);
 
 		$getStmt = $db->stmt_init();
 		$getStmt->prepare('SELECT revisionId FROM BentoCMS_Content

@@ -240,7 +240,7 @@ class ModuleInstaller
 
 		$moduleRecord->releaseType = $version->releaseType;
 		$moduleRecord->releaseVersion = $version->releaseVersion;
-
+		$moduleRecord->lastupdated = gmdate('Y-m-d H:i:s');
 		$moduleRecord->querySet('lastupdated', 'NOW()');
 
 		if(!$moduleRecord->save())
