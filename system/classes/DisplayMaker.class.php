@@ -344,6 +344,8 @@ class DisplayMaker
 		if(!is_array($this->tags))
 			return $this->mainString;
 
+		$preferedTimeZone = new DateTimeZone(date_default_timezone_get());
+
 		foreach($this->tags as $tagArray)
 		{
 			if(isset($this->replacementContent[$tagArray['name']]))
@@ -366,7 +368,7 @@ class DisplayMaker
 				}
 
 				$dateTime = new DateTime($this->replacementDates[$tagArray['name']], new DateTimeZone('UTC'));
-				$dateTime->setTimezone(new DateTimeZone(date_default_timezone_get()));
+				$dateTime->setTimezone($preferedTimeZone);
 
 				$processTags[] = $tagArray['original'];
 				$processContent[] = $dateTime->format($format);;
