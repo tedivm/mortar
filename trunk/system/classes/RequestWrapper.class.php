@@ -9,7 +9,8 @@
  */
 
 /**
- * This class returns the arguments or query (get) values sent by the system
+ * This class acts as a main controller. It loads the appropriate input/output handler for the system,
+ * the format output class, and the action to be run.
  *
  * @package System
  * @subpackage RequestWrapper
@@ -60,6 +61,7 @@ class RequestWrapper
 				try{
 					$action = $this->getAction();
 					$this->runAction($action);
+					$this->logRequest();
 				}catch(Exception $e){
 					$errorAction = $this->handleError($e);
 					$this->runAction($errorAction);
@@ -114,9 +116,10 @@ class RequestWrapper
 				if($moduleInfo->getStatus() != 'installed')
 					throw new BentoError('Module ' . $query['module'] . ' present but not installed');
 
-				$action = ($query['action']) ? $query['action'] : 'Default';
+				if(!isset($query['action']))
+					$query['action'] = 'Default';
 
-				if(!($actionInfo = $moduleInfo->getActions(($query['action']) ? $query['action'] : 'Default')))
+				if(!($actionInfo = $moduleInfo->getActions($query['action'])))
 					throw new BentoError('Unable to load action for module ' . $query['module']);
 
 
@@ -140,7 +143,11 @@ class RequestWrapper
 			}
 
 			$model = $location->getResource();
-			$actionInfo = $model->getAction($query['action'] ? $query['action'] : 'Read');
+
+			if(!isset($query['action']))
+				$query['action'] = 'Read';
+
+			$actionInfo = $model->getAction($query['action']);
 			$className = $actionInfo['className'];
 			$path = $actionInfo['path'];
 			$argument = $model;
@@ -382,6 +389,24 @@ class RequestWrapper
 
 		//no more database access after this point!
 		DatabaseConnection::close();
+	}
+
+	/**
+	 * This function logs request details to the database.
+	 *
+	 * @return bool
+	 */
+	protected function logRequest()
+	{
+		$query = Query::getQuery();
+		$userId = ActiveUser::getCurrentUser()->getId();
+		$location = isset($query['location']) ? $query['location'] : false;
+		$action = isset($query['action']) ? $query['action'] : false;
+		$iohandler = self::$ioHandlerType;
+		$format = isset($query['format']) ? $query['format'] : false;
+		$module = isset($query['module']) ? $query['module'] : false;
+		$siteId = ActiveSite::getSite()->getId();
+		return RequestLog::logRequest($userId, $siteId, $location, $module, $action, $iohandler, $format);
 	}
 
 }

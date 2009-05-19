@@ -9,7 +9,8 @@
  */
 
 /**
- * This class returns the arguments or query (get) values sent by the system
+ * This class overloads some of the original RequestWrapper functions for the installation process. Primarily, this
+ * means cutting out anything that needs database access.
  *
  * @package System
  * @subpackage RequestWrapper
@@ -101,6 +102,16 @@ class RequestWrapperInstaller extends RequestWrapper
 		return array('className' => $classname, 'argument' => null);
 	}
 
+	/**
+	 * In the parent class this function logs request details to the database, but the installer doesn't always have
+	 * database access so logging is disabled.
+	 *
+	 * @return bool
+	 */
+	protected function logRequest()
+	{
+		return true;
+	}
 }
 
 ?>
