@@ -17,7 +17,7 @@ if(BENCHMARK && function_exists('getrusage'))
 {
 	$startdat = getrusage();
 	$startProcTime = $startdat["ru_utime.tv_usec"];
-	define(START_PROCESS_TIME, $startdat['ru_utime.tv_usec']);
+	define('START_PROCESS_TIME', $startdat['ru_utime.tv_usec']);
 	unset($startdat);
 }
 
