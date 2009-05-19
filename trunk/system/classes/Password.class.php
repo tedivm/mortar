@@ -48,9 +48,6 @@ class Password
 	 */
 	protected $version = 1;
 
-	// The stored result needs to fit in the database, which currently has a length of 192
-	// ((saltLength * 2) + 4 + algorithm hash length) <= 192
-
 	/**
 	 * This is the length of each salt (so the total salt length ends up as twice this number
 	 *
@@ -69,6 +66,7 @@ class Password
 
 	/**
 	 * This is how many times we hash the string. This makes the hashing slower, but doesn't add any additional security
+	 * beyond adding additional time when building hash tables.
 	 *
 	 * @access protected
 	 * @var int
@@ -78,13 +76,13 @@ class Password
 	/**
 	 * This array tells the storage functions which values to save in the storage string
 	 *
-	 * @var unknown_type
+	 * @var array
 	 */
 	protected $storeValues = array('version', 'cryptoAlgorithm', 'hashDepth', 'saltStart', 'saltEnd', 'hash');
 
-
 	/**
-	 * Builds the password object up from a stored password string
+	 * Builds the password object up from a stored password string, overwriting any class settings that are stored in
+	 * the hash.
 	 *
 	 * @param string $storedHash
 	 */
