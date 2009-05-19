@@ -62,8 +62,9 @@ class RequestLog
 
 		$stmt = DatabaseConnection::getStatement(self::getDatabase('write'));
 		$stmt->prepare('INSERt INTO requestLog (userId, siteId, location, module, action, ioHandler, format, accessTime)
-									VALUES (?, ?, ?, ?, ?, ?, ?, NOW())');
-		return $stmt->bindAndExecute('iiissss', $userId, $siteId, $locationId, $module, $action, $ioHandler, $format);
+									VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+		return $stmt->bindAndExecute('iiisssss', $userId, $siteId, $locationId,
+					$module, $action, $ioHandler, $format, gmdate('Y-m-d H:i:s'));
 	}
 }
 

@@ -444,10 +444,9 @@ class Location
 
 		}else{
 			// should only run when id isn't set (so new objects only)
-			$db_location->querySet('creationDate', 'NOW()');
+			$db_location->creationDate = gmdate('Y-m-d H:i:s');
 		}
-
-		$db_location->querySet('lastModified', 'NOW()');
+		$db_location->lastModified = gmdate('Y-m-d H:i:s');
 
 		if($parent = $this->getParent())
 		{
