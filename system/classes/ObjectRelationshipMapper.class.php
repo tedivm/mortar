@@ -73,7 +73,7 @@ class ObjectRelationshipMapper
 
 	/**
 	 * This array is used to define the datatype that is required for each column type. This is used when sending the
-	 * arguments along to prevent sql injection.
+	 * arguments along to prevent sql injection. Anything column not in here is assumed to be a string.
 	 *
 	 * @var array column_type => data_type
 	 */
