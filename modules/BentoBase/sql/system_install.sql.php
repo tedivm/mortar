@@ -134,7 +134,7 @@ CREATE UNIQUE INDEX mod_config_mod_id_name_Idx ON mod_config (mod_id, name);
 CREATE TABLE modules
 (
 	mod_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	package VARCHAR(45) NOT NULL,
+	package VARCHAR(65) NOT NULL,
 	lastupdated TIMESTAMP NULL,
 	majorVersion INTEGER UNSIGNED NULL DEFAULT 0,
 	minorVersion INTEGER UNSIGNED NULL DEFAULT 0,
@@ -179,6 +179,31 @@ CREATE TABLE plugins
 /* Table Items: location_meta */
 ALTER TABLE plugins ADD CONSTRAINT pkplugins
 	PRIMARY KEY (realm, category, name, module, plugin);
+
+/******************** Add Table: requestLog ************************/
+
+/* Build Table Structure */
+CREATE TABLE requestLog
+(
+	userId INTEGER UNSIGNED,
+	siteId INTEGER UNSIGNED,
+	location INTEGER UNSIGNED,
+	module VARCHAR(65),
+	action VARCHAR(65),
+	ioHandler VARCHAR(65),
+	format VARCHAR(65),
+	accessTime DATETIME
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+/* Add Indexes for: sites */
+CREATE INDEX requestLog_userId_Idx ON requestLog (userId);
+CREATE INDEX requestLog_siteId_Idx ON requestLog (siteId);
+CREATE INDEX requestLog_location_Idx ON requestLog (location);
+CREATE INDEX requestLog_module_Idx ON requestLog (module);
+CREATE INDEX requestLog_action_Idx ON requestLog (action);
+CREATE INDEX requestLog_ioHandler_Idx ON requestLog (ioHandler);
+CREATE INDEX requestLog_format_Idx ON requestLog (format);
+CREATE INDEX requestLog_accessTime_Idx ON requestLog (accessTime);
 
 /******************** Add Table: sites ************************/
 
