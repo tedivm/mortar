@@ -61,7 +61,9 @@ class Url
 			unset($attributes['module']);
 			if(isset($attributes['action']))
 			{
-				$urlString .= $attributes['action'] . '/';
+				if($attributes['action'] != 'Default')
+					$urlString .= $attributes['action'] . '/';
+
 				unset($attributes['action']);
 			}
 		}
@@ -76,6 +78,10 @@ class Url
 				$location = new Location($attributes['location']);
 				unset($attributes['location']);
 			}
+
+			if(isset($attributes['action']) && $attributes['action'] == 'Read')
+				unset($attributes['action']);
+
 		}elseif(isset($attributes['locationId']) && is_numeric($attributes['locationId'])){
 			$location = new Location($attributes['locationId']);
 			unset($attributes['locationId']);
