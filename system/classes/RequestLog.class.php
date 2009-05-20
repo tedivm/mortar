@@ -66,6 +66,40 @@ class RequestLog
 		return $stmt->bindAndExecute('iiisssss', $userId, $siteId, $locationId,
 					$module, $action, $ioHandler, $format, gmdate('Y-m-d H:i:s'));
 	}
+
+	/**
+	 * This function logs an exception to the error log.
+	 *
+	 * @param BentoError $e
+	 * @param int $severity
+	 * @param null|string $type Defaults to the exception's class name.
+	 * @return bool
+	 */
+	static function logError($e, $severity, $type = null)
+	{
+		$currentUrl = Query::getUrl();
+
+		if(isset($type))
+		{
+			$errorType = $type;
+			$message = get_class($e) . ': ' . $e->getMessage();
+		}else{
+			$errorType = get_class($e);
+			$message = $e->getMessage();
+		}
+
+		$file = $e->getFile();
+		$line = $e->getLine();
+		$trace = $e->getTraceAsString();
+		$code = $e->getCode();
+
+		$stmt = DatabaseConnection::getStatement(self::getDatabase('write'));
+		$stmt->prepare('INSERt INTO errorLog (errorType, severity, message, url, file, line, trace, accessTime)
+									VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+		return $stmt->bindAndExecute('sissssss', $errorType, $severity, $message, (string) $currentUrl,
+											$file, $line, $trace, gmdate('Y-m-d H:i:s'));
+	}
+
 }
 
 ?>

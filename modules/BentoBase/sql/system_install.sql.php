@@ -38,6 +38,29 @@ CREATE TABLE directories
 /* Add Indexes for: sites */
 CREATE INDEX directories_id_defaultChild_Idx ON directories (id, defaultChild);
 
+/******************** Add Table: errorLog ************************/
+
+/* Build Table Structure */
+CREATE TABLE errorLog
+(
+	errorType VARCHAR(45) NOT NULL,
+	severity INTEGER UNSIGNED NOT NULL,
+	message VARCHAR(255),
+	url TEXT,
+	file TEXT,
+	line INTEGER UNSIGNED,
+	trace TEXT,
+	accessTime DATETIME NOT NULL
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+/* Add Indexes for: sites */
+CREATE INDEX errorLog_errorType_Idx ON errorLog (errorType);
+CREATE INDEX errorLog_severity_Idx ON errorLog (severity);
+CREATE INDEX errorLog_url_Idx ON errorLog (url(65));
+CREATE INDEX errorLog_file_Idx ON errorLog (file(255));
+CREATE INDEX errorLog_line_Idx ON errorLog (line);
+CREATE INDEX errorLog_accessTime_Idx ON errorLog (accessTime);
+
 /******************** Add Table: groupPermissions ************************/
 
 /* Build Table Structure */
