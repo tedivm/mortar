@@ -123,7 +123,7 @@ abstract class ModelActionBase implements ActionInterface
 	public function start()
 	{
 		if($this->checkAuth() !== true)
-			throw new AuthenticationError();
+			throw new AuthenticationError('Insufficient permissions to access this action');
 
 		if(method_exists($this, 'logic'))
 			$this->logic();

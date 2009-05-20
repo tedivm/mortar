@@ -285,7 +285,8 @@ class RequestWrapper
 	}
 
 	/**
-	 * When an action throws an error this function loads the action to handle it
+	 * If the action class throws an exception and doesn't handle it internally this function takes care of assigning a
+	 * an action handle and, if appropriate, logging the error to the database.
 	 *
 	 * @param exception $e
 	 * @return Action
@@ -317,6 +318,7 @@ class RequestWrapper
 
 			case 'BentoError':
 			default:
+				RequestLog::logError($e, 1, 'BLOCKING');
 				$action = 'TechnicalError';
 				break;
 		}

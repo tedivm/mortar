@@ -1,5 +1,6 @@
 <?php
 define('DEBUG', 2);
+define('ERROR_LOGGING', 5);
 define('STRICT', false);
 define('IGNOREPERMISSIONS', false);	//FOR TESTING ONLY!!!!
 define('BENCHMARK', true);

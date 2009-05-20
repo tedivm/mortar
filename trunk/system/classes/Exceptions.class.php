@@ -28,8 +28,8 @@ class BentoError extends Exception
 	protected $debugLevel = 1;
 
 	/**
-	 * This is a replacement __construct function that allows us to decide whether or not to display an error
-	 * when an exception is thrown
+	 * This constructor calls uses the environmental constants ERROR_LOGGING and DEBUG to decide whether or not to log
+	 * the error and/or display it, respectively.
 	 *
 	 * @access public
 	 * @param string $message
@@ -41,6 +41,9 @@ class BentoError extends Exception
 
 		if(method_exists($this, 'runAction'))
 			$this->runAction();
+
+		if(!INSTALLMODE && ERROR_LOGGING >= $this->debugLevel)
+			RequestLog::logError($this, $this->debugLevel);
 
 		if(DEBUG >= $this->debugLevel)
 			$this->debugAction();
@@ -176,7 +179,8 @@ class BentoError extends Exception
 	}
 
 	/**
-	 * This function describes what happens when the debug level is high enough to output debug information
+	 * When the DEBUG constant is set to an integer equal to or great than this classes debugLevel this function is run.
+	 * Currently it outputs a string version of the exception.
 	 *
 	 * @access public
 	 */

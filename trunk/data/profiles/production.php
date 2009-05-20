@@ -8,7 +8,7 @@ define('DEBUG', 0);
 // error reporting (useful for production environments), while 3 will give all errors and notices. For development
 // purposes your best bet would be 2 or 3.
 define('STRICT', false);
-
+define('ERROR_LOGGING', 3);
 define('IGNOREPERMISSIONS', false);	//FOR TESTING ONLY!!!!
 // This was placed in while testing the permissions code during the early creation phases
 // It still comes in handy when testing those things, but if turned on in a development environment
