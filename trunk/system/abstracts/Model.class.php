@@ -1,5 +1,19 @@
 <?php
+/**
+ * BentoBase
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage ModelSupport
+ */
 
+/**
+ *
+ *
+ * @package System
+ * @subpackage ModelSupport
+ */
 class AbstractModel implements Model
 {
 	static public $type;
