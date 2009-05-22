@@ -16,6 +16,15 @@
 class Url
 {
 	/**
+	 * This is an array of strings that, when used in the path as the first value, refers to a model type (with the id
+	 * being the second path variable). This is primarily used for models that don't have an associated location, such
+	 * as Users.
+	 *
+	 * @var array
+	 */
+	static public $specialDirectories = array('users' => 'User');
+
+	/**
 	 * This array contains the values that need to be passed via the url
 	 *
 	 * @access protected
@@ -42,6 +51,11 @@ class Url
 		{
 			$urlString .= 'index.php?p=';
 		}
+		if(isset($attributes['locationId']) && !isset($attributes['location']))
+		{
+			$attributes['location'] = $attributes['locationId'];
+			unset($attributes['locationId']);
+		}
 
 		if(isset($attributes['format']) && strtolower($attributes['format']) == 'admin')
 		{
@@ -66,10 +80,9 @@ class Url
 
 				unset($attributes['action']);
 			}
-		}
 
-		if(isset($attributes['location']))
-		{
+		}elseif(isset($attributes['location'])){
+
 			if($attributes['location'] instanceof Location)
 			{
 				$location = $attributes['location'];
@@ -77,18 +90,13 @@ class Url
 			}elseif(is_numeric($attributes['location'])){
 				$location = new Location($attributes['location']);
 				unset($attributes['location']);
+			}else{
+
 			}
 
 			if(isset($attributes['action']) && $attributes['action'] == 'Read')
 				unset($attributes['action']);
 
-		}elseif(isset($attributes['locationId']) && is_numeric($attributes['locationId'])){
-			$location = new Location($attributes['locationId']);
-			unset($attributes['locationId']);
-		}
-
-		if(isset($location))
-		{
 			$tempLoc = $location;
 			while($tempLoc->getType() != 'Site')
 			{
@@ -129,6 +137,17 @@ class Url
 			}
 			$urlString .= $parameters->makeDisplay(true);
 			$urlString = rtrim(trim($urlString), '_/');
+
+		}else{
+
+			$specialAttributes = array_intersect(array_values(self::$specialDirectories), array_keys($attributes));
+			if(count($specialAttributes) == 1)
+			{
+				$specialattributeName = array_shift($specialAttributes);
+				$urlString .= self::$specialDirectories[$specialattributeName] . '/'
+												. $attribute[$specialattributeName] . '/';
+			}
+
 		}
 
 		if(isset($attributes['ssl']))
@@ -242,7 +261,11 @@ class Url
 		unset($this->attributes[$name]);
 	}
 
-	// for the sake of caching
+	/**
+	 * This function allows instances of the class to be serialized. This is primarily for the purposes of caching.
+	 *
+	 * @return array This returns the properties that should be saved in the serialization.
+	 */
 	public function __sleep()
 	{
 		return array('attributes');

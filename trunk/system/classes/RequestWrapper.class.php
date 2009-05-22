@@ -126,7 +126,7 @@ class RequestWrapper
 				$argument = '';
 				$className = importFromModule($actionInfo['name'], $query['module'], 'action', true);
 
-
+				$query->save();
 				return array('className' => $className, 'argument' => $argument);
 			}
 
@@ -136,13 +136,17 @@ class RequestWrapper
 
 		if($query['action'] != 'Add')
 		{
-			if(!isset($location))
+			if(!isset($location) && isset($query['type']))
 			{
-				$site = ActiveSite::getSite();
-				$location = $site->getLocation();
+				$model = ModelRegistry::loadModel($query['type'], $query['id']);
+			}else{
+				if(!isset($location) && !isset($query['type']))
+				{
+					$site = ActiveSite::getSite();
+					$location = $site->getLocation();
+				}
+				$model = $location->getResource();
 			}
-
-			$model = $location->getResource();
 
 			if(!isset($query['action']))
 				$query['action'] = 'Read';
@@ -194,6 +198,7 @@ class RequestWrapper
 				 '405');
 		}
 
+		$query->save();
 		return array('className' => $className, 'argument' => $argument);
 	}
 

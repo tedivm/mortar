@@ -144,23 +144,36 @@ class Query
 		if(isset($inputArray['location']) && is_numeric($inputArray['location']))
 		{
 			$location = new Location($inputArray['location']);
-		}elseif(isset($pathArray) && INSTALLMODE == false){
+		}elseif(isset($pathArray) && count($pathArray) > 0 && INSTALLMODE == false){
 	// if location isn't set, find it from the path
-			$site = ActiveSite::getSite();
-			$currentLocation = $site->getLocation();
 
-			foreach($pathArray as $pathIndex => $pathPiece)
+			if(in_array($pathArray[0], array_keys(Url::$specialDirectories)))
 			{
-				if(!($childLocation = $currentLocation->getChildByName(str_replace('-', ' ', $pathPiece))))
-					break;
+				$inputArray['type'] = Url::$specialDirectories[array_shift($pathArray)];
+				$resource['type'] = $inputArray['type'];
 
-				// if the current location has a child with the next path pieces name, we descend
-				$currentLocation = $childLocation;
-				array_shift($pathArray);
+				if(count($pathArray) > 0)
+					$inputArray['id'] = array_shift($pathArray);
+			}else{
+
+				$site = ActiveSite::getSite();
+				$currentLocation = $site->getLocation();
+
+				foreach($pathArray as $pathIndex => $pathPiece)
+				{
+					if(!($childLocation = $currentLocation->getChildByName(str_replace('-', ' ', $pathPiece))))
+						break;
+
+					// if the current location has a child with the next path pieces name, we descend
+					$currentLocation = $childLocation;
+					array_shift($pathArray);
+				}
+
+				$inputArray['location'] = $currentLocation->getId();
+				$resource = $currentLocation->getResource(true);
 			}
 
-			$inputArray['location'] = $currentLocation->getId();
-			$resource = $currentLocation->getResource(true);
+
 
 			if(isset($resource['type']) && is_array($pathArray) && count($pathArray) > 0)
 			{
@@ -179,6 +192,7 @@ class Query
 				}else{
 					$inputArray['action'] = $pathArray[0];
 				}
+
 			}
 		}
 
