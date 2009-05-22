@@ -9,7 +9,7 @@
  */
 
 /**
- * All models should follow this interface.
+ * All models should follow this interface. It inherits the ArrayAccess interface.
  *
  * @package System
  * @subpackage ModelSupport
@@ -144,37 +144,6 @@ Interface Model extends ArrayAccess
 	 * @param string|int $offset
 	 */
 	public function __unset($offset);
-
-	/**
-	 * Returns a content value of the model.
-	 *
-	 * @param string $name
-	 * @return mixed
-	 */
-	public function offsetGet($name);
-
-	/**
-	 * Sets a content value of the model.
-	 *
-	 * @param string|int $name
-	 * @param string|mixed $value
-	 */
-	public function offsetSet($name, $value);
-
-	/**
-	 * Checks to see if a content value is set.
-	 *
-	 * @param string|int $name
-	 * @return bool
-	 */
-	public function offsetExists($name);
-
-	/**
-	 * Unsets a content value of the model.
-	 *
-	 * @param string|int $name
-	 */
-	public function offsetUnset($name);
 
 	/**
 	 * Returns an array representation of the model.
