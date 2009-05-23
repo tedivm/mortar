@@ -27,6 +27,8 @@ class AbstractModel implements Model
 	protected $properties;
 	protected $content;
 
+	static public $fallbackModelActions = array('Read', 'Add', 'Edit', 'Delete');
+
 	public function __construct($id = null)
 	{
 		$handlerInfo = ModelRegistry::getHandler($this->getType());
@@ -165,7 +167,7 @@ class AbstractModel implements Model
 
 		if(!$actionInfo)
 		{
-			if(in_array($actionName, array('Read', 'Add', 'Edit', 'Delete'))
+			if(in_array($actionName, staticHack(get_class($this), 'fallbackModelActions'))
 				|| ($actionName == 'Execute' && method_exists($this, 'execute')) )
 			{
 				$actionInfo['className'] = 'ModelAction' . $actionName;
