@@ -447,16 +447,23 @@ class PackageInfo
 
 				if(!class_exists($fileInfo['className'], false))
 				{
-					if(!include($filename))
-						throw new BentoWarning('Unable to load ' . $type . ' ' . $fileInfo['className'] .
-												 ' file at: ' . $filename);
+
+					if(!include($fileInfo['path']))
+					{
+						$e = new Exception('Unable to load ' . $type . ' ' . $fileInfo['className']
+										. ' from ' . $fileInfo['path']);
+						RequestLog::logError($e, '3');
+						continue;
+					}
 
 					if(!class_exists($fileInfo['className'], false))
-						throw new BentoWarning($type . ' ' . $fileInfo['className'] . 'does not exist at' .
-												 ' file at: ' . $filename);
-
+					{
+						$e = new Exception('Unable to load ' . $type . ' ' . $fileInfo['className']
+										. ' from ' . $fileInfo['path']);
+						RequestLog::logError($e, '3');
+						continue;
+					}
 				}
-
 				$files[$fileClassName] = $fileInfo;
 			}catch(Exception $e){
 
