@@ -284,7 +284,8 @@ class IOProcessorHttp extends IOProcessorCli
 				$this->addHeader('Cache-Control', $cacheControl);
 			}
 
-			$this->addHeader('Pragma', 'Asparagus'); // if something isn't sent out, apache sends no-cache
+			$pragma = defined('HEADER_MESSAGE') ? HEADER_MESSAGE : 'tedivm was here';
+			$this->addHeader('Pragma', $pragma); // if something isn't sent out, apache sends no-cache
 
 
 			if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || isset($_SERVER['HTTP_IF_NONE_MATCH']))
