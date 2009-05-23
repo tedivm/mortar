@@ -452,7 +452,7 @@ class PackageInfo
 					{
 						$e = new Exception('Unable to load ' . $type . ' ' . $fileInfo['className']
 										. ' from ' . $fileInfo['path']);
-						RequestLog::logError($e, '3');
+					//	RequestLog::logError($e, '3');
 						continue;
 					}
 
@@ -460,7 +460,7 @@ class PackageInfo
 					{
 						$e = new Exception('Unable to load ' . $type . ' ' . $fileInfo['className']
 										. ' from ' . $fileInfo['path']);
-						RequestLog::logError($e, '3');
+					//	RequestLog::logError($e, '3');
 						continue;
 					}
 				}
