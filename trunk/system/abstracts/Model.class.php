@@ -133,10 +133,13 @@ class AbstractModel implements Model
 
 	public function delete()
 	{
+		if(!isset($this->id))
+			throw new BentoError('Attempted to delete unsaved model.');
+
 		if(isset($this->table))
 		{
 			$record = new ObjectRelationshipMapper($this->table);
-			$record->primaryKey($id);
+			$record->primaryKey($this->id);
 
 			if($record->select(1))
 			{
