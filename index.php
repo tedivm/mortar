@@ -65,8 +65,7 @@ require('system/classes/User.class.php');
 require('system/interfaces/ActionInterface.interface.php');
 require('system/classes/Permissions.class.php');
 require('system/classes/Page.class.php');
-require('system/abstracts/ModuleBase.abstract.php');
-require('system/abstracts/Plugin.abstract.php');
+
 require('system/abstracts/action.class.php');
 require('system/classes/Site.class.php');
 
