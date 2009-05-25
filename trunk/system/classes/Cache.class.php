@@ -329,7 +329,8 @@ class Cache
 		{
 			if(!class_exists($class, false))
 			{
-				$path = 'cacheHandlers/' . $name . 'class.php';
+				$config = Config::getInstance();
+				$path = $config['path']['mainclasses'] . 'cacheHandlers/' . $name . '.class.php';
 				if(file_exists($path))
 				{
 					include($path);
