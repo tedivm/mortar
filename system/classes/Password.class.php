@@ -81,6 +81,14 @@ class Password
 	protected $storeValues = array('version', 'cryptoAlgorithm', 'hashDepth', 'saltStart', 'saltEnd', 'hash');
 
 	/**
+	 * This value is used to see if the password is using the current settings. If a stored value gets brought in and
+	 * isn't using the current settings, this will be false.
+	 *
+	 * @var bool
+	 */
+	protected $current = true;
+
+	/**
 	 * Builds the password object up from a stored password string, overwriting any class settings that are stored in
 	 * the hash.
 	 *
@@ -91,9 +99,26 @@ class Password
 		$split = explode('::', $storedHash);
 
 		foreach($this->storeValues as $name)
-		{
-			$this->$name = array_shift($split);
-		}
+			$info[$name] = array_shift($split);
+
+		if($this->version != $info['version']
+			|| $this->cryptoAlgorithm != $info['cryptoAlgorithm']
+			|| $this->hashDepth != $info['hashDepth']);
+				$this->current = false;
+
+
+		foreach($info as $name => $value)
+			$this->$name = $value;
+	}
+
+	/**
+	 * This returns whether or not the password is using the current standards
+	 *
+	 * @return bool
+	 */
+	public function isCurrent()
+	{
+		return $this->current;
 	}
 
 	/**
