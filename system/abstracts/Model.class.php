@@ -31,7 +31,8 @@ class AbstractModel implements Model
 
 		if(!is_null($id))
 		{
-			$this->load($id);
+			if(!$this->load($id))
+				throw new BentoError('No model of type ' . $this->getType() . ' with id ' . $id);
 		}
 	}
 
@@ -176,9 +177,14 @@ class AbstractModel implements Model
 						$info['content'][$columnName] = $record->$columnName;
 					}
 				}
+			}else{
+				$info = false;
 			}
 			$cache->storeData($info);
 		}
+
+		if($info == false)
+			return false;
 
 		if(isset($info['id']))
 			$this->id = $info['id'];

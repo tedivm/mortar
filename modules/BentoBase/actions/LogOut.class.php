@@ -10,8 +10,7 @@ class BentoBaseActionLogOut extends ActionBase
 
 	public function logic()
 	{
-		$user = ActiveUser::getInstance();
-		$user->loadUserByName('guest');
+		ActiveUser::changeUserByName('guest');
 		$this->ioHandler->setStatusCode(200);
 	}
 

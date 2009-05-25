@@ -273,23 +273,23 @@ class BentoBaseInstaller
 			$config = Config::getInstance();
 			$input = Input::getInput();
 
-			// CREATE USERS
 			if(!class_exists('User', false))
 			{
-				include($config['path']['mainclasses'] . 'user.class.php');
+				include($config['path']['modules'] . 'BentoBase/models/User.class.php');
 			}
 
-			$userAdmin = new User();
-			$userAdmin->setName($input['username']);
-			$userAdmin->setPassword($input['password']);
+
+			$userAdmin = new BentoBaseModelUser();
+			$userAdmin['name'] = $input['username'];
+			$userAdmin['password'] = $input['password'];
 			$userAdmin->save();
 
-			$userGuest = new User();
-			$userGuest->setName('guest');
+			$userGuest = new BentoBaseModelUser();
+			$userGuest['name'] = 'guest';
 			$userGuest->save();
 
-			$userSystem = new User();
-			$userSystem->setName('system');
+			$userSystem = new BentoBaseModelUser();
+			$userSystem['name'] = 'system';
 			$userSystem->save();
 
 			// CREATE MEMBERGROUPS
@@ -337,10 +337,6 @@ class BentoBaseInstaller
 			$memgroupSuperUser->addUser($userSystem);
 
 
-			// Make the active user the system
-			$activeUser = ActiveUser::getInstance();
-			$activeUser->loadUser($userSystem->getId());
-
 
 			// CREATE ROOT LOCATION
 
@@ -364,6 +360,9 @@ class BentoBaseInstaller
 			if(!$this->setupCoreModule())
 				return false;
 
+
+			// Make the active user the system
+			ActiveUser::changeUserById($userSystem->getId());
 
 
 			// Create Site

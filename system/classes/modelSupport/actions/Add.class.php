@@ -116,7 +116,7 @@ class ModelActionLocationBasedAdd extends ModelActionLocationBasedBase
 
 		if($location->getName() == 'tmp') // this is a new, unsaved location
 		{
-			$user = ActiveUser::getCurrentUser();
+			$user = ActiveUser::getUser();
 			$location->setOwner($user);
 		}
 
@@ -162,7 +162,7 @@ class ModelActionLocationBasedAdd extends ModelActionLocationBasedBase
 	 */
 	protected function setPermissionObject()
 	{
-		$user = ActiveUser::getInstance();
+		$user = ActiveUser::getUser();
 		$this->permissionObject = new Permissions($this->model->getLocation()->getParent(), $user);
 	}
 

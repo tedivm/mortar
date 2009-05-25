@@ -132,7 +132,7 @@ class AdminControllerResourceFilterNavigation
 	 */
 	public function update($adminController)
 	{
-		$user = ActiveUser::getInstance();
+		$user = ActiveUser::getUser();
 		$userId = $user->getId();
 		$action = $adminController->getAction();
 		$tabs = $this->loadLinks();
@@ -261,7 +261,7 @@ class AdminControllerResourceFilterNavigation
 	 */
 	protected function processLinks($unprocessedLinks)
 	{
-		$user = ActiveUser::getInstance();
+		$user = ActiveUser::getUser();
 		$userId = $user->getId();
 		$processedLinks = array();
 		foreach($unprocessedLinks as $tab => $containers)

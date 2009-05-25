@@ -53,16 +53,12 @@ class Permissions
 		if(IGNOREPERMISSIONS)
 			return;
 
-		if($userId instanceof User){
+		if($userId instanceof Model && $userId->getType() == 'User'){
 			$this->user = $userId;
 			$userId = $this->user->getId();
 		}elseif(is_numeric($userId)){
 			$this->user = new User();
 			$this->user->loadUser($userId);
-		}elseif($userId instanceof ActiveUser){
-			$this->user = new User();
-			$this->user->loadUser($userId->getId());
-			$userId = $this->user->getId();
 		}else{
 			throw new TypeMismatch(array('User', $userId));
 		}
@@ -89,7 +85,7 @@ class Permissions
 	protected function loadPermissions()
 	{
 		$memberGroupPermissionsArray = array();
-		$memberGroups = $this->user->getMemberGroups();
+		$memberGroups = $this->user['membergroups'];
 
 		$resourceOwner = $this->location->getOwner();
 		if($resourceOwner && $resourceOwner->getId() == $this->user->getId())
@@ -535,8 +531,8 @@ class PermissionLists
 	 */
 	protected function load()
 	{
-		$user = new User($this->userId);
-		$memberGroups = $user->getMemberGroups();
+		$user = ModelRegistry::loadModel('User', $this->userId);
+		$memberGroups = $user['membergroups'];
 
 		$permissions = array();
 		$permissions[] = $this->loadUserPermissions($user->getId());

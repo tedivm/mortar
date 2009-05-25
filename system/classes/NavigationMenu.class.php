@@ -47,7 +47,7 @@ class NavigationMenu
 	 * @access protected
 	 * @var array
 	 */
-	protected $subMenus;
+	protected $subMenus = array();
 
 	/**
 	 * Constructor takes a name as its argument
@@ -106,7 +106,7 @@ class NavigationMenu
 	 */
 	public function makeDisplay()
 	{
-		$userId = ActiveUser::getInstance()->getId();
+		$userId = ActiveUser::getUser()->getId();
 		$menuDiv = new HtmlObject('div');
 
 

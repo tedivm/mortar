@@ -52,7 +52,7 @@ class BentoCMSActionListPages extends ActionBase
 			$moduleId = $moduleList['module']['moduleId'];
 			$pageList = $moduleList['pageList'];
 
-			$user = ActiveUser::getInstance();
+			$user = ActiveUser::getUser();;
 			$modulePermission = new Permissions($moduleLocation, $user->getId());
 
 			$columnArray = array('name');

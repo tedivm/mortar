@@ -9,9 +9,8 @@ class BentoBasePluginAdminNav
 		$url = new Url();
 		$url->module = 'BentoBase';
 		$url->format = 'Admin';
-		$user = ActiveUser::getInstance();
 
-		if($user->getName() == 'guest')
+		if(!ActiveUser::isLoggedIn())
 		{
 			$url->action = 'LogIn';
 			$this->addDynamicLink('Log In', $url, 'Main', 'User');

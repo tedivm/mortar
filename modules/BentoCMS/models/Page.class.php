@@ -53,7 +53,7 @@ class BentoCMSModelPage extends LocationModel
 		$revision->filteredContent = $this->content['filteredContent'];
 		$revision->title = $this->content['title'];
 
-		$user = ActiveUser::getInstance();
+		$user = ActiveUser::getUser();
 		$revision->author = $user->getId();
 		$revision->save();
 		$revision->makeActive();
@@ -194,7 +194,7 @@ class PageRevision
 	{
 		if(!$this->author && class_exists('ActiveUser', false))
 		{
-			$user = ActiveUser::getInstance();
+			$user = ActiveUser::getUser();
 			$this->author = $user->getId();
 
 		}

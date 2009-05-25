@@ -17,7 +17,7 @@
  * @subpackage	Environment
  * @property-read ActiveUser $User
  * @property-read Config $Configuration
- * @property-read ActiveSite $Site
+ * @property-read User $Site
  * @property-read Array $Input
  * @property-read Array $Query
  */
@@ -44,7 +44,7 @@ class InfoRegistry
 	{
 		switch ($offset) {
 			case 'User':
-				return ActiveUser::getInstance();
+				return ActiveUser::getUser();
 				break;
 			case 'Configuration':
 				return Config::getInstance();

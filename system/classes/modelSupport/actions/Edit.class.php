@@ -55,7 +55,7 @@ class ModelActionLocationBasedEdit extends ModelActionLocationBasedAdd
 	 */
 	protected function setPermissionObject()
 	{
-		$user = ActiveUser::getInstance();
+		$user = ActiveUser::getUser();
 		$this->permissionObject = new Permissions($this->model->getLocation(), $user);
 	}
 }

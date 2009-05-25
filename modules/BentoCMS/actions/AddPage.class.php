@@ -17,7 +17,7 @@ class BentoCMSActionAddPage //extends FormAction
 
 	protected function processInput($inputHandler)
 	{
-		$user = ActiveUser::getInstance();
+		$user = ActiveUser::getUser();
 
 		$resource = $this->resourceClass;
 		$cms = new $resource();
