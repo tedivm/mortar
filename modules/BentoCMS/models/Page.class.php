@@ -1,6 +1,6 @@
 <?php
 
-class BentoCMSModelPage extends AbstractModel
+class BentoCMSModelPage extends LocationModel
 {
 	static public $type = 'Page';
 	protected $table = 'BentoCMS_Pages';

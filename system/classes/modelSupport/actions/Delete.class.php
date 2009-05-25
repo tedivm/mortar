@@ -15,7 +15,7 @@
  * @subpackage ModelSupport
  * @todo write this
  */
-class ModelActionDelete extends ModelActionBase
+class ModelActionLocationBasedDelete extends ModelActionLocationBasedBase
 {
 
 	/**

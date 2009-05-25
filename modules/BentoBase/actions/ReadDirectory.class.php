@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseActionReadDirectory extends ModelActionRead
+class BentoBaseActionReadDirectory extends ModelActionLocationBasedRead
 {
 	public function viewHtml()
 	{

@@ -29,7 +29,7 @@ Interface Model extends ArrayAccess
 	 *
 	 * @param null|Location $parent
 	 */
-	public function save($parent = null);
+	public function save();
 
 	/**
 	 * This function should delete the stored verion of the mode.
@@ -72,13 +72,6 @@ Interface Model extends ArrayAccess
 	public function getId();
 
 	/**
-	 * Returns the location object the model is saved to.
-	 *
-	 * @return Location
-	 */
-	public function getLocation();
-
-	/**
 	 * This returns all the properties of the model as an array.
 	 *
 	 * @return array
@@ -99,20 +92,6 @@ Interface Model extends ArrayAccess
 	 */
 	public function getModule();
 
-	/**
-	 * This class is used to set the current parent location.
-	 *
-	 * @param Location $parent
-	 */
-	public function setParent(Location $parent);
-
-	/**
-	 * This function checks to see if the model can be saved to parent location of a certain resource type.
-	 *
-	 * @param string $resourceType
-	 * @return bool
-	 */
-	public function canSaveTo($resourceType);
 
 	/**
 	 * Returns a property of the model.

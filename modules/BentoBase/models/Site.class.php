@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseModelSite extends AbstractModel
+class BentoBaseModelSite extends LocationModel
 {
 	static public $type = 'Site';
 	protected $table = 'sites';

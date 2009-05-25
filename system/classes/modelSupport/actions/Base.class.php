@@ -16,7 +16,7 @@
  * @package System
  * @subpackage ModelSupport
  */
-abstract class ModelActionBase implements ActionInterface
+abstract class ModelActionLocationBasedBase implements ActionInterface
 {
 	/**
 	 * This is the model that called up the action.

@@ -15,7 +15,7 @@
  * @package System
  * @subpackage ModelSupport
  */
-class ModelActionRead extends ModelActionBase
+class ModelActionLocationBasedRead extends ModelActionLocationBasedBase
 {
 
 	/**
