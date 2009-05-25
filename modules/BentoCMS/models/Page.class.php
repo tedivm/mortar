@@ -16,6 +16,9 @@ class BentoCMSModelPage extends LocationModel
 			$this->loadRevision($this->content['activeRevision']);
 			$this->activeRevision = $this->content['activeRevision'];
 			unset($this->content['activeRevision']);
+			return true;
+		}else{
+			return false;
 		}
 	}
 

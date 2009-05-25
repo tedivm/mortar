@@ -91,7 +91,7 @@ class ActiveUser
 			}else{
 				$userId = false;
 			}
-			$cache->storeData($name);
+			$cache->storeData($userId);
 		}
 		return $userId;
 	}
