@@ -88,14 +88,6 @@ class BentoBaseModelSite extends LocationModel
 		return $url;
 	}
 
-	public function save($parent = null)
-	{
-		if(!parent::save($parent))
-			return false;
-
-		return true;
-	}
-
 }
 
 ?>

@@ -48,20 +48,7 @@ class LocationModel extends AbstractModel
 
 			if(!$this->location)
 			{
-				if(!$parent)
-					throw new BentoError('On creation a parent location is required.');
-				$this->location = new Location();
-			}
-
-			if($parent)
-			{
-				if(!($parent instanceof Location))
-					throw new TypeMismatch(array('Location', $parent));
-
-				if(!$this->canSaveTo($parent->getType()))
-					throw new BentoError('Unable to save to resource type ' . $parent->getType());
-
-				$this->location->setParent($parent);
+				throw new BentoError('There is no location');
 			}
 
 			$this->location->setResource($this->getType(), $this->getId());
