@@ -292,10 +292,10 @@ ALTER TABLE userPermissions ADD CONSTRAINT pkuserPermissions
 CREATE TABLE users
 (
 	user_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	user_name VARCHAR(16) NOT NULL,
-	user_password VARCHAR(255) NULL,
-	user_email VARCHAR(255) NULL,
-	user_allowlogin CHAR(1) NOT NULL DEFAULT 1
+	name VARCHAR(16) NOT NULL,
+	password VARCHAR(255) NULL,
+	email VARCHAR(255) NULL,
+	allowlogin CHAR(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: users */

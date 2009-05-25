@@ -131,10 +131,10 @@ class User
 		if($info != false)
 		{
 			$this->id = $userId;
-			$this->password = $info['user_password'];
-			$this->username = $info['user_name'];
-			$this->email = $info['user_email'];
-			$this->allowLogin = $info['user_allowlogin'];
+			$this->password = $info['password'];
+			$this->username = $info['name'];
+			$this->email = $info['email'];
+			$this->allowLogin = $info['allowlogin'];
 			$this->memberGroups = $info['membergroups'];
 			return $userId;
 		}else{
@@ -272,7 +272,7 @@ class User
 			$stmt = $db->stmt_init();
 			if(!is_numeric($this->id))
 			{
-				$stmt->prepare('INSERT INTO users (user_id, user_name, user_password, user_email, user_allowlogin)
+				$stmt->prepare('INSERT INTO users (user_id, name, password, email, allowlogin)
 												VALUES (NULL, ?, ?, ?, ?)');
 				if(!$stmt->bindAndExecute('sssi', $this->username, $this->password,
 											 $this->email, ($this->allowLogin) ? 1 : 0))
@@ -282,7 +282,7 @@ class User
 
 				$this->id = $stmt->insert_id;
 			}else{
-				$stmt->prepare('UPDATE users SET user_name = ?, user_password = ?, user_email = ?, user_allowlogin = ?
+				$stmt->prepare('UPDATE users SET name = ?, password = ?, email = ?, allowlogin = ?
 										WHERE user_id = ?');
 
 				if(!$stmt->bindAndExecute('sssii', $this->username, $this->password,
@@ -400,14 +400,14 @@ class ActiveUser implements SplSubject
 	{
 		$db = db_connect('default_read_only');
 		$stmt = $db->stmt_init();
-		$stmt->prepare("SELECT * FROM users WHERE user_name=?");
+		$stmt->prepare("SELECT * FROM users WHERE name=?");
 		$stmt->bindAndExecute('s', $userName);
 		$numRows = $stmt->num_rows;
 		$user_array = $stmt->fetch_array();
 
 		$stmt->close();
 		$storedPassword = new Password();
-		$storedPassword->fromStored($user_array['user_password']);
+		$storedPassword->fromStored($user_array['password']);
 
 		if($numRows == 1 && $storedPassword->isMatch($password))
 		{
@@ -508,7 +508,7 @@ class ActiveUser implements SplSubject
 		{
 			$db = db_connect('default_read_only');
 			$stmt = $db->stmt_init();
-			$stmt->prepare("SELECT * FROM users WHERE user_name=? LIMIT 1");
+			$stmt->prepare("SELECT * FROM users WHERE name=? LIMIT 1");
 			$stmt->bindAndExecute('s', $user);
 
 			if($stmt->num_rows == 1)
