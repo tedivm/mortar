@@ -14,7 +14,7 @@
  * @package System
  * @subpackage ModelSupport
  */
-class ModelActionAdd extends ModelActionBase
+class ModelActionLocationBasedAdd extends ModelActionLocationBasedBase
 {
 	/**
 	 * This is the model that the new model is going to be attached to

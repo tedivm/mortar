@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseModelRoot extends AbstractModel
+class BentoBaseModelRoot extends LocationModel
 {
 	static public $type = 'Root';
 }

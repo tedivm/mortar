@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseActionSiteRead extends ModelActionBase
+class BentoBaseActionSiteRead extends ModelActionLocationBasedBase
 {
 	public $adminSettings = array('headerTitle' => 'Installer',
 									'tab' => 'Main');

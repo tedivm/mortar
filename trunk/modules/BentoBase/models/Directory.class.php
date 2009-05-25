@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseModelDirectory extends AbstractModel
+class BentoBaseModelDirectory extends LocationModel
 {
 	static public $type = 'Directory';
 	protected $table = 'directories';

@@ -76,7 +76,7 @@ require('system/classes/modelSupport/actions/Edit.class.php');
 require('system/classes/modelSupport/actions/Read.class.php');
 require('system/interfaces/Model.interface.php');
 require('system/abstracts/Model.class.php');
-
+require('system/abstracts/LocationModel.class.php');
 
 require('system/classes/modelSupport/Converters/Array.class.php');
 require('system/classes/modelSupport/Converters/Html.class.php');

@@ -15,7 +15,7 @@
  * @package System
  * @subpackage ModelSupport
  */
-class ModelActionEdit extends ModelActionAdd
+class ModelActionLocationBasedEdit extends ModelActionLocationBasedAdd
 {
 	/**
 	 * This function calls the parent::getForm function, but then overwrites the default values with the actual values
