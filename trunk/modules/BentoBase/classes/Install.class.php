@@ -371,7 +371,8 @@ class BentoBaseInstaller
 			$site = new BentoBaseModelSite();
 			$site->name = $input['siteName'];
 			$site['allowIndex'] = 1;
-			$site->save($locationRoot);
+			$site->setParent($locationRoot);
+			$site->save();
 
 			$ssl = isset($input['ssl'][0]);
 			$site->addUrl($input['domain'], $ssl, true);
@@ -383,7 +384,8 @@ class BentoBaseInstaller
 			$membersOnlyDirectory = new BentoBaseModelDirectory();
 			$membersOnlyDirectory->name = 'MembersOnly';
 			$membersOnlyDirectory['allowIndex'] = 1;
-			$membersOnlyDirectory->save($siteLocation);
+			$membersOnlyDirectory->setParent($siteLocation);
+			$membersOnlyDirectory->save();
 
 			$locationMembersOnly = $membersOnlyDirectory->getLocation();
 			$locationMembersOnly->setInherit(false);
@@ -393,7 +395,9 @@ class BentoBaseInstaller
 			$adminOnlyDirectory = new BentoBaseModelDirectory();
 			$adminOnlyDirectory->name = 'AdminOnly';
 			$adminOnlyDirectory['allowIndex'] = 1;
-			$adminOnlyDirectory->save($siteLocation);
+			$adminOnlyDirectory->setParent($siteLocation);
+			$adminOnlyDirectory->save();
+
 			$locationAdminOnly = $adminOnlyDirectory->getLocation();
 			$locationAdminOnly->setInherit(false);
 			$locationAdminOnly->save();
@@ -403,7 +407,8 @@ class BentoBaseInstaller
 			$page->name = 'home';
 			$page['title'] = 'Welcome to BentoBase';
 			$page['content'] = 'BentoBase- default installation text coming soon!';
-			$page->save($siteLocation);
+			$page->setParent($siteLocation);
+			$page->save();
 			$pageLocation = $page->getLocation();
 
 

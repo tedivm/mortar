@@ -72,13 +72,15 @@ class RequestWrapperInstaller extends RequestWrapper
 	 *
 	 * @access protected
 	 */
+
+	/*
 	protected function close()
 	{
-		$this->requestHandler->close();
+		$this->ioHandler->close();
 
 
 	}
-
+*/
 	/**
 	 * This class makes sure the action class is loaded into the system and returns its name
 	 *

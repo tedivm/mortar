@@ -215,7 +215,7 @@ class PageRevision
 													ORDER BY tempContent.revisionId DESC LIMIT 1) + 1),
 											1)
 										),
-										?, NOW(),
+										?, ?,
 										?, ?, ?)');
 
 		$insertStmt->bindAndExecute('iiissss', $this->pageId, $this->pageId,
