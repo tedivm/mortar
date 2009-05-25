@@ -27,7 +27,6 @@ Interface Model extends ArrayAccess
 	 * This function saves the model to the database. It takes an optional argument of a Location, which if passed
 	 * is where the model should be saved.
 	 *
-	 * @param null|Location $parent
 	 */
 	public function save();
 
