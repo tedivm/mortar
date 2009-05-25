@@ -406,7 +406,7 @@ class RequestWrapper
 	protected function logRequest()
 	{
 		$query = Query::getQuery();
-		$userId = ActiveUser::getCurrentUser()->getId();
+		$userId = ActiveUser::getUser()->getId();
 		$location = isset($query['location']) ? $query['location'] : false;
 		$action = isset($query['action']) ? $query['action'] : false;
 		$iohandler = self::$ioHandlerType;

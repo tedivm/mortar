@@ -37,18 +37,11 @@ class BentoBaseActionLogIn extends ActionBase
 		if($inputHandler = $form->checkSubmit())
 		{
 			try{
-				//$inputHandler = $form->getInputhandler();
-				$active_user = ActiveUser::get_instance();
-
-				if($active_user->changeUser($inputHandler['username'], $inputHandler['password']))
-				{
-					$this->loginSuccessful = true;
-				}
-
+				$this->loginSuccessful = (bool) (ActiveUser::changeUserByNameAndPassword($inputHandler['username'],
+																						$inputHandler['password']));
 			}catch(Exception $e){
 
 			}
-
 		}
 		$this->ioHandler->setStatusCode(200);
 	}

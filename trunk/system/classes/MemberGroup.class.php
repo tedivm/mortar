@@ -120,7 +120,7 @@ class MemberGroup
 		if(!$this->id)
 			return false;
 
-		if($userId instanceof User)
+		if($userId instanceof Model && $userId->getType('User'))
 			$userId = $userId->getId();
 
 		if($this->containsUser($userId))

@@ -91,21 +91,20 @@ class IOProcessorCli
 		if(INSTALLMODE === true)
 			return;
 
-		$user = ActiveUser::getInstance();
 		switch (true) {
 			case ($query['username'] && $query['password']):
-				$user->changeUser($query['username'], $query['password']);
+				ActiveUser::changeUserByNameAndPassword($query['username'], $query['password']);
 				break;
 			case ($query['username'] && $isRoot):
-				$user->loadUserByName($query['username']);
+				ActiveUser::changeUserByName($query['username']);
 				break;
 
 			case ($isRoot):
-				$user->loadUser(1);
+				ActiveUser::changeUserById(1);
 				break;
 
 			default:
-				$user->loadUserByName('guest');
+				ActiveUser::changeUserByName('guest');
 				break;
 			}
 	}

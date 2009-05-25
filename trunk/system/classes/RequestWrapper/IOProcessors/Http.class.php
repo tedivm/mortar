@@ -112,8 +112,7 @@ class IOProcessorHttp extends IOProcessorCli
 			session_set_cookie_params(self::$cookieTimeLimit, '/', null, isset($_SERVER["HTTPS"]), true);
 			session_start();
 			$sessionObserver = new SessionObserver();
-			$user = ActiveUser::getInstance();
-			$user->attach($sessionObserver);
+			ActiveUser::attach($sessionObserver);
 		}
 	}
 
@@ -310,7 +309,7 @@ class IOProcessorHttp extends IOProcessorCli
  * This class attaches to the active user as an observer to keep the user active across requests
  *
  */
-class SessionObserver implements SplObserver
+class SessionObserver
 {
 	protected $userId;
 
@@ -328,20 +327,18 @@ class SessionObserver implements SplObserver
 	 *
 	 * @param ActiveUser $object
 	 */
-	public function update(SplSubject $object)
+	public function update($object)
 	{
-		if($object instanceof ActiveUser)
+		// If this class hasn't been loaded before and the session is good, load it
+		if(!is_numeric($this->userId) && $this->checkSession())
 		{
-			// If this class hasn't been loaded before and the session is good, load it
-			if(!is_numeric($this->userId) && $this->checkSession())
-			{
-				$this->userId = 0; // prevents looping
-				$object->loadUser($_SESSION['user_id']);
-			}
-
-			$this->userId = $object->getId();
-			$this->regenerateSession();
+			$this->userId = 0; // prevents looping
+			ActiveUser::changeUserById($_SESSION['user_id']);
 		}
+
+		$this->userId = $object->getId();
+		$this->regenerateSession();
+
 	}
 
 	/**
@@ -420,6 +417,7 @@ class SessionObserver implements SplObserver
 			{
 				throw new Exception('No session started');
 			}
+
 			if(!isset($_SESSION['IPaddress']) || $_SESSION['IPaddress'] != $_SERVER['REMOTE_ADDR'])
 				throw new BentoNotice('IP Address mixmatch (possible session hijacking attempt).');
 

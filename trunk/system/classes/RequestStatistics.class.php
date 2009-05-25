@@ -56,9 +56,9 @@ class RequestStatistics
 		$info['Current Site']['Id'] = $currentSite->getId();
 		$info['Current Site']['Current Page'] = Query::getUrl();
 
-		$user = ActiveUser::getInstance();
+		$user = ActiveUser::getUser();
 		$info['Active User']['Id'] = $user->getId();
-		$info['Active User']['Name'] = $user->getName();
+		$info['Active User']['Name'] = $user['name'];
 
 
 		$info['Cache']['Calls Count'] = Cache::$cacheCalls;
