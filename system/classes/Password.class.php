@@ -103,9 +103,8 @@ class Password
 
 		if($this->version != $info['version']
 			|| $this->cryptoAlgorithm != $info['cryptoAlgorithm']
-			|| $this->hashDepth != $info['hashDepth']);
+			|| $this->hashDepth != $info['hashDepth'])
 				$this->current = false;
-
 
 		foreach($info as $name => $value)
 			$this->$name = $value;

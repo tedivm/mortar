@@ -44,6 +44,14 @@ class ActiveUser
 
 		if($storedPassword->isMatch($password))
 		{
+			// If the password is not stored with the current password settings, restore the password to it gets
+			// hashed properly.
+			if(!$storedPassword->isCurrent())
+			{
+				$user['password'] = $password;
+				$user->save();
+			}
+
 			self::changeUserById($userId);
 			return true;
 		}else{
