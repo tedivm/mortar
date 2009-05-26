@@ -61,7 +61,7 @@ class RequestLog
 			$locationId = 0;
 
 		$stmt = DatabaseConnection::getStatement(self::getDatabase('write'));
-		$stmt->prepare('INSERt INTO requestLog (userId, siteId, location, module, action, ioHandler, format, accessTime)
+		$stmt->prepare('INSERT INTO requestLog (userId, siteId, location, module, action, ioHandler, format, accessTime)
 									VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
 		return $stmt->bindAndExecute('iiisssss', $userId, $siteId, $locationId,
 					$module, $action, $ioHandler, $format, gmdate('Y-m-d H:i:s'));
@@ -94,7 +94,7 @@ class RequestLog
 		$code = $e->getCode();
 
 		$stmt = DatabaseConnection::getStatement(self::getDatabase('write'));
-		$stmt->prepare('INSERt INTO errorLog (errorType, severity, message, url, file, line, trace, accessTime)
+		$stmt->prepare('INSERT INTO errorLog (errorType, severity, message, url, file, line, trace, accessTime)
 									VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
 		return $stmt->bindAndExecute('sissssss', $errorType, $severity, $message, (string) $currentUrl,
 											$file, $line, $trace, gmdate('Y-m-d H:i:s'));
