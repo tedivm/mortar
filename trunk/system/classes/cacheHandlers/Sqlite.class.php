@@ -9,7 +9,7 @@
  */
 
 /**
- * This class is used by the Cache class for persistent storage of cached objects using an sqlite file.
+ * This class is used by the Cache class for persistent storage of cached objects using multiple sqlite files.
  *
  * @package System
  * @subpackage Caching
