@@ -84,7 +84,8 @@ class Cache
 	 * @var array
 	 */
 	protected static $handlers = array('FileSystem' => 'cacheHandlerFilesystem',
-										'SQLite' => 'cacheHandlerSqlite');
+										'SQLiteMF' => 'cacheHandlerSqlite',
+										'SQLite' => 'cacheHandlerSqliteOneFile');
 	/**
 	 * This variable can be used to disable the cache system wide. It is used when the storage engine fails or if the
 	 * cache is being cleared.
@@ -162,11 +163,15 @@ class Cache
 
 				if(!class_exists($handlerClass, false))
 				{
-					$path = $config['path']['mainclasses'] .'cacheHandlers/' . $handlerType . '.class.php';
+
+					$filename = (strpos($handlerClass, 'cacheHandler') !== false) ? substr($handlerClass, '12') : $handlerClass;
+					$path = $config['path']['mainclasses'] .'cacheHandlers/' . $filename . '.class.php';
+					var_dump($path);
 					if(file_exists($path))
 					{
 						include($path);
 					}else{
+						self::$runtimeDisable = true;
 						throw new BentoError('Unable to load cache handler ' . $handlerType . ' at ' . $path);
 					}
 				}
@@ -336,7 +341,10 @@ class Cache
 			if(!class_exists($class, false))
 			{
 				$config = Config::getInstance();
-				$path = $config['path']['mainclasses'] . 'cacheHandlers/' . $name . '.class.php';
+
+				$filename = (strpos($class, 'cacheHandler') !== false) ? substr($class, '12') : $class;
+
+				$path = $config['path']['mainclasses'] . 'cacheHandlers/' . $filename . '.class.php';
 				if(file_exists($path))
 				{
 					include($path);
