@@ -31,6 +31,13 @@ class cacheHandlerSqlite implements cacheHandler
 	protected $data;
 
 	/**
+	 * This is the name of the current section, identified by being the first string in the key.
+	 *
+	 * @var string
+	 */
+	protected $section;
+
+	/**
 	 * This is a stored sqlObject using the cache database. This way each cache call does not need to open the handler
 	 * again, saving a bit of overhead.
 	 *
@@ -55,12 +62,9 @@ class cacheHandlerSqlite implements cacheHandler
 	 */
 	public function setup($key)
 	{
+		$this->section = $key[0];
 		$this->key = self::makeSqlKey($key);
-
-		if(get_class(self::$sqlObject) == 'SQLiteDatabase')
-			return true;
-
-		return (self::setSqliteHandler());
+		return (get_class(self::getSqliteHandler($this->section)) == 'SQLiteDatabase');
 	}
 
 	/**
@@ -70,8 +74,8 @@ class cacheHandlerSqlite implements cacheHandler
 	 */
 	public function getData()
 	{
-
-		$query = self::$sqlObject->query("SELECT * FROM cacheStore WHERE key LIKE '{$this->key}'");
+		$sqlResource = self::getSqliteHandler($this->section);
+		$query = $sqlResource->query("SELECT * FROM cacheStore WHERE key LIKE '{$this->key}'");
 
 		if($resultArray = $query->fetch(SQLITE_ASSOC))
 		{
@@ -92,14 +96,15 @@ class cacheHandlerSqlite implements cacheHandler
 	public function storeData($data, $expiration)
 	{
 		$data = sqlite_escape_string(serialize($data));
-
-		$query = self::$sqlObject->query("INSERT INTO cacheStore (key, expires, data)
+		$sqlResource = self::getSqliteHandler($this->section);
+		$query = $sqlResource->query("INSERT INTO cacheStore (key, expires, data)
 											VALUES ('{$this->key}', '{$expiration}', '{$data}')");
 	}
 
 	/**
 	 * This function takes in a key array, turns it into an sql key, and deletes all objects in the database whose
-	 * keys begin with this key. If the argument passed is null the entire sqlite file is deleted.
+	 * keys begin with this key. If the argument passed is null the entire cache directory is deleted, or if it is a
+	 * single word key the appropriste sqlite database is removed.
 	 *
 	 * @param null|array $key
 	 */
@@ -107,34 +112,47 @@ class cacheHandlerSqlite implements cacheHandler
 	{
 		if(is_null($key) || (is_array($key) && count($key) == 0))
 		{
-			$info = InfoRegistry::getInstance();
-			$filePath = $info->Configuration['path']['temp'] . 'cacheDatabase.sqlite';
-			unlink($filePath);
+			$config = Config::getInstance();
+			deltree($config['path']['temp'] . 'cache');
+			self::$sqlObject = false;
+
+		}elseif(is_array($key) && count($key) == 1){
+
+			$config = Config::getInstance();
+			$name = array_shift($key);
+
+			deltree($config['path']['temp'] . 'cache/' . $name . '.sqlite');
+			self::$sqlObject[$name] = false;
+
 		}else{
-			if(!self::$sqlObject)
-			{
-				self::setSqliteHandler();
-			}
 			$key = self::makeSqlKey($key) . '%';
-			$query = self::$sqlObject->queryExec("DELETE FROM cacheStore WHERE key LIKE '{$key}'");
+			$sqlResource = self::getSqliteHandler($key[0]);
+			$query = $sqlResource->queryExec("DELETE FROM cacheStore WHERE key LIKE '{$key}'");
 		}
 	}
 
 	/**
-	 * This function is used to retrieve the SQLiteDatabase object. If one is not set, it opens one. If the created
-	 * object is a new database, it creates the structure.
+	 * This function is used to retrieve an SQLiteDatabase object. If the requested section does not exist, it creates
+	 * and and sets up the structure.
 	 *
+	 * @param string
 	 * @return bool
 	 */
-	static function setSqliteHandler()
+	static function getSqliteHandler($name)
 	{
 		try{
-			if(get_class(self::$sqlObject) != 'SQLiteDatabase')
+			if(!isset(self::$sqlObject[$name]) || get_class(self::$sqlObject[$name]) != 'SQLiteDatabase')
 			{
 				$info = InfoRegistry::getInstance();
-				$filePath = $info->Configuration['path']['temp'] . 'cacheDatabase.sqlite';
+				$filePath = $info->Configuration['path']['temp'] . 'cache/' . $name . '.sqlite';
 
 				$isSetup = file_exists($filePath);
+
+				if(!file_exists(dirname($filePath)))
+				{
+					if(!mkdir(dirname($filePath), 0700, true))
+						return false;
+				}
 
 				$db = new SQLiteDatabase($filePath, '0666', $errorMessage);
 
@@ -154,14 +172,14 @@ class cacheHandlerSqlite implements cacheHandler
 				}
 
 				$db->busyTimeout(self::$busyTimeout);
-				self::$sqlObject = $db;
+				self::$sqlObject[$name] = $db;
 			}
 
 		}catch(Exception $e){
 			return false;
 		}
 
-		return true;
+		return self::$sqlObject[$name];
 	}
 
 	/**
