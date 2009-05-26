@@ -64,7 +64,8 @@ class cacheHandlerSqlite implements cacheHandler
 	{
 		$this->section = $key[0];
 		$this->key = self::makeSqlKey($key);
-		return (get_class(self::getSqliteHandler($this->section)) == 'SQLiteDatabase');
+		$sqlResource = staticFunctionHack(get_class($this), 'getSqliteHandler', $this->section);
+		return (get_class($sqlResource) == 'SQLiteDatabase');
 	}
 
 	/**
@@ -74,7 +75,8 @@ class cacheHandlerSqlite implements cacheHandler
 	 */
 	public function getData()
 	{
-		$sqlResource = self::getSqliteHandler($this->section);
+		//$sqlResource = self::getSqliteHandler($this->section);
+		$sqlResource = staticFunctionHack(get_class($this), 'getSqliteHandler', $this->section);
 		$query = $sqlResource->query("SELECT * FROM cacheStore WHERE key LIKE '{$this->key}'");
 
 		if($resultArray = $query->fetch(SQLITE_ASSOC))
@@ -96,7 +98,7 @@ class cacheHandlerSqlite implements cacheHandler
 	public function storeData($data, $expiration)
 	{
 		$data = sqlite_escape_string(serialize($data));
-		$sqlResource = self::getSqliteHandler($this->section);
+		$sqlResource = staticFunctionHack(get_class($this), 'getSqliteHandler', $this->section);
 		$query = $sqlResource->query("INSERT INTO cacheStore (key, expires, data)
 											VALUES ('{$this->key}', '{$expiration}', '{$data}')");
 	}
@@ -126,7 +128,7 @@ class cacheHandlerSqlite implements cacheHandler
 
 		}else{
 			$key = self::makeSqlKey($key) . '%';
-			$sqlResource = self::getSqliteHandler($key[0]);
+			$sqlResource = staticFunctionHack(get_class($this), 'getSqliteHandler', $this->section);
 			$query = $sqlResource->queryExec("DELETE FROM cacheStore WHERE key LIKE '{$key}'");
 		}
 	}
