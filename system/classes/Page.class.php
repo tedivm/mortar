@@ -160,7 +160,7 @@ class Page implements ArrayAccess
 		$cache = new Cache('theme', $this->theme, $file);
 		$template = $cache->getData();
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$basePath = $config['path']['theme'] . $this->theme . '/';
 			$path = $basePath . $file;

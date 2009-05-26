@@ -83,7 +83,7 @@ class Hook
 		$cache = new Cache('plugins', $realm, $category, $name, 'list');
 		$pluginList = $cache->getData();
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$pluginList = array();
 			$db = DatabaseConnection::getConnection('default_read_only');

@@ -70,7 +70,7 @@ class BentoBaseModelSite extends LocationModel
 		$cache = new Cache('models', 'site', $this->id, 'url', ($ssl) ? 1:0);
 		$url = $cache->getData();
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$row = new ObjectRelationshipMapper('urls');
 			$row->path = $this->content['primaryUrl'];

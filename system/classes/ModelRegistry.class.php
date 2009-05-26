@@ -124,7 +124,7 @@ class ModelRegistry
 		$cache = new Cache('system', 'models', 'handlers');
 		$handlers = $cache->getData();
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$handlers = array();
 			$db = dbConnect('default_read_only');

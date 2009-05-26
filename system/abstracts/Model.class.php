@@ -160,7 +160,7 @@ class AbstractModel implements Model
 		$cache = new Cache('models', $this->getType(), $id, 'info');
 		$info = $cache->getData();
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			if(isset($this->table))
 			{

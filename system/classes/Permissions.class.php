@@ -347,7 +347,7 @@ class UserPermission
 
 		$cache = new Cache('permissions', $type, $id, $this->location);
 		$permissions = $cache->getData();
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$permissions = array();
 			$db = dbConnect('default_read_only');
@@ -556,7 +556,7 @@ class PermissionLists
 		$cache = new Cache('permissions', 'user', $userId, 'allowedActions');
 		$allowedPermissions = $cache->getData();
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$allowedPermissions = array();
 
@@ -593,7 +593,7 @@ class PermissionLists
 		$cache = new Cache('permissions', 'group', $groupId, 'allowedActions');
 		$allowedPermissions = $cache->getData();
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$allowedPermissions = array();
 
@@ -709,7 +709,7 @@ class PermissionActionList
 		$cache = new Cache('permissions', 'actionLookup');
 		$actions = $cache->getData();
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$db = db_connect('default_read_only');
 			$result = $db->query('SELECT action_id, action_name FROM actions');

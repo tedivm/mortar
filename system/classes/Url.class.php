@@ -110,7 +110,7 @@ class Url
 			$pathCache = new Cache($location->getType(), $handler['module'], 'url', 'pathCache');
 			$pathTemplate = $pathCache->getData();
 
-			if(!$pathCache->cacheReturned)
+			if($pathCache->isStale())
 			{
 				$pathCacheDisplay = new DisplayMaker();
 				if(!$pathCacheDisplay->loadTemplate('UrlPath', $handler['module']))

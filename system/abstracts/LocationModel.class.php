@@ -14,7 +14,7 @@ class LocationModel extends AbstractModel
 			$cache = new Cache('models', $this->getType(), $id, 'location');
 			$locationId = $cache->getData();
 
-			if(!$cache->cacheReturned)
+			if($cache->isStale())
 			{
 				$db = DatabaseConnection::getConnection('default_read_only');
 				$stmt = $db->stmt_init();

@@ -274,6 +274,12 @@ class Cache
 		return $record['data']['return'];
 	}
 
+
+	public function isStale()
+	{
+		return !$this->cacheReturned;
+	}
+
 	/**
 	 * This function takes in any php datatype, including properly defined classes (must be able to serialize), and
 	 * stores it for later retrieval. It adds an expiration date (current time plus the cacheTime value, with a small
