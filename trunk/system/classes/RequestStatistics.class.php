@@ -65,17 +65,15 @@ class RequestStatistics
 		$info['Cache']['Returns'] = Cache::$cacheReturns;
 		$info['Cache']['Total Results'] = count(Cache::$memStore);
 
+		$calls = array();
+		foreach(Cache::$queryRecord as $path => $count)
+			$calls[$path] = $count;
 
+		ksort($calls);
+		$info['Cache']['Calls'] = $calls;
 
-		$memStore = array_keys(Cache::$memStore);
-		asort($memStore);
-		$info['Cache']['Calls'] = array_values($memStore);
-
-
-	//	$info['Current Site']['name'] = $currentSite->getName();
-
-		$info['MySql']['Query Count'] = MysqlBase::$queryCount;
-		$info['MySql']['Queries'] = MysqlBase::$queryArray;
+		$info['MySQL']['Query Count'] = MysqlBase::$queryCount;
+		$info['MySQL']['Queries'] = MysqlBase::$queryArray;
 		$this->requestValues = $info;
 	}
 
