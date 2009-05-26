@@ -78,7 +78,7 @@ class ActiveUser
 		$cache = new Cache('userLookup', $name, 'id');
 		$userId = $cache->getData();
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$db = DatabaseConnection::getConnection('default_read_only');
 			$stmt = $db->stmt_init();

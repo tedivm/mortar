@@ -15,7 +15,7 @@ class BentoBlogPost extends BentoCMSCmsPage
 		$cache = new Cache('modules', 'cms', $id, 'blogInfo');
 		$blogInfo = $cache->getData();
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$db = dbConnect('default_read_only');
 			$tagRows = $db->stmt_init();

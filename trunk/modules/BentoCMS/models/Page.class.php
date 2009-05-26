@@ -161,7 +161,7 @@ class PageRevision
 			$cache = new Cache('models', 'Page', $this->pageId, 'content', $this->revisionId);
 			$contentData = $cache->getData();
 
-			if(!$cache->cacheReturned)
+			if($cache->isStale())
 			{
 				$db = dbConnect('default_read_only');
 				$contentStmt = $db->stmt_init();

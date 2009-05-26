@@ -45,7 +45,7 @@ class BentoBaseModelUser extends AbstractModel
 		{
 			$cache = new Cache('models', $this->getType(), $id, 'membergroups');
 			$memberGroups = $cache->getData();
-			if(!$cache->cacheReturned)
+			if($cache->isStale())
 			{
 				$db = db_connect('default_read_only');
 				$db = DatabaseConnection::getConnection('default_read_only');

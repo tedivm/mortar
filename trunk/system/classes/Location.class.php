@@ -372,7 +372,7 @@ class Location
 			$cache = new Cache('locations', $id, 'info');
 			$locationInfo = $cache->getData();
 
-			if(!$cache->cacheReturned)
+			if($cache->isStale())
 			{
 				$dbLocation = new ObjectRelationshipMapper('locations');
 				$dbLocation->location_id = $id;
@@ -514,7 +514,7 @@ class Location
 	{
 		$cache = new Cache('locations', $this->id, 'children', $name);
 		$childId = $cache->getData();
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$db = db_connect('default_read_only');
 			$stmt = $db->stmt_init();

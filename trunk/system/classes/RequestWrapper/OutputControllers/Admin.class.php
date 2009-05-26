@@ -213,7 +213,7 @@ class AdminControllerResourceFilterNavigation
 
 		$tabs = call_user_func_array('array_merge_recursive', $tabResults);
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$links = array();
 			if(count($tabs) > 0)

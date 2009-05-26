@@ -259,7 +259,7 @@ class Form
 		$cache = new Cache($cacheKey);
 
 		$formHtml = $cache->getData();
-		if(!$cache->cacheReturned || !$this->cacheEnabled)
+		if($cache->isStale() || !$this->cacheEnabled)
 		{
 			if(self::$xsfrProtection && $nonce = $this->getNonce())
 			{

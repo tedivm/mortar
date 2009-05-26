@@ -78,7 +78,7 @@ class Theme
 		$cache = new Cache('theme', $this->name, ActiveSite::getLink('theme'));
 		$data = $cache->getData();
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$baseModulePath = $config['path']['modules'];
 			$baseModuleUrl = $config['url']['modules'];

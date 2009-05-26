@@ -112,7 +112,7 @@ class DisplayMaker
 		$cache->cacheTime = 86400; // this can be ridiculously high because the keyname changes when the string does
 		$tags = $cache->getData();
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			preg_match_all('{\{# (.*?) #\}}', $this->mainString, $matches, PREG_SET_ORDER);
 

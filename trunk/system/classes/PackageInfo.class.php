@@ -104,7 +104,7 @@ class PackageInfo
 		$cache = new Cache('packages', 'moduleLookup', $id);
 		$package = $cache->getData();
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$db = DatabaseConnection::getConnection('default_read_only');
 			$packageStmt = $db->stmt_init();
@@ -150,7 +150,7 @@ class PackageInfo
 
 		$cache = new Cache('packages', $packageName, 'info');
 		$info = $cache->getData();
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			try {
 
@@ -325,7 +325,7 @@ class PackageInfo
 	{
 		$cache = new Cache('packages', $this->name, 'actions');
 		$actions = $cache->getData();
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$actions = array();
 			// Load Actions
@@ -377,17 +377,18 @@ class PackageInfo
 		$cache = new Cache('packages', $this->packageName, 'plugins');
 		$plugins = $cache->getData();
 
-		if($cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$plugins = array();
 			$pluginFiles = $this->loadClasses('plugins');
 			foreach($pluginFiles as $pluginFile)
 			{
+				$plugins[$pluginFile['name']] = $pluginFile['classname'];
+				$plugins[$pluginFile['name']] = $pluginFile['path'];
 
 			}
+			$cache->storeData($plugins);
 		}
-
-
 		return $plugins;
 	}
 
@@ -403,7 +404,7 @@ class PackageInfo
 		$cache = new Cache('packages', $this->name, 'models');
 		$models = $cache->getData();
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$models = array();
 			$modelFiles = $this->loadClasses('model');

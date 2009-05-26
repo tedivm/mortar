@@ -95,7 +95,7 @@ class MemberGroup
 		$cache = new Cache('membergroups', $this->id, 'containsUser', $userId);
 		$inGroup = $cache->getData();
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$db = db_connect('default_read_only');
 			$stmt = $db->stmt_init();
@@ -213,7 +213,7 @@ class MemberGroup
 
 		$info = $cache->getData();
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$db = DatabaseConnection::getConnection('default_read_only');
 			$stmt = $db->stmt_init();
@@ -257,7 +257,7 @@ class MemberGroup
 
 		$id = $cache->getData();
 
-		if(!$cache->cacheReturned)
+		if($cache->isStale())
 		{
 			$db = DatabaseConnection::getConnection('default_read_only');
 			$stmt = $db->stmt_init();
