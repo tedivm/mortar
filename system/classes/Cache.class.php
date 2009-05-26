@@ -166,7 +166,7 @@ class Cache
 
 					$filename = (strpos($handlerClass, 'cacheHandler') !== false) ? substr($handlerClass, '12') : $handlerClass;
 					$path = $config['path']['mainclasses'] .'cacheHandlers/' . $filename . '.class.php';
-					var_dump($path);
+
 					if(file_exists($path))
 					{
 						include($path);
