@@ -62,6 +62,13 @@ class ImapConnection
 	protected $port;
 
 	/**
+	 * This is the set of options, represented by a bitmask, to be passed to the server during connection.
+	 *
+	 * @var int
+	 */
+	protected $options = 0;
+
+	/**
 	 * This is the resource connection to the server. It is required by a number of imap based functions to specify how
 	 * to connect.
 	 *
@@ -143,6 +150,19 @@ class ImapConnection
 		}else{
 			$this->flags[] = '/' . $flag;
 		}
+	}
+
+	/**
+	 * This funtion is used to set various options for connecting to the server.
+	 *
+	 * @param int $bitmask
+	 */
+	public function setOptions($bitmask = 0)
+	{
+		if(!is_numeric($bitmask))
+			throw new ImapException();
+
+		$this->options = $bitmask;
 	}
 
 	/**
@@ -349,6 +369,27 @@ class ImapMessage
 	static protected $flagTypes = array('recent', 'flagged', 'answered', 'deleted', 'seen', 'draft');
 
 	/**
+	 * This holds the plantext email message.
+	 *
+	 * @var string
+	 */
+	protected $plaintextMessage;
+
+	/**
+	 * This holds the html version of the email.
+	 *
+	 * @var string
+	 */
+	protected $htmlMessage;
+
+	/**
+	 * This value defines the encoding we want the email message to use.
+	 *
+	 * @var string
+	 */
+	static public $charset = 'UTF-8';
+
+	/**
 	 * This constructor takes in the uid for the message and the ImapConnection class representing the mailbox the
 	 * message should be opened from. This constructor should generally not be called directly, but rather retrieved
 	 * through the apprioriate ImapConnection functions.
@@ -360,7 +401,7 @@ class ImapMessage
 	{
 		$this->imapConnection = $mailbox;
 		$this->uid = $messageUniqueId;
-		$this->imapStream = $this->mailbox->getImapStream();
+		$this->imapStream = $this->imapConnection->getImapStream();
 		$this->loadMessage();
 	}
 
@@ -371,19 +412,22 @@ class ImapMessage
 	 */
 	protected function loadMessage()
 	{
-		// header
 		$messageOverview = $this->getOverview();
 
 		foreach(self::$flagTypes as $flag)
-		{
 			$this->status[$flag] = ($messageOverview->$flag == 1);
+
+		$structure = $this->getStructure();
+
+		if(!isset($structure->parts))
+		// not multipart
+		{
+			$this->processStructure($structure);
+		}else{
+		// multipart
+			foreach($structure->parts as $id => $part)
+				$this->processStructure($part, $id + 1);
 		}
-
-		$this->processStructure();
-
-		// body
-
-
 	}
 
 	/**
@@ -447,40 +491,100 @@ class ImapMessage
 		return $this->structure;
 	}
 
-
-	protected function processStructure($structure = null, $partIdentifier = null)
+	/**
+	 * This function returns the message body of the email. By default it returns the plaintext version. If a plaintext
+	 * version is requested but not present, the html version is stripped of tags and returned. If the opposite occurs,
+	 * the plaintext version is given some html formatting and returned. If neither are present the return value will be
+	 * false.
+	 *
+	 * @param bool $html Pass true to receive an html response.
+	 * @return string|bool Returns false if no body is present.
+	 */
+	public function getMessageBody($html = false)
 	{
-		if(!isset($structure))
-			$structure = $this->getStructure();;
-
-		if(!isset($structure->parts))  // not multipart
+		if($html)
 		{
-			var_dump($partIdentifier);
-			var_dump($structure);
-			echo '<br><br>';
-
-			$parameters = array();
-
-			if(isset($structure->ifparameters))
-				foreach($structure->parameters as $parameter)
-					$parameters[$parameter->attribute] = $parameter->value;
-
-			if(isset($structure->ifdparameters))
-				foreach($structure->dparameters as $parameter)
-					$parameters[$parameter->attribute] = $parameter->value;
-
-			if(isset($parameters['name']) || isset($parameters['filename']))
+			if(!isset($this->htmlMessage) && isset($this->plaintextMessage))
 			{
-				// this is an attachment
-			}elseif($structure->type==0){
+				$output = nl2br($this->plaintextMessage);
+				return $output;
 
-				// this is text
-
-
+			}elseif(isset($this->htmlMessage)){
+				return $this->htmlMessage;
 			}
+		}else{
+			if(!isset($this->plaintextMessage) && isset($this->htmlMessage))
+			{
+				$output = strip_tags($this->htmlMessage);
+				return $output;
+			}elseif(isset($this->plaintextMessage)){
+				return $this->plaintextMessage;
+			}
+		}
+	}
+
+	/**
+	 * This function takes in a structure and identifier and processes that part of the message. If that portion of the
+	 * message has its own subparts, those are recursively processed using this function.
+	 *
+	 * @param stdClass $structure
+	 * @param string $partIdentifier
+	 * @todoa process attachments.
+	 */
+	protected function processStructure($structure, $partIdentifier = null)
+	{
+		$parameters = array();
+
+		if(isset($structure->parameters))
+			foreach($structure->parameters as $parameter)
+				$parameters[$parameter->attribute] = $parameter->value;
+
+		if(isset($structure->dparameters))
+			foreach($structure->dparameters as $parameter)
+				$parameters[$parameter->attribute] = $parameter->value;
 
 
-		}else{  // multipart: iterate through each part
+
+		if(isset($parameters['name']) || isset($parameters['filename']))
+		{
+			// attachments!
+		}elseif($structure->type == 0 || $structure->type == 1){
+
+			$messageBody = isset($partIdentifier) ?
+							  imap_fetchbody($this->imapStream, $this->uid, $partIdentifier, FT_UID)
+							: imap_body($this->imapStream, $this->uid, FT_UID);
+
+			$messageBody = $this->decode($messageBody, $structure->encoding);
+
+			if($parameters['charset'] !== self::$charset)
+				$messageBody = iconv($parameters['charset'], self::$charset, $messageBody);
+
+			if(strtolower($structure->subtype) == 'plain' || $structure->type == 1)
+			{
+				if(isset($this->plaintextMessage))
+				{
+					$this->plaintextMessage .= PHP_EOL . PHP_EOL;
+				}else{
+					$this->plaintextMessage = '';
+				}
+
+				$this->plaintextMessage .= trim($messageBody);
+			}else{
+
+				if(isset($this->htmlMessage))
+				{
+					$this->htmlMessage .= '<br><br>';
+				}else{
+					$this->htmlMessage = '';
+				}
+
+				$xssFilter = new XSS();
+				$this->htmlMessage .= $xssFilter->filter($messageBody);
+			}
+		}
+
+		if(isset($structure->parts)){  // multipart: iterate through each part
+
 			foreach ($structure->parts as $partIndex => $part)
 			{
 				$partId = $partIndex + 1;
@@ -490,6 +594,33 @@ class ImapMessage
 
 				$this->processStructure($part, $partId);
 			}
+		}
+	}
+
+	/**
+	 * This function takes in the message data and encoding type and returns the decoded data.
+	 *
+	 * @param string $data
+	 * @param int|string $encoding
+	 * @return string
+	 */
+	protected function decode($data, $encoding)
+	{
+		if(!is_numeric($encoding))
+			$encoding = strtolower($encoding);
+
+		switch($encoding)
+		{
+			case 'quoted-printable':
+			case 4:
+				return quoted_printable_decode($data);
+
+			case 'base64':
+			case 3:
+				return base64_decode($data);
+
+			default:
+				return $data;
 		}
 	}
 
@@ -538,7 +669,10 @@ class ImapMessage
 
 }
 
+class ImapAttachment
+{
 
+}
 
 
 class ImapException extends Exception {}
