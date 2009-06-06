@@ -666,6 +666,16 @@ class ImapMessage
 	}
 
 	/**
+	 * This function returns ImapConnection this message came from.
+	 *
+	 * @return ImapConnection
+	 */
+	public function getImapBox()
+	{
+		return $this->imapConnection;
+	}
+
+	/**
 	 * This function takes in a structure and identifier and processes that part of the message. If that portion of the
 	 * message has its own subparts, those are recursively processed using this function.
 	 *
@@ -675,28 +685,19 @@ class ImapMessage
 	 */
 	protected function processStructure($structure, $partIdentifier = null)
 	{
-		$parameters = array();
-
-		if(isset($structure->parameters))
-			foreach($structure->parameters as $parameter)
-				$parameters[$parameter->attribute] = $parameter->value;
-
-		if(isset($structure->dparameters))
-			foreach($structure->dparameters as $parameter)
-				$parameters[$parameter->attribute] = $parameter->value;
-
-
+		$parameters = self::getParametersFromStructure($structure);
 
 		if(isset($parameters['name']) || isset($parameters['filename']))
 		{
-			// attachments!
+			$attachment = new ImapAttachment($this, $structure, $partIdentifier);
+
 		}elseif($structure->type == 0 || $structure->type == 1){
 
 			$messageBody = isset($partIdentifier) ?
 							  imap_fetchbody($this->imapStream, $this->uid, $partIdentifier, FT_UID)
 							: imap_body($this->imapStream, $this->uid, FT_UID);
 
-			$messageBody = $this->decode($messageBody, $structure->encoding);
+			$messageBody = self::decode($messageBody, $structure->encoding);
 
 			if($parameters['charset'] !== self::$charset)
 				$messageBody = iconv($parameters['charset'], self::$charset, $messageBody);
@@ -745,7 +746,7 @@ class ImapMessage
 	 * @param int|string $encoding
 	 * @return string
 	 */
-	protected function decode($data, $encoding)
+	static public function decode($data, $encoding)
 	{
 		if(!is_numeric($encoding))
 			$encoding = strtolower($encoding);
@@ -763,6 +764,58 @@ class ImapMessage
 			default:
 				return $data;
 		}
+	}
+
+	/**
+	 * This function returns the body type that an imap integer maps to.
+	 *
+	 * @param int $id
+	 * @return string
+	 */
+	static public function typeIdToString($id)
+	{
+		switch($id)
+		{
+			case 0:
+				return 'text';
+
+			case 1:
+				return 'multipart';
+
+			case 2:
+				return 'message';
+
+			case 3:
+				return 'application';
+
+			case 4:
+				return 'audio';
+
+			case 5:
+				return 'image';
+
+			case 6:
+				return 'video';
+
+			default:
+			case 7:
+				return 'other';
+		}
+	}
+
+
+	static function getParametersFromStructure($structure)
+	{
+		$parameters = array();
+		if(isset($structure->parameters))
+			foreach($structure->parameters as $parameter)
+				$parameters[$parameter->attribute] = $parameter->value;
+
+		if(isset($structure->dparameters))
+			foreach($structure->dparameters as $parameter)
+				$parameters[$parameter->attribute] = $parameter->value;
+
+		return $parameters;
 	}
 
 	/**
@@ -834,7 +887,67 @@ class ImapMessage
 
 class ImapAttachment
 {
+	protected $structure;
+	protected $messageId;
+	protected $imapStream;
+	protected $partId;
 
+	protected $filename;
+	protected $size;
+
+	public function __construct(ImapMessage $message, $structure, $partIdentifier = null)
+	{
+		$this->messageId = $message->getUid();
+		$this->imapStream = $message->getImapBox()->getImapStream();
+
+		if(isset($partIdentifier))
+			$this->partId = $partIdentifier;
+
+		$parameters = ImapMessage::getParametersFromStructure($structure);
+
+		if(isset($parameters['filename']))
+		{
+			$this->filename = $parameters['filename'];
+		}elseif(isset($parameters['name'])){
+			$this->filename = $parameters['name'];
+		}
+
+		$this->size = $structure->bytes;
+
+		var_dump($structure);
+		var_dump($parameters);
+		echo '<br><br>';
+	}
+
+	public function getData()
+	{
+		$messageBody = isset($this->partId) ?
+						  imap_fetchbody($this->imapStream, $this->messageId, $this->partId, FT_UID)
+						: imap_body($this->imapStream, $this->messageId, FT_UID);
+
+		$messageBody = ImapMessage::decode($messageBody, $this->structure->encoding);
+
+	}
+
+	/**
+	 * This function saves the attachment to the passed directory, keeping the original name of the file.
+	 *
+	 * @param string $path
+	 */
+	public function saveToDirectory($path)
+	{
+
+	}
+
+	/**
+	 * This function saves the attachment to the exact specified location.
+	 *
+	 * @param path $path
+	 */
+	public function saveAs($path)
+	{
+
+	}
 }
 
 
