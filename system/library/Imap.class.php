@@ -215,9 +215,15 @@ class ImapConnection
 	{
 		if(isset($this->imapStream))
 		{
-			imap_reopen($this->imapStream, $this->mailbox, $this->options, 1);
+			if(!imap_reopen($this->imapStream, $this->mailbox, $this->options, 1))
+				throw new ImapException(imap_last_error());
 		}else{
-			$this->imapStream = imap_open($this->getServerString(), $this->username, $this->password, $this->options, 1);
+			$imapStream = imap_open($this->getServerString(), $this->username, $this->password, $this->options, 1);
+
+			if($imapStream === false)
+				throw new ImapException(imap_last_error());
+
+			$this->imapStream = $imapStream;
 		}
 	}
 
@@ -299,6 +305,15 @@ class ImapConnection
 		return $messages;
 	}
 
+	/**
+	 * This function removes all of the messages flagged for deletion from the mailbox.
+	 *
+	 * @return bool
+	 */
+	public function expunge()
+	{
+		return imap_expunge($this->getImapStream());
+	}
 }
 
 /**
@@ -637,6 +652,17 @@ class ImapMessage
 	public function getDate()
 	{
 		return isset($this->date) ? $this->date : false;
+	}
+
+	/**
+	 * This function marks a message for deletion. It is important to note that the message will not be deleted form the
+	 * mailbox until the ImapConnection->expunge it run.
+	 *
+	 * @return bool
+	 */
+	public function delete()
+	{
+		return imap_delete($this->imapStream, $this->uid, FT_UID);
 	}
 
 	/**
