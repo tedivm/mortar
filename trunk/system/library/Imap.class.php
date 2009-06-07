@@ -440,6 +440,13 @@ class ImapMessage
 	protected $replyTo;
 
 	/**
+	 * This is an array of ImapAttachments retrieved from the message.
+	 *
+	 * @var array
+	 */
+	protected $attachments = array();
+
+	/**
 	 * This value defines the encoding we want the email message to use.
 	 *
 	 * @var string
@@ -655,6 +662,16 @@ class ImapMessage
 	}
 
 	/**
+	 * This returns the subject of the message.
+	 *
+	 * @return string
+	 */
+	public function getSubject()
+	{
+		return $this->subject;
+	}
+
+	/**
 	 * This function marks a message for deletion. It is important to note that the message will not be deleted form the
 	 * mailbox until the ImapConnection->expunge it run.
 	 *
@@ -690,7 +707,7 @@ class ImapMessage
 		if(isset($parameters['name']) || isset($parameters['filename']))
 		{
 			$attachment = new ImapAttachment($this, $structure, $partIdentifier);
-
+			$this->attachments[] = $attachment;
 		}elseif($structure->type == 0 || $structure->type == 1){
 
 			$messageBody = isset($partIdentifier) ?
@@ -803,7 +820,12 @@ class ImapMessage
 		}
 	}
 
-
+	/**
+	 * Takes in a section structure and returns its parameters as an associative array.
+	 *
+	 * @param stdClass $structure
+	 * @return array
+	 */
 	static function getParametersFromStructure($structure)
 	{
 		$parameters = array();
@@ -851,6 +873,41 @@ class ImapMessage
 	}
 
 	/**
+	 * This function returns the attachments a message contains. If a filename is passed then just that ImapAttachment
+	 * is returned, unless
+	 *
+	 * @param null|string $filename
+	 * @return array|bool|ImapAttachments
+	 */
+	public function getAttachments($filename = null)
+	{
+		if(!isset($this->attachments) || count($this->attachments) < 1)
+			return false;
+
+		if(!isset($filename))
+			return $this->attachments;
+
+		$results = array();
+		foreach($this->attachments as $attachment)
+		{
+			if($attachment->getFileName() == $filename)
+				$results[] = $attachment;
+		}
+
+		switch (count($results)) {
+			case 0:
+				return false;
+
+			case 1:
+				return array_shift($results);
+
+			default:
+				return $results;
+				break;
+		}
+	}
+
+	/**
 	 * This function checks to see if an imap flag is set on the email message.
 	 *
 	 * @param string $flag Recent, Flagged, Answered, Deleted, Seen, Draft
@@ -885,20 +942,82 @@ class ImapMessage
 
 }
 
+
+/**
+ * This library is a wrapper around the Imap library functions included in php. This class wraps around an attachment
+ * in a message, allowing developers to easily save or display attachments.
+ *
+ * @package		Library
+ * @subpackage	Imap
+ */
 class ImapAttachment
 {
+
+	/**
+	 * This is the structure object for the piece of the message body that the attachment is located it.
+	 *
+	 * @var stdClass
+	 */
 	protected $structure;
+
+	/**
+	 * This is the unique identifier for the message this attachment belongs to.
+	 *
+	 * @var unknown_type
+	 */
 	protected $messageId;
+
+	/**
+	 * This is the ImapResource.
+	 *
+	 * @var resource
+	 */
 	protected $imapStream;
+
+	/**
+	 * This is the id pointing to the section of the message body that contains the attachment.
+	 *
+	 * @var unknown_type
+	 */
 	protected $partId;
 
+	/**
+	 * This is the attachments filename.
+	 *
+	 * @var unknown_type
+	 */
 	protected $filename;
+
+	/**
+	 * This is the size of the attachment.
+	 *
+	 * @var int
+	 */
 	protected $size;
 
+	/**
+	 * This stores the data of the attachment so it doesn't have to be retrieved from the server multiple times. It is
+	 * only populated if the getData() function is called and should not be directly used.
+	 *
+	 * @internal
+	 * @var unknown_type
+	 */
+	protected $data;
+
+	/**
+	 * This function takes in an ImapMessage, the structure object for the particular piece of the message body that the
+	 * attachment is located at, and the identifier for that body part. As a general rule you should not be creating
+	 * instances of this yourself, but rather should get them from an ImapMessage class.
+	 *
+	 * @param ImapMessage $message
+	 * @param stdClass $structure
+	 * @param string $partIdentifier
+	 */
 	public function __construct(ImapMessage $message, $structure, $partIdentifier = null)
 	{
 		$this->messageId = $message->getUid();
 		$this->imapStream = $message->getImapBox()->getImapStream();
+		$this->structure = $structure;
 
 		if(isset($partIdentifier))
 			$this->partId = $partIdentifier;
@@ -914,19 +1033,62 @@ class ImapAttachment
 
 		$this->size = $structure->bytes;
 
-		var_dump($structure);
-		var_dump($parameters);
-		echo '<br><br>';
+		$this->mimeType = ImapMessage::typeIdToString($structure->type);
+
+		if(isset($structure->subtype))
+			$this->mimeType .= '/' . strtolower($structure->subtype);
+
+		$this->encoding = $structure->encoding;
 	}
 
+	/**
+	 * This function returns the data of the attachment. Combined with getMimeType() it can be used to directly output
+	 * data to a browser.
+	 *
+	 * @return binary
+	 */
 	public function getData()
 	{
-		$messageBody = isset($this->partId) ?
-						  imap_fetchbody($this->imapStream, $this->messageId, $this->partId, FT_UID)
-						: imap_body($this->imapStream, $this->messageId, FT_UID);
+		if(!isset($this->data))
+		{
+			$messageBody = isset($this->partId) ?
+							  imap_fetchbody($this->imapStream, $this->messageId, $this->partId, FT_UID)
+							: imap_body($this->imapStream, $this->messageId, FT_UID);
 
-		$messageBody = ImapMessage::decode($messageBody, $this->structure->encoding);
+			$messageBody = ImapMessage::decode($messageBody, $this->encoding);
+			$this->data = $messageBody;
+		}
+		return $this->data;
+	}
 
+	/**
+	 * This returns the filename of the attachment, or false if one isn't given.
+	 *
+	 * @return string
+	 */
+	public function getFileName()
+	{
+		return (isset($this->filename)) ? $this->filename : false;
+	}
+
+	/**
+	 * This function returns the mimetype of the attachment.
+	 *
+	 * @return string
+	 */
+	public function getMimeType()
+	{
+		return $this->mimeType;
+	}
+
+	/**
+	 * This returns the size of the attachment.
+	 *
+	 * @return int
+	 */
+	public function getSize()
+	{
+		return $this->size;
 	}
 
 	/**
@@ -936,7 +1098,12 @@ class ImapAttachment
 	 */
 	public function saveToDirectory($path)
 	{
+		$path = rtrim($path, '/') . '/';
 
+		if(is_dir($path))
+			return $this->saveAs($path . $this->getFileName());
+
+		return false;
 	}
 
 	/**
@@ -946,7 +1113,21 @@ class ImapAttachment
 	 */
 	public function saveAs($path)
 	{
+		$dirname = dirname($path);
+		if(file_exists($path))
+		{
+			if(!is_writable($path))
+				return false;
+		}elseif(!is_dir($dirname) || !is_writable($dirname)){
+			return false;
+		}
 
+		if(($filePointer = fopen($path, 'w')) == false)
+			return false;
+
+		$results = fwrite($filePointer, $this->getData());
+		fclose($filePointer);
+		return is_numeric($results);
 	}
 }
 
