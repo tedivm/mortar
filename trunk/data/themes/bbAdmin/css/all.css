@@ -97,11 +97,23 @@ color: #fff;
 float: left;
 }
 
+#right_sidebar_menu {
+float: right;
+}
+
+#BB_left_sidebar {
+float: left;
+}
+
+#BB_right_sidebar {
+float: right;
+}
+
 #BB_main {
-width: 780px;
+width: 620px;
 border: solid 3px #659EC7;
 margin: 0 7px;
-float: right;
+float: left;
 }
 
 #BB_main_left {
