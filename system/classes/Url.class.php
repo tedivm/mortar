@@ -155,7 +155,7 @@ class Url
 					$parameters->addContent($tag, htmlentities($attributes[$tag]));
 					unset($attributes[$tag]);
 				}else{
-					$parameters->addContent($tag, '_');
+					break;
 				}
 			}
 			$urlString .= $parameters->makeDisplay(true);
