@@ -57,7 +57,7 @@ class ImapConnection
 	/**
 	 * This is the port used to connect to the server
 	 *
-	 * @var unknown_type
+	 * @var int
 	 */
 	protected $port;
 
@@ -1131,6 +1131,10 @@ class ImapAttachment
 	}
 }
 
-
-class ImapException extends Exception {}
+/**
+ * This is a specific exception for the Imap classes. It extends the BentoWarning class- if you want to use this library
+ * outside of BentoBase you can have this exception the core extension class, or whatever base exception class you use.
+ *
+ */
+class ImapException extends BentoWarning  {}
 ?>
