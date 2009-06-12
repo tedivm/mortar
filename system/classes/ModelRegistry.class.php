@@ -92,24 +92,28 @@ class ModelRegistry
 	}
 
 	/**
-	 * Returns the resource that corresponds to the appropriate type and id
+	 * Returns the resource that corresponds to the appropriate type and id or false if its unable to load.
 	 *
-	 * @static
 	 * @param string $type
 	 * @param int|null $id
-	 * @return mixed|Model
+	 * @return Model|bool
 	 */
 	static public function loadModel($type, $id = null)
 	{
-		$modelInfo = self::getHandler($type);
+		try{
+			$modelInfo = self::getHandler($type);
 
-		if(!$modelInfo)
-			throw new BentoError('Unable to load handler for model ' . $type . '.');
+			if(!$modelInfo)
+				throw new BentoError('Unable to load handler for model ' . $type . '.');
 
-		$handler = importFromModule($modelInfo['name'], $modelInfo['module'], 'Model', true);
+			$handler = importFromModule($modelInfo['name'], $modelInfo['module'], 'Model', true);
 
-		$model = new $handler($id);
-		return $model;
+			$model = new $handler($id);
+			return $model;
+
+		}catch(Exception $e){
+			return false;
+		}
 	}
 
 	/**
@@ -117,7 +121,6 @@ class ModelRegistry
 	 *
 	 * @access protected
 	 * @cache system models handlers
-	 * @static
 	 */
 	static protected function loadHandlers()
 	{
