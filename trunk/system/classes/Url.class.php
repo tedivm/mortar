@@ -22,7 +22,7 @@ class Url
 	 *
 	 * @var array
 	 */
-	static public $specialDirectories = array('users' => 'User');
+	static public $specialDirectories = array('Users' => 'User');
 
 	/**
 	 * This array contains the values that need to be passed via the url
@@ -51,6 +51,7 @@ class Url
 		{
 			$urlString .= 'index.php?p=';
 		}
+
 		if(isset($attributes['locationId']) && !isset($attributes['location']))
 		{
 			$attributes['location'] = $attributes['locationId'];
@@ -81,6 +82,21 @@ class Url
 				unset($attributes['action']);
 			}
 
+		}elseif(isset($attributes['type'])){
+
+			if(in_array($attributes['type'], self::$specialDirectories))
+			{
+				$key = array_search($attributes['type'], self::$specialDirectories);
+				$urlString .= $key . '/';
+
+			}else{
+				$urlString .= 'resource/' . $attributes['type'];
+			}
+
+			// set the 'modelType' variable so that it can be used later for processing the rest of the attributes
+			$modelType = $attributes['type'];
+			unset($attributes['type']);
+
 		}elseif(isset($attributes['location'])){
 
 			if($attributes['location'] instanceof Location)
@@ -94,9 +110,7 @@ class Url
 
 			}
 
-			if(isset($attributes['action']) && $attributes['action'] == 'Read')
-				unset($attributes['action']);
-
+			// here we will iterate back to the site, creating the path to the model in reverse.
 			$tempLoc = $location;
 			while($tempLoc->getType() != 'Site')
 			{
@@ -106,16 +120,25 @@ class Url
 				$tempLoc = $parent;
 			}
 
-			$handler = ModelRegistry::getHandler($location->getType());
-			$pathCache = new Cache($location->getType(), $handler['module'], 'url', 'pathCache');
+			// set the 'modelType' variable so that it can be used later for processing the rest of the attributes
+			$modelType = $location->getType();
+		}
+
+		if(isset($modelType))
+		{
+			if(isset($attributes['action']) && $attributes['action'] == 'Read')
+				unset($attributes['action']);
+
+			$handler = ModelRegistry::getHandler($modelType);
+			$pathCache = new Cache($modelType, $handler['module'], 'url', 'pathCache');
 			$pathTemplate = $pathCache->getData();
 
 			if($pathCache->isStale())
 			{
 				$pathCacheDisplay = new DisplayMaker();
 				if(!$pathCacheDisplay->loadTemplate('UrlPath', $handler['module']))
-					if(!$pathCacheDisplay->loadTemplate('UrlPath' . $location->getType() , $handler['module']))
-						$pathCacheDisplay->setDisplayTemplate('{# action #}/{# id #}/');
+					if(!$pathCacheDisplay->loadTemplate('UrlPath' . $modelType , $handler['module']))
+						$pathCacheDisplay->setDisplayTemplate('{# id #}/{# action #}/');
 
 				$pathTemplate = $pathCacheDisplay->makeDisplay(false);
 				$pathCache->storeData($pathTemplate);
@@ -137,17 +160,6 @@ class Url
 			}
 			$urlString .= $parameters->makeDisplay(true);
 			$urlString = rtrim(trim($urlString), '_/');
-
-		}else{
-
-			$specialAttributes = array_intersect(array_values(self::$specialDirectories), array_keys($attributes));
-			if(count($specialAttributes) == 1)
-			{
-				$specialattributeName = array_shift($specialAttributes);
-				$urlString .= self::$specialDirectories[$specialattributeName] . '/'
-												. $attribute[$specialattributeName] . '/';
-			}
-
 		}
 
 		if(isset($attributes['ssl']))

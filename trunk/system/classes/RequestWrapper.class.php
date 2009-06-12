@@ -138,9 +138,10 @@ class RequestWrapper
 		{
 			if(!isset($location) && isset($query['type']))
 			{
-				$model = ModelRegistry::loadModel($query['type'], $query['id']);
+				if(!$model = ModelRegistry::loadModel($query['type'], $query['id']))
+					throw new ResourceNotFoundError();
 			}else{
-				if(!isset($location) && !isset($query['type']))
+				if(!isset($location))
 				{
 					$site = ActiveSite::getSite();
 					$location = $site->getLocation();

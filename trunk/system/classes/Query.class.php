@@ -117,27 +117,49 @@ class Query
 			$pathArray = explode('/', str_replace('_', ' ', $path));
 			$rootPiece = strtolower($pathArray[0]);
 
-			if($rootPiece == 'admin')
+			if(isset($pathArray[0]) && strtolower($pathArray[0]) == 'admin')
 			{
 				$inputArray['format'] = 'admin';
 				array_shift($pathArray);
-				$rootPiece = (isset($pathArray[0])) ? $pathArray[0] : null;
 			}
 
-			if($rootPiece == 'rest')
+			if(isset($pathArray[0]) && strtolower($pathArray[0]) == 'rest')
 			{
 				RequestWrapper::$ioHandlerType = 'Rest';
 				array_shift($pathArray);
-				$rootPiece = (isset($pathArray[0])) ? $pathArray[0] : null;
 			}
 
-			if($rootPiece == 'module')
+			if(isset($pathArray[0]) && strtolower($pathArray[0]) == 'module' && isset($pathArray[1]))
 			{
 				// discard the 'module' tag
 				array_shift($pathArray);
 				// grab the name, drop it from the path
 				$inputArray['module'] = array_shift($pathArray);
 			}
+
+			if(isset($pathArray[0]) && strtolower($pathArray[0]) == 'resource')
+			{
+				array_shift($pathArray);
+
+				if(isset($pathArray[0]))
+					$inputArray['type'] = array_shift($pathArray);
+
+				if(isset($pathArray[0]))
+					$inputArray['id'] = array_shift($pathArray);
+
+
+
+			}elseif(isset($pathArray[0]) && in_array($pathArray[0], Url::$specialDirectories)){
+
+				$inputArray['type'] = array_shift($pathArray);
+
+				if(isset($pathArray[0]))
+					$inputArray['id'] = array_shift($pathArray);
+
+			}
+
+
+
 		}
 
 	// if location exists, use it

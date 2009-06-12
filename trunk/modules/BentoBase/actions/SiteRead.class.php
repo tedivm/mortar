@@ -15,13 +15,13 @@ class BentoBaseActionSiteRead extends ModelActionLocationBasedBase
 
 	public function viewAdmin($resource)
 	{
+		if(!ActiveUser::isLoggedIn())
+			throw new AuthenticationError();
 
 		$query = Query::getQuery();
-		if($query['tab'])
-		{
-			$this->adminSettings['tab'] = $query['tab'];
-		}
 
+		if($query['tab'])
+			$this->adminSettings['tab'] = $query['tab'];
 
 		return 'Default Admin page';
 	}

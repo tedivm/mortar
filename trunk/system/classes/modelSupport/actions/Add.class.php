@@ -14,7 +14,7 @@
  * @package System
  * @subpackage ModelSupport
  */
-class ModelActionLocationBasedAdd extends ModelActionAdd
+class ModelActionAdd extends ModelActionBase
 {
 	/**
 	 * This is the model that the new model is going to be attached to
@@ -65,19 +65,20 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 	 */
 	protected function getForm()
 	{
-		$form = parent::getForm();
+		$query = Query::getQuery();
+		$formName = $this->type . 'Form';
+		$formClassName = importFromModule($formName, $this->model->getModule(), 'class', true);
+		$form = new $formClassName($formName . $this->actionName);
 
-		// If the parent location isn't set, there should be some form to do so.
-		if($this->model->getLocation()->getParent() === false)
+		$formExtension = $this->type . $query['format'] . 'Form';
+		$formExtensionClassName = importFromModule($formExtension, $this->model->getModule(), 'class');
+
+		if($formExtensionClassName)
 		{
-			throw new BentoError('Unspecified  parent', 400);
-		}else{
-			$locationFormName = importClass('LocationForm', 'modelSupport/Forms/LocationForm.class.php',
-									 'mainclasses', true);
-			$locationForm = new $locationFormName('j');
-			$form->merge($locationForm);
-			// parent is set
+			$formExtentionObject = new $formClassName('this will be erased when they merge :-(');
+			$form->merge($formExtentionObject);
 		}
+
 		return $form;
 	}
 
@@ -98,20 +99,6 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 		{
 			$this->model[$name] = $input['model_' . $name];
 		}
-
-		$location = $this->model->getLocation();
-
-		if($location->getName() == 'tmp') // this is a new, unsaved location
-		{
-			$user = ActiveUser::getUser();
-			$location->setOwner($user);
-		}
-
-		if(isset($input['location_name']))
-		{
-			$this->model->name = $input['location_name'];
-		}
-
 
 		return $this->model->save();
 	}
@@ -140,28 +127,8 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 		return $inputGroups;
 	}
 
-	/**
-	 * Because the new model we want to create doesn't have a location yet, we have to check the location we are trying
-	 * to save it to for the appropriate permissions. As such we are overloading the parent classes
-	 * setPermissionObject() function to use the parent instead of the model when creating the permission object.
-	 *
-	 * @access protected
-	 */
-	protected function setPermissionObject()
-	{
-		$user = ActiveUser::getUser();
-		$this->permissionObject = new Permissions($this->model->getLocation()->getParent(), $user);
-	}
 
-	/**
-	 * Here we are overloading the parent class to prevent certain headers from being sent to the http views.
-	 *
-	 * @access protected
-	 */
-	protected function setHeaders()
-	{
 
-	}
 
 	/**
 	 * This function handles the view for the admin format. If the form was not submitted, or if there is an error, it
@@ -187,10 +154,9 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 				 	2. to the edit page, also with a success message
 				 	*3. to the 'read' page, which isn't really defined yet for the admin side of things
 				*/
-
-				$locationId = $this->model->getLocation()->getId();
 				$url = new Url();
-				$url->locationId = $locationId;
+				$url->id = $this->model->getId();
+				$url->type = $this->model->getType();
 				$url->format = 'Admin';
 				$url->action = 'Read';
 
@@ -200,7 +166,7 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 
 
 			}else{
-				return $this->makeDisplay();
+				return 'Unable to add ' . $this->type;
 			}
 		}else{
 			return $this->form->makeHtml();

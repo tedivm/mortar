@@ -25,10 +25,6 @@ if(BENCHMARK && function_exists('getrusage'))
 
 switch(DEBUG)
 {
-	case 4:
-		$errorLevel = E_ALL;
-		break;
-
 	case 3:
 		$errorLevel = E_ALL ^ E_NOTICE;
 		break;
@@ -42,16 +38,18 @@ switch(DEBUG)
 		break;
 
 	case 0:
-	default:
 		$errorLevel = 0;
 		break;
 
+	default:
+	case 4:
+		$errorLevel = E_ALL;
+		break;
 }
 
 if(STRICT)
-{
 	$errorLevel = $errorLevel | E_STRICT;
-}
+
 error_reporting($errorLevel);
 
 require('system/classes/Exceptions.class.php');
@@ -68,6 +66,11 @@ require('system/classes/Page.class.php');
 
 require('system/abstracts/action.class.php');
 require('system/classes/Site.class.php');
+
+
+require('system/classes/modelSupport/actions/Base.class.php');
+require('system/classes/modelSupport/actions/Add.class.php');
+require('system/classes/modelSupport/actions/Read.class.php');
 
 require('system/classes/modelSupport/actions/LocationBased/Base.class.php');
 require('system/classes/modelSupport/actions/LocationBased/Delete.class.php');

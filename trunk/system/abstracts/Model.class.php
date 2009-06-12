@@ -77,6 +77,8 @@ class AbstractModel implements Model
 
 			}
 
+			Cache::clear('models', $this->getType(), $this->id);
+
 		}catch(Exception $e){
 			$db->rollback();
 			$db->autocommit(true);
@@ -112,7 +114,7 @@ class AbstractModel implements Model
 		$moduleActionName = $this->getType() . $actionName;
 		$actionInfo = $packageInfo->getActions($moduleActionName);
 
-		return (!$actionInfo) ? $this->loadFallbackAction($actionName) :$actionInfo;
+		return (!$actionInfo) ? $this->loadFallbackAction($actionName) : $actionInfo;
 	}
 
 	protected function loadFallbackAction($actionName)
@@ -123,7 +125,7 @@ class AbstractModel implements Model
 			$actionInfo = array();
 			$actionInfo['className'] = 'ModelAction' . $actionName;
 			$config = Config::getInstance();
-			$actionInfo['path'] = $config['path']['mainclasses'] . 'models/actions/' . $actionName . '.class.php';
+			$actionInfo['path'] = $config['path']['mainclasses'] . 'modelSupport/actions/' . $actionName . '.class.php';
 			return $actionInfo;
 		}else{
 			return false;
