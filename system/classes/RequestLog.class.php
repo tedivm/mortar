@@ -93,11 +93,14 @@ class RequestLog
 		$trace = $e->getTraceAsString();
 		$code = $e->getCode();
 
+		$url = (string) $currentUrl;
+
 		$stmt = DatabaseConnection::getStatement(self::getDatabase('write'));
 		$stmt->prepare('INSERT INTO errorLog (errorType, severity, message, url, file, line, trace, accessTime)
 									VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-		return $stmt->bindAndExecute('sissssss', $errorType, $severity, $message, (string) $currentUrl,
+		$result = $stmt->bindAndExecute('sissssss', $errorType, $severity, $message, $url,
 											$file, $line, $trace, gmdate('Y-m-d H:i:s'));
+		return ($result !== false);
 	}
 
 }
