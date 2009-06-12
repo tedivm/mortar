@@ -30,8 +30,6 @@ class FormValidationEqualTo extends FormValidationAbstract
 	 */
 	public function validate()
 	{
-		//$this->form->
-		$form = new form();
 		$inputHandler = $this->form->getInputHandler();
 
 		if($inputHandler[$this->argument] == $this->value)

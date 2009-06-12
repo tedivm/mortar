@@ -593,6 +593,8 @@ class Form
 					case 'checkbox':
 						if(isset($inputHandler[$input->name]))
 						{
+							// if there is only one checkbox it should return the direct object or a boolean, not
+							// an array.
 							$checkboxInputs = $this->getInput($input->name);
 							if(count($checkboxInputs) == 1)
 							{
@@ -604,13 +606,26 @@ class Form
 								}
 
 								$processedInput[$input->name] = $input->filter($inputHandler[$input->name]);
-
 								$input->check(true);
 							}else{
-								if(in_array($input->property('value'), $inputHandler[$input->name]))
+							// For multiple checkboxes with the same name the input should be placed in an array, even
+							// if that array returns as empty or with one object.
+
+								$inputValue = ($inputHandler[$input->name] instanceof FilteredArray) ?
+												 $inputHandler[$input->name]->getArrayCopy()
+												 : $inputHandler[$input->name];
+
+
+								if(is_array($input)	&& in_array($input->property('value'), $inputValue)
+									|| $inputValue == $input->property('value'))
 								{
-									$input->check(true);
-									$processedInput[$input->name][] = $input->filter($inputHandler[$input->name]);
+									if(in_array($input->property('value'), $inputValue))
+									{
+										$input->check(true);
+										$processedInput[$input->name] = $input->filter($input->property('value'));
+									}else{
+										$input->check(false);
+									}
 								}else{
 									$input->check(false);
 								}
