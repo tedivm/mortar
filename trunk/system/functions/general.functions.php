@@ -141,8 +141,11 @@ function importFromModule($name, $module, $classType, $require = false)
 		'plugin' => 'plugins',
 		'plugins' => 'plugins');
 
-	if(isset($moduleFolders[strtolower($classType)]))
+
+	if($classType == 'class')
 	{
+		$classDivider = '';
+	}elseif(isset($moduleFolders[strtolower($classType)])){
 		$classDivider = ucwords(strtolower($classType));
 	}elseif($classDivider = array_search(strtolower($classType), $moduleFolders)){
 		$classDivider = ucwords($classDivider);
