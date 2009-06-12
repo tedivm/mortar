@@ -194,7 +194,7 @@ function staticFunctionHack()
 	}else{
 		try
 		{
-			throw new BentoError('static function ' . $functionName . 'not found in class ' . $className);
+			throw new BentoError('static function ' . $functionName . ' not found in class ' . $className);
 		}catch(Exception $e){
 
 		}
