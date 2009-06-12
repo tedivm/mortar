@@ -14,6 +14,10 @@ if(!class_exists('FormValidationAbstract', false))
 	$config = Config::getInstance();
 	$path = $config['path']['library'] . 'Form/ValidationRules/Abstract.class.php';
 	include($path);
+
+	$path = $config['path']['library'] . 'Form/ValidationRules/Filter.class.php';
+	include($path);
+
 	$path = $config['path']['library'] . 'Form/ValidationRules/Regex.class.php';
 	include($path);
 	unset($path);
@@ -39,7 +43,8 @@ class ValidationLookup
 									'max' => 'FormValidationMaximumValue',
 									'min' => 'FormValidationMinimumWords',
 									'maxWords' => 'FormValidationMaximumWords',
-									'emailWords' => 'FormValidationEmail',
+									'email' => 'FormValidationEmail',
+									'equalTo' => 'FormValidationEqualTo',
 									'url' => 'FormValidationUrl',
 									'number' => 'FormValidationNumber',
 									'digits' => 'FormValidationDigits',
@@ -56,6 +61,9 @@ class ValidationLookup
 	 */
 	static public function getClass($validationRule)
 	{
+		if(!isset(self::$validators[$validationRule]))
+			return false;
+
 		$classname = self::$validators[$validationRule];
 
 		if(!class_exists($classname, false))

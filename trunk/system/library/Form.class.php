@@ -480,7 +480,15 @@ class Form
 
 		if(!is_null($validationRules) && count($validationRules) > 0)
 		{
-			$validationClasses = json_encode(array('validation' => $validationRules));
+			$validationClientSideRules = array();
+			foreach($validationRules as $ruleName => $ruleArgument)
+			{
+				$className = ValidationLookup::getClass($ruleName);
+				$argument = staticFunctionHack($className, 'getHtmlArgument', $input, $ruleArgument);
+				$validationClientSideRules[$ruleName] = $argument;
+			}
+//exit();
+			$validationClasses = json_encode(array('validation' => $validationClientSideRules));
 			$inputHtml->addClass($validationClasses);
 		}
 
@@ -671,6 +679,16 @@ class Form
 		$this->inputs = array_merge_recursive($this->inputs, $package['inputs']);
 		$this->sectionIntro = array_merge_recursive($this->sectionIntro, $package['intros']);
 		$this->sectionLegends = array_merge_recursive($this->sectionLegends, $package['legends']);
+	}
+
+	/**
+	 * This function returns the name of the form.
+	 *
+	 * @return string
+	 */
+	public function getName()
+	{
+		return $this->name;
 	}
 
 	/**
