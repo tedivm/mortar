@@ -407,7 +407,7 @@ class Page implements ArrayAccess
 		$template = new DisplayMaker();
 		$template->setDisplayTemplate($templateString);
 
-		$template->addContent('currentYear', date('y'));
+		$template->addDate('currentDate', time());
 		$template->addContent('head', $this->headerTemplate);
 		return $template->makeDisplay(false);
 	}
