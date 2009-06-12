@@ -60,14 +60,28 @@ function stripslashes_deep($value)
 
 function deltree($file)
 {
+	if(substr($file, 0, 1) !== '/')
+		throw new BentoError('deltree function requires an absolute path.');
+
+	$badCalls = array('/', '/*', '/.', '/..');
+	if(in_array($file, $badCalls))
+		throw new BentoError('deltree function does not like that call.');
+
 	$file = rtrim($file, ' /');
-	if (is_dir($file)) {
+	if(is_dir($file)) {
+		$hiddenFiles = glob($file.'/.?*');
 		$files = glob($file.'/*');
-		foreach($files as $sf){
-			if(is_dir($sf) && !is_link($sf)) {
-				deltree($sf);
+		$files = array_merge($hiddenFiles, $files);
+
+		foreach($files as $filePath)
+		{
+			if(substr($filePath, -2, 2) == '/.' || substr($filePath, -3, 3) == '/..')
+				continue;
+
+			if(is_dir($filePath) && !is_link($filePath)) {
+				deltree($filePath);
 			}else{
-				unlink($sf);
+				unlink($filePath);
 			}
 		}
 		rmdir($file);
