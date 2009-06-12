@@ -83,6 +83,18 @@ abstract class FormValidationAbstract
 	abstract public function validate();
 
 	/**
+	 * This function allows inheriting classes to alter the argument before it is passed to the html form.
+	 *
+	 * @param FormInput $input
+	 * @param mixed $argument
+	 * @return mixed
+	 */
+	static public function getHtmlArgument(FormInput $input, $argument)
+	{
+		return $argument;
+	}
+
+	/**
 	 * This returns an array of errors, or false if there are none.
 	 *
 	 * @return array|bool

@@ -135,6 +135,16 @@ class FormInput
 	}
 
 	/**
+	 * This function returns the name of the input.
+	 *
+	 * @return string
+	 */
+	public function getName()
+	{
+		return $this->name;
+	}
+
+	/**
 	 * This function sets the value of input. Returns itself for method chaining.
 	 *
 	 * @param string $value
@@ -260,6 +270,9 @@ class FormInput
 		foreach($this->validationRules as $rule => $argument)
 		{
 			$classname = ValidationLookup::getClass($rule);
+
+			if($classname === false)
+				throw new BentoError('Unable to load validation class ' . $rule);
 
 			$validationRule = new $classname();
 			$validationRule->attachInput($this, $value, $argument);
