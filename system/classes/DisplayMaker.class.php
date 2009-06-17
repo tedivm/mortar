@@ -157,8 +157,9 @@ class DisplayMaker
 
 							}elseif(isset($curName)){ // outside of quotes a space means its time for a new value
 
-								if(!isset($curValue))
-									$curValue = true;
+								// if there is a curString set it means the argument has its own values, otherwise
+								// it just demarks a one word setting that is enabled, so we mark it as true.
+								$curValue = isset($curString) ? $curString : true;
 
 								$args[$curName] = $curValue;
 								unset($curName);
