@@ -4,6 +4,7 @@ class BentoBasePluginAdminNav
 {
 	protected $staticLinks = array('Universal' => array());
 	protected $dynamicLinks = array('Universal' => array());
+
 	public function __construct()
 	{
 		$url = new Url();
@@ -35,13 +36,18 @@ class BentoBasePluginAdminNav
 		$url->action = 'InstallModule';
 		$this->addStaticLink('Install Module', $url, 'System', 'Modules');
 
-		$url = clone $url;
-		$url->action = 'AddUser';
+
+		$url = new Url();
+		$url->type = 'User';
+		$url->action = 'Add';
+		$url->format = 'Admin';
 		$this->addStaticLink('Add User', $url, 'Users', 'Manage Users');
 
-		$url = clone $url;
-		$url->action = 'EditUser';
-		$this->addStaticLink('Edit User', $url, 'Users', 'Manage Users');
+//		$url = new Url();
+//		$url->type = 'User';
+//		$url->action = 'Add';
+//		$url->action = 'EditUser';
+//		$this->addStaticLink('Edit User', $url, 'Users', 'Manage Users');
 
 		//$url->action = '';
 		//$this->addDynamicLink('name', 'label', $url, 'tab', 'category');

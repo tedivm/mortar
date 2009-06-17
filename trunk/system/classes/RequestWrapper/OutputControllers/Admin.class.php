@@ -138,10 +138,10 @@ class AdminControllerResourceFilterNavigation
 		$tabs = $this->loadLinks();
 		$activeTab = isset($action->adminSettings['tab']) ? $action->adminSettings['tab'] : 'Main';
 
-		$newNav = new NavigationMenu('left');
-		$newNav->setMenu('menuName');
-		$newNav->setMenuLabel('menuLabel');
-		$newNav->addItem('name', 'url', 'label');
+
+
+		$page = $adminController->getResource();
+
 
 		$activeNav = isset($tabs[$activeTab]) ? $tabs[$activeTab] : 'main';
 		$navbar = new NavigationMenu('left');
@@ -151,6 +151,7 @@ class AdminControllerResourceFilterNavigation
 		{
 			if(count($links) > 0)
 			{
+				$navbar = $page->getMenu($container, 'left');
 				$navbar->setMenu($container);
 				$navbar->setMenuLabel($container);
 
@@ -160,9 +161,6 @@ class AdminControllerResourceFilterNavigation
 				}
 			}
 		}
-
-		$page = $adminController->getResource();
-		$page['navbar'] = $navbar->makeDisplay();
 
 		$tabUl = new HtmlObject('ul');
 		$tabUl->id = 'top-navigation';

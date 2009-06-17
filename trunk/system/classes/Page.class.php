@@ -79,6 +79,15 @@ class Page implements ArrayAccess
 	 */
 	protected $javascript = array();
 
+
+
+	protected $menuLookup;
+
+	protected $menuObjects = array();
+
+	protected $menuReverseLookup;
+
+
 	// actual paths
 
 	/**
@@ -162,22 +171,92 @@ class Page implements ArrayAccess
 
 		if($cache->isStale())
 		{
+			$template = array();
+
 			$basePath = $config['path']['theme'] . $this->theme . '/';
 			$path = $basePath . $file;
 
 			if(!file_exists($path))
-			{
 				$path = $config['path']['theme'] . $this->theme . 'index.html';
+
+			$rawTemplate = file_get_contents($path);
+
+			$templateProcess = new DisplayMaker();
+			$templateProcess->setDisplayTemplate($rawTemplate);
+
+			$tags = $templateProcess->tagsUsed(true);
+
+			foreach($tags as $index => $tagArray)
+			{
+				if(isset($tagArray['type']) && $tagArray['type'] == 'navbar')
+				{
+					(!isset($navCount)) ? $navCount = 1 : $navCount++;
+					$newName = '__navbar_' . $navCount;
+
+					$templateProcess->addContent($tagArray['name'], '{# ' . $newName . ' #}');
+
+					$template['reverseLookup'][$newName] = $tagArray['name'];
+					$template['menuLookup'][$tagArray['name']] = $newName;
+
+					if(isset($tagArray['menus']))
+					{
+						$menus = explode(',', $tagArray['menus']);
+
+						foreach($menus as $menuName)
+						{
+							$template['menuLookup'][$menuName] = $newName;
+						}
+					}elseif(!isset($lookup['main'])){
+						$template['menuLookup']['main'] = $newName;
+					}
+
+
+				}
 			}
 
-			$template = file_get_contents($path);
-			$template = $this->preProcessTemplate($template);
+			$templateProcess->addDate('currentDate', time());
+			$templateProcess->addContent('head', $this->headerTemplate);
+
+			$template['string'] = $templateProcess->makeDisplay(false);
+
 			$cache->storeData($template);
 		}
 
+		$this->menuLookup = $template['menuLookup'];
+		$this->menuReverseLookup = $template['reverseLookup'];
 		$this->display = new DisplayMaker();
-		$this->display->setDisplayTemplate($template);
+		$this->display->setDisplayTemplate($template['string']);
 	}
+
+
+	public function getMenu($subtype, $menu = 'main')
+	{
+		switch (true) {
+			case isset($this->menuLookup[$subtype]):
+				$menu = $this->menuLookup[$subtype];
+				break;
+
+			case $menu == false:
+				return false;
+				break;
+
+			case isset($this->menuLookup[$menu]):
+				$menu = $this->menuLookup[$menu];
+				break;
+
+			case $this->menuLookup['main']:
+				$menu = $this->menuLookup['main'];
+				break;
+		}
+
+		if(!isset($this->menuObjects[$menu]))
+			$this->menuObjects[$menu] = new NavigationMenu($this->menuReverseLookup[$menu]);
+
+		$menuObject = $this->menuObjects[$menu];
+		$menuObject->setMenu($subtype);
+		return $menuObject;
+	}
+
 
 	/**
 	 * Returns the URL to the current theme
@@ -394,27 +473,9 @@ class Page implements ArrayAccess
 		$this->regions[$tag] = $content . $this->regions[$tag];
 	}
 
-	/**
-	 * Prepares a template from the theme by populating it with information that does not change that often.
-	 * allow some of the processing to be cached
-	 *
-	 * @access protected
-	 * @param string $templateString
-	 * @return string
-	 */
-	protected function preProcessTemplate($templateString)
-	{
-		$template = new DisplayMaker();
-		$template->setDisplayTemplate($templateString);
-
-		$template->addDate('currentDate', time());
-		$template->addContent('head', $this->headerTemplate);
-		return $template->makeDisplay(false);
-	}
 
 	/**
-	 * This is a runtime preprocessor (as opposed to the preProcessTemplate function, which runs and gets cached)
-	 * allow some preprocessing before running all the tag replacement code
+	 * This is a runtime preprocessor allow some preprocessing before running all the tag replacement code.
 	 *
 	 * @access protected
 	 */
@@ -451,6 +512,15 @@ class Page implements ArrayAccess
 		$this->addCssInclude($cssUrls);
 
 		$this->preStartupJs[] = 'var baseUrl = ' . json_encode(ActiveSite::getLink()) . ';';
+
+
+		if(isset($this->menuObjects))
+			foreach($this->menuObjects as $name => $menuDisplay)
+		{
+			$this->addRegion($name, $menuDisplay->makeDisplay());
+		}
+
+
 	}
 
 	/**
