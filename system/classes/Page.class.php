@@ -79,12 +79,25 @@ class Page implements ArrayAccess
 	 */
 	protected $javascript = array();
 
-
-
+	/**
+	 * This contains an associative array used to link submenus to their containers.
+	 *
+	 * @var array
+	 */
 	protected $menuLookup;
 
+	/**
+	 * This contains an array of NavigationMenu objects.
+	 *
+	 * @var unknown_type
+	 */
 	protected $menuObjects = array();
 
+	/**
+	 * This is an associative array used to link container names back to their origin name.
+	 *
+	 * @var array
+	 */
 	protected $menuReverseLookup;
 
 
@@ -172,6 +185,8 @@ class Page implements ArrayAccess
 		if($cache->isStale())
 		{
 			$template = array();
+			$template['menuLookup'] = array();
+			$template['reverseLookup'] = array();
 
 			$basePath = $config['path']['theme'] . $this->theme . '/';
 			$path = $basePath . $file;
@@ -228,7 +243,15 @@ class Page implements ArrayAccess
 		$this->display->setDisplayTemplate($template['string']);
 	}
 
-
+	/**
+	 * This function returns a NavigationMenu specified by the subtype, menu and specific template settings. This
+	 * function should be called instead of the NavigationMenu::setMenu() function, as the needed subtype may be in a
+	 * different container if the template designer desires.
+	 *
+	 * @param string $subtype
+	 * @param string $menu
+	 * @return NavigationMenu
+	 */
 	public function getMenu($subtype, $menu = 'main')
 	{
 		switch (true) {
