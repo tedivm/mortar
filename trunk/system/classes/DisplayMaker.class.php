@@ -106,8 +106,8 @@ class DisplayMaker
 
 		if(isset($name) && (!(defined('CONCISE_HTML') && CONCISE_HTML === true)))
 		{
-			$this->mainString = '<!-- @begin template' . $name . '-->' . $this->mainString . PHP_EOL;
-			$this->mainString .= PHP_EOL . '<!-- @end template' . $name . '-->';
+			$this->mainString = '<!-- @begin template: ' . $name . '-->' . $this->mainString . PHP_EOL;
+			$this->mainString .= PHP_EOL . '<!-- @end template: ' . $name . '-->';
 		}
 	}
 
