@@ -94,14 +94,31 @@ class DisplayMaker
 	}
 
 	/**
-	 * This function takes in a string, processes it for tags (or retrieves the information from cache)
-	 * and initializes this class
+	 * This function takes in a string to be used as the basis of the template
 	 *
 	 * @access public
 	 * @cache template scheme *md5(string)
 	 * @param string $text
 	 */
-	public function setDisplayTemplate($text)
+	public function setDisplayTemplate($text, $name = null)
+	{
+		$this->processDisplayTemplate($text);
+
+		if(isset($name) && (!(defined('CONCISE_HTML') && CONCISE_HTML === true)))
+		{
+			$this->mainString = '<!-- @begin template' . $name . '-->' . $this->mainString . PHP_EOL;
+			$this->mainString .= PHP_EOL . '<!-- @end template' . $name . '-->';
+		}
+	}
+
+	/**
+	 * This function takes in a string, processes it for tags (or retrieves the information from cache)
+	 * and initializes this class
+	 *
+	 * @cache template scheme *md5(string)
+	 * @param string $text
+	 */
+	public function processDisplayTemplate($text)
 	{
 		if(!is_string($text))
 			throw new TypeMismatch(array('String', $text));
@@ -239,6 +256,9 @@ class DisplayMaker
 		$this->tags = $tags;
 	}
 
+
+
+
 	/**
 	 * This will load a template from a modules package
 	 *
@@ -251,7 +271,6 @@ class DisplayMaker
 	{
 		$config = Config::getInstance();
 		$path_to_theme = $config['url']['theme'];
-
 
 		if(is_numeric($package))
 		{
@@ -293,7 +312,7 @@ class DisplayMaker
 				return false;
 			}
 
-			$this->setDisplayTemplate(file_get_contents($filepath));
+			$this->setDisplayTemplate(file_get_contents($filepath), $filepath);
 			return true;
 
 		}catch(Exception $e){
