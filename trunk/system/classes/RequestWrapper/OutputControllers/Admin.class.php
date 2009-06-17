@@ -152,7 +152,6 @@ class AdminControllerResourceFilterNavigation
 			if(count($links) > 0)
 			{
 				$navbar = $page->getMenu($container, 'left');
-				$navbar->setMenu($container);
 				$navbar->setMenuLabel($container);
 
 				foreach($links as $link)
