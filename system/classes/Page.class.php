@@ -182,7 +182,7 @@ class Page implements ArrayAccess
 			$rawTemplate = file_get_contents($path);
 
 			$templateProcess = new DisplayMaker();
-			$templateProcess->setDisplayTemplate($rawTemplate);
+			$templateProcess->setDisplayTemplate($rawTemplate, $path);
 
 			$tags = $templateProcess->tagsUsed(true);
 
