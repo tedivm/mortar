@@ -93,11 +93,11 @@ background: #659EC7;
 color: #fff;
 }
 
-#left_sidebar_menu {
+#main_sidebar_menu {
 float: left;
 }
 
-#right_sidebar_menu {
+#action_sidebar_menu {
 float: right;
 }
 
