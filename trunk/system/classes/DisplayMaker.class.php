@@ -94,11 +94,11 @@ class DisplayMaker
 	}
 
 	/**
-	 * This function takes in a string to be used as the basis of the template
+	 * This function takes in a string to be used as the basis of the template. If this argument is passed a string and
+	 * concise_html is disabled the template will be wrapped in tags for designers to identify it with
 	 *
-	 * @access public
-	 * @cache template scheme *md5(string)
 	 * @param string $text
+	 * @param string|null
 	 */
 	public function setDisplayTemplate($text, $name = null)
 	{
