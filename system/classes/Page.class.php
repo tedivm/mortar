@@ -221,7 +221,7 @@ class Page implements ArrayAccess
 						{
 							$template['menuLookup'][$menuName] = $newName;
 						}
-					}elseif(!isset($lookup['main'])){
+					}elseif(!isset($template['menuLookup']['main'])){
 						$template['menuLookup']['main'] = $newName;
 					}
 
@@ -256,7 +256,7 @@ class Page implements ArrayAccess
 	{
 		switch (true) {
 			case isset($this->menuLookup[$subtype]):
-				$menu = $this->menuLookup[$subtype];
+				$finalMenu = $this->menuLookup[$subtype];
 				break;
 
 			case $menu == false:
@@ -264,18 +264,18 @@ class Page implements ArrayAccess
 				break;
 
 			case isset($this->menuLookup[$menu]):
-				$menu = $this->menuLookup[$menu];
+				$finalMenu = $this->menuLookup[$menu];
 				break;
 
 			case $this->menuLookup['main']:
-				$menu = $this->menuLookup['main'];
+				$finalMenu = $this->menuLookup['main'];
 				break;
 		}
 
-		if(!isset($this->menuObjects[$menu]))
-			$this->menuObjects[$menu] = new NavigationMenu($this->menuReverseLookup[$menu]);
+		if(!isset($this->menuObjects[$finalMenu]))
+			$this->menuObjects[$finalMenu] = new NavigationMenu($this->menuReverseLookup[$finalMenu]);
 
-		$menuObject = $this->menuObjects[$menu];
+		$menuObject = $this->menuObjects[$finalMenu];
 		$menuObject->setMenu($subtype);
 		return $menuObject;
 	}
