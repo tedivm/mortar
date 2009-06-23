@@ -221,7 +221,10 @@ class Theme
 
 		if($templateString = $this->getTemplateFromPackage($model . $template, $handler['module']))
 			return $templateString;
-;
+
+		if($templateString = $this->getTemplateFromSystem('models', $template))
+			return $templateString;
+
 		return false;
 	}
 
@@ -243,7 +246,7 @@ class Theme
 		if($templateString = $this->getTemplateFromTheme('packages', $package, $template))
 			return $templateString;
 
-		if(filter_var($template, FILTER_VALIDATE_REGEXP, array('options' => array('regexp' => '/[^0-9a-zA-Z]/i'))) !== false)
+		if(filter_var($template, FILTER_VALIDATE_REGEXP, array('options' => array('regexp' => '/[^0-9a-zA-Z\.]/i'))) !== false)
 			return false;
 
 		$path = $packageInfo->getPath() . 'templates/' . $template;
@@ -275,9 +278,43 @@ class Theme
 			return false;
 
 		$args = func_get_args();
-		$path = $this->pathToTheme;
 		$templateName = array_pop($args);
+		$path = $this->pathToTheme;
 
+		return $this->getTemplateFromContainer($path, $templateName, $args);
+	}
+
+	/**
+	 * This function loads templates from the base system.
+	 *
+	 * @return string|false Returns false if the template can't be found.
+	 */
+	public function getTemplateFromSystem()
+	{
+		if(func_num_args() < 1)
+			return false;
+
+		$args = func_get_args();
+		$templateName = array_pop($args);
+		$config = Config::getInstance();
+		$path = $config['path']['templates'];
+		return $this->getTemplateFromContainer($path, $templateName, $args);
+	}
+
+
+
+	/**
+	 * This function takes in a base path, template name and container (which is an array of strings) and returns the
+	 * specified template, or false if it is not found. The container array represents a hierarchal structure, which
+	 * each element representing a deeper folder in the system.
+	 *
+	 * @param string $path
+	 * @param string $templateName
+	 * @param array $container
+	 * @return string|false Returns false if it can not find the template.
+	 */
+	protected function getTemplateFromContainer($path, $templateName, $container = array())
+	{
 		$regexp = array('options' => array('regexp' => '/[^0-9a-zA-Z\.]/i'));
 
 		if(filter_var($templateName, FILTER_VALIDATE_REGEXP, $regexp) !== false)
@@ -285,14 +322,14 @@ class Theme
 
 		$regexp = array('options' => array('regexp' => '/[^0-9a-zA-Z]/i'));
 
-		foreach($args as $pathPiece)
+		foreach($container as $pathPiece)
 		{
 			if(filter_var($pathPiece, FILTER_VALIDATE_REGEXP, $regexp) !== false)
 				return false;
 
+
 			$path .= $pathPiece . '/';
 		}
-
 		$path .= $templateName;
 
 		if(!file_exists($path) || !is_readable($path))
@@ -305,6 +342,7 @@ class Theme
 
 		return $templateString;
 	}
+
 
 	/**
 	 * Returns all of the urls for the files in the requested directory
