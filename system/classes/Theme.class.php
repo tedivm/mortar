@@ -52,6 +52,13 @@ class Theme
 	protected $url;
 
 	/**
+	 * Directory of the current active theme.
+	 *
+	 * @var string
+	 */
+	protected $pathToTheme;
+
+	/**
 	 * Whether js and css minification is enabled
 	 *
 	 * @access protected
@@ -112,6 +119,7 @@ class Theme
 
 
 			$themePath = $config['path']['theme'] . $name . '/';
+			$this->pathToTheme = $themePath;
 			$themeUrl = $this->url;
 
 
@@ -195,6 +203,110 @@ class Theme
 	}
 
 	/**
+	 * This function returns the requested template for a model type. This first checks the theme/models/ModelType
+	 * (where model type is $model) directory first, and then falls back to calling the getTemplateFromPackage method.
+	 * When falling back to the package, the template name gets the model name prepended to it (so when looking for the
+	 * Listing template for a Page model, PageListing would be checked in the package).
+	 *
+	 * @param string $template
+	 * @param string $model
+	 * @return string|false Returns a string or, if no suitable template can be found, false.
+	 */
+	public function getModelTemplate($template, $model)
+	{
+		if($templateString = $this->getTemplateFromTheme('models', $model, $template))
+			return $templateString;
+
+		$handler = ModelRegistry::getHandler($model);
+
+		if($templateString = $this->getTemplateFromPackage($model . $template, $handler['module']))
+			return $templateString;
+;
+		return false;
+	}
+
+	/**
+	 * This function returns the requested template for a package. This first checks the theme/packages/PackageName
+	 * (where PackageName is the name of the package) then, if no template is present, checks to see if a template
+	 * was shipped with the package.
+	 *
+	 * @param string $template
+	 * @param string $package
+	 * @return string|false Returns a string or, if no suitable template can be found, false.
+	 */
+	public function getTemplateFromPackage($template, $package)
+	{
+		$packageInfo = new PackageInfo($package);
+		$package = $packageInfo->getName();
+
+
+		if($templateString = $this->getTemplateFromTheme('packages', $package, $template))
+			return $templateString;
+
+		if(filter_var($template, FILTER_VALIDATE_REGEXP, array('options' => array('regexp' => '/[^0-9a-zA-Z]/i'))) !== false)
+			return false;
+
+		$path = $packageInfo->getPath() . 'templates/' . $template;
+
+		if(!file_exists($path) || !is_readable($path))
+			return false;
+
+		$templateString = file_get_contents($path);
+
+		if($templateString === false)
+			return false;
+
+		return $templateString;
+	}
+
+	/**
+	 * This function takes in a variable number of arguments, with the first arguments being containers and the last
+	 * argument passed being the actual name of the template. For example, $theme->getTemplateFromTheme('models',
+	 * 'Page', 'Listing.html') will check for the the file "theme/models/Page/Listing.html" while
+	 * $theme->getTemplateFromTheme('index.html') will check for "theme/index.html".
+	 *
+	 * @param string|null $container,..
+	 * @param string $templatename
+	 * @return string|false Returns a string or, if no suitable template can be found, false.
+	 */
+	public function getTemplateFromTheme()
+	{
+		if(func_num_args() < 1)
+			return false;
+
+		$args = func_get_args();
+		$path = $this->pathToTheme;
+		$templateName = array_pop($args);
+
+		$regexp = array('options' => array('regexp' => '/[^0-9a-zA-Z\.]/i'));
+
+		if(filter_var($templateName, FILTER_VALIDATE_REGEXP, $regexp) !== false)
+			return false;
+
+		$regexp = array('options' => array('regexp' => '/[^0-9a-zA-Z]/i'));
+
+		foreach($args as $pathPiece)
+		{
+			if(filter_var($pathPiece, FILTER_VALIDATE_REGEXP, $regexp) !== false)
+				return false;
+
+			$path .= $pathPiece . '/';
+		}
+
+		$path .= $templateName;
+
+		if(!file_exists($path) || !is_readable($path))
+			return false;
+
+		$templateString = file_get_contents($path);
+
+		if($templateString === false)
+			return false;
+
+		return $templateString;
+	}
+
+	/**
 	 * Returns all of the urls for the files in the requested directory
 	 *
 	 * @access protected
@@ -205,7 +317,6 @@ class Theme
 	 */
 	protected function getFiles($path, $url, $extention = '.*')
 	{
-
 		if(strlen($path) < 1 || strlen($url) < 1)
 			return false;
 
@@ -217,9 +328,7 @@ class Theme
 			$fileName = array_pop($tmpArray);
 			$fileDetails = explode('.', $fileName);
 			$min = false;
-
 			$extension = array_pop($fileDetails);
-
 			$library = array_shift($fileDetails);
 
 			switch (count($fileDetails))
@@ -255,6 +364,15 @@ class Theme
 		return $fileArray;
 	}
 
+	/**
+	 * This function attempts to return the URL for the requested resource. If minification is enabled, and a minified
+	 * version is available, that URL is returned instead.
+	 *
+	 * @param string $type js or css
+	 * @param string $name
+	 * @param string $library
+	 * @return string|false Returns false if the requested URL does not exist.
+	 */
 	protected function loadUrl($type, $name, $library)
 	{
 		$filesAttribute = $type . 'Urls';
@@ -269,9 +387,6 @@ class Theme
 			return false;
 		}
 	}
-
 }
-
-
 
 ?>
