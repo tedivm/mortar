@@ -164,8 +164,8 @@ class Permissions
 	 * Checks to see if an action is allowed to be performed by the user at this location
 	 *
 	 * @param string $action
-	 * @param string|null $type this represents a resource type
-	 * @return unknown
+	 * @param string|null $type this represents a resource type. If null, it uses the current location's type.
+	 * @return bool
 	 */
 	public function isAllowed($action, $type = null)
 	{
