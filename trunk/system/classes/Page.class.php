@@ -303,6 +303,17 @@ class Page implements ArrayAccess
 	}
 
 	/**
+	 * This function returns the Theme being used by the current page.
+	 *
+	 * @return Theme
+	 */
+	public function getTheme()
+	{
+		$theme = new Theme($this->theme);
+		return $theme;
+	}
+
+	/**
 	 * Adds a meta tag to the page
 	 *
 	 * @param string $name
