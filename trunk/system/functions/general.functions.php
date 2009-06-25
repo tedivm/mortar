@@ -208,15 +208,12 @@ function staticFunctionHack()
 
 function depreciationWarning()
 {
-	try
-	{
-		throw new BentoDepreciated('Function has been depreciated.');
-	}catch(Exception $e){}
+
 }
 
 function depreciationError()
 {
-	throw new BentoDepreciated('Function has been depreciated.');
+
 }
 
 ?>
