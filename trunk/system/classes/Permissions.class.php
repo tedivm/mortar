@@ -57,8 +57,11 @@ class Permissions
 			$this->user = $userId;
 			$userId = $this->user->getId();
 		}elseif(is_numeric($userId)){
-			$this->user = new User();
-			$this->user->loadUser($userId);
+
+			if(!($user = ModelRegistry::loadModel('User', $userId)))
+				throw new BentoError('Invalid user id passed to Permissions class.');
+
+			$this->user = $user;
 		}else{
 			throw new TypeMismatch(array('User', $userId));
 		}
@@ -212,12 +215,12 @@ class Permissions
 	 * This is depreciated. Use isAllowed.
 	 *
 	 * @deprecated
-	 * @param unknown_type $action
+	 * @param string $action
 	 * @return bool
 	 */
 	public function checkAuth($action)
 	{
-		depreciationError();
+		depreciationWarning();
 		return $this->isAllowed($action);
 	}
 
@@ -350,7 +353,7 @@ class UserPermission
 		if($cache->isStale())
 		{
 			$permissions = array();
-			$db = dbConnect('default_read_only');
+			$db = DatabaseConnection::getConnection('default_read_only');
 			$stmt = $db->stmt_init();
 			$stmt->prepare('SELECT ' . $type . 'Permissions.permission, '. $type .'Permissions.resource,
 								actions.action_id
