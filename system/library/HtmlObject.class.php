@@ -91,15 +91,15 @@ class HtmlObject
 	 *
 	 * @var array
 	 */
-	protected $hasClosingComment = array('div', 'fieldset', 'ul');
+	protected $hasClosingComment = array('div', 'fieldset', 'ul', 'table', 'tr', 'tbody');
 
 	/**
 	 * This is a list of tags that are, by default, listed as having a tight enclosure.
 	 *
 	 * @var array
 	 */
-	protected $hasTightEnclose = array('a', 'label', 'textarea', 'input', 'legend', 'option',
-										'h1', 'h2', 'h3', 'h4', 'h5', 'b', 'u', 'i', 'em');
+	protected $hasTightEnclose = array('a', 'label', 'textarea', 'input', 'legend', 'option', 'td', 'th',
+										'h1', 'h2', 'h3', 'h4', 'h5', 'b', 'u', 'i', 'em', 'caption');
 
 	/**
 	 * This constructor takes the type of html tag as its argument.
