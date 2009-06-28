@@ -77,6 +77,8 @@ require('system/classes/modelSupport/actions/LocationBased/Delete.class.php');
 require('system/classes/modelSupport/actions/LocationBased/Add.class.php');
 require('system/classes/modelSupport/actions/LocationBased/Edit.class.php');
 require('system/classes/modelSupport/actions/LocationBased/Read.class.php');
+require('system/classes/modelSupport/actions/LocationBased/Index.class.php');
+
 require('system/interfaces/Model.interface.php');
 require('system/abstracts/Model.class.php');
 require('system/abstracts/LocationModel.class.php');
