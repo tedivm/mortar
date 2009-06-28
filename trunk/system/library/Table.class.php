@@ -10,11 +10,30 @@ class Table
 	protected $rows = array();
 	protected $index = 0;
 
+	protected $repeatHeader = true;
+	protected $enableIndex = false;
+
+	protected $classes = array();
+
+	static $headerInverval = 15;
+	static $headerMinimumSubRows = 6;
 
 	public function __construct($name)
 	{
 		$name = str_replace(' ', '_', $name);
 		$this->name = $name;
+	}
+
+	public function addClass($name)
+	{
+		$this->classes[] = $name;
+	}
+
+
+	public function enableIndex($enable = true)
+	{
+		array_push($this->columns, 'index');
+		$this->enableIndex = (bool) $enable;
 	}
 
 	public function setCaption($caption)
@@ -46,12 +65,41 @@ class Table
 		return $this;
 	}
 
+	protected function makeHeader($baseId)
+	{
+		if(count($this->columnLabels) > 0)
+		{
+			$tableHeader = new HtmlObject('tr');//$tableHtml->insertNewHtmlObject('thead');
+			$tableHeader->property('id', $baseId);
+
+			foreach($this->columns as $column)
+			{
+				$tableColumnHeader = $tableHeader->insertNewHtmlObject('th');
+				$tableColumnHeader->property('id', $baseId . '_' . $column);
+
+				if(isset($this->columnLabels[$column]))
+				{
+					$tableColumnHeader->wrapAround($this->columnLabels[$column]);
+				}else{
+					$tableColumnHeader->wrapAround('&nbsp;');
+				}
+			}
+			return $tableHeader;
+		}else{
+			return false;
+		}
+
+	}
+
 	public function makeHtml()
 	{
 		$tableHtml = new HtmlObject('table');
 
 		$tableId = 'table_' . $this->name;
 		$tableHtml->property('id', $tableId);
+
+		foreach($this->classes as $class)
+			$tableHtml->addClass($class);
 
 		if(isset($this->caption))
 		{
@@ -61,35 +109,37 @@ class Table
 
 		if(count($this->columnLabels) > 0)
 		{
-			$tableHeader = $tableHtml->insertNewHtmlObject('thead');
-			$headerId = $tableId . '_head';
-			$tableHeader->property('id', $headerId);
+			$headerId = $tableId . '_header';
 
-			foreach($this->columns as $column)
+			if($header = $this->makeHeader($headerId . '_1'))
 			{
-				$tableColumnHeader = $tableHeader->insertNewHtmlObject('th');
-				$tableColumnHeader->property('id', $headerId . '_' . $column);
-
-				if(isset($this->columnLabels[$column]))
-				{
-					$tableColumnHeader->wrapAround($this->columnLabels[$column]);
-				}else{
-					$tableColumnHeader->wrapAround('&nbsp;');
-				}
+				$tableHeader = $tableHtml->insertNewHtmlObject('thead');
+				$tableHeader->property('id', $headerId);
+				$tableHeader->wrapAround($header);
 			}
 		}
-
 
 		$tableBody = $tableHtml->insertNewHtmlObject('tbody');
 		$bodyId = $tableId . '_body';
 		$tableBody->property('id', $bodyId);
 
 		$y = 0;
+		$headerCount = 1;
+		$totalRows = count($this->rows);
 		foreach($this->rows as $row)
 		{
-			$y++;
-			$rowId = $bodyId . '_' . $y;
+			if($this->repeatHeader &&
+				$y > 0 && ($y % self::$headerInverval) == 0
+				&& ($totalRows - $y) >= self::$headerMinimumSubRows)
+			{
+				$headerCount++;
+				$headerId = $bodyId . '_header_' . $headerCount;
+				$headerRow = $this->makeHeader($headerId);
+				$tableBody->wrapAround($headerRow);
+			}
 
+			$y++;
+			$rowId = $bodyId . '_y' . $y;
 			$tableRow = $tableBody->insertNewHtmlObject('tr');
 			$tableRow->property('id', $rowId);
 
@@ -114,7 +164,7 @@ class Table
 			foreach($this->columns as $column)
 			{
 				$x++;
-				$fieldId = $rowId . 'x' . $x;
+				$fieldId = $rowId . 'x_' . $column;
 				$tableRowField = $tableRow->insertNewHtmlObject('td');
 				$tableRowField->property('id', $fieldId);
 				$tableRowField->addClass($column);
@@ -140,16 +190,18 @@ class Table
 				{
 					$tableRowField->wrapAround($row[$column]);
 				}else{
+
+					if($column == 'index' && $this->enableIndex)
+					{
+						$tableRowField->wrapAround($y . '.');
+					}
+
 					$tableRowField->wrapAround('&nbsp;');
 				}
 			}
 		}
-
 		return (string) $tableHtml;
 	}
-
-
-
 }
 
 ?>
