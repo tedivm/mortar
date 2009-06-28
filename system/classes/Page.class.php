@@ -267,7 +267,7 @@ class Page implements ArrayAccess
 				$finalMenu = $this->menuLookup[$menu];
 				break;
 
-			case $this->menuLookup['main']:
+			default:
 				$finalMenu = $this->menuLookup['main'];
 				break;
 		}
