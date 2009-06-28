@@ -65,9 +65,10 @@ class Hook
 	 * @param string $realm This is a broad category used to describe a plugin and can be anything the author chooses
 	 * @param string $category This is a subdivision of the $realm and can be anything the author chooses
 	 * @param string $name This is the name of the specific hook you are calling and can be anything the author chooses
+	 * @param string $onlyRecursive This is used to restrict plugin selection to those marked as recursive
 	 * @return bool true if new plugins are loaded and added to the system, false otherwise
 	 */
-	public  function loadPlugins($realm, $category, $name)
+	public  function loadPlugins($realm, $category, $name, $onlyRecursive = false)
 	{
 		if(!isset($realm))
 			throw new TypeMismatch(array('String or Location', $realm));
@@ -88,7 +89,9 @@ class Hook
 			$pluginList = array();
 			$db = DatabaseConnection::getConnection('default_read_only');
 			$stmt = $db->stmt_init();
-			$stmt->prepare('SELECT module, plugin FROM plugins WHERE realm = ? AND category = ? AND name = ?');
+			$stmt->prepare('SELECT module, plugin, isRecursive
+								FROM plugins
+								WHERE realm = ? AND category = ? AND name = ?');
 
 			if($stmt->bindAndExecute('sss', $realm, $category, $name))
 			{
@@ -96,14 +99,12 @@ class Hook
 				{
 					try{
 						$className = importFromModule($row['plugin'], $row['module'], 'plugin');
-
 						$classReflection = new ReflectionClass($className);
 						foreach($this->interfaces as $interface)
 						{
 							if(!$classReflection->implementsInterface($interface))
 								continue 2;
 						}
-
 						$pluginList[] = $row;
 					}catch(Exception $e){}
 				}
@@ -116,8 +117,12 @@ class Hook
 		$classList = array();
 		foreach($pluginList as $plugin)
 		{
+			if($onlyRecursive && $row['isRecursive'] != 1)
+				break;
+
 			$classList[] = importFromModule($plugin['plugin'], $plugin['module'], 'plugin');
 		}
+
 		$pluginObjects = array();
 		foreach($classList as $class)
 		{
@@ -135,6 +140,38 @@ class Hook
 			return false;
 		}
 	}
+
+	/**
+	 * This function loads plugins based off of a model instance and a plugin name. It loads all of the plugins for that
+	 * particular model type, the model types that it inherits from (if the plugins are marked to be inherited), and any
+	 * plugin belonging to the model type "All".
+	 *
+	 * @param Model $model
+	 * @param String $name
+	 * @return bool
+	 */
+	public function loadModelPlugins(Model $model, $name)
+	{
+		$modelClass = get_class($model);
+		$restrict = false;
+
+		$hasPlugins = $this->loadPlugins('models', 'all', $name, $restrict);
+
+		do
+		{
+			$parentType = staticHack($modelClass, 'type');
+			if(isset($parentType))
+			{
+				$hasPlugins = ($this->loadPlugins('models', $parentType, $name, $restrict) || $hasPlugins);
+				$restrict = true;
+			}else{
+				break;
+			}
+		}while($modelClass = get_parent_class($modelClass));
+
+		return $hasPlugins;
+	}
+
 
 	/**
 	 * This magic method allows developers to run functions across all of the plugins at once by calling them on the
@@ -175,14 +212,23 @@ class Hook
 	 * @param string $name
 	 * @param int $module
 	 * @param string $plugin
+	 * @param bool $isRecursive
 	 */
-	static public function registerPlugin($realm, $category, $name, $module, $plugin)
+	static public function registerPlugin($realm, $category, $name, $module, $plugin, $isRecursive = false)
 	{
+		$isRecursive = $isRecursive ? 1 : 0;
 		$db = DatabaseConnection::getConnection('default');
 		$stmt = $db->stmt_init();
-		$stmt->prepare('INSERT INTO plugins (realm, category, name, module, plugin) VALUES (?, ?, ?, ?, ?)');
-		$stmt->bindAndExecute('sssis', $realm, $category, $name, $module, $plugin);
+		$stmt->prepare('INSERT
+							INTO plugins (realm, category, name, module, plugin, isRecursive)
+							VALUES (?, ?, ?, ?, ?, ?)');
+		$stmt->bindAndExecute('sssisi', $realm, $category, $name, $module, $plugin, $isRecursive);
 		Cache::clear('plugins', $realm, $category, $name);
+	}
+
+	static public function registerModelPlugin($type, $name, $module, $plugin, $isRecursive = false)
+	{
+		return self::registerPlugin('model', $type, $name, $module, $plugin, $isRecursive);
 	}
 
 }

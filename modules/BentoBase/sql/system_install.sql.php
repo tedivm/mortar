@@ -196,12 +196,13 @@ CREATE TABLE plugins
 	category VARCHAR(80) NOT NULL,
 	name VARCHAR(65) NOT NULL,
 	module INTEGER UNSIGNED NOT NULL,
-	plugin  VARCHAR(65) NOT NULL
+	plugin  VARCHAR(65) NOT NULL,
+	isRecursive CHAR(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: location_meta */
 ALTER TABLE plugins ADD CONSTRAINT pkplugins
-	PRIMARY KEY (realm, category, name, module, plugin);
+	PRIMARY KEY (realm, category, name);
 
 /******************** Add Table: requestLog ************************/
 
