@@ -100,6 +100,14 @@ class BentoCMSModelPage extends LocationModel
 		}
 	}
 
+	public function __toArray()
+	{
+		$array = parent::__toArray();
+		$array['content'] = $array['filteredContent'];
+		unset($array['filteredContent']);
+		return $array;
+	}
+
 	public function offsetGet($name)
 	{
 		if($name == 'content')
