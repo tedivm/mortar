@@ -2,8 +2,10 @@
 
 class LocationModel extends AbstractModel
 {
+	public $allowedChildrenTypes = array();
 	protected $location;
-	static public $fallbackModelActions = array('LocationBasedRead', 'LocationBasedAdd', 'LocationBasedEdit', 'LocationBasedDelete');
+	static public $fallbackModelActions = array('LocationBasedRead', 'LocationBasedAdd', 'LocationBasedEdit',
+													'LocationBasedDelete', 'LocationBasedIndex');
 
 	public function __construct($id = null)
 	{
@@ -92,13 +94,26 @@ class LocationModel extends AbstractModel
 		$location->setParent($parent);
 	}
 
-	public function canSaveTo($resourceType)
+	public function getAllowedChildrenTypes()
 	{
-		if(in_array($resourceType, $this->allowedParents))
-			return true;
+		$hook = new Hook();
+		$hook->loadModelPlugins($this, 'getAllowedChildrenTypes');
 
-		return false;
+		$pluginChildren = $hook->getAllowedChildren();
+
+		if(is_array($this->allowedChildrenTypes))
+			$pluginChildren[] = $this->allowedChildrenTypes;
+
+		return call_user_func_array('array_merge', $pluginChildren);
 	}
+
+	public function canHaveChildType($resourceType)
+	{
+		$modelList = $this->getAllowedChildrenTypes();
+		return in_array($resourceType, $modelList);
+	}
+
+
 
 	public function getLocation()
 	{
@@ -116,6 +131,21 @@ class LocationModel extends AbstractModel
 	protected function loadFallbackAction($actionName)
 	{
 		return parent::loadFallbackAction('LocationBased' . $actionName);
+	}
+
+	public function __toArray()
+	{
+		$array = parent::__toArray();
+		$location = $this->getLocation();
+		$locationInfo['id'] = $location->getId();
+		$locationInfo['type'] = $location->getType();
+		$locationInfo['createdOn'] = strtotime($location->getCreationDate());
+		$locationInfo['lastModified'] = strtotime($location->getLastModified());
+		$locationInfo['owner'] = $location->getOwner();
+		$locationInfo['group'] = $location->getOwnerGroup();
+		$locationInfo['name'] = $location->getName();
+		$array = array_merge($array, $locationInfo);
+		return $array;
 	}
 }
 

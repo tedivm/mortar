@@ -16,6 +16,17 @@
  */
 class ModelActionLocationBasedAdd extends ModelActionAdd
 {
+
+	/**
+	 * This defines the permission action that the user needs to run this. Permissions are based off of an action and
+	 * a resource type, so this value is used with the model type to generate a permissions object
+	 *
+	 * @access public
+	 * @var string
+	 */
+	public static $requiredPermission = 'Add';
+
+
 	/**
 	 * This is the model that the new model is going to be attached to
 	 *

@@ -15,7 +15,7 @@
  * @package System
  * @subpackage ModelSupport
  */
-class ModelActionRead extends ModelActionBase
+class ModelActionIndex extends ModelActionBase
 {
 
 	/**
@@ -36,18 +36,7 @@ class ModelActionRead extends ModelActionBase
 	 */
 	public function viewAdmin()
 	{
-		$output = 'Model Type: ' . $this->model->getType() . '<br>' . PHP_EOL;
-		$output .= 'Model Id: ' . $this->model->getId() . '<br>';
 
-		$url = new Url();
-		$url->id = $this->model->getId();
-		$url->type = $this->model->getType();
-		$url->format = 'Admin';
-		$url->action = 'Read';
-
-		$output .= 'Model Url: ' . (string) $url;
-
-		return $output;
 	}
 
 	/**
@@ -58,22 +47,7 @@ class ModelActionRead extends ModelActionBase
 	 */
 	public function viewHtml()
 	{
-		$page = ActivePage::getInstance();
 
-		if(isset($this->model['title']))
-			$page->addRegion('title', $this->model['title']);
-
-		if(isset($this->model->keywords))
-			$page->addMeta('keywords', $this->model->keywords);
-
-		if(isset($this->model->description))
-			$page->addMeta('description', $this->model->description);
-
-		$html = ModelToHtml::convert($this->model, $this->ioHandler);
-		$html = $this->model['name'];
-
-
-		return $html;
 	}
 
 	/**
@@ -83,8 +57,7 @@ class ModelActionRead extends ModelActionBase
 	 */
 	public function viewXml()
 	{
-		$xml = ModelToXml::convert($this->model, $this->requestHandler);
-		return $xml;
+
 	}
 
 	/**
@@ -95,7 +68,7 @@ class ModelActionRead extends ModelActionBase
 	 */
 	public function viewJson()
 	{
-		return $this->model->__toArray();;
+
 	}
 }
 

@@ -22,7 +22,7 @@ class AbstractModel implements Model
 	protected $properties;
 	protected $content;
 
-	static public $fallbackModelActions = array('Read', 'Add', 'Edit', 'Delete');
+	static public $fallbackModelActions = array('Read', 'Add', 'Edit', 'Delete', 'Index');
 
 	public function __construct($id = null)
 	{
@@ -43,7 +43,17 @@ class AbstractModel implements Model
 
 	public function __toArray()
 	{
+		$array = array();
+		$array['id'] = $this->getId();
+		$array['type'] = $this->getType();
 
+		if(isset($this->properties))
+			$array['properties'] = $this->properties;
+
+		if(isset($this->content))
+			$array = array_merge($array, $this->content);
+
+		return $array;
 	}
 
 	public function save()

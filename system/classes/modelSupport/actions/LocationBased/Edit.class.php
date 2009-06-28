@@ -18,6 +18,15 @@
 class ModelActionLocationBasedEdit extends ModelActionLocationBasedAdd
 {
 	/**
+	 * This defines the permission action that the user needs to run this. Permissions are based off of an action and
+	 * a resource type, so this value is used with the model type to generate a permissions object
+	 *
+	 * @access public
+	 * @var string
+	 */
+	public static $requiredPermission = 'Edit';
+
+	/**
 	 * This function calls the parent::getForm function, but then overwrites the default values with the actual values
 	 * the model has set.
 	 *
