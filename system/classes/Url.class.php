@@ -64,10 +64,16 @@ class Url
 			unset($attributes['format']);
 		}
 
-		if(isset($attributes['rest']) && $attributes['rest'])
+ 		if(isset($attributes['rest']) && $attributes['rest'])
 		{
 			$urlString .= 'rest/';
 			unset($attributes['rest']);
+
+			if(isset($attributes['format']) && strtolower($attributes['format']) == 'xml')
+				unset($attributes['format']);
+
+		}elseif(isset($attributes['format']) && strtolower($attributes['format']) == 'html'){
+			unset($attributes['format']);
 		}
 
 		if(isset($attributes['module']))
@@ -248,6 +254,9 @@ class Url
 
 	public function __set($name, $value)
 	{
+		if(strtolower($name) == 'location')
+			$name = 'locationId';
+
 		if($value instanceof Location)
 		{
 			$name = 'locationId';
@@ -293,13 +302,21 @@ class Url
 	{
 		if(isset($this->attributes['locationId']))
 		{
-			$action = (isset($this->attributes['action'])) ? $this->attributes['action'] : 'Read';
+			if(isset($this->attributes['action'])
+				&& $this->attributes['action'] == 'Add'
+				&& isset($this->attributes['type']))
+			{
+				$resource = ModelRegistry::loadModel($this->attributes['type']);
+				$actionInfo = $resource->getAction('Add');
+			}else{
+				$action = (isset($this->attributes['action'])) ? $this->attributes['action'] : 'Read';
+				$location = new Location($this->attributes['locationId']);
+				$resource = $location->getResource();
+				$actionInfo = $resource->getAction($action);
+			}
 
-			$location = new Location($this->attributes['locationId']);
-			$resource = $location->getResource();
-			$actionName = $resource->getAction($action);
+			$actionName = $actionInfo['className'];
 			$requiredPermission = staticHack($actionName, 'requiredPermission');
-
 			$permission = new Permissions($this->attributes['locationId'], $userId);
 			return $permission->isAllowed($requiredPermission);
 
