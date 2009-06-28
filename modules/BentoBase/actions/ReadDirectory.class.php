@@ -2,7 +2,7 @@
 
 class BentoBaseActionReadDirectory extends ModelActionLocationBasedRead
 {
-	public function viewHtml()
+	public function viewHtml($page)
 	{
 		if(is_numeric($this->model->defaultChild))
 		{

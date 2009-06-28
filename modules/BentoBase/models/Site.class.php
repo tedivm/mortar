@@ -4,7 +4,7 @@ class BentoBaseModelSite extends LocationModel
 {
 	static public $type = 'Site';
 	protected $table = 'sites';
-	protected $allowedParents = array('Root');
+	public $allowedChildrenTypes = array('Directory');
 
 	public function addUrl($url, $ssl = false, $primary = false)
 	{
