@@ -98,11 +98,15 @@ class DisplayMaker
 	 * concise_html is disabled the template will be wrapped in tags for designers to identify it with
 	 *
 	 * @param string $text
-	 * @param string|null
+	 * @param string|null $name
 	 */
 	public function setDisplayTemplate($text, $name = null)
 	{
-		$this->processDisplayTemplate($text);
+		$textString = (string) $text;
+		if(!is_string($textString))
+			throw new TypeMismatch(array('string', $text));
+
+		$this->processDisplayTemplate($textString);
 
 		if(isset($name) && (!(defined('CONCISE_HTML') && CONCISE_HTML === true)))
 		{
