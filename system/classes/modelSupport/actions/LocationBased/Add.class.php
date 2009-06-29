@@ -88,7 +88,7 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 
 		$locationForm = new $locationFormName($this->type . 'Form' . $this->actionName);
 
-		if($form instanceof From)
+		if($form instanceof Form)
 		{
 			$form->merge($locationForm);
 		}else{
@@ -168,7 +168,14 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 	protected function setPermissionObject()
 	{
 		$user = ActiveUser::getUser();
-		$this->permissionObject = new Permissions($this->model->getLocation()->getParent(), $user);
+
+		$location = $this->model->getLocation();
+		$parentLocation = $location->getParent();
+
+		if(!($parentLocation instanceof Location))
+			throw new BentoError('Attempted to add LocationModule without specifying a parent.');
+
+		$this->permissionObject = new Permissions($parentLocation->getParent(), $user);
 	}
 
 	/**
