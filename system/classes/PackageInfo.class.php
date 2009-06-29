@@ -147,7 +147,6 @@ class PackageInfo
 			throw new BentoError('Unable to locate package ' . $this->name);
 		}
 
-
 		$cache = new Cache('packages', $packageName, 'info');
 		$info = $cache->getData();
 		if($cache->isStale())
@@ -182,10 +181,6 @@ class PackageInfo
 
 			$cache->storeData($info);
 		}
-
-		$this->actions = $this->loadActions();
-		$this->models = $this->loadModels();
-		$this->loadMeta();
 
 		$this->status = $info['status'];
 
@@ -251,6 +246,9 @@ class PackageInfo
 	 */
 	public function getActions($actionName = null)
 	{
+		if(!isset($this->actions))
+			$this->actions = $this->loadActions();
+
 		if($actionName)
 		{
 			if(!$this->packageHasAction($actionName))
@@ -268,6 +266,9 @@ class PackageInfo
 	 */
 	public function getModels()
 	{
+		if(!isset($this->models))
+			$this->models = $this->loadModels();
+
 		return $this->models;
 	}
 
@@ -279,7 +280,8 @@ class PackageInfo
 	 */
 	public function packageHasAction($name)
 	{
-		return isset($this->actions[$name]);
+		$actions = $this->getActions();
+		return isset($actions[$name]);
 	}
 
 	/**
@@ -290,6 +292,9 @@ class PackageInfo
 	 */
 	public function getMeta($name)
 	{
+		if(!isset($this->meta))
+			$this->loadMeta();
+
 		return $this->meta[$name];
 	}
 
@@ -300,18 +305,24 @@ class PackageInfo
 	 */
 	protected function loadMeta()
 	{
-		$metaPath = $this->path . 'meta.php';
+		$cache = new Cache('packages', $this->getName(), 'meta');
+		$meta = $cache->getData();
 
-		if(is_readable($metaPath))
+		if($cache->isStale())
 		{
-			include $metaPath;
+			$meta = array();
+			$metaPath = $this->path . 'meta.php';
 
-			$meta['name'] = $packageName;
-			$meta['version'] = $version;
-			$meta['description'] = $description;
-			$this->meta = $meta;
-
+			if(is_readable($metaPath))
+			{
+				include $metaPath;
+				$meta['name'] = $packageName;
+				$meta['version'] = $version;
+				$meta['description'] = $description;
+			}
+			$cache->storeData($meta);
 		}
+		$this->meta = $meta;
 	}
 
 	/**
