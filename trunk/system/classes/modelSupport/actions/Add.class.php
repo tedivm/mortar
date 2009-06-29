@@ -72,7 +72,11 @@ class ModelActionAdd extends ModelActionBase
 		$formDisplayName = $formName . $this->actionName;
 
 		if($formClassName = importFromModule($formName, $this->model->getModule(), 'class'))
+		{
 			$baseForm = new $formClassName($formDisplayName);
+		}else{
+			new BentoInfo('Unable to load ' . $this->model->getType() . ' form ' . $formName);
+		}
 
 		$formExtension = $this->type . $query['format'] . 'Form';
 
@@ -82,10 +86,13 @@ class ModelActionAdd extends ModelActionBase
 
 			if(isset($baseForm))
 			{
+				echo 33;
 				$baseForm->merge($formatForm);
 			}else{
 				$baseForm = $formatForm;
 			}
+		}else{
+			new BentoInfo('Unable to load ' . $this->model->getType() . ' ' . $query['format'] . ' form extension');
 		}
 
 		if(!isset($baseForm))
