@@ -438,7 +438,6 @@ class Form
 		{
 			case'html':
 			case 'textarea':
-				$inputHtml->tightEnclose();
 				$inputHtml->wrapAround($input->property('value'));
 				unset($input->properties['value']);
 				break;
