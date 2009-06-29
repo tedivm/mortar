@@ -269,8 +269,11 @@ class Location
 	 *
 	 * @param User $user
 	 */
-	public function setOwner(User $user)
+	public function setOwner($user)
 	{
+		if(!($user instanceof Model && $user->getType() == 'User'))
+			throw new TypeMismatch(array('User', $user));
+
 		$this->owner = $user->getId();
 	}
 
@@ -282,7 +285,7 @@ class Location
 	public function getOwner()
 	{
 		if(isset($this->owner))
-			return new User($this->owner);
+			ModelRegistry::loadModel('User', $this->owner);
 
 		return false;
 	}
@@ -572,6 +575,33 @@ class Location
 			$locations[] = new Location($id);
 
 		return $locations;
+	}
+
+	/**
+	 * This function checks to see if the location has any children.
+	 *
+	 * @cache locations *id hasChildren
+	 * @return bool
+	 */
+	public function hasChildren()
+	{
+		$id = $this->getId();
+
+		if(!is_numeric($id))
+			return false;
+
+		$cache = new Cache('locations', $id, 'hasChildren');
+		$hasChildren = $cache->getData();
+
+		if($cache->isStale())
+		{
+			$stmt = DatabaseConnection::getStatement('default_read_only');
+			$stmt->prepare('SELECT location_id FROM locations WHERE parent = ? LIMIT 1');
+			$stmt->bindAndExecute('i', $id);
+			$hasChildren = ($stmt->num_rows() == 1);
+			$cache->storeData($hasChildren);
+		}
+		return $hasChildren;
 	}
 
 	/**
