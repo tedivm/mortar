@@ -10,6 +10,7 @@ class LocationForm extends Form
 
 		$this->createInput('location_name')->
 			setLabel('Name')->
+			addRule('alphanumeric')->
 			addRule('required');
 	}
 }
