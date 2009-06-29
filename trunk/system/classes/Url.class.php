@@ -88,7 +88,10 @@ class Url
 				unset($attributes['action']);
 			}
 
-		}elseif(isset($attributes['type'])){
+		}elseif(isset($attributes['type'])
+				&& !(isset($attributes['location'])
+					&& (isset($attributes['action']) && $attributes['action'] == 'Add')))
+		{
 
 			if(in_array($attributes['type'], self::$specialDirectories))
 			{
@@ -118,13 +121,15 @@ class Url
 
 			// here we will iterate back to the site, creating the path to the model in reverse.
 			$tempLoc = $location;
+			$locationString = '';
 			while($tempLoc->getType() != 'Site')
 			{
-				$urlString .= str_replace(' ', '-', $tempLoc->getName()) . '/';
+				$locationString = str_replace(' ', '-', $tempLoc->getName()) . '/' . $locationString;
 				if(!$parent = $tempLoc->getParent())
 					break;
 				$tempLoc = $parent;
 			}
+			$urlString .= $locationString;
 
 			// set the 'modelType' variable so that it can be used later for processing the rest of the attributes
 			$modelType = $location->getType();
