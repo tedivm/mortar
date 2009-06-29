@@ -145,56 +145,17 @@ class Cache
 			return;
 		}
 
-		try {
+		try{
 
 			if(func_num_args() == 0)
 				throw new BentoError('No key sent to the cache constructor.');
 
-			if(self::$handlerClass == '')
-			{
-				$config = Config::getInstance();
-
-				$handlerType = (isset($config['system']['cacheHandler'])
-									&& isset(self::$handlers[$config['system']['cacheHandler']]))
-											? $config['system']['cacheHandler']
-											: 'FileSystem';
-
-				$handlerClass = self::$handlers[$handlerType];
-
-				if(!class_exists($handlerClass, false))
-				{
-
-					$filename = (strpos($handlerClass, 'cacheHandler') !== false) ? substr($handlerClass, '12') : $handlerClass;
-					$path = $config['path']['mainclasses'] .'cacheHandlers/' . $filename . '.class.php';
-
-					if(file_exists($path))
-					{
-						include($path);
-					}else{
-						self::$runtimeDisable = true;
-						throw new BentoError('Unable to load cache handler ' . $handlerType . ' at ' . $path);
-					}
-				}
-				self::$handlerClass = $handlerClass;
-			}
-
 			$key = func_get_args();
-
 			if(count($key) == 1 && is_array($key[0]))
 				$key = $key[0];
 
-			$key = (is_array($key[0])) ? $key[0] : $key;
-
-			$this->key =array_map('strtolower', $key);
-
+			$this->key = array_map('strtolower', $key);
 			$this->keyString = implode(':::', $this->key);
-
-			$this->handler = new self::$handlerClass();
-			if(!$this->handler->setup($this->key))
-				throw new BentoError('Unable to setup cache handler.');
-
-			$this->cache_enabled = true;
-
 
 			if(BENCHMARK)
 			{
@@ -265,8 +226,12 @@ class Cache
 		{
 			$record = self::$memStore[$this->keyString];
 		}else{
-			$record = $this->handler->getData();
-			self::$memStore[$this->keyString] =  ($this->storeMemory) ? $record : false;
+			$handler = $this->getHandler();
+			if(!$handler)
+				return false;
+
+			$record = $handler->getData();
+			self::$memStore[$this->keyString] = ($this->storeMemory) ? $record : false;
 		}
 
 		if($record['expiration'] - START_TIME < 0)
@@ -279,7 +244,11 @@ class Cache
 		return $record['data']['return'];
 	}
 
-
+	/**
+	 * This function can be used to see if a cached object is fresh or stale.
+	 *
+	 * @return bool
+	 */
 	public function isStale()
 	{
 		return !$this->cacheReturned;
@@ -308,8 +277,11 @@ class Cache
 			if($this->storeMemory)
 				self::$memStore[$this->keyString] = array('expiration' => $expiration, 'data' => $store);
 
+			$handler = $this->getHandler();
+			if(!$handler)
+				return false;
 
-			$this->handler->storeData($store, $expiration);
+			$handler->storeData($store, $expiration);
 		}catch(Exception $e){
 
 		}
@@ -335,13 +307,11 @@ class Cache
 	 */
 	static function getHandlers()
 	{
-
 		foreach(self::$handlers as $name => $class)
 		{
 			if(!class_exists($class, false))
 			{
 				$config = Config::getInstance();
-
 				$filename = (strpos($class, 'cacheHandler') !== false) ? substr($class, '12') : $class;
 
 				$path = $config['path']['mainclasses'] . 'cacheHandlers/' . $filename . '.class.php';
@@ -360,6 +330,55 @@ class Cache
 		return $availableHandlers;
 	}
 
+	/**
+	 * This function returns cache handler for use by this class.
+	 *
+	 * @return cacheHandler
+	 */
+	protected function getHandler()
+	{
+		if($this->cache_enabled != true)
+			return false;
+
+		if(isset($this->handler))
+			return $this->handler;
+
+		if(self::$handlerClass == '')
+		{
+			$config = Config::getInstance();
+			$handlerType = (isset($config['system']['cacheHandler'])
+								&& isset(self::$handlers[$config['system']['cacheHandler']]))
+										? $config['system']['cacheHandler']
+										: 'FileSystem';
+
+			$handlerClass = self::$handlers[$handlerType];
+
+			if(!class_exists($handlerClass, false))
+			{
+				$filename = (strpos($handlerClass, 'cacheHandler') !== false) ? substr($handlerClass, '12') : $handlerClass;
+				$path = $config['path']['mainclasses'] .'cacheHandlers/' . $filename . '.class.php';
+
+				if(file_exists($path))
+				{
+					include($path);
+				}else{
+					self::$runtimeDisable = true;
+					throw new BentoError('Unable to load cache handler ' . $handlerType . ' at ' . $path);
+				}
+			}
+
+			self::$handlerClass = $handlerClass;
+		}
+
+		$this->handler = new self::$handlerClass();
+
+		if(!$this->handler->setup($this->key))
+		{
+			$this->cache_enabled = false;
+			throw new BentoError('Unable to setup cache handler.');
+		}
+		return $this->handler;
+	}
 }
 
 /**
