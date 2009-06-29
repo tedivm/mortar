@@ -230,6 +230,44 @@ class BentoNotice extends BentoError
 }
 
 /**
+ * BentoUserError exception handler
+ *
+ * This is an exception handler that deals with User errors
+ *
+ * @package System
+ * @subpackage ErrorHandling
+ */
+class BentoUserError extends BentoError
+{
+	/**
+	 * This is the minimal debug level that this exception class will output with.
+	 *
+	 * @access protected
+	 * @var int
+	 */
+	protected $debugLevel = 4;
+}
+
+/**
+ * BentoInfo exception handler
+ *
+ * This is an exception handler that deals with Info-level errors
+ *
+ * @package System
+ * @subpackage ErrorHandling
+ */
+class BentoInfo extends BentoError
+{
+	/**
+	 * This is the minimal debug level that this exception class will output with.
+	 *
+	 * @access protected
+	 * @var int
+	 */
+	protected $debugLevel = 5;
+}
+
+/**
  * Depreciation exception handler
  *
  * This exception is thrown to notify developers they are using depreciated, but available, functions
@@ -328,16 +366,7 @@ class TypeMismatch extends BentoError
  * @package System
  * @subpackage ErrorHandling
  */
-class AuthenticationError extends BentoError
-{
-	/**
-	 * This is the minimal debug level that this exception class will output with. For this class it is 4.
-	 *
-	 * @access protected
-	 * @var int
-	 */
-	protected $debugLevel = 4;
-}
+class AuthenticationError extends BentoUserError {}
 
 /**
  * ResourceNotFoundError exception handler
@@ -347,17 +376,7 @@ class AuthenticationError extends BentoError
  * @package System
  * @subpackage ErrorHandling
  */
-class ResourceNotFoundError extends BentoError
-{
-	/**
-	 * This is the minimal debug level that this exception class will output with. For this class it is 4.
-	 *
-	 * @access protected
-	 * @var int
-	 */
-	protected $debugLevel = 4;
-}
-
+class ResourceNotFoundError extends BentoUserError {}
 
 
 
