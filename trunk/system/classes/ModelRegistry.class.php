@@ -106,7 +106,12 @@ class ModelRegistry
 			if(!$modelInfo)
 				throw new BentoError('Unable to load handler for model ' . $type . '.');
 
-			$handler = importFromModule($modelInfo['name'], $modelInfo['module'], 'Model', true);
+			if(!class_exists($modelInfo['class'], false))
+			{
+				$handler = importFromModule($modelInfo['name'], $modelInfo['module'], 'Model', true);
+			}else{
+				$handler = $modelInfo['class'];
+			}
 
 			$model = new $handler($id);
 			return $model;
