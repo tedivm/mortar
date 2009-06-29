@@ -40,10 +40,12 @@ class ModelActionAdd extends ModelActionBase
 	public function logic()
 	{
 		$query = Query::getQuery();
-		$this->form = $this->getForm();
+		$form = $this->getForm();
 
-//		$form = new Form();
+		if($form == false)
+			throw new BentoError('Unable to locate ' . $this->model->getType() . ' form');
 
+		$this->form = $form;
 		if($this->form->wasSubmitted())
 		{
 			$inputs = $this->form->checkSubmit();
@@ -67,19 +69,29 @@ class ModelActionAdd extends ModelActionBase
 	{
 		$query = Query::getQuery();
 		$formName = $this->type . 'Form';
-		$formClassName = importFromModule($formName, $this->model->getModule(), 'class', true);
-		$form = new $formClassName($formName . $this->actionName);
+		$formDisplayName = $formName . $this->actionName;
+
+		if($formClassName = importFromModule($formName, $this->model->getModule(), 'class'))
+			$baseForm = new $formClassName($formDisplayName);
 
 		$formExtension = $this->type . $query['format'] . 'Form';
-		$formExtensionClassName = importFromModule($formExtension, $this->model->getModule(), 'class');
 
-		if($formExtensionClassName)
+		if($formExtensionClassName = importFromModule($formExtension, $this->model->getModule(), 'class'))
 		{
-			$formExtentionObject = new $formClassName('this will be erased when they merge :-(');
-			$form->merge($formExtentionObject);
+			$formatForm = new $formClassName($formDisplayName);
+
+			if(isset($baseForm))
+			{
+				$baseForm->merge($formatForm);
+			}else{
+				$baseForm = $formatForm;
+			}
 		}
 
-		return $form;
+		if(!isset($baseForm))
+			return false;
+
+		return $baseForm;
 	}
 
 	/**
