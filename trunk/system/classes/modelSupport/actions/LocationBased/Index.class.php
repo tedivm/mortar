@@ -214,7 +214,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 	public function viewAdmin($page)
 	{
 		$menu = $page->getMenu('actions', 'modelNav');
-		$this->makeModelActionMenu($menu, $this->model);
+		$this->makeModelActionMenu($menu, $this->model, 'Admin');
 
 		$table = new Table('test');
 		$table->addClass('model-listing');

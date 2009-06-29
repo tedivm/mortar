@@ -80,15 +80,21 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 
 		// If the parent location isn't set, there should be some form to do so.
 		if($this->model->getLocation()->getParent() === false)
-		{
 			throw new BentoError('Unspecified  parent', 400);
-		}else{
-			$locationFormName = importClass('LocationForm', 'modelSupport/Forms/LocationForm.class.php',
-									 'mainclasses', true);
-			$locationForm = new $locationFormName('j');
+
+		$locationFormName = importClass('LocationForm', 'modelSupport/Forms/LocationForm.class.php', 'mainclasses');
+		if(!isset($locationFormName))
+			throw new BentoError('Unable to load LocationForm');
+
+		$locationForm = new $locationFormName($this->type . 'Form' . $this->actionName);
+
+		if($form instanceof From)
+		{
 			$form->merge($locationForm);
-			// parent is set
+		}else{
+			$form = $locationForm;
 		}
+
 		return $form;
 	}
 
@@ -105,7 +111,8 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 		$inputNames = array_keys($input);
 		$inputGroups = $this->getInputGroups($inputNames);
 
-		foreach($inputGroups['model'] as $name)
+		if(isset($inputGroups['model']))
+			foreach($inputGroups['model'] as $name)
 		{
 			$this->model[$name] = $input['model_' . $name];
 		}
