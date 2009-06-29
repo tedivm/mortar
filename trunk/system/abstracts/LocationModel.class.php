@@ -59,6 +59,9 @@ class LocationModel extends AbstractModel
 			if(!$this->location->save())
 				throw new BentoError('Unable to save model location');
 
+			if($parentLocation = $this->location->getParent())
+				Cache::clear('locations', $parentLocation->getId(), 'children');
+
 		}catch(Exception $e){
 			$db->rollback();
 			$db->autocommit(true);
