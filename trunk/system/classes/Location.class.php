@@ -208,13 +208,14 @@ class Location
 	public function getParent()
 	{
 		if(is_numeric($this->parent))
-		{
-			return new Location($this->parent);
-		}elseif($this->parent instanceof Location){
-			return $this->parent;
-		}
+			$this->parent = new Location($this->parent);
 
-		return false;
+		if($this->parent instanceof Location)
+		{
+			return $this->parent;
+		}else{
+			return false;
+		}
 	}
 
 	/**
@@ -247,9 +248,22 @@ class Location
 	{
 		if($name)
 		{
-			return $this->meta[$name];
+			if(isset($this->meta[$name]))
+			{
+				return $this->meta[$name];
+			}else{
+				$parent = $this->getParent();
+				if($parent = $this->getParent())
+					return $parent->getMeta($name);
+				return false;
+			}
 		}else{
-			return $this->meta;
+			if($parent = $this->getParent())
+			{
+				return array_merge($parent->getMeta(), $this->meta);
+			}else{
+				return $this->meta;
+			}
 		}
 	}
 
@@ -354,7 +368,7 @@ class Location
 	 */
 	public function setParent(Location $parent)
 	{
-		$this->parent = $parent->getId();
+		$this->parent = $parent;
 	}
 
 	/**
@@ -386,8 +400,8 @@ class Location
 					$locationInfo['name'] = $dbLocation->name;
 					$locationInfo['resourceType'] = $dbLocation->resourceType;
 					$locationInfo['resourceId'] = $dbLocation->resourceId;
-					$locationInfo['createdOn'] = $dbLocation->creationDate;
-					$locationInfo['lastModified'] = $dbLocation->lastModified;
+					$locationInfo['createdOn'] = strtotime($dbLocation->creationDate . 'UTC');
+					$locationInfo['lastModified'] = strtotime($dbLocation->lastModified . 'UTC');
 					$locationInfo['owner'] = $dbLocation->owner;
 					$locationInfo['group'] = $dbLocation->groupOwner;
 					$locationInfo['inherits'] = ($dbLocation->inherits == 1);
@@ -418,11 +432,6 @@ class Location
 
 				foreach($properties as $property)
 					$this->$property = $locationInfo[$property];
-
-				// keeping the parent information out of cache will make sure changes cascade faster
-				if($parent = $this->getParent())
-					$this->meta = array_merge($parent->getMeta(), $this->meta);
-
 
 				return true;
 			}else{
@@ -611,9 +620,9 @@ class Location
 	 */
 	public function __toString()
 	{
-		if(isset($this->parent))
+		if($parent = $this->getParent())
 		{
-			$output = (string) $this->parent;
+			$output = (string) $parent;
 		}
 
 		if($this->name == 'root'){
