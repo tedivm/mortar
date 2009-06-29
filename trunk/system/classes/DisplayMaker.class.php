@@ -260,9 +260,6 @@ class DisplayMaker
 		$this->tags = $tags;
 	}
 
-
-
-
 	/**
 	 * This will load a template from a modules package
 	 *
@@ -348,7 +345,7 @@ class DisplayMaker
 	public function addDate($name, $timestamp)
 	{
 		if(is_numeric($timestamp))
-			$timestamp = date("Y-m-d H:i:s", $timestamp);
+			$timestamp = gmdate("Y-m-d H:i:s", $timestamp);
 
 		$this->replacementDates[$name] = $timestamp;
 	}
@@ -369,6 +366,8 @@ class DisplayMaker
 			return $this->mainString;
 
 		$preferedTimeZone = new DateTimeZone(date_default_timezone_get());
+		$utcTimeZone = new DateTimeZone('UTC');
+
 
 		foreach($this->tags as $tagArray)
 		{
@@ -391,7 +390,7 @@ class DisplayMaker
 					$format = DATE_RFC850;
 				}
 
-				$dateTime = new DateTime($this->replacementDates[$tagArray['name']], new DateTimeZone('UTC'));
+				$dateTime = new DateTime($this->replacementDates[$tagArray['name']], $utcTimeZone);
 				$dateTime->setTimezone($preferedTimeZone);
 
 				$processTags[] = $tagArray['original'];
