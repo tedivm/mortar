@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseActionSiteRead extends ModelActionLocationBasedBase
+class BentoBaseActionSiteRead extends ModelActionLocationBasedRead
 {
 	public $adminSettings = array('headerTitle' => 'Installer',
 									'tab' => 'Main');
@@ -13,7 +13,7 @@ class BentoBaseActionSiteRead extends ModelActionLocationBasedBase
 	}
 
 
-	public function viewAdmin($resource)
+	public function viewAdmin($page)
 	{
 		if(!ActiveUser::isLoggedIn())
 			throw new AuthenticationError();
@@ -23,10 +23,10 @@ class BentoBaseActionSiteRead extends ModelActionLocationBasedBase
 		if($query['tab'])
 			$this->adminSettings['tab'] = $query['tab'];
 
-		return 'Default Admin page';
+		return parent::viewAdmin($page);
 	}
 
-	public function viewHtml()
+	public function viewHtml($page)
 	{
 
 		if(is_numeric($this->model['defaultChild']))
