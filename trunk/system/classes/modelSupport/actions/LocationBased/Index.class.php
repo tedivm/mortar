@@ -17,17 +17,13 @@
  */
 class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 {
-
+	protected $indexDateFormat = 'm.d.y g:i a';
 	public $indexBrowseBy = 'creationDate';
 	public $indexBrowseOptions = array('name', 'resourceType', 'creationDate', 'owner', 'groupOwner', 'lastModified');
 	public $indexMaxLimit = 100;
 	public $indexLimit = 10;
 	public $childModels = array();
 
-	/**
-	 * This literally does nothing at all.
-	 *
-	 */
 	public function logic()
 	{
 		$childLocations = $this->getChildren();
@@ -121,34 +117,41 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		return $processedIds;
 	}
 
-	protected function getChildrenByBrowsing($offset, $numberChildren, $browseBy = 'creationDate')
+	protected function getChildrenByBrowsing($offset, $numberChildren, $browseBy = 'creationDate', $ascending = false)
 	{
 		$query = Query::getQuery();
 
+		if(!in_array($browseBy, $this->indexBrowseOptions))
+			$browseBy = $this->indexBrowseBy;
+
+		$order = $ascending ? 'ASC' : 'DESC';
+
 		$locationId = $this->model->getLocation()->getId();
-		$cache = new Cache('locations', $locationId, 'children', 'browseBy', $browseBy, $offset, $numberChildren);
+		$cache = new Cache('locations', $locationId, 'children', 'browseBy',
+								$browseBy, $order, $offset, $numberChildren);
 		$childrenLocations = $cache->getData();
 
-		if($cache->isStale())
+		if($cache->isStale() || true)
 		{
 			$selectStmt = DatabaseConnection::getStatement();
+
+			// $browseby is checked against an array of allowed options
+			// $order is set by this function
 		  	$selectStmt->prepare('SELECT location_id
 							  		FROM locations
 							  		WHERE parent = ?
-							  		ORDER BY ?
+							  		ORDER BY ' . $browseBy . ' ' . $order . '
 							  		LIMIT ?, ?');
-			$selectStmt->bindAndExecute('isii', $locationId, $browseBy, $offset, $numberChildren);
+			$selectStmt->bindAndExecute('iii', $locationId, $offset, $numberChildren);
 
 			if($selectStmt->num_rows() > 0)
 			{
 				$childrenLocations = array();
 				while($row = $selectStmt->fetch_array())
 					$childrenLocations[] = $row['location_id'];
-
 			}else{
 				$childrenLocations = false;
 			}
-
 			$cache->storeData($childrenLocations);
 		}
 		return $childrenLocations;
@@ -244,17 +247,26 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 			$location = $model->getLocation();
 			$baseUrl->locationId = $location->getId();
 			$table->addField('name', $location->getName());
+
+			$table->addField('creation', date($this->indexDateFormat, $location->getCreationDate()));
+
 		}else{
 			$baseUrl->type = $model->getType();
 			$baseUrl->id = $model->getId();
+
+			$name = isset($model['name']) ? $model['name'] : isset($model['title']) ? $model['title'] : false;
+			if($name)
+				$table->addField('name', $name);
 		}
 
 		$baseUrl->format = 'Admin';
 
-		$table->addField('read', $baseUrl->getLink('Read'));
+		$actionTypes = array('Read', 'Edit', 'Delete');
 
+		$location = $model->getLocation();
+		if(isset($location) && $location->hasChildren())
+			array_unshift($actionTypes, 'Index');
 
-		$actionTypes = array('Index', 'Edit', 'Delete');
 
 		$user = ActiveUser::getUser();
 		$userId = $user->getId();
