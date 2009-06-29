@@ -45,6 +45,10 @@ class Url
 
 		$attributes = $this->attributes;
 		ksort($attributes);
+
+		if(defined('XDEBUG_PROFILE') && XDEBUG_PROFILE)
+			$attributes['XDEBUG_PROFILE'] = 1;
+
 		$urlString = '';
 
 		if(!isset($info->Configuration['url']['modRewrite']) || !$info->Configuration['url']['modRewrite'])
@@ -135,7 +139,7 @@ class Url
 			$modelType = $location->getType();
 		}
 
-		if(isset($modelType))
+		if(isset($modelType) && count($attributes) > 0)
 		{
 			if(isset($attributes['action']) && $attributes['action'] == 'Read')
 				unset($attributes['action']);
@@ -154,6 +158,7 @@ class Url
 				$pathTemplate = $pathCacheDisplay->makeDisplay(false);
 				$pathCache->storeData($pathTemplate);
 			}
+
 			$parameters = new DisplayMaker();
 			$parameters->setDisplayTemplate($pathTemplate);
 			$urlTags = $parameters->tagsUsed();
@@ -322,12 +327,12 @@ class Url
 
 			$actionName = $actionInfo['className'];
 			$requiredPermission = staticHack($actionName, 'requiredPermission');
-			$permission = new Permissions($this->attributes['locationId'], $userId);
-			return $permission->isAllowed($requiredPermission);
+			$permissions = new Permissions($this->attributes['locationId'], $userId);
+			return $permissions->isAllowed($requiredPermission);
 
 		}elseif(isset($this->attributes['module'])){
 
-			$permissionList = new PermissionLists($userId);
+			$permissionsList = new PermissionLists($userId);
 			$actionName = importFromModule($this->attributes['action'], $this->attributes['module'], 'action');
 			$permission = staticHack($actionName, 'requiredPermission');
 			$permissionType = staticHack($actionName, 'requiredPermissionType');
@@ -338,7 +343,7 @@ class Url
 			if(!$permissionType)
 				$permissionType = 'base';
 
-			if(!$permissionList->checkAction($permissionType, $permission))
+			if(!$permissionsList->checkAction($permissionType, $permission))
 			{
 				return false;
 			}
