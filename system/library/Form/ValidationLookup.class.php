@@ -49,7 +49,7 @@ class ValidationLookup
 									'number' => 'FormValidationNumber',
 									'digits' => 'FormValidationDigits',
 									'letterswithbasicpunc' => 'FormValidationLettersWithPunctuation',
-									'alphanumeric' => 'FormValidationAlphaNumberic',
+									'alphanumeric' => 'FormValidationAlphaNumeric',
 									'lettersonly' => 'FormValidationLettersOnly',
 									'nowhitespace' => 'FormValidationNoWhiteSpace');
 
@@ -61,6 +61,7 @@ class ValidationLookup
 	 */
 	static public function getClass($validationRule)
 	{
+		$validationRule = strtolower($validationRule);
 		if(!isset(self::$validators[$validationRule]))
 			return false;
 
