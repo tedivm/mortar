@@ -767,7 +767,7 @@ class ObjectRelationshipMapper
 
 		$db = DatabaseConnection::getConnection($this->db_write);
 
-		if(count($sql_input) < 1)
+		if(!isset($sql_input) || count($sql_input) < 1)
 		{
 			if(!$db->query($query))
 			{
