@@ -163,18 +163,13 @@ function staticHack($className, $memberName)
 		$className = get_class($className);
 
 	if(!class_exists($className, false))
-		return;
+		return null;
 
-	if (!@property_exists($className,$memberName)) {
-		//trigger_error("Static property does not exist: $class::\$$var");
-		//debug_callstack(); //This is just a wrapper for debug_backtrace() for HTML
-		return;
-	}
+	if(!property_exists($className, $memberName))
+		return null;
 
 	//Store a reference so that the base data can be referred to
-		//The code [[ return eval('return &'.$class.'::$'.$var.';') ]] does not work - can not return references...
-		//To establish the reference, use [[ $ref=&get_static(...) ]]
-	eval('$temp=&'.$className.'::$'.$memberName.';'); //using
+	eval('$temp=&'.$className.'::$'.$memberName.';');
 	return $temp;
 }
 
