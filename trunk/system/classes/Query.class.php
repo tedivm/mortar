@@ -94,7 +94,6 @@ class Query
 	 */
 	static protected function processInput($inputArray)
 	{
-
 	// first lets check to see if there is a path
 		if(isset($inputArray['p']))
 		{
@@ -114,7 +113,7 @@ class Query
 			}
 
 			$path = rtrim($path, '/');
-			$pathArray = explode('/', str_replace('_', ' ', $path));
+			$pathArray = explode('/', $path);
 			$rootPiece = strtolower($pathArray[0]);
 
 			if(isset($pathArray[0]) && strtolower($pathArray[0]) == 'admin')
@@ -166,10 +165,10 @@ class Query
 		if(isset($inputArray['location']) && is_numeric($inputArray['location']))
 		{
 			$location = new Location($inputArray['location']);
-		}elseif(isset($pathArray) && count($pathArray) > 0 && INSTALLMODE == false){
+		}elseif(isset($pathArray) && INSTALLMODE == false){
 	// if location isn't set, find it from the path
 
-			if(in_array($pathArray[0], array_keys(Url::$specialDirectories)))
+			if(count($pathArray) > 0 && in_array($pathArray[0], array_keys(Url::$specialDirectories)))
 			{
 				$inputArray['type'] = Url::$specialDirectories[array_shift($pathArray)];
 				$resource['type'] = $inputArray['type'];
@@ -183,7 +182,7 @@ class Query
 
 				foreach($pathArray as $pathIndex => $pathPiece)
 				{
-					if(!($childLocation = $currentLocation->getChildByName(str_replace('-', ' ', $pathPiece))))
+					if(!($childLocation = $currentLocation->getChildByName(str_replace(' ', '_', $pathPiece))))
 						break;
 
 					// if the current location has a child with the next path pieces name, we descend

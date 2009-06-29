@@ -195,7 +195,7 @@ class RequestWrapper
 		if(!class_exists($className, false))
 		{
 			if(!(file_exists($path) && include($path)) || !class_exists($className, false))
-				throw new ResourceNotFoundError('Unable to load action class ' . $className . ' at location: ' . $path,
+				throw new ResourceNotFoundError('Unable to load action class ' . $className . ' at path: ' . $path,
 				 '405');
 		}
 
