@@ -34,7 +34,7 @@ class LocationModel extends AbstractModel
 			}
 
 			if($locationId)
-				$this->location = new Location($locationId);
+				$this->location = $locationId;
 		}
 	}
 
@@ -48,18 +48,20 @@ class LocationModel extends AbstractModel
 			if(!parent:: save())
 				throw new BentoError('Unable to save model');
 
-			if(!$this->location)
+			$location = $this->getLocation();
+
+			if(!$location)
 			{
 				throw new BentoError('There is no location');
 			}
 
-			$this->location->setResource($this->getType(), $this->getId());
-			$this->location->setName($this->properties['name']);
+			$location->setResource($this->getType(), $this->getId());
+			$location->setName($this->properties['name']);
 
-			if(!$this->location->save())
+			if(!$location->save())
 				throw new BentoError('Unable to save model location');
 
-			if($parentLocation = $this->location->getParent())
+			if($parentLocation = $location->getParent())
 				Cache::clear('locations', $parentLocation->getId(), 'children');
 
 		}catch(Exception $e){
@@ -117,8 +119,6 @@ class LocationModel extends AbstractModel
 		return in_array($resourceType, $modelList);
 	}
 
-
-
 	public function getLocation()
 	{
 		if(!isset($this->location))
@@ -128,7 +128,14 @@ class LocationModel extends AbstractModel
 			$name = (isset($this->properties['name'])) ? $this->properties['name'] : 'tmp';
 			$this->location->setResource($this->getType(), $id);
 			$this->location->setName($name);
+
+		}elseif(is_numeric($this->location)){
+			$this->location = new Location($this->location);
 		}
+
+		if(!($this->location instanceof Location))
+			return false;
+
 		return $this->location;
 	}
 
