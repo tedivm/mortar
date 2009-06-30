@@ -93,7 +93,7 @@ class LocationModel extends AbstractModel
 	public function setParent(Location $parent)
 	{
 		$parentModel = $parent->getResource();
-		if(!$parentModel->canHaveChildType($this->getType()))
+		if(!(defined('INSTALLMODE') && INSTALLMODE) && !$parentModel->canHaveChildType($this->getType()))
 			throw new BentoError('Attempted to save ' . $this->getType() . ' to incompatible parent location.', 409);
 
 		$location = $this->getLocation();
