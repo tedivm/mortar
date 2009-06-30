@@ -30,7 +30,10 @@ class AbstractModel implements Model
 		$handlerInfo = ModelRegistry::getHandler($this->getType());
 		$this->module = $handlerInfo['module'];
 
-		if(!is_null($id))
+		if(is_numeric($id))
+			$id = (int) $id;
+
+		if(!is_null($id) && $id !== 0)
 		{
 			if(!$this->load($id))
 				throw new BentoError('No model of type ' . $this->getType() . ' with id ' . $id);

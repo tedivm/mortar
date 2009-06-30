@@ -296,8 +296,14 @@ class AdminControllerResourceFilterInstallerNavigation
 	public function update($adminController)
 	{
 		$page = $adminController->getResource();
-		$page['navbar'] = '
-   <div id="left_sidebar_menu" class="sidebar">
+
+	//	$page = new Page();
+	//	$menu = $page->getMenu('installer');
+
+	//	$menu->setMenuLabel('Installation Links');
+
+		$page['__navbar_1'] = '
+   <div id="main_sidebar_menu" class="sidebar">
       <div class="sidebar_menu">
          <h2>Menu</h2>
          <ul>
@@ -307,11 +313,25 @@ class AdminControllerResourceFilterInstallerNavigation
          </ul>
       </div>
    </div>
-'; // $adminNav->getLinks($tab);
+';
+
+		$page['__navbar_2'] = '
+   <div id="modelNav_sidebar_menu" class="sidebar">
+      <div class="sidebar_menu">
+         <h2>Menu</h2>
+         <ul>
+            <li class="sidebar_menu last">
+               <a href="#">Menu Item</a>
+            </li>
+         </ul>
+      </div>
+   </div>
+';
 
 
 
 		$page['navtabs'] = '   <ul id="top-navigation">
+		<!--
       <li class="active BB_tool_box">
          <a href="#">Tab</a>
       </li>
@@ -323,7 +343,7 @@ class AdminControllerResourceFilterInstallerNavigation
       <li class="BB_tool_box">
          <a href="#">Tab</a>
       </li>
-
+		-->
    </ul>
 '; // $adminNav->getTabs($tab);
 
