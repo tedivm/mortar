@@ -12,6 +12,7 @@
 class AbstractModel implements Model
 {
 	static public $type;
+	private $currentType;
 
 	protected $table;
 
@@ -159,7 +160,10 @@ class AbstractModel implements Model
 
 	public function getType()
 	{
-		return staticHack(get_class($this), 'type');
+		if(!isset($this->currentType))
+			$this->currentType = staticHack(get_class($this), 'type');
+
+		return $this->currentType;
 	}
 
 	public function getModule()
