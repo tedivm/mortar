@@ -179,7 +179,7 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 		if(!($parentLocation instanceof Location))
 			throw new BentoError('Attempted to add LocationModule without specifying a parent.');
 
-		$this->permissionObject = new Permissions($parentLocation->getParent(), $user);
+		$this->permissionObject = new Permissions($parentLocation, $user);
 	}
 
 	/**

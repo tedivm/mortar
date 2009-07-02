@@ -564,6 +564,9 @@ class Page implements ArrayAccess
 			$x = 1;
 			do
 			{
+				if($location->getType() == 'Root')
+					break;
+
 				$url = new Url();
 				$url->location = $location->getId();
 				$url->format = $query['format'];
@@ -573,19 +576,22 @@ class Page implements ArrayAccess
 
 			}while($location = $location->getParent());
 
-			$urlList = array_reverse($urlList);
-
-			$breadCrumbList = new HtmlObject('ul');
-			$breadCrumbList->property('id', 'breadcrumbs');
-			$breadCrumbList->addClass('breadcrumbs');
-
-			foreach($urlList as $url)
+			if(count($urlList) > 0)
 			{
-				$listItem = $breadCrumbList->insertNewHtmlObject('li');
-				$listItem->wrapAround($url);
+				$urlList = array_reverse($urlList);
+
+				$breadCrumbList = new HtmlObject('ul');
+				$breadCrumbList->property('id', 'breadcrumbs');
+				$breadCrumbList->addClass('breadcrumbs');
+
+				foreach($urlList as $url)
+				{
+					$listItem = $breadCrumbList->insertNewHtmlObject('li');
+					$listItem->wrapAround($url);
+				}
+				$listItem->addClass('current');
+				$this->addRegion('breadcrumbs', (string) $breadCrumbList);
 			}
-			$listItem->addClass('current');
-			$this->addRegion('breadcrumbs', (string) $breadCrumbList);
 		}
 
 
@@ -608,7 +614,7 @@ class Page implements ArrayAccess
 
 		$template->addContent('js_path', $jsInclude);
 
-		return $template->makeDisplay(!(DEBUG>2));
+		return $template->makeDisplay(!(defined('CLEAN_TEMPLATES') && CLEAN_TEMPLATES === FALSE));
 	}
 
 	public function offsetGet($offset)
