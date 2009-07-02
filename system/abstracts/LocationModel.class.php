@@ -34,7 +34,7 @@ class LocationModel extends AbstractModel
 				}
 			}
 
-			if($locationId)
+			if(isset($locationId))
 			{
 				$this->location = new Location($locationId);
 				$this->properties['name'] = $this->location->getName();
