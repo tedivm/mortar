@@ -644,23 +644,16 @@ class Location
 	 */
 	public function getSite()
 	{
-		$tempLoc = $this;
-
-		while($tempLoc->getType() != 'Site')
+		if($this->getType() == 'Site')
 		{
-			if(!$parent = $tempLoc->getParent())
-				break;
-
-			$tempLoc = $parent;
-		}
-
-		if($tempLoc->getType() == 'Site')
-		{
-			$tempResource = $tempLoc->getResource(true);
+			$tempResource = $this->getResource(true);
 			return $tempResource['id'];
-		}else{
-			return false;
 		}
+
+		if($parent = $this->getParent())
+			return $parent->getSite();
+
+		return false;
 	}
 
 	/**
