@@ -4,6 +4,7 @@ class LocationForm extends Form
 {
 	protected function define()
 	{
+		/*
 		$this->changeSection('location')->
 			setlegend('Location Information');
 
@@ -12,6 +13,8 @@ class LocationForm extends Form
 			setLabel('Name')->
 			addRule('alphanumeric')->
 			addRule('required');
+
+		*/
 	}
 }
 
