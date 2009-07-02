@@ -115,28 +115,36 @@ class Url
 			if($attributes['location'] instanceof Location)
 			{
 				$location = $attributes['location'];
-				unset($attributes['location']);
+				//unset($attributes['location']);
 			}elseif(is_numeric($attributes['location'])){
 				$location = new Location($attributes['location']);
-				unset($attributes['location']);
+				//unset($attributes['location']);
 			}else{
 
 			}
 
-			// here we will iterate back to the site, creating the path to the model in reverse.
-			$tempLoc = $location;
-			$locationString = '';
-			while($tempLoc->getType() != 'Site')
+			if(isset($location) && $location->getSite())
 			{
-				$locationString = str_replace(' ', '-', $tempLoc->getName()) . '/' . $locationString;
-				if(!$parent = $tempLoc->getParent())
-					break;
-				$tempLoc = $parent;
-			}
-			$urlString .= $locationString;
+				unset($attributes['location']);
 
-			// set the 'modelType' variable so that it can be used later for processing the rest of the attributes
-			$modelType = $location->getType();
+
+
+
+				// here we will iterate back to the site, creating the path to the model in reverse.
+				$tempLoc = $location;
+				$locationString = '';
+				while($tempLoc->getType() != 'Site')
+				{
+					$locationString = str_replace(' ', '-', $tempLoc->getName()) . '/' . $locationString;
+					if(!$parent = $tempLoc->getParent())
+						break;
+					$tempLoc = $parent;
+				}
+				$urlString .= $locationString;
+
+				// set the 'modelType' variable so that it can be used later for processing the rest of the attributes
+				$modelType = $location->getType();
+			}
 		}
 
 		if(isset($modelType) && count($attributes) > 0)
@@ -189,7 +197,10 @@ class Url
 			$ssl = false;
 		}
 
-		$site = (isset($location)) ? ModelRegistry::loadModel('Site', $location->getSite()) : ActiveSite::getSite();
+		if(isset($location))
+			$siteId = $location->getSite();
+
+		$site = (isset($siteId) && is_numeric($siteId)) ? ModelRegistry::loadModel('Site', $siteId) : ActiveSite::getSite();
 
 		if($site)
 		{
