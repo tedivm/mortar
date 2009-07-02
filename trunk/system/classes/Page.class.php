@@ -554,6 +554,40 @@ class Page implements ArrayAccess
 			$this->addRegion($name, $menuDisplay->makeDisplay());
 		}
 
+		$user = ActiveUser::getUser();
+		$userId = $user->getId();
+		$query = Query::getQuery();
+		if(isset($query['location']) && is_numeric($query['location']))
+		{
+			$location = new Location($query['location']);
+			$urlList = array();
+			$x = 1;
+			do
+			{
+				$url = new Url();
+				$url->location = $location->getId();
+				$url->format = $query['format'];
+
+				if($url->checkPermission($userId))
+					$urlList[] = $url->getLink(str_replace('_', ' ', $location->getName()));
+
+			}while($location = $location->getParent());
+
+			$urlList = array_reverse($urlList);
+
+			$breadCrumbList = new HtmlObject('ul');
+			$breadCrumbList->property('id', 'breadcrumbs');
+			$breadCrumbList->addClass('breadcrumbs');
+
+			foreach($urlList as $url)
+			{
+				$listItem = $breadCrumbList->insertNewHtmlObject('li');
+				$listItem->wrapAround($url);
+			}
+			$listItem->addClass('current');
+			$this->addRegion('breadcrumbs', (string) $breadCrumbList);
+		}
+
 
 	}
 
