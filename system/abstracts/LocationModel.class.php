@@ -6,6 +6,7 @@ class LocationModel extends AbstractModel
 	protected $location;
 	static public $fallbackModelActions = array('LocationBasedRead', 'LocationBasedAdd', 'LocationBasedEdit',
 													'LocationBasedDelete', 'LocationBasedIndex');
+	static public $autoName = false;
 
 	public function __construct($id = null)
 	{
@@ -34,7 +35,10 @@ class LocationModel extends AbstractModel
 			}
 
 			if($locationId)
-				$this->location = $locationId;
+			{
+				$this->location = new Location($locationId);
+				$this->properties['name'] = $this->location->getName();
+			}
 		}
 	}
 
@@ -56,7 +60,20 @@ class LocationModel extends AbstractModel
 			}
 
 			$location->setResource($this->getType(), $this->getId());
-			$location->setName($this->properties['name']);
+
+
+			// I'm kind of torn on whether I should force the autoname for models that request it, or leave the
+			// option open for programmers who feel the need to give custom names, so I'm siding on the less restrictive
+			// choice for now.
+			if(!isset($this->properties['name'])
+					|| $this->properties['name'] == 'tmp'
+					||staticHack($this, 'autoName') === true)
+			{
+				$name = $this->getType() . $this->getId();
+				$location->setName($name);
+			}elseif(isset($this->properties['name'])){
+				$location->setName($this->properties['name']);
+			}
 
 			if(!$location->save())
 				throw new BentoError('Unable to save model location');

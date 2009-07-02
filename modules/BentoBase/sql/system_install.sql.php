@@ -243,6 +243,18 @@ CREATE TABLE sites
 /* Add Indexes for: sites */
 CREATE INDEX sites_primaryUrl_Idx ON sites (primaryUrl);
 
+/******************** Add Table: trash ************************/
+
+/* Build Table Structure */
+CREATE TABLE trash
+(
+	id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	originLocation INTEGER UNSIGNED NOT NULL
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+/* Add Indexes for: trash */
+CREATE INDEX trash_id_location_id_Idx ON trash (id, originLocation);
+
 /******************** Add Table: urls ************************/
 
 /* Build Table Structure */
@@ -373,6 +385,10 @@ ALTER TABLE sites ADD CONSTRAINT fk_sites_locations
 /************ Foreign Key: fk_sites_urls ***************/
 ALTER TABLE sites ADD CONSTRAINT fk_sites_urls
 	FOREIGN KEY (primaryUrl) REFERENCES urls (path) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/************ Foreign Key: fk_trash_locations ***************/
+ALTER TABLE trash ADD CONSTRAINT fk_trash_locations
+	FOREIGN KEY (originLocation) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_domains_sites ***************/
 ALTER TABLE urls ADD CONSTRAINT fk_domains_sites

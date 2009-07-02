@@ -356,7 +356,11 @@ class BentoBaseInstaller
 
 			$locationRoot->save();
 
-
+			$locationTrash = new Location();
+			$locationTrash->setName('Trash');
+			$locationTrash->setResource('TrashCan', '0');
+			$locationTrash->setParent($locationRoot);
+			$locationTrash->save();
 
 
 
