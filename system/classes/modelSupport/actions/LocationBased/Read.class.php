@@ -74,8 +74,8 @@ class ModelActionLocationBasedRead extends ModelActionLocationBasedBase
 	 */
 	public function viewJson()
 	{
-		$array = ModelToArray::convert($this->model, $this->requestHandler);
-		return $array;
+		$htmlConverter = $this->model->getModelAs('Array');
+		return $htmlConverter->getOutput();
 	}
 }
 

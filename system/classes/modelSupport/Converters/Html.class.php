@@ -16,65 +16,77 @@
  */
 class ModelToHtml
 {
+	protected $model;
+	protected $modelProperties = array(array('name' => 'content', 'permission' => 'Read'),
+										array('name' => 'title', 'permission' => 'Read'));
+	protected $template;
+
+	public function __construct(Model $model)
+	{
+		$this->model = $model;
+	}
+
+	public function useTemplate($template)
+	{
+		$this->template = $template;
+	}
+
 	/**
 	 * This function converts a model into an HTML string
 	 *
-	 * @static
 	 * @param Model $model
 	 * @return string
 	 */
-	static public function convert($model, $handler)
+	public function getOutput()
 	{
-		$display = new DisplayMaker();
+		$properties = $this->modelProperties;
+		$modelDisplay = new DisplayMaker();
+		$modelDisplay->setDisplayTemplate($this->template);
 
-		if($display->loadTemplate($model->getType() . 'Display', $model->getModule()))
+		$user = ActiveUser::getUser();
+		$permission = new Permissions($this->model->getLocation(), $user->getId());
+
+		foreach($properties as $property)
 		{
-			$tags = $display->tagsUsed();
+			try {
+				if(!isset($property['name']))
+					continue;
 
-			$location = $model->getLocation();
+				if(isset($property['permission']) && !$permission->isAllowed($property['permission']))
+					continue;
 
-			if($index = array_search('createdOn', $tags))
-			{
-				$display->addDate('createdOn', $location->getCreationDate());
-				unset($tags[$index]);
+				if(isset($this->model[$property['name']]))
+					$modelDisplay->addContent('model_' . $property['name'], $this->model[$property['name']]);
+
+			}catch(Exception $e){
+				// if one property fails we don't want to abort the listing
 			}
-
-			if($index = array_search('lastModified', $tags))
-			{
-				$display->addDate('lastModified', $location->getLastModified());
-				unset($tags[$index]);
-			}
-
-			if($index = array_search('permalink', $tags))
-			{
-				$url = new Url();
-				$url->location = $location;
-				$display->addContent('permalink', (string) $url);
-				unset($tags[$index]);
-			}
-
-			if(is_array($tags))
-				foreach($tags as $tagName)
-			{
-
-				if(strpos($tagName, 'attr_') === 0)
-				{
-					$tagName = substr($tagName, 5);
-					if(isset($model->$tagName))
-						$display->addContent($tagName, $model->tagName);
-
-				}elseif(isset($model[$tagName])){
-					$display->addContent($tagName, $model[$tagName]);
-				}
-
-			}
-
-			return $display->makeDisplay();
-
-		}else{
-			if(isset($model['content']))
-				return $model['content'];
 		}
+
+		$location = $this->model->getLocation();
+		$url = new Url();
+		$url->location = $location->getId();
+
+		$query = Query::getQuery();
+		$url->format = $query['format'];
+
+		$modelDisplay->addContent('permalink', (string) $url);
+
+		$userId = $location->getOwner();
+
+		if(is_numeric($userId))
+		{
+			$user = ModelRegistry::loadModel('User', $userId);
+			$modelDisplay->addContent('model_owner', $user['name']);
+		}
+
+		$modelDisplay->addDate('model_creationTime', $location->getCreationDate());
+		$modelDisplay->addDate('model_lastModified', $location->getLastModified());
+		$modelDisplay->addContent('model_name', $location->getName());
+
+		$modelOutput = $modelDisplay->makeDisplay(true);
+
+		return $modelOutput;
 	}
 
 }
