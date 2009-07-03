@@ -212,20 +212,29 @@ class Theme
 	 * @param string $model
 	 * @return string|false Returns a string or, if no suitable template can be found, false.
 	 */
-	public function getModelTemplate($template, $model)
+	public function getModelTemplate($templateName, $model)
 	{
-		if($templateString = $this->getTemplateFromTheme('models', $model, $template))
-			return $templateString;
+		$cache = new Cache('models', $model, 'templates', $templateName);
+		$template = $cache->getData();
 
-		$handler = ModelRegistry::getHandler($model);
+		if($cache->isStale())
+		{
+			$handler = ModelRegistry::getHandler($model);
 
-		if($templateString = $this->getTemplateFromPackage($model . $template, $handler['module']))
-			return $templateString;
+			if($templateString = $this->getTemplateFromTheme('models', $model, $templateName))
+			{
+				$template = $templateString;
+			}elseif($templateString = $this->getTemplateFromPackage($model . $templateName, $handler['module'])){
+				$template = $templateString;
+			}elseif($templateString = $this->getTemplateFromSystem('models', $templateName)){
+				$template = $templateString;
+			}else{
+				$template = false;
+			}
+			$cache->storeData($template);
+		}
 
-		if($templateString = $this->getTemplateFromSystem('models', $template))
-			return $templateString;
-
-		return false;
+		return $template;
 	}
 
 	/**
