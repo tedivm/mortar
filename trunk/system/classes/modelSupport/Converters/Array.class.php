@@ -16,6 +16,13 @@
  */
 class ModelToArray
 {
+	protected $model;
+
+	public function __construct(Model $model)
+	{
+		$this->model = $model;
+	}
+
 	/**
 	 * This function converts a model into an array
 	 *
@@ -23,41 +30,9 @@ class ModelToArray
 	 * @param Model $model
 	 * @return array
 	 */
-	static function convert($model)
+	public function getOutput()
 	{
-		$finalArray = array();
-		$properties = $model->getProperties();
-
-		foreach($properties as $index => $property)
-		{
-			$propertyName = $property->getName();
-			$node = $this->$name;
-
-			if(is_scalar($node))
-			{
-				$finalArray[$name] = $node;
-			}elseif(is_array()){
-				// do we need to descend and sanitize this thing?
-				$finalArray[$name] = $node;
-			}elseif($node instanceof Model){
-				$finalArray[$name] = $node->__toArray();
-			}
-		}
-
-		$attributes = $model->getAttributes();
-
-		foreach($properties as $index => $property)
-		{
-			$propertyName = $property->getName();
-			$node = $this->$name;
-
-			if(is_scalar($node))
-			{
-				$finalArray['attributes'][$name] = $node;
-			}
-		}
-
-		return $finalArray;
+		return $this->model->__toArray();
 	}
 
 }

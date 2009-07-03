@@ -307,24 +307,25 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		{
 			$listingHtml = new HtmlObject('div');
 			$listingHtml->property('name', 'listing-container');
-
+			$theme = $page->getTheme();
 			$templates = array();
 			$x = 1;
+
 			foreach($this->childModels as $model)
 			{
-				if($modelDisplay = $this->modelToHtml($page, $model, $templateName))
+				$type = $model->getType();
+
+				if($modelDisplay = $this->modelToHtml($page, $model, 'Listing.html'))
 				{
 					$listingHtml->insertNewHtmlObject('div')->
 						property('name', 'listing-container-child-' . $x)->
-						addClass('modelListing')->addClass($model->getType())->
+						addClass('modelListing')->addClass($type)->
 						wrapAround($modelDisplay);
 					$x++;
 				}
 			}
-
 			$output = (string) $listingHtml;
 		}
-
 		return $output;
 	}
 

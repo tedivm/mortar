@@ -101,71 +101,10 @@ abstract class ModelActionLocationBasedBase extends ModelActionBase
 	protected function modelToHtml($page, $model, $templateName)
 	{
 		$theme = $page->getTheme();
-		if(!isset($this->indexModelProperties[$model->getType()]))
-		{
-			$properties = array(
-							array('name' => 'content', 'permission' => 'Read'),
-							array('name' => 'title', 'permission' => 'Read'));
-		}else{
-			$properties = $this->indexModelProperties[$model->getType()];
-		}
-
-		$cache = new Cache('models', $model->getType(), 'templates', $templateName);
-		$template = $cache->getData();
-
-		if($cache->isStale())
-		{
-			$template = $theme->getModelTemplate($templateName, $model->getType());
-			$cache->storeData($template);
-		}
-
-		$modelDisplay = new DisplayMaker();
-		$modelDisplay->setDisplayTemplate($template);
-
-		$user = ActiveUser::getUser();
-		$permission = new Permissions($model->getLocation(), $user->getId());
-
-		foreach($properties as $property)
-		{
-			try {
-				if(!isset($property['name']))
-					continue;
-
-				if(isset($property['permission']) && !$permission->isAllowed($property['permission']))
-					continue;
-
-				if(isset($model[$property['name']]))
-					$modelDisplay->addContent('model_' . $property['name'], $model[$property['name']]);
-
-			}catch(Exception $e){
-				// if one property fails we don't want to abort the listing
-			}
-		}
-
-		$location = $model->getLocation();
-		$url = new Url();
-		$url->location = $location->getId();
-
-		$query = Query::getQuery();
-		$url->format = $query['format'];
-
-		$modelDisplay->addContent('permalink', (string) $url);
-
-		$userId = $location->getOwner();
-
-		if(is_numeric($userId))
-		{
-			$user = ModelRegistry::loadModel('User', $userId);
-			$modelDisplay->addContent('model_owner', $user['name']);
-		}
-
-		$modelDisplay->addDate('model_creationTime', $location->getCreationDate());
-		$modelDisplay->addDate('model_lastModified', $location->getLastModified());
-		$modelDisplay->addContent('model_name', $location->getName());
-
-		$modelOutput = $modelDisplay->makeDisplay(true);
-
-		return $modelOutput;
+		$template = $theme->getModelTemplate($templateName, $model->getType());
+		$htmlConverter = $model->getModelAs('Html');
+		$htmlConverter->useTemplate($template);
+		return $htmlConverter->getOutput();
 	}
 
 
