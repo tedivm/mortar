@@ -24,6 +24,7 @@ class AbstractModel implements Model
 	protected $content;
 
 	static public $fallbackModelActions = array('Read', 'Add', 'Edit', 'Delete', 'Index');
+	protected $backupActionDirectory = array('actions');
 
 	public function __construct($id = null)
 	{
@@ -136,14 +137,66 @@ class AbstractModel implements Model
 		if(in_array($actionName, staticHack(get_class($this), 'fallbackModelActions'))
 			|| ($actionName == 'Execute' && method_exists($this, 'execute')) )
 		{
-			$actionInfo = array();
-			$actionInfo['className'] = 'ModelAction' . $actionName;
-			$config = Config::getInstance();
-			$actionInfo['path'] = $config['path']['mainclasses'] . 'modelSupport/actions/' . $actionName . '.class.php';
-			return $actionInfo;
-		}else{
-			return false;
+			$pathArgs = $this->backupActionDirectory;
+			$pathArgs[] = $actionName;
+
+			if($path = call_user_func_array(array($this, 'getModelSupportFilePath'), $pathArgs))
+				return array('className' => 'ModelActionLocationBased' . $actionName, 'path' => $path);
 		}
+		return false;
+	}
+
+	public function getModelAs($format)
+	{
+		$className = $this->getType() . 'To' . $format;
+		if($path = $this->getModelFilePathFromPackage('Converters', $format))
+		{
+			if(!class_exists($className, false))
+				include($path);
+		}else{
+			$className = 'ModelTo' . $format;
+			if($path = $this->getModelSupportFilePath('Converters', $format))
+			{
+				if(!class_exists($className, false))
+					include($path);
+			}
+		}
+
+		if(!class_exists($className, false))
+			return false;
+
+		$modelConverter = new $className($this);
+		return $modelConverter;
+	}
+
+	protected function getModelFilePathFromPackage()
+	{
+		$args = func_get_args();
+		$package = new PackageInfo($this->getModule());
+		$pathToPackage = $package->getPath();
+		array_unshift($args, $pathToPackage);
+		return $this->getModelFilePath($args);
+	}
+
+	protected function getModelSupportFilePath()
+	{
+		$args = func_get_args();
+		$config = Config::getInstance();
+		$path = $config['path']['mainclasses'] . 'modelSupport';
+		array_unshift($args, $path);
+		return $this->getModelFilePath($args);
+	}
+
+	protected function getModelFilePath($args)
+	{
+		$path = '';
+		foreach ($args as $pathPiece)
+			$path .= '/' . $pathPiece;
+
+		$path .= '.class.php';
+
+		return (file_exists($path)) ? $path : false;
+
 	}
 
 	public function getContent()

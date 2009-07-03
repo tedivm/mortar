@@ -4,9 +4,10 @@ class LocationModel extends AbstractModel
 {
 	public $allowedChildrenTypes = array();
 	protected $location;
-	static public $fallbackModelActions = array('LocationBasedRead', 'LocationBasedAdd', 'LocationBasedEdit',
-													'LocationBasedDelete', 'LocationBasedIndex');
+
 	static public $autoName = false;
+	protected $backupActionDirectory = array('actions', 'LocationBased');
+
 
 	public function __construct($id = null)
 	{
@@ -156,10 +157,7 @@ class LocationModel extends AbstractModel
 		return $this->location;
 	}
 
-	protected function loadFallbackAction($actionName)
-	{
-		return parent::loadFallbackAction('LocationBased' . $actionName);
-	}
+
 
 	public function __toArray()
 	{
