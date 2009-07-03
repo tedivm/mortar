@@ -100,6 +100,12 @@ class Page implements ArrayAccess
 	 */
 	protected $menuReverseLookup;
 
+	/**
+	 * This contains an array of strings (or string convertable objects) that are passed to the system as messages
+	 *
+	 * @var array
+	 */
+	protected $messages = array();
 
 	// actual paths
 
@@ -280,7 +286,6 @@ class Page implements ArrayAccess
 		return $menuObject;
 	}
 
-
 	/**
 	 * Returns the URL to the current theme
 	 *
@@ -311,6 +316,16 @@ class Page implements ArrayAccess
 	{
 		$theme = new Theme($this->theme);
 		return $theme;
+	}
+
+	/**
+	 * This function adds a message to be displayed by the page.
+	 *
+	 * @param string $message
+	 */
+	public function addMessage($message)
+	{
+		$this->messages[] = $message;
 	}
 
 	/**
@@ -593,6 +608,21 @@ class Page implements ArrayAccess
 				$this->addRegion('breadcrumbs', (string) $breadCrumbList);
 			}
 		}
+
+
+		if(count($this->messages) > 0)
+		{
+			$outputMessage = new HtmlObject('div');
+			$outputMessage->addClass('messageContainer');
+
+			foreach($this->messages as $message)
+			{
+				$outputMessage->insertNewHtmlObject('div')->wrapAround($message);
+			}
+			$this->addRegion('messages', (string) $outputMessage);
+		}
+
+
 
 
 	}
