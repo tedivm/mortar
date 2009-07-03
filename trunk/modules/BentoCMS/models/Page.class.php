@@ -4,7 +4,7 @@ class BentoCMSModelPage extends LocationModel
 {
 	static public $type = 'Page';
 	protected $table = 'BentoCMS_Pages';
-	protected $allowedParents = array('Site', 'Directory');
+	public $allowedChildrenTypes = array();
 
 	protected $activeRevision;
 	protected $filters = array();
