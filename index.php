@@ -71,6 +71,9 @@ require('system/classes/Site.class.php');
 require('system/classes/modelSupport/actions/Base.class.php');
 require('system/classes/modelSupport/actions/Add.class.php');
 require('system/classes/modelSupport/actions/Read.class.php');
+require('system/classes/modelSupport/actions/Edit.class.php');
+require('system/classes/modelSupport/actions/Index.class.php');
+
 
 require('system/classes/modelSupport/actions/LocationBased/Base.class.php');
 require('system/classes/modelSupport/actions/LocationBased/Add.class.php');

@@ -7,7 +7,7 @@ class LocationModel extends AbstractModel
 
 	static public $autoName = false;
 	protected $backupActionDirectory = array('actions', 'LocationBased');
-
+	protected $fallbackActionString = 'ModelActionLocationBased';
 
 	public function __construct($id = null)
 	{
@@ -156,8 +156,6 @@ class LocationModel extends AbstractModel
 
 		return $this->location;
 	}
-
-
 
 	public function __toArray()
 	{
