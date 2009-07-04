@@ -25,6 +25,8 @@ class AbstractModel implements Model
 
 	static public $fallbackModelActions = array('Read', 'Add', 'Edit', 'Delete', 'Index');
 	protected $backupActionDirectory = array('actions');
+	protected $fallbackActionString = 'ModelAction';
+
 
 	public function __construct($id = null)
 	{
@@ -80,7 +82,15 @@ class AbstractModel implements Model
 				foreach($columns as $columnName)
 				{
 					if(isset($this->content[$columnName]))
-						$record->$columnName = $this->content[$columnName];
+					{
+						if(is_bool($this->content[$columnName]))
+						{
+							$value = ($this->content[$columnName]) ? 1 : 0;
+						}else{
+							$value = $this->content[$columnName];
+						}
+						$record->$columnName = $value;
+					}
 				}
 
 
@@ -141,7 +151,7 @@ class AbstractModel implements Model
 			$pathArgs[] = $actionName;
 
 			if($path = call_user_func_array(array($this, 'getModelSupportFilePath'), $pathArgs))
-				return array('className' => 'ModelActionLocationBased' . $actionName, 'path' => $path);
+				return array('className' => $this->fallbackActionString . $actionName, 'path' => $path);
 		}
 		return false;
 	}
