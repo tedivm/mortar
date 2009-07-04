@@ -17,18 +17,18 @@ class BentoBaseUserForm extends Form
 			addRule('email');
 
 
-		$this->createInput('model_login')->
+		$this->createInput('model_allowlogin')->
 			setType('checkbox')->
 			setLabel('Allow Login');
 
-		$this->createInput('model_password')->
+		$this->createInput('password')->
 			setType('password')->
 			setLabel('Password');
 
 		$this->createInput('password_verify')->
 			setType('password')->
 			setLabel('Verify Password')->
-			addRule('equalTo', 'model_password');
+			addRule('equalTo', 'password');
 								// Set to the actual ID until I figure out a better way to handle that
 
 
@@ -44,7 +44,7 @@ class BentoBaseUserForm extends Form
 			if($memberGroup['memgroup_name'] == 'Guest')
 				continue;
 
-			$this->createInput('model_memberGroup')->
+			$this->createInput('memberGroups')->
 				setType('checkbox')->
 				setLabel($memberGroup['memgroup_name'])->
 				property('value', $memberGroup['memgroup_id']);
