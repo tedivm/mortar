@@ -21,14 +21,6 @@ class BentoBasePluginAdminNav
 		}
 
 		$url = clone $url;
-		$url->action = 'Configuration';
-		$this->addStaticLink('Configuration', $url, 'System', 'Environment');
-
-		$url = clone $url;
-		$url->action = 'DatabaseSettings';
-		$this->addStaticLink('DatabaseSettings', $url, 'System', 'Environment');
-
-		$url = clone $url;
 		$url->action = 'ClearCache';
 		$this->addStaticLink('Clear Cache', $url, 'System', 'Environment');
 
