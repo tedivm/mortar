@@ -629,7 +629,8 @@ class Page implements ArrayAccess
 
 	/**
 	 * This acts as a final processing point, allow some tags to 'float' to the top through other replacement cycles
-	 * before being processed. This function also takes care of the final cleanup of tags (assuming debugging is off)
+	 * before being processed. This function also takes care of the final cleanup of tags (assuming CLEAN_TEMPLATES
+	 * constant is not set to false)
 	 *
 	 * @param string $templateString
 	 * @return string

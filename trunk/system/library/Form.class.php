@@ -482,9 +482,17 @@ class Form
 			$validationClientSideRules = array();
 			foreach($validationRules as $ruleName => $ruleArgument)
 			{
-				$className = ValidationLookup::getClass($ruleName);
-				$argument = staticFunctionHack($className, 'getHtmlArgument', $input, $ruleArgument);
-				$validationClientSideRules[$ruleName] = $argument;
+				try
+				{
+					if(!($className = ValidationLookup::getClass($ruleName)))
+						throw new BentoWarning('Unable to load validation class for rule ' . $ruleName);
+
+					$argument = staticFunctionHack($className, 'getHtmlArgument', $input, $ruleArgument);
+					$validationClientSideRules[$ruleName] = $argument;
+
+				}catch(Exception $e){
+
+				}
 			}
 //exit();
 			$validationClasses = json_encode(array('validation' => $validationClientSideRules));
@@ -566,7 +574,7 @@ class Form
 				return false;
 
 			$success = true;
-
+			$processedCheckboxes = array();
 			foreach($this->inputs as $section => $inputs)
 				foreach($inputs as $input)
 			{
@@ -590,48 +598,51 @@ class Form
 						continue;
 
 					case 'checkbox':
-						if(isset($inputHandler[$input->name]))
+
+						if(in_array($input->name, $processedCheckboxes))
+							continue;
+
+						$processedCheckboxes[] = $input->name;
+
+						$checkboxInputs = $this->getInput($input->name);
+						$checkboxValues = (isset($inputHandler[$input->name]))
+												? $inputHandler[$input->name]->getArrayCopy() : false;
+
+						if($checkboxInputs instanceof FormInput)
 						{
-							// if there is only one checkbox it should return the direct object or a boolean, not
-							// an array.
-							$checkboxInputs = $this->getInput($input->name);
-							if(count($checkboxInputs) == 1)
+							$checkboxInputs->check(false);
+							$processedInput[$input->name] = false;
+							if($checkboxValues)
 							{
-								$inputHandler[$input->name] = $inputHandler[$input->name][0];
-
-								if($inputHandler[$input->name] == 'on')
+								if(count($checkboxValues) == 1)
 								{
-									$inputHandler[$input->name] = true;
+									$inputValue = array_pop($checkboxValues);
+									$processedInput[$input->name] = ($inputValue == 'on') ? true : $inputValue;
+									$checkboxInputs->check(true);
+									unset($inputValue);
 								}
+							}
 
-								$processedInput[$input->name] = $input->filter($inputHandler[$input->name]);
-								$input->check(true);
-							}else{
-							// For multiple checkboxes with the same name the input should be placed in an array, even
-							// if that array returns as empty or with one object.
+						}elseif(is_array($checkboxInputs) && count($checkboxInputs) > 0){
 
-								$inputValue = ($inputHandler[$input->name] instanceof FilteredArray) ?
-												 $inputHandler[$input->name]->getArrayCopy()
-												 : $inputHandler[$input->name];
+							foreach($checkboxInputs as $checkbox)
+							{
+								$checkbox->check(false);
 
+								if(!$checkboxValues)
+									continue;
 
-								if(is_array($input)	&& in_array($input->property('value'), $inputValue)
-									|| $inputValue == $input->property('value'))
+								if(isset($checkbox->properties['value']) && (in_array($checkbox->properties['value'], $checkboxValues)))
 								{
-									if(in_array($input->property('value'), $inputValue))
-									{
-										$input->check(true);
-										$processedInput[$input->name] = $input->filter($input->property('value'));
-									}else{
-										$input->check(false);
-									}
-								}else{
-									$input->check(false);
+									$processedInput[$input->name][] = $checkbox->properties['value'];
+									$checkbox->check(true);
 								}
 							}
 						}else{
-							$input->check(false);
+							throw new BentoNotice('Unable to find checkboxes, even though one was found. This shouldn\'t
+												happen, but if you see this it obviously did. I\'m sorry.');
 						}
+
 						break;
 
 					default:
