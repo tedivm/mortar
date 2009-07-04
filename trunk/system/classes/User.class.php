@@ -39,6 +39,12 @@ class ActiveUser
 		$userId = self::getIdFromName($name);
 		$user = ModelRegistry::loadModel('User', $userId);
 
+		if($user['allowlogin'] != 1 && $user['allowlogin'] !== true)
+		{
+			self::changeUserByName('guest');
+			return false;
+		}
+
 		$storedPassword = new Password();
 		$storedPassword->fromStored($user['password']);
 
