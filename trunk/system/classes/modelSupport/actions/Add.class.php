@@ -86,7 +86,6 @@ class ModelActionAdd extends ModelActionBase
 
 			if(isset($baseForm))
 			{
-				echo 33;
 				$baseForm->merge($formatForm);
 			}else{
 				$baseForm = $formatForm;
