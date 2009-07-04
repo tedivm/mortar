@@ -44,7 +44,7 @@ class ValidationLookup
 									'min' => 'FormValidationMinimumWords',
 									'maxWords' => 'FormValidationMaximumWords',
 									'email' => 'FormValidationEmail',
-									'equalTo' => 'FormValidationEqualTo',
+									'equalto' => 'FormValidationEqualTo',
 									'url' => 'FormValidationUrl',
 									'number' => 'FormValidationNumber',
 									'digits' => 'FormValidationDigits',
@@ -82,6 +82,8 @@ class ValidationLookup
 				}else{
 					return false;
 				}
+			}else{
+				return false;
 			}
 		}
 
