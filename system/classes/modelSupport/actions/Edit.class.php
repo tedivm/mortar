@@ -33,10 +33,18 @@ class ModelActionEdit extends ModelActionAdd
 		{
 			$input = $form->getInput('model_' . $name);
 
-
 			if($input instanceof FormInput)
 			{
-				$input->setValue($this->model[$name]);
+				if($input->type == 'checkbox')
+				{
+					if(isset($this->model[$name]) && $this->model[$name])
+					{
+						$input->check(true);
+					}
+				}else{
+					$input->setValue($this->model[$name]);
+				}
+
 			}else{
 				//check boxes
 			}
