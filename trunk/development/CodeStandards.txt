@@ -45,6 +45,8 @@ Database
 
 	Use parameterized sql and never directly place data in your sql strings.
 
+	If you do insert data directly into an sql string, put a comment directly above it stating why it was needed, where it came from, and what was done to keep it safe.
+
 Testing
 
 	Testing should be performed with caching enabled and disabled
