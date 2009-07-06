@@ -569,7 +569,6 @@ class Page implements ArrayAccess
 			$this->addRegion($name, $menuDisplay->makeDisplay());
 		}
 
-		if(defined('INSTALLMODE') && INSTALLMODE) return true;
 		$user = ActiveUser::getUser();
 		$userId = $user->getId();
 		$query = Query::getQuery();
@@ -596,9 +595,17 @@ class Page implements ArrayAccess
 			{
 				$urlList = array_reverse($urlList);
 
+				$breadCrumb = new HtmlObject('div');
+				$breadCrumb->property('id', count($urlList)."_level_breadcrumbs");
+				$breadCrumb->addClass('breadcrumbs');
+
 				$breadCrumbList = new HtmlObject('ul');
-				$breadCrumbList->property('id', 'breadcrumbs');
-				$breadCrumbList->addClass('breadcrumbs');
+				$breadCrumbList->addClass('breadcrumblist');
+				$breadCrumb->wrapAround($breadCrumbList);
+
+				$breadCrumbClean = new HtmlObject('div');
+				$breadCrumbClean->addClass('clean');
+				$breadCrumb->wrapAround($breadCrumbClean);
 
 				foreach($urlList as $url)
 				{
@@ -606,7 +613,7 @@ class Page implements ArrayAccess
 					$listItem->wrapAround($url);
 				}
 				$listItem->addClass('current');
-				$this->addRegion('breadcrumbs', (string) $breadCrumbList);
+				$this->addRegion('breadcrumbs', (string) $breadCrumb);
 			}
 		}
 

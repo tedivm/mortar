@@ -10,6 +10,10 @@ font-family: "Gill Sans", "Gill MT", GillSans, sans-serif;
 color: #659EC7;
 }
 
+a {
+text-decoration: none;
+}
+
 #BB_wrapper {
 width: 960px;
 min-height: 90%;
@@ -88,7 +92,7 @@ border-top: solid 3px #659EC7;
 text-align: center;
 }
 
-ul li:hover {
+.sidebar_menu ul li:hover, #BB_tools ul li:hover {
 background: #659EC7;
 color: #fff;
 }
@@ -194,4 +198,26 @@ form br {
 form div.intro {
 	margin-left: 10px;
 	margin-bottom: 10px;
+}
+
+/* breadcrumbs */
+
+.breadcrumblist {
+padding-left: 2px;
+margin-bottom: 10px;
+}
+
+.breadcrumblist li {
+display: block;
+list-style-type: none;
+float: left;
+}
+
+.breadcrumblist li + li:before {
+content: "\00a0:";
+font-weight: bold;
+}
+
+.breadcrumblist a:hover {
+text-decoration: underline;
 }
