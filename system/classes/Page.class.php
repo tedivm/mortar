@@ -569,6 +569,7 @@ class Page implements ArrayAccess
 			$this->addRegion($name, $menuDisplay->makeDisplay());
 		}
 
+		if(defined('INSTALLMODE') && INSTALLMODE) return true;
 		$user = ActiveUser::getUser();
 		$userId = $user->getId();
 		$query = Query::getQuery();
