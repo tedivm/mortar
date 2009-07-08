@@ -57,15 +57,17 @@ class ModelActionLocationBasedEdit extends ModelActionLocationBasedAdd
 	}
 
 	/**
-	 * Because we are inheriting from the Add class, which overwrites this function to call from the parent, we need
-	 * to place this back in here.
+	 * This class checks to make sure the user has permission to access this action. If passed an argument it will check
+	 * for other action types at this location, with this resource (this is useful for checking before redirecting to a
+	 * different action on the same location).
 	 *
-	 * @access protected
+	 * @param string $action
+	 * @return bool
 	 */
-	protected function setPermissionObject()
+	public function checkAuth($action = NULL)
 	{
-		$user = ActiveUser::getUser();
-		$this->permissionObject = new Permissions($this->model->getLocation(), $user);
+		$action = isset($action) ? $action : staticHack(get_class($this), 'requiredPermission');
+		return $this->model->checkAuth($action);
 	}
 }
 
