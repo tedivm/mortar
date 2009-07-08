@@ -136,6 +136,13 @@ class ObjectRelationshipMapper
 	protected $select_stmt;
 
 	/**
+	 * If set this array limits the columns selected by the ORM class.
+	 *
+	 * @var array
+	 */
+	protected $restrictColumns;
+
+	/**
 	 * This is the number of rows retrieved or affected.
 	 *
 	 * @var int
@@ -198,7 +205,20 @@ class ObjectRelationshipMapper
 		$db = DatabaseConnection::getConnection($this->db_read);
 
 	// setup SELECT
-		$sql_select = 'SELECT * FROM ' . $this->table;
+
+
+		if(isset($this->restrictColumns))
+		{
+			$columnRestrictions = '';
+			foreach($this->restrictColumns as $selectColumnName)
+				$columnRestrictions .= $selectColumnName . ', ';
+
+			$columnRestrictions = rtrim($columnRestrictions, ', ');
+		}else{
+			$columnRestrictions = '*';
+		}
+
+		$sql_select = 'SELECT ' . $columnRestrictions . ' FROM ' . $this->table;
 	// END setup SELECT
 
 	// setup WHERE
@@ -632,6 +652,28 @@ class ObjectRelationshipMapper
 		return ($withAttributes) ? $output : array_keys($output);
 	}
 
+	/**
+	 * This function takes in an array of column names and limits the information it retrieves to only those columns.
+	 *
+	 * @param array $columns
+	 */
+	public function setColumnLimits($columns)
+	{
+		$confirmedColumns = array();
+		foreach($columns as $column)
+		{
+			if(strtolower($column) == 'primarykey')
+			{
+				foreach($this->primary_keys as $primaryKey)
+					$confirmedColumns[] = $primaryKey;
+			}elseif(isset($this->columns[$column]))	{
+				$confirmedColumns[] = $column;
+			}else{
+
+			}
+		}
+		$this->restrictColumns = $confirmedColumns;
+	}
 
 	// internal stuff
 
@@ -823,34 +865,36 @@ class ObjectRelationshipMapper
 			$sql_columns .= $column_name . ', ';
 			if(isset($this->direct_values[$column_name]))
 			{
+				$sql_columns .= $column_name . ', ';
 				$sql_set .= $column_name . ' = ' . $this->direct_values[$column_name] .= ', ';
 			}else{
 
 				if(isset($this->values[$column_name]))
 				{
+					$sql_columns .= $column_name . ', ';
 					$sql_typestring .= self::getType($column_info['Type']);
 					$sql_input[] = $this->values[$column_name];
 					$sql_set .= $column_name . ' = ?, ';
+
+				}elseif(isset($this->restrictColumns) && !in_array($column_name, $this->restrictColumns)){
+
+					continue;
+
 				}else{
 
-					if(isset($column_info['Default']))
+					if($column_info['Null'])
 					{
-						$sql_set .= $column_name . ' = DEFAULT, ';
-
-					}elseif($column_info['Null']){
-
+						$sql_columns .= $column_name . ', ';
 						$sql_set .= $column_name . ' = NULL, ';
 
-					}else{
-
-						return false;
-
+					}elseif(isset($column_info['Default'])){
+						$sql_columns .= $column_name . ', ';
+						$sql_set .= $column_name . ' = DEFAULT, ';
 					}
 
 				} // if(isset($this->values[$column_name])) else
 			} // if($this->direct_values[$column_name]) else
 		}//foreach($this->columns as $column_name => $column_info)
-
 
 		$sql_where = 'WHERE ';
 		$loop = 0;
