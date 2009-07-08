@@ -270,13 +270,23 @@ class MysqlBase extends mysqli
 	}
 
 	/**
-	 * Enables or disables autocommit
+	 * Enables or disables autocommit. Because multiple classes can enable or disable this the function keeps track of
+	 * the 'depth' of the autocommits to figure out when to properly commit to the database. This only affects
+	 * autocommits, so committing manually works fun, and it can be overridden to force whatever option you want through
+	 * immediately using the second argument.
 	 *
-	 * @access public
 	 * @param bool $mode
+	 * @param bool $force
 	 */
-	public function autocommit($mode)
+	public function autocommit($mode, $force = false)
 	{
+		if($force)
+		{
+			if($mode) $this->commit();
+			$this->autocommitCounter = 1;
+			return parent::autocommit((bool) $mode);
+		}
+
 		if($mode) //enable
 		{
 			// highest value should be 1
@@ -284,7 +294,10 @@ class MysqlBase extends mysqli
 				$this->autocommitCounter++;
 
 			if($this->autocommitCounter == 1)
+			{
+				$this->commit();
 				parent::autocommit(true);
+			}
 
 		}else{ //disable
 			$this->autocommitCounter--;
