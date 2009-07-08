@@ -163,23 +163,18 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 	}
 
 	/**
-	 * Because the new model we want to create doesn't have a location yet, we have to check the location we are trying
-	 * to save it to for the appropriate permissions. As such we are overloading the parent classes
-	 * setPermissionObject() function to use the parent instead of the model when creating the permission object.
+	 * This class checks to make sure the user has permission to access this action. Because this model needs to be
+	 * added to an existing location, that location is what gets checked by this function.
 	 *
-	 * @access protected
+	 * @param string $action
+	 * @return bool
 	 */
-	protected function setPermissionObject()
+	public function checkAuth($action = NULL)
 	{
-		$user = ActiveUser::getUser();
-
-		$location = $this->model->getLocation();
-		$parentLocation = $location->getParent();
-
-		if(!($parentLocation instanceof Location))
-			throw new BentoError('Attempted to add LocationModule without specifying a parent.');
-
-		$this->permissionObject = new Permissions($parentLocation, $user);
+		$action = isset($action) ? $action : staticHack(get_class($this), 'requiredPermission');
+		$parentLocation = $this->model->getLocation();
+		$parentModel = $parentLocation->getResource();
+		return $parentModel->checkAuth($action);
 	}
 
 	/**

@@ -154,13 +154,8 @@ abstract class ModelActionBase implements ActionInterface
 	 */
 	public function checkAuth($action = NULL)
 	{
-		if(!isset($this->permissionObject))
-			$this->setPermissionObject();
-
-		if(!$action)
-			$action = staticHack(get_class($this), 'requiredPermission');
-
-		return $this->permissionObject->isAllowed($action, $this->model->getType());
+		$action = isset($action) ? $action : staticHack(get_class($this), 'requiredPermission');
+		return $this->model->checkAuth($action);
 	}
 
 	/**

@@ -36,18 +36,6 @@ abstract class ModelActionLocationBasedBase extends ModelActionBase
 
 	}
 
-
-	/**
-	 * This creates the permission object and saves it. This function can be overwritten for special purposes, such as
-	 * with the Add class which needs to check the parent models permission, not the current model.
-	 *
-	 */
-	protected function setPermissionObject()
-	{
-		$user = ActiveUser::getUser();
-		$this->permissionObject = new Permissions($this->model->getLocation(), $user);
-	}
-
 	/**
 	 * This function adds new actions and settings to a menu based off of the passed model.
 	 *
