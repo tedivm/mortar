@@ -51,6 +51,21 @@ if(STRICT)
 	$errorLevel = $errorLevel | E_STRICT;
 
 error_reporting($errorLevel);
+unset($errorLevel);
+if(ini_get('register_globals'))
+{
+	$names = array_merge(array_keys($_GET),
+							array_keys($_POST),
+							array_keys($_COOKIE),
+							array_keys($_SERVER),
+							array_keys($_ENV));
+	foreach($names as $name)
+		if(isset($name))
+			unset($name);
+
+	unset($names);
+	unset($name);
+}
 
 require('system/classes/Exceptions.class.php');
 require('system/classes/Config.class.php');
