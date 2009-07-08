@@ -2,6 +2,8 @@ Formatting and Naming
 
 	CamelCase, with lower case first letters for everything but class names.
 
+	Constants should be capital letters.
+
 	Indentation should be handled with tabs, not spaces.
 
 	Functions and methods that return a value should begin with 'get', those that set one 'set', and those that return booleans should begin with 'is'.
@@ -23,6 +25,7 @@ Commenting
 Error Handling
 
 	All code should run in strict mode (E_STRICT) without throwing notices or other php errors.
+
 	Proper exception handling and graceful error handling should be taken care of at all times.
 
 Data Handling
