@@ -166,7 +166,7 @@ class ObjectRelationshipMapper
 
 	/**
 	 * This constructor takes the table name that the object should be mapped to, and two optional arguments identifying
-	 * the database connections to use. This function calls load_schema, which loads the meta data needed for the class
+	 * the database connections to use. This function calls loadSchema, which loads the meta data needed for the class
 	 * from the database.
 	 *
 	 * @param string $table
@@ -175,6 +175,9 @@ class ObjectRelationshipMapper
 	 */
 	public function __construct($table, $db_write = null, $db_read = null)
 	{
+		if(is_null($table))
+			throw new BentoError('ORM class requires a table name.');
+
 		$this->table = $table;
 
 		if(isset($db_read))
@@ -183,7 +186,7 @@ class ObjectRelationshipMapper
 		if(isset($db_write))
 			$this->db_write =  $db_write;
 
-		$this->load_schema();
+		$this->loadSchema();
 	}
 
 	// create, record, update, delete
@@ -198,7 +201,7 @@ class ObjectRelationshipMapper
 	 * @param string $order If orderby is set, this defines whether it ASC or DESC (asceneds or descends)
 	 * @return bool returns true if successful and rows return
 	 */
-	public function select($limit = 0, $position = 0, $orderby = '', $order = 'ASC')
+	public function select($limit = 0, $position = 0, $orderby = null, $order = null)
 	{
 
 	// retreive database connection
@@ -245,6 +248,8 @@ class ObjectRelationshipMapper
 	// END setup WHERE
 
 	// setup ORDER BY
+	if(isset($orderby))
+	{
 		if(is_array($orderby))
 		{
 			$sql_orderby = 'ORDER BY ';
@@ -260,19 +265,13 @@ class ObjectRelationshipMapper
 					$orderby_loop++;
 				}
 			}
-		}
-
-		if(is_string($orderby) && $orderby != '')
-		{
+		}elseif(is_string($orderby))		{
 			$sql_orderby = 'ORDER BY ' . $orderby;
 		}
+	}
 
-		if(isset($sql_orderby))
-		{
-			$sql_orderby .= ($order == 'ASC') ? ' ASC' : ' DESC';
-		}else{
-			$sql_orderby = '';
-		}
+	$sql_orderby = (isset($sql_orderby)) ? $sql_orderby .= ($order == 'ASC') ? ' ASC' : ' DESC' : $sql_orderby = '';
+
 	// END setup ORDER BY
 
 	// setup LIMIT
@@ -292,7 +291,7 @@ class ObjectRelationshipMapper
 		$query = rtrim($sql_select, ' ,') . ' ' . rtrim($sql_where, ' ,') . ' ' . rtrim($sql_orderby, ' ,') . ' ' . rtrim($sql_limit, ' ,');
 
 	// run query
-		if(count($sql_input) < 1)
+		if(!isset($sql_input) || count($sql_input) < 1)
 		{
 			$db->query($query);
 			$results = $db->query($query);
@@ -683,7 +682,7 @@ class ObjectRelationshipMapper
 	 *
 	 * @cache orm scheme *tableName
 	 */
-	protected function load_schema()
+	protected function loadSchema()
 	{
 
 		$cache = new Cache('orm', 'schema', $this->table);
