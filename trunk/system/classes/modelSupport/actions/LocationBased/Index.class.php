@@ -17,30 +17,67 @@
  */
 class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 {
+	/**
+	 * This is the date format used when converting the model to an html table.
+	 *
+	 * @var string
+	 */
 	protected $indexDateFormat = 'm.d.y g:i a';
-	public $indexBrowseBy = 'creationDate';
-	public $indexBrowseOptions = array('name', 'resourceType', 'creationDate', 'owner', 'groupOwner', 'lastModified');
+
+	/**
+	 * If this $query['browseBy'] option isn't set this column is used to sort the models.
+	 *
+	 * @var string
+	 */
+	public $indexBrowseBy = 'name';
+
+	/**
+	 * This is the maximum number of models a user can request at one time.
+	 *
+	 * @var int
+	 */
 	public $indexMaxLimit = 100;
+
+	/**
+	 * This is the default number of models returned if the user does not specify how many they want.
+	 *
+	 * @var int
+	 */
 	public $indexLimit = 10;
+
+	/**
+	 * This array contains the models requested by the user.
+	 *
+	 * @var array
+	 */
 	public $childModels = array();
 
+	/**
+	 * This function loads the requested models into the childModels properly for us by the various output functions.
+	 *
+	 */
 	public function logic()
 	{
-		$childLocations = $this->getChildren();
+		$modelInformationArray = $this->getChildren(array());
 		$childrenModels = array();
-		foreach($childLocations as $childId)
+		foreach($modelInformationArray as $modelInfo)
 		{
-			$location = new Location($childId);
-			$childrenModels[] = $location->getResource();
+			$childrenModels[] = ModelRegistry::loadModel($modelInfo['type'], $modelInfo['id']);
 		}
 
 		$this->childModels = $childrenModels;
 	}
 
-	protected function getChildren()
+	/**
+	 * This function ties the user input into a Listing class retrieved from getModelListingClass() and returns the
+	 * models to the logic function.
+	 *
+	 * @param array $restrictions
+	 * @return array Contains keys 'type' and 'id'
+	 */
+	protected function getChildren($restrictions)
 	{
 		$query = Query::getQuery();
-		$location = $this->model->getLocation();
 
 		$offset = isset($query['start']) ? $query['start'] : 0;
 		$numberChildren = isset($query['limit']) && is_numeric($query['limit'])
@@ -50,162 +87,38 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		if($numberChildren > $this->indexMaxLimit)
 			$numberChildren = $this->indexMaxLimit;
 
-		if(isset($query['browseby']) && $key = array_search($query['browseby'], $this->indexBrowseOptions))
-		{
-			$browseBy = $this->indexBrowseOptions[$key];
-		}else{
+		$modelListing = $this->getModelListingClass();
 
-			if(isset($query['month']) && is_numeric($query['month']) && $query['month'] > 0 & $query['month'] <= 12)
-			{
-				$browseBy = 'month';
-			}else{
-				$browseBy = $this->indexBrowseBy;
-			}
-			$browseBy = $this->indexBrowseBy;
-		}
+		foreach($restrictions as $restrictionName => $restrictionValue)
+			$modelListing->addRestriction($restrictionName, $restrictionValue);
 
 
-		$user = ActiveUser::getUser();
-		$processedIds = array();
-
-		switch($browseBy)
-		{
-			case 'month':
-				while($childIds = $this->getChildrenByMonth($offset, $numberChildren))
-				{
-					$processedIds = array_merge($processedIds, $this->filterChildren($childIds));
-					if($processedIds >= $numberChildren)
-					{
-						if($processedIds > $numberChildren);
-							$processedIds = array_slice($processedIds, 0, $numberChildren, true);
-
-						break;
-					}
-					$offset = $offset + $numberChildren;
-				}
-				break;
-
-			default:
-				while($childIds = $this->getChildrenByBrowsing($offset, $numberChildren, $browseBy))
-				{
-					$processedIds = array_merge($processedIds, $this->filterChildren($childIds));
-					if($processedIds >= $numberChildren)
-					{
-						if($processedIds > $numberChildren);
-							$processedIds = array_slice($processedIds, 0, $numberChildren, true);
-
-						break;
-					}
-					$offset = $offset + $numberChildren;
-				}
-				break;
-		}
-
-		return $processedIds;
+		$listing = $modelListing->getListing($numberChildren, $offset);
+		return $listing;
 	}
 
-	protected function filterChildren($childIds)
+	/**
+	 * This function initiates and sets up the Listing class used by the getChildren class. When overloading this class
+	 * this function is an ideal starting place.
+	 *
+	 * @return ModelListing
+	 */
+	protected function getModelListingClass()
 	{
-		$user = ActiveUser::getUser();
-		$processedIds = array();
-		foreach($childIds as $id)
-		{
-			$permission = new Permissions($id, $user);
-			if($permission->isAllowed('Read'))
-				$processedIds[] = $id;
-		}
-		return $processedIds;
-	}
+		$locationListing = new LocationListing();
 
-	protected function getChildrenByBrowsing($offset, $numberChildren, $browseBy = 'creationDate', $ascending = false)
-	{
 		$query = Query::getQuery();
 
-		if(!in_array($browseBy, $this->indexBrowseOptions))
-			$browseBy = $this->indexBrowseBy;
+		$browseBy = (isset($query['browseBy'])) ? $query['browseBy'] : $this->indexBrowseBy;
+		$locationListing->setOption('browseBy', $browseBy);
 
-		$order = $ascending ? 'ASC' : 'DESC';
+		$locationListing->addRestriction('parent', $this->model->getLocation()->getId());
 
-		$locationId = $this->model->getLocation()->getId();
-		$cache = new Cache('locations', $locationId, 'children', 'browseBy',
-								$browseBy, $order, $offset, $numberChildren);
-		$childrenLocations = $cache->getData();
+		if(isset($query['order']))
+			$locationListing->setOption('order', $query['order']);
 
-		if($cache->isStale() || true)
-		{
-			$selectStmt = DatabaseConnection::getStatement();
-
-			// $browseby is checked against an array of allowed options
-			// $order is set by this function
-		  	$selectStmt->prepare('SELECT location_id
-							  		FROM locations
-							  		WHERE parent = ?
-							  		ORDER BY ' . $browseBy . ' ' . $order . '
-							  		LIMIT ?, ?');
-			$selectStmt->bindAndExecute('iii', $locationId, $offset, $numberChildren);
-
-			if($selectStmt->num_rows() > 0)
-			{
-				$childrenLocations = array();
-				while($row = $selectStmt->fetch_array())
-					$childrenLocations[] = $row['location_id'];
-			}else{
-				$childrenLocations = false;
-			}
-			$cache->storeData($childrenLocations);
-		}
-		return $childrenLocations;
+		return $locationListing;
 	}
-
-	protected function getChildrenByMonth($offset, $numberChildren)
-	{
-		$query = Query::getQuery();
-		$month = (isset($query['month']) && is_numeric($query['month'])) ? $query['month'] : gmdate('m');
-		$year = (isset($query['year']) && is_numeric($query['year'])) ? $query['year'] : gmdate('Y');
-
-		$locationId = $this->model->getLocation()->getId();
-		$cache = new Cache('locations', $locationId, 'children', 'browseByTime', $year, $month, $offset, $numberChildren);
-		$childrenLocations = $cache->getData();
-
-		if($cache->isStale())
-		{
-			if($month !== date('m') || $year !== date('Y'))
-				$cache->cacheTime = 86400;
-
-			$startTime = date('Y-m-d H:i:s', mktime(0, 0, 0, $month, 1, $year));
-
-			if($month == 12)
-			{
-				$endTime = date('Y-m-d H:i:s', mktime(0, 0, 0, 1, 1, $year + 1));
-			}else{
-				$endTime = date('Y-m-d H:i:s', mktime(0, 0, 0, $month + 1, 1, $year));
-			}
-			$selectStmt = DatabaseConnection::getStatement();
-			$selectStmt->prepare('SELECT location_id
-							  		FROM locations
-							  		WHERE parent = ?
-							  			AND	(creationDate >= ? AND creationDate < ?)
-							  		LIMIT ?, ?');
-			$selectStmt->bindAndExecute('issii', $locationId, $startTime, $endTime, $offset, $numberChildren);
-
-			if($selectStmt->num_rows() > 0)
-			{
-				$childrenLocations = array();
-				while($row = $selectStmt->fetch_array())
-					$childrenLocations[] = $row['location_id'];
-
-			}else{
-				$childrenLocations = false;
-			}
-
-			$cache->storeData($childrenLocations);
-		}
-
-		return $childrenLocations;
-	}
-
-
-
 
 
 	/**
@@ -281,12 +194,6 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 
 
 	}
-
-
-
-
-
-
 
 	/**
 	 * This function takes the model's data and puts it into a template, which gets injected into the active page. It
