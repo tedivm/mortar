@@ -96,7 +96,7 @@ class ModelRegistry
 	 *
 	 * @param string $type
 	 * @param int|null $id
-	 * @return Model|bool
+	 * @return Model returns false on failure
 	 */
 	static public function loadModel($type, $id = null)
 	{
