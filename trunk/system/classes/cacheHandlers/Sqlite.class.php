@@ -145,8 +145,8 @@ class cacheHandlerSqlite implements cacheHandler
 		try{
 			if(!isset(self::$sqlObject[$name]) || get_class(self::$sqlObject[$name]) != 'SQLiteDatabase')
 			{
-				$info = InfoRegistry::getInstance();
-				$filePath = $info->Configuration['path']['temp'] . 'cache/' . $name . '.sqlite';
+				$config = Config::getInstance();
+				$filePath = $config['path']['temp'] . 'cache/' . $name . '.sqlite';
 
 				$isSetup = file_exists($filePath);
 

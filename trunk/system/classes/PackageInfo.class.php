@@ -153,7 +153,7 @@ class PackageInfo
 		{
 			try {
 
-				AutoLoader::import($this->name);
+				//AutoLoader::import($this->name);
 				$db = db_connect('default_read_only');
 
 
@@ -290,10 +290,13 @@ class PackageInfo
 	 * @param string $name
 	 * @return string
 	 */
-	public function getMeta($name)
+	public function getMeta($name = null)
 	{
 		if(!isset($this->meta))
 			$this->loadMeta();
+
+		if(is_null($name))
+			return $this->meta;
 
 		return $this->meta[$name];
 	}

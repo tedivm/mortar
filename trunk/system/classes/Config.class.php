@@ -162,6 +162,9 @@ class Config implements ArrayAccess
 		if(is_dir(BASE_PATH . 'system/classes/'))
 			$this->config['path']['mainclasses'] = BASE_PATH . 'system/classes/';
 
+		if(is_dir(BASE_PATH . 'system/interfaces/'))
+			$this->config['path']['interfaces'] = BASE_PATH . 'system/interfaces/';
+
 		if(is_dir(BASE_PATH . 'data/themes/'))
 			$this->config['path']['theme'] = BASE_PATH . 'data/themes/';
 
