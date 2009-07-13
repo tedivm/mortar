@@ -202,7 +202,7 @@ CREATE TABLE plugins
 
 /* Table Items: location_meta */
 ALTER TABLE plugins ADD CONSTRAINT pkplugins
-	PRIMARY KEY (realm, category, name);
+	PRIMARY KEY (realm, category, name, module, plugin);
 
 /******************** Add Table: requestLog ************************/
 
