@@ -9,7 +9,7 @@
  */
 
 
-abstract class AbstractModel implements Model
+abstract class ModelBase implements Model
 {
 	/**
 	 * This describes the 'type' of model the class represents, such as "Site", "User" or "Directory".

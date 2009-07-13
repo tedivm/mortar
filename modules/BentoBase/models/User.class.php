@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseModelUser extends AbstractModel
+class BentoBaseModelUser extends ModelBase
 {
 	static public $type = 'User';
 	protected $table = 'users';

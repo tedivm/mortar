@@ -51,6 +51,20 @@ class ModelActionLocationBasedEdit extends ModelActionLocationBasedAdd
 				$input = $form->getInput('location_name');
 				$input->setValue($this->model->getLocation()->getName());
 			}
+
+			if(in_array('owner', $inputGroups['location']))
+			{
+				$input = $form->getInput('location_owner');
+				$input->setValue($this->model->getLocation()->getOwner());
+			}
+
+			if(in_array('groupOwner', $inputGroups['location']))
+			{
+				$input = $form->getInput('location_groupOwner');
+				$input->setValue($this->model->getLocation()->getOwnerGroup());
+			}
+
+
 		}
 
 		return $form;

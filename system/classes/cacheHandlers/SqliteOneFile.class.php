@@ -62,8 +62,8 @@ class cacheHandlerSqliteOneFile extends cacheHandlerSqlite
 		try{
 			if(!isset(self::$sqlObject) || get_class(self::$sqlObject) != 'SQLiteDatabase')
 			{
-				$info = InfoRegistry::getInstance();
-				$filePath = $info->Configuration['path']['temp'] . 'cache/cache.sqlite';
+				$config = Config::getInstance();
+				$filePath = $config['path']['temp'] . 'cache/cache.sqlite';
 
 				$isSetup = file_exists($filePath);
 

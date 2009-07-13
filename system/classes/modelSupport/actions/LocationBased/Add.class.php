@@ -91,6 +91,22 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 				addRule('required');
 		}
 
+
+		/*
+
+			location_owner
+			location_ownerGroup
+			location_name
+
+
+
+
+		*/
+
+
+
+
+
 		$locationFormName = importClass('LocationForm', 'modelSupport/Forms/LocationForm.class.php', 'mainclasses');
 		if(!isset($locationFormName))
 			throw new BentoError('Unable to load LocationForm');

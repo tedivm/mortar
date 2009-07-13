@@ -51,9 +51,8 @@ class PackageList
 	 */
 	protected function loadInstallablePackages()
 	{
-		$info = InfoRegistry::getInstance();
-
-		$packageDirectories = glob($info->Configuration['path']['modules'] . '*');
+		$config = Config::getInstance();
+		$packageDirectories = glob($config['path']['modules'] . '*');
 		$packageList = array();
 		foreach ($packageDirectories as $packagePath)
 		{
