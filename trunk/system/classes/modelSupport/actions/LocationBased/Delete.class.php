@@ -55,12 +55,13 @@ class ModelActionLocationBasedDelete extends ModelActionLocationBasedEdit
 		if(!isset($input['confirm']))
 			return false;
 
-		$this->originalParent = $this->model->getLocation()->getParent();
+		$this->originalParent = $this->model->getLocation()->getParent()->getId();
 
 		$root = new Location(1);
 		$trashLocation = $root->getChildByName('Trash');
 
 		$trashBag = ModelRegistry::loadModel('TrashBag');
+		$trashBag['originLocation'] = $this->originalParent;
 		$trashBag->setParent($trashLocation);
 		$trashBag->save();
 
