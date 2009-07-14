@@ -38,7 +38,8 @@ class ModelActionLocationBasedEdit extends ModelActionLocationBasedAdd
 		$form = parent::getForm();
 		$inputGroups = $this->getInputGroups(($form->getInputList()));
 
-		foreach($inputGroups['model'] as $name)
+		if(isset($inputGroups['model']))
+			foreach($inputGroups['model'] as $name)
 		{
 			$input = $form->getInput('model_' . $name);
 			$input->setValue($this->model[$name]);

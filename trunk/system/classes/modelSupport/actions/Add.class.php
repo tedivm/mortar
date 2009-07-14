@@ -68,10 +68,10 @@ class ModelActionAdd extends ModelActionBase
 	protected function getForm()
 	{
 		$query = Query::getQuery();
-		$formName = $this->type . 'Form';
-		$formDisplayName = $formName . $this->actionName;
+		$formName = self::getFormByType('BlogEntry');
 
-		if($formClassName = importFromModule($formName, $this->model->getModule(), 'class'))
+		$formDisplayName = $this->type . 'Form' . $this->actionName;
+		if($formClassName = self::getFormByType($this->model->getType()))
 		{
 			$baseForm = new $formClassName($formDisplayName);
 		}else{
@@ -99,6 +99,33 @@ class ModelActionAdd extends ModelActionBase
 
 		return $baseForm;
 	}
+
+	static function getFormByType($type)
+	{
+		$moduleInfo = ModelRegistry::getHandler($type);
+		$formname = $type . 'Form';
+		$formClassName = importFromModule($formname, $moduleInfo['module'], 'class');
+
+		if($formClassName !== false)
+		{
+			return $formClassName;
+		}else{
+			$reflection = new ReflectionClass($moduleInfo['class']);
+			$parentClass = $reflection->getParentClass();
+
+			if($parentType = $parentClass->getStaticPropertyValue('type'))
+			{
+				return self::getFormByType($parentType);
+			}else{
+				return false;
+			}
+		}
+	}
+
+
+
+
+
 
 	/**
 	 * This function seperates out the specific input groups (specified by groupname_) and adds them to the object
