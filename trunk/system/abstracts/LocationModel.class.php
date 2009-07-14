@@ -77,7 +77,7 @@ class LocationModel extends ModelBase
 				}
 			}
 
-			if(isset($locationId))
+			if(isset($locationId) && is_numeric($locationId))
 			{
 				$this->location = new Location($locationId);
 				$this->properties['name'] = $this->location->getName();
