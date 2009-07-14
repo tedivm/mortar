@@ -188,7 +188,7 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 	public function checkAuth($action = NULL)
 	{
 		$action = isset($action) ? $action : staticHack(get_class($this), 'requiredPermission');
-		$parentLocation = $this->model->getLocation();
+		$parentLocation = $this->model->getLocation()->getParent();
 		$parentModel = $parentLocation->getResource();
 		return $parentModel->checkAuth($action);
 	}
