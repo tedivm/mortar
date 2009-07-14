@@ -511,7 +511,7 @@ class Location
 			$metaAdd->save();
 		}
 
-		Cache::clear('locations', $this->id, 'info');
+		Cache::clear('locations', $this->id);
 		return true;
 	}
 
