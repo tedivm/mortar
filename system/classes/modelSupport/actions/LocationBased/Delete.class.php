@@ -29,6 +29,20 @@ class ModelActionLocationBasedDelete extends ModelActionLocationBasedEdit
 
 	protected $originalParent;
 
+	/**
+	 * This method checks to see if input was sent, validates that input through a subordinate class,
+	 * passes it to the processInput class to save, and then sets the formStatus to the appropriate value.
+	 *
+	 */
+	public function logic()
+	{
+		$modelLocation = $this->model->getLocation();
+		$parentLocation = $modelLocation->getParent();
+		parent::logic();
+		if($this->formStatus)
+			$parentLocation->save();
+	}
+
 	protected function getForm()
 	{
 		$form = new Form($this->model->getType() . 'Delete');

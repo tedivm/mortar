@@ -50,20 +50,12 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 	 */
 	public function logic()
 	{
-		$query = Query::getQuery();
-		$this->form = $this->getForm();
-
-//		$form = new Form();
-
-		if($this->form->wasSubmitted())
+		parent::logic();
+		if($this->formStatus)
 		{
-			$inputs = $this->form->checkSubmit();
-			if($inputs && $this->formStatus = $this->processInput($inputs))
-			{
-				$this->formStatus = true;
-			}else{
-				$this->ioHandler->setStatusCode(400);
-			}
+			$modelLocation = $this->model->getLocation();
+			$parentLocation = $modelLocation->getParent();
+			$parentLocation->save();
 		}
 	}
 
