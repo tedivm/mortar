@@ -18,13 +18,13 @@ class BentoBaseActionInstallModule extends ActionBase
 	protected function logic()
 	{
 		Cache::$runtimeDisable = true;
+		$query = Query::getQuery();
+		$installPackage = $query['id'];
 
 		$packageList = new PackageList();
-		$info = InfoRegistry::getInstance();
-		$installPackage = $info->Get['id'];
 		$installablePackages = $packageList->getInstallablePackages();
 
-		if(!$installPackage)
+		if(!isset($query['id']))
 		{
 			//make listing
 			$this->installablePackages = $installablePackages;
@@ -45,40 +45,36 @@ class BentoBaseActionInstallModule extends ActionBase
 				}
 
 			}else{
+				//redirect to listing
 				unset($this->form);
 				$this->installablePackages = $installablePackages;
-				//redirect to listing
 			}
 
 		}
 
-		Cache::clear('packages');
+		Cache::$runtimeDisable = false;
+		Cache::clear();
 	}
 
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
+		$output = '';
 		if(isset($this->installablePackages) && !isset($this->form))
 		{
-			$template = $this->loadTemplate('adminInstallModuleListing');
+			$theme = $page->getTheme();
+			$template = $theme->getTemplateFromPackage('adminInstallModuleListing', $this->package);
+
+			$linkToSelf = Query::getUrl();
+			unset($linkToSelf->locationId);
 
 			foreach($this->installablePackages as $package)
 			{
-				$packageInfo = new PackageInfo($package);
+				$linkToPackage = clone $linkToSelf;
+				$linkToPackage->id = $package;
 
-				$packageDisplay = new DisplayMaker();
-				$packageDisplay->setDisplayTemplate($template);
-				$packageDisplay->addContent('name', $package);
+				$output .= $linkToPackage->getLink($package) . '<br>';
 
-				$packageDisplay->addContent('description', $packageInfo->getMeta('description'));
-
-				$installLink = $this->linkToSelf();
-				$installLink->property('id', $package);
-				$installLink->property('engine', 'Admin');
-				$packageDisplay->addContent('link_to_install', $installLink);
-				$packageDisplay->addContent('version', $this->packageInfo->getMeta('version'));
-				// link_to_install
-
-				$output .= $packageDisplay->makeDisplay();
+			//	$packageInfo = new PackageInfo($package);
 			}
 		}elseif($this->form){
 			if($this->success)
@@ -87,6 +83,8 @@ class BentoBaseActionInstallModule extends ActionBase
 			}else{
 				$output = $this->form->makeHtml();
 			}
+
+			$output = ($this->success) ? 'Module successfully installed' : $this->form->makeHtml();
 		}
 
 		return $output;
