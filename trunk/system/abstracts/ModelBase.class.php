@@ -255,12 +255,41 @@ abstract class ModelBase implements Model
 	 */
 	public function getAction($actionName)
 	{
-		$moduleActionName = $this->getType() . $actionName;
-		$packageInfo = new PackageInfo($this->module);
-		$actionInfo = $packageInfo->getActions($moduleActionName);
-
+		$actionInfo = self::loadActionFromResource($this->getType(), $actionName);
 		return (!$actionInfo) ? $this->loadFallbackAction($actionName) : $actionInfo;
 	}
+
+	/**
+	 * This function looks for an action from a model type. If that model does not have an action and is extended from
+	 * another model the function recursively checks to see if the parent has a suitable action.
+	 *
+	 * @param string $resourceType
+	 * @param string $actionName
+	 * @return array
+	 */
+	static function loadActionFromResource($resourceType, $actionName)
+	{
+		$moduleInfo = ModelRegistry::getHandler($resourceType);
+
+		$packageInfo = new PackageInfo($moduleInfo['module']);
+		$actionInfo = $packageInfo->getActions($resourceType . $actionName);
+
+		if($actionInfo !== false)
+		{
+			return $actionInfo;
+		}else{
+			$reflection = new ReflectionClass($moduleInfo['class']);
+			$parentClass = $reflection->getParentClass();
+
+			if($parentType = $parentClass->getStaticPropertyValue('type'))
+			{
+				return self::loadActionFromResource($parentType, $actionName);
+			}else{
+				return false;
+			}
+		}
+	}
+
 
 	/**
 	 * This function is used by the getAction function when no action is available in the module.
