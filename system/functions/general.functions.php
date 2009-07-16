@@ -28,28 +28,6 @@ function dbConnect($database_name = 'default_read_only')
 	return DatabaseConnection::getConnection($database_name);
 }
 
-function load_helper($package, $class)
-{
-	depreciationWarning();
-	$config = Config::getInstance();
-
-	$classname = $package . $class;
-
-	if(!class_exists($classname, false))
-	{
-		$class_path = $config['path']['modules'] . $package . '/classes/' . $class .'.helper_class.php';
-
-		if(file_exists($class_path))
-		{
-			include($class_path);
-		}else{
-			return false;
-		}
-	}
-
-	return new $classname();
-}
-
 function stripslashes_deep($value)
 {
 	$value = is_array($value) ?
@@ -91,7 +69,7 @@ function deltree($file)
 function importClass($classname, $path, $basePath = null, $require = false)
 {
 
-	if(!class_exists($classname, false))
+	if(!class_exists($classname))
 	{
 		if(isset($basePath))
 		{
