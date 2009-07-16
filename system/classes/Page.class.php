@@ -698,7 +698,7 @@ class ActivePage extends Page
 	 */
 	private function __construct()
 	{
-		$this->addJavaScript(array('1_2_6', 'ui-1_6b', 'metadata', 'dimensions', 'bentoSettings'), 'jquery');
+		$this->addJavaScript(array('core', 'ui', 'metadata', 'dimensions', 'bentoSettings'), 'jquery');
 		$this->addCss(array('none' => array('all')));
 	}
 
