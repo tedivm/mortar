@@ -153,51 +153,45 @@ class RequestWrapper
 				$query['action'] = 'Read';
 
 			$actionInfo = $model->getAction($query['action']);
+			if($actionInfo == false)
+				return false;
+
 			$className = $actionInfo['className'];
-			$path = $actionInfo['path'];
 			$argument = $model;
+			$query->save();
 
-		}else{
+			return array('className' => $className, 'argument' => $argument);
+		}
 
-			if(isset($query['type']))
+
+		if(isset($query['type']))
+		{
+			$type = $query['type'];
+		}elseif(isset($location)){
+			$parentModel = $location->getResource();
+			if(!($type = $parentModel->getDefaultChildType()))
 			{
-				$type = $query['type'];
-			}elseif(isset($location)){
-				$parentModel = $location->getResource();
-				if(!($type = $parentModel->getDefaultChildType()))
-				{
-					throw new ResourceNotFoundError('Attempted to add resource without specifying type', 400);
-				}
-			}else{
 				throw new ResourceNotFoundError('Attempted to add resource without specifying type', 400);
 			}
-
-			$modelHandler = ModelRegistry::loadModel($type);
-			if(!$modelHandler)
-				throw new ResourceNotFoundError('Unable to load model handler.');
-
-			$model = new $modelHandler();
-			$actionInfo = $model->getAction('Add');
-			$argument = $model;
-
-			if(isset($location))
-			{
-				$model->setParent($location);
-			}
+		}else{
+			throw new ResourceNotFoundError('Attempted to add resource without specifying type', 400);
 		}
 
-		if(isset($actionInfo))
-		{
-			$className = $actionInfo['className'];
-			$path = $actionInfo['path'];
-		}
+		$modelHandler = ModelRegistry::loadModel($type);
+		if(!$modelHandler)
+			throw new ResourceNotFoundError('Unable to load model handler.');
 
-		if(!class_exists($className, false))
-		{
-			if(!(file_exists($path) && include($path)) || !class_exists($className, false))
-				throw new ResourceNotFoundError('Unable to load action class ' . $className . ' at path: ' . $path,
-				 '405');
-		}
+		$model = new $modelHandler();
+		$actionInfo = $model->getAction('Add');
+		$className = $actionInfo['className'];
+		$argument = $model;
+
+		if(!class_exists($className))
+			throw new ResourceNotFoundError('Unable to load action class ' . $className, '405');
+
+
+		if(($model instanceof LocationModel) && isset($location))
+			$model->setParent($location);
 
 		$query->save();
 		return array('className' => $className, 'argument' => $argument);
@@ -213,9 +207,12 @@ class RequestWrapper
 	protected function getAction($className = null, $argument = null)
 	{
 		// if we aren't given the classname and argument, we load them up
-		if(!$className)
+		if(!isset($className))
 		{
 			$actionClassInfo = $this->loadActionClass();
+
+			if(!$actionClassInfo)
+				throw new ResourceNotFoundError('Unable to load action class.');
 			$className = $actionClassInfo['className'];
 			$argument = $actionClassInfo['argument'];
 		}
@@ -257,34 +254,7 @@ class RequestWrapper
 		$config = Config::getInstance();
 		$query = Query::getQuery();
 		$format = preg_replace("/[^a-zA-Z0-9s]/", '', $query['format']);
-
-		if(!class_exists('AbstractOutputController', false))
-		{
-			$path = $config['path']['mainclasses'] . 'RequestWrapper/OutputControllers/Abstract.class.php';
-
-			if(!include($path))
-				throw new BentoError('Unable to load file ' . $path);
-
-			if(!class_exists('AbstractOutputController'))
-				throw new BentoError('Unable to find output filter AbstractOutputController');
-		}
-
 		$formatFilter = $format . 'OutputController';
-
-		if(!class_exists($formatFilter, false))
-		{
-			$config = Config::getInstance();
-
-			$filename = $format . '.class.php';
-			$path = $config['path']['mainclasses'] . 'RequestWrapper/OutputControllers/' . $format . '.class.php';
-
-			if(!include($path))
-				throw new BentoError('Unable to load file ' . $path);
-
-			if(!class_exists($formatFilter, false))
-				throw new BentoError('Unable to find output filter ' . $formatFilter);
-		}
-
 		$controller = new $formatFilter($this->getHandler());
 
 		return $controller;
@@ -350,28 +320,14 @@ class RequestWrapper
 		if(!$handlerName)
 			$handlerName = self::$ioHandlerType; staticHack(get_class($this), 'ioHandlerType');
 
-		// I know this is lame, but its the easiest way to deal with this dependency until we get namespaces
-		if($handlerName != 'Cli')
-			$this->loadIoHandler('Cli');
-
 		if(in_array($handlerName, $this->internalIoHandlers))
 		{
 			$className = 'IOProcessor' . $handlerName;
-
-			if(!class_exists($className, false))
-			{
-				$config = Config::getInstance();
-				$path = $config['path']['mainclasses'] . 'RequestWrapper/IOProcessors/' . $handlerName . '.class.php';
-
-				if(file_exists($path))
-					include($path);
-			}
-
 		}else{
 			$className = $handlerName;
 		}
 
-		if(!class_exists($className, false))
+		if(!class_exists($className))
 			throw new BentoError('Unable to find request handler: ' . $className);
 
 		return $className;
