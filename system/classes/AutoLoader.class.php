@@ -23,6 +23,14 @@ class AutoLoader
 	protected static $classIndex;
 
 	/**
+	 * This array contains all of the system directories that the autoloader will crawl for classes. This doesn't
+	 * include packages or subfolders, although those get indexed as well.
+	 *
+	 * @var array
+	 */
+	protected static $baseDirectories = array('interfaces', 'abstracts', 'mainclasses', 'library');
+
+	/**
 	 * This function is called by the system when it is unable to locate a class.
 	 *
 	 * @param string $classname
@@ -66,19 +74,53 @@ class AutoLoader
 		$classArray = array();
 		$config = Config::getInstance();
 
-		foreach(array('interfaces', 'abstracts', 'mainclasses', 'library', 'moduleSupport') as $folder)
+
+		$classArray = array_merge($classArray,
+								self::loadPackageClasses(),
+								self::loadCoreClasses(),
+								self::loadExtraSystemClasses());
+
+		$classes = call_user_func_array('array_merge', $classArray);
+
+		// the active page class exists in the page file
+		$classes['ActivePage'] = $classes['Page'];
+		self::$classIndex = $classes;
+	}
+
+
+	/**
+	 * This function looks through all of the system directories and loads the classes from it.
+	 *
+	 * @cache system classLookup *folder
+	 * @return array
+	 */
+	static protected function loadCoreClasses()
+	{
+		$classArray = array();
+		$config = Config::getInstance();
+		foreach(self::$baseDirectories as $folder)
 		{
 			$cache = new Cache('system', 'classLookup', $folder);
 			$lookupClasses = $cache->getData();
 			if($cache->isStale())
 			{
-				$lookupClasses = ($folder == 'moduleSupport') ? self::loadModuleSupport($config['path']['mainclasses'])
-																: self::loadDirectory($config['path'][$folder]);
+				$lookupClasses = self::loadDirectory($config['path'][$folder]);
 				$cache->storeData($lookupClasses);
 			}
 			$classArray[] = $lookupClasses;
 		}
+		return $classArray;
+	}
 
+	/**
+	 * This function runs through each installed package and loads all of the classes from it.
+	 *
+	 * @cache modules *moduleName classLookup
+	 * @return array
+	 */
+	static protected function loadPackageClasses()
+	{
+		$classArray = array();
 		$packageList = new PackageList();
 		$installedPackages = $packageList->getInstalledPackages();
 
@@ -97,43 +139,75 @@ class AutoLoader
 			}
 			$classArray[] = $lookupClasses;
 		}
-
-		$classes = call_user_func_array('array_merge', $classArray);
-
-		// the active page class exists in the page file
-		$classes['ActivePage'] = $classes['Page'];
-
-		self::$classIndex = $classes;
+		return $classArray;
 	}
 
 	/**
-	 * This function returns an array of classes and paths from the system/classes/modelSupport folder and subfolder. As
-	 * its argument it takes in the system/classes path.
+	 * This function loads all of the subfolders (and their subfolders) in the system/classes directory.
 	 *
-	 * @param string $basePath
 	 * @return array
 	 */
-	static protected function loadModuleSupport($basePath)
+	static protected function loadExtraSystemClasses()
 	{
-		$moduleFolders = array('actions' => 'ModelAction',
-								'actions/LocationBased' => 'ModelActionLocationBased',
-								'converters' => 'ModelTo',
-								'Listings' => 'none',
-								'Forms' => 'none');
+		$config = Config::getInstance();
+		$moduleFolders = array('modelSupport/actions' => 'ModelAction',
+								'modelSupport/actions/LocationBased' => 'ModelActionLocationBased',
+								'modelSupport/converters' => 'ModelTo',
+								'modelSupport/Listings' => 'none',
+								'modelSupport/Forms' => 'none',
+								'InputHandlers' => 'none',
+								'cacheHandlers' => 'cacheHandler',
+								'RequestWrapper/IOProcessors' => 'IOProcessor');
+
+		$classes = array(self::loadDirectoryAndFilter($config['path']['mainclasses'], $moduleFolders));
+		$outputControllers = self::loadDirectoryAndFilter($config['path']['mainclasses'],
+									array('RequestWrapper/OutputControllers' => 'none'));
+
+		$outputClasses = array();
+		foreach($outputControllers as $outputBaseName => $classPath)
+			$outputClasses[$outputBaseName . 'OutputController'] = $classPath;
+
+		$classes[] = $outputClasses;
+		return $classes;
+	}
+
+	/**
+	 * This function takes in a path and an array of subpaths mapped to class prefixes. All of the elements get looped
+	 * through, returning class information from the loadDirectory function. It then loops through and applies the
+	 * prefix to all of the class names generated from tee loadDirectory function, unless that prefix is the string
+	 * "none"
+	 *
+	 * @cache system classLookup *path
+	 * @param string $basePath
+	 * @param array $moduleFolders
+	 * @return array
+	 */
+	static protected function loadDirectoryAndFilter($basePath, $moduleFolders)
+	{
 		$classes = array();
 		foreach($moduleFolders as $folder => $label)
 		{
-			$path = $basePath . 'modelSupport/' . $folder . '/';
-			$unfilteredClasses = self::loadDirectory($path);
-			$namePrefix = '';
+			$path = $basePath . $folder . '/';
 
-			if($label != 'none')
-				$namePrefix .= $label;
+			$cache = new Cache('system', 'classLookup', $path);
+			$lookupClasses = $cache->getData();
 
-			foreach($unfilteredClasses as $name => $path)
+			if($cache->isStale())
 			{
-				$classes[$namePrefix . $name] = $path;
+				$lookupClasses = array();
+				$unfilteredClasses = self::loadDirectory($path);
+
+				if($label != 'none')
+				{
+					foreach($unfilteredClasses as $name => $path)
+						$lookupClasses[$label . $name] = $path;
+				}else{
+					$lookupClasses = $unfilteredClasses;
+				}
+
+				$cache->storeData($lookupClasses);
 			}
+			$classes = array_merge($classes, $lookupClasses);
 		}
 
 		return $classes;
