@@ -372,13 +372,20 @@ class Theme
 
 		if($type == 'js' || $type == 'css')
 		{
-			$minifier = $this->getMinifier($type);
-			$initialCheckSum = $minifier->getInitialChecksum();
-			$url = new Url();
-			$url->module = 'BentoBase';
-			$url->format = 'direct';
-			$url->action = 'Minify';
-			$url->id = $this->name . '-' . $initialCheckSum . '.' . $type;
+			$cache = new Cache('themes', $this->name, 'minification', $type, 'url');
+			$url = $cache->getData();
+
+			if($cache->isStale())
+			{
+				$minifier = $this->getMinifier($type);
+				$initialCheckSum = $minifier->getInitialChecksum();
+				$url = new Url();
+				$url->module = 'BentoBase';
+				$url->format = 'direct';
+				$url->action = 'Minify';
+				$url->id = $this->name . '-' . $initialCheckSum . '.' . $type;
+				$cache->storeData($url);
+			}
 			return $url;
 
 		}else{
