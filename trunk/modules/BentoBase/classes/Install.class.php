@@ -119,6 +119,7 @@ class BentoBaseInstaller
 			$path['javascript'] = ($input['javascript']) ? $input['javascript'] : $path['base'] . 'javascript/';
 			$path['interfaces'] = ($input['interfaces']) ? $input['interfaces'] : $path['base'] . 'system/interfaces/';
 			$path['templates'] = ($input['templates']) ? $input['templates'] : $path['base'] . 'system/templates/';
+			$path['thirdparty'] = ($input['thirdparty']) ? $input['thirdparty'] : $path['base'] . 'system/thirdparty/';
 
 
 			$url['theme'] = 'data/themes/';
@@ -149,6 +150,7 @@ class BentoBaseInstaller
 				$configFile->set('path', 'javascript', $path['javascript']);
 				$configFile->set('path', 'interfaces', $path['interfaces']);
 				$configFile->set('path', 'templates', $path['templates']);
+				$configFile->set('path', 'thirdparty', $path['thirdparty']);
 
 				$configFile->set('url', 'theme', $url['theme']);
 				$configFile->set('url', 'modules', $url['modules']);

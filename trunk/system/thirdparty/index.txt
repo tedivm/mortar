@@ -1,0 +1,13 @@
+cssmin.class.php
+	cssmin
+	v1.0
+	MIT License
+	cssmin reduces the size of stylesheet definitions by removing all unneeded whitespaces and comments.
+	http://code.google.com/p/cssmin/
+
+JSMin.class.php
+	jsmin
+	v1.1.1
+	MIT License
+	PHP port of Douglas Crockford's JSMin JavaScript minifier
+	http://code.google.com/p/jsmin-php/
