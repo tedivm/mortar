@@ -237,7 +237,9 @@ class RequestWrapper
 	 */
 	protected function runAction($action)
 	{
-		$outputController = $this->loadFormatHandler();
+		$query = Query::getQuery();
+		$format = $query['format'];
+		$outputController = $this->loadFormatHandler($action, $format);
 		$outputController->initialize($action);
 		$output = $outputController->getFinalOutput();
 		$this->ioHandler->output($output);
@@ -249,15 +251,17 @@ class RequestWrapper
 	 * @access protected
 	 * @return OutputFormatter
 	 */
-	protected function loadFormatHandler()
+	protected function loadFormatHandler($action, $format)
 	{
-		$config = Config::getInstance();
-		$query = Query::getQuery();
-		$format = preg_replace("/[^a-zA-Z0-9s]/", '', $query['format']);
 		$formatFilter = $format . 'OutputController';
-		$controller = new $formatFilter($this->getHandler());
+		if(!class_exists($formatFilter))
+			return false;
 
-		return $controller;
+		$outputController = new $formatFilter($this->getHandler());
+		if(!$outputController->checkAction($action, $format))
+			return false;
+
+		return $outputController;
 	}
 
 	/**
