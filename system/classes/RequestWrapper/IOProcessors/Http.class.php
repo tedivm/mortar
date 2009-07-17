@@ -238,7 +238,10 @@ class IOProcessorHttp extends IOProcessorCli
 			$sendOutput = false;
 
 		if($sendOutput)
+		{
 			echo $output;
+			flush();
+		}
 	}
 
 	/**

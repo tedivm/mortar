@@ -148,23 +148,22 @@ class Page implements ArrayAccess
 	 */
 	protected $headerTemplate = '
 	<title>{# title #}</title>
+	{# cssIncludes #}
 	<script type="text/javascript">
 	{# preStartupJs #}
 	</script>
-
 	{# meta #}
-	{# cssIncludes #}
+';
+
+	protected $footerTemplate = '
 	{# jsIncludes #}
-
 	<script type="text/javascript">
-
 		$(function(){
 			{# scriptStartup #}
 		});
-
 		{# script #}
-
 	</script>';
+
 
 	/**
 	 * This function changes the current theme and template
@@ -239,7 +238,7 @@ class Page implements ArrayAccess
 			$templateProcess->addContent('head', $this->headerTemplate);
 
 			$template['string'] = $templateProcess->makeDisplay(false);
-
+			$template['string'] .= PHP_EOL . $this->footerTemplate;
 			$cache->storeData($template);
 		}
 
