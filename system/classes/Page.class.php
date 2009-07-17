@@ -364,6 +364,11 @@ class Page implements ArrayAccess
 		}
 	}
 
+
+
+
+
+
 	/**
 	 * Adds a javascript library file to be loaded
 	 *
@@ -411,7 +416,7 @@ class Page implements ArrayAccess
 	 */
 	protected function addJSInclude($jsfiles)
 	{
-		if(is_string($jsfiles))
+		if(!is_array($jsfiles))
 			$jsfiles = array($jsfiles);
 
 		foreach($jsfiles as $file)
@@ -429,7 +434,7 @@ class Page implements ArrayAccess
 	 */
 	protected function addCssInclude($cssfiles)
 	{
-		if(is_string($cssfiles))
+		if(!is_array($cssfiles))
 			$cssfiles = array($cssfiles);
 
 		foreach($cssfiles as $file)
@@ -438,6 +443,15 @@ class Page implements ArrayAccess
 				$this->cssIncludes[] = '<link href="' . $file . '" rel="stylesheet" type="text/css"/>';
  		}
 	}
+
+
+
+
+
+
+
+
+
 
 	/**
 	 * Creates and returns the final page
@@ -535,6 +549,12 @@ class Page implements ArrayAccess
 
 		$theme = new Theme($this->theme);
 
+		$this->addJSInclude($theme->getUrl('js'));
+		$this->addCssInclude($theme->getUrl('css'));
+
+
+		/*
+
 		$jsUrls = array();
 		foreach($this->javascript as $library => $plugins)
 		{
@@ -545,6 +565,7 @@ class Page implements ArrayAccess
 
 			}
 		}
+
 
 		$this->addJSInclude($jsUrls);
 
@@ -559,6 +580,9 @@ class Page implements ArrayAccess
 		}
 
 		$this->addCssInclude($cssUrls);
+
+		*/
+
 
 		$this->preStartupJs[] = 'var baseUrl = ' . json_encode(ActiveSite::getLink()) . ';';
 

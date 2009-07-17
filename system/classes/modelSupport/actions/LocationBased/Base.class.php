@@ -39,6 +39,7 @@ abstract class ModelActionLocationBasedBase extends ModelActionBase
 	/**
 	 * This function adds new actions and settings to a menu based off of the passed model.
 	 *
+	 * @plugin model actionMenu
 	 * @param NavigationMenu $menu
 	 * @param LocationModel $model
 	 * @param string $format

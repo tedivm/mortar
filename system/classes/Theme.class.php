@@ -145,19 +145,6 @@ class Theme
 				$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
 
 
-/*
-			$bentoCssPath = $config['path']['css'];
-			$bentoCssUrl = $info->Site->getLink('css');
-
-			// css
-			$CssResult = $this->getFiles($bentoCssPath, $bentoCssUrl, 'js');
-			if($CssResult)
-				$cssLinks = array_merge_recursive($CssResult, $cssLinks);
-				// the order is important- this method favors the Theme CSS files over the system ones
-*/
-
-
-
 			$data['cssLinks'] = $cssLinks;
 			$data['jsLinks'] = $javascriptLinks;
 
@@ -168,39 +155,6 @@ class Theme
 		$this->cssUrls = $data['cssLinks'];
 	}
 
-	/**
-	 * Returns the matching url
-	 *
-	 * @param string $name
-	 * @param string $library
-	 * @return string
-	 */
-	public function jsUrl($name, $library = 'none')
-	{
-		return $this->loadUrl('js', $name, $library);
-	}
-
-	/**
-	 * Returns the matching url
-	 *
-	 * @param string $name
-	 * @param string $library
-	 * @return string
-	 */
-	public function cssUrl($name, $library = 'none')
-	{
-		return $this->loadUrl('css', $name, $library);
-	}
-
-	/**
-	 * Returns the base url for the theme
-	 *
-	 * @return string
-	 */
-	public function getUrl()
-	{
-		return $this->url;
-	}
 
 	/**
 	 * This function returns the requested template for a model type. This first checks the theme/models/ModelType
@@ -310,8 +264,6 @@ class Theme
 		return $this->getTemplateFromContainer($path, $templateName, $args);
 	}
 
-
-
 	/**
 	 * This function takes in a base path, template name and container (which is an array of strings) and returns the
 	 * specified template, or false if it is not found. The container array represents a hierarchal structure, which
@@ -353,6 +305,104 @@ class Theme
 	}
 
 
+	public function getPaths($type = 'css')
+	{
+		if($type == 'css')
+		{
+			$urlArray = $this->cssUrls;
+		}elseif($type == 'js'){
+			$urlArray = $this->jsUrls;
+		}else{
+			return false;
+		}
+
+		$paths = array();
+		foreach($urlArray as $section)
+		{
+			foreach($section as $url)
+			{
+				$priority = isset($url['priority']) ? (int) $url['priority'] : 30;
+
+				if($priority == 0)
+					continue;
+
+				if(isset($url['path']))
+					$paths[$priority][] = $url['path'];
+			}
+		}
+		ksort($paths);
+		$finalPaths = call_user_func_array('array_merge', $paths);
+		return $finalPaths;
+	}
+
+
+	/**
+	 * Returns the matching url
+	 *
+	 * @param string $name
+	 * @param string $library
+	 * @return string
+	 */
+	public function jsUrl($name, $library = 'none')
+	{
+		return $this->loadUrl('js', $name, $library);
+	}
+
+	/**
+	 * Returns the matching url
+	 *
+	 * @param string $name
+	 * @param string $library
+	 * @return string
+	 */
+	public function cssUrl($name, $library = 'none')
+	{
+		return $this->loadUrl('css', $name, $library);
+	}
+
+	/**
+	 * Returns the base url for the theme
+	 *
+	 * @return string
+	 */
+	public function getUrl($type = null)
+	{
+		if(!isset($type))
+			return $this->url;
+
+		if($type == 'js' || $type == 'css')
+		{
+			$minifier = $this->getMinifier($type);
+			$initialCheckSum = $minifier->getInitialChecksum();
+			$url = new Url();
+			$url->module = 'BentoBase';
+			$url->format = 'direct';
+			$url->action = 'Minify';
+			$url->id = $this->name . '-' . $initialCheckSum . '.' . $type;
+			return $url;
+
+		}else{
+			return false;
+		}
+
+
+
+	}
+
+	/**
+	 * This function returns a Minifier object which contains either the Javascript or CSS paths.
+	 *
+	 * @param string $type js or css
+	 * @return Minifier
+	 */
+	public function getMinifier($type = 'js')
+	{
+		$type = ($type == 'js') ? 'js' : 'css';
+		$minifier = new Minifier($type);
+		$minifier->addFiles($this->getPaths($type));
+		return $minifier;
+	}
+
 	/**
 	 * Returns all of the urls for the files in the requested directory
 	 *
@@ -371,6 +421,7 @@ class Theme
 		$fileArray = array();
 		foreach($pattern as $file)
 		{
+			unset($priority);
 			$tmpArray = explode('/', $file);
 			$fileName = array_pop($tmpArray);
 			$fileDetails = explode('.', $fileName);
@@ -387,10 +438,8 @@ class Theme
 
 				case 2:
 					$option = array_pop($fileDetails);
-					if($option = 'min')
-					{
-						$min = true;
-					}
+					if(is_numeric($option))
+						$priority = $option;
 
 				case 1:
 					$name = array_pop($fileDetails);
@@ -398,15 +447,9 @@ class Theme
 
 			}
 
-			// name, library, extension, min
-
-			if($min)
-			{
-				$fileArray[$library][$name]['minLink'] = $url . $fileName;
-			}else{
-				$fileArray[$library][$name]['mainLink'] = $url . $fileName;
-			}
-
+			$fileArray[$library][$name]['mainLink'] = $url . $fileName;
+			$fileArray[$library][$name]['path']  = $file;
+			$fileArray[$library][$name]['priority']  = isset($priority) ? $priority : 30;
 		}
 		return $fileArray;
 	}
@@ -426,10 +469,7 @@ class Theme
 
 		if(isset($this->{$filesAttribute}[$library][$name]))
 		{
-			$output = ($this->allowMin && isset($this->{$filesAttribute}[$library][$name]['minLink'])) ?
-															$this->{$filesAttribute}[$library][$name]['minLink'] :
-															$this->{$filesAttribute}[$library][$name]['mainLink'];
-			return $output;
+			return $this->{$filesAttribute}[$library][$name]['mainLink'];
 		}else{
 			return false;
 		}
