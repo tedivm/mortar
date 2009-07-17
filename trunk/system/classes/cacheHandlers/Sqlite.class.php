@@ -101,10 +101,11 @@ class cacheHandlerSqlite implements cacheHandler
 		$sqlResource = staticFunctionHack(get_class($this), 'getSqliteHandler', $this->section);
 
 		$resetBusy = false;
-		if(strlen($data) > 100000)
+		$contentLength = strlen($data);
+		if($contentLength > 100000)
 		{
 			$resetBusy = true;
-			$sqlResource->busyTimeout(self::$busyTimeout);
+			$sqlResource->busyTimeout(self::$busyTimeout * (ceil($contentLength/100000))); // half a second per 100k
 		}
 
 		$query = $sqlResource->query("INSERT INTO cacheStore (key, expires, data)
