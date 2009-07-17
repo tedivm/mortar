@@ -28,7 +28,7 @@ class AutoLoader
 	 *
 	 * @var array
 	 */
-	protected static $baseDirectories = array('interfaces', 'abstracts', 'mainclasses', 'library');
+	protected static $baseDirectories = array('interfaces', 'abstracts', 'mainclasses', 'library', 'thirdparty');
 
 	/**
 	 * This function is called by the system when it is unable to locate a class.
