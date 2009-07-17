@@ -278,7 +278,13 @@ class IOProcessorHttp extends IOProcessorCli
 				$offset = (isset($this->cacheExpirationOffset) && $this->cacheExpirationOffset < $maxCache)
 									? $this->cacheExpirationOffset : $maxCache;
 
-				$this->addHeader('Expires', gmdate('D, d M y H:i:s T', $time + $offset ));
+				if(isset($this->headers['Expires']))
+				{
+					$offset = strtotime($this->headers['Expires']) - $time;
+				}else{
+					$this->addHeader('Expires', gmdate('D, d M y H:i:s T', $time + $offset ));
+				}
+
 				$cacheControl = 'must-revalidate,max-age=' . $offset;
 				$this->addHeader('Cache-Control', $cacheControl);
 			}
