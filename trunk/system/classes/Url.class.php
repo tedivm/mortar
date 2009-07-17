@@ -62,9 +62,12 @@ class Url
 			unset($attributes['locationId']);
 		}
 
-		if(isset($attributes['format']) && strtolower($attributes['format']) == 'admin')
+		if(isset($attributes['format']))
+			$format = strtolower($attributes['format']);
+
+		if(isset($format) && ($format == 'admin' || $format == 'direct'))
 		{
-			$urlString .= 'admin/';
+			$urlString .= $format . '/';
 			unset($attributes['format']);
 		}
 
@@ -73,10 +76,10 @@ class Url
 			$urlString .= 'rest/';
 			unset($attributes['rest']);
 
-			if(isset($attributes['format']) && strtolower($attributes['format']) == 'xml')
+			if(isset($format) && $format == 'xml')
 				unset($attributes['format']);
 
-		}elseif(isset($attributes['format']) && strtolower($attributes['format']) == 'html'){
+		}elseif(isset($format) && $format == 'html'){
 			unset($attributes['format']);
 		}
 
@@ -89,6 +92,11 @@ class Url
 				if($attributes['action'] != 'Default')
 					$urlString .= $attributes['action'] . '/';
 
+				if(isset($attributes['id']))
+				{
+					$urlString .= $attributes['id'] . '/';
+					unset($attributes['id']);
+				}
 				unset($attributes['action']);
 			}
 
@@ -96,12 +104,10 @@ class Url
 				&& !(isset($attributes['location'])
 					&& (isset($attributes['action']) && $attributes['action'] == 'Add')))
 		{
-
 			if(in_array($attributes['type'], self::$specialDirectories))
 			{
 				$key = array_search($attributes['type'], self::$specialDirectories);
 				$urlString .= $key . '/';
-
 			}else{
 				$urlString .= 'resource/' . $attributes['type'];
 			}
@@ -126,9 +132,6 @@ class Url
 			if(isset($location) && $location->getSite())
 			{
 				unset($attributes['location']);
-
-
-
 
 				// here we will iterate back to the site, creating the path to the model in reverse.
 				$tempLoc = $location;
@@ -200,19 +203,20 @@ class Url
 		if(isset($location))
 			$siteId = $location->getSite();
 
-		$site = (isset($siteId) && is_numeric($siteId)) ? ModelRegistry::loadModel('Site', $siteId) : ActiveSite::getSite();
+		$site = (isset($siteId) && is_numeric($siteId))
+						? ModelRegistry::loadModel('Site', $siteId)
+						: ActiveSite::getSite();
 
 		if($site)
 		{
 			$basePath = $site->getUrl($ssl);
 		}else{
-
 			$basePath = ($ssl) ? 'https://' : 'http://';
 			$basePath .= $_SERVER['SERVER_NAME'] . substr($_SERVER['PHP_SELF'], 0 ,
 															strpos($_SERVER['PHP_SELF'], DISPATCHER));
 		}
 
-		$urlString = $basePath . $urlString;
+		$urlString = $basePath . rtrim($urlString, '/');
 
 		if(count($attributes) > 0)
 		{

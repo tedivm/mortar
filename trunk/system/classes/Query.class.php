@@ -116,9 +116,11 @@ class Query
 			$pathArray = explode('/', $path);
 			$rootPiece = strtolower($pathArray[0]);
 
-			if(isset($pathArray[0]) && strtolower($pathArray[0]) == 'admin')
+			$pathPiece = strtolower($pathArray[0]);
+			if(isset($pathArray[0]) && ($pathPiece == 'admin' || $pathPiece == 'direct'))
 			{
-				$inputArray['format'] = 'admin';
+				$inputArray['format'] = $pathPiece;
+				unset($pathPiece);
 				array_shift($pathArray);
 			}
 
@@ -146,20 +148,12 @@ class Query
 				if(isset($pathArray[0]))
 					$inputArray['id'] = array_shift($pathArray);
 
-
-
 			}elseif(isset($pathArray[0]) && in_array($pathArray[0], Url::$specialDirectories)){
-
 				$inputArray['type'] = array_shift($pathArray);
-
 				if(isset($pathArray[0]))
 					$inputArray['id'] = array_shift($pathArray);
-
 			}
-
-
-
-		}
+		} // END if(isset($inputArray['p']))
 
 	// if location exists, use it
 		if(isset($inputArray['location']) && is_numeric($inputArray['location']))
@@ -168,6 +162,7 @@ class Query
 		}elseif(isset($pathArray) && INSTALLMODE == false){
 	// if location isn't set, find it from the path
 
+			// First check to see if the model path is set and if it maps to a non-location based model directory
 			if(count($pathArray) > 0 && in_array($pathArray[0], array_keys(Url::$specialDirectories)))
 			{
 				$inputArray['type'] = Url::$specialDirectories[array_shift($pathArray)];
@@ -175,6 +170,9 @@ class Query
 
 				if(count($pathArray) > 0)
 					$inputArray['id'] = array_shift($pathArray);
+
+			// If the path does not map to a non-location based something then process the path starting from the
+			// currently active site.
 			}else{
 
 				$site = ActiveSite::getSite();
@@ -189,62 +187,44 @@ class Query
 					$currentLocation = $childLocation;
 					array_shift($pathArray);
 				}
-
 				$inputArray['location'] = $currentLocation->getId();
 				$resource = $currentLocation->getResource(true);
 			}
 
-
-
+			// This code checks for any custom url path mapping associated with the model.
 			if(isset($resource['type']) && is_array($pathArray) && count($pathArray) > 0)
 			{
 				$resourceInfo = ModelRegistry::getHandler($resource['type']);
 				$urlTemplate = new DisplayMaker();
-
 				if(($urlTemplate->loadTemplate($resource['type'] . 'UrlMapping', $resourceInfo['module']))
 					|| $urlTemplate->loadTemplate('UrlMapping', $resourceInfo['module']))
 				{
 					$tags = $urlTemplate->tagsUsed();
 					if(count($tags) > 0)
-					{
 						foreach($tags as $name)
 							$inputArray[$name] = array_shift($pathArray);
-					}
 				}else{
 					$inputArray['action'] = $pathArray[0];
+					if(isset($pathArray[1]))
+					{
+						$inputArray['id'] = $pathArray[1];
+					}
 				}
-
 			}
 		}
 
+		// if the format is set this checks to make sure it is allowed and that it is formatted correct (first letter
+		// upper case, the rest lower, no spaces).
 		if(isset($inputArray['format']))
 		{
-			switch(strtolower($inputArray['format']))
+			$allowedFormats = array('admin', 'xml', 'rss', 'json', 'admin', 'html', 'direct');
+			if(in_array(strtolower($inputArray['format']), $allowedFormats))
 			{
-				case 'xml':
-					$inputArray['format'] = 'Xml';
-					break;
-
-				case 'rss':
-					$inputArray['format'] = 'Rss';
-					break;
-
-				case 'json':
-					$inputArray['format'] = 'Json';
-					break;
-
-				case 'admin':
-					$inputArray['format'] = 'Admin';
-					break;
-
-				case 'html':
-					$inputArray['format'] = 'Html';
-					break;
-
-				default:
-					unset($inputArray['format']);
-					break;
+				$inputArray['format'] = ucfirst(strtolower($inputArray['format']));
+			}else{
+				unset($inputArray['format']);
 			}
+
 		}
 
 		if(isset($inputArray['action']))

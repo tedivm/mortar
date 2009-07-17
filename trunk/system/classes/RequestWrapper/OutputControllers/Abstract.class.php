@@ -99,22 +99,21 @@ abstract class AbstractOutputController
 	 */
 	public function initialize($action)
 	{
-		if(!$this->checkAction($action))
-			throw new TypeMismatch(array('Action', $action));
-
-		$this->action = $action;
-
 		if(!$this->format)
 		{
 			$class = get_class($this);
 			$this->format = substr($class, 0, strpos($class, 'OutputController'));
 		}
 
-		if(isset($this->mimeType))
-			$this->ioHandler->addHeader('Content-type', $this->mimeType);
+		if(!$this->checkAction($action))
+			throw new TypeMismatch(array('Action', $action));
 
+		$this->action = $action;
 
 		$this->start();
+
+		if(isset($this->mimeType))
+			$this->ioHandler->addHeader('Content-type', $this->mimeType);
 	}
 
 
@@ -195,7 +194,10 @@ abstract class AbstractOutputController
 	 *
 	 * @param unknown_type $output
 	 */
-	abstract protected function bundleOutput($output);
+	protected function bundleOutput($output)
+	{
+		$this->activeResource = $output;
+	}
 
 	/**
 	 * This function should take the active resource and turn it into a string to be displayed.
@@ -239,26 +241,37 @@ abstract class AbstractOutputController
 	 * @return bool
 	 * @todo Write format-specific permissions
 	 */
-	protected function checkAction($action)
+	public function checkAction($action, $format = null)
 	{
-		if(!$action)
-			throw new TypeMismatch(array('Action', $action));
-
-		$query = Query::getQuery();
-		$settingsArrayName = $query['format'] . 'Settings';
-
-		$viewMethod = 'view' . $query['format'];
-
-		// check to see that it has an output for the current format
-		if(!in_array($viewMethod, get_class_methods($action)))
-			throw new ResourceNotFoundError('Action ' . get_class_methods($action) . ' needs ' . $viewMethod
-						. ' method to be available for this format');
-
-		if(isset($this->permission)
-			&& !isset($action->{$settingsArrayName}['EnginePermissionOverride']))
+		try
 		{
-			if(!$action->checkAuth(staticHack($formatFilter, 'permission')))
-				throw new AuthenticationError('Not allowed to access this engine at this location.');
+			if(!$action)
+				throw new TypeMismatch(array('Action', $action));
+
+			if(!isset($format))
+			{
+				$query = Query::getQuery();
+				$format = $query['format'];
+			}
+
+			$settingsArrayName = $format . 'Settings';
+
+			$viewMethod = 'view' . $format;
+
+			// check to see that it has an output for the current format
+			if(!in_array($viewMethod, get_class_methods($action)))
+				throw new ResourceNotFoundError('Action ' . get_class_methods($action) . ' needs ' . $viewMethod
+							. ' method to be available for this format');
+
+			if(isset($this->permission)
+				&& !isset($action->{$settingsArrayName}['EnginePermissionOverride']))
+			{
+				if(!$action->checkAuth(staticHack($formatFilter, 'permission')))
+					throw new AuthenticationError('Not allowed to access this engine at this location.');
+			}
+
+		}catch(Exception $e){
+			return false;
 		}
 
 		return true;
