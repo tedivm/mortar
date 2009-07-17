@@ -64,22 +64,6 @@ class Page implements ArrayAccess
 	protected $display;
 
 	/**
-	 * An array of CSS libraries to include
-	 *
-	 * @access protected
-	 * @var array
-	 */
-	protected $css = array();
-
-	/**
-	 * An array containing the javascript libraries and scripts to include
-	 *
-	 * @access protected
-	 * @var unknown_type
-	 */
-	protected $javascript = array();
-
-	/**
 	 * This contains an associative array used to link submenus to their containers.
 	 *
 	 * @var array
@@ -363,50 +347,6 @@ class Page implements ArrayAccess
 		}
 	}
 
-
-
-
-
-
-	/**
-	 * Adds a javascript library file to be loaded
-	 *
-	 * @param string $name
-	 * @param string $library
-	 */
-	public function addJavaScript($name, $library = 'none')
-	{
-		if(!is_array($name))
-		{
-			$this->javascript[$library][] = $name;
-		}else{
-
-			if(!isset($this->javascript[$library]))
-			{
-				$this->javascript[$library] = $name;
-			}else{
-				$this->javascript[$library] = array_merge_recursive($this->javascript[$library], $name);
-			}
-		}
-	}
-
-	/**
-	 * Adds a CSS library file to be included
-	 *
-	 * @param string $name
-	 * @param string $library
-	 */
-	public function addCss($name, $library = 'none')
-	{
-		if(!is_array($name))
-		{
-			$this->css[$library][] = $name;
-		}elseif(is_array($name))
-		{
-			$this->css = array_merge_recursive($this->css, $name);
-		}
-	}
-
 	/**
 	 * Adds script include tags to the template for these javascript urls
 	 *
@@ -442,15 +382,6 @@ class Page implements ArrayAccess
 				$this->cssIncludes[] = '<link href="' . $file . '" rel="stylesheet" type="text/css"/>';
  		}
 	}
-
-
-
-
-
-
-
-
-
 
 	/**
 	 * Creates and returns the final page
@@ -535,7 +466,6 @@ class Page implements ArrayAccess
 		$this->regions[$tag] = $content . $this->regions[$tag];
 	}
 
-
 	/**
 	 * This is a runtime preprocessor allow some preprocessing before running all the tag replacement code.
 	 *
@@ -543,48 +473,12 @@ class Page implements ArrayAccess
 	 */
 	protected function runtimeProcessTemplate()
 	{
-		$this->addJavaScript('defaults', 'jquery');
-		$this->addJavaScript('defaults', 'bento');
-
+	// Here we grab the theme to get the javascript and css include file.
 		$theme = new Theme($this->theme);
-
 		$this->addJSInclude($theme->getUrl('js'));
 		$this->addCssInclude($theme->getUrl('css'));
 
-
-		/*
-
-		$jsUrls = array();
-		foreach($this->javascript as $library => $plugins)
-		{
-			foreach($plugins as $pluginName)
-			{
-				if($url = $theme->jsUrl($pluginName, $library))
-					$jsUrls[] = $url;
-
-			}
-		}
-
-
-		$this->addJSInclude($jsUrls);
-
-		$cssUrls = array();
-		foreach($this->css as $library => $plugins)
-		{
-			foreach($plugins as $pluginName)
-			{
-				if($url = $theme->cssUrl($pluginName, $library))
-					$cssUrls[] = $url;
-			}
-		}
-
-		$this->addCssInclude($cssUrls);
-
-		*/
-
-
 		$this->preStartupJs[] = 'var baseUrl = ' . json_encode(ActiveSite::getLink()) . ';';
-
 
 		if(isset($this->menuObjects))
 			foreach($this->menuObjects as $name => $menuDisplay)
@@ -592,10 +486,13 @@ class Page implements ArrayAccess
 			$this->addRegion($name, $menuDisplay->makeDisplay());
 		}
 
+	// Since breadcrumbs rely on database access we bail out here during install mode.
 		if(defined('INSTALLMODE') && INSTALLMODE) return true;
 		$user = ActiveUser::getUser();
 		$userId = $user->getId();
 		$query = Query::getQuery();
+
+	// if the location is set we'll attempt to add breadcrumbs
 		if(isset($query['location']) && is_numeric($query['location']))
 		{
 			$location = new Location($query['location']);
@@ -641,7 +538,7 @@ class Page implements ArrayAccess
 			}
 		}
 
-
+	// Add the messages to the page.
 		if(count($this->messages) > 0)
 		{
 			$outputMessage = new HtmlObject('div');
@@ -653,10 +550,6 @@ class Page implements ArrayAccess
 			}
 			$this->addRegion('messages', (string) $outputMessage);
 		}
-
-
-
-
 	}
 
 	/**
@@ -721,8 +614,7 @@ class ActivePage extends Page
 	 */
 	private function __construct()
 	{
-		$this->addJavaScript(array('core', 'ui', 'metadata', 'dimensions', 'bentoSettings'), 'jquery');
-		$this->addCss(array('none' => array('all')));
+
 	}
 
 	/**

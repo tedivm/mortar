@@ -370,25 +370,11 @@ class Form
 		if($this->wasSubmitted())
 			$jsStartup[] = '$(\'#' . $this->name . '\').valid();';
 
-		$jqueryPlugins = array('form', 'validate', 'validate-methods', 'cluetip', 'FCKeditor');
-
 		if(class_exists('ActivePage', false))
 		{
 			$page = ActivePage::getInstance();
 			$page->addStartupScript($jsStartup);
-			$page->addJavaScript($jqueryPlugins, 'jquery');
-
-			foreach ($jsIncludes as $library => $plugin)
-			{
-				$page->addJavaScript($plugin, $library);
-			}
-			$page->addCss($this->name, 'forms');
-			//$page->
-
-		}else{
-
 		}
-
 		return $output;
 	}
 
