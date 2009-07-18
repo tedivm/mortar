@@ -117,8 +117,8 @@ class Hook
 		$classList = array();
 		foreach($pluginList as $plugin)
 		{
-			if($onlyRecursive && $row['isRecursive'] != 1)
-				break;
+			if($onlyRecursive && $plugin['isRecursive'] != 1)
+				continue;
 
 			$classList[] = importFromModule($plugin['plugin'], $plugin['module'], 'plugin');
 		}
