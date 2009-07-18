@@ -84,6 +84,54 @@ class BentoCMSModelPage extends LocationModel
 		return $revision;
 	}
 
+	public function getRevisionCount()
+	{
+		if(!($pageId = $this->getId()))
+			return 0;
+
+		$stmt = DatabaseConnection::getStatement('default_read_only');
+		$stmt->prepare('SELECT COUNT(revisionId) FROM BentoCMS_Content WHERE pageId = ?');
+		$stmt->bindAndExecute('i', $pageId);
+		$results = $stmt->fetch_array();
+
+		if(is_numeric($results['COUNT(revisionId)']))
+			return $results['COUNT(revisionId)'];
+
+		return 0;
+	}
+
+	public function getRevisionList($quantity, $offset = 0)
+	{
+		if(!is_numeric($quantity) || !is_numeric($offset))
+			throw new TypeMismatch(array('Integer'));
+
+		$cache = new Cache('models', 'Page', $this->getId(), 'content', 'browseRevisions', $quantity, $offset);
+		$revisionList = $cache->getData();
+		if($cache->isStale())
+		{
+			$stmt = DatabaseConnection::getStatement('default_read_only');
+			$stmt->prepare('SELECT revisionId
+									FROM BentoCMS_Content
+									WHERE pageId = ?
+									ORDER BY updateTime DESC
+									LIMIT ?,?');
+			$stmt->bindAndExecute('iii', $this->getId(), $offset, $quantity);
+
+			$revisionList = array();
+			while($results = $stmt->fetch_array())
+				$revisionList[] = $results['revisionId'];
+
+			$cache->storeData($revisionList);
+		}
+
+		$returnRevisions = array();
+		foreach($revisionList as $revisionId)
+			$returnRevisions[] = $this->getRevision($revisionId);
+
+		return (count($returnRevisions) > 0) ? $returnRevisions : false;
+	}
+
+
 	protected function filterContent($content)
 	{
 		foreach($this->filters as $filter)
@@ -154,7 +202,7 @@ class PageRevision
 		$this->pageId = $pageId;
 	}
 
-	public function getId($id)
+	public function getId()
 	{
 		return $this->revisionId;
 	}

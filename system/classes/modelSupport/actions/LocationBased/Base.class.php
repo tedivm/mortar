@@ -46,12 +46,12 @@ abstract class ModelActionLocationBasedBase extends ModelActionBase
 	 */
 	protected function makeModelActionMenu($menu, $model, $format = 'Html')
 	{
-		$plugins = new Hook();
-		$plugins->loadModelPlugins($model, 'actionMenu');
-		$plugins->addToMenu($menu, $model, $format);
-
 		$menu->setMenu('models_actions');
 		$menu->setMenuLabel($model->getType());
+
+		$plugins = new Hook();
+		$plugins->loadModelPlugins($model, 'ActionMenu');
+		$plugins->addToMenu($menu, $model, $format);
 
 		$location = $model->getLocation();
 
