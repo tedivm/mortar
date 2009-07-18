@@ -133,7 +133,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		$menu = $page->getMenu('actions', 'modelNav');
 		$this->makeModelActionMenu($menu, $this->model, 'Admin');
 
-		$table = new Table('test');
+		$table = new Table($this->model->getType() . '_' . $this->model->getId() . '_listing');
 		$table->addClass('model-listing');
 		$table->enableIndex();
 

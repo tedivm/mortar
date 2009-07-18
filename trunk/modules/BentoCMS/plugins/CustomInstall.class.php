@@ -16,6 +16,7 @@ class BentoCMSPluginCustomInstall
 	{
 		Hook::registerModelPlugin('Directory', 'getAllowedChildrenTypes', $this->packageId, 'AllowPageType', true);
 		Hook::registerModelPlugin('Site', 'getAllowedChildrenTypes', $this->packageId, 'AllowPageType', true);
+		Hook::registerModelPlugin('Page', 'ActionMenu', $this->packageId, 'AllowPageType', true);
 	}
 }
 
