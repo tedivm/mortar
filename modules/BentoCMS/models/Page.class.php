@@ -33,7 +33,8 @@ class BentoCMSModelPage extends LocationModel
 
 		if(isset($this->activeRevision))
 		{
-			$revision = new PageRevision($this->getId(), $this->activeRevision);
+			$revision = $this->getRevision($this->activeRevision);
+//			$revision = new PageRevision($this->getId(), $this->activeRevision);
 			if($revision->rawContent != $this->content['rawContent'] ||
 					$revision->filteredContent != $this->content['filteredContent']	||
 					$revision->title != $this->content['title'])
@@ -64,13 +65,11 @@ class BentoCMSModelPage extends LocationModel
 
 	public function loadRevision($id)
 	{
-//		var_dump($id);
-		$revision = new PageRevision($this->getId(), $id);
-//		var_dump($revision);
+//		$revision = new PageRevision($this->getId(), $id);
+		$revision = $this->getRevision($id);
 		$this->content['title'] = $revision->title;
 		$this->content['filteredContent'] = $revision->filteredContent;
 		$this->content['rawContent'] = $revision->rawContent;
-
 		//if($this->content['author'] != $revision->author)
 			//$this->content['lastEditor'] = $revision->author;
 	}
@@ -80,7 +79,9 @@ class BentoCMSModelPage extends LocationModel
 		if(!$id)
 			$id = $this->activeRevision;
 
-		return new PageRevision($this->getId(), $id);
+		$revision = new PageRevision($this->getId());
+		$revision->loadById($id);
+		return $revision;
 	}
 
 	protected function filterContent($content)
@@ -148,12 +149,9 @@ class PageRevision
 	public $filteredContent;
 
 
-	public function __construct($pageId, $id = null)
+	public function __construct($pageId)
 	{
 		$this->pageId = $pageId;
-
-		if($id)
-			$this->loadById($id);
 	}
 
 	public function getId($id)
@@ -161,12 +159,12 @@ class PageRevision
 		return $this->revisionId;
 	}
 
-	protected function loadById($revisionId)
+	public function loadById($revisionId)
 	{
 		if(is_numeric($this->pageId) && is_numeric($revisionId))
 		{
 
-			$cache = new Cache('models', 'Page', $this->pageId, 'content', $this->revisionId);
+			$cache = new Cache('models', 'Page', $this->pageId, 'content', $revisionId);
 			$contentData = $cache->getData();
 
 			if($cache->isStale())
