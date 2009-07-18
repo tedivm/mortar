@@ -49,4 +49,6 @@ define('CLEAN_TEMPLATES', true);
 
 define('XDEBUG_PROFILE', false);
 // This setting appends an attribute to enable xdebug profiling to all URLs
+
+define('DISABLE_MINIFICATION', false);
 ?>
