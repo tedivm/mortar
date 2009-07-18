@@ -57,10 +57,13 @@ class BentoCMSModelPage extends LocationModel
 		$revision->filteredContent = $this->content['filteredContent'];
 		$revision->title = $this->content['title'];
 
+		if(isset($this->content['note']))
+			$revision->note = $this->content['note'];
+
 		$user = ActiveUser::getUser();
 		$revision->author = $user->getId();
-		$revision->save();
-		$revision->makeActive();
+		if($revision->save())
+			$revision->makeActive();
 	}
 
 	public function loadRevision($id)
@@ -195,7 +198,7 @@ class PageRevision
 	public $title;
 	public $rawContent;
 	public $filteredContent;
-
+	public $note;
 
 	public function __construct($pageId)
 	{
@@ -211,7 +214,6 @@ class PageRevision
 	{
 		if(is_numeric($this->pageId) && is_numeric($revisionId))
 		{
-
 			$cache = new Cache('models', 'Page', $this->pageId, 'content', $revisionId);
 			$contentData = $cache->getData();
 
@@ -236,14 +238,18 @@ class PageRevision
 				$this->title = $contentData['title'];
 				$this->rawContent = $contentData['rawContent'];
 				$this->filteredContent = $contentData['filteredContent'];
-
+				$this->note = $contentData['note'];
 			}else{
 				throw new BentoError('Invalid page revision');
 			}
-		}elseif(is_numeric($locationId)){
-			$this->locationId = $locationId;
 		}else{
-			throw new BentoError('Location ID required');
+
+			if(!is_numeric($this->pageId))
+				throw new BentoError('Page ID required required to load revision');
+
+
+			if(!is_numeric($revisionId))
+				throw new BentoError('Revision ID required required to load revision');
 		}
 	}
 
@@ -261,7 +267,7 @@ class PageRevision
 		$insertStmt->prepare('INSERT INTO BentoCMS_Content
 										(pageId,
 										revisionId,
-										author, updateTime,
+										author, updateTime, note,
 										title, filteredContent, rawContent)
 									VALUES
 										 (?,
@@ -272,11 +278,11 @@ class PageRevision
 													ORDER BY tempContent.revisionId DESC LIMIT 1) + 1),
 											1)
 										),
-										?, ?,
+										?, ?, ?,
 										?, ?, ?)');
 
-		$insertStmt->bindAndExecute('iiissss', $this->pageId, $this->pageId,
-														$this->author, gmdate('Y-m-d H:i:s'),
+		$insertStmt->bindAndExecute('iiisssss', $this->pageId, $this->pageId,
+														$this->author, gmdate('Y-m-d H:i:s'), $this->note,
 														$this->title, $this->filteredContent, $this->rawContent);
 
 		$getStmt = $db->stmt_init();
@@ -292,6 +298,9 @@ class PageRevision
 
 	public function makeActive()
 	{
+		if(!is_numeric($this->getId()))
+			return false;
+
 		$db = DatabaseConnection::getConnection('default');
 		$stmt = $db->stmt_init();
 		$stmt->prepare('UPDATE BentoCMS_Pages SET activeRevision = ? WHERE id = ?');
