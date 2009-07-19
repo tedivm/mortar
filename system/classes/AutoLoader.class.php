@@ -98,17 +98,18 @@ class AutoLoader
 	{
 		$classArray = array();
 		$config = Config::getInstance();
-		foreach(self::$baseDirectories as $folder)
+		$cache = new Cache('system', 'classLookup', 'coreIndex');
+		$classArray = $cache->getData();
+		if($cache->isStale())
 		{
-			$cache = new Cache('system', 'classLookup', $folder);
-			$lookupClasses = $cache->getData();
-			if($cache->isStale())
+			foreach(self::$baseDirectories as $folder)
 			{
 				$lookupClasses = self::loadDirectory($config['path'][$folder]);
-				$cache->storeData($lookupClasses);
+				$classArray[] = $lookupClasses;
 			}
-			$classArray[] = $lookupClasses;
+			$cache->storeData($classArray);
 		}
+
 		return $classArray;
 	}
 
@@ -126,12 +127,8 @@ class AutoLoader
 
 		foreach($installedPackages as $package)
 		{
-			$packageInfo = new PackageInfo($package);
-			$moduleName = $packageInfo->getName();
-
-			$cache = new Cache('modules', $moduleName, 'classLookup');
+			$cache = new Cache('modules', $package, 'classLookup');
 			$lookupClasses = $cache->getData();
-
 			if($cache->isStale())
 			{
 				$lookupClasses = self::loadModule($package);
@@ -149,25 +146,31 @@ class AutoLoader
 	 */
 	static protected function loadExtraSystemClasses()
 	{
-		$config = Config::getInstance();
-		$moduleFolders = array('modelSupport/actions' => 'ModelAction',
-								'modelSupport/actions/LocationBased' => 'ModelActionLocationBased',
-								'modelSupport/converters' => 'ModelTo',
-								'modelSupport/Listings' => 'none',
-								'modelSupport/Forms' => 'none',
-								'InputHandlers' => 'none',
-								'cacheHandlers' => 'cacheHandler',
-								'RequestWrapper/IOProcessors' => 'IOProcessor');
+		$cache = new Cache('system', 'classLookup', 'extraSystemClasses');
+		$classes = $cache->getData();
+		if($cache->isStale())
+		{
+			$config = Config::getInstance();
+			$moduleFolders = array('modelSupport/actions' => 'ModelAction',
+									'modelSupport/actions/LocationBased' => 'ModelActionLocationBased',
+									'modelSupport/converters' => 'ModelTo',
+									'modelSupport/Listings' => 'none',
+									'modelSupport/Forms' => 'none',
+									'InputHandlers' => 'none',
+									'cacheHandlers' => 'cacheHandler',
+									'RequestWrapper/IOProcessors' => 'IOProcessor');
 
-		$classes = array(self::loadDirectoryAndFilter($config['path']['mainclasses'], $moduleFolders));
-		$outputControllers = self::loadDirectoryAndFilter($config['path']['mainclasses'],
-									array('RequestWrapper/OutputControllers' => 'none'));
+			$classes = array(self::loadDirectoryAndFilter($config['path']['mainclasses'], $moduleFolders));
+			$outputControllers = self::loadDirectoryAndFilter($config['path']['mainclasses'],
+										array('RequestWrapper/OutputControllers' => 'none'));
 
-		$outputClasses = array();
-		foreach($outputControllers as $outputBaseName => $classPath)
-			$outputClasses[$outputBaseName . 'OutputController'] = $classPath;
+			$outputClasses = array();
+			foreach($outputControllers as $outputBaseName => $classPath)
+				$outputClasses[$outputBaseName . 'OutputController'] = $classPath;
 
-		$classes[] = $outputClasses;
+			$classes[] = $outputClasses;
+			$cache->storeData($classes);
+		}
 		return $classes;
 	}
 
@@ -188,25 +191,17 @@ class AutoLoader
 		foreach($moduleFolders as $folder => $label)
 		{
 			$path = $basePath . $folder . '/';
+			$lookupClasses = array();
+			$unfilteredClasses = self::loadDirectory($path);
 
-			$cache = new Cache('system', 'classLookup', $path);
-			$lookupClasses = $cache->getData();
-
-			if($cache->isStale())
+			if($label != 'none')
 			{
-				$lookupClasses = array();
-				$unfilteredClasses = self::loadDirectory($path);
-
-				if($label != 'none')
-				{
-					foreach($unfilteredClasses as $name => $path)
-						$lookupClasses[$label . $name] = $path;
-				}else{
-					$lookupClasses = $unfilteredClasses;
-				}
-
-				$cache->storeData($lookupClasses);
+				foreach($unfilteredClasses as $name => $path)
+					$lookupClasses[$label . $name] = $path;
+			}else{
+				$lookupClasses = $unfilteredClasses;
 			}
+
 			$classes = array_merge($classes, $lookupClasses);
 		}
 
