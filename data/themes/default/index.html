@@ -2,47 +2,39 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" >
 <head>
 {# head #}
-
-
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-<link href='{# theme_path #}css/three_column_layout.css' rel='stylesheet' type='text/css'/>
 
 </head>
 <body>
 
-<div id="header">
-<!-- Header Start -->
-{# title #}
-Header
-<!-- Header End -->
-</div>
-<div class="colmask holygrail">
-    <div class="colmid">
-        <div class="colleft">
-            <div class="col1wrap">
-                <div class="col1">
-					<!-- Column 1 start -->
-					{# content #}
-    				<!-- Column 1 end -->
-                </div>
-            </div>
-            <div class="col2">
-				<!-- Column 2 start -->
-Left Column
-                <!-- Column 2 end -->
-            </div>
-            <div class="col3">
-				<!-- Column 3 start -->
-Right Column
-				<!-- Column 3 end -->
-            </div>
-        </div>
+<div class="container">
+    <div id="header">
+        <!-- Header Start -->
+        <h1>bento</h1>
+  
+        <h2>{# title #}</h2>
+
+        <ul>
+            <li><a href="#">Option 1</a></li>
+            <li><a href="#">Option 1</a></li>
+            <li><a href="#">Option 1</a></li>
+        </ul>
+        <!-- Header End -->
+    </div> 
+
+
+    <div class="column-left column-box">&nbsp;
+    </div> <!-- column-left -->
+
+    <div class="column-right column-box">
+        {# content #}
+    </div> <!-- column-right -->
+    <div style="clear: both;">&nbsp;</div>
+    <div id="footer">
+    <!-- Footer Start -->
+    Footer
+    <!-- Footer End -->
     </div>
-</div>
-<div id="footer">
-<!-- Footer Start -->
-Footer
-<!-- Footer End -->
 </div>
 </body>
 </html>
