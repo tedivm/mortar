@@ -210,7 +210,6 @@ class RequestWrapper
 		if(!isset($className))
 		{
 			$actionClassInfo = $this->loadActionClass();
-
 			if(!$actionClassInfo)
 				throw new ResourceNotFoundError('Unable to load action class.');
 			$className = $actionClassInfo['className'];
@@ -235,7 +234,7 @@ class RequestWrapper
 	 * @access protected
 	 * @param Action $action
 	 */
-	protected function runAction($action)
+	protected function runAction(ActionInterface $action)
 	{
 		$query = Query::getQuery();
 		$format = $query['format'];
