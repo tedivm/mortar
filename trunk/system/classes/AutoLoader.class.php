@@ -74,11 +74,13 @@ class AutoLoader
 		$classArray = array();
 		$config = Config::getInstance();
 
-
+		$packageClasses = self::loadPackageClasses();
+		$coreClasses = self::loadCoreClasses();
+		$systemClasses = self::loadExtraSystemClasses();
 		$classArray = array_merge($classArray,
-								self::loadPackageClasses(),
-								self::loadCoreClasses(),
-								self::loadExtraSystemClasses());
+								$packageClasses,
+								$coreClasses,
+								$systemClasses);
 
 		$classes = call_user_func_array('array_merge', $classArray);
 
