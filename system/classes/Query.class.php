@@ -208,7 +208,7 @@ class Query
 								$inputArray[$name] = array_shift($pathArray);
 					}
 				}
-				if(!isset($inputArray['action'])){
+				if(!isset($inputArray['action']) && count($pathArray) >= 1){
 					$inputArray['action'] = $pathArray[0];
 					if(isset($pathArray[1]))
 						$inputArray['id'] = $pathArray[1];
