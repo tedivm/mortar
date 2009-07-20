@@ -69,7 +69,6 @@ class ModelActionAdd extends ModelActionBase
 	protected function getForm()
 	{
 		$query = Query::getQuery();
-		$formName = self::getFormByType('BlogEntry');
 
 		$formDisplayName = $this->type . 'Form' . $this->actionName;
 		if($formClassName = self::getFormByType($this->model->getType()))
