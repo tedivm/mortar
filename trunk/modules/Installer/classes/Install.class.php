@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseInstaller
+class InstallerInstaller // thats the most pathetic name ever
 {
 	public $error = array();
 	public $installed = false;
@@ -43,12 +43,6 @@ class BentoBaseInstaller
 				if(!$this->setupStructure())
 					throw new Exception('Error setting up base structure', 4);
 
-
-		//		if(!$this->setupCoreModule())
-		//			throw new Exception('Error installing Core module.', 5);
-
-
-				file_put_contents($config['path_base'] . '.blockinstall', 'To unblock installation, delete this file.');
 				$this->installed = true;
 				return true;
 			}
@@ -63,7 +57,7 @@ class BentoBaseInstaller
 				case 4: // structure
 				case 3: // database
 					$config = Config::getInstance();
-					$pathToSQL = $config['path']['modules'] . 'BentoBase/sql/system_remove.sql.php';
+					$pathToSQL = $config['path']['modules'] . 'Installer/sql/system_remove.sql.php';
 					$db = dbConnect('default');
 
 					if(!$this->dbDebug)
@@ -258,7 +252,7 @@ class BentoBaseInstaller
 			$config->reset();
 
 			// Set Up database structure
-			$pathToSQL = $config['path']['modules'] . 'BentoBase/sql/system_install.sql.php';
+			$pathToSQL = $config['path']['modules'] . 'Installer/sql/system_install.sql.php';
 
 			$db = dbConnect('default');
 

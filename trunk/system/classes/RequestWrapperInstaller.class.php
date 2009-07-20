@@ -34,25 +34,33 @@ class RequestWrapperInstaller extends RequestWrapper
 	 */
 	protected function getAction($className = null, $argument = null)
 	{
-		// if we aren't given the classname and argument, we load them up
-		if(!$className)
-		{
-			$actionClassInfo = $this->loadActionClass();
-			$className = $actionClassInfo['className'];
-			$argument = $actionClassInfo['argument'];
+		try{
+
+			// if we aren't given the classname and argument, we load them up
+			if(!$className)
+			{
+				$actionClassInfo = $this->loadActionClass();
+				$className = $actionClassInfo['className'];
+				$argument = $actionClassInfo['argument'];
+			}
+
+			// Check the class to make sure its usable with the current settings
+			$reflectionClass = new ReflectionClass($className);
+
+			// match interface
+			if(!in_array('ActionInterface', $reflectionClass->getInterfaceNames()))
+				throw new BentoError($className . ' should implement interface ActionInterface');
+
+			// Create the class
+			$action = new $className($argument, $this->getHandler());
+
+
+			if(!is_object($action))
+				throw new BentoError('Can not run invalid action.');
+
+		}catch(Exception $e){
+			throw new BentoError('Unable to load action handler.');
 		}
-
-
-		// Check the class to make sure its usable with the current settings
-		$reflectionClass = new ReflectionClass($className);
-
-		// match interface
-		if(!in_array('ActionInterface', $reflectionClass->getInterfaceNames()))
-			throw new BentoError($className . ' should implement interface ActionInterface');
-
-		// Create the class
-		$action = new $className($argument, $this->getHandler());
-
 		return $action;
 	}
 
@@ -64,23 +72,9 @@ class RequestWrapperInstaller extends RequestWrapper
 	 */
 	protected function handleError($e)
 	{
-
+		// well shit
 	}
 
-	/**
-	 * Final code run for the request
-	 *
-	 * @access protected
-	 */
-
-	/*
-	protected function close()
-	{
-		$this->ioHandler->close();
-
-
-	}
-*/
 	/**
 	 * This class makes sure the action class is loaded into the system and returns its name
 	 *
@@ -89,10 +83,18 @@ class RequestWrapperInstaller extends RequestWrapper
 	 */
 	protected function loadActionClass()
 	{
-		$classname = 'BentoBaseActionInstall';
+		$query = Query::getQuery();
+		if(strstr($query['p'], 'Minify') && substr($query['p'], -2) == 'js')
+		{
+			$classname = 'InstallerActionJsSub';
+			$fileName = 'JsSub.class.php';
+		}else{
+			$classname = 'InstallerActionInstall';
+			$fileName = 'Install.class.php';
+		}
 
 		$config = Config::getInstance();
-		$path = $config['path']['modules'] . 'BentoBase/actions/Install.class.php';
+		$path = $config['path']['modules'] . 'Installer/actions/' . $fileName;
 
 		if(!class_exists($classname, false))
 		{
@@ -101,7 +103,7 @@ class RequestWrapperInstaller extends RequestWrapper
 			include($path);
 		}
 
-		return array('className' => $classname, 'argument' => null);
+		return array('className' => $classname, 'argument' => $this->ioHandler);
 	}
 
 	/**
