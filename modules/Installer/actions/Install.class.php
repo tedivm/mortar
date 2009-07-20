@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseActionInstall implements ActionInterface //extends Action
+class InstallerActionInstall implements ActionInterface //extends Action
 {
 
 	public $AdminSettings = array('headerTitle' => 'Installer');
@@ -28,10 +28,10 @@ class BentoBaseActionInstall implements ActionInterface //extends Action
 		$input = Input::getInput();
 		$config = Config::getInstance();
 
-		$modulePath = $config['path']['modules'] . 'BentoBase/';
+		$modulePath = $config['path']['modules'] . 'Installer/';
 
 		include($modulePath . 'classes/InstallationForm.class.php');
-		$form = new InstallationForm('Installation');
+		$form = new InstallerInstallationForm('Installation');
 		$this->form = $form;
 
 		if($form->wasSubmitted())
@@ -40,7 +40,7 @@ class BentoBaseActionInstall implements ActionInterface //extends Action
 			{
 				$installerPath = $modulePath . 'classes/Install.class.php';
 				require($installerPath);
-				$installer = new BentoBaseInstaller();
+				$installer = new InstallerInstaller();
 
 				if($installer->install())
 				{
@@ -59,12 +59,24 @@ class BentoBaseActionInstall implements ActionInterface //extends Action
 
 	}
 
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
+		$theme = $page->getTheme();
+		$jsMin = $theme->getMinifier('js');
+		//$page->addScript($jsMin->getBaseString());
+
+		$cssMin = $theme->getMinifier('css');
+
+
+		$css = '<style type="text/css">' . $cssMin->getBaseString() . '</style>';
+
+
+		$page->addHeaderContent($css);
+
 		$config = Config::getInstance();
 		$output = '';
 
-		$modulePath = $config['path']['modules'] . 'BentoBase/';
+		$modulePath = $config['path']['modules'] . 'Installer/';
 
 		foreach($this->error as $errorMessage)
 		{

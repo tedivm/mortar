@@ -1,6 +1,6 @@
 <?php
 
-class InstallationForm extends Form
+class InstallerInstallationForm extends Form
 {
 	protected function define()
 	{

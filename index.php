@@ -93,8 +93,7 @@ try{
 		Cache::$runtimeDisable = true;
 
 		// If the blockinstall file is there, or the install class file is not, we shouldn't attempt an install
-		if(file_exists('.blockinstall')
-			|| !file_exists($config['path']['modules'] . 'BentoBase/actions/Install.class.php'))
+		if(file_exists($config['path']['modules'] . 'Installer/actions/Install.class.php'))
 		{
 			define('INSTALLMODE', false);
 			throw new BentoError('Unable to load configuration file.');
