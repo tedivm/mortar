@@ -159,7 +159,7 @@ class Query
 		if(isset($inputArray['location']) && is_numeric($inputArray['location']))
 		{
 			$location = new Location($inputArray['location']);
-		}elseif(isset($pathArray) && INSTALLMODE == false){
+		}elseif(isset($pathArray)){
 	// if location isn't set, find it from the path
 
 			// First check to see if the model path is set and if it maps to a non-location based model directory
@@ -173,7 +173,7 @@ class Query
 
 			// If the path does not map to a non-location based something then process the path starting from the
 			// currently active site.
-			}else{
+			}elseif(INSTALLMODE == false){
 
 				$site = ActiveSite::getSite();
 				$currentLocation = $site->getLocation();
@@ -191,27 +191,30 @@ class Query
 				$resource = $currentLocation->getResource(true);
 			}
 
-			// This code checks for any custom url path mapping associated with the model.
-			if(isset($resource['type']) && is_array($pathArray) && count($pathArray) > 0)
+			// Now we handle any left over path information, basically custom stuff associated with models or the
+			// we fill in for the 'action' class if its already set
+			if(count($pathArray) > 0)
 			{
-				$resourceInfo = ModelRegistry::getHandler($resource['type']);
-				$urlTemplate = new DisplayMaker();
-				if(($urlTemplate->loadTemplate($resource['type'] . 'UrlMapping', $resourceInfo['module']))
-					|| $urlTemplate->loadTemplate('UrlMapping', $resourceInfo['module']))
+				if(isset($resource['type']) && is_array($pathArray) && count($pathArray) > 0)
 				{
-					$tags = $urlTemplate->tagsUsed();
-					if(count($tags) > 0)
-						foreach($tags as $name)
-							$inputArray[$name] = array_shift($pathArray);
-				}else{
+					$resourceInfo = ModelRegistry::getHandler($resource['type']);
+					$urlTemplate = new DisplayMaker();
+					if(($urlTemplate->loadTemplate($resource['type'] . 'UrlMapping', $resourceInfo['module']))
+						|| $urlTemplate->loadTemplate('UrlMapping', $resourceInfo['module']))
+					{
+						$tags = $urlTemplate->tagsUsed();
+						if(count($tags) > 0)
+							foreach($tags as $name)
+								$inputArray[$name] = array_shift($pathArray);
+					}
+				}elseif(!isset($inputArray['action'])){
 					$inputArray['action'] = $pathArray[0];
 					if(isset($pathArray[1]))
-					{
 						$inputArray['id'] = $pathArray[1];
-					}
 				}
 			}
 		}
+
 
 		// if the format is set this checks to make sure it is allowed and that it is formatted correct (first letter
 		// upper case, the rest lower, no spaces).

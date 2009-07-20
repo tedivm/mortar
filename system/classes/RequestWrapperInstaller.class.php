@@ -72,7 +72,19 @@ class RequestWrapperInstaller extends RequestWrapper
 	 */
 	protected function handleError($e)
 	{
-		// well shit
+		switch(get_class($e))
+		{
+			case 'ResourceNotFoundError':
+				$output = 'These are not the resources you are looking for.';
+				break;
+			default:
+				var_dump($e);
+				$output = 'There was an error with the installer.';
+				break;
+		}
+
+		echo $output;
+		exit(); // Inappropriate bailout! Way to handle errors, jackass! (note to self)
 	}
 
 	/**
@@ -84,17 +96,19 @@ class RequestWrapperInstaller extends RequestWrapper
 	protected function loadActionClass()
 	{
 		$query = Query::getQuery();
-		if(strstr($query['p'], 'Minify') && substr($query['p'], -2) == 'js')
+		if(isset($query['action']))
 		{
-			$classname = 'InstallerActionJsSub';
-			$fileName = 'JsSub.class.php';
+			$action = preg_replace('/[^a-zA-Z0-9\s]/', '', $query['action']);
+
+			if($action == 'Minify')
+				$action = 'JsSub';
 		}else{
-			$classname = 'InstallerActionInstall';
-			$fileName = 'Install.class.php';
+			$action = 'Install';
 		}
 
+		$classname = 'InstallerAction' . $action;
 		$config = Config::getInstance();
-		$path = $config['path']['modules'] . 'Installer/actions/' . $fileName;
+		$path = $config['path']['modules'] . 'Installer/actions/' . $action . '.class.php';
 
 		if(!class_exists($classname, false))
 		{
