@@ -110,12 +110,19 @@ class Page implements ArrayAccess
 	protected $cssIncludes = array();
 
 	/**
-	 * Javescript code that needs to be run before the jQuery statup code
+	 * Javescript code that needs to be run before at the top of the page
 	 *
 	 * @access protected
 	 * @var array
 	 */
 	protected $preStartupJs = array();
+
+	/**
+	 * The contents of this array get added to the "head" section of the page, outside of any javascript or CSS tag
+	 *
+	 * @var array
+	 */
+	protected $headerContent = array();
 
 	/**
 	 * The current theme file to use (out of the files in the root of the theme's directory)
@@ -137,6 +144,7 @@ class Page implements ArrayAccess
 	{# preStartupJs #}
 	</script>
 	{# meta #}
+	{# headerContent #}
 ';
 
 	protected $footerTemplate = '
@@ -333,6 +341,16 @@ class Page implements ArrayAccess
 	}
 
 	/**
+	 * This function adds content directly to the head section of the html document.
+	 *
+	 * @param string $content
+	 */
+	public function addHeaderContent($content)
+	{
+		$this->headerContent[] = $content;
+	}
+
+	/**
 	 * Adds javascript to the jQuery startup function
 	 *
 	 * @param string $javascript
@@ -402,7 +420,13 @@ class Page implements ArrayAccess
 		$tags = $display->tagsUsed(false);
 
 		// This is a list of all of the 'array' items that need to be cycled through and added as a single items
-		$groups = array('script', 'scriptStartup', 'meta', 'jsIncludes', 'cssIncludes', 'preStartupJs');
+		$groups = array('script',
+						'scriptStartup',
+						'meta',
+						'jsIncludes',
+						'cssIncludes',
+						'preStartupJs',
+						'headerContent');
 
 		$output = PHP_EOL;
 		foreach($groups as $variable)
