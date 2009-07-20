@@ -207,7 +207,8 @@ class Query
 							foreach($tags as $name)
 								$inputArray[$name] = array_shift($pathArray);
 					}
-				}elseif(!isset($inputArray['action'])){
+				}
+				if(!isset($inputArray['action'])){
 					$inputArray['action'] = $pathArray[0];
 					if(isset($pathArray[1]))
 						$inputArray['id'] = $pathArray[1];
