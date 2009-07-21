@@ -29,9 +29,11 @@ class BentoCMSActionPageHistory extends ModelActionLocationBasedRead
 			$url->format = $format;
 			$url->revision = $revision->getId();
 
-
-			$table->addField('author', $users[$revision->author]['name']);
 			$table->addField('updateTime', $url->getLink($revision->updateTime));
+			$table->addField('author', $users[$revision->author]['name']);
+
+			if(isset($revision->note) && strlen($revision->note) > 0)
+				$table->addField('note', '(' . $revision->note . ')');
 			$table->newRow();
 		}
 
