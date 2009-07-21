@@ -72,6 +72,13 @@ class Cache
 	protected $handler;
 
 	/**
+	 * If this flag is set to true the cache record is only stored in the scripts memory, not persisted.
+	 *
+	 * @var bool
+	 */
+	protected $memOnly = false;
+
+	/**
 	 * This is the name of the cache handler the system is using to store data.
 	 *
 	 * @var string
@@ -176,6 +183,17 @@ class Cache
 	}
 
 	/**
+	 * This function makes it so the data object is only stored for the duraction of the script. This is used for things
+	 * that may be different from each script or that require less overhead to generate than store, but are called
+	 * enough times to justify storing each script.
+	 *
+	 */
+	public function setMemOnly()
+	{
+		$this->memOnly = true;
+	}
+
+	/**
 	 * This takes the same argument as the constructor, specifically an unlimited number of strings that are used to
 	 * define the key. Unlike the constructor, this function affects multiple items- the key used used hierarchical and
 	 * the less arguments passed, the more data that will be cleared. No arguments passed clears the cache complete.
@@ -194,6 +212,8 @@ class Cache
 	{
 		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable)
 			return true;
+
+		self::$memStore = array();
 
 		if(self::$handlerClass == '')
 		{
@@ -225,21 +245,21 @@ class Cache
 		if(isset(self::$memStore[$this->keyString]) && is_array(self::$memStore[$this->keyString]))
 		{
 			$record = self::$memStore[$this->keyString];
-		}else{
+		}elseif(!$this->memOnly){
 			$handler = $this->getHandler();
 			if(!$handler)
 				return false;
 
 			$record = $handler->getData();
 			self::$memStore[$this->keyString] = ($this->storeMemory) ? $record : false;
+		}else{
+			return false;
 		}
 
 		if($record['expiration'] - START_TIME < 0)
-		{
 			return false;
-		}
-		$this->cacheReturned = true;
 
+		$this->cacheReturned = true;
 		self::$cacheReturns++;
 		return $record['data']['return'];
 	}
@@ -276,6 +296,9 @@ class Cache
 
 			if($this->storeMemory)
 				self::$memStore[$this->keyString] = array('expiration' => $expiration, 'data' => $store);
+
+			if($this->memOnly)
+				return true;
 
 			$handler = $this->getHandler();
 			if(!$handler)
