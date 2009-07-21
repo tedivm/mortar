@@ -21,7 +21,6 @@ class InstallerActionInstall implements ActionInterface //extends Action
 
 	public function start()
 	{
-
 		if(INSTALLMODE !== true)
 			exit();
 
