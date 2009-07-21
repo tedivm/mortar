@@ -298,7 +298,10 @@ class PackageInfo
 		if(is_null($name))
 			return $this->meta;
 
-		return $this->meta[$name];
+		if(isset($this->meta[$name]))
+			return $this->meta[$name];
+
+		return false;
 	}
 
 	/**
@@ -309,6 +312,7 @@ class PackageInfo
 	protected function loadMeta()
 	{
 		$cache = new Cache('packages', $this->getName(), 'meta');
+		$cache->setMemOnly();
 		$meta = $cache->getData();
 
 		if($cache->isStale())

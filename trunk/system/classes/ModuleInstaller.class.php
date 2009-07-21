@@ -223,13 +223,15 @@ class ModuleInstaller
 	{
 		$moduleRecord = new ObjectRelationshipMapper('modules');
 		$moduleRecord->package = $this->package;
-
 		$moduleRecord->select();
-
 		$moduleRecord->status = $status;
 
+		$versionString = $this->packageInfo->getMeta('version');
+		if(!$versionString)
+			$versionString = '0.0.0';
+
 		$version = new Version();
-		$version->fromString($this->packageInfo->getMeta('version'));
+		$version->fromString($versionString);
 
 		if(is_numeric($version->major))
 			$moduleRecord->majorVersion = $version->major;
