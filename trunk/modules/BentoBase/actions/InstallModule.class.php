@@ -17,7 +17,6 @@ class BentoBaseActionInstallModule extends ActionBase
 
 	protected function logic()
 	{
-		Cache::$runtimeDisable = true;
 		$query = Query::getQuery();
 		$installPackage = $query['id'];
 
@@ -40,20 +39,18 @@ class BentoBaseActionInstallModule extends ActionBase
 
 				if($this->form->checkSubmit())
 				{
+					Cache::$runtimeDisable = true;
 					$moduleInstaller = new ModuleInstaller($installPackage);
 					$this->success = $moduleInstaller->fullInstall();
+					Cache::$runtimeDisable = false;
+					Cache::clear();
 				}
-
 			}else{
 				//redirect to listing
 				unset($this->form);
 				$this->installablePackages = $installablePackages;
 			}
-
 		}
-
-		Cache::$runtimeDisable = false;
-		Cache::clear();
 	}
 
 	public function viewAdmin($page)
