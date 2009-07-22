@@ -80,7 +80,7 @@ class PackageList
 			return array();
 
 		$db = dbConnect('default_read_only');
-		$results = $db->query('SELECT package FROM modules');
+		$results = $db->query('SELECT package FROM modules WHERE status LIKE \'installed\'');
 		$packageList = array();
 		while($row = $results->fetch_assoc())
 		{
