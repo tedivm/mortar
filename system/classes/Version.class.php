@@ -197,26 +197,22 @@ class Version
 	 */
 	public function fromString($version)
 	{
-
 		$versionArray = explode('.', $version);
 
-		$lastPiece =array_pop($versionArray);
-
-		if(!is_int($lastPiece) && is_string($lastPiece))
+		$lastPiece = array_pop($versionArray);
+		if(!is_int($lastPiece) && is_string($lastPiece) && strlen($lastPiece) > 0)
 		{
 			$lastPieceArray = explode(' ', $lastPiece);
 			$versionArray[] = $lastPieceArray[0];
-			$this->releaseType = $lastPieceArray[1];
-			$this->releaseVersion = $lastPieceArray[2];
+			if(isset($lastPieceArray[1]))
+				$this->releaseType = $lastPieceArray[1];
+
+			if(isset($lastPieceArray[2]))
+				$this->releaseVersion = $lastPieceArray[2];
 		}
-
-
 		$this->major = (int) $versionArray[0];
-
-		$this->minor = (int) $versionArray[1];
-
-		$this->micro = (int) $versionArray[2];
-
+		$this->minor = isset($versionArray[1]) ? (int) $versionArray[1] : 0;
+		$this->micro = isset($versionArray[2]) ? (int) $versionArray[2] : 0;
 	}
 
 }

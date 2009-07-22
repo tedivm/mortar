@@ -144,7 +144,9 @@ class ModuleInstaller
 		if(file_exists($sqlPath))
 		{
 			$db = db_connect('default');
-			$db->runFile($sqlPath);
+			if($db->runFile($sqlPath) === false)
+				throw new BentoError('Unable to install database structure.');
+
 			$this->changeStatus('dbStructure');
 		}
 	}
