@@ -162,7 +162,8 @@ abstract class ModelBase implements Model
 
 	/**
 	 * This function saves the model to the database. If the $table property is set then it will map the $content array
-	 * directly to the columns of the same name in that table.
+	 * directly to the columns of the same name in that table. On the first save the function 'firstSave' is called, if
+	 * it exists.
 	 *
 	 * @return bool
 	 */
@@ -178,10 +179,14 @@ abstract class ModelBase implements Model
 				$record = new ObjectRelationshipMapper($this->table);
 
 				if(isset($this->id))
+				{
 					$record->primaryKey = $this->id;
+					$newItem = false;
+				}else{
+					$newItem = true;
+				}
 
 				$columns = $record->getColumns(false, false);
-
 				foreach($columns as $columnName)
 				{
 					if(isset($this->content[$columnName]))
@@ -196,13 +201,14 @@ abstract class ModelBase implements Model
 					}
 				}
 
-
 				if(!$record->save())
 					throw new BentoError('Unable to save model information to table');
 
 				if(!isset($this->id))
 					$this->id = $record->primaryKey;
 
+				if($newItem && method_exists($this, 'firstSave'))
+					$this->firstSave();
 			}
 
 			Cache::clear('models', $this->getType(), $this->id);
