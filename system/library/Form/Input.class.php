@@ -34,6 +34,13 @@ class FormInput
 	public $label;
 
 	/**
+	 * This is a discription or hint about what the input expects.
+	 *
+	 * @var string
+	 */
+	public $description;
+
+	/**
 	 * This is an array of properties about the input. Examples include the value of the input, although any html tag
 	 * can be here.
 	 *
@@ -122,6 +129,16 @@ class FormInput
 	{
 		$this->label = $label;
 		return $this;
+	}
+
+	/**
+	 * This function sets the description, a hint on the type of input expected from the user.
+	 *
+	 * @param string $description
+	 */
+	public function setDescription($description)
+	{
+		$this->description = $description;
 	}
 
 	/**

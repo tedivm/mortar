@@ -327,6 +327,8 @@ class Form
 						if(isset($input->label))
 						{
 							$labelHtml->wrapAround($input->label);
+							if(isset($input->description))
+								$labelHtml->property('title', $input->description);
 						}
 
 						$br = new HtmlObject('br');
@@ -364,7 +366,8 @@ class Form
 
 		$output = $formHtml;
 
-		$jsStartup[] = '$(\'#' . $this->name . '\').validate();';
+		$jsStartup[] = '$("#' . $this->name . '").validate();';
+		$jsStartup[] = '$("#' . $this->name . ' label").tooltip({extraClass: "formTip"});';
 
 		// if the form was submitted, trigger the errors on reload
 		if($this->wasSubmitted())
