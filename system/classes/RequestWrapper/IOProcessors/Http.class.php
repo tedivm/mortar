@@ -367,7 +367,7 @@ class SessionObserver
 		// This token is used by forms to prevent cross site forgery attempts
 		if(!isset($_SESSION['nonce']))
 		{
-			$_SESSION['nonce'] = md5($this->userId . START_TIME);
+			$_SESSION['nonce'] = md5($this->userId . START_TIME . rand());
 		}
 		if(!isset($_SESSION['IPaddress']) || $_SESSION['IPaddress'] != $_SERVER['REMOTE_ADDR'])
 			$_SESSION['IPaddress'] = $_SERVER['REMOTE_ADDR'];
