@@ -16,7 +16,7 @@ class BentoBaseActionMinify extends ActionBase
 			$tmp = explode('-', $query['id']);
 			$themeName = $tmp[0];
 			$tmp = explode('.', $tmp[1]);
-			$checksum = $tmp[0];
+			$requestedChecksum = $tmp[0];
 			$type = $tmp[1];
 		}elseif(isset($query['location'])){
 
@@ -28,12 +28,17 @@ class BentoBaseActionMinify extends ActionBase
 
 		$theme = new Theme($themeName);
 		$minifier = $theme->getMinifier($type);
-		$initialCheckSum = $minifier->getInitialChecksum();
+		$actualCheckSum = $minifier->getInitialChecksum();
 
 		// if the checksum from the url doesn't match the checksum of the base url
-		if($initialCheckSum != $checksum)
+		if($actualCheckSum != $requestedChecksum)
 		{
 			$url = $theme->getUrl($type);
+			if($url->id == $query['id'])
+			{
+				Cache::clear('themes', $themeName, 'minification', $type);
+				$url = $theme->getUrl($type);
+			}
 			$this->ioHandler->addHeader('Location', (string) $url);
 			$this->ioHandler->setStatusCode(301);
 			return;
@@ -55,10 +60,10 @@ class BentoBaseActionMinify extends ActionBase
 		$cache->cacheTime = 31449600;
 		$minifiedData = $cache->getData();
 
-		if($cache->isStale() || $minifiedData['checksum'] != $initialCheckSum)
+		if($cache->isStale() || $minifiedData['checksum'] != $requestedChecksum)
 		{
 			Cache::clear('themes', $themeName, 'minification', $type, 'url');
-			$minifiedData['checksum'] = $initialCheckSum;
+			$minifiedData['checksum'] = $actualCheckSum;
 			$minifiedData['data'] = $minifier->minifyFiles();
 			$cache->storeData($minifiedData);
 		}
