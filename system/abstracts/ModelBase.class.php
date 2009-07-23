@@ -499,7 +499,17 @@ abstract class ModelBase implements Model
 		return true;
 	}
 
-
+	/**
+	 * This function is run the first time the model is saved.
+	 *
+	 * @hook *model firstSave
+	 */
+	protected function firstSave()
+	{
+		$hook = new Hook();
+		$hook->loadModelPlugins($this, 'firstSave');
+		$hook->runFirstSave($this);
+	}
 	// class properties define attributes and meta data
 	public function __get($offset)
 	{
