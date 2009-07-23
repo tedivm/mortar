@@ -75,7 +75,7 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 		if($this->model->getLocation()->getParent() === false)
 			throw new BentoError('Unspecified  parent', 400);
 
-		if(!staticHack($this->model, 'autoName'))
+		if(!staticHack($this->model, 'autoName') && !$form->getInput('location_name'))
 		{
 			$form->createInput('location_name')->
 				setLabel('Name')->
