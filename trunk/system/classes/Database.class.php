@@ -328,8 +328,8 @@ class Mystmt extends mysqli_stmt
 	/**
 	 * This is an extension of the Mysqli_stmt function
 	 *
-	 * @param unknown_type $query
-	 * @return unknown
+	 * @param string $query
+	 * @return bool
 	 */
 	public function prepare($query)
 	{
