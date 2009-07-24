@@ -171,7 +171,7 @@ class cacheHandlerSqlite implements cacheHandler
 				$db = new SQLiteDatabase($filePath, '0666', $errorMessage);
 
 				if(!$db)
-					throw new BentoWarning('Unable to open SQLite Database: '. $errorMessage);
+					throw new CacheSqliteWarning('Unable to open SQLite Database: '. $errorMessage);
 
 				if(!$isSetup)
 				{
@@ -227,4 +227,5 @@ class cacheHandlerSqlite implements cacheHandler
 	}
 }
 
+class CacheSqliteWarning extends CoreWarning {}
 ?>

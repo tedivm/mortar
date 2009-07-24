@@ -420,18 +420,16 @@ class SessionObserver
 		try{
 
 			if(isset($_SESSION['OBSOLETE']) && ($_SESSION['EXPIRES'] < time()))
-				throw new BentoWarning('Attempt to use expired session.');
+				throw new SessionWarning('Attempt to use expired session.');
 
 			if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id']))
-			{
-				throw new Exception('No session started');
-			}
+				return false;
 
 			if(!isset($_SESSION['IPaddress']) || $_SESSION['IPaddress'] != $_SERVER['REMOTE_ADDR'])
-				throw new BentoNotice('IP Address mixmatch (possible session hijacking attempt).');
+				throw new SessionNotice('IP Address mixmatch (possible session hijacking attempt).');
 
 			if(!isset($_SESSION['userAgent']) || $_SESSION['userAgent'] != $_SERVER['HTTP_USER_AGENT'])
-				throw new BentoNotice('Useragent mixmatch (possible session hijacking attempt).');
+				throw new SessionNotice('Useragent mixmatch (possible session hijacking attempt).');
 
 		}catch(Exception $e){
 			return false;
@@ -520,4 +518,6 @@ class ResponseCodeLookup
 	}
 }
 
+class SessionNotice extends CoreNotice {}
+class SessionWarning extends CoreWarning {}
 ?>

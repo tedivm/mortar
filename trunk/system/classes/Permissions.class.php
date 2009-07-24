@@ -59,7 +59,7 @@ class Permissions
 		}elseif(is_numeric($userId)){
 
 			if(!($user = ModelRegistry::loadModel('User', $userId)))
-				throw new BentoError('Invalid user id passed to Permissions class.');
+				throw new PermissionsError('Invalid user id passed to Permissions class.');
 
 			$this->user = $user;
 		}else{
@@ -435,7 +435,7 @@ class UserPermission
 		}catch(Exception $e){
 			$db->rollback();
 			$db->autocommit(true);
-			throw new BentoError('Error while inserting ' . $type . 'Permissions');
+			throw new PermissionsError('Error while inserting ' . $type . 'Permissions');
 		}
 
 
@@ -728,4 +728,5 @@ class PermissionActionList
 
 }
 
+class PermissionsError extends CoreError {}
 ?>

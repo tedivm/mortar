@@ -43,7 +43,7 @@ class ModelActionAdd extends ModelActionBase
 		$form = $this->getForm();
 
 		if($form == false)
-			throw new BentoError('Unable to locate ' . $this->model->getType() . ' form');
+			throw new CoreError('Unable to locate ' . $this->model->getType() . ' form');
 
 		$this->form = $form;
 		if($this->form->wasSubmitted())
@@ -75,7 +75,7 @@ class ModelActionAdd extends ModelActionBase
 		{
 			$baseForm = new $formClassName($formDisplayName);
 		}else{
-			new BentoInfo('Unable to load ' . $this->model->getType() . ' form ' . $formName);
+			new CoreInfo('Unable to load ' . $this->model->getType() . ' form ' . $formName);
 		}
 
 		$formExtension = $this->type . $query['format'] . 'Form';
@@ -91,7 +91,7 @@ class ModelActionAdd extends ModelActionBase
 				$baseForm = $formatForm;
 			}
 		}else{
-			new BentoInfo('Unable to load ' . $this->model->getType() . ' ' . $query['format'] . ' form extension');
+			new CoreInfo('Unable to load ' . $this->model->getType() . ' ' . $query['format'] . ' form extension');
 		}
 
 		if(!isset($baseForm))

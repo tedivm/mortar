@@ -40,7 +40,7 @@ class Query
 			if(!class_exists($type, false))
 			{
 				if(!(include('inputHandlers/' . $type . '.class.php')))
-					throw new BentoError('Unable to load input handler ' . $type);
+					throw new QueryError('Unable to load input handler ' . $type);
 			}
 
 			$input = staticFunctionHack($type, 'getArray');
@@ -238,4 +238,5 @@ class Query
 	}
 }
 
+class QueryError extends CoreError {}
 ?>

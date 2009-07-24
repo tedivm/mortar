@@ -49,17 +49,17 @@ class RequestWrapperInstaller extends RequestWrapper
 
 			// match interface
 			if(!in_array('ActionInterface', $reflectionClass->getInterfaceNames()))
-				throw new BentoError($className . ' should implement interface ActionInterface');
+				throw new RequestError($className . ' should implement interface ActionInterface');
 
 			// Create the class
 			$action = new $className($argument, $this->getHandler());
 
 
 			if(!is_object($action))
-				throw new BentoError('Can not run invalid action.');
+				throw new RequestError('Can not run invalid action.');
 
 		}catch(Exception $e){
-			throw new BentoError('Unable to load action handler.');
+			throw new RequestError('Unable to load action handler.');
 		}
 		return $action;
 	}

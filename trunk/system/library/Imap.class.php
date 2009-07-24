@@ -1132,9 +1132,9 @@ class ImapAttachment
 }
 
 /**
- * This is a specific exception for the Imap classes. It extends the BentoWarning class- if you want to use this library
+ * This is a specific exception for the Imap classes. It extends the CoreWarning class- if you want to use this library
  * outside of Mortar you can have this exception the core extension class, or whatever base exception class you use.
  *
  */
-class ImapException extends BentoWarning  {}
+class ImapException extends CoreWarning  {}
 ?>

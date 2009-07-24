@@ -17,7 +17,7 @@
  * @package System
  * @subpackage ErrorHandling
  */
-class BentoError extends Exception
+class CoreError extends Exception
 {
 	/**
 	 * This is the minimal debug level that this exception class will output with. For this class it is 1.
@@ -78,7 +78,7 @@ class BentoError extends Exception
 		$dispatcher = DISPATCHER;
 
 		$errorClass = get_class($this);
-		$output = "<font size='1'><table class='Bento-error' dir='ltr' border='1' cellspacing='0' cellpadding='2'>
+		$output = "<font size='1'><table class='Core-error' dir='ltr' border='1' cellspacing='0' cellpadding='2'>
 <tr><th align='left' bgcolor='#f57900' colspan='4'>( ! ) " . $errorClass . ": {$message} in <br>{$file} on line <i>{$line}</i></th></tr>
 <tr><th align='left' bgcolor='#e9b96e' colspan='3'>System Information</th></tr>
 <tr>
@@ -94,7 +94,7 @@ class BentoError extends Exception
 
 <tr>
 <td colspan='3' cellspacing='0' cellpadding='0'>
-	<table class='Bento-error' dir='ltr' border='1' cellspacing='0' cellpadding='2' width='100%'>
+	<table class='Core-error' dir='ltr' border='1' cellspacing='0' cellpadding='2' width='100%'>
 	<th align='left' bgcolor='#e9b96e' colspan='3'>Call Stack</th></tr>
 	<tr>
 		<th align='center' bgcolor='#eeeeec'>#</th>
@@ -192,14 +192,14 @@ class BentoError extends Exception
 }
 
 /**
- * BentoWarning exception handler
+ * CoreWarning exception handler
  *
  * This is an exception handler that deals with Warning-level errors
  *
  * @package System
  * @subpackage ErrorHandling
  */
-class BentoWarning extends BentoError
+class CoreWarning extends CoreError
 {
 	/**
 	 * This is the minimal debug level that this exception class will output with. For this class it is 2.
@@ -211,14 +211,14 @@ class BentoWarning extends BentoError
 }
 
 /**
- * BentoNotice exception handler
+ * CoreNotice exception handler
  *
  * This is an exception handler that deals with Notice-level errors
  *
  * @package System
  * @subpackage ErrorHandling
  */
-class BentoNotice extends BentoError
+class CoreNotice extends CoreError
 {
 	/**
 	 * This is the minimal debug level that this exception class will output with. For this class it is 3.
@@ -230,14 +230,14 @@ class BentoNotice extends BentoError
 }
 
 /**
- * BentoUserError exception handler
+ * CoreUserError exception handler
  *
  * This is an exception handler that deals with User errors
  *
  * @package System
  * @subpackage ErrorHandling
  */
-class BentoUserError extends BentoError
+class CoreUserError extends CoreError
 {
 	/**
 	 * This is the minimal debug level that this exception class will output with.
@@ -249,14 +249,14 @@ class BentoUserError extends BentoError
 }
 
 /**
- * BentoInfo exception handler
+ * CoreInfo exception handler
  *
  * This is an exception handler that deals with Info-level errors
  *
  * @package System
  * @subpackage ErrorHandling
  */
-class BentoInfo extends BentoError
+class CoreInfo extends CoreError
 {
 	/**
 	 * This is the minimal debug level that this exception class will output with.
@@ -275,7 +275,7 @@ class BentoInfo extends BentoError
  * @package System
  * @subpackage ErrorHandling
  */
-class BentoDepreciated extends BentoError
+class CoreDepreciated extends CoreError
 {
 	/**
 	 * This needs to be set to a high value to let the DEPRECIATION_WARNINGS constant control its display.
@@ -303,7 +303,7 @@ class BentoDepreciated extends BentoError
  * @package System
  * @subpackage ErrorHandling
  */
-class BentoDepreciatedError extends BentoDepreciated
+class CoreDepreciatedError extends CoreDepreciated
 {
 	/**
 	 * This is the minimal debug level that this exception class will output with. For this class it is 1.
@@ -322,7 +322,7 @@ class BentoDepreciatedError extends BentoDepreciated
  * @package System
  * @subpackage ErrorHandling
  */
-class TypeMismatch extends BentoError
+class TypeMismatch extends CoreError
 {
 	/**
 	 * Exception-specific constructor to allow additional information to be passed to the thrown exception.
@@ -366,7 +366,7 @@ class TypeMismatch extends BentoError
  * @package System
  * @subpackage ErrorHandling
  */
-class AuthenticationError extends BentoUserError {}
+class AuthenticationError extends CoreUserError {}
 
 /**
  * ResourceNotFoundError exception handler
@@ -376,7 +376,7 @@ class AuthenticationError extends BentoUserError {}
  * @package System
  * @subpackage ErrorHandling
  */
-class ResourceNotFoundError extends BentoUserError {}
+class ResourceNotFoundError extends CoreUserError {}
 
 
 

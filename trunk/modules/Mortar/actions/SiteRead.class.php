@@ -45,7 +45,7 @@ class MortarActionSiteRead extends ModelActionLocationBasedRead
 					if(is_numeric($location['defaultChild']))
 					{
 						if(in_array($location['defaultChild'], $childrenArray))
-							throw new BentoError('Redirect look detected');
+							throw new CoreError('Redirect look detected');
 
 						$childrenArray[] = $location['defaultChild'];
 						$childId = $location['defaultChild'];

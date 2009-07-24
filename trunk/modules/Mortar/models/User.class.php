@@ -101,7 +101,7 @@ class MortarModelUser extends ModelBase
 	public function loadByEmail($address)
 	{
 		if(!filter_var($address, FILTER_VALIDATE_EMAIL))
-			throw new BentoError('You must pass an email address to the loadByEmail function.');
+			throw new CoreError('You must pass an email address to the loadByEmail function.');
 
 		$cache = new Cache('models', $this->getType(), 'loadByEmail', $address);
 		$userId = $cache->getData();

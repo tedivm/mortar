@@ -101,13 +101,13 @@ class LocationModel extends ModelBase
 		try
 		{
 			if(!parent:: save())
-				throw new BentoError('Unable to save model');
+				throw new CoreError('Unable to save model');
 
 			$location = $this->getLocation();
 
 			if(!$location)
 			{
-				throw new BentoError('There is no location');
+				throw new CoreError('There is no location');
 			}
 
 			$location->setResource($this->getType(), $this->getId());
@@ -127,7 +127,7 @@ class LocationModel extends ModelBase
 			}
 
 			if(!$location->save())
-				throw new BentoError('Unable to save model location');
+				throw new CoreError('Unable to save model location');
 
 			if($parentLocation = $location->getParent())
 				Cache::clear('locations', $parentLocation->getId(), 'children');
@@ -154,7 +154,7 @@ class LocationModel extends ModelBase
 	public function delete()
 	{
 		if(!isset($this->id))
-			throw new BentoError('Attempted to delete unsaved model of the type ' . $this->getType());
+			throw new CoreError('Attempted to delete unsaved model of the type ' . $this->getType());
 
 		try
 		{
@@ -173,15 +173,15 @@ class LocationModel extends ModelBase
 				{
 					$childModel = $child->getResource();
 					if(!$childModel->delete())
-						throw new BentoError('Unable to delete child location ' . (string) $child);
+						throw new CoreError('Unable to delete child location ' . (string) $child);
 				}
 			}
 
 			if(!parent::delete())
-				throw new BentoError('Unable to delete model information location ' . (string) $child);
+				throw new CoreError('Unable to delete model information location ' . (string) $child);
 
 			if(!$location->delete())
-				throw new BentoError('Unable to delete child location ' . (string) $child);
+				throw new CoreError('Unable to delete child location ' . (string) $child);
 
 			$db->autocommit(true);
 			Cache::clear('locations', $location->getId());
@@ -212,7 +212,7 @@ class LocationModel extends ModelBase
 	{
 		$parentModel = $parent->getResource();
 		if(!(defined('INSTALLMODE') && INSTALLMODE) && !$parentModel->canHaveChildType($this->getType()))
-			throw new BentoError('Attempted to save ' . $this->getType() . ' to incompatible parent location.', 409);
+			throw new CoreError('Attempted to save ' . $this->getType() . ' to incompatible parent location.', 409);
 
 		$location = $this->getLocation();
 		$location->setParent($parent);
