@@ -1,14 +1,13 @@
 <?php
 /**
- * BentoBase
+ * Mortar
  *
  * A framework for developing modular applications.
  *
- * @package		BentoBase
+ * @package		Mortar
  * @author		Robert Hafner
  * @copyright	Copyright (c) 2007, Robert Hafner
  * @license		http://www.mozilla.org/MPL/
- * @link		http://www.BentoBase.org
  */
 
 
