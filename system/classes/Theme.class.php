@@ -133,14 +133,14 @@ class Theme
 			if($cssResult)
 				$cssLinks = array_merge_recursive($cssLinks, $cssResult);
 
-			$bentoJavascriptPath = $config['path']['javascript'];
-			$bentoJavascriptUrl = ActiveSite::getLink('javascript');
+			$baseJavascriptPath = $config['path']['javascript'];
+			$baseJavascriptUrl = ActiveSite::getLink('javascript');
 
 			// javascript
-			// This code loads the javascript that ships with Bento- we load it last so it overrides any
+			// This code loads the javascript that ships with Mortar- we load it last so it overrides any
 			// javascript in the modules. Since we only store libraries here, and all modules use those libraries,
 			// we don't want modules or themes to be able to overwrite those specific ones.
-			$javascriptResult = $this->getFiles($bentoJavascriptPath, $bentoJavascriptUrl, 'js');
+			$javascriptResult = $this->getFiles($baseJavascriptPath, $baseJavascriptUrl, 'js');
 			if($javascriptResult)
 				$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
 

@@ -3,7 +3,7 @@
 define('DEBUG', 0);
 // 4,		3,		2,			1,		0
 // notices,	info, 	warning, 	error,	none
-// strict - E_STRICT with no Bento error displays.
+// strict - E_STRICT with no Mortar error displays.
 // The higher the number, the more information you get. This constant also controls the php error levels- 0 disables
 // error reporting (useful for production environments), while 3 will give all errors and notices. For development
 // purposes your best bet would be 2 or 3.
