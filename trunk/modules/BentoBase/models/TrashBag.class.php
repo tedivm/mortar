@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseModelTrashBag extends LocationModel
+class MortarModelTrashBag extends LocationModel
 {
 	static public $type = 'TrashBag';
 	protected $table = 'trash';

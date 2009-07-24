@@ -1,6 +1,6 @@
 <?php
 
-class BentoBasePluginCustomInstall
+class MortarPluginCustomInstall
 {
 	protected $package;
 	protected $packageId;

@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseActionMinify extends ActionBase
+class MortarActionMinify extends ActionBase
 {
 	static $requiredPermission = 'Read';
 

@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseActionLogOut extends ActionBase
+class MortarActionLogOut extends ActionBase
 {
 	static $requiredPermission = 'Read';
 

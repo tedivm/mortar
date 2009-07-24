@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseActionUserEdit extends ModelActionEdit
+class MortarActionUserEdit extends ModelActionEdit
 {
 
 	protected function getForm()

@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseActionUserAdd extends ModelActionAdd
+class MortarActionUserAdd extends ModelActionAdd
 {
 	protected function processInput($input)
 	{

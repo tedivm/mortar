@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseActionjsSettings extends ActionBase
+class MortarActionjsSettings extends ActionBase
 {
 	static $requiredPermission = 'Read';
 

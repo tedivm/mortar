@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseModelUser extends ModelBase
+class MortarModelUser extends ModelBase
 {
 	static public $type = 'User';
 	protected $table = 'users';

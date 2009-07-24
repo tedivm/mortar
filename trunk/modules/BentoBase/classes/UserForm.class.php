@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseUserForm extends Form
+class MortarUserForm extends Form
 {
 
 	protected function define()
