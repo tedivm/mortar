@@ -1,4 +1,4 @@
-$.siteSetting.defaults.url = baseUrl + 'index.php?format=json&action=jsSettings&module=BentoBase';
+$.siteSetting.defaults.url = baseUrl + 'index.php?format=json&action=jsSettings&module=Mortar';
 
 if(typeof($.validator) == 'function')
 {
