@@ -10,7 +10,6 @@ class InstallerActionJsSub implements ActionInterface
 
 	public function start()
 	{
-		//http://localhost/BentoBase/index.php?p=direct/module/BentoBase/Minify/bbAdmin-65b02d8f.js
 
 	}
 
