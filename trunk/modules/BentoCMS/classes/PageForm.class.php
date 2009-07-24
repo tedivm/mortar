@@ -1,6 +1,6 @@
 <?php
 
-class BentoCMSPageForm extends Form
+class LithoPageForm extends Form
 {
 	protected function define()
 	{

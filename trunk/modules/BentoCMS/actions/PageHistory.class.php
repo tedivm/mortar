@@ -1,6 +1,6 @@
 <?php
 
-class BentoCMSActionPageHistory extends ModelActionLocationBasedRead
+class LithoActionPageHistory extends ModelActionLocationBasedRead
 {
 	protected $revisionCount;
 	protected $revisionList;

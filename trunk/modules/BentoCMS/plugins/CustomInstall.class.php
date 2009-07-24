@@ -1,6 +1,6 @@
 <?php
 
-class BentoCMSPluginCustomInstall
+class LithoPluginCustomInstall
 {
 	protected $package;
 	protected $packageId;

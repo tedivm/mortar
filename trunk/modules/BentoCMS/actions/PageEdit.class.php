@@ -1,6 +1,6 @@
 <?php
 
-class BentoCMSActionPageEdit extends ModelActionLocationBasedEdit
+class LithoActionPageEdit extends ModelActionLocationBasedEdit
 {
 	protected function getForm()
 	{

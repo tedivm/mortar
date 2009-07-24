@@ -1,6 +1,6 @@
 <?php
 
-class BentoCMSPluginPageActionMenu
+class LithoPluginPageActionMenu
 {
 	/**
 	 * Enter description here...

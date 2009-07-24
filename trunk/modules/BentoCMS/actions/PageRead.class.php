@@ -1,6 +1,6 @@
 <?php
 
-class BentoCMSActionPageRead extends ModelActionLocationBasedRead
+class LithoActionPageRead extends ModelActionLocationBasedRead
 {
 	public function logic()
 	{

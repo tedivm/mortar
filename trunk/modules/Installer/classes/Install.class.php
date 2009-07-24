@@ -406,7 +406,7 @@ class InstallerInstaller // thats the most pathetic name ever
 			$locationAdminOnly->save();
 
 
-			$page = new BentoCMSModelPage();
+			$page = new LithoModelPage();
 			$page->name = 'home';
 			$page['title'] = 'Welcome to Mortar';
 			$page['content'] = 'Mortar- default installation text coming soon!';
@@ -500,7 +500,7 @@ class InstallerInstaller // thats the most pathetic name ever
 			}
 			$rootLocation->save();
 
-			$this->installModule('BentoCMS');
+			$this->installModule('Litho');
 
 		}catch(Exception $e){
 			return false;
