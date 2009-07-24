@@ -1,6 +1,6 @@
 <?php
 
-class BentoBlogPluginAllowBlogType
+class ChalkPluginAllowBlogType
 {
 	public function getAllowedChildren()
 	{

@@ -1,6 +1,6 @@
 <?php
 
-class BentoBlogModelBlog extends LocationModel
+class ChalkModelBlog extends LocationModel
 {
 	static public $type = 'Blog';
 	public $allowedChildrenTypes = array('BlogEntry');
