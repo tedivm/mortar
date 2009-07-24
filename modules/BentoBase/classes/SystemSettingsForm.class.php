@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseSystemSettingsForm extends Form
+class MortarSystemSettingsForm extends Form
 {
 	protected function define()
 	{

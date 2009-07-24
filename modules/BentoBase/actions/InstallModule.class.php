@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseActionInstallModule extends ActionBase
+class MortarActionInstallModule extends ActionBase
 {
 	static $requiredPermission = 'System';
 

@@ -1,6 +1,6 @@
 <?php
 
-class BentoBasePluginAdminNav
+class MortarPluginAdminNav
 {
 	protected $staticLinks = array('Universal' => array());
 	protected $dynamicLinks = array('Universal' => array());
@@ -8,7 +8,7 @@ class BentoBasePluginAdminNav
 	public function __construct()
 	{
 		$url = new Url();
-		$url->module = 'BentoBase';
+		$url->module = 'Mortar';
 		$url->format = 'Admin';
 
 		if(!ActiveUser::isLoggedIn())

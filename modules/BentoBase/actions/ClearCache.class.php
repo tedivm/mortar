@@ -1,6 +1,6 @@
 <?php
 
-class BentoBaseActionClearCache extends ActionBase
+class MortarActionClearCache extends ActionBase
 {
 	static $requiredPermission = 'System';
 
