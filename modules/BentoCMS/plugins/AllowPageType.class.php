@@ -1,6 +1,6 @@
 <?php
 
-class BentoCMSPluginAllowPageType
+class LithoPluginAllowPageType
 {
 	public function getAllowedChildren()
 	{

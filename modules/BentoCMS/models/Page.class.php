@@ -1,9 +1,9 @@
 <?php
 
-class BentoCMSModelPage extends LocationModel
+class LithoModelPage extends LocationModel
 {
 	static public $type = 'Page';
-	protected $table = 'BentoCMS_Pages';
+	protected $table = 'Litho_Pages';
 	public $allowedChildrenTypes = array();
 
 	protected $activeRevision;
@@ -93,7 +93,7 @@ class BentoCMSModelPage extends LocationModel
 			return 0;
 
 		$stmt = DatabaseConnection::getStatement('default_read_only');
-		$stmt->prepare('SELECT COUNT(revisionId) FROM BentoCMS_Content WHERE pageId = ?');
+		$stmt->prepare('SELECT COUNT(revisionId) FROM Litho_Content WHERE pageId = ?');
 		$stmt->bindAndExecute('i', $pageId);
 		$results = $stmt->fetch_array();
 
@@ -114,7 +114,7 @@ class BentoCMSModelPage extends LocationModel
 		{
 			$stmt = DatabaseConnection::getStatement('default_read_only');
 			$stmt->prepare('SELECT revisionId
-									FROM BentoCMS_Content
+									FROM Litho_Content
 									WHERE pageId = ?
 									ORDER BY updateTime DESC
 									LIMIT ?,?');
@@ -221,7 +221,7 @@ class PageRevision
 			{
 				$db = dbConnect('default_read_only');
 				$contentStmt = $db->stmt_init();
-				$contentStmt->prepare('SELECT * FROM BentoCMS_Content WHERE pageId = ? AND revisionId = ?');
+				$contentStmt->prepare('SELECT * FROM Litho_Content WHERE pageId = ? AND revisionId = ?');
 				$contentStmt->bindAndExecute('ii', $this->pageId, $revisionId);
 
 
@@ -264,7 +264,7 @@ class PageRevision
 
 		$db = dbConnect('default');
 		$insertStmt = $db->stmt_init();
-		$insertStmt->prepare('INSERT INTO BentoCMS_Content
+		$insertStmt->prepare('INSERT INTO Litho_Content
 										(pageId,
 										revisionId,
 										author, updateTime, note,
@@ -273,7 +273,7 @@ class PageRevision
 										 (?,
 										(IFNULL(
 											((SELECT revisionId
-													FROM BentoCMS_Content AS tempContent
+													FROM Litho_Content AS tempContent
 													WHERE tempContent.pageId = ?
 													ORDER BY tempContent.revisionId DESC LIMIT 1) + 1),
 											1)
@@ -286,7 +286,7 @@ class PageRevision
 														$this->title, $this->filteredContent, $this->rawContent);
 
 		$getStmt = $db->stmt_init();
-		$getStmt->prepare('SELECT revisionId FROM BentoCMS_Content
+		$getStmt->prepare('SELECT revisionId FROM Litho_Content
 								WHERE pageId = ? AND author = ? AND title = ?
 								ORDER BY revisionId DESC LIMIT 1');
 		$getStmt->bindAndExecute('iis', $this->pageId, $this->author, $this->title);
@@ -303,7 +303,7 @@ class PageRevision
 
 		$db = DatabaseConnection::getConnection('default');
 		$stmt = $db->stmt_init();
-		$stmt->prepare('UPDATE BentoCMS_Pages SET activeRevision = ? WHERE id = ?');
+		$stmt->prepare('UPDATE Litho_Pages SET activeRevision = ? WHERE id = ?');
 		return $stmt->bindAndExecute('ii', $this->revisionId, $this->pageId);
 	}
 
