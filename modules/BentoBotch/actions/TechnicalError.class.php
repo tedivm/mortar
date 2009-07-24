@@ -1,6 +1,6 @@
 <?php
 
-class BentoBotchActionTechnicalError extends ActionBase
+class RubbleActionTechnicalError extends ActionBase
 {
 	public $AdminSettings = array(	'linkTab' => 'Universal',
 									'headerTitle' => 'Unknown Error',

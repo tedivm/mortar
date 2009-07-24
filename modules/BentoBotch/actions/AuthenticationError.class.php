@@ -1,6 +1,6 @@
 <?php
 
-class BentoBotchActionAuthenticationError extends ActionBase
+class RubbleActionAuthenticationError extends ActionBase
 {
 	public $AdminSettings = array(	'linkTab' => 'Universal',
 									'headerTitle' => 'Forbidden',
