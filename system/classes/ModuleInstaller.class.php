@@ -64,7 +64,7 @@ class ModuleInstaller
 		$pathToPackage = $info->Configuration['path']['modules'] . $this->package;
 
 		if(!is_dir($pathToPackage))
-			throw new BentoError('Unable to load package ' . $this->package . ' for installation.');
+			throw new ModuleInstallerError('Unable to load package ' . $this->package . ' for installation.');
 
 		$this->packageInfo = new PackageInfo($this->package);
 		$this->pathToPackage = $pathToPackage;
@@ -111,7 +111,7 @@ class ModuleInstaller
 					$db->rollback();	// problem, this could erase the status, which means the database structure
 										// would be set up but the system wouldn't know
 					$db->autocommit(true);
-					throw new BentoError('Unable to install module ' . $this->package . ', rolling back database changes.');
+					throw new ModuleInstallerError('Unable to install module ' . $this->package . ', rolling back database changes.');
 				}
 
 			}else{
@@ -145,7 +145,7 @@ class ModuleInstaller
 		{
 			$db = db_connect('default');
 			if($db->runFile($sqlPath) === false)
-				throw new BentoError('Unable to install database structure.');
+				throw new ModuleInstallerError('Unable to install database structure.');
 
 			$this->changeStatus('dbStructure');
 		}
@@ -249,7 +249,7 @@ class ModuleInstaller
 
 		if(!$moduleRecord->save())
 		{
-			throw new BentoError('Unable to update package database with version information.');
+			throw new ModuleInstallerError('Unable to update package database with version information.');
 		}else{
 			return true;
 		}
@@ -257,4 +257,5 @@ class ModuleInstaller
 
 }
 
+class ModuleInstallerError extends CoreError {}
 ?>

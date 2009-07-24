@@ -104,7 +104,7 @@ class ModelRegistry
 			$modelInfo = self::getHandler($type);
 
 			if(!$modelInfo)
-				throw new BentoError('Unable to load handler for model ' . $type . '.');
+				throw new ModuleRegistryError('Unable to load handler for model ' . $type . '.');
 
 			if(!class_exists($modelInfo['class'], false))
 			{
@@ -157,4 +157,5 @@ class ModelRegistry
 
 }
 
+class ModuleRegistryError extends CoreError {}
 ?>

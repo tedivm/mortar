@@ -474,7 +474,7 @@ class Form
 				try
 				{
 					if(!($className = ValidationLookup::getClass($ruleName)))
-						throw new BentoWarning('Unable to load validation class for rule ' . $ruleName);
+						throw new FormWarning('Unable to load validation class for rule ' . $ruleName);
 
 					$argument = staticFunctionHack($className, 'getHtmlArgument', $input, $ruleArgument);
 					$validationClientSideRules[$ruleName] = $argument;
@@ -628,7 +628,7 @@ class Form
 								}
 							}
 						}else{
-							throw new BentoNotice('Unable to find checkboxes, even though one was found. This shouldn\'t
+							throw new FormNotice('Unable to find checkboxes, even though one was found. This shouldn\'t
 												happen, but if you see this it obviously did. I\'m sorry.');
 						}
 
@@ -644,7 +644,7 @@ class Form
 			// we place this here on the off chance someone is submitting a stale form, so things get filled again
 			if(self::$xsfrProtection && $inputHandler['nonce'] != $this->getNonce())
 			{
-				throw new BentoWarning('Potential XSFR attack blocked');
+				throw new FormWarning('Potential XSFR attack blocked');
 			}
 
 		}catch(Exception $e){
@@ -774,4 +774,7 @@ class Form
 	}
 }
 
+class FormWarning extends CoreWarning {}
+class FormNotice extends CoreNotice {}
+class FormError extends CoreError {}
 ?>

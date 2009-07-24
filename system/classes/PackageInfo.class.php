@@ -134,7 +134,7 @@ class PackageInfo
 	public function loadByName($packageName)
 	{
 		if(is_null($packageName) || strlen($packageName) < 1)
-			throw new BentoError('Class PackageInfo constructor expects one arguement');
+			throw new PackageInfoError('Class PackageInfo constructor expects one arguement');
 
 		$config = Config::getInstance();
 		$this->name = $packageName;
@@ -144,7 +144,7 @@ class PackageInfo
 		{
 			$this->path = $path;
 		}else{
-			throw new BentoError('Unable to locate package ' . $this->name);
+			throw new PackageInfoError('Unable to locate package ' . $this->name);
 		}
 
 		$cache = new Cache('packages', $packageName, 'info');
@@ -175,7 +175,7 @@ class PackageInfo
 				}
 
 			}catch(Exception $e){
-				throw new BentoError('requested package ' . $this->name . ' does not exist');
+				throw new PackageInfoError('requested package ' . $this->name . ' does not exist');
 				$info = false;
 			}
 
@@ -493,4 +493,5 @@ class PackageInfo
 
 }
 
+class PackageInfoError extends CoreError {}
 ?>

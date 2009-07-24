@@ -82,12 +82,12 @@ class DatabaseConnection
 				$connectionInfo['dbname']);
 
 				if($dbConnection->connect_errno)
-					throw new BentoError('Could not connect to database ' . $db_name . ': ' . $dbConnection->error);
+					throw new DatabaseConnectionError('Could not connect to database ' . $db_name . ': ' . $dbConnection->error);
 
 				$charset = (isset($connectionInfo['charset'])) ? $connectionInfo['charset'] : 'utf8';
 
 				if(!$dbConnection->set_charset($charset))
-					throw new BentoError('Unable to switch db connection charset to ' . $charset . ' c.');
+					throw new DatabaseConnectionError('Unable to switch db connection charset to ' . $charset . ' c.');
 
 				if(($useSaved && !isset(self::$dbConnections[$database])))
 				{
@@ -97,7 +97,7 @@ class DatabaseConnection
 				}
 
 				return $dbConnection;
-			}catch(BentoError $e){
+			}catch(DatabaseConnectionError $e){
 				return false;
 			}
 		}
@@ -215,7 +215,7 @@ class MysqlBase extends mysqli
 			if(!($result = parent::query($query, $resultmode)))
 				$this->throwError();
 
-		}catch(BentoError $e){
+		}catch(DatabaseConnectionError $e){
 			throw $e;
 		}catch(Exception $e){
 
@@ -235,7 +235,7 @@ class MysqlBase extends mysqli
 	{
 		try{
 			if(!($sql = file_get_contents($path)))
-				throw new BentoNotice('SQL file not found at ' . $path);
+				throw new DatabaseConnectionNotice('SQL file not found at ' . $path);
 
 			if($this->multi_query($sql))
 			{
@@ -255,7 +255,7 @@ class MysqlBase extends mysqli
 
 
 	/**
-	 * This throws a Bento error or notice, depending on the circumstances
+	 * This throws a BDatabaseConnectionError or DatabaseConnectionNotice, depending on the circumstances
 	 *
 	 * @access protected
 	 */
@@ -263,9 +263,9 @@ class MysqlBase extends mysqli
 	{
 		if($this->errno !== 0)
 		{
-			throw new BentoError($this->error);
+			throw new DatabaseConnectionError($this->error);
 		}else{
-			throw new BentoNotice($this->error);
+			throw new DatabaseConnectionNotice($this->error);
 		}
 	}
 
@@ -409,7 +409,7 @@ class Mystmt extends mysqli_stmt
 	}
 
 	/**
-	 * This throws a Bento error or notice, depending on the circumstances
+	 * This throws a BDatabaseConnectionError or DatabaseConnectionNotice, depending on the circumstances
 	 *
 	 * @access protected
 	 */
@@ -418,11 +418,13 @@ class Mystmt extends mysqli_stmt
 		$message .= ' MySQL Error-' .$this->error;
 		if($this->errno !== 0)
 		{
-			throw new BentoError($message);
+			throw new DatabaseConnectionError($message);
 		}else{
-			throw new BentoNotice($message);
+			throw new DatabaseConnectionNotice($message);
 		}
 	}
 }
 
+class DatabaseConnectionError extends CoreError {}
+class DatabaseConnectionNotice extends CoreNotice {}
 ?>

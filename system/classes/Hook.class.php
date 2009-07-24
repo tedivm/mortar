@@ -41,7 +41,7 @@ class Hook
 	public function enforceInterface($interface)
 	{
 		if(!class_exists($interface, false))
-			throw new BentoError('Attempting to add nonexistent interface ' . $interface . ' to plugin');
+			throw new HookError('Attempting to add nonexistent interface ' . $interface . ' to plugin');
 
 		$this->interfaces[] = $interface;
 	}
@@ -233,5 +233,5 @@ class Hook
 
 }
 
-
+class HookError extends CoreError {}
 ?>

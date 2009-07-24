@@ -96,7 +96,7 @@ try{
 		if(!file_exists($config['path']['modules'] . 'Installer/actions/Install.class.php'))
 		{
 			define('INSTALLMODE', false);
-			throw new BentoError('Unable to load configuration file.');
+			throw new CoreError('Unable to load configuration file.');
 		}else{
 			// there is no block file, no configuration or block install file, so lets set this into install mode
 			define('INSTALLMODE', true);

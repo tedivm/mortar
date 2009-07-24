@@ -155,7 +155,7 @@ class Cache
 		try{
 
 			if(func_num_args() == 0)
-				throw new BentoError('No key sent to the cache constructor.');
+				throw new CacheError('No key sent to the cache constructor.');
 
 			$key = func_get_args();
 			if(count($key) == 1 && is_array($key[0]))
@@ -386,7 +386,7 @@ class Cache
 					include($path);
 				}else{
 					self::$runtimeDisable = true;
-					throw new BentoError('Unable to load cache handler ' . $handlerType . ' at ' . $path);
+					throw new CacheError('Unable to load cache handler ' . $handlerType . ' at ' . $path);
 				}
 			}
 
@@ -398,7 +398,7 @@ class Cache
 		if(!$this->handler->setup($this->key))
 		{
 			$this->cache_enabled = false;
-			throw new BentoError('Unable to setup cache handler.');
+			throw new CacheError('Unable to setup cache handler.');
 		}
 		return $this->handler;
 	}
@@ -454,6 +454,5 @@ interface cacheHandler
 
 }
 
-
-
+class CacheError extends CoreError {}
 ?>

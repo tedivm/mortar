@@ -176,7 +176,7 @@ class ObjectRelationshipMapper
 	public function __construct($table, $db_write = null, $db_read = null)
 	{
 		if(is_null($table))
-			throw new BentoError('ORM class requires a table name.');
+			throw new OrmError('ORM class requires a table name.');
 
 		$this->table = $table;
 
@@ -237,7 +237,7 @@ class ObjectRelationshipMapper
 			$sql_where .= $column . ' = ? ';
 
 			if(!isset($this->columns[$column]['Type']))
-				throw new BentoError('Column ' . $column . ' not found in table ' . $this->table);
+				throw new OrmError('Column ' . $column . ' not found in table ' . $this->table);
 
 			$sql_typestring .= self::getType($this->columns[$column]['Type']);
 			$where_loop++;
@@ -695,7 +695,7 @@ class ObjectRelationshipMapper
 			$primarykey = array();
 
 			if(!$result)
-				throw new BentoError('Database Error:' . $db->error . '    ORM unable to load table ' . $this->table);
+				throw new OrmError('Database Error:' . $db->error . '    ORM unable to load table ' . $this->table);
 
 			while($results = $result->fetch_array())
 			{
@@ -926,4 +926,5 @@ class ObjectRelationshipMapper
 	}
 }
 
+class OrmError extends CoreError {}
 ?>

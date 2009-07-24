@@ -13,7 +13,7 @@ class MortarModelSite extends LocationModel
 		$url = rtrim($url, '/');
 
 		if(!is_numeric($id))
-			throw new BentoError('Site must be saved before attaching urls');
+			throw new CoreError('Site must be saved before attaching urls');
 
 		if(strpos($url, 'http') === 0)
 		{
@@ -48,7 +48,7 @@ class MortarModelSite extends LocationModel
 	{
 		$id = $this->getId();
 		if(!is_numeric($id))
-			throw new BentoError('Can\'t remove domains from non-existant site.');
+			throw new CoreError('Can\'t remove domains from non-existant site.');
 
 		if(strpos($url, 'http') === 0)
 		{

@@ -240,16 +240,16 @@ class PageRevision
 				$this->filteredContent = $contentData['filteredContent'];
 				$this->note = $contentData['note'];
 			}else{
-				throw new BentoError('Invalid page revision');
+				throw new CoreError('Invalid page revision');
 			}
 		}else{
 
 			if(!is_numeric($this->pageId))
-				throw new BentoError('Page ID required required to load revision');
+				throw new CoreError('Page ID required required to load revision');
 
 
 			if(!is_numeric($revisionId))
-				throw new BentoError('Revision ID required required to load revision');
+				throw new CoreError('Revision ID required required to load revision');
 		}
 	}
 

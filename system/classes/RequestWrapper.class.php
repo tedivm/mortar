@@ -114,13 +114,13 @@ class RequestWrapper
 				$moduleInfo = new PackageInfo($query['module']);
 
 				if($moduleInfo->getStatus() != 'installed')
-					throw new BentoError('Module ' . $query['module'] . ' present but not installed');
+					throw new RequestError('Module ' . $query['module'] . ' present but not installed');
 
 				if(!isset($query['action']))
 					$query['action'] = 'Default';
 
 				if(!($actionInfo = $moduleInfo->getActions($query['action'])))
-					throw new BentoError('Unable to load action for module ' . $query['module']);
+					throw new RequestError('Unable to load action for module ' . $query['module']);
 
 
 				$argument = '';
@@ -221,7 +221,7 @@ class RequestWrapper
 
 		// match interface
 		if(!in_array('ActionInterface', $reflectionClass->getInterfaceNames()))
-			throw new BentoError($reflectionClass->getName() . ' should implement ActionInterface');
+			throw new RequestError($reflectionClass->getName() . ' should implement ActionInterface');
 
 		// Create the class
 		$action = new $className($argument, $this->ioHandler);
@@ -291,11 +291,11 @@ class RequestWrapper
 				$action = 'ResourceNotFound';
 				break;
 
-			case 'BentoWarning':
-			case 'BentoNotice':
+			case 'CoreWarning':
+			case 'CoreNotice':
 				// uncaught minor thing
 
-			case 'BentoError':
+			case 'CoreError':
 			default:
 				RequestLog::logError($e, 1, 'BLOCKING');
 				$action = 'TechnicalError';
@@ -331,7 +331,7 @@ class RequestWrapper
 		}
 
 		if(!class_exists($className))
-			throw new BentoError('Unable to find request handler: ' . $className);
+			throw new RequestError('Unable to find request handler: ' . $className);
 
 		return $className;
 	}
@@ -378,4 +378,5 @@ class RequestWrapper
 
 }
 
+class RequestError extends CoreError {}
 ?>

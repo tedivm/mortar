@@ -107,7 +107,7 @@ abstract class ModelBase implements Model
 		if(!is_null($id))
 		{
 			if(!$this->load($id))
-				throw new BentoError('No model of type ' . $this->getType() . ' with id ' . $id);
+				throw new CoreError('No model of type ' . $this->getType() . ' with id ' . $id);
 		}
 	}
 
@@ -132,7 +132,7 @@ abstract class ModelBase implements Model
 		}elseif($user instanceof Model && $user->getType() == 'User'){
 			$userId = $user->getId();
 		}else{
-			throw new BentoError('Attempted to check permissions on a non user item.');
+			throw new CoreError('Attempted to check permissions on a non user item.');
 		}
 
 		$location = new Location(1); // zee root
@@ -202,7 +202,7 @@ abstract class ModelBase implements Model
 				}
 
 				if(!$record->save())
-					throw new BentoError('Unable to save model information to table');
+					throw new CoreError('Unable to save model information to table');
 
 				if(!isset($this->id))
 					$this->id = $record->primaryKey;
@@ -234,7 +234,7 @@ abstract class ModelBase implements Model
 	{
 		$id = $this->getId();
 		if(!isset($id))
-			throw new BentoError('Attempted to delete unsaved model.');
+			throw new CoreError('Attempted to delete unsaved model.');
 
 		if(isset($this->table))
 		{
@@ -520,7 +520,7 @@ abstract class ModelBase implements Model
 	public function __set($offset, $value)
 	{
 		if(!is_scalar($value))
-			throw new BentoError('Model attributes must be scalar.');
+			throw new CoreError('Model attributes must be scalar.');
 
 		return $this->properties[$offset] = $value;
 	}

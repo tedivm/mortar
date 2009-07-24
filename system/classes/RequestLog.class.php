@@ -70,7 +70,7 @@ class RequestLog
 	/**
 	 * This function logs an exception to the error log.
 	 *
-	 * @param BentoError $e
+	 * @param CoreError $e
 	 * @param int $severity
 	 * @param null|string $type Defaults to the exception's class name.
 	 * @return bool

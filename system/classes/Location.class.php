@@ -355,7 +355,7 @@ class Location
 	public function setName($name)
 	{
 		if(in_array(strtolower($name), $this->reservedNames))
-			throw new BentoError('Attempted to name location a reserved name: ' . $name);
+			throw new LocationError('Attempted to name location a reserved name: ' . $name);
 
 
 		$this->name = str_replace(' ', '_', $name);
@@ -491,7 +491,7 @@ class Location
 
 		if(!$db_location->save())
 		{
- 			throw new BentoError('Unable to save location due to error ' . $db_location->errorString);
+ 			throw new LocationError('Unable to save location due to error ' . $db_location->errorString);
 		}
 
 		if(!is_numeric($this->id))
@@ -716,7 +716,7 @@ class Location
 		return $outputArray;
 
 	}
-
-
 }
+
+class LocationError extends CoreError {}
 ?>

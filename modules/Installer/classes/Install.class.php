@@ -157,7 +157,7 @@ class InstallerInstaller // thats the most pathetic name ever
 				$configFile->write();
 
 			}else{
-				throw new BentoError('Configuration filed to save');
+				throw new CoreError('Configuration filed to save');
 			}
 			$config->reset();
 		}catch(Exception $e){
@@ -258,7 +258,7 @@ class InstallerInstaller // thats the most pathetic name ever
 
 			if(!$db->runFile($pathToSQL))
 			{
-				throw new BentoError('Unable to load database structure');
+				throw new CoreError('Unable to load database structure');
 			}
 
 		}catch(Exception $e){

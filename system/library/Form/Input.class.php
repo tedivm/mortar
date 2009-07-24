@@ -289,7 +289,7 @@ class FormInput
 			$classname = ValidationLookup::getClass($rule);
 
 			if($classname === false)
-				throw new BentoError('Unable to load validation class ' . $rule);
+				throw new FormError('Unable to load validation class ' . $rule);
 
 			$validationRule = new $classname();
 			$validationRule->attachInput($this, $value, $argument);

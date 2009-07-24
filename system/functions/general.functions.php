@@ -38,11 +38,11 @@ function stripslashes_deep($value)
 function deltree($file)
 {
 	if(substr($file, 0, 1) !== '/')
-		throw new BentoError('deltree function requires an absolute path.');
+		throw new CoreError('deltree function requires an absolute path.');
 
 	$badCalls = array('/', '/*', '/.', '/..');
 	if(in_array($file, $badCalls))
-		throw new BentoError('deltree function does not like that call.');
+		throw new CoreError('deltree function does not like that call.');
 
 	$file = rtrim($file, ' /');
 	if(is_dir($file)) {
@@ -85,7 +85,7 @@ function importClass($classname, $path, $basePath = null, $require = false)
 			return $classname;
 		}else{
 			if($require)
-				throw new BentoError('Unable to load class ' . $classname . ' at ' . $path);
+				throw new CoreError('Unable to load class ' . $classname . ' at ' . $path);
 
 			return false;
 		}
@@ -166,7 +166,7 @@ function staticFunctionHack()
 	}else{
 		try
 		{
-			throw new BentoError('static function ' . $functionName . ' not found in class ' . $className);
+			throw new CoreError('static function ' . $functionName . ' not found in class ' . $className);
 		}catch(Exception $e){
 
 		}
