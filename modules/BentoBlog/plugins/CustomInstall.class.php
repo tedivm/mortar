@@ -1,6 +1,6 @@
 <?php
 
-class BentoBlogPluginCustomInstall
+class ChalkPluginCustomInstall
 {
 	protected $package;
 	protected $packageId;

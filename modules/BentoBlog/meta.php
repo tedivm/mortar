@@ -1,8 +1,8 @@
 <?php
 
-$packageName = 'BentoBlog';
+$packageName = 'Chalk';
 $version = '0.1.0 Alpha 1';
-$description = 'BentoBlog provides a basic blog.';
+$description = 'Chalk provides a basic blog.';
 
 // Depends on the Litho
 
