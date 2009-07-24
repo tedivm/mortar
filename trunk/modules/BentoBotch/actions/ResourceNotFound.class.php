@@ -1,6 +1,6 @@
 <?php
 
-class BentoBotchActionResourceNotFound extends ActionBase
+class RubbleActionResourceNotFound extends ActionBase
 {
 
 	public $AdminSettings = array(	'linkTab' => 'Universal',
