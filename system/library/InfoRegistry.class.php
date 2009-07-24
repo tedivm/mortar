@@ -1,6 +1,6 @@
 <?php
 /**
- * BentoBase
+ * Mortar
  *
  * @deprecated
  * @copyright Copyright (c) 2009, Robert Hafner

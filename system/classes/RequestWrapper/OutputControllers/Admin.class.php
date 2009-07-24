@@ -1,6 +1,6 @@
 <?php
 /**
- * BentoBase
+ * Mortar
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
@@ -23,7 +23,7 @@ class AdminOutputController extends AbstractOutputController
 	protected function start()
 	{
 		$page = ActivePage::getInstance();
-		$page->addRegion('title', 'BentoBase Admin');
+		$page->addRegion('title', 'Mortar Admin');
 
 		$this->activeResource = $page;
 

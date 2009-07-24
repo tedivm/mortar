@@ -16,7 +16,7 @@
 /**
  * FKCEditor Class
  *
- * Originally from the FCKeditor package, modified to better fit BentoBase
+ * Originally from the FCKeditor package, modified to better fit Mortar
  *
  * @subpackage	Library
  * @category	Form

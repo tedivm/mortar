@@ -1,6 +1,6 @@
 <?php
 /**
- * BentoBase
+ * Mortar
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
@@ -30,7 +30,7 @@ class HtmlOutputController extends AbstractOutputController
 	protected function start()
 	{
 		$page = ActivePage::getInstance();
-		$page->addRegion('title', 'BentoBase');
+		$page->addRegion('title', 'Mortar');
 		$page->setTemplate('index.html', 'default');
 
 		$this->activeResource = $page;

@@ -1,6 +1,6 @@
 <?php
 /**
- * BentoBase
+ * Mortar
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
@@ -1133,7 +1133,7 @@ class ImapAttachment
 
 /**
  * This is a specific exception for the Imap classes. It extends the BentoWarning class- if you want to use this library
- * outside of BentoBase you can have this exception the core extension class, or whatever base exception class you use.
+ * outside of Mortar you can have this exception the core extension class, or whatever base exception class you use.
  *
  */
 class ImapException extends BentoWarning  {}
