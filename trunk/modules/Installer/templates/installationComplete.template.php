@@ -1,2 +1,2 @@
-Congratulations on your installation of BentoBase.
+Congratulations on your installation of Mortar.
 

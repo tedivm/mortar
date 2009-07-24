@@ -380,7 +380,7 @@ class Theme
 				$minifier = $this->getMinifier($type);
 				$initialCheckSum = $minifier->getInitialChecksum();
 				$url = new Url();
-				$url->module = 'BentoBase';
+				$url->module = 'Mortar';
 				$url->format = 'direct';
 				$url->action = 'Minify';
 				$url->id = $this->name . '-' . $initialCheckSum . '.' . $type;

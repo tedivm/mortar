@@ -275,20 +275,20 @@ class InstallerInstaller // thats the most pathetic name ever
 
 			if(!class_exists('User', false))
 			{
-				include($config['path']['modules'] . 'BentoBase/models/User.class.php');
+				include($config['path']['modules'] . 'Mortar/models/User.class.php');
 			}
 
 
-			$userAdmin = new BentoBaseModelUser();
+			$userAdmin = new MortarModelUser();
 			$userAdmin['name'] = $input['username'];
 			$userAdmin['password'] = $input['password'];
 			$userAdmin->save();
 
-			$userGuest = new BentoBaseModelUser();
+			$userGuest = new MortarModelUser();
 			$userGuest['name'] = 'guest';
 			$userGuest->save();
 
-			$userSystem = new BentoBaseModelUser();
+			$userSystem = new MortarModelUser();
 			$userSystem['name'] = 'system';
 			$userSystem->save();
 
@@ -371,7 +371,7 @@ class InstallerInstaller // thats the most pathetic name ever
 
 			// Create Site
 
-			$site = new BentoBaseModelSite();
+			$site = new MortarModelSite();
 			$site->name = $input['siteName'];
 			$site['allowIndex'] = 1;
 			$site->setParent($locationRoot);
@@ -384,7 +384,7 @@ class InstallerInstaller // thats the most pathetic name ever
 
 
 
-			$membersOnlyDirectory = new BentoBaseModelDirectory();
+			$membersOnlyDirectory = new MortarModelDirectory();
 			$membersOnlyDirectory->name = 'MembersOnly';
 			$membersOnlyDirectory['allowIndex'] = 1;
 			$membersOnlyDirectory->setParent($siteLocation);
@@ -395,7 +395,7 @@ class InstallerInstaller // thats the most pathetic name ever
 			$locationMembersOnly->save();
 
 
-			$adminOnlyDirectory = new BentoBaseModelDirectory();
+			$adminOnlyDirectory = new MortarModelDirectory();
 			$adminOnlyDirectory->name = 'AdminOnly';
 			$adminOnlyDirectory['allowIndex'] = 1;
 			$adminOnlyDirectory->setParent($siteLocation);
@@ -408,8 +408,8 @@ class InstallerInstaller // thats the most pathetic name ever
 
 			$page = new BentoCMSModelPage();
 			$page->name = 'home';
-			$page['title'] = 'Welcome to BentoBase';
-			$page['content'] = 'BentoBase- default installation text coming soon!';
+			$page['title'] = 'Welcome to Mortar';
+			$page['content'] = 'Mortar- default installation text coming soon!';
 			$page->setParent($siteLocation);
 			$page->save();
 			$pageLocation = $page->getLocation();
@@ -491,7 +491,7 @@ class InstallerInstaller // thats the most pathetic name ever
 	{
 		try{
 			$rootLocation = new Location(1);
-			$defaultModules = array ('default' => 'BentoBase', 'error' => 'BentoBotch');
+			$defaultModules = array ('default' => 'Mortar', 'error' => 'BentoBotch');
 
 			foreach($defaultModules as $name => $package)
 			{
