@@ -75,7 +75,7 @@ class ModelActionAdd extends ModelActionBase
 		{
 			$baseForm = new $formClassName($formDisplayName);
 		}else{
-			new CoreInfo('Unable to load ' . $this->model->getType() . ' form ' . $formName);
+			new CoreInfo('Unable to load ' . $this->model->getType() . ' form ' . $formDisplayName);
 		}
 
 		$formExtension = $this->type . $query['format'] . 'Form';
