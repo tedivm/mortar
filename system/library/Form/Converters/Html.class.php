@@ -1,5 +1,20 @@
 <?php
+/**
+ * Mortar
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package		Library
+ * @subpackage	Form
+ */
 
+/**
+ * This class takes Form objects and converts them to Html. This includes priming the active Page object with any
+ * javascript required by the various inputs, such as validation and autosuggest tools.
+ *
+ * @package		Library
+ * @subpackage	Form
+ */
 class FormToHtml
 {
 	protected $submitButton = false;
@@ -33,9 +48,11 @@ class FormToHtml
 	 */
 	public function makeOutput()
 	{
+		$formId = $this->name;
+
 		$formHtml = new HtmlObject('form');
 		$formHtml->property('method', $this->form->getMethod())->
-					property('id', $this->name)->
+					property('id', $formId)->
 					property('action', $this->form->getAction());
 
 		$jsIncludes = array();
@@ -61,7 +78,8 @@ class FormToHtml
 
 			foreach($inputs as $input)
 			{
-				$input->property('id', $this->name . "_" . $input->name);
+				$inputId = $formId . "_" . $input->name;
+				$input->property('id', $inputId);
 				$inputJavascript = $this->getInputJavascript($input);
 
 				if(is_array($inputJavascript['startup']))
@@ -76,8 +94,8 @@ class FormToHtml
 				}else{
 
 					$labelHtml = new HtmlObject('label');
-					$labelHtml->property('for', $input->property('id'))->
-						property('id', $input->property('id') . '_label');
+					$labelHtml->property('for', $inputId)->
+						property('id', $inputId . '_label');
 
 					if(isset($input->label))
 					{
@@ -89,13 +107,9 @@ class FormToHtml
 					$br = new HtmlObject('br');
 					$br->noClose();
 
-					$labelHtml->property('for', $input->property('id'))->
-						property('id', $input->property('id') . '_label');
-
 					$sectionHtml->wrapAround($labelHtml)->
 						wrapAround($inputHtml)->
-						wrapAround($br);
-
+						insertNewHtmlObject('br');
 				}
 			}//foreach($this->inputs as $section => $inputs)
 
