@@ -30,6 +30,22 @@ class AutoLoader
 	 */
 	protected static $baseDirectories = array('interfaces', 'abstracts', 'mainclasses', 'library', 'thirdparty');
 
+
+	protected static $extraClassDirectories = array('modelSupport/actions' => 'ModelAction',
+										'modelSupport/actions/LocationBased' => 'ModelActionLocationBased',
+										'modelSupport/converters' => 'ModelTo',
+										'modelSupport/Listings' => 'none',
+										'modelSupport/Forms' => 'none',
+										'InputHandlers' => 'none',
+										'cacheHandlers' => 'cacheHandler',
+										'RequestWrapper/IOProcessors' => 'IOProcessor');
+
+	protected static $extraLibraryDirectories = array('Form/Converters' => 'FormTo',
+										'Form/ValidationRules' => 'FormValidation',
+										'Form' => 'Form',
+										'Filters' => 'Filter');
+
+
 	/**
 	 * This function is called by the system when it is unable to locate a class.
 	 *
@@ -152,17 +168,13 @@ class AutoLoader
 		$classes = $cache->getData();
 		if($cache->isStale())
 		{
-			$config = Config::getInstance();
-			$moduleFolders = array('modelSupport/actions' => 'ModelAction',
-									'modelSupport/actions/LocationBased' => 'ModelActionLocationBased',
-									'modelSupport/converters' => 'ModelTo',
-									'modelSupport/Listings' => 'none',
-									'modelSupport/Forms' => 'none',
-									'InputHandlers' => 'none',
-									'cacheHandlers' => 'cacheHandler',
-									'RequestWrapper/IOProcessors' => 'IOProcessor');
+			$classes = array();
 
-			$classes = array(self::loadDirectoryAndFilter($config['path']['mainclasses'], $moduleFolders));
+			$config = Config::getInstance();
+
+			$classes[] = self::loadDirectoryAndFilter($config['path']['mainclasses'], self::$extraClassDirectories);
+			$classes[] = self::loadDirectoryAndFilter($config['path']['library'], self::$extraLibraryDirectories);
+
 			$outputControllers = self::loadDirectoryAndFilter($config['path']['mainclasses'],
 										array('RequestWrapper/OutputControllers' => 'none'));
 
