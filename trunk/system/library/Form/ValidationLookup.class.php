@@ -29,7 +29,7 @@ if(!class_exists('FormValidationAbstract', false))
  * @package		Library
  * @subpackage	Form
  */
-class ValidationLookup
+class FormValidationLookup
 {
 	/**
 	 * This is a list of validators in the Form/ValidationRules folder, with the shortname for looking them up.

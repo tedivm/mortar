@@ -8,9 +8,6 @@
  * @subpackage	Form
  */
 
-if(!class_exists('ValidationLookup', false))
-	include('ValidationLookup.class.php');
-
 /**
  * This class stores the data for individual inputs in the Form class.
  *
@@ -286,7 +283,7 @@ class FormInput
 		$errors = array();
 		foreach($this->validationRules as $rule => $argument)
 		{
-			$classname = ValidationLookup::getClass($rule);
+			$classname = FormValidationLookup::getClass($rule);
 
 			if($classname === false)
 				throw new FormError('Unable to load validation class ' . $rule);
