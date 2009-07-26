@@ -48,7 +48,7 @@ class MortarModelUser extends ModelBase
 	 * This function runs the parent function to load the user information and then loads the user's membergroups into
 	 * an array.
 	 *
-	 * @cache models *type *id membegroups
+	 * @cache models User *id membegroups
 	 * @param int $id
 	 * @return bool
 	 */
@@ -56,7 +56,7 @@ class MortarModelUser extends ModelBase
 	{
 		if(parent::load($id))
 		{
-			$cache = new Cache('models', $this->getType(), $id, 'membergroups');
+			$cache = new Cache('models', 'User', $id, 'membergroups');
 			$memberGroups = $cache->getData();
 			if($cache->isStale())
 			{

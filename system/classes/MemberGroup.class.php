@@ -86,13 +86,14 @@ class MemberGroup
 	/**
 	 * Checks to see if a membergroup contains the specified user
 	 *
-	 * @cache membergroups *id containsUser *userId
+	 * @cache models Users *userId membergroups *memberGroupId
 	 * @param int $userId
 	 * @return bool
 	 */
 	public function containsUser($userId)
 	{
-		$cache = new Cache('membergroups', $this->id, 'containsUser', $userId);
+		//'models', 'Users', $userId, 'membergroups', $this->id
+		$cache = new Cache('models', 'Users', $userId, 'membergroups', $this->id);
 		$inGroup = $cache->getData();
 
 		if($cache->isStale())
@@ -107,6 +108,40 @@ class MemberGroup
 		}
 
 		return $inGroup;
+	}
+
+	/**
+	 * This function returns an array of users that are in the membergroup.
+	 *
+	 * @cache membergroups *id userList *limit *offset
+	 * @param int $limit Ignored if 0
+	 * @param int $offset Ignored if a limit is not passed
+	 * @return array Returns false if empty.
+	 */
+	public function getUsers($limit = 0, $offset = 0)
+	{
+		$cache = new Cache('membergroups', $this->getId(), 'userList', $limit, $offset);
+		$results = $cache->getData();
+
+		if($cache->isStale())
+		{
+			$stmt = DatabaseConnection::getStatement('default_read_only');
+			if(!isset($limit) || $limit < 1)
+			{
+				$stmt->prepare('SELECT user_id FROM userInMemberGroup WHERE user_id = ? AND memgroup_id = ?');
+				$stmt->bindAndExecute('ii', $userId, $this->id);
+			}else{
+				$stmt->prepare('SELECT user_id FROM userInMemberGroup WHERE user_id = ? AND memgroup_id = ? LIMIT ?,?');
+				$stmt->bindAndExecute('iiii', $userId, $this->id, $offset, $limit);
+			}
+			$results = array();
+			while($row = $stmt->fetch_array())
+				$results[] = $row['user_id'];
+
+			$cache->storeData($results);
+		}
+
+		return (count($results) > 0) ? $results : false;
 	}
 
 	/**
@@ -129,7 +164,9 @@ class MemberGroup
 		$dbWrite = db_connect('default');
 		$insertStmt = $dbWrite->stmt_init();
 		$insertStmt->prepare('INSERT INTO userInMemberGroup (user_id, memgroup_id) VALUES (?, ?)');
-		return $insertStmt->bindAndExecute('ii', $userId, $this->id);
+		$result = $insertStmt->bindAndExecute('ii', $userId, $this->id);
+		Cache::clear('models', 'User', $userId, 'membergroups');
+		return $result;
 	}
 
 	/**

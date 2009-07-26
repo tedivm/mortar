@@ -69,7 +69,7 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 	protected function getForm()
 	{
 		$form = parent::getForm();
-		$form = ($form instanceof Form) ? $form : new Form($this->type . 'Form' . $this->actionName);
+		$form = ($form instanceof Form) ? $form : new Form($this->model->getType() . 'Form' . $this->actionName);
 
 		// If the parent location isn't set, there should be some form to do so.
 		if($this->model->getLocation()->getParent() === false)
