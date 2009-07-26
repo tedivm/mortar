@@ -8,9 +8,6 @@
  * @subpackage	Form
  */
 
-
-require('Form/Input.class.php');
-
 /**
  * This is used to generate forms. This is different than just HTML forms (although that is an option for output), as
  * this class is used to define which inputs should be accepted and what rules they need to follow regardless of engine.
@@ -92,7 +89,7 @@ class Form
 	 *
 	 * @var bool
 	 */
-	static protected $xsfrProtection = true;
+	static public $xsfrProtection = true;
 
 	/**
 	 * This is an internal flag to see if a form has been submitted. It is set by the checkSubmit function.
@@ -230,6 +227,32 @@ class Form
 	}
 
 	/**
+	 * This function returns the action url the form should be submitted to, defaulting to 'self'  if no action has been
+	 * set(as in, submit back to the action calling the form).
+	 *
+	 * @return string
+	 */
+	public function getAction()
+	{
+		if(!isset($this->action))
+		{
+			$this->setAction(Query::getUrl());
+		}
+
+		return $this->action;
+	}
+
+	/**
+	 * This function returns the method used to submit the form, most commonly 'Post'.
+	 *
+	 * @return string
+	 */
+	public function getMethod()
+	{
+		return $this->method;
+	}
+
+	/**
 	 * This enables caching and sets an array for the cacheKey. Caching is still being tested, its not ready for
 	 * production.
 	 *
@@ -248,277 +271,35 @@ class Form
 
 	}
 
+	public function getFormAs($format = 'Html')
+	{
+		if(self::$xsfrProtection
+			&& !$this->getInput('nonce')
+			&& $nonce = $this->getNonce())
+		{
+			$this->createInput('nonce')->
+				setType('hidden')->
+				property('value', $nonce);
+		}
+
+		$converterClass = 'FormTo' . $format;
+
+		if(!class_exists($converterClass))
+			throw new FormError('Unable to load conversation class ' . $converterClass);
+
+		$converter = new $converterClass($this);
+		return $converter->makeOutput();
+	}
+
 	/**
 	 * This function returns the current form as html.
 	 *
+	 * @deprecated
 	 * @return string
 	 */
 	public function makeHtml()
 	{
-		$cacheKey = array_merge(array('forms', $this->name), $this->cacheKey);
-		$cache = new Cache($cacheKey);
-
-		$formHtml = $cache->getData();
-		if($cache->isStale() || !$this->cacheEnabled)
-		{
-			if(self::$xsfrProtection && $nonce = $this->getNonce())
-			{
-				$this->createInput('nonce')->
-					setType('hidden')->
-					property('value', $this->getNonce());
-			}
-
-			// if the action isn't set, use the current link
-			if(!isset($this->action))
-			{
-				$this->setAction(Query::getUrl());
-			}
-
-			$formHtml = new HtmlObject('form');
-			$formHtml->property('method', $this->method)->
-						property('id', $this->name)->
-						property('action', $this->action);
-
-			$jsIncludes = array();
-			$jsStartup = array();
-
-			foreach($this->inputs as $section => $inputs)
-			{
-				$sectionHtml = new HtmlObject('fieldset');
-				$sectionHtml->property('id', $this->name . "_section_" . $section);
-
-				if(isset($this->sectionLegends[$section]))
-				{
-					$sectionHtml->insertNewHtmlObject('legend')->
-						wrapAround($this->sectionLegends[$section]);
-				}
-
-				if(isset($this->sectionIntro[$section]))
-				{
-					$sectionHtml->insertNewHtmlObject('div')->
-						wrapAround($this->sectionIntro[$section])->
-						addClass('intro');
-				}
-
-				foreach($inputs as $input)
-				{
-					$input->property('id', $this->name . "_" . $input->name);
-					$inputJavascript = $this->getInputJavascript($input);
-
-					if(is_array($inputJavascript['startup']))
-						$jsStartup = array_merge_recursive($jsStartup, $inputJavascript['startup']);
-
-					if(is_array($inputJavascript['includes']))
-						$jsIncludes = array_merge_recursive($jsIncludes, $inputJavascript['includes']);
-
-					$this->processSpecialInputFields($input);
-					$inputHtml = $this->getInputHtmlByType($input);
-
-					if($input->type == 'hidden')
-					{
-						$inputHtml->noClose();
-						$formHtml->wrapAround($inputHtml);
-					}else{
-
-						$labelHtml = new HtmlObject('label');
-						$labelHtml->property('for', $input->property('id'))->
-							property('id', $input->property('id') . '_label');
-
-						if(isset($input->label))
-						{
-							$labelHtml->wrapAround($input->label);
-							if(isset($input->description))
-								$labelHtml->property('title', $input->description);
-						}
-
-						$br = new HtmlObject('br');
-						$br->noClose();
-
-						$labelHtml->property('for', $input->property('id'))->
-							property('id', $input->property('id') . '_label');
-
-						$sectionHtml->wrapAround($labelHtml)->
-							wrapAround($inputHtml)->
-							wrapAround($br);
-
-					}
-				}//foreach($this->inputs as $section => $inputs)
-
-				$formHtml->wrapAround($sectionHtml);
-			}
-
-			if(!$this->submitButton)
-			{
-				$sectionHtml = new HtmlObject('div');
-				$sectionHtml->property('id', $this->name . "_section_" . 'control');
-				$inputHtml = new HtmlObject('input');
-				$inputHtml->name = $input->name;
-				$inputHtml->property('name', 'Submit')->property('type', 'Submit')->property('value', 'Submit');
-
-				$labelHtml = new HtmlObject('label');
-				$sectionHtml->wrapAround($labelHtml)->wrapAround($inputHtml)->wrapAround('<br>');
-				$formHtml->wrapAround($sectionHtml);
-			}
-
-			$formHtml = (string) $formHtml;
-			$cache->storeData($formHtml);
-		}
-
-		$output = $formHtml;
-
-		$jsStartup[] = '$("#' . $this->name . '").validate();';
-		$jsStartup[] = '$("#' . $this->name . ' label").tooltip({extraClass: "formTip"});';
-
-		// if the form was submitted, trigger the errors on reload
-		if($this->wasSubmitted())
-			$jsStartup[] = '$(\'#' . $this->name . '\').valid();';
-
-		if(class_exists('ActivePage', false))
-		{
-			$page = ActivePage::getInstance();
-			$page->addStartupScript($jsStartup);
-		}
-		return $output;
-	}
-
-	/**
-	 * This function acts a preprocessor for special input types. Currently its empty, as the last special types were
-	 * depreciated out, but that could change.
-	 *
-	 * @param FormInput $input
-	 */
-	protected function processSpecialInputFields(FormInput $input)
-	{
-
-	}
-
-	/**
-	 * Takes an input item and outputs html.
-	 *
-	 * @param FormInput $input
-	 * @return string
-	 */
-	protected function getInputHtmlByType(FormInput $input)
-	{
-		$tagByType = array(
-		'html' => 'textarea',
-		'textarea' => 'textarea',
-		'select' => 'select',
-		'checkbox' => 'input',
-		'submit' => 'input',
-		'radio' => 'input',
-		'hidden' => 'input',
-		'image' => 'input',
-		'text' => 'input',
-		'password' => 'input',
-		'input' => 'input'
-		);
-
-		$tagType = isset($tagByType[$input->type]) ? $tagByType[$input->type] : 'input';
-		$inputHtml = new HtmlObject($tagByType[$tagType]);
-		$inputHtml->property('name', $input->name);
-
-		if($tagByType[$input->type] == 'input');
-		{
-			$inputHtml->property('type', $input->type);
-		}
-
-		switch ($input->type)
-		{
-			case'html':
-			case 'textarea':
-				$inputHtml->wrapAround($input->property('value'));
-				unset($input->properties['value']);
-				break;
-
-			case 'select':
-
-				$value = $input->property('value');
-
-				foreach($input->options as $option)
-				{
-					$properties = array();
-
-					if($option['value'] == $value)
-						$properties['selected'] = 'selected';
-
-					$optionHtml = $inputHtml->insertNewHtmlObject('option')->
-						property('value', $option['value'])->
-						wrapAround($option['label']);
-
-						if(isset($properties) && is_array($option['properties']))
-							$properties = array_merge($properties, $option['properties']);
-
-						$optionHtml->property($properties);
-				}
-				break;
-
-			// Checkboxes need to be arrays if they have multiple items, but we'll just make them all arrays
-			// If only one checkbox item exists with a single name, we'll take care of it in 'checkSubmit'
-			case 'checkbox':
-				$inputHtml->property('name', $input->name . '[]');
-				break;
-
-			case 'submit':
-				$this->submitButton = true;
-		}//switch ($input->type)
-
-		$inputHtml->property($input->properties);
-		$validationRules = $input->getRules();
-
-		if(!is_null($validationRules) && count($validationRules) > 0)
-		{
-			$validationClientSideRules = array();
-			foreach($validationRules as $ruleName => $ruleArgument)
-			{
-				try
-				{
-					if(!($className = ValidationLookup::getClass($ruleName)))
-						throw new FormWarning('Unable to load validation class for rule ' . $ruleName);
-
-					$argument = staticFunctionHack($className, 'getHtmlArgument', $input, $ruleArgument);
-					$validationClientSideRules[$ruleName] = $argument;
-
-				}catch(Exception $e){
-
-				}
-			}
-//exit();
-			$validationClasses = json_encode(array('validation' => $validationClientSideRules));
-			$inputHtml->addClass($validationClasses);
-		}
-
-		return $inputHtml;
-	}
-
-	/**
-	 * This function takes in a FormInput and returns any javascript that needs to be included or put into the startup
-	 * script.
-	 *
-	 * @param FormInput $input
-	 * @return bool
-	 */
-	protected function getInputJavascript(FormInput $input)
-	{
-
-		// to require a javascript file, return $include['Library'][] = 'Name';
-		$includes = $startup = $plugin = array();
-
-		switch ($input->type) {
-			case 'html':
-				$fckOptions = (is_array($input->property('options'))) ? json_encode($input->property('options')) : '';
-				$includes['jquery'] = array('FCKEditor');
-				$startup[] = '$(\'textarea#' . $input->property('id') . '\').fck(' . $fckOptions . ');';
-				break;
-
-			default:
-				break;
-		}
-
-		if(count($plugin) > 0 || count($startup) > 0)
-			return array('includes' => $includes, 'startup' => $startup);
-
-		return false;
+		return $this->getFormAs('Html');
 	}
 
 	/**
@@ -662,9 +443,9 @@ class Form
 	 *
 	 * @return unknown
 	 */
-	protected function getNonce()
+	public function getNonce()
 	{
-		if(self::$xsfrProtection && isset($_SESSION['none']))
+		if(self::$xsfrProtection && isset($_SESSION['nonce']))
 		{
 			return md5($_SESSION['nonce'] . $this->name);
 		}
@@ -708,7 +489,7 @@ class Form
 	/**
 	 * This returns an array for other packages to use when merging.
 	 *
-	 * @return array
+	 * @return array inputs, intros, legends
 	 */
 	public function getMergePackage()
 	{

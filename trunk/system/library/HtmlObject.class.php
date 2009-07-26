@@ -102,6 +102,13 @@ class HtmlObject
 										'h1', 'h2', 'h3', 'h4', 'h5', 'b', 'u', 'i', 'em', 'caption');
 
 	/**
+	 * This array contains all of the tags which, by default, do not have closing tags.
+	 *
+	 * @var array
+	 */
+	protected $hasNoClose = array('br', 'hr');
+
+	/**
 	 * This constructor takes the type of html tag as its argument.
 	 *
 	 * @example $div = new HtmlObject('div');
@@ -114,6 +121,8 @@ class HtmlObject
 		if(in_array($type,$this->hasTightEnclose))
 			$this->tightEnclose = true;
 
+		if(in_array($type, $this->hasNoClose))
+			$this->noClose();
 	}
 
 	/**
