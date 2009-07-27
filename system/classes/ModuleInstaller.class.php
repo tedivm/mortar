@@ -49,6 +49,7 @@ class ModuleInstaller
 		if(!is_string($package))
 			throw new TypeMismatch(array('String', $package, 'Must include the package name.'));
 
+		AutoLoader::addModule($package);
 		$this->package = $package;
 		$this->loadSettings();
 	}
