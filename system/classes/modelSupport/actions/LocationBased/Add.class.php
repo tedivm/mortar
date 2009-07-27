@@ -235,7 +235,7 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 				return $this->makeDisplay();
 			}
 		}else{
-			return $this->form->makeHtml();
+			return $this->form->getFormAs('Html');
 		}
 	}
 

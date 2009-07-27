@@ -536,7 +536,7 @@ class Page implements ArrayAccess
 
 			}while($location = $location->getParent());
 
-			if(count($urlList) > 0)
+			if(count($urlList) > 1)
 			{
 				$urlList = array_reverse($urlList);
 

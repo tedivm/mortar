@@ -31,16 +31,10 @@
 				var inputOpts = $(this).metadata();
 
 				if(inputOpts.autosuggest && inputOpts.autosuggest.data)
-				{
-					data = (inputOpts.autosuggest.data)
 					$(this).autosuggest(inputOpts.autosuggest.data, inputOpts.autosuggest.options)
-				}
 
 				if(inputOpts.html)
-				{
 					$(this).fck();
-				}
-
 			});
 		});
 	};

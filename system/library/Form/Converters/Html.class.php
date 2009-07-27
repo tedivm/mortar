@@ -228,6 +228,14 @@ class FormToHtml
 		return $inputHtml;
 	}
 
+	/**
+	 * This function takes certain data from the input column and passes it through the HtmlObject to the client end.
+	 * This is done by taking the information as a json encoded array, which our jquery form wrapper picks up.
+	 *
+	 * @param FormInput $input
+	 * @param HtmlObject $inputHtml
+	 * @return HtmlObject
+	 */
 	protected function setInputHtmlMetaData(FormInput $input, HtmlObject $inputHtml)
 	{
 		$validationRules = $input->getRules();
