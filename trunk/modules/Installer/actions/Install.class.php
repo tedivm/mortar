@@ -107,7 +107,7 @@ class InstallerActionInstall implements ActionInterface //extends Action
 			$this->ioHandler->addHeader('Location', (string) $url);
 
 		}elseif($this->form){
-			$output .= $this->form->makeHtml();
+			$output .= $this->form->getFormAs('Html');
 		}
 
 		return $output;

@@ -78,10 +78,10 @@ class MortarActionInstallModule extends ActionBase
 			{
 				$output = 'Module successfully installed';
 			}else{
-				$output = $this->form->makeHtml();
+				$output = $this->form->getFormAs('Html');
 			}
 
-			$output = ($this->success) ? 'Module successfully installed' : $this->form->makeHtml();
+			$output = ($this->success) ? 'Module successfully installed' : $this->form->getFormAs('Html');
 		}
 
 		return $output;

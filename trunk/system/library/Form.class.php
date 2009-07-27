@@ -271,6 +271,13 @@ class Form
 
 	}
 
+	/**
+	 * This function returns the form in the requested format. It does so by calling upon a 'converter' class, located
+	 * in Form/Converters
+	 *
+	 * @param string $format
+	 * @return string
+	 */
 	public function getFormAs($format = 'Html')
 	{
 		if(self::$xsfrProtection
@@ -289,17 +296,6 @@ class Form
 
 		$converter = new $converterClass($this);
 		return $converter->makeOutput();
-	}
-
-	/**
-	 * This function returns the current form as html.
-	 *
-	 * @deprecated
-	 * @return string
-	 */
-	public function makeHtml()
-	{
-		return $this->getFormAs('Html');
 	}
 
 	/**

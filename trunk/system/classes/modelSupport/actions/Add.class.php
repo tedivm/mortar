@@ -214,7 +214,7 @@ class ModelActionAdd extends ModelActionBase
 				return 'Unable to add ' . $this->type;
 			}
 		}else{
-			return $this->form->makeHtml();
+			return $this->form->getFormAs('Html');
 		}
 	}
 

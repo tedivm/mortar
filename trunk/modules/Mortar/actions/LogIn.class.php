@@ -62,7 +62,7 @@ class MortarActionLogIn extends ActionBase
 				$this->AdminSettings['headerSubTitle'] = 'Invalid login';
 			}
 
-			$output .= $this->form->makeHtml();
+			$output .= $this->form->getFormAs('Html');
 
 		}
 

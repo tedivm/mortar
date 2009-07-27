@@ -87,7 +87,7 @@ class ModelActionLocationBasedDelete extends ModelActionLocationBasedEdit
 			}
 			return 'Item successfully deleted';
 		}else{
-			return $this->form->makeHtml();
+			return $this->form->getFormAs('Html');
 		}
 	}
 

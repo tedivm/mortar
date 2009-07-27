@@ -125,7 +125,7 @@ abstract class FormActionBase extends ActionBase
 		}
 
 
-		$output .= $this->form->makeHtml();
+		$output .= $this->form->getFormAs('Html');
 		return $output;
 	}
 
