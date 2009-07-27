@@ -78,6 +78,13 @@ class AutoLoader
 		}
 	}
 
+	static function addModule($moduleName)
+	{
+		$classes = self::loadModule($moduleName);
+		if(is_array($classes) && count($classes) > 0)
+			self::$classIndex = array_merge(self::$classIndex, $classes);
+	}
+
 	/**
 	 * This function creates the index array used by the loadClass function. It relies on numerous helper functions and
 	 * caches their results individually.
