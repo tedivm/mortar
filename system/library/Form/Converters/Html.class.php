@@ -25,6 +25,20 @@ class FormToHtml
 	protected $sectionLegends;
 
 
+	protected $tagByType = array('html' => 'textarea',
+							'textarea' => 'textarea',
+							'select' => 'select',
+							'checkbox' => 'input',
+							'submit' => 'input',
+							'radio' => 'input',
+							'hidden' => 'input',
+							'image' => 'input',
+							'text' => 'input',
+							'password' => 'input',
+							'input' => 'input');
+
+
+
 	/**
 	 * This contructor takes in a Form object and extracts the information needed from it to create the output.
 	 *
@@ -55,35 +69,29 @@ class FormToHtml
 					property('id', $formId)->
 					property('action', $this->form->getAction());
 
-		$jsIncludes = array();
 		$jsStartup = array();
 
 		foreach($this->inputs as $section => $inputs)
 		{
 			$sectionHtml = new HtmlObject('fieldset');
-			$sectionHtml->property('id', $this->name . "_section_" . $section);
+			$sectionHtml->property('id', $formId . "_section_" . $section);
 
 			if(isset($this->sectionLegends[$section]))
-			{
 				$sectionHtml->insertNewHtmlObject('legend')->
 					wrapAround($this->sectionLegends[$section]);
-			}
 
 			if(isset($this->sectionIntro[$section]))
-			{
 				$sectionHtml->insertNewHtmlObject('div')->
 					wrapAround($this->sectionIntro[$section])->
 					addClass('intro');
-			}
 
 			foreach($inputs as $input)
 			{
 				$inputId = $formId . "_" . $input->name;
 				$input->property('id', $inputId);
-				$inputJavascript = $this->getInputJavascript($input);
 
-				if(is_array($inputJavascript['startup']))
-					$jsStartup = array_merge_recursive($jsStartup, $inputJavascript['startup']);
+				if($inputStartupJs = $this->getInputJavascript($input))
+					$jsStartup = array_merge_recursive($jsStartup, $inputStartupJs);
 
 				$inputHtml = $this->getInputHtmlByType($input);
 
@@ -133,12 +141,9 @@ class FormToHtml
 
 		$output = $formHtml;
 
-		$jsStartup[] = '$("#' . $this->name . '").validate();';
-		$jsStartup[] = '$("#' . $this->name . ' label").tooltip({extraClass: "formTip"});';
-
-		// if the form was submitted, trigger the errors on reload
-		if($this->form->wasSubmitted())
-			$jsStartup[] = '$(\'#' . $this->name . '\').valid();';
+		$formJsOptions = array();
+		$formJsOptions['validateOnLoad'] = $this->form->wasSubmitted();
+		$jsStartup[] = '$("#' . $this->name . '").MorterForm(' . json_encode($formJsOptions) . ');';
 
 		if(class_exists('ActivePage', false))
 		{
@@ -167,29 +172,16 @@ class FormToHtml
 	 */
 	protected function getInputHtmlByType(FormInput $input)
 	{
-		$tagByType = array(
-		'html' => 'textarea',
-		'textarea' => 'textarea',
-		'select' => 'select',
-		'checkbox' => 'input',
-		'submit' => 'input',
-		'radio' => 'input',
-		'hidden' => 'input',
-		'image' => 'input',
-		'text' => 'input',
-		'password' => 'input',
-		'input' => 'input'
-		);
-
-		$tagType = isset($tagByType[$input->type]) ? $tagByType[$input->type] : 'input';
-		$inputHtml = new HtmlObject($tagByType[$tagType]);
+		// Do a lookup to see what kind of html tag the input needs.
+		$tagType = isset($this->tagByType[$input->type]) ? $this->tagByType[$input->type] : 'input';
+		$inputHtml = new HtmlObject($tagType);
 		$inputHtml->property('name', $input->name);
 
-		if($tagByType[$input->type] == 'input');
-		{
+		// If its a generic input, define the type
+		if($tagType == 'input' && $input->type !== 'input')
 			$inputHtml->property('type', $input->type);
-		}
 
+		// Add the tag specific data to the html. This includes setting the name and value.
 		switch ($input->type)
 		{
 			case'html':
@@ -199,9 +191,7 @@ class FormToHtml
 				break;
 
 			case 'select':
-
 				$value = $input->property('value');
-
 				foreach($input->options as $option)
 				{
 					$properties = array();
@@ -221,18 +211,27 @@ class FormToHtml
 				break;
 
 			// Checkboxes need to be arrays if they have multiple items, but we'll just make them all arrays
-			// If only one checkbox item exists with a single name, we'll take care of it in 'checkSubmit'
+			// If only one checkbox item exists with a single name, we'll take care of turning it to a scalar
+			// in the Form class's 'checkSubmit' function
 			case 'checkbox':
 				$inputHtml->property('name', $input->name . '[]');
 				break;
 
+			// Here we're just making down that the form has a submit button, otherwise we're going to add our own.
 			case 'submit':
 				$this->submitButton = true;
 		}//switch ($input->type)
 
+		// Set all of the input properties (since the HtmlObject class can take an entire array).
 		$inputHtml->property($input->properties);
-		$validationRules = $input->getRules();
+		$inputHtml = $this->setInputHtmlMetaData($input, $inputHtml);
+		return $inputHtml;
+	}
 
+	protected function setInputHtmlMetaData(FormInput $input, HtmlObject $inputHtml)
+	{
+		$validationRules = $input->getRules();
+		$validationClientSideRules = array();
 		if(!is_null($validationRules) && count($validationRules) > 0)
 		{
 			$validationClientSideRules = array();
@@ -250,11 +249,20 @@ class FormToHtml
 
 				}
 			}
-//exit();
-			$validationClasses = json_encode(array('validation' => $validationClientSideRules));
-			$inputHtml->addClass($validationClasses);
-		}
 
+			if(count($validationClientSideRules) > 0)
+				$inputOptions['validation'] = $validationClientSideRules;
+
+			if($input->type == 'html')
+				$inputOptions['html'] = true;
+
+
+			if(count($inputOptions > 0))
+			{
+				$metaDataClass = json_encode($inputOptions);
+				$inputHtml->addClass($metaDataClass);
+			}
+		}
 		return $inputHtml;
 	}
 
@@ -267,24 +275,6 @@ class FormToHtml
 	 */
 	protected function getInputJavascript(FormInput $input)
 	{
-
-		// to require a javascript file, return $include['Library'][] = 'Name';
-		$includes = $startup = $plugin = array();
-
-		switch ($input->type) {
-			case 'html':
-				$fckOptions = (is_array($input->property('options'))) ? json_encode($input->property('options')) : '';
-				$includes['jquery'] = array('FCKEditor');
-				$startup[] = '$(\'textarea#' . $input->property('id') . '\').fck(' . $fckOptions . ');';
-				break;
-
-			default:
-				break;
-		}
-
-		if(count($plugin) > 0 || count($startup) > 0)
-			return array('includes' => $includes, 'startup' => $startup);
-
 		return false;
 	}
 
