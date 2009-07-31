@@ -283,10 +283,7 @@ class Url
 			$name = 'locationId';
 
 		if($value instanceof Location)
-		{
-			$name = 'locationId';
 			$value = $value->getId();
-		}
 
 		if(!is_scalar($value))
 			return false;
