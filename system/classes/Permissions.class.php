@@ -66,7 +66,7 @@ class Permissions
 			throw new TypeMismatch(array('User', $userId));
 		}
 
-		if(is_int($location))
+		if(is_numeric($location))
 			$location = new Location($location);
 
 		if(!($location instanceof Location))
