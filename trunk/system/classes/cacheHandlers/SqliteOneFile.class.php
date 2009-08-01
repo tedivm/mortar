@@ -42,6 +42,7 @@ class cacheHandlerSqliteOneFile extends cacheHandlerSqlite
 		{
 			$config = Config::getInstance();
 			deltree($config['path']['temp'] . 'cache');
+			SqliteConnection::clear();
 			self::$sqlObject = false;
 		}else{
 			$key = self::makeSqlKey($key) . '%';
@@ -59,45 +60,7 @@ class cacheHandlerSqliteOneFile extends cacheHandlerSqlite
 	 */
 	static function getSqliteHandler($name)
 	{
-		try{
-			if(!isset(self::$sqlObject) || get_class(self::$sqlObject) != 'SQLiteDatabase')
-			{
-				$config = Config::getInstance();
-				$filePath = $config['path']['temp'] . 'cache/cache.sqlite';
-
-				$isSetup = file_exists($filePath);
-
-				if(!file_exists(dirname($filePath)))
-				{
-					if(!mkdir(dirname($filePath), 0700, true))
-						return false;
-				}
-
-				$db = new SQLiteDatabase($filePath, '0666', $errorMessage);
-
-				if(!$db)
-					throw new CacheSqliteWarning('Unable to open SQLite Database: '. $errorMessage);
-
-				if(!$isSetup)
-				{
-					$db->queryExec('
-					CREATE TABLE cacheStore (
-						key TEXT UNIQUE ON CONFLICT REPLACE,
-						expires FLOAT,
-						data BLOB
-					);
-					CREATE INDEX keyIndex ON cacheStore (key);');
-
-				}
-
-				$db->busyTimeout(self::$busyTimeout);
-				self::$sqlObject = $db;
-			}
-
-		}catch(Exception $e){
-			return false;
-		}
-		return self::$sqlObject;
+		return cacheHandlerSqlite::getSqliteHandler('cache');
 	}
 }
 
