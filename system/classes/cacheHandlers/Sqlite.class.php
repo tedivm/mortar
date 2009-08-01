@@ -129,7 +129,7 @@ class cacheHandlerSqlite implements cacheHandler
 			$config = Config::getInstance();
 			deltree($config['path']['temp'] . 'cache');
 			self::$sqlObject = false;
-
+			SqliteConnection::clear();
 		}elseif(is_array($key) && count($key) == 1){
 
 			$config = Config::getInstance();
@@ -137,7 +137,7 @@ class cacheHandlerSqlite implements cacheHandler
 
 			deltree($config['path']['temp'] . 'cache/' . $name . '.sqlite');
 			self::$sqlObject[$name] = false;
-
+			SqliteConnection::clear();
 		}else{
 			$key = self::makeSqlKey($key) . '%';
 			$sqlResource = staticFunctionHack(get_class($this), 'getSqliteHandler', $this->section);
@@ -154,46 +154,37 @@ class cacheHandlerSqlite implements cacheHandler
 	 */
 	static function getSqliteHandler($name)
 	{
-		try{
-			if(!isset(self::$sqlObject[$name]) || get_class(self::$sqlObject[$name]) != 'SQLiteDatabase')
+		try {
+			if(isset(self::$sqlObject[$name]) && get_class(self::$sqlObject[$name]) == 'SQLiteDatabase')
+				return self::$sqlObject[$name];
+
+			$config = Config::getInstance();
+			$filePath = $config['path']['temp'] . 'cache/';
+
+			if(!file_exists($filePath))
+				mkdir($filePath);
+
+			if(!$db = SqliteConnection::getDatabase($name, $filePath))
 			{
-				$config = Config::getInstance();
-				$filePath = $config['path']['temp'] . 'cache/' . $name . '.sqlite';
+				$creationResults = SqliteConnection::createDatabase($name,'
+						CREATE TABLE cacheStore (
+							key TEXT UNIQUE ON CONFLICT REPLACE,
+							expires FLOAT,
+							data BLOB
+						);
+						CREATE INDEX keyIndex ON cacheStore (key);', false, $filePath);
 
-				$isSetup = file_exists($filePath);
-
-				if(!file_exists(dirname($filePath)))
-				{
-					if(!mkdir(dirname($filePath), 0700, true))
-						return false;
-				}
-
-				$db = new SQLiteDatabase($filePath, '0666', $errorMessage);
-
-				if(!$db)
-					throw new CacheSqliteWarning('Unable to open SQLite Database: '. $errorMessage);
-
-				if(!$isSetup)
-				{
-					$db->queryExec('
-					CREATE TABLE cacheStore (
-						key TEXT UNIQUE ON CONFLICT REPLACE,
-						expires FLOAT,
-						data BLOB
-					);
-					CREATE INDEX keyIndex ON cacheStore (key);');
-
-				}
-
-				$db->busyTimeout(self::$busyTimeout);
-				self::$sqlObject[$name] = $db;
+				if(!($creationResults && $db = SqliteConnection::getDatabase($name, $filePath)))
+					return false;
 			}
+
+			$db->busyTimeout(self::$busyTimeout);
+			self::$sqlObject[$name] = $db;
+			return $db;
 
 		}catch(Exception $e){
 			return false;
 		}
-
-		return self::$sqlObject[$name];
 	}
 
 	/**
