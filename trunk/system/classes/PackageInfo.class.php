@@ -209,6 +209,19 @@ class PackageInfo
 	}
 
 	/**
+	 * Returns the version of the installed module.
+	 *
+	 * @return Version
+	 */
+	public function getVersion()
+	{
+		if($this->getStatus() != 'installed')
+			return false;
+
+		return $this->version;
+	}
+
+	/**
 	 * Returns the id of the installed module, or false if it is not installed
 	 *
 	 * @return int|bool
@@ -489,6 +502,22 @@ class PackageInfo
 			}
 		}
 		return $files;
+	}
+
+	static function checkModuleStatus($moduleName)
+	{
+		$config = Config::getInstance();
+		$pathToModule = $config['path']['modules'] . $moduleName;
+
+		if(!file_exists($pathToModule))
+			return false;
+
+		$packageInfo = new PackageInfo($moduleName);
+
+		if(!$status = $packageInfo->getStatus())
+			return 'filesystem';
+
+		return $status;
 	}
 
 }

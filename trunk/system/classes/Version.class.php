@@ -215,6 +215,20 @@ class Version
 		$this->micro = isset($versionArray[2]) ? (int) $versionArray[2] : 0;
 	}
 
+	public function inRange(Version $minimum, Version $maximum = null)
+	{
+		if(!isset($minimum, $maximum))
+			throw new CoreError('Version::inRange requires at least a minimum or maximum version to compare against.');
+
+		if(isset($minimum) && $this->compare($minimum) < 1)
+			return false;
+
+		if(isset($maximum) && $this->compare($maximum) > 1)
+			return false;
+
+		return true;
+	}
+
 }
 
 ?>
