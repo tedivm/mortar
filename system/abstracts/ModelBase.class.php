@@ -107,7 +107,7 @@ abstract class ModelBase implements Model
 		if(!is_null($id))
 		{
 			if(!$this->load($id))
-				throw new CoreError('No model of type ' . $this->getType() . ' with id ' . $id);
+				throw new CoreWarning('No model of type ' . $this->getType() . ' with id ' . $id);
 		}
 	}
 

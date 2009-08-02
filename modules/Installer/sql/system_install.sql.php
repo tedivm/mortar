@@ -101,10 +101,11 @@ CREATE TABLE locations
 	name VARCHAR(65) NOT NULL,
 	resourceType VARCHAR(16) NOT NULL,
 	resourceId INTEGER UNSIGNED NOT NULL,
-	creationDate DATETIME NOT NULL,
+	resourceStatus VARCHAR(30) NOT NULL DEFAULT 'Active',
 	owner INTEGER UNSIGNED,
 	groupOwner INTEGER UNSIGNED,
 	inherits CHAR(1) NOT NULL DEFAULT 1,
+	creationDate DATETIME NOT NULL,
 	lastModified TIMESTAMP ON UPDATE CURRENT_TIMESTAMP /* This will update on each save */
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 

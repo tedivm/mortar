@@ -87,6 +87,13 @@ class Location
 	protected $inherit = true;
 
 	/**
+	 * Different resources can populate this in different ways.
+	 *
+	 * @var string
+	 */
+	protected $status;
+
+	/**
 	 * This is the user id representing the owner of the location
 	 *
 	 * @access protected
@@ -279,6 +286,31 @@ class Location
 	}
 
 	/**
+	 * This function is used to set the status of the location. Generally it should be called through its attached
+	 * resource to allow any filtering or other custom status handling to take place, although it can certainly be used
+	 * outside that context should the need arise.
+	 *
+	 * @param string $status
+	 */
+	public function setStatus($status)
+	{
+		$this->status = $status;
+	}
+
+	/**
+	 * This function is used to retrieve the status of the location. If the location is new and does not yet have a
+	 * status it will return false.
+	 *
+	 * @return string
+	 */
+	public function getStatus()
+	{
+		if(!isset($this->status))
+			return false;
+		return $this->status;
+	}
+
+	/**
 	 * This allows you to change the owner
 	 *
 	 * @param User $user
@@ -405,38 +437,32 @@ class Location
 					$locationInfo['owner'] = $dbLocation->owner;
 					$locationInfo['group'] = $dbLocation->groupOwner;
 					$locationInfo['inherits'] = ($dbLocation->inherits == 1);
+					$locationInfo['status'] = $dbLocation->resrouceStatus;
 
 					$db_meta = new ObjectRelationshipMapper('location_meta');
 					$db_meta->location_id = $locationInfo['id'];
 					$meta = array();
-					if($db_meta->select())
-					{
-						$results = $db_meta->resultsToArray();
+
+					if($db_meta->select() && $results = $db_meta->resultsToArray())
 						foreach($results as $row)
-						{
 							$meta[$row['name']] = $row['value'];
-						}
-					}
+
 					$locationInfo['meta'] = $meta;
 
 				}else{
 					$locationInfo = false;
 				}
-
 				$cache->storeData($locationInfo);
 			}
 
-			if($locationInfo != false)
-			{
-				$properties = array_keys($locationInfo);
-
-				foreach($properties as $property)
-					$this->$property = $locationInfo[$property];
-
-				return true;
-			}else{
+			if($locationInfo === false)
 				return false;
-			}
+
+			$properties = array_keys($locationInfo);
+			foreach($properties as $property)
+				$this->$property = $locationInfo[$property];
+
+			return true;
 		}
 	}
 
@@ -473,6 +499,9 @@ class Location
 		$db_location->resourceType = $this->resourceType;
 		$db_location->resourceId = $this->resourceId;
 		$db_location->inherits = ($this->inherit) ? 1 : 0;
+
+		if(isset($this->status))
+			$db_location->resourceStatus = $this->status;
 
 		if(is_numeric($this->owner))
 		{
