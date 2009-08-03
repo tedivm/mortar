@@ -1,0 +1,189 @@
+html, body {
+height: 100%;
+margin: 0;
+padding: 0;
+}
+
+body {
+background: #cccccc;
+font-family: "Gill Sans", "Gill MT", GillSans, sans-serif;
+color: #659EC7;
+}
+
+a {
+text-decoration: none;
+}
+
+#BB_wrapper {
+width: 960px;
+min-height: 90%;
+border: solid 1px #000;
+border: solid 1px #000;
+margin: 0 auto;
+background: #fff;
+position: relative;
+}
+
+#BB_header, #BB_body, #BB_footer {
+width: 100%;
+}
+
+.clean {
+clear: both;
+}
+
+#BB_branding {
+width: 90%;
+height: 3em;
+margin: 1em auto;
+border: solid 3px #659EC7;
+text-align: center;
+}
+
+#BB_branding h1 {
+margin: 0;
+padding: 0;
+}
+
+#BB_tools ul {
+list-style: none;
+margin: .3em 0;
+padding: 0;
+width: 100%;
+height: 1.5em;
+border-top: solid 3px #659EC7;
+border-bottom: solid 3px #659EC7;
+}
+
+#BB_tools ul li {
+display: block;
+width: 120px;
+height: 100%;
+float: left;
+border-right: solid 3px #659EC7;
+text-align: center;
+}
+
+.sidebar {
+width: 140px;
+border: solid 3px #659EC7;
+margin: 0 7px;
+}
+
+.sidebar_menu h2 {
+width: 100%;
+font-size: 1.2em;
+background: #659EC7;
+color: #fff;
+text-align: center;
+margin: 0;
+padding; 0;
+}
+
+.sidebar_menu ul {
+list-style: none;
+margin: 0;
+padding: 0;
+}
+
+.sidebar_menu ul li {
+height: 1.5em;
+border-top: solid 3px #659EC7;
+text-align: center;
+}
+
+.sidebar_menu ul li:hover, #BB_tools ul li:hover {
+background: #659EC7;
+color: #fff;
+}
+
+#main_sidebar_menu {
+float: left;
+}
+
+#modelNav_sidebar_menu {
+float: right;
+}
+
+#BB_left_sidebar {
+float: left;
+}
+
+#BB_right_sidebar {
+float: right;
+}
+
+#BB_main {
+width: 620px;
+border: solid 3px #659EC7;
+margin: 0 7px;
+float: left;
+}
+
+#BB_main_left {
+width: 565px;
+float: left;
+border: solid 3px #659EC7;
+margin: 0 7px;
+}
+
+#BB_main_right {
+float: right;
+width: 175px;
+border: solid 3px #659EC7;
+margin: 0 7px;
+}
+
+#BB_footer {
+text-align: center;
+position: float;
+bottom: 0;
+}
+
+.BB_option_name {
+display: block;
+float: left;
+clear: both;
+width: 300px;
+height: 1.5em;
+margin: 5px;
+border: solid 3px #659EC7;
+}
+
+.BB_option_button {
+display: block;
+float: left;
+width: 65px;
+height: 1.5em;
+margin: 5px;
+border: solid 3px #659EC7;
+background: #659EC7;
+color: #fff;
+}
+
+.BB_option_button:hover {
+color: #659EC7;
+background: #fff;
+}
+
+/* breadcrumbs */
+
+.breadcrumblist {
+padding-left: 2px;
+margin-bottom: 10px;
+}
+
+.breadcrumblist li {
+display: block;
+list-style-type: none;
+float: left;
+}
+
+.breadcrumblist li + li:before {
+content: "\00a0:";
+font-weight: bold;
+}
+
+.breadcrumblist a:hover {
+text-decoration: underline;
+}
