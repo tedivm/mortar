@@ -20,6 +20,11 @@ class MortarActionClearCache extends ActionBase
 		return 'Cache has been cleared.';
 	}
 
+	public function viewText()
+	{
+		return 'Cache cleared';
+	}
+
 
 }
 
