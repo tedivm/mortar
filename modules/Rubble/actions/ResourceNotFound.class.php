@@ -39,6 +39,6 @@ class RubbleActionResourceNotFound extends RubbleActionAuthenticationError
 
 	public function viewText()
 	{
-		return 'THe resource you are looking for can not be found.';
+		return 'The resource you are looking for can not be found.';
 	}
 }
