@@ -54,7 +54,6 @@ class RequestWrapper
 	public function main()
 	{
 		try{
-			$query = Query::getQuery();
 			$handlerClass = $this->loadIoHandler();
 			$this->ioHandler = new $handlerClass();
 			do{
@@ -97,7 +96,7 @@ class RequestWrapper
 	 * @access protected
 	 * @return array
 	 */
-	protected function loadActionClass()
+	protected function getActionClass()
 	{
 		$query = Query::getQuery();
 
@@ -209,7 +208,7 @@ class RequestWrapper
 		// if we aren't given the classname and argument, we load them up
 		if(!isset($className))
 		{
-			$actionClassInfo = $this->loadActionClass();
+			$actionClassInfo = $this->getActionClass();
 			if(!$actionClassInfo)
 				throw new ResourceNotFoundError('Unable to load action class.');
 			$className = $actionClassInfo['className'];
@@ -254,7 +253,15 @@ class RequestWrapper
 	{
 		$formatFilter = $format . 'OutputController';
 		if(!class_exists($formatFilter))
-			return false;
+		{
+			if(DirectOutputController::acceptsFormat($format))
+			{
+				$formatFilter = 'DirectOutputController';
+			}else{
+				return false;
+			}
+		}
+		//	return false;
 
 		$outputController = new $formatFilter($this->getHandler());
 		if(!$outputController->checkAction($action, $format))
@@ -273,7 +280,14 @@ class RequestWrapper
 	protected function handleError($e)
 	{
 		$site = ActiveSite::getSite();
-		$location = $site->getLocation();
+
+		if($site = ActiveSite::getSite())
+		{
+			$location = $site->getLocation();
+		}else{
+			$location = new Location(1);
+		}
+
 
 		$errorModule = $location->getMeta('error');
 
@@ -321,14 +335,15 @@ class RequestWrapper
 	protected function loadIoHandler($handlerName = null)
 	{
 		if(!$handlerName)
-			$handlerName = self::$ioHandlerType; staticHack(get_class($this), 'ioHandlerType');
-
-		if(in_array($handlerName, $this->internalIoHandlers))
 		{
-			$className = 'IOProcessor' . $handlerName;
-		}else{
-			$className = $handlerName;
+			$query = Query::getQuery();
+			$handlerName = isset($query['ioType']) ? $query['ioType'] : self::$ioHandlerType;
+
+
+//			var_dump($query);
 		}
+//var_dump($handlerName);
+		$className = (in_array($handlerName, $this->internalIoHandlers)) ? 'IOProcessor' . $handlerName : $handlerName;
 
 		if(!class_exists($className))
 			throw new RequestError('Unable to find request handler: ' . $className);
@@ -372,7 +387,7 @@ class RequestWrapper
 		$iohandler = self::$ioHandlerType;
 		$format = isset($query['format']) ? $query['format'] : false;
 		$module = isset($query['module']) ? $query['module'] : false;
-		$siteId = ActiveSite::getSite()->getId();
+		$siteId = ($site = ActiveSite::getSite()) ? $site->getId() : 0;
 		return RequestLog::logRequest($userId, $siteId, $location, $module, $action, $iohandler, $format);
 	}
 

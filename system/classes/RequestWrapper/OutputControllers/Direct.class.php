@@ -25,8 +25,9 @@ class DirectOutputController extends AbstractOutputController
 	 */
 	public $mimeType;
 
+	static protected $formatToMimetype = array();
 
-	protected $formatToMimetype = array();
+	static $acceptedFormats = array('Text');
 
 
 	protected function makeDisplayFromResource()
@@ -44,7 +45,6 @@ class DirectOutputController extends AbstractOutputController
 	 */
 	public function checkAction($action, $format = null)
 	{
-
 		$query = Query::getQuery();
 		if(parent::checkAction($action, $query['format']))
 		{
@@ -59,10 +59,16 @@ class DirectOutputController extends AbstractOutputController
 
 	protected function setFormat($format)
 	{
+		if((in_array($format, self::$formatToMimetype)))
+			$this->mimeType = self::$formatToMimetype[$format];
 
+		$this->format = $format;
 	}
 
-
+	static function acceptsFormat($format)
+	{
+		return (in_array($format, self::$acceptedFormats));
+	}
 }
 
 ?>

@@ -59,6 +59,9 @@ class IOProcessorCli
 	 */
 	public function output($output)
 	{
+		if(!is_numeric($output))
+			$output .= PHP_EOL;
+
 		echo $output;
 	}
 
@@ -80,7 +83,6 @@ class IOProcessorCli
 	{
 		$query = Query::getQuery();
 		Form::disableXsfrProtection();
-		Form::$userInput = 'stdin';
 
 		if($query['disableCache'])
 			Cache::$runtimeDisable = true;
