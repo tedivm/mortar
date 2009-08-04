@@ -210,10 +210,12 @@ class Url
 		if($site)
 		{
 			$basePath = $site->getUrl($ssl);
-		}else{
+		}elseif(isset($_SERVER['SERVER_NAME'])){
 			$basePath = ($ssl) ? 'https://' : 'http://';
 			$basePath .= $_SERVER['SERVER_NAME'] . substr($_SERVER['PHP_SELF'], 0 ,
 															strpos($_SERVER['PHP_SELF'], DISPATCHER));
+		}else{
+			$basePath = '';
 		}
 
 		$urlString = $basePath . rtrim($urlString, '/');
