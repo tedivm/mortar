@@ -1,6 +1,6 @@
 <?php
 
-class RubbleActionTechnicalError extends ActionBase
+class RubbleActionTechnicalError extends RubbleActionAuthenticationError
 {
 	public $AdminSettings = array(	'linkTab' => 'Universal',
 									'headerTitle' => 'Unknown Error',
@@ -35,4 +35,10 @@ class RubbleActionTechnicalError extends ActionBase
 
 		return $output;
 	}
+
+	public function viewText()
+	{
+		return 'An unknown error occured.';
+	}
+
 }

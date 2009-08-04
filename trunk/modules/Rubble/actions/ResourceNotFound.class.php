@@ -1,6 +1,6 @@
 <?php
 
-class RubbleActionResourceNotFound extends ActionBase
+class RubbleActionResourceNotFound extends RubbleActionAuthenticationError
 {
 
 	public $AdminSettings = array(	'linkTab' => 'Universal',
@@ -34,5 +34,11 @@ class RubbleActionResourceNotFound extends ActionBase
 	{
 
 		return $output;
+	}
+
+
+	public function viewText()
+	{
+		return 'THe resource you are looking for can not be found.';
 	}
 }

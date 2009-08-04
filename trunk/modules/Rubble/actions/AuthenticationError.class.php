@@ -54,6 +54,11 @@ class RubbleActionAuthenticationError extends ActionBase
 		return $output;
 	}
 
+	public function viewText()
+	{
+		return 'You do not have permission to perform that action.';
+	}
+
 	protected function redirectUrl()
 	{
 		$query = Query::getQuery();
@@ -76,5 +81,10 @@ class RubbleActionAuthenticationError extends ActionBase
 			}
 		}
 		return $redirectUrl;
+	}
+
+	public function checkAuth($action = NULL)
+	{
+		return true;
 	}
 }
