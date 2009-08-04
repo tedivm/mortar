@@ -44,9 +44,40 @@ class Query
 			}
 
 			$input = staticFunctionHack($type, 'getArray');
-
-
 			$inputArray = self::processInput($input);
+
+			if($type == 'Argv')
+			{
+				if(isset($inputArray['cron']))
+				{
+					$inputArray['ioType'] = 'Cron';
+				}else{
+					$inputArray['ioType'] = 'Cli';
+				}
+
+			}elseif(!isset($inputArray['ioType'])){
+				$inputArray['ioType'] = 'Http';
+			}
+
+			if(!isset($inputArray['format']))
+			{
+				switch (strtolower($inputArray['ioType']))
+				{
+					case 'rest':
+						$inputArray['format'] = 'Xml';
+						break;
+
+					case 'cli':
+						$inputArray['format'] = 'Text';
+						break;
+
+					default:
+					case 'http':
+						$inputArray['format'] = 'Html';
+						break;
+				}
+			}
+
 			self::$query = new FilteredArray($inputArray);
 		}
 
@@ -126,7 +157,7 @@ class Query
 
 			if(isset($pathArray[0]) && strtolower($pathArray[0]) == 'rest')
 			{
-				RequestWrapper::$ioHandlerType = 'Rest';
+				$inputArray['ioType'] = 'Rest';
 				array_shift($pathArray);
 			}
 
