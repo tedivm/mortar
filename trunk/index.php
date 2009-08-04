@@ -21,6 +21,9 @@ if(BENCHMARK && function_exists('getrusage'))
 	unset($startdat);
 }
 
+if(defined('STDIN'))
+	define('EXCEPTION_OUTPUT', 'Text');
+
 // Error Handling Setup
 
 switch(DEBUG)
@@ -83,7 +86,6 @@ require('system/classes/AutoLoader.class.php');
 try{
 
 	$config = Config::getInstance();
-
 
 	$requestWrapperName = 'RequestWrapper';
 
