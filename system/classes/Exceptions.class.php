@@ -52,10 +52,67 @@ class CoreError extends Exception
 	/**
 	 * This magic method turns the current exception into a string, allowing it to be outputted to a browser
 	 *
-	 * @access public
 	 * @return string
 	 */
 	public function __toString()
+	{
+		return defined('EXCEPTION_OUTPUT') && EXCEPTION_OUTPUT == 'Text'
+					? $this->getAsText()
+					: $this->getAsHtml();
+	}
+
+	public function getAsText()
+	{
+		$output = PHP_EOL . '*****' . PHP_EOL;;
+		$output .= '*' . PHP_EOL;
+
+
+		// Add header
+		$file = $this->getFile();
+		$line = $this->getLine();
+		$message = $this->getMessage();
+		$code = $this->getCode();
+		$errorClass = get_class($this);
+		$output .= '* ' . $errorClass . ':' . $message . ' in ' . $file . ' on line ' . $line . PHP_EOL;
+		$output .= '*' . PHP_EOL;
+
+
+		// Add Call Stack
+		$output .= '*   Call Stack:' . PHP_EOL;
+
+		$stack = array_reverse($this->getTrace());
+		foreach($stack as $index => $line)
+		{
+			$function = '';
+			if(isset($line['class']))
+				$function = $line['class'] . $line['type'];
+
+			$function .= $line['function'];
+
+			if(isset($line['args']) && count($line['args']) > 0)
+			{
+				$argString = '';
+				foreach($line['args'] as $argument)
+				{
+					$argString .= is_object($argument) ? get_class($argument) : $argument;
+					$argString .= ', ';
+				}
+				$argString = rtrim($argString, ', ');
+				$function .= '(' . $argString . ')';
+			}else{
+				$function .= '()';
+			}
+
+			$output .= "*      " . ($index + 1) . '. ' . $function . ' ' . $line['file'] . ':' . $line['line'] . PHP_EOL;
+		}
+
+		$output .= '*' . PHP_EOL;
+		$output .= '*****' . PHP_EOL;
+
+		return $output . PHP_EOL . PHP_EOL;
+	}
+
+	public function getAsHtml()
 	{
 		$runtimeConfig = Query::getQuery();
 
