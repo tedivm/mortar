@@ -75,11 +75,10 @@ class DatabaseConnection
 
 				$connectionInfo = self::$iniFile->getArray($database);
 
-				$dbConnection = new MysqlBase(
-				$connectionInfo['host'],
-				$connectionInfo['username'],
-				$connectionInfo['password'],
-				$connectionInfo['dbname']);
+				$dbConnection = new MysqlBase($connectionInfo['host'],
+								$connectionInfo['username'],
+								$connectionInfo['password'],
+								$connectionInfo['dbname']);
 
 				if($dbConnection->connect_errno)
 					throw new DatabaseConnectionError('Could not connect to database ' . $db_name . ': ' . $dbConnection->error);

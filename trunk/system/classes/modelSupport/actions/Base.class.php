@@ -166,8 +166,7 @@ abstract class ModelActionBase implements ActionInterface
 	protected function setPermissionObject()
 	{
 		$user = ActiveUser::getUser();
-		$site = ActiveSite::getSite();
-		$this->permissionObject = new Permissions($site->getLocation(), $user);
+		$this->permissionObject = new Permissions(1, $user);
 	}
 
 	/*
