@@ -46,7 +46,7 @@ class ActiveSite
 		if(is_null(self::$site))
 		{
 
-			if(INSTALLMODE)
+			if(INSTALLMODE || !isset($_SERVER['SERVER_NAME']))
 				return false;
 
 			$ssl = isset($_SERVER['HTTPS']);
@@ -65,7 +65,12 @@ class ActiveSite
 				$cache->storeData($siteId);
 			}
 
-			self::$site = $siteId ? ModelRegistry::loadModel('Site', $siteId) : false;
+			if($siteId === false)
+			{
+				self::$site = false; // this should eventually be the default or main site.
+			}else{
+				self::$site = ModelRegistry::loadModel('Site', $siteId);
+			}
 		}
 
 		return self::$site;

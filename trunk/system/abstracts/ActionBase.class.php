@@ -38,7 +38,15 @@ abstract class ActionBase implements ActionInterface
 		if(!isset($this->permissionObject))
 		{
 			$user = ActiveUser::getUser();
-			$this->permissionObject = new Permissions(1, $user); // 1 == Root
+
+			if($site = ActiveSite::getSite())
+			{
+				$this->permissionObject = new Permissions($site->getLocation(), $user); // 1 == Root
+			}else{
+				$this->permissionObject = new Permissions(1, $user); // 1 == Root
+			}
+
+//			$this->permissionObject = new Permissions(1, $user); // 1 == Root
 		}
 
 		if(!$action)
