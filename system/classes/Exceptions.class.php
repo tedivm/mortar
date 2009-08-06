@@ -63,17 +63,15 @@ class CoreError extends Exception
 
 	public function getAsText()
 	{
-		$output = PHP_EOL . '*****' . PHP_EOL;;
-		$output .= '*' . PHP_EOL;
-
-
 		// Add header
+		$output = PHP_EOL . '*****' . PHP_EOL;;
 		$file = $this->getFile();
 		$line = $this->getLine();
 		$message = $this->getMessage();
 		$code = $this->getCode();
 		$errorClass = get_class($this);
-		$output .= '* ' . $errorClass . ':' . $message . ' in ' . $file . ' on line ' . $line . PHP_EOL;
+		$output .= '*  ' . $errorClass . ':' . $message . PHP_EOL;
+		$output .= '*    in ' . $file . ' on line ' . $line . PHP_EOL;
 		$output .= '*' . PHP_EOL;
 
 
@@ -103,12 +101,12 @@ class CoreError extends Exception
 				$function .= '()';
 			}
 
-			$output .= "*      " . ($index + 1) . '. ' . $function . ' ' . $line['file'] . ':' . $line['line'] . PHP_EOL;
+			$output .= '*      ' . ($index + 1) . '. ' . $function . PHP_EOL;
+			$output .= '*          ' . $line['file'] . ':' . $line['line'] . PHP_EOL;
+			$output .= '*' . PHP_EOL;
 		}
 
-		$output .= '*' . PHP_EOL;
 		$output .= '*****' . PHP_EOL;
-
 		return $output . PHP_EOL . PHP_EOL;
 	}
 
@@ -136,7 +134,10 @@ class CoreError extends Exception
 
 		$errorClass = get_class($this);
 		$output = "<font size='1'><table class='Core-error' dir='ltr' border='1' cellspacing='0' cellpadding='2'>
-<tr><th align='left' bgcolor='#f57900' colspan='4'>( ! ) " . $errorClass . ": {$message} in <br>{$file} on line <i>{$line}</i></th></tr>
+<tr><th align='left' bgcolor='#f57900' colspan='4'>( ! ) " . $errorClass . ": {$message} in <br>{$file} on line <i>{$line}</i></th></tr>";
+
+/*
+		$output .= "
 <tr><th align='left' bgcolor='#e9b96e' colspan='3'>System Information</th></tr>
 <tr>
 	<td bgcolor='#eeeeec'><b>Site ID:</b> {$siteOutput}</td>
@@ -147,8 +148,10 @@ class CoreError extends Exception
 	<td bgcolor='#eeeeec'><b>ID:</b> {$idOutput}</td>
 	<td bgcolor='#eeeeec'><b>Engine:</b> {$engineOutput}</td>
 	<td bgcolor='#eeeeec'><b>Dispatcher:</b> {$dispatcher}</td>
-</tr>
+</tr>";
+*/
 
+		$output .= "
 <tr>
 <td colspan='3' cellspacing='0' cellpadding='0'>
 	<table class='Core-error' dir='ltr' border='1' cellspacing='0' cellpadding='2' width='100%'>
