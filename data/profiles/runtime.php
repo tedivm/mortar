@@ -1,3 +1,3 @@
 <?php
-include('dev-nocache.php');
+include('production.php');
 ?>
