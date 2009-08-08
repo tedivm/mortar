@@ -73,8 +73,8 @@ class LithoModelPage extends LocationModel
 		$this->content['title'] = $revision->title;
 		$this->content['filteredContent'] = $revision->filteredContent;
 		$this->content['rawContent'] = $revision->rawContent;
-		//if($this->content['author'] != $revision->author)
-			//$this->content['lastEditor'] = $revision->author;
+		if($this->content['author'] != $revision->author)
+			$this->content['lastEditor'] = $revision->author;
 	}
 
 	public function getRevision($id = null)
