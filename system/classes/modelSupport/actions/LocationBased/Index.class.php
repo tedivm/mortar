@@ -121,10 +121,8 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		return $locationListing;
 	}
 
-
 	/**
-	 * This is incredibly basic right now, but thats because I'm working woth the Joshes on getting the interface
-	 * for it set up.
+	 * Creates a listing of models along with relevant qualities and actions for use in an admin page.
 	 *
 	 * @return string
 	 */
@@ -133,46 +131,53 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		$menu = $page->getMenu('actions', 'modelNav');
 		$this->makeModelActionMenu($menu, $this->model, 'Admin');
 
-		$table = new Table($this->model->getType() . '_' . $this->model->getId() . '_listing');
-		$table->addClass('model-listing');
-		$table->enableIndex();
+		$theme = $page->getTheme();
+	
+		foreach($this->childModels as $model) {
+			$rowPolarity = $rowPolarity ? false : true;
+			$modelData .= $this->makeModelListEntry($model, $theme, ($rowPolarity ? "odd" : "even"));
+		}
+			
+		$modelListTable = new DisplayMaker();
+		$modelListTable->setDisplayTemplate($theme->getModelTemplate("ModelListTable.html", $model->getType()));
 
-		foreach($this->childModels as $model)
-			$this->addModelToTable($table, $model);
-
-		return $table->makeHtml();
+		$name = isset($page['title']) ? preg_replace('/\s/', '', $page['title']) : "no-name";
+		$modelListTable->addContent('id', $name . "-admin-table");
+		$modelListTable->addContent('class', 'modellist-table');
+		$modelListTable->addContent('table-contents', $modelData);
+		return $modelListTable->makeDisplay();
 	}
 
-
 	/**
-	 * This function adds a model class to a Table
+	 * Generates a list entry for a model for inclusion in an admin page listing.
 	 *
-	 * @param table $table
 	 * @param Model $model
+	 * @param Theme $theme
+	 * @param String $evenodd
 	 */
-	protected function addModelToTable($table, $model)
+	public function makeModelListEntry($model, $theme, $evenodd)
 	{
-		$table->newRow();
-		$table->addField('name', 'value');
-
+		$modelListLine = new DisplayMaker();
+		$modelListLine->setDisplayTemplate($theme->getModelTemplate("ModelListLine.html", $model->getType()));
 		$baseUrl = new Url();
 		if(method_exists($model, 'getLocation'))
 		{
 			$location = $model->getLocation();
 			$baseUrl->locationId = $location->getId();
-			$table->addField('name', $location->getName());
-
-			$table->addField('creation', date($this->indexDateFormat, $location->getCreationDate()));
-
-		}else{
+			$modelListLine->addContent('name', $location->getName());
+			$modelListLine->addContent('creation', date($this->indexDateFormat, $location->getCreationDate()));
+		} else 
+		{
 			$baseUrl->type = $model->getType();
 			$baseUrl->id = $model->getId();
 
 			$name = isset($model['name']) ? $model['name'] : isset($model['title']) ? $model['title'] : false;
 			if($name)
-				$table->addField('name', $name);
+				$modelListLine->addContent('name', $name);
+				$modelListLine->addContent('creation', '');
 		}
-
+		$modelListLine->addContent('evenodd', $evenodd);
+		
 		$baseUrl->format = 'Admin';
 
 		$actionTypes = array('Read', 'Edit', 'Delete');
@@ -186,14 +191,21 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		$userId = $user->getId();
 		foreach($actionTypes as $action)
 		{
+			$modelListAction = new DisplayMaker();
+			$modelListAction->setDisplayTemplate($theme->getModelTemplate("ModelListAction.html", $model->getType()));
 			$actionUrl = clone $baseUrl;
 			$actionUrl->action = $action;
 
-			if($actionUrl->checkPermission($userId))
-				$table->addField($action, $actionUrl->getLink(ucfirst($action)));
+			if($actionUrl->checkPermission($userId)) 
+			{
+				$modelListAction->addContent('action', $actionUrl->getLink(ucfirst($action)));
+				$actionList .= $modelListAction->makeDisplay();
+			}
+			
 		}
-
-
+		$modelListLine->addContent('actions', $actionList);
+		
+		return $modelListLine->makeDisplay();
 	}
 
 	/**
