@@ -47,15 +47,15 @@ Paths contain a lot of information. The suggested way to build them is to use th
 ==== Path Examples ===
 
 The "home" page, with and without mod_rewrite:
- /home
+ /home<br>
  /index.php?p=home
 
 The "home" page, but through the admin system:
- /admin/home
+ /admin/home<br>
  /index.php?p=admin/home
 
 The "home" page over a REST request:
- /rest/home
+ /rest/home<br>
  /index.php?p=rest/home
 
 == User Input ==
