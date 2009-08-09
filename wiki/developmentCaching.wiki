@@ -1,0 +1,136 @@
+#summary Caching with Mortar
+
+= Introduction =
+
+Caching is vital to the performance of any application. By storing the results of high cost code- such as template parsing or database calls- we greatly reduce the overall run time of future requests.
+
+= Details =
+
+== Features ==
+
+ * Any item that can be serialized can be cached.
+ * Modular storage allows different back ends to be used without changing the API.
+ * Runtime storage prevents multiple calls to the storage engine for items already picked up.
+ * Nested caching containers allows developers to group related items for easy clearing.
+
+== Concepts ==
+
+=== Containers and Keys ===
+
+Containers are used to organize related cache data together. Each container can hold saved data as well as other cache containers, allowing developers to nest their data into similar groups. When a container is cleared all of the data and other containers inside the container are removed as well.
+
+Keys are used by the Cache constructor and Cache::clear static methods to specify what container you are looking for. Each of those functions can a variable number of string arguments, with each new argument specifying the next container to look in. It is also possible to pass the key to the cache functions as an array. In this case just place each container name as an element of the array and pass it as the first and only argument to the function.
+
+==== Examples ====
+
+By using a key structure of "locations / id" for locations, we can clear out either specific data for locations or all of the cached data on every location at once.
+
+{{{
+
+// To specify the info container for the location with the id of 4
+new Cache('locations', 4, 'info');
+
+// To specific the container with the parent if for location 2
+new Cache('locations', 2, 'parent')
+
+// To clear the parent location for location 3
+Cache::clear('locations', 3, 'parent');
+
+// To clear all data for location 2
+Cache::clear('locations', 2);
+
+// To clear all data for all locations
+Cache::clear('locations');
+
+}}}
+
+=== Engines ===
+
+The main Cache object uses additional classes, or Engines, to store persist any data stored. At the moment these engines included a filebased one (used mostly for testing) and a couple of sqlite engines. Using the interface provided in the caching class new engines can be added quite easily.
+
+The active cache engine is selected using the Mortar's configuration ini file.
+
+== Usage ==
+
+=== Getting and Storing Data===
+
+The basic usage of the Cache class is pretty simple.  Create a new Cache item, passing the key (more on that below) to the constructor. Then grab the returned data, and if it is stale rebuild and store it.
+
+There are three main functions you need to know to manage this-
+
+ * Cache->getData() retrieves the stored value from the cache engine
+ * Cache->storeData() takes any value that can be serialized (native datatypes and [http://www.devshed.com/c/a/PHP/The-Basics-of-Serializing-Objects-in-PHP/ classes set up properly])
+ * Cache->isStale() returns true when the data need to be recalculated.
+
+==== Example ====
+
+{{{
+
+$cache = new Cache('key', 'to', 'item');
+$data = $cache->getData();
+
+if($cache->isStale())
+{
+   // do stuff that takes a lot of resources
+   $data = $stuffYouDid;
+   $cache->storeDate($data);
+}
+
+// Use data
+
+}}}
+
+Clearing data is accomplished by using a static function.
+
+{{{
+// Clear the specific data
+Cache::clear('key', 'to', 'data'); 
+
+// Clear all data in the 'key' container and its children containers (such as 'to', which would clear out 'data' as well)
+Cache::clear('key');
+
+// Clear everything
+Cache::clear();
+}}}
+
+=== Other Uses ===
+
+==== Custom Expiration ====
+
+By default the expiration for items stored in cache is 30 minutes, after which the item will return stale. That number can be adjusted by changing the "cacheTime" property before calling storeData. The cachetime property expects an integer value representing the amount of time, in seconds, to get stored.  *It is important to note this this exact number will not be used.* The caching system adds a random variation to the time, never more than 10% longer or shorter, to distribute the expiration of cached objects.
+
+{{{
+$cache->cacheTime = 3600;
+}}}
+
+==== Extend Cache ====
+
+If you know a stored value is good and want to extend its expiration you can use the extendCache function. It works the storeData function, using the cacheTime, but does not take any data in as an argument.
+
+{{{
+$cache->extendCache();
+}}}
+
+==== Store for Run Only ====
+
+For data that gets called on multiple times but need to be calculated separately for each run. In order to store things in memory for the current runtime only you need to run the "setMemOnly" function before calling getData;
+
+{{{
+$cache = new Cache('key', 'to', 'item');
+$cache->setMemOnly();
+$data = $cache->getData();
+}}}
+
+==== Retrieve Usable Engines ====
+
+The static function getHandlers returns an array of cache engines that are compatible with the current environment.
+
+{{{
+$engines = Cache::getHandlers();
+
+$engines == array(
+'FileSystem' => 'cacheHandlerFilesystem',
+'SQLiteMF' => 'cacheHandlerSqlite',
+'SQLite' => 'cacheHandlerSqliteOneFile');
+
+}}}
