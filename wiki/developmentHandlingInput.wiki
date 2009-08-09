@@ -1,0 +1,63 @@
+#summary Dealing with inputs in Mortar
+
+= Introduction =
+
+User input is handled through two wrapper classes, the Query and Input classes. These wrappers get populated based on the type of engine and input- the Input class can use Post, Put or stdin while the Query class can use Get and Cli arguments.
+
+Both wrapper classes return an extension of the SPL ArrayObject class. 
+
+= Details =
+
+== Input ==
+
+Retrieving the user input, whether its POST, PUT, or STDIN, is a simple static function.
+
+{{{
+$input = Input::getInput();
+}}}
+
+== Query ==
+
+As with the Input class, retrieving Query data is a simple static function. It draws its data from command line input or Get data.
+
+{{{
+$query = Query::getQuery();
+}}}
+
+=== getUrl ===
+
+The Query class has an additional function to retrieve the current url, as a [classUrl Url] object. This is meant to be a more secure version of `$_SERVER['php_self']`.
+
+{{{
+$url = Query::getUrl();
+}}}
+
+=== Paths ===
+
+If the Query class has a value set for "p" it processes that value as a path. The primary purpose of these paths is to make easy urls that are easy to remember and contain actual useful information without a lot of query variables. Using the htaccess file that ships with Mortar, or a similar script for other http servers, that paths can be called directly (see the examples below).
+
+Paths contain a lot of information. The suggested way to build them is to use the Url class, which handles all of this automatically. By building all Urls through that class you can ensure that future changes to the way paths work will not affect your code. It isn't necessarily important to know what is in the path and what is just a regular variable, as its all the same from the programming perspective, but paths can include:
+
+ * The current resource (or location) requested by the user.
+ * Speciality ioProcessors (such as REST).
+ * The format to return a resource in.
+ * The action to perform.
+ * Other, custom information based on modules.
+
+==== Path Examples ===
+
+The "home" page, with and without mod_rewrite:
+ /home
+ /index.php?p=home
+
+The "home" page, but through the admin system:
+ /admin/home
+ /index.php?p=admin/home
+
+The "home" page over a REST request:
+ /rest/home
+ /index.php?p=rest/home
+
+== User Input ==
+
+User input, as retrieved from either wrapper class, is returned as an extension of the ArrayObject class. Since it is stored as an object by the wrapper class any changed made to it will be passed on to the parent classes. 
