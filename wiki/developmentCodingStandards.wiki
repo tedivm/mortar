@@ -1,4 +1,4 @@
-#summary One-Standards for submitted code
+#summary Standards for submitted code
 
 = Introduction =
 
