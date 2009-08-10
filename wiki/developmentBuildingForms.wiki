@@ -1,0 +1,174 @@
+#summary Building Forms in Mortar
+
+= Introduction =
+
+The Form library handles the majority of all user input. This unified interface makes it easy to create secure forms that are flexible and easy for designers to enhance.
+
+= Details =
+
+== Features ==
+
+ * Simple form generation in multiple formats.
+ * Generates semantic HTML markup, with unique ids and informative classes.
+ * Cross site request forgery protection.
+ * Provides server side user input validation and filtering.
+ * Client side validation is done using jQuery's form, validation and metadata plugins.
+ * Allows inputs to be divided into sections, which can each have their own labels and legend text.
+ * Tooltips can be added to inputs to assist the user in filling out the form.
+ * Supports advanced input options like Html editors (FCK) and autosuggest fields (including ajax lookup)
+
+== Usage ==
+
+=== Building Forms ===
+
+=== Settings ===
+
+By default forms post their data to the current url. You can use the setAction to change the url or setMethod function to change the method to get.
+
+{{{
+$form->setAction('actionUrl');
+$form->setMethod('get);
+}}}
+
+You can disable xsfr protection for all forms using the static function disableXsfrProtection. This is primarily used for engines (CLI, REST) where sessions aren't used.
+{{{
+Form::disableXsfrProtection()
+}}}
+
+=== Sections ===
+
+Sections are used to organize inputs that are similar. They can be ignored completely, and everything will be put into one main section.
+
+The active section is where all new inputs are placed. You can change that using changeSection. The name passed will be used when generating IDs.
+{{{
+$form->changeSection('user');
+}}}
+
+You can set legends for each section.
+{{{
+$form->setlegend('User Information');
+}}}
+
+You can also set introduction text.
+{{{
+$form->setSectionIntro('This information is used to create your profile.');
+}}}
+
+=== Inputs ===
+
+The easiest way to create an Input object is to call createInput on the form, passing the name of the field you want to you. This name is used to generate the ID (which will be a combination of the form, section and input name) and will be the name of the user input value.
+{{{
+$input = $form->createInput('inputName');
+}}}
+
+Inputs default to the type "text", but can be any type of input allowed by Html fields as well as a few custom ones. The "html" is an enhanced textarea that uses a javascript html editor.
+{{{
+$input->setType('text');
+$input->setType('html');
+$input->setType('checkbox');
+$input->setType('password');
+$input->setType('select');
+}}}
+
+Inputs can get descriptions and labels.
+{{{
+$input->setLabel('label');
+$input->setDescription('Description');
+}}}
+
+
+You can add rules and filters to inputs. Rules are validated on the client side as well.
+{{{
+$input->addRule($rule, $params, $errorMessage);
+$input->addFilter($filter);
+}}}
+
+
+Properties, including the set value, can be set with the property function. For checkboxes you can use the check function to flag them as checked or not. For inputs that have options, like the Select type, you can use the setOptions method to set them up.
+{{{
+$input->property($name, $value);
+$input->property('value', 'Nice');
+$input->check(true);
+$input->setOptions($value, $label, $properties);
+}}}
+
+In order to make method chaining easier this function returns the form that the input is attached too.
+{{{
+$input->getForm();
+}}}
+
+=== Storing Forms ===
+
+By extending a form and implementing its 'define' function you can create forms classes with inputs already set.
+
+{{{
+
+class MyForm extends Form
+{
+   protected define()
+   {
+      $this->createInput('hidden'); 
+      // etc
+   }
+}
+
+}}}
+
+=== Merging ===
+
+You can combine two forms together using the merge function. The secondary form is passed to the function as an argument, and all of its sections, inputs and properties get absorbed by the calling class.
+{{{
+$formA->merge($formB);
+}}}
+
+
+=== Putting it Together ===
+
+{{{
+
+$form = new Form('Registration');
+
+$form->changeSection('Main')
+    ->setLegend('Main')
+    ->setSectionIntro('Please select a username and password')
+
+    ->createInput('username')
+       ->setLabel('Username')
+       ->addRule('required')
+       ->addRule('alphanumeric')
+       ->addRule('maxlength', 15)
+    ->getForm()
+
+    ->createInput('password')
+       ->setLabel('Password')
+       ->setType('password')
+       ->addRule('required')
+       ->addRule('minlength', 8)
+    ->getForm()
+
+    ->createInput('password_verify')
+       ->setLabel('Verify Password')
+       ->setType('password')
+       ->addRule('equalTo', 'password');
+}}}
+
+
+=== Returning Input ===
+
+The Form class can check, validate and return the user input using the checkSubmit button. On failure it returns false, otherwise it returns an array of validated, processed inputs.
+
+{{{
+if($inputs = $form->checkSubmit())
+{
+   // Process inputs
+}
+}}}
+
+If, after running checkSubmit, you want to check and see if the form was submitted or not, you can use wasSubmitted.
+
+{{{
+if($form->wasSubmitted() && $formStatus == false)
+{
+   // display errors
+}
+}}}
