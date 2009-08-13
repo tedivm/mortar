@@ -188,4 +188,32 @@ function depreciationError()
 
 }
 
+
+
+/**
+ * This takes an array and returns it as a string. It recursively turns element arrays into strings, increasing the
+ * indentation at each level.
+ *
+ * @param array $array
+ * @param int $level
+ * @return string
+ */
+function arrayToString($array, $level = 0)
+{
+	$tab = str_repeat('   ', $level);
+	$string = PHP_EOL;
+
+	foreach($array as $name => $value)
+	{
+		$string .= $tab . $name . ': ';
+		if(is_array($value))
+		{
+			$string .= arrayToString($value, $level + 1) . PHP_EOL;
+		}else{
+			$string .= $value . PHP_EOL;
+		}
+	}
+	return $string;
+}
+
 ?>

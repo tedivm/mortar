@@ -59,6 +59,7 @@ class MortarActionLogIn extends ActionBase
 					$delayList = array(60);
 					$delayList[] = ini_get('max_execution_time') * .85;
 					$delayList[] = log($badLogins, 1.07);
+					$delayList[] = log($this->maxFailures, 1.07);
 					$delay = (int) min($delayList);
 
 					if($delay > 0)
