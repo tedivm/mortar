@@ -315,8 +315,8 @@ CREATE TABLE users
 /* Table Items: users */
 
 /* Add Indexes for: users */
-CREATE INDEX user_name ON users (user_name, user_password);
-CREATE UNIQUE INDEX user_name_2 ON users (user_name);
+CREATE INDEX user_name ON users (name, password);
+CREATE UNIQUE INDEX user_name_2 ON users (name);
 
 
 

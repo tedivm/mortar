@@ -25,6 +25,12 @@ class Query
 	 */
 	static protected $query;
 
+	static public function setQuery($query)
+	{
+		if(is_array($query))
+			self::$query = new FilteredArray($query);
+	}
+
 	/**
 	 * This function returns the current Query (Arguments or Get values)
 	 *
