@@ -25,6 +25,29 @@ CREATE TABLE aliases
 	aliasOther VARCHAR(60) NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
+/******************** Add Table: cronJobs ************************/
+
+/* Build Table Structure */
+CREATE TABLE cronJobs
+(
+	module INTEGER UNSIGNED NOT NULL,
+	actionName VARCHAR(65) NOT NULL,
+	jobPid INTEGER UNSIGNED NOT NULL DEFAULT 0,
+	lastRun DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+	minutesBetweenRequests INTEGER UNSIGNED NOT NULL DEFAULT 5,
+	restrictTimeStart TIME NULL,
+	restrictTimeEnd TIME NULL,
+	restrictTimeDayOfWeek VARCHAR(12) NULL,
+	restrictTimeDayOfMonth VARCHAR(90) NULL
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+/* Table Items: cronJobs */
+ALTER TABLE cronJobs ADD CONSTRAINT pkcronJobs
+	PRIMARY KEY (module, actionName);
+
+/* Add Indexes for: cronJobs */
+CREATE INDEX cronJobs_jobPid_lastRun_Idx ON cronJobs (jobPid, lastRun);
+
 /******************** Add Table: directories ************************/
 
 /* Build Table Structure */
@@ -35,7 +58,7 @@ CREATE TABLE directories
 	defaultChild INTEGER UNSIGNED
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
-/* Add Indexes for: sites */
+/* Add Indexes for: directories */
 CREATE INDEX directories_id_defaultChild_Idx ON directories (id, defaultChild);
 
 /******************** Add Table: errorLog ************************/
@@ -53,7 +76,7 @@ CREATE TABLE errorLog
 	accessTime DATETIME NOT NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
-/* Add Indexes for: sites */
+/* Add Indexes for: errorLog */
 CREATE INDEX errorLog_errorType_Idx ON errorLog (errorType);
 CREATE INDEX errorLog_severity_Idx ON errorLog (severity);
 CREATE INDEX errorLog_url_Idx ON errorLog (url(65));
@@ -334,6 +357,10 @@ ALTER TABLE aliases ADD CONSTRAINT fk_aliases_locations_result
 /************ Foreign Key: fk_aliases_locations_target ***************/
 ALTER TABLE aliases ADD CONSTRAINT fk_aliases_locations_target
 	FOREIGN KEY (aliasLocation) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/************ Foreign Key: fk_cronJobs_modules ***************/
+ALTER TABLE cronJobs ADD CONSTRAINT fk_cronJobs_modules
+	FOREIGN KEY (module) REFERENCES modules (mod_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_directories_locations ***************/
 ALTER TABLE directories ADD CONSTRAINT fk_directories_locations

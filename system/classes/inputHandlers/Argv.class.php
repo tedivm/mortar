@@ -27,7 +27,8 @@ class Argv
 									'l' => 'locationId',
 									'a' => 'action',
 									'u' => 'username',
-									'p' => 'password');
+									'p' => 'password',
+									'r' => 'cron');
 
 	/**
 	 * This function processes command line inputs and returns those inputs as an array. As part of the processing it
