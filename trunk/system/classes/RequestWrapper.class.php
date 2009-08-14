@@ -38,7 +38,7 @@ class RequestWrapper
 	 *
 	 * @var array
 	 */
-	protected $internalIoHandlers = array('Http', 'Rest', 'Cli', 'Install');
+	protected $internalIoHandlers = array('Http', 'Rest', 'Cli', 'Install', 'Cron');
 
 	/**
 	 * Current running location
@@ -67,6 +67,7 @@ class RequestWrapper
 				}
 			// If the io handler says it can handle another request, loop around and go for it
 			}while($this->ioHandler->nextRequest());
+
 		}catch(Exception $e){
 			// If we're here we bailed out of the program loop due to an error with the error handler
 			echo 'There was an error, and when attempting to deal with that error there was another error.';
@@ -119,7 +120,8 @@ class RequestWrapper
 					$query['action'] = 'Default';
 
 				if(!($actionInfo = $moduleInfo->getActions($query['action'])))
-					throw new RequestError('Unable to load action for module ' . $query['module']);
+					throw new RequestError('Unable to load action ' . $query['action']
+													. ' for module ' . $query['module']);
 
 
 				$argument = '';
@@ -338,11 +340,9 @@ class RequestWrapper
 		{
 			$query = Query::getQuery();
 			$handlerName = isset($query['ioType']) ? $query['ioType'] : self::$ioHandlerType;
-
-
-//			var_dump($query);
+			self::$ioHandlerType = $handlerName;
 		}
-//var_dump($handlerName);
+
 		$className = (in_array($handlerName, $this->internalIoHandlers)) ? 'IOProcessor' . $handlerName : $handlerName;
 
 		if(!class_exists($className))
