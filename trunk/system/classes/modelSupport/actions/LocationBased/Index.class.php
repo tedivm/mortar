@@ -132,12 +132,15 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		$this->makeModelActionMenu($menu, $this->model, 'Admin');
 
 		$theme = $page->getTheme();
-	
-		foreach($this->childModels as $model) {
-			$rowPolarity = $rowPolarity ? false : true;
-			$modelData .= $this->makeModelListEntry($model, $theme, ($rowPolarity ? "odd" : "even"));
+
+		$rowPolarity = false;
+		$modelData = '';
+		foreach($this->childModels as $model)
+		{
+			$rowPolarity = (isset($rowPolarity) && 'even') ? 'odd' : 'even';
+			$modelData .= $this->makeModelListEntry($model, $theme, $rowPolarity);
 		}
-			
+
 		$modelListTable = new DisplayMaker();
 		$modelListTable->setDisplayTemplate($theme->getModelTemplate("ModelListTable.html", $model->getType()));
 
@@ -166,7 +169,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 			$baseUrl->locationId = $location->getId();
 			$modelListLine->addContent('name', $location->getName());
 			$modelListLine->addContent('creation', date($this->indexDateFormat, $location->getCreationDate()));
-		} else 
+		} else
 		{
 			$baseUrl->type = $model->getType();
 			$baseUrl->id = $model->getId();
@@ -177,7 +180,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 				$modelListLine->addContent('creation', '');
 		}
 		$modelListLine->addContent('evenodd', $evenodd);
-		
+
 		$baseUrl->format = 'Admin';
 
 		$actionTypes = array('Read', 'Edit', 'Delete');
@@ -189,6 +192,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 
 		$user = ActiveUser::getUser();
 		$userId = $user->getId();
+		$actionList = '';
 		foreach($actionTypes as $action)
 		{
 			$modelListAction = new DisplayMaker();
@@ -196,15 +200,15 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 			$actionUrl = clone $baseUrl;
 			$actionUrl->action = $action;
 
-			if($actionUrl->checkPermission($userId)) 
+			if($actionUrl->checkPermission($userId))
 			{
 				$modelListAction->addContent('action', $actionUrl->getLink(ucfirst($action)));
 				$actionList .= $modelListAction->makeDisplay();
 			}
-			
+
 		}
 		$modelListLine->addContent('actions', $actionList);
-		
+
 		return $modelListLine->makeDisplay();
 	}
 
