@@ -63,7 +63,7 @@ class InstallerInstaller // thats the most pathetic name ever
 					if(!$this->dbDebug)
 						$db->runFile($pathToSQL);
 				case 2: // database files
-		//			unlink($config['path']['base'] . 'data/configuration/databases.php');
+					unlink($config['path']['base'] . 'data/configuration/databases.php');
 				case 1: // configuration files
 					unlink($config['path']['base'] . 'data/configuration/configuration.php');
 				default:
