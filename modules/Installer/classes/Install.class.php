@@ -63,7 +63,7 @@ class InstallerInstaller // thats the most pathetic name ever
 					if(!$this->dbDebug)
 						$db->runFile($pathToSQL);
 				case 2: // database files
-					unlink($config['path']['base'] . 'data/configuration/databases.php');
+		//			unlink($config['path']['base'] . 'data/configuration/databases.php');
 				case 1: // configuration files
 					unlink($config['path']['base'] . 'data/configuration/configuration.php');
 				default:
@@ -192,11 +192,16 @@ class InstallerInstaller // thats the most pathetic name ever
 				throw new Exception('Unable to select database with main user', 2);
 			}
 
-			if((isset($input['DBROhost']) && isset($input['DBROusername']) && isset($input['DBROpassword'])
-							&& isset($input['DBROname'])))
+			if(isset($input['DBROhost'], $input['DBROusername'], $input['DBROpassword'], $input['DBROname'])
+				&& (strlen($input['DBROname']) > 0
+					|| strlen($input['DBROusername']) > 0
+					|| strlen($input['DBROpassword']) > 0))
 			{
-				if($ROconnection = mysqli_connect($input['DBROhost'], $input['DBROusername'],
-									 $input['DBROpassword'], $input['DBROname']))
+
+				$ROconnection = mysqli_connect($input['DBROhost'], $input['DBROusername'],
+									 $input['DBROpassword'], $input['DBROname']);
+
+				if(!mysqli_connect_error())
 				{
 					$dbIniFile->set('default_read_only', 'username', $input['DBROusername']);
 					$dbIniFile->set('default_read_only', 'password', $input['DBROpassword']);
