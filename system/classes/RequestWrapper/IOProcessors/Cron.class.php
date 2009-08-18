@@ -28,7 +28,7 @@ class IOProcessorCron extends IOProcessorCli
 		if(!is_numeric(self::$pid))
 			throw new CoreError('Unable to retrieve process id for cron handler.');
 
-		ActiveUser::changeUserByName('System');
+		ActiveUser::changeUserByName('Cron');
 		$pidPath = $this->getPidPath();
 		$pidDir = dirname($pidPath);
 

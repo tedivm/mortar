@@ -285,12 +285,17 @@ class InstallerInstaller // thats the most pathetic name ever
 			$userAdmin->save();
 
 			$userGuest = new MortarModelUser();
-			$userGuest['name'] = 'guest';
+			$userGuest['name'] = 'Guest';
 			$userGuest->save();
 
 			$userSystem = new MortarModelUser();
-			$userSystem['name'] = 'system';
+			$userSystem['name'] = 'System';
 			$userSystem->save();
+
+
+			$userCron = new MortarModelUser();
+			$userCron['name'] = 'Cron';
+			$userCron->save();
 
 			// CREATE MEMBERGROUPS
 
@@ -335,7 +340,7 @@ class InstallerInstaller // thats the most pathetic name ever
 			// Root Users (these guys can do anything)
 			$memgroupSuperUser->addUser($userAdmin);
 			$memgroupSuperUser->addUser($userSystem);
-
+			$memgroupSuperUser->addUser($userCron);
 
 
 			// CREATE ROOT LOCATION
