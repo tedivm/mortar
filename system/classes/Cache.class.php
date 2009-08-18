@@ -15,6 +15,7 @@
  *
  * @package System
  * @subpackage Caching
+ * @todo Document the "Purge" functions
  */
 class Cache
 {
@@ -90,7 +91,7 @@ class Cache
 	 *
 	 * @var array
 	 */
-	protected static $handlers = array('FileSystem' => 'cacheHandlerFilesystem',
+	protected static $handlers = array('FileSystem' => 'cacheHandlerFileSystem',
 										'SQLiteMF' => 'cacheHandlerSqlite',
 										'SQLite' => 'cacheHandlerSqliteOneFile');
 	/**
@@ -215,19 +216,47 @@ class Cache
 
 		self::$memStore = array();
 
-		if(self::$handlerClass == '')
+		if($handlerClass = self::getHandlerClass())
+		{
+			$args = func_get_args();
+			return staticFunctionHack($handlerClass, 'clear', $args);
+		}
+	}
+
+	/**
+	 * The purge function removes all expired or stale data from the cache system. It may also perform other cleanup
+	 * actions depending on the cache handler used.
+	 *
+	 * @return bool
+	 */
+	static public function purge()
+	{
+		self::$memStore = array();
+
+		if($handlerClass = self::getHandlerClass())
+			return staticFunctionHack($handlerClass, 'purge');
+
+		return false;
+	}
+
+	/**
+	 * This function returns the handler class that is currently active.
+	 *
+	 * @return string
+	 */
+	static public function getHandlerClass()
+	{
+		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable)
+			return false;
+
+		if(!isset(self::$handlerClass) || self::$handlerClass == '')
 		{
 			$handlers = self::getHandlers();
 			$config = Config::getInstance();
 			self::$handlerClass = (isset($handlers[$config['cacheType']])) ? $handlers[$config['cacheType']]
 																			: $handlers['FileSystem'];
 		}
-
-		if(self::$handlerClass != '')
-		{
-			$args = func_get_args();
-			return staticFunctionHack(self::$handlerClass, 'clear', $args);
-		}
+		return self::$handlerClass;
 	}
 
 	/**
@@ -452,6 +481,7 @@ interface cacheHandler
 	 */
 	static function clear($key = null);
 
+	static function purge();
 }
 
 class CacheError extends CoreError {}

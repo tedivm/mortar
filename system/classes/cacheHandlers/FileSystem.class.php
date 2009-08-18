@@ -5,7 +5,7 @@
  * @package System
  * @subpackage Caching
  */
-class cacheHandlerFilesystem implements cacheHandler
+class cacheHandlerFileSystem implements cacheHandler
 {
 	/**
 	 * This is the path to the file which will be used to store the cached item. It is based off of the key.
@@ -69,8 +69,24 @@ class cacheHandlerFilesystem implements cacheHandler
 	{
 		if(file_exists($this->path))
 		{
-			$file = fopen($this->path, 'r');
-			$filesize = filesize($this->path);
+			if($data = self::getDataFromFile($this->path))
+			{
+				return $data;
+			}else{
+				$this->cache_enabled = false;
+				// the only way to get here is if there is a write lock already in place
+				// so we disable caching to make sure this one doesn't attempt to write to the file
+			}
+		}
+		return false;
+	}
+
+	static function getDataFromFile($path)
+	{
+		if(file_exists($path))
+		{
+			$file = fopen($path, 'r');
+			$filesize = filesize($path);
 			if(flock($file, LOCK_SH | LOCK_NB))
 			{
 				$data = fread($file, $filesize);
@@ -85,15 +101,12 @@ class cacheHandlerFilesystem implements cacheHandler
 				return $store;
 
 			}else{
-				$this->cache_enabled = false;
-				// the only way to get here is if there is a write lock already in place
-				// so we disable caching to make sure this one doesn't attempt to write to the file
+				fclose($file);
 			}
-
 		}
 		return false;
-
 	}
+
 
 	/**
 	 * This function takes the data and stores it to the path specified. If the directory leading up to the path does
@@ -231,6 +244,46 @@ class cacheHandlerFilesystem implements cacheHandler
 		}else{
 			return false;
 		}
+
+		return true;
+	}
+
+	/**
+	 * Cleans out the cache directory by removing all stale cache files and empty directories.
+	 *
+	 * @return bool
+	 */
+	static function purge()
+	{
+		$config = Config::getInstance();
+
+		$filePath = $config['path']['temp'] . 'cache/';
+
+		$directoryIt = new RecursiveDirectoryIterator($filePath);
+
+		foreach(new RecursiveIteratorIterator($directoryIt, RecursiveIteratorIterator::CHILD_FIRST) as $file)
+		{
+			if($file->isDir())
+			{
+				$dirFiles = scandir($file->getPathname());
+				if($dirFiles && count($dirFiles) == 2)
+				{
+					rmdir($file->getPathname());
+				}
+
+				continue;
+			}
+
+
+			$path = $file->getPathname();
+
+			$data = self::getDataFromFile($path);
+			if($data['expiration'] > START_TIME)
+				continue;
+
+			unlink($path);
+		}
+
 
 		return true;
 	}
