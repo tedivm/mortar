@@ -136,7 +136,7 @@ class cacheHandlerSqlite implements cacheHandler
 			$name = array_shift($key);
 
 			deltree($config['path']['temp'] . 'cache/' . $name . '.sqlite');
-			self::$sqlObject[$name] = false;
+			self::$sqlObject[$name] = null;
 			SqliteConnection::clear();
 		}else{
 			$key = self::makeSqlKey($key) . '%';
@@ -146,11 +146,35 @@ class cacheHandlerSqlite implements cacheHandler
 	}
 
 	/**
+	 * Removes all stale data from each of the sqlite databases that make up the cache.
+	 *
+	 * @return bool
+	 */
+	static function purge()
+	{
+		$config = Config::getInstance();
+		$filePath = $config['path']['temp'] . 'cache/';
+
+		$databases = glob($filePath . '*.sqlite');
+		foreach($databases as $database)
+		{
+			$tmpArray = explode('/', $filename);
+			$tmpArray = array_pop($tmpArray);
+			$tmpArray = explode('.', $tmpArray);
+			$cacheName = array_shift($tmpArray);
+
+			$handler = self::getSqliteHandler($cacheName);
+			$handler->query('DELETE FROM cacheStore WHERE expires < ' . microtime(true));
+		}
+		return true;
+	}
+
+	/**
 	 * This function is used to retrieve an SQLiteDatabase object. If the requested section does not exist, it creates
 	 * and and sets up the structure.
 	 *
 	 * @param string
-	 * @return bool
+	 * @return SQLiteDatabase
 	 */
 	static function getSqliteHandler($name)
 	{

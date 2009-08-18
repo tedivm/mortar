@@ -52,6 +52,18 @@ class cacheHandlerSqliteOneFile extends cacheHandlerSqlite
 	}
 
 	/**
+	 * Removes all stale columns from the sqlite database.
+	 *
+	 * @return unknown
+	 */
+	static function purge()
+	{
+		$handler = self::getSqliteHandler('cache');
+		$handler->query('DELETE FROM cacheStore WHERE expires < ' . microtime(true));
+		return true;
+	}
+
+	/**
 	 * This function is used to retrieve an SQLiteDatabase object. If the requested section does not exist, it creates
 	 * and and sets up the structure.
 	 *
