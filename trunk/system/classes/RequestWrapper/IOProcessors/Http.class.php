@@ -329,7 +329,7 @@ class SessionObserver
 	 * @access protected
 	 * @var int
 	 */
-	protected $obsoleteTime = 15;
+	protected $obsoleteTime = 2;
 
 	/**
 	 * This function gets called whenever the activeuser gets changed
@@ -358,33 +358,24 @@ class SessionObserver
 	 */
 	protected function regenerateSession()
 	{
-		// This forces the system to reload certain variables when the user changes.
-		$reload = (!isset($_SESSION['user_id']) ||
-						$_SESSION['user_id'] != $this->userId ||
-						($_SESSION['idExpiration'] < time()));
-
 		$_SESSION['user_id'] = $this->userId;
 		// This token is used by forms to prevent cross site forgery attempts
 		if(!isset($_SESSION['nonce']))
-		{
 			$_SESSION['nonce'] = md5($this->userId . START_TIME . rand());
-		}
-		if(!isset($_SESSION['IPaddress']) || $_SESSION['IPaddress'] != $_SERVER['REMOTE_ADDR'])
-			$_SESSION['IPaddress'] = $_SERVER['REMOTE_ADDR'];
 
-		if(!isset($_SESSION['userAgent']) || $_SESSION['userAgent'] != $_SERVER['HTTP_USER_AGENT'])
-			$_SESSION['userAgent'] = $_SERVER['HTTP_USER_AGENT'];
+		$_SESSION['IPaddress'] = $_SERVER['REMOTE_ADDR'];
+		$_SESSION['userAgent'] = $_SERVER['HTTP_USER_AGENT'];
 
 		// there's a one percent of the session id changing to help prevent session theft
 
 		if(isset($_SESSION['OBSOLETE']))
 		{
-			if(!isset($_SESSION['idExpiration']) || $_SESSION['idExpiration'] < time())
+			if(!isset($_SESSION['EXPIRES']) || $_SESSION['EXPIRES'] < time())
 			{
 				$_SESSION = array();
 				session_destroy();
 			}
-		}elseif((!isset($_SESSION['idExpiration']) || $_SESSION['idExpiration'] < time()) || mt_rand(1, 100) == 1){
+		}elseif(!isset($_SESSION['idExpiration']) || $_SESSION['idExpiration'] < time() || mt_rand(1, 100) == 1){
 
 			// Set current session to expire in x seconds
 			$_SESSION['OBSOLETE'] = true;
