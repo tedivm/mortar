@@ -1,0 +1,132 @@
+/* General styles */
+
+html, body {
+width: 100%;
+height: 100%;
+position: relative;
+}
+
+body {
+   margin:0;
+   padding:0;
+   border:0;			/* This removes the border around the viewport in old versions of IE */
+   background:#fff;
+   min-width:600px;    /* Minimum width of layout - remove line if not required */
+							/* The min-width property does not work in old versions of Internet Explorer */
+   font-size:90%;
+   font-family: "Gill Sans MT", "Gill Sans", Gill, sans-serif;
+ }
+ 
+/* Header styles */
+
+#header {
+   width:100%;
+   display: block;
+   height: 180px;
+   position: relative;
+}
+ 
+#header h1 {
+   position: absolute;
+   top: -70px;
+   font-size: 180pt;
+   color: #E8E8E9;
+   margin: 0;
+   padding: 0;
+   z-index: -1;
+} 
+
+#header h2 {
+float: left;
+}
+ 
+#header ul {
+   clear: both;
+   float: left;
+   width:100%;
+   list-style:none;
+   margin: 50px 0 0 0;
+   padding: 0;
+   border-style: solid;
+   border-width: 3px 0 3px 0;
+   border-color: #636466;
+   background: #fff;
+ }
+ 
+#header ul li {
+   height: 100%;
+   display: table-cell;
+   text-align: center;
+   font-size: 12pt;
+   margin:0;
+   border-style: solid;
+   border-width: 0 3px 0 0;
+   border-color: #636466;
+   padding: 5px 25px;
+   background: #fff;
+ }
+
+#header ul li:hover {
+   background: #BE2343;
+}
+	
+#header ul li a {
+   color: #636466;
+   text-decoration: none;
+}
+
+#header ul li:hover a {
+   color: #fff;
+   text-decoration: none;
+}
+ 
+#header ul li a.active,
+#header ul li a.active:hover {
+   color:#fff;
+   background:#000;
+   font-weight:bold;
+ }
+ 
+#header ul li a span {
+   display:block;
+ }
+ 
+/* columns */
+
+.container  {
+position: relative;
+min-height: 100%;
+}
+
+.column-box {
+border: 2px solid #636466;
+margin: 20px;
+background: #fff;
+}
+
+.column-left {
+float: left;
+width: 160px;
+height: 500px;
+}
+ 
+.column-right {
+float: left;
+position: absolute;
+right: 20px;
+left: 200px;
+}
+ 
+/* Footer styles */
+#footer {
+   position: absolute;
+   bottom: 0;
+   clear: both;
+   width:100%;
+   border-top: 2px solid #636466;
+ }
+ 
+#footer p {
+   padding:10px;
+   margin:0;
+ }
