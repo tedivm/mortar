@@ -105,7 +105,8 @@ class ActiveUser
 	static public function isLoggedIn()
 	{
 		$user = self::getUser();
-		return ($user['name'] != 'guest');
+		$name = strtolower($user['name']);
+		return $name != 'guest';
 	}
 
 	/**
