@@ -23,7 +23,7 @@ class ActiveUser
 	static function getUser()
 	{
 		if(!isset(self::$user))
-			self::changeUserByName('guest');
+			self::changeUserByName('Guest');
 
 		return self::$user;
 	}
@@ -41,7 +41,7 @@ class ActiveUser
 
 		if($user['allowlogin'] != 1 && $user['allowlogin'] !== true)
 		{
-			self::changeUserByName('guest');
+			self::changeUserByName('Guest');
 			return false;
 		}
 
@@ -61,7 +61,7 @@ class ActiveUser
 			self::changeUserById($userId);
 			return true;
 		}else{
-			self::changeUserByName('guest');
+			self::changeUserByName('Guest');
 			return false;
 		}
 	}
@@ -74,7 +74,7 @@ class ActiveUser
 			self::notify();
 			return true;
 		}catch(Exception $e){
-			self::changeUserByName('guest');
+			self::changeUserByName('Guest');
 			return false;
 		}
 	}
