@@ -10,7 +10,7 @@ class MortarActionLogOut extends ActionBase
 
 	public function logic()
 	{
-		ActiveUser::changeUserByName('guest');
+		ActiveUser::changeUserByName('Guest');
 		$this->ioHandler->setStatusCode(200);
 	}
 
