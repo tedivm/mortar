@@ -30,10 +30,10 @@ class FormValidationMaximumLength extends FormValidationAbstract
 	 */
 	public function validate()
 	{
-		if($this->value <= $this->argument)
+		if(strlen($this->value) <= $this->argument)
 			return true;
 
-		$this->addError('value should be at most ' . $this->argument . 'charactors.');
+		$this->addError('value should be at most ' . $this->argument . ' charactors.');
 		return false;
 	}
 }

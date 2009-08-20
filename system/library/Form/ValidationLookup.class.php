@@ -41,7 +41,7 @@ class FormValidationLookup
 									'maxlength' => 'FormValidationMaximumLength',
 									'min' => 'FormValidationMinimumValue',
 									'max' => 'FormValidationMaximumValue',
-									'min' => 'FormValidationMinimumWords',
+									'minWords' => 'FormValidationMinimumWords',
 									'maxWords' => 'FormValidationMaximumWords',
 									'email' => 'FormValidationEmail',
 									'equalto' => 'FormValidationEqualTo',

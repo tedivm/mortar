@@ -23,10 +23,10 @@ class FormValidationMinimumLength extends FormValidationAbstract
 	 */
 	public function validate()
 	{
-		if($this->value >= $this->argument)
+		if(strlen($this->value) >= $this->argument)
 			return true;
 
-		$this->addError('value should be at least ' . $this->argument . 'charactors.');
+		$this->addError('value should be at least ' . $this->argument . ' charactors.');
 		return false;
 	}
 }

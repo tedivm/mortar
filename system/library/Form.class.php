@@ -122,6 +122,13 @@ class Form
 	protected $discardInput = array('password', 'hidden');
 
 	/**
+	 * Contains an associative array with the errors from each input that has undergone validation.
+	 *
+	 * @var array
+	 */
+	protected $errors;
+
+	/**
 	 * This takes in the name of the form and runs the 'define' method, if it exists (this gives a way for subclasses
 	 * to easily set up form inputs that exist by default).
 	 *
@@ -344,11 +351,10 @@ class Form
 			foreach($this->inputs as $section => $inputs)
 				foreach($inputs as $input)
 			{
-				$validationResults = $input->validate();
 				if($input->validate(isset($inputHandler[$input->name]) ? $inputHandler[$input->name] : null) !== true)
 				{
 					$success = false;
-					//$error[$input->name] = $input->getErrors;
+					$error[$input->name] = $input->getErrors;
 				}
 
 				// Is the input allows it, place the user value in as the default this way if the form isn't
@@ -360,7 +366,13 @@ class Form
 							continue;
 
 					case 'password':
-						$processedInput[$input->name] = $input->filter($inputHandler[$input->name]);
+
+						if(isset($inputHandler[$input->name]) && strlen($inputHandler[$input->name]) > 0)
+						{
+							$processedInput[$input->name] = $input->filter($inputHandler[$input->name]);
+						}elseif($value = $input->property('value')){
+							$processedInput[$input->name] = $value;
+						}
 						continue;
 
 					case 'checkbox':
@@ -417,6 +429,9 @@ class Form
 				} // switch ($input->type)
 
 			} // foreach($inputs as $input) / foreach($this->inputs as $section => $inputs)
+
+			if(isset($error))
+				$this->errors = $error;
 
 			// we place this here on the off chance someone is submitting a stale form, so things get filled again
 			if(self::$xsfrProtection && $inputHandler['nonce'] != $this->getNonce())
@@ -554,4 +569,5 @@ class Form
 class FormWarning extends CoreWarning {}
 class FormNotice extends CoreNotice {}
 class FormError extends CoreError {}
+class FormValidation extends FormNotice {}
 ?>
