@@ -85,7 +85,7 @@ class FormInput
 	 *
 	 * @var array
 	 */
-	protected $validationMessages = array();
+	public $validationMessages = array();
 
 	/**
 	 * This is an array of Filters that the input is run through before being returned.
@@ -291,7 +291,7 @@ class FormInput
 			$validationRule = new $classname();
 			$validationRule->attachInput($this, $value, $argument);
 
-			if(!$validationRule->validate())
+			if($validationRule->validate() !== true)
 			{
 				$success = false;
 
@@ -302,7 +302,12 @@ class FormInput
 		} // foreach($this->validationRules as $rule => $argument)
 
 		if(count($errors) > 0)
+		{
 			$this->validationMessages = $errors;
+			$name = $this->getName();
+			foreach($errors as $error)
+				new FormValidation($name . $error);
+		}
 
 		return $success;
 	}

@@ -181,17 +181,23 @@ class FormToHtml
 		if($tagType == 'input' && $input->type !== 'input')
 			$inputHtml->property('type', $input->type);
 
+		$properties = $input->properties;
+
 		// Add the tag specific data to the html. This includes setting the name and value.
 		switch ($input->type)
 		{
-			case'html':
+			case 'password':
+				unset($properties['value']);
+				break;
+
+			case 'html':
 			case 'textarea':
-				$inputHtml->wrapAround($input->property('value'));
-				unset($input->properties['value']);
+				$inputHtml->wrapAround($properties['value']);
+				unset($properties['value']);
 				break;
 
 			case 'select':
-				$value = $input->property('value');
+				$value = $properties['value'];
 				foreach($input->options as $option)
 				{
 					$properties = array();
@@ -223,7 +229,7 @@ class FormToHtml
 		}//switch ($input->type)
 
 		// Set all of the input properties (since the HtmlObject class can take an entire array).
-		$inputHtml->property($input->properties);
+		$inputHtml->property($properties);
 		$inputHtml = $this->setInputHtmlMetaData($input, $inputHtml);
 		return $inputHtml;
 	}
