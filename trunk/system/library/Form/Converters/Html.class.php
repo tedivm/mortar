@@ -192,12 +192,17 @@ class FormToHtml
 
 			case 'html':
 			case 'textarea':
-				$inputHtml->wrapAround($properties['value']);
-				unset($properties['value']);
+				if((isset($properties['value'])))
+				{
+					$inputHtml->wrapAround($properties['value']);
+					unset($properties['value']);
+				}
 				break;
 
 			case 'select':
-				$value = $properties['value'];
+
+				$value = (isset($properties['value'])) ? $properties['value'] : null;
+
 				foreach($input->options as $option)
 				{
 					$properties = array();
