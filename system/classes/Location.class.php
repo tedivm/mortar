@@ -331,7 +331,7 @@ class Location
 	public function getOwner()
 	{
 		if(isset($this->owner))
-			ModelRegistry::loadModel('User', $this->owner);
+			return ModelRegistry::loadModel('User', $this->owner);
 
 		return false;
 	}
