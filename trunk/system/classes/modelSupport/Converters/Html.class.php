@@ -72,17 +72,38 @@ class ModelToHtml
 
 		$modelDisplay->addContent('permalink', (string) $url);
 
-		$userId = $location->getOwner();
+		$locOwner = $location->getOwner();
+		$modelDisplay->addContent('model_owner', $locOwner['name']);
 
-		if(is_numeric($userId))
+		$baseUrl = new Url();
+		$baseUrl->locationId = $location->getId();
+		$baseUrl->format = "Admin";
+		
+		$actionTypes = array('Read', 'Edit', 'Delete');
+		if(isset($location) && $location->hasChildren())
+			array_unshift($actionTypes, 'Index');
+			
+		$user = ActiveUser::getUser();
+		$userId = $user->getId();
+		$actionList = '';	
+		foreach($actionTypes as $action)
 		{
-			$user = ModelRegistry::loadModel('User', $userId);
-			$modelDisplay->addContent('model_owner', $user['name']);
-		}
+			$modelListAction = new DisplayMaker();
+			$modelListAction->setDisplayTemplate("<li>{# action #}</li>");
+			$actionUrl = clone $baseUrl;
+			$actionUrl->action = $action;
 
+			if($actionUrl->checkPermission($userId))
+			{
+				$modelListAction->addContent('action', $actionUrl->getLink(ucfirst($action)));
+				$actionList .= $modelListAction->makeDisplay();
+			}
+		}
+		
 		$modelDisplay->addDate('model_creationTime', $location->getCreationDate());
 		$modelDisplay->addDate('model_lastModified', $location->getLastModified());
 		$modelDisplay->addContent('model_name', $location->getName());
+		$modelDisplay->addContent('model_actions', $actionList);
 
 		$modelOutput = $modelDisplay->makeDisplay(true);
 

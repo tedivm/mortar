@@ -133,13 +133,9 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 
 		$theme = $page->getTheme();
 
-		$rowPolarity = false;
 		$modelData = '';
 		foreach($this->childModels as $model)
-		{
-			$rowPolarity = (isset($rowPolarity) && 'even') ? 'odd' : 'even';
-			$modelData .= $this->makeModelListEntry($model, $theme, $rowPolarity);
-		}
+			$modelData .= $this->modelToHtml($page, $model, "DisplayAdmin.html");
 
 		$modelListTable = new DisplayMaker();
 		$modelListTable->setDisplayTemplate($theme->getModelTemplate("ModelListTable.html", $model->getType()));
@@ -151,66 +147,6 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		return $modelListTable->makeDisplay();
 	}
 
-	/**
-	 * Generates a list entry for a model for inclusion in an admin page listing.
-	 *
-	 * @param Model $model
-	 * @param Theme $theme
-	 * @param String $evenodd
-	 */
-	public function makeModelListEntry($model, $theme, $evenodd)
-	{
-		$modelListLine = new DisplayMaker();
-		$modelListLine->setDisplayTemplate($theme->getModelTemplate("ModelListLine.html", $model->getType()));
-		$baseUrl = new Url();
-		if(method_exists($model, 'getLocation'))
-		{
-			$location = $model->getLocation();
-			$baseUrl->locationId = $location->getId();
-			$modelListLine->addContent('name', $location->getName());
-			$modelListLine->addContent('creation', date($this->indexDateFormat, $location->getCreationDate()));
-		} else
-		{
-			$baseUrl->type = $model->getType();
-			$baseUrl->id = $model->getId();
-
-			$name = isset($model['name']) ? $model['name'] : isset($model['title']) ? $model['title'] : false;
-			if($name)
-				$modelListLine->addContent('name', $name);
-				$modelListLine->addContent('creation', '');
-		}
-		$modelListLine->addContent('evenodd', $evenodd);
-
-		$baseUrl->format = 'Admin';
-
-		$actionTypes = array('Read', 'Edit', 'Delete');
-
-		$location = $model->getLocation();
-		if(isset($location) && $location->hasChildren())
-			array_unshift($actionTypes, 'Index');
-
-
-		$user = ActiveUser::getUser();
-		$userId = $user->getId();
-		$actionList = '';
-		foreach($actionTypes as $action)
-		{
-			$modelListAction = new DisplayMaker();
-			$modelListAction->setDisplayTemplate($theme->getModelTemplate("ModelListAction.html", $model->getType()));
-			$actionUrl = clone $baseUrl;
-			$actionUrl->action = $action;
-
-			if($actionUrl->checkPermission($userId))
-			{
-				$modelListAction->addContent('action', $actionUrl->getLink(ucfirst($action)));
-				$actionList .= $modelListAction->makeDisplay();
-			}
-
-		}
-		$modelListLine->addContent('actions', $actionList);
-
-		return $modelListLine->makeDisplay();
-	}
 
 	/**
 	 * This function takes the model's data and puts it into a template, which gets injected into the active page. It
