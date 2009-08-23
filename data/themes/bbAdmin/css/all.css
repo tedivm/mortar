@@ -74,7 +74,7 @@ height:100%;
 }
 
 #BB_body {
-padding-top: 20px;
+padding: 20px 0;
 }
 
 .sidebar {
@@ -129,6 +129,7 @@ background: #fff;
 margin: 0 7px;
 margin-left: 160px;
 margin-right: 160px;
+padding: 10px;
 }
 
 #BB_main_content {

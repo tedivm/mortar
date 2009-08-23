@@ -15,7 +15,16 @@ body {
 							/* The min-width property does not work in old versions of Internet Explorer */
    font-size:90%;
    font-family: "Gill Sans MT", "Gill Sans", Gill, sans-serif;
- }
+}
+ 
+a:link, a:visited {
+text-decoration: none;
+color: #671324;
+}
+
+a:hover {
+color: #BE2343;
+}
  
 /* Header styles */
 
@@ -100,21 +109,24 @@ min-height: 100%;
 
 .column-box {
 border: 2px solid #636466;
-margin: 20px;
 background: #fff;
 }
 
 .column-left {
 float: left;
-width: 160px;
+width: 140px;
+margin: 0 7px;
 height: 500px;
 }
  
 .column-right {
-float: left;
-position: absolute;
-right: 20px;
-left: 200px;
+margin: 0 160px;
+min-width: 600px;
+padding: 10px;
+}
+
+.column-container {
+padding: 20px 0; 
 }
  
 /* content styles */
@@ -144,6 +156,7 @@ display: inline;
    clear: both;
    width:100%;
    border-top: 2px solid #636466;
+   text-align: center;
  }
  
 #footer p {
