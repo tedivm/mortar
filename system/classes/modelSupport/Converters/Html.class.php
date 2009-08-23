@@ -21,7 +21,7 @@ class ModelToHtml
 										array('name' => 'title', 'permission' => 'Read'));
 	protected $template;
 
-	protected $convertedProperties;
+	public $convertedProperties;
 
 	/**
 	 * The constructor sets the protected vars and prepares the relevant information for Html display which can be output in a template or accessed directly
@@ -61,8 +61,8 @@ class ModelToHtml
 		$url = new Url();
 		$url->location = $location->getId();
 
-		$query = Query::getQuery();
-		$url->format = $query['format'];
+		/*$query = Query::getQuery();
+		$url->format = $query['format']; */
 
 		$this->convertedProperties['permalink'] = (string) $url;
 
@@ -100,20 +100,17 @@ class ModelToHtml
 		$this->convertedProperties['model_actions'] = $actionList;
 	}
 
+	/**
+	 * Provides a template for model data to be inserted into when getOutput() is called
+	 *
+	 * @param String $template
+	 */
+
 	public function useTemplate($template)
 	{
 		$this->template = $template;
 	}
 
-        public function __toArray()
-        {
-                $array = array();
-
-                if(isset($this->convertedProperties))
-                        $array['properties'] = $this->convertedProperties;
-
-                return $array;
-        }
 
 	/**
 	 * This function outputs the loaded model into an HTML string by inserting its values into the used template
@@ -132,7 +129,6 @@ class ModelToHtml
 
 		return $modelOutput;
 	}
-
 }
 
 ?>

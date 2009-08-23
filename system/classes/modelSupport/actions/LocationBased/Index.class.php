@@ -130,21 +130,34 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 	{
 		$menu = $page->getMenu('actions', 'modelNav');
 		$this->makeModelActionMenu($menu, $this->model, 'Admin');
-
+		
 		$theme = $page->getTheme();
+		
+		$table = new Table($this->model->getLocation()->getName() . '_listing');
+		$table->addClass('model-listing');
+		$table->addClass('index-listing');
+		$table->addClass($this->model->getLocation()->getName() . '-listing');
+		$table->enableIndex();
+		
+		foreach($this->childModels as $model) 
+		{
+			$modelData = $model->getModelAs('Html');
+			$table->newRow();
+			$table->addField('model_name', 
+					 isset($modelData->convertedProperties['model_name']) ? $modelData->convertedProperties['model_name'] : "");
+			$table->addField('model_title', 
+					 isset($modelData->convertedProperties['model_title']) ? $modelData->convertedProperties['model_title'] : "");
+			$table->addField('model_owner', 
+					 isset($modelData->convertedProperties['model_owner']) ? $modelData->convertedProperties['model_owner'] : "");
+			$table->addField('model_creationTime', 
+					 isset($modelData->convertedProperties['model_creationTime']) ? date($this->indexDateFormat, $modelData->convertedProperties['model_creationTime']) : "");
+			$table->addField('model_lastModified', 
+					 isset($modelData->convertedProperties['model_lastModified']) ? date($this->indexDateFormat, $modelData->convertedProperties['model_lastModified']) : "");
+			$table->addField('model_actions', 
+					 isset($modelData->convertedProperties['model_actions']) ? "<ul>" . $modelData->convertedProperties['model_actions'] . "</ul>" : "");
+		}
 
-		$modelData = '';
-		foreach($this->childModels as $model)
-			$modelData .= $this->modelToHtml($page, $model, "DisplayAdmin.html");
-
-		$modelListTable = new DisplayMaker();
-		$modelListTable->setDisplayTemplate($theme->getModelTemplate("ModelListTable.html", $model->getType()));
-
-		$name = isset($page['title']) ? preg_replace('/\s/', '', $page['title']) : "no-name";
-		$modelListTable->addContent('id', $name . "-admin-table");
-		$modelListTable->addContent('class', 'modellist-table');
-		$modelListTable->addContent('table-contents', $modelData);
-		return $modelListTable->makeDisplay();
+		return $table->makeHtml();
 	}
 
 
