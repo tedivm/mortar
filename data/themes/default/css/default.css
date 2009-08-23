@@ -117,6 +117,26 @@ right: 20px;
 left: 200px;
 }
  
+/* content styles */
+
+
+.meta {
+display: block;
+border: 1px solid #aaa;
+background: #eee;
+margin: 10px;
+}
+
+.meta ul {
+list-style: none;
+padding: 0;
+margin: 0;
+}
+
+.meta ul li {
+display: inline;
+}
+ 
 /* Footer styles */
 #footer {
    position: absolute;

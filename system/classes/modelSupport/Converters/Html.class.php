@@ -75,7 +75,7 @@ class ModelToHtml
 		
 		$actionTypes = array('Read', 'Edit', 'Delete');
 		if(isset($location) && $location->hasChildren())
-			array_unshift($actionTypes, 'Index');
+			array_push($actionTypes, 'Index');
 			
 		$user = ActiveUser::getUser();
 		$userId = $user->getId();
@@ -83,7 +83,7 @@ class ModelToHtml
 		foreach($actionTypes as $action)
 		{
 			$modelListAction = new DisplayMaker();
-			$modelListAction->setDisplayTemplate("<li>{# action #}</li>");
+			$modelListAction->setDisplayTemplate("<li class='action action_$action'>{# action #}</li>");
 			$actionUrl = clone $baseUrl;
 			$actionUrl->action = $action;
 
