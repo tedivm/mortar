@@ -139,6 +139,13 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		$table->addClass($this->model->getLocation()->getName() . '-listing');
 		$table->enableIndex();
 		
+		$table->addColumnLabel('model_name', 'Name');
+		$table->addColumnLabel('model_title', 'Title');
+		$table->addColumnLabel('model_owner', 'Owner');
+		$table->addColumnLabel('model_creationTime', 'Created');
+		$table->addColumnLabel('model_lastModified', 'Last Modified');
+		$table->addColumnLabel('model_actions', 'Actions');
+		
 		foreach($this->childModels as $model) 
 		{
 			$modelData = $model->getModelAs('Html');
@@ -154,7 +161,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 			$table->addField('model_lastModified', 
 					 isset($modelData->convertedProperties['model_lastModified']) ? date($this->indexDateFormat, $modelData->convertedProperties['model_lastModified']) : "");
 			$table->addField('model_actions', 
-					 isset($modelData->convertedProperties['model_actions']) ? "<ul>" . $modelData->convertedProperties['model_actions'] . "</ul>" : "");
+					 isset($modelData->convertedProperties['model_actions']) ? "<ul class='action_list'>" . $modelData->convertedProperties['model_actions'] . "</ul>" : "");
 		}
 
 		return $table->makeHtml();

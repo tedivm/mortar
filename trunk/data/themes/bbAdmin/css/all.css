@@ -122,7 +122,6 @@ display: block;
 float: right;
 }
 
-
 #BB_main {
 border: solid 3px #2D5F8A;
 min-width: 600px;
@@ -156,6 +155,10 @@ border-top: solid 3px #2D5F8A;
 text-align: center;
 position: absolute;
 bottom: 0;
+}
+
+#cc_license_block {
+font-size: 6pt;
 }
 
 .BB_option_name {
@@ -204,4 +207,64 @@ font-weight: bold;
 
 .breadcrumblist a:hover {
 text-decoration: underline;
+}
+
+
+/* LISTING TABLES */
+
+.index-listing {
+width: 90%;
+margin: 5px auto;
+border: 2px solid #2D5F8A;
+border-collapse: collapse;
+}
+
+.index-listing th {
+text-align: left;
+}
+
+.index-listing tbody tr {
+background: #C9DDEE;
+height: 2em;
+}
+
+.index-listing tbody tr.y_even {
+background: #fff;
+}
+
+.index-listing ul {
+list-style: none;
+padding: 0;
+margin: 0;
+}
+
+.index-listing ul li {
+display: inline;
+float: left;
+}
+
+.index-listing .action, .index-listing .action a {
+width: 16px;
+height: 16px;
+text-indent: -9999px;
+}
+
+.action a {
+display: block;
+}
+
+.index-listing .action_Read a {
+background-image: url('/mortar/data/themes/bbAdmin/images/16/022.png');
+}
+
+.index-listing .action_Edit a {
+background-image: url('/mortar/data/themes/bbAdmin/images/16/018.png');
+}
+
+.index-listing .action_Delete a {
+background-image: url('/mortar/data/themes/bbAdmin/images/16/101.png');
+}
+
+.index-listing .action_Index a {
+background-image: url('/mortar/data/themes/bbAdmin/images/16/047.png');
 }
