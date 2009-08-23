@@ -151,7 +151,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 			$modelData = $model->getModelAs('Html');
 			$table->newRow();
 			$table->addField('model_name', 
-					 isset($modelData->convertedProperties['model_name']) ? $modelData->convertedProperties['model_name'] : "");
+					 isset($modelData->convertedProperties['model_name']) ? "<a href='" . $modelData->convertedProperties['permalink'] . "'>" . $modelData->convertedProperties['model_name'] . "</a>" : "");
 			$table->addField('model_title', 
 					 isset($modelData->convertedProperties['model_title']) ? $modelData->convertedProperties['model_title'] : "");
 			$table->addField('model_owner', 
