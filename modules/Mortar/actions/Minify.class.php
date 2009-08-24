@@ -67,7 +67,7 @@ class MortarActionMinify extends ActionBase
 		{
 			Cache::clear('themes', $themeName, 'minification', $type, 'url');
 			$minifiedData['checksum'] = $actualCheckSum;
-			$minifiedData['data'] = $minifier->minifyFiles();
+			$minifiedData['data'] = $this->processTags($minifier->minifyFiles());
 			$cache->storeData($minifiedData);
 		}
 
