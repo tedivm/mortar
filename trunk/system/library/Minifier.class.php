@@ -15,11 +15,8 @@ class Minifier
 
 	public function minifyFiles()
 	{
-		if(!isset($this->scriptString))
-			if(!$this->combineFiles())
-				return false;
-
-		$string = $this->getBaseString();
+		if (!$string = $this->getBaseString())
+			return false;
 		if($this->type == 'js')
 		{
 			$output = JSMin::minify($string);
@@ -34,7 +31,7 @@ class Minifier
 	public function getBaseString()
 	{
 		if(!isset($this->scriptString))
-			if(!$this->combineFiles())
+			if(!$this->processFiles())
 				return false;
 		return $this->scriptString;
 	}
@@ -55,7 +52,7 @@ class Minifier
 	public function getInitialChecksum()
 	{
 		if(!isset($this->scriptString))
-			if(!$this->combineFiles())
+			if(!$this->processFiles())
 				return false;
 
 		if(!isset($this->initialCheckSum))
@@ -64,7 +61,7 @@ class Minifier
 		return $this->initialCheckSum;
 	}
 
-	protected function combineFiles()
+	protected function processFiles()
 	{
 		$bigFile = '';
 		foreach($this->paths as $path)
@@ -84,6 +81,4 @@ class Minifier
 		$this->initialCheckSum = hash('crc32', $bigFile);
 		return true;
 	}
-
-
 }
