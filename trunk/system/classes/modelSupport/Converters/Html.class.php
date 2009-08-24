@@ -21,7 +21,7 @@ class ModelToHtml
 										array('name' => 'title', 'permission' => 'Read'));
 	protected $template;
 
-	public $convertedProperties;
+	protected $convertedProperties;
 
 	/**
 	 * The constructor sets the protected vars and prepares the relevant information for Html display which can be output in a template or accessed directly
@@ -128,6 +128,17 @@ class ModelToHtml
 		$modelOutput = $modelDisplay->makeDisplay(true);
 
 		return $modelOutput;
+	}
+	
+	
+	/**
+	 * This function returns the array of properties.
+	 *
+	 * @return array
+	 */	
+	public function getProperties()
+	{
+		return $this->convertedProperties;
 	}
 }
 
