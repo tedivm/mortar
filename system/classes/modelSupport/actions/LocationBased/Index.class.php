@@ -150,18 +150,19 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		{
 			$modelData = $model->getModelAs('Html');
 			$table->newRow();
+			$modelProperties = $modelData->getProperties();
 			$table->addField('model_name', 
-					 isset($modelData->convertedProperties['model_name']) ? "<a href='" . $modelData->convertedProperties['permalink'] . "'>" . $modelData->convertedProperties['model_name'] . "</a>" : "");
+					 isset($modelProperties['model_name']) ? "<a href='" . $modelProperties['permalink'] . "'>" . $modelProperties['model_name'] . "</a>" : "");
 			$table->addField('model_title', 
-					 isset($modelData->convertedProperties['model_title']) ? $modelData->convertedProperties['model_title'] : "");
+					 isset($modelProperties['model_title']) ? $modelProperties['model_title'] : "");
 			$table->addField('model_owner', 
-					 isset($modelData->convertedProperties['model_owner']) ? $modelData->convertedProperties['model_owner'] : "");
+					 isset($modelProperties['model_owner']) ? $modelProperties['model_owner'] : "");
 			$table->addField('model_creationTime', 
-					 isset($modelData->convertedProperties['model_creationTime']) ? date($this->indexDateFormat, $modelData->convertedProperties['model_creationTime']) : "");
+					 isset($modelProperties['model_creationTime']) ? date($this->indexDateFormat, $modelProperties['model_creationTime']) : "");
 			$table->addField('model_lastModified', 
-					 isset($modelData->convertedProperties['model_lastModified']) ? date($this->indexDateFormat, $modelData->convertedProperties['model_lastModified']) : "");
+					 isset($modelProperties['model_lastModified']) ? date($this->indexDateFormat, $modelProperties['model_lastModified']) : "");
 			$table->addField('model_actions', 
-					 isset($modelData->convertedProperties['model_actions']) ? "<ul class='action_list'>" . $modelData->convertedProperties['model_actions'] . "</ul>" : "");
+					 isset($modelProperties['model_actions']) ? "<ul class='action_list'>" . $modelProperties['model_actions'] . "</ul>" : "");
 		}
 
 		return $table->makeHtml();
