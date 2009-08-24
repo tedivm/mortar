@@ -255,17 +255,17 @@ display: block;
 }
 
 .index-listing .action_Read a {
-background-image: url('/mortar/data/themes/bbAdmin/images/16/022.png');
+background-image: url('{# theme_path #}images/16/022.png');
 }
 
 .index-listing .action_Edit a {
-background-image: url('/mortar/data/themes/bbAdmin/images/16/018.png');
+background-image: url('{# theme_path #}images/16/018.png');
 }
 
 .index-listing .action_Delete a {
-background-image: url('/mortar/data/themes/bbAdmin/images/16/101.png');
+background-image: url('{# theme_path #}images/16/101.png');
 }
 
 .index-listing .action_Index a {
-background-image: url('/mortar/data/themes/bbAdmin/images/16/047.png');
+background-image: url('{# theme_path #}images/16/047.png');
 }

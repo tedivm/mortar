@@ -6,6 +6,8 @@ class MortarActionMinify extends ActionBase
 
 	protected $output = '';
 
+	protected $processingTheme;
+
 	public function logic()
 	{
 		$query = Query::getQuery();
@@ -27,6 +29,7 @@ class MortarActionMinify extends ActionBase
 		}
 
 		$theme = new Theme($themeName);
+		$this->processingTheme = $theme;
 		$minifier = $theme->getMinifier($type);
 		$actualCheckSum = $minifier->getInitialChecksum();
 
@@ -51,7 +54,7 @@ class MortarActionMinify extends ActionBase
 
 		if(defined('DISABLE_MINIFICATION') && DISABLE_MINIFICATION === true)
 		{
-			$this->output = $minifier->getBaseString();
+			$this->output = $this->processTags($minifier->getBaseString());
 			return;
 		}
 
@@ -74,6 +77,21 @@ class MortarActionMinify extends ActionBase
 	public function viewDirect()
 	{
 		return $this->output;
+	}
+
+	/**
+	 * Processes JS and CSS files in order to incorporate tags. Any CSS/JS specific tags or calls to external classes for tag processing should be added here.
+	 * 
+	 * @param String $rawtext
+	 * @return String
+	 */
+
+	protected function processTags($rawText)
+	{
+		$processedText = new DisplayMaker(); 
+		$processedText->setDisplayTemplate($rawText);
+		$processedText->addContent('theme_path', ActiveSite::getLink('theme') . $this->processingTheme->name . '/');
+		return $processedText->makeDisplay();
 	}
 
 }
