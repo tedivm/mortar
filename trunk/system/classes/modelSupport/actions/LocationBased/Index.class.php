@@ -130,38 +130,38 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 	{
 		$menu = $page->getMenu('actions', 'modelNav');
 		$this->makeModelActionMenu($menu, $this->model, 'Admin');
-		
+
 		$theme = $page->getTheme();
-		
+
 		$table = new Table($this->model->getLocation()->getName() . '_listing');
 		$table->addClass('model-listing');
 		$table->addClass('index-listing');
 		$table->addClass($this->model->getLocation()->getName() . '-listing');
 		$table->enableIndex();
-		
+
 		$table->addColumnLabel('model_name', 'Name');
 		$table->addColumnLabel('model_title', 'Title');
 		$table->addColumnLabel('model_owner', 'Owner');
 		$table->addColumnLabel('model_creationTime', 'Created');
 		$table->addColumnLabel('model_lastModified', 'Last Modified');
 		$table->addColumnLabel('model_actions', 'Actions');
-		
-		foreach($this->childModels as $model) 
+
+		foreach($this->childModels as $model)
 		{
 			$modelData = $model->getModelAs('Html');
 			$table->newRow();
 			$modelProperties = $modelData->getProperties();
-			$table->addField('model_name', 
+			$table->addField('model_name',
 					 isset($modelProperties['model_name']) ? "<a href='" . $modelProperties['permalink'] . "'>" . $modelProperties['model_name'] . "</a>" : "");
-			$table->addField('model_title', 
+			$table->addField('model_title',
 					 isset($modelProperties['model_title']) ? $modelProperties['model_title'] : "");
-			$table->addField('model_owner', 
+			$table->addField('model_owner',
 					 isset($modelProperties['model_owner']) ? $modelProperties['model_owner'] : "");
-			$table->addField('model_creationTime', 
+			$table->addField('model_creationTime',
 					 isset($modelProperties['model_creationTime']) ? date($this->indexDateFormat, $modelProperties['model_creationTime']) : "");
-			$table->addField('model_lastModified', 
+			$table->addField('model_lastModified',
 					 isset($modelProperties['model_lastModified']) ? date($this->indexDateFormat, $modelProperties['model_lastModified']) : "");
-			$table->addField('model_actions', 
+			$table->addField('model_actions',
 					 isset($modelProperties['model_actions']) ? "<ul class='action_list'>" . $modelProperties['model_actions'] . "</ul>" : "");
 		}
 
@@ -211,6 +211,16 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 	}
 
 
+	/**
+	 * This function sends along the Last-Modified headers, and if $this->cacheExpirationOffset is set it also sends
+	 * that to the ioHandler. This is vital for client side http caching
+	 *
+	 * @access protected
+	 */
+	protected function setHeaders()
+	{
+		$this->ioHandler->addHeader('Cache-Control', 'must-revalidate');
+	}
 
 
 	/**
