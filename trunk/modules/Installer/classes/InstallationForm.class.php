@@ -106,6 +106,7 @@ class InstallerInstallationForm extends Form
 				createInput('DBpassword')->
 					setLabel('Password')->
 					addRule('required')->
+					property('autocomplete', 'off')->
 				getForm()->
 
 				createInput('DBhost')->
@@ -129,6 +130,7 @@ class InstallerInstallationForm extends Form
 
 				createInput('DBROpassword')->
 					setLabel('Password')->
+					property('autocomplete', 'off')->
 				getForm()->
 
 				createInput('DBROhost')->
