@@ -275,11 +275,17 @@ class IOProcessorHttp extends IOProcessorCli
 				$time = time();
 				$timeBetweenNowAndLastChange = $time - $lastModifiedAsTime;
 
-				// at most the cache time should be 20% the time between access and last modification
-				$maxCache = floor($timeBetweenNowAndLastChange * .2);
-				$maxCache = ($this->maxClientCache > $maxCache) ? $maxCache : $this->maxClientCache;
-				$offset = (isset($this->cacheExpirationOffset) && $this->cacheExpirationOffset < $maxCache)
-									? $this->cacheExpirationOffset : $maxCache;
+				if($timeBetweenNowAndLastChange < 3600)
+				{
+					$offset = 0;
+				}else{
+					// at most the cache time should be 20% the time between access and last modification
+					$maxCache = floor($timeBetweenNowAndLastChange * .2);
+					$maxCache = ($this->maxClientCache > $maxCache) ? $maxCache : $this->maxClientCache;
+
+					$offset = (isset($this->cacheExpirationOffset) && $this->cacheExpirationOffset < $maxCache)
+										? $this->cacheExpirationOffset : $maxCache;
+				}
 
 				if(isset($this->headers['Expires']))
 				{

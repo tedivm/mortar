@@ -5,8 +5,6 @@ class MortarActionSiteRead extends ModelActionLocationBasedRead
 	public $adminSettings = array('headerTitle' => 'Installer',
 									'tab' => 'Main');
 
-	protected $cacheExpirationOffset = -3600;
-
 	public function logic()
 	{
 

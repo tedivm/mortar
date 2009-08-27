@@ -111,6 +111,16 @@ abstract class ModelActionBase implements ActionInterface
 		$namingInfo = explode('Action', get_class($this));
 		$this->actionName = array_pop($namingInfo);
 		$this->package = array_shift($namingInfo);
+
+		$query = Query::getQuery();
+
+		if($query['format'] == 'Admin')
+		{
+			$this->cacheExpirationOffset = 0;
+		}
+
+
+
 	}
 
 	/**

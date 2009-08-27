@@ -7,7 +7,11 @@ class MortarActionjsSettings extends ActionBase
 
 	public function logic()
 	{
-		//$info = InfoRegistry::getInstance();
+		$offset = 43200;
+		$this->ioHandler->addHeader('Expires', gmdate('D, d M y H:i:s T', time() + $offset));
+
+		$cacheControl = 'must-revalidate,max-age=' . $offset;
+		$this->ioHandler->addHeader('Cache-Control', $cacheControl);
 	}
 
 	public function viewJson()
@@ -28,22 +32,7 @@ class MortarActionjsSettings extends ActionBase
 
 		$urls = ($info->Configuration['url']);
 
-$output['url']['theme'] = ActiveSite::getLink('theme');
-$output['url']['module'] = ActiveSite::getLink('module');
-$output['url']['javascript'] = ActiveSite::getLink('javascript');
-
-//		$output['url']['adminTheme'] = $urls['theme'];
-
-//		$output['url']['theme'] = $output['url']['current'] . $urls['theme'];
-//		$output['url']['modules'] = $output['url']['current'] . $urls['modules'];
-//		$output['url']['javascript'] = $output['url']['current'] . $urls['javascript'];
-
-//		$output['url']['base'] = $urls[''];
-//		$output[] = 'cheese';
-
-
-
-
+		$output['url']['javascript'] = ActiveSite::getLink('javascript');
 
 		return $output;
 	}
