@@ -18,6 +18,7 @@
  */
 abstract class ModelActionLocationBasedBase extends ModelActionBase
 {
+	protected $lastModified;
 
 	/**
 	 * This function sends along the Last-Modified headers, and if $this->cacheExpirationOffset is set it also sends
@@ -28,12 +29,37 @@ abstract class ModelActionLocationBasedBase extends ModelActionBase
 	protected function setHeaders()
 	{
 		$location = $this->model->getLocation();
-		$modifiedDate = strtotime($location->getLastModified());
+		$modifiedDate = $location->getLastModified();
+
+		$locationListing = new LocationListing();
+		$locationListing->addRestriction('parent', $this->model->getLocation()->getId());
+		$locationListing->setOption('order', 'DESC');
+		$locationListing->setOption('browseBy', 'lastModified');
+
+		if($listingArray = $locationListing->getListing(1))
+		{
+			$childLocationInfo = array_pop($listingArray);
+			$childModel = ModelRegistry::loadModel($childLocationInfo['type'], $childLocationInfo['id']);
+			$location = $childModel->getLocation();
+			$childModifiedDate = $location->getLastModified();
+			if($childModifiedDate > $modifiedDate)
+				$modifiedDate = $childModifiedDate;
+		}
+
+
+		if(isset($this->lastModified))
+		{
+			$locationModifiedDate = $location->getLastModified();
+			if($this->lastModified > $modifiedDate)
+			{
+				$modifiedDate = $locationModifiedDate;
+			}
+		}
+
 		$this->ioHandler->addHeader('Last-Modified', gmdate('D, d M y H:i:s T', $modifiedDate));
 
 		if(isset($this->cacheExpirationOffset) && !isset($this->ioHandler->cacheExpirationOffset))
 			$this->ioHandler->cacheExpirationOffset = $this->cacheExpirationOffset;
-
 	}
 
 	/**

@@ -63,9 +63,15 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		if(is_array($modelInformationArray))
 			foreach($modelInformationArray as $modelInfo)
 		{
-			$childrenModels[] = ModelRegistry::loadModel($modelInfo['type'], $modelInfo['id']);
+			$childModel = ModelRegistry::loadModel($modelInfo['type'], $modelInfo['id']);
+			$childrenModels[] = $childModel;
+			$location = $childModel->getLocation();
+			$creation = $location->getCreationDate();
+			$modification = $location->getLastModified();
+			$lastModifiied = ($lastModifiied > $modification) ? $lastModifiied : $modification;
 		}
 
+		$this->lastModified = $lastModifiied;
 		$this->childModels = $childrenModels;
 	}
 
@@ -211,16 +217,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 	}
 
 
-	/**
-	 * This function sends along the Last-Modified headers, and if $this->cacheExpirationOffset is set it also sends
-	 * that to the ioHandler. This is vital for client side http caching
-	 *
-	 * @access protected
-	 */
-	protected function setHeaders()
-	{
-		$this->ioHandler->addHeader('Cache-Control', 'must-revalidate');
-	}
+
 
 
 	/**
