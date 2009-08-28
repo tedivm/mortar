@@ -75,6 +75,14 @@ abstract class ModelBase implements Model
 	static public $fallbackModelActions = array('Read', 'Add', 'Edit', 'Delete', 'Index');
 
 	/**
+	 * If an inheriting model wants to exclude one or more of the fallback actions it should extend this property with
+	 * an array of those actions.
+	 *
+	 * @var array
+	 */
+	protected $excludeFallbackActions = array();
+
+	/**
 	 * This specificies what folder inside the modelSupport folder contains the model's fallback actions. Each array
 	 * element is an additional directory level and name.
 	 *
@@ -305,6 +313,9 @@ abstract class ModelBase implements Model
 	 */
 	protected function loadFallbackAction($actionName)
 	{
+		if(in_array($actionName, $this->excludeFallbackActions))
+			return false;
+
 		if(in_array($actionName, staticHack(get_class($this), 'fallbackModelActions'))
 			|| ($actionName == 'Execute' && method_exists($this, 'execute')) )
 		{
