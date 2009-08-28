@@ -34,20 +34,20 @@ class LithoModelPage extends LocationModel
 		if(isset($this->activeRevision))
 		{
 			$revision = $this->getRevision($this->activeRevision);
-//			$revision = new PageRevision($this->getId(), $this->activeRevision);
 			if($revision->rawContent != $this->content['rawContent'] ||
 					$revision->filteredContent != $this->content['filteredContent']	||
 					$revision->title != $this->content['title'])
 			{
 				$revision = new PageRevision($this->getId(), $this->activeRevision);
 				$this->saveRevision($revision);
+			}else{
+				$revision->makeActive();
 			}
 
 		}else{
 				$revision = new PageRevision($this->getId());
 				$this->saveRevision($revision);
 		}
-
 		return true;
 	}
 
