@@ -57,7 +57,7 @@ class ActiveSite
 			$cache = new Cache('urlLookup', $url);
 			$siteId = $cache->getData();
 
-			if($cache->isStale())
+			if($cache->isStale() || !is_numeric($siteId))
 			{
 				$urlRecord = new ObjectRelationshipMapper('urls');
 				$urlRecord->path = $url;
@@ -102,8 +102,6 @@ class ActiveSite
 		}
 		return $link;
 	}
-
-
 
 }
 
