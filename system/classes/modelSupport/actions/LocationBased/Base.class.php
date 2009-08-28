@@ -92,6 +92,9 @@ abstract class ModelActionLocationBasedBase extends ModelActionBase
 
 		foreach($modelActions as $action => $label)
 		{
+			if($model->getAction($action) == false)
+				continue;
+
 			$browseUrl = clone $url;
 			$browseUrl->action = $action;
 			$menu->addItem($action, $browseUrl, $label);
