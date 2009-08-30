@@ -86,7 +86,7 @@ class DisplayMaker
 			foreach($this->tags as $tag)
 				$tagNames[] = $tag['name'];
 
-			return $tagNames;
+			return array_unique($tagNames);
 		}
 
 		return $this->tags;
