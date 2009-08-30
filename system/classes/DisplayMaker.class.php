@@ -72,11 +72,10 @@ class DisplayMaker
 	 * Returns either a simple array containing the names of all tags used, or a more details array
 	 * containing the tags arguments
 	 *
-	 * @access public
 	 * @param bool $withAttributes
 	 * @return array
 	 */
-	public function tagsUsed($withAttributes = false)
+	public function getTags($withAttributes = false)
 	{
 		if(!is_array($this->tags))
 			return false;
@@ -92,6 +91,19 @@ class DisplayMaker
 
 		return $this->tags;
 	}
+
+	/**
+	 * Depreciated in favor of $this->getTags();
+	 *
+	 * @deprecated
+	 * @param bool $withAttributes
+	 * @return array
+	 */
+	public function tagsUsed($withAttributes = false)
+	{
+		return $this->getTags($withAttributes);
+	}
+
 
 	/**
 	 * This function takes in a string to be used as the basis of the template. If this argument is passed a string and
