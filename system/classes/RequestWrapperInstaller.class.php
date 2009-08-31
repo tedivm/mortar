@@ -75,15 +75,16 @@ class RequestWrapperInstaller extends RequestWrapper
 		switch(get_class($e))
 		{
 			case 'ResourceNotFoundError':
-				$output = 'These are not the resources you are looking for.';
+				echo 'These are not the resources you are looking for.';
 				break;
 			default:
+
+				echo 'There was an unknown fatal error with the installer. ',
+								'Please put the following in a bug report: ';
 				var_dump($e);
-				$output = 'There was an error with the installer.';
 				break;
 		}
 
-		echo $output;
 		exit(); // Inappropriate bailout! Way to handle errors, jackass! (note to self)
 	}
 
