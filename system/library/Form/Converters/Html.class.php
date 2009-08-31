@@ -52,6 +52,7 @@ class FormToHtml
 		$this->inputs = $formPackage['inputs'];
 		$this->sectionIntro = $formPackage['intros'];
 		$this->sectionLegends = $formPackage['legends'];
+
 	}
 
 	/**
@@ -85,15 +86,40 @@ class FormToHtml
 					wrapAround($this->sectionIntro[$section])->
 					addClass('intro');
 
+
 			foreach($inputs as $input)
 			{
 				$inputId = $formId . "_" . $input->name;
 				$input->property('id', $inputId);
 
+				$plugins = new Hook();
+				$plugins->enforceInterface('FormToHtmlHook');
+				$plugins->loadPlugins('Forms', 'HtmlConvert', 'Base');
+				$plugins->loadPlugins('Forms', 'HtmlConvert', $input->type);
+				$plugins->setInput($input);
+
+				$jsStartup = array_merge_recursive($jsStartup,
+								Hook::mergeResults($plugins->getCustomJavaScript()));
+
+				if(in_array(true, Hook::mergeResults($plugins->overrideHtml())))
+				{
+					$plugins->createOverriddingHtml($sectionHtml);
+					continue;
+				}
+
+
 				if($inputStartupJs = $this->getInputJavascript($input))
 					$jsStartup = array_merge_recursive($jsStartup, $inputStartupJs);
 
 				$inputHtml = $this->getInputHtmlByType($input);
+				$plugins->setCustomHtml($inputHtml);
+
+				if($inputOptions = $this->getInputMetaData($input) ) //count($inputOptions > 0))
+				{
+					$metaDataClass = json_encode($inputOptions);
+					$inputHtml->addClass($metaDataClass);
+				}
+
 
 				if($input->type == 'hidden')
 				{
@@ -235,20 +261,20 @@ class FormToHtml
 
 		// Set all of the input properties (since the HtmlObject class can take an entire array).
 		$inputHtml->property($properties);
-		$inputHtml = $this->setInputHtmlMetaData($input, $inputHtml);
+
 		return $inputHtml;
 	}
 
 	/**
-	 * This function takes certain data from the input column and passes it through the HtmlObject to the client end.
-	 * This is done by taking the information as a json encoded array, which our jquery form wrapper picks up.
+	 * This function places meta data used by the client side jQuery code to add various effects, such as user input
+	 * validation and ajax autocomplete values.
 	 *
 	 * @param FormInput $input
-	 * @param HtmlObject $inputHtml
-	 * @return HtmlObject
+	 * @return array|false
 	 */
-	protected function setInputHtmlMetaData(FormInput $input, HtmlObject $inputHtml)
+	protected function getInputMetaData(FormInput $input)
 	{
+		$inputOptions = array();
 		$validationRules = $input->getRules();
 		$validationClientSideRules = array();
 		if(!is_null($validationRules) && count($validationRules) > 0)
@@ -271,18 +297,19 @@ class FormToHtml
 
 			if(count($validationClientSideRules) > 0)
 				$inputOptions['validation'] = $validationClientSideRules;
-
-			if($input->type == 'html')
-				$inputOptions['html'] = true;
-
-
-			if(count($inputOptions > 0))
-			{
-				$metaDataClass = json_encode($inputOptions);
-				$inputHtml->addClass($metaDataClass);
-			}
 		}
-		return $inputHtml;
+
+		if($input->type == 'html')
+			$inputOptions['html'] = true;
+
+
+		if($input->properties['autocomplete'])
+		{
+			$inputOptions['autocomplete'] = $input->properties['autocomplete'];
+			unset($input->properties['autocomplete']);
+		}
+
+		return (count($inputOptions > 0)) ? $inputOptions : false;
 	}
 
 	/**
@@ -297,6 +324,16 @@ class FormToHtml
 		return false;
 	}
 
+}
+
+
+interface FormToHtmlHook
+{
+	public function setInput(FormInput $input);
+	public function getCustomJavaScript();
+	public function overrideHtml();
+	public function createOverriddingHtml($sectionHtml);
+	public function setCustomHtml($inputHtml);
 }
 
 ?>
