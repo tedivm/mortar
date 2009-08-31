@@ -14,7 +14,7 @@
  * @package System
  * @subpackage ModelSupport
  */
-class IndexDisplayList {
+class IndexDisplayList implements DisplayList {
 
 	/**
 	 * This is the date format used when converting the model to an html table.
