@@ -141,6 +141,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		$this->makeModelActionMenu($menu, $this->model, 'Admin');
 
 		$theme = $page->getTheme();
+		$themeSettings = $theme->getSettings();
 
 		$table = new Table($this->model->getLocation()->getName() . '_listing');
 		$table->addClass('model-listing');
@@ -173,7 +174,11 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 					 isset($modelProperties['model_lastModified']) ? date($this->indexDateFormat, $modelProperties['model_lastModified']) : "");
 
 			foreach($modelProperties['model_action_list'] as $action) 
-				$modelActions .= '<li class="action action_' . $action . '"><a href="' . $modelProperties['model_action_' . $action] . '"><img alt="' . $action . '" src="' . '" /></a></li>'; 
+			{
+				$actionDisplay = (isset($themeSettings['images']['action_images']) && $themeSettings['images']['action_images'] == true) ?
+						'<img alt="' . $action . '" src="' . $theme->getUrl() . $themeSettings['images'][$action . '_image'] . '" />' : $action; 
+				$modelActions .= '<li class="action action_' . $action . '"><a href="' . $modelProperties['model_action_' . $action] . '">' . $actionDisplay . '</a></li>'; 
+			}
 				
 			$table->addField('model_actions',
 					 isset($modelProperties['model_actions']) ? "<ul class='action_list'>" . /* $modelProperties['model_actions'] */ $modelActions . "</ul>" : "");

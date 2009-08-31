@@ -244,28 +244,12 @@ display: inline;
 float: left;
 }
 
-.index-listing .action, .index-listing .action a {
-width: 16px;
-height: 16px;
-text-indent: -9999px;
-}
-
 .action a {
 display: block;
 }
 
-.index-listing .action_Read a {
-background-image: url('{# theme_path #}images/16/022.png');
-}
-
-.index-listing .action_Edit a {
-background-image: url('{# theme_path #}images/16/018.png');
-}
-
-.index-listing .action_Delete a {
-background-image: url('{# theme_path #}images/16/101.png');
-}
-
-.index-listing .action_Index a {
-background-image: url('{# theme_path #}images/16/047.png');
+.action a img {
+border: 0;
+padding: 0;
+margin: 0;
 }
