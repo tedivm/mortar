@@ -67,6 +67,13 @@ class Theme
 	protected $allowMin = true;
 
 	/**
+	 * Settings from the INI file in the theme folder.
+	 *
+	 * @var array
+	 */
+	protected $settings;
+
+	/**
 	 * Constructor takes the name of the theme and loads the initial information
 	 *
 	 * @cache theme *name *link
@@ -81,6 +88,9 @@ class Theme
 
 		$this->name = $name;
 		$this->url = ActiveSite::getLink('theme') . $name . '/';
+		$themePath = $config['path']['theme'] . $name . '/';
+		$this->pathToTheme = $themePath;
+		$themeUrl = $this->url;
 
 		$cache = new Cache('theme', $this->name, ActiveSite::getLink('theme'));
 		$data = $cache->getData();
@@ -117,9 +127,6 @@ class Theme
 
 			}
 
-
-			$themePath = $config['path']['theme'] . $name . '/';
-			$this->pathToTheme = $themePath;
 			$themeUrl = $this->url;
 
 
@@ -145,12 +152,21 @@ class Theme
 				$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
 
 
+			$settingsPath = $this->pathToTheme . 'settings.ini';
+
+			if(is_readable($settingsPath))
+			{
+				$iniFile = new IniFile($settingsPath);
+				$data['settings'] = $iniFile->getArray();
+			}
+
 			$data['cssLinks'] = $cssLinks;
 			$data['jsLinks'] = $javascriptLinks;
 
 			$cache->storeData($data);
 		}
-
+		if(isset($data['settings']))
+			$this->settings = $data['settings'];
 		$this->jsUrls = $data['jsLinks'];
 		$this->cssUrls = $data['cssLinks'];
 	}
@@ -189,6 +205,16 @@ class Theme
 		}
 
 		return $template;
+	}
+
+	/**
+	 * Returns the theme-specific settings found in the settings.ini theme file.
+	 *
+	 * @return array
+	 */
+	public function getSettings()
+	{
+		return isset($this->settings) ? $this->settings : false;
 	}
 
 	/**
