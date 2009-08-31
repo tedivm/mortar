@@ -15,6 +15,8 @@ class MortarPluginCustomInstall
 	public function run()
 	{
 		Hook::registerPlugin('system', 'adminInterface', 'navigation', $this->packageId, 'AdminNav');
+		Hook::registerPlugin('Forms', 'HtmlConvert', 'location', $this->packageId, 'FormInputLocationToHtml');
+		Hook::registerPlugin('Forms', 'HtmlConvert', 'user', $this->packageId, 'FormInputUserToHtml');
 	}
 }
 
