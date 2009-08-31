@@ -42,3 +42,5 @@ class RubbleActionTechnicalError extends RubbleActionAuthenticationError
 	}
 
 }
+
+?>

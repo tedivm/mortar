@@ -30,3 +30,5 @@ class FormValidationLettersWithPunctuation extends FormValidationRegex
 	 */
 	protected $error = '';
 }
+
+?>

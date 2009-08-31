@@ -88,3 +88,5 @@ class RubbleActionAuthenticationError extends ActionBase
 		return true;
 	}
 }
+
+?>

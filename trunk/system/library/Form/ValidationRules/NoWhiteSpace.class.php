@@ -30,3 +30,5 @@ class FormValidationNoWhiteSpace extends FormValidationRegex
 	 */
 	protected $error = 'There should be no whitespace in the input.';
 }
+
+?>
