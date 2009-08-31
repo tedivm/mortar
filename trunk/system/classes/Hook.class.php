@@ -40,7 +40,7 @@ class Hook
 	 */
 	public function enforceInterface($interface)
 	{
-		if(!class_exists($interface, false))
+		if(!interface_exists($interface, false))
 			throw new HookError('Attempting to add nonexistent interface ' . $interface . ' to plugin');
 
 		$this->interfaces[] = $interface;
@@ -70,6 +70,9 @@ class Hook
 	 */
 	public  function loadPlugins($realm, $category, $name, $onlyRecursive = false)
 	{
+		if(defined('INSTALLMODE') && INSTALLMODE == true)
+			return false;
+
 		if(!isset($realm))
 			throw new TypeMismatch(array('String or Location', $realm));
 
@@ -194,7 +197,10 @@ class Hook
 					// we seperate the function call from the assignment to the response array in order to deal with
 					// any errors.
 					$response = call_user_func_array(array($plugin, $name), $arguments);
-					$responses[] = $response;
+
+					// Functions can return null to just be ignored.
+					if(!is_null($response))
+						$responses[] = $response;
 				}
 			}catch(Exception $e){
 
@@ -229,6 +235,13 @@ class Hook
 	static public function registerModelPlugin($type, $name, $module, $plugin, $isRecursive = false)
 	{
 		return self::registerPlugin('model', $type, $name, $module, $plugin, $isRecursive);
+	}
+
+	static public function mergeResults($results)
+	{
+		if(count($results) < 2)
+			return array();
+		return call_user_func_array('array_merge', $results);
 	}
 
 }
