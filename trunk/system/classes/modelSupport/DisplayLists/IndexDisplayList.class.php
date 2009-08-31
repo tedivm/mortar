@@ -90,6 +90,7 @@ class IndexDisplayList implements DisplayList {
 			$modelProperties = $modelData->getProperties();
 			$table->addField('model_type',
 					 isset($modelProperties['model_type']) ? $modelProperties['model_type'] : "");
+			$table->addRowClass(isset($modelProperties['model_type']) ? $modelProperties['model_type'] . "_item" : "");
 			$table->addField('model_name',
 					 isset($modelProperties['model_name']) ? "<a href='" . $modelProperties['permalink'] . "'>" . $modelProperties['model_name'] . "</a>" : "");
 			$table->addField('model_title',
