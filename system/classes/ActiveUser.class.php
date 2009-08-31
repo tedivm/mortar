@@ -28,12 +28,32 @@ class ActiveUser
 		return self::$user;
 	}
 
+	/**
+	 * This function changes the active user to one matching the passed name. This is most commonly used for special
+	 * accounts (Guest, System, Admin, and Cron) and should be avoided in favor of changeUserById.
+	 *
+	 * @param string $name
+	 * @return bool
+	 */
 	static function changeUserByName($name)
 	{
 		$userId = self::getIdFromName($name);
 		return self::changeUserById($userId);
 	}
 
+	/**
+	 * This function takes in a username and password (string, not class) to authenticate and change the active user to.
+	 * If the username isn't found or the password does not match the Guest user is set to active. In cases where the
+	 * password does match but is stored in an older format the password will be resaved in the new format (since this
+	 * is the only time we have access to the plaintext password).
+	 *
+	 * When we begin moving the authentication stuff to its own plugin architecture this function will be moved out of
+	 * this class.
+	 *
+	 * @param string $name
+	 * @param string $password
+	 * @return bool
+	 */
 	static function changeUserByNameAndPassword($name, $password)
 	{
 		$userId = self::getIdFromName($name);
@@ -66,22 +86,43 @@ class ActiveUser
 		}
 	}
 
+	/**
+	 * This function loads the user model based off of the ID passed. All of the "changeUser" functions ultimately
+	 * rely on this one.
+	 *
+	 * @param int $id
+	 * @return bool
+	 */
 	static function changeUserById($id)
 	{
-		try {
-			$user = ModelRegistry::loadModel('User', $id);
-			self::$user = $user;
-			self::notify();
-			return true;
+		try
+		{
+			if($user = ModelRegistry::loadModel('User', $id))
+			{
+				self::$user = $user;
+				self::notify();
+				return true;
+			}else{
+				self::changeUserByName('Guest');
+				return false;
+			}
+
 		}catch(Exception $e){
 			self::changeUserByName('Guest');
 			return false;
 		}
 	}
 
+	/**
+	 * This function returns the users ID from their name.
+	 *
+	 * @cache userLookup byname *name
+	 * @param string $name
+	 * @return int
+	 */
 	static function getIdFromName($name)
 	{
-		$cache = new Cache('userLookup', $name, 'id');
+		$cache = new Cache('userLookup', 'byname', $name);
 		$userId = $cache->getData();
 
 		if($cache->isStale())
@@ -102,6 +143,11 @@ class ActiveUser
 		return $userId;
 	}
 
+	/**
+	 * Returns true if the user is logged in, false otherwise.
+	 *
+	 * @return bool
+	 */
 	static public function isLoggedIn()
 	{
 		$user = self::getUser();
