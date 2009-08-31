@@ -42,3 +42,5 @@ class RubbleActionResourceNotFound extends RubbleActionAuthenticationError
 		return 'The resource you are looking for can not be found.';
 	}
 }
+
+?>
