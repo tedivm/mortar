@@ -26,9 +26,8 @@ class Table
 
 	public function addClass($name)
 	{
-		$this->classes[] = $name;
+		$this->classes['main'][] = $name;
 	}
-
 
 	public function enableIndex($enable = true)
 	{
@@ -47,7 +46,12 @@ class Table
 		$this->index = count($this->rows);
 		return $this;
 	}
-
+	
+	public function addRowClass($name)
+	{
+		$this->classes[$this->index][] = $name;
+	}
+	
 	public function addColumnLabel($column, $label)
 	{
 		$column = str_replace(' ', '_', $column);
@@ -76,6 +80,7 @@ class Table
 			{
 				$tableColumnHeader = $tableHeader->insertNewHtmlObject('th');
 				$tableColumnHeader->property('id', $baseId . '_' . $column);
+				$tableColumnHeader->addClass($column . '_header');
 
 				if(isset($this->columnLabels[$column]))
 				{
@@ -98,7 +103,7 @@ class Table
 		$tableId = 'table_' . $this->name;
 		$tableHtml->property('id', $tableId);
 
-		foreach($this->classes as $class)
+		foreach($this->classes['main'] as $class)
 			$tableHtml->addClass($class);
 
 		if(isset($this->caption))
@@ -145,6 +150,8 @@ class Table
 
 			if(!($y % 2))
 				$tableRow->addClass('y_even');
+			else
+				$tableRow->addClass('y_odd');
 
 			switch ($y % 3) {
 				case 1:
@@ -160,6 +167,10 @@ class Table
 					break;
 			}
 
+			if (isset($this->classes[$y-1]))
+				foreach($this->classes[($y-1)] as $class)
+					$tableRow->addClass($class);
+
 			$x = 0;
 			foreach($this->columns as $column)
 			{
@@ -171,6 +182,8 @@ class Table
 
 				if(!($x % 2))
 					$tableRowField->addClass('x_even');
+				else
+					$tableRowField->addClass('x_odd');
 
 				switch ($x % 3) {
 					case 1:
