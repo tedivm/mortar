@@ -113,4 +113,4 @@ Retrieves the URL for the image specified by @1 from the gallery
 
 ===Logic===
 
-mathematical ops, comparators, if/then, looping -- do we want to handle this in PHP or allow it in templates?
+Math operators, logical operators, if structure, looping structures?
