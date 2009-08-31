@@ -61,8 +61,8 @@ class ModelToHtml
 		$url = new Url();
 		$url->location = $location->getId();
 
-		/*$query = Query::getQuery();
-		$url->format = $query['format']; */
+		$query = Query::getQuery();
+		$url->format = $query['format']; 
 
 		$this->convertedProperties['permalink'] = (string) $url;
 
@@ -71,15 +71,17 @@ class ModelToHtml
 		
 		$baseUrl = new Url();
 		$baseUrl->locationId = $location->getId();
-		$baseUrl->format = "Admin";
+		/* $baseUrl->format = "Admin"; */
+		$baseUrl->format = $query['format']; 
 		
 		$actionTypes = array('Read', 'Edit', 'Delete');
 		if(isset($location) && $location->hasChildren())
 			array_push($actionTypes, 'Index');
 			
+		$allowedActionTypes = array();
 		$user = ActiveUser::getUser();
 		$userId = $user->getId();
-		$actionList = '';	
+		$actionList = '';
 		foreach($actionTypes as $action)
 		{
 			$modelListAction = new DisplayMaker();
@@ -91,9 +93,12 @@ class ModelToHtml
 			{
 				$modelListAction->addContent('action', $actionUrl->getLink(ucfirst($action)));
 				$actionList .= $modelListAction->makeDisplay();
+				$this->convertedProperties['model_action_' . $action] = $actionUrl->__toString();
+				array_push($allowedActionTypes, $action);
 			}
 		}
 		
+		$this->convertedProperties['model_action_list'] = $allowedActionTypes;
 		$this->convertedProperties['model_creationTime'] = $location->getCreationDate();
 		$this->convertedProperties['model_lastModified'] = $location->getLastModified();
 		$this->convertedProperties['model_name'] = $location->getName();

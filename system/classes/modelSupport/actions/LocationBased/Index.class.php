@@ -61,17 +61,20 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		$modelInformationArray = $this->getChildren(array());
 		$childrenModels = array();
 		if(is_array($modelInformationArray))
-			foreach($modelInformationArray as $modelInfo)
 		{
-			$childModel = ModelRegistry::loadModel($modelInfo['type'], $modelInfo['id']);
-			$childrenModels[] = $childModel;
-			$location = $childModel->getLocation();
-			$creation = $location->getCreationDate();
-			$modification = $location->getLastModified();
-			$lastModifiied = ($lastModifiied > $modification) ? $lastModifiied : $modification;
+			$lastModified = 0;
+			foreach($modelInformationArray as $modelInfo)
+			{
+				$childModel = ModelRegistry::loadModel($modelInfo['type'], $modelInfo['id']);
+				$childrenModels[] = $childModel;
+				$location = $childModel->getLocation();
+				$creation = $location->getCreationDate();
+				$modification = $location->getLastModified();
+				$lastModified = ($lastModified > $modification) ? $lastModified : $modification;
+			}
 		}
 
-		$this->lastModified = $lastModifiied;
+		$this->lastModified = $lastModified;
 		$this->childModels = $childrenModels;
 	}
 
@@ -154,6 +157,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 
 		foreach($this->childModels as $model)
 		{
+			$modelActions = '';
 			$modelData = $model->getModelAs('Html');
 			$table->newRow();
 			$modelProperties = $modelData->getProperties();
@@ -167,8 +171,14 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 					 isset($modelProperties['model_creationTime']) ? date($this->indexDateFormat, $modelProperties['model_creationTime']) : "");
 			$table->addField('model_lastModified',
 					 isset($modelProperties['model_lastModified']) ? date($this->indexDateFormat, $modelProperties['model_lastModified']) : "");
+
+			foreach($modelProperties['model_action_list'] as $action) 
+				$modelActions .= '<li class="action action_' . $action . '"><a href="' . $modelProperties['model_action_' . $action] . '"><img alt="' . $action . '" src="' . '" /></a></li>'; 
+				
 			$table->addField('model_actions',
-					 isset($modelProperties['model_actions']) ? "<ul class='action_list'>" . $modelProperties['model_actions'] . "</ul>" : "");
+					 isset($modelProperties['model_actions']) ? "<ul class='action_list'>" . /* $modelProperties['model_actions'] */ $modelActions . "</ul>" : "");
+			
+
 		}
 
 		return $table->makeHtml();
