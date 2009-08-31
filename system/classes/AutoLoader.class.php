@@ -36,6 +36,7 @@ class AutoLoader
 										'modelSupport/converters' => 'ModelTo',
 										'modelSupport/Listings' => 'none',
 										'modelSupport/Forms' => 'none',
+										'modelSupport/DisplayLists' => 'none',
 										'InputHandlers' => 'none',
 										'cacheHandlers' => 'cacheHandler',
 										'RequestWrapper/IOProcessors' => 'IOProcessor');
