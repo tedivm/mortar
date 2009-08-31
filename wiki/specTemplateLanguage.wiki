@@ -54,6 +54,20 @@ Here is a brainstormed and completely non-binding list of tags that the language
 
 (These elements _should_ be supplied by ModelToHtml eventually.)
 
+===Navigation===
+
+{# next @1 @2 etc. #}
+-Returns the URL for the "next" item. (By default the next item by date with the same parent, but can be filtered or expanded by args.)
+
+{# prev @1 @2 etc. #}
+-Returns the URL for the "previous" item. (By default the previous item by date with the same parent, but can be filtered or expanded by args.)
+
+{# first @1 @2 etc. #}
+-Returns the URL for the "first" item. (By default the first item by date with the same parent, but can be filtered or expanded by args.)
+
+{# last @1 @2 etc. #}
+-Returns the URL for the "last" item. (By default the last item by date with the same parent, but can be filtered or expanded by args.)
+
 ===Local Info===
 
 {# current_url #}
