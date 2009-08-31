@@ -1,0 +1,6 @@
+This page will outline all deficiencies in the currently displayed menu structure.
+
+Current List:
+After editing a page neither menu (left/right) allows return to the index. Although there is a link at the top of the main section that returns to the index (This is not an obvious link). SVN 691
+
+All pages in the module install section do not have any links to previous or next pages. SVN 691
