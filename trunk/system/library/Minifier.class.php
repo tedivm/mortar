@@ -82,3 +82,4 @@ class Minifier
 		return true;
 	}
 }
+?>
