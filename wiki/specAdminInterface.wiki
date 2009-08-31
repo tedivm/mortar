@@ -1,4 +1,5 @@
 #summary Areas in which the administrative interface needs to be expanded.
+#labels Specification
 
 = Introduction =
 
