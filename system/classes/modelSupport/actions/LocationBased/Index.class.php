@@ -149,6 +149,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		$table->addClass($this->model->getLocation()->getName() . '-listing');
 		$table->enableIndex();
 
+		$table->addColumnLabel('model_type', 'Type');
 		$table->addColumnLabel('model_name', 'Name');
 		$table->addColumnLabel('model_title', 'Title');
 		$table->addColumnLabel('model_owner', 'Owner');
@@ -162,6 +163,8 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 			$modelData = $model->getModelAs('Html');
 			$table->newRow();
 			$modelProperties = $modelData->getProperties();
+			$table->addField('model_type',
+					 isset($modelProperties['model_type']) ? $modelProperties['model_type'] : "");
 			$table->addField('model_name',
 					 isset($modelProperties['model_name']) ? "<a href='" . $modelProperties['permalink'] . "'>" . $modelProperties['model_name'] . "</a>" : "");
 			$table->addField('model_title',
