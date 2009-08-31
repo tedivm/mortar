@@ -1,0 +1,13 @@
+#summary Areas in which the administrative interface needs to be expanded.
+
+= Introduction =
+
+
+= Details =
+
+Things we need that aren't present at all right now:
+
+  * User/group list/administration interface
+  * Site list/administration interface
+  * Module "home base" (list and breakdown of what's provided by each)
+  * ???
