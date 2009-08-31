@@ -62,7 +62,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		$childrenModels = array();
 		if(is_array($modelInformationArray))
 		{
-			$lastModified = 0;
+			$lastModified = $this->model->getLocation()->getLastModified();
 			foreach($modelInformationArray as $modelInfo)
 			{
 				$childModel = ModelRegistry::loadModel($modelInfo['type'], $modelInfo['id']);
