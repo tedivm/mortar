@@ -5,3 +5,98 @@
 
 
 = Details =
+
+
+Here is a brainstormed and completely non-binding list of tags that the language should support:
+
+===Page Segments===
+
+{# head #}
+- Retrieves the HTML head, complete with all relevant information provided by the system.
+
+{# footer #}
+- Retrieves footer content.
+
+{# menu @1 #}
+- Retrieves the HTML contents of the menu or sidebar designated by @1, in _ul_ form.
+
+===Location Content===
+
+{# posts @1 @2 etc. #}
+- Retrieves X posts from the current location, with optional filters, and displays each in template @1. (Maybe have a capture -> dupe mechanism for this?)
+
+{# query_posts @1 @2 etc. #}
+- Retrieves posts from anywhere, based on a list of filter/search criteria, and displays each in template (as above).
+
+===Model Content===
+
+{# model_name #}
+
+{# model_title #}
+
+{# model_content #}
+
+{# model_owner #}
+
+{# model_type #}
+
+{# model_creationTime #}
+
+{# model_lastModified #}
+
+{# model_actions #}
+
+(These elements are currently supplied by ModelToHtml.)
+
+{# model_tags #}
+
+{# model_propertyX #}
+
+(These elements _should_ be supplied by ModelToHtml eventually.)
+
+===Local Info===
+
+{# current_url #}
+- The fully-qualified, canonical URL for the resource currently being viewed.
+
+===Site Info===
+
+{# site_name #}
+- Name of the current site.
+
+{# site_url #}
+- The fully-qualified, canonical URL for the root of the current site.
+
+===Theme Info===
+
+{# theme_name #}
+- Name of the theme used to render the current page.
+
+{# theme_url #}
+- The fully-qualified, canonical URL for the home directory of the current display theme.
+
+{# theme_setting @1 @2 etc... #}
+- The value of a setting from the theme's settings.ini file.
+
+===Feeds===
+
+{# feed @1 etc. #}
+- Link to the root site feed, with optional filters.
+
+{# feed_loc @1 @2 etc. #}
+- Link to the feed for content located at @1, with optional filters. 
+
+===Gallery/Media===
+
+{# image @1 #}
+
+Retrieves the URL for the image specified by @1 from the gallery
+
+===Meta===
+
+{# login #}
+-Displays currently logged in user, or login box if no user is logged in.
+
+===Operators/Flow===
+
+mathematical ops, comparators, if/then, looping -- do we want to handle this in PHP or allow it in templates?
