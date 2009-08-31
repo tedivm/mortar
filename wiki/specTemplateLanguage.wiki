@@ -111,6 +111,6 @@ Retrieves the URL for the image specified by @1 from the gallery
 {# login #}
 -Displays currently logged in user, or login box if no user is logged in.
 
-===Operators/Flow===
+===Logic===
 
 mathematical ops, comparators, if/then, looping -- do we want to handle this in PHP or allow it in templates?
