@@ -303,7 +303,7 @@ class FormToHtml
 			$inputOptions['html'] = true;
 
 
-		if($input->properties['autocomplete'])
+		if(isset($input->properties['autocomplete']) && $input->properties['autocomplete'])
 		{
 			$inputOptions['autocomplete'] = $input->properties['autocomplete'];
 			unset($input->properties['autocomplete']);
