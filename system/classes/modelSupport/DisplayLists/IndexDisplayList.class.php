@@ -104,7 +104,8 @@ class IndexDisplayList {
 			foreach($modelProperties['model_action_list'] as $action) 
 			{
 				$actionDisplay = (isset($themeSettings['images']['action_images']) && $themeSettings['images']['action_images'] == true) ?
-						'<img alt="' . $action . '" src="' . $theme->getUrl() . $themeSettings['images'][$action . '_image'] . '" />' : $action; 
+						 '<img class="tooltip action_icon ' . $action . '_icon" title="' . $action . '" alt="' . $action . '" src="' . 
+						 $theme->getUrl() . $themeSettings['images'][$action . '_image'] . '" />' : $action; 
 				$modelActions .= '<li class="action action_' . $action . '"><a href="' . $modelProperties['model_action_' . $action] . '">' . $actionDisplay . '</a></li>'; 
 			}
 				
