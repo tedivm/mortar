@@ -30,19 +30,46 @@
 
 				var inputOpts = $(this).metadata();
 
-				if(inputOpts.autosuggest && inputOpts.autosuggest.data)
-					$(this).autosuggest(inputOpts.autosuggest.data, inputOpts.autosuggest.options)
 
+				if(inputOpts.autocomplete && inputOpts.autocomplete)
+				{
+					autocompleteOpts = $.extend({},
+												$.fn.MorterForm.defaults.autocomplete,
+												inputOpts.autocomplete.options);
+
+					$(this).autocomplete(inputOpts.autocomplete, autocompleteOpts)
+				}
+
+				// Setup WYSIWYG editor
 				if(inputOpts.html)
+				{
+					// Unfortunately the fck plugin doesn't work well with the validation stuff
 					$(this).fck();
+					$(this).rules("remove");
+				}
 			});
 		});
 	};
 
   // plugin defaults
-  $.fn.MorterForm.defaults = {
+	$.fn.MorterForm.defaults = {
   							tooltipClass:"formTip",
   							validationMetaClass:"validation"
   						};
 
+	$.fn.MorterForm.defaults.autocomplete = {
+					dataType:"json",
+					formatItem:function(data,i,max,value,term){ return value; },
+					parse: function parse(data) {
+									var parsed = [];
+									$.each(data, function(i, val){
+										parsed[parsed.length] = {
+											data: val.id,
+											value: val.name,
+											result: val.name
+										};
+									});
+									return parsed;
+								}
+  						};
 })(jQuery);
