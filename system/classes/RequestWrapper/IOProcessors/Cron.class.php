@@ -71,11 +71,17 @@ class IOProcessorCron extends IOProcessorCli
 
 	public function nextRequest()
 	{
+		// In case the previous action changed it we reset the active user.
+		ActiveUser::changeUserByName('Cron');
+
 		$query = Query::getQuery();
 
+		// If the cleanup job was the last to run we bail out.
 		if($query['action'] == 'CronEnd')
 			return false;
 
+		// Whatever job has the current process's pid for its jobPid value is the job that just finished,
+		// so we clear out the pid and reset the lastRun time.
 		if($query['action'] != 'CronStart')
 		{
 			$stmt = DatabaseConnection::getStatement('default');
@@ -87,6 +93,8 @@ class IOProcessorCron extends IOProcessorCli
 			$stmt->bindAndExecute('i', self::$pid);
 		}
 
+		// If another process erased our pid file or there are no more jobs (setNextJob returns false) we set the
+		// cleanup action as the next, and final, action.
 		if(!file_exists($this->getPidPath()) || !$this->setNextJob())
 		{
 			$newQuery = array();
@@ -101,6 +109,11 @@ class IOProcessorCron extends IOProcessorCli
 
 	protected function setNextJob()
 	{
+
+		// This epic beast below checks to see if any jobs match the criteria to run. It discounts any items that have
+		// restrictions preventing them from running at this time, as well as those which haven't had enough of a delay
+		// between runs (as set by the job) and those already running (possibly in another process) and then priorizes
+		// the rest based on the last time they ran.
 		$db = DatabaseConnection::getConnection('default_read_only');
 		$results = $db->query("SELECT
 							module,
