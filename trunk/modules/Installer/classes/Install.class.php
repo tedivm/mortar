@@ -57,7 +57,7 @@ class InstallerInstaller // thats the most pathetic name ever
 				case 4: // structure
 				case 3: // database
 					$config = Config::getInstance();
-					$pathToSQL = $config['path']['modules'] . 'Installer/sql/system_remove.sql.php';
+					$pathToSQL = $config['path']['modules'] . 'Installer/sql/system_remove.sql';
 					$db = dbConnect('default');
 
 					if(!$this->dbDebug)
@@ -257,7 +257,7 @@ class InstallerInstaller // thats the most pathetic name ever
 			$config->reset();
 
 			// Set Up database structure
-			$pathToSQL = $config['path']['modules'] . 'Installer/sql/system_install.sql.php';
+			$pathToSQL = $config['path']['modules'] . 'Installer/sql/system_install.sql';
 
 			$db = dbConnect('default');
 

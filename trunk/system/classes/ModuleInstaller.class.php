@@ -136,12 +136,12 @@ class ModuleInstaller
 	}
 
 	/**
-	 * This sets up the database structure by checking the package for an installation.sql.php file.
+	 * This sets up the database structure by checking the package for an installation.sql file.
 	 *
 	 */
 	public function installDatabaseStructure()
 	{
-		$sqlPath = $this->packageInfo->getPath() . 'sql/install.sql.php';
+		$sqlPath = $this->packageInfo->getPath() . 'sql/install.sql';
 		if(file_exists($sqlPath))
 		{
 			$db = db_connect('default');
@@ -153,12 +153,12 @@ class ModuleInstaller
 	}
 
 	/**
-	 * Here we add the data to the database, if the install_data.sql.php file is present
+	 * Here we add the data to the database, if the install_data.sql file is present
 	 *
 	 */
 	public function installDatabaseData()
 	{
-		$sqlPath = $this->pathToPackage . 'sql/install_data.sql.php';
+		$sqlPath = $this->pathToPackage . 'sql/install_data.sql';
 		if(file_exists($sqlPath))
 		{
 			$db = db_connect('default');
