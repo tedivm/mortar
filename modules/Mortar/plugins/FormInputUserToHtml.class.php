@@ -42,9 +42,8 @@ class MortarPluginFormInputUserToHtml implements FormToHtmlHook
 				}
 			}
 			$valueString = rtrim($valueString, ', ');
+			$input->property('value', $valueString);
 		}
-
-		$input->property('value', $valueString);
 
 		$input->setType('input');
 		$input->property('autocomplete', (string) $url);
