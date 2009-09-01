@@ -31,13 +31,13 @@
 				var inputOpts = $(this).metadata();
 
 
-				if(inputOpts.autocomplete && inputOpts.autocomplete)
+				if(inputOpts.autocomplete && inputOpts.autocomplete.data)
 				{
 					autocompleteOpts = $.extend({},
 												$.fn.MorterForm.defaults.autocomplete,
 												inputOpts.autocomplete.options);
 
-					$(this).autocomplete(inputOpts.autocomplete, autocompleteOpts)
+					$(this).autocomplete(inputOpts.autocomplete.data, autocompleteOpts)
 				}
 
 				// Setup WYSIWYG editor
@@ -59,6 +59,7 @@
 
 	$.fn.MorterForm.defaults.autocomplete = {
 					dataType:"json",
+					cacheLength:10,
 					formatItem:function(data,i,max,value,term){ return value; },
 					parse: function parse(data) {
 									var parsed = [];
