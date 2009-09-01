@@ -4,16 +4,21 @@ class MortarActionUserLookUp extends ActionBase
 {
 	protected $list;
 
+	protected $maxLimit = 25;
+	protected $Limit = 10;
+
 	public function logic()
 	{
+		$offset = 43200;
+		$this->ioHandler->addHeader('Expires', gmdate('D, d M y H:i:s T', time() + $offset));
+
 		$query = Query::getQuery();
 		if(isset($query['q'])
-			&& strlen($query['q']) > 2
 			&& ActiveUser::isLoggedIn())
 		{
 			if(isset($query['m']))
 			{
-				if(!is_numeric($query['m']))
+				if(is_numeric($query['m']))
 				{
 					$membergroup = $query['m'];
 				}else{
@@ -23,13 +28,19 @@ class MortarActionUserLookUp extends ActionBase
 				$membergroup = 'all';
 			}
 
-			$cache = new Cache('userLookup', 'bystring', $membergroup, $query['q']);
+			$limit = isset($query['limit']) && is_numeric($query['limit']) ? $query['limit'] : $this->limit;
+
+			if($limit > $this->maxLimit)
+				$limit = $this->maxLimit;
+
+			$cache = new Cache('userLookup', 'bystring', $membergroup, $query['q'], $limit);
 			$userList = $cache->getData();
 
 			if($cache->isStale())
 			{
 				$userList = array();
-				$searchString = '%' . $query['q'] . '%';
+				$searchString = isset($query['q']) ? '%' . $query['q'] . '%' : '%';
+
 				$stmt = DatabaseConnection::getStatement('default_read_only');
 
 				if(is_numeric($membergroup))
@@ -37,12 +48,14 @@ class MortarActionUserLookUp extends ActionBase
 					$stmt->prepare('SELECT users.user_id, name
 									FROM users JOIN userInMemberGroup
 										ON users.user_id = userInMemberGroup.user_id
-									WHERE name LIKE ?
-										memgroup_id = ?');
-					$stmt->bindAndExecute('si', $searchString, $membergroup);
+									WHERE name LIKE ? AND
+										memgroup_id = ?
+									ORDER BY name ASC
+									LIMIT ?');
+					$stmt->bindAndExecute('sii', $searchString, $membergroup, $limit);
 				}else{
-					$stmt->prepare('SELECT user_id, name FROM users WHERE name LIKE ?');
-					$stmt->bindAndExecute('s', $searchString);
+					$stmt->prepare('SELECT user_id, name FROM users WHERE name LIKE ? LIMIT ?');
+					$stmt->bindAndExecute('si', $searchString, $limit);
 				}
 
 				while($results = $stmt->fetch_array())
@@ -79,8 +92,6 @@ class MortarActionUserLookUp extends ActionBase
 	{
 		return $this->list;
 	}
-
-
 
 }
 
