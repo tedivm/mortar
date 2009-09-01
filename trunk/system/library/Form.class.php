@@ -334,6 +334,8 @@ class Form
 	 * validation rules and security features, and in the event of failure sets the user inputs as the values so the
 	 * form doesn't need to be completely filled out again.
 	 *
+	 * @hook Forms checkSubmit Base
+	 * @hook Forms checkSubmit *type
 	 * @return bool|array Returns either false (if the form doesn't validate) or an array of processed inputs.
 	 */
 	public function checkSubmit()
@@ -351,6 +353,14 @@ class Form
 			foreach($this->inputs as $section => $inputs)
 				foreach($inputs as $input)
 			{
+				$plugins = new Hook();
+				//$plugins->enforceInterface('FormToHtmlHook');
+				$plugins->loadPlugins('Forms', 'checkSubmit', 'Base');
+				$plugins->loadPlugins('Forms', 'checkSubmit', $input->type);
+				$plugins->setInput($input);
+
+				$plugins->processInput($inputHandler);
+
 				if($input->validate(isset($inputHandler[$input->name]) ? $inputHandler[$input->name] : null) !== true)
 				{
 					$success = false;

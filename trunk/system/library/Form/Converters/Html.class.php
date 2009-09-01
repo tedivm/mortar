@@ -59,6 +59,8 @@ class FormToHtml
 	 * This function prepares the Form class by converting it, and all of its inputs, into Html and preparing the
 	 * javascript needed to make sure the user sends back what is needed.
 	 *
+	 * @hook Forms HtmlConvert Base
+	 * @hook Forms HtmlConvert *type
 	 * @return string
 	 */
 	public function makeOutput()
@@ -305,7 +307,11 @@ class FormToHtml
 
 		if(isset($input->properties['autocomplete']) && $input->properties['autocomplete'])
 		{
-			$inputOptions['autocomplete'] = $input->properties['autocomplete'];
+			$inputOptions['autocomplete']['data'] = $input->properties['autocomplete'];
+			if(isset($input->properties['multiple']))
+			{
+				$inputOptions['autocomplete']['options']['multiple'] = true;
+			}
 			unset($input->properties['autocomplete']);
 		}
 
