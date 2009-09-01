@@ -29,7 +29,7 @@ if(defined('STDIN'))
 switch(DEBUG)
 {
 	case 3:
-		$errorLevel = E_ALL ^ E_NOTICE;
+		$errorLevel = E_ALL;
 		break;
 
 	case 2:
