@@ -329,6 +329,14 @@ class SessionObserver
 	protected $userId;
 
 	/**
+	 * AOL users may switch IP addresses from one proxy to another.
+	 *
+	 * @link http://webmaster.info.aol.com/proxyinfo.html
+	 * @var array
+	 */
+	protected $aolProxies = array('195.93.', '205.188', '198.81.', '207.200', '202.67.', '64.12.9');
+
+	/**
 	 * This is the delay between marking a session as expired and actually killing it this is needed because quick
 	 * concurrent connections (ajax) doesn't handle immediate session changes well
 	 *
@@ -419,14 +427,28 @@ class SessionObserver
 			if(isset($_SESSION['OBSOLETE']) && ($_SESSION['EXPIRES'] < time()))
 				throw new SessionWarning('Attempt to use expired session.');
 
-			if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id']))
+			if(!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id']) || !isset($_SESSION['IPaddress']))
 				return false;
 
-			if(!isset($_SESSION['IPaddress']) || $_SESSION['IPaddress'] != $_SERVER['REMOTE_ADDR'])
-				throw new SessionNotice('IP Address mixmatch (possible session hijacking attempt).');
+			// If the IP addresses don't match we're going to want to see if they're in the same proxy group
+			// At the moment this pretty much means just checking AOL, but that may grow
 
-			if(!isset($_SESSION['userAgent']) || $_SESSION['userAgent'] != $_SERVER['HTTP_USER_AGENT'])
+			$ipHeader = substr($_SESSION['IPaddress'], 0, 7);
+			$remoteIpHeader = substr($_SERVER['REMOTE_ADDR'], 0, 7);
+
+			if($_SESSION['IPaddress'] != $_SERVER['REMOTE_ADDR']
+				&& !(in_array($ipHeader, $this->aolProxies) && in_array($remoteIpHeader, $this->aolProxies)))
+			{
+				throw new SessionNotice('IP Address mixmatch (possible session hijacking attempt).');
+			}
+
+			if((!isset($_SESSION['userAgent']) || $_SESSION['userAgent'] != $_SERVER['HTTP_USER_AGENT'])
+				// Since IE8 likes to change its UserAgent around we need to check that
+				&& !( strpos($_SESSION['userAgent'], 'Trident') !== false
+					&& strpos($_SERVER['HTTP_USER_AGENT'], 'Trident') !== false))
+			{
 				throw new SessionNotice('Useragent mixmatch (possible session hijacking attempt).');
+			}
 
 		}catch(Exception $e){
 			return false;
