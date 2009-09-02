@@ -109,16 +109,18 @@ class IOProcessorCron extends IOProcessorCli
 
 	protected function setNextJob()
 	{
-
 		// This epic beast below checks to see if any jobs match the criteria to run. It discounts any items that have
 		// restrictions preventing them from running at this time, as well as those which haven't had enough of a delay
 		// between runs (as set by the job) and those already running (possibly in another process) and then priorizes
 		// the rest based on the last time they ran.
 		$db = DatabaseConnection::getConnection('default_read_only');
 		$results = $db->query("SELECT
-							module,
+							id,
+							moduleId,
+							locationId,
 							actionName,
 							lastRun
+
 					FROM cronJobs
 					WHERE
 
@@ -154,36 +156,46 @@ class IOProcessorCron extends IOProcessorCli
 								( (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(lastRun)) >= (minutesBetweenRequests * 60) + 60 )
 							)
 
+						AND
+							(moduleId IS NOT NULL OR locationId IS NOT NULL)
+
 						ORDER BY lastRun ASC
 						LIMIT 1");
 
 		if($results->num_rows)
 		{
 			$actionRow = $results->fetch_array();
-			$actionRow['module'];
-			$actionRow['actionName'];
 
-			if(isset(self::$actionsPerformed[$actionRow['module']][$actionRow['actionName']]))
+			if(in_array($actionRow['id'], self::$actionsPerformed))
 				return false;
 
-			self::$actionsPerformed[$actionRow['module']][$actionRow['actionName']] = true;
+			self::$actionsPerformed[] = $actionRow['id'];
 
 			$stmt = DatabaseConnection::getStatement('default');
 			$stmt->prepare('UPDATE cronJobs
-								SET jobPid = ?
-								WHERE
-									module = ?
-									AND  actionName LIKE ?');
-			if(!$stmt->bindAndExecute('iis', self::$pid, $actionRow['module'], $actionRow['actionName']))
+							SET jobPid = ?
+							WHERE
+								id = ?
+								AND jobPid = 1');
+
+			if(!$stmt->bindAndExecute('ii', self::$pid, $actionRow['id']))
 					return false;
 
-			$newQuery = array(
-						'format' => 'Text',
-						'action' => $actionRow['actionName'],
-						'lastRun' => $actionRow['lastRun']);
+			$newQuery = array();
+			$newQuery['format'] = 'Text';
+			$newQuery['action'] = $actionRow['actionName'];
+			$newQuery['lastRun'] = $actionRow['lastRun'];
 
-			$module = new PackageInfo($actionRow['module']);
-			$newQuery['module'] = $module->getName();
+			if(isset($actionRow['moduleId']) && is_numeric($actionRow['moduleId']))
+			{
+				$module = new PackageInfo($actionRow['moduleId']);
+				$newQuery['module'] = $module->getName();
+			}elseif(isset($actionRow['locationId']) && is_numeric($actionRow['locationId'])){
+				$type = 'location';
+				$newQuery['location'] = $actionRow['locationId'];
+			}else{
+				return false;
+			}
 
 			Query::setQuery($newQuery);
 			return true;

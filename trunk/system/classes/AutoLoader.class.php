@@ -241,7 +241,7 @@ class AutoLoader
 	static protected function loadModule($module)
 	{
 		if(in_array($module, self::$loadedModules))
-			return true;
+			return array();
 
 		self::$loadedModules[] = $module;
 

@@ -19,7 +19,7 @@ class MortarPluginCustomInstall
 		Hook::registerPlugin('Forms', 'HtmlConvert', 'user', $this->packageId, 'FormInputUserToHtml');
 		Hook::registerPlugin('Forms', 'checkSubmit', 'user', $this->packageId, 'FormInputUserCheckSubmit');
 
-		CronManager::registerJob('Mortar', 'CachePurge', 30);
+		CronManager::registerJob('CachePurge', 'Mortar', 'module', 30);
 	}
 }
 
