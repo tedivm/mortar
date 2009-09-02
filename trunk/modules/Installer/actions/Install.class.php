@@ -86,7 +86,7 @@ class InstallerActionInstall implements ActionInterface //extends Action
 		{
 
 			$input = Input::getInput();
-			$cookieName = $input['siteName'] . '_Session';
+			$cookieName = str_replace(' ', '_', $input['siteName']) . '_Session';
 			session_name($cookieName);
 			session_set_cookie_params(0, '/', null, isset($_SERVER["HTTPS"]), true);
 			session_start();
