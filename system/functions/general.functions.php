@@ -139,7 +139,7 @@ function staticHack($className, $memberName)
 	if(is_object($className))
 		$className = get_class($className);
 
-	if(!class_exists($className, false))
+	if(!class_exists($className))
 		return null;
 
 	if(!property_exists($className, $memberName))

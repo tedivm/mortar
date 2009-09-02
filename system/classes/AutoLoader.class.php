@@ -30,6 +30,7 @@ class AutoLoader
 	 */
 	protected static $baseDirectories = array('interfaces', 'abstracts', 'mainclasses', 'library', 'thirdparty');
 
+	protected static $loadedModules = array();
 
 	protected static $extraClassDirectories = array('modelSupport/actions' => 'ModelAction',
 										'modelSupport/actions/LocationBased' => 'ModelActionLocationBased',
@@ -239,6 +240,11 @@ class AutoLoader
 	 */
 	static protected function loadModule($module)
 	{
+		if(in_array($module, self::$loadedModules))
+			return true;
+
+		self::$loadedModules[] = $module;
+
 		$module = new PackageInfo($module);
 		$basePath = $module->getPath();
 		$moduleName = $module->getName();
