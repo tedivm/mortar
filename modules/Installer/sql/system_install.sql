@@ -30,7 +30,9 @@ CREATE TABLE aliases
 /* Build Table Structure */
 CREATE TABLE cronJobs
 (
-	module INTEGER UNSIGNED NOT NULL,
+	id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	moduleId INTEGER UNSIGNED NULL,
+	locationId INTEGER UNSIGNED NULL,
 	actionName VARCHAR(65) NOT NULL,
 	jobPid INTEGER UNSIGNED NOT NULL DEFAULT 0,
 	lastRun DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
@@ -42,10 +44,11 @@ CREATE TABLE cronJobs
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: cronJobs */
-ALTER TABLE cronJobs ADD CONSTRAINT pkcronJobs
-	PRIMARY KEY (module, actionName);
 
 /* Add Indexes for: cronJobs */
+CREATE UNIQUE INDEX cronJobs_moduleId_locationId_actionName_Idx ON cronJobs (moduleId, locationId, actionName);
+CREATE UNIQUE INDEX cronJobs_locationId_actionName_Idx ON cronJobs (locationId, actionName);
+CREATE UNIQUE INDEX cronJobs_moduleId_actionName_Idx ON cronJobs (moduleId, actionName);
 CREATE INDEX cronJobs_jobPid_lastRun_Idx ON cronJobs (jobPid, lastRun);
 
 /******************** Add Table: directories ************************/
@@ -360,7 +363,11 @@ ALTER TABLE aliases ADD CONSTRAINT fk_aliases_locations_target
 
 /************ Foreign Key: fk_cronJobs_modules ***************/
 ALTER TABLE cronJobs ADD CONSTRAINT fk_cronJobs_modules
-	FOREIGN KEY (module) REFERENCES modules (mod_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+	FOREIGN KEY (moduleId) REFERENCES modules (mod_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/************ Foreign Key: fk_cronJobs_locations ***************/
+ALTER TABLE cronJobs ADD CONSTRAINT fk_cronJobs_locations
+	FOREIGN KEY (locationId) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_directories_locations ***************/
 ALTER TABLE directories ADD CONSTRAINT fk_directories_locations

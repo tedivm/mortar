@@ -29,10 +29,10 @@ class CronManager
 	 * @param int|array $daysOfMonth Arrays assign multiple days
 	 * @return bool
 	 */
-	static function registerJob($module, $action, $minutesBetweenRequests = null, $start = null,
+	static function registerJob($action, $source, $type = 'module', $minutesBetweenRequests = null, $start = null,
 										$end = null, $daysOfWeek = null, $daysOfMonth = null)
 	{
-		if(!($cronJobOrm = self::getOrm($module, $action)))
+		if(!($cronJobOrm = self::getOrm($action, $source, $type)))
 			return false;
 
 		// If it exists use it then update it.
@@ -115,9 +115,9 @@ class CronManager
 	 * @param string $action
 	 * @return bool
 	 */
-	static function disableJob($module, $action)
+	static function disableJob($action, $source, $type = 'module')
 	{
-		if(!($cronJobOrm = self::getOrm($module, $action)))
+		if(!($cronJobOrm = self::getOrm($action, $source, $type)))
 			return false;
 
 		// If it exists use it then update it.
@@ -134,9 +134,9 @@ class CronManager
 	 * @param string $action
 	 * @return bool
 	 */
-	static function enableJob($module, $action)
+	static function enableJob($action, $source, $type = 'module')
 	{
-		if(!($cronJobOrm = self::getOrm($module, $action)))
+		if(!($cronJobOrm = self::getOrm($action, $source, $type)))
 			return false;
 
 		// If it exists use it then update it.
@@ -155,19 +155,40 @@ class CronManager
 	 * @param string $action
 	 * @return ObjectRelationshipMapper
 	 */
-	static protected function getOrm($module, $action)
+	static protected function getOrm($action, $source, $type = 'module')
 	{
-		$packageInfo = new PackageInfo($module);
-		$moduleId = $packageInfo->getId();
-
-		if(!is_numeric($moduleId))
-			return false;
-
-		if(!$packageInfo->getActions($action))
-			return false;
-
 		$cronJobOrm = new ObjectRelationshipMapper('cronJobs');
-		$cronJobOrm->module = $moduleId;
+
+		if($type == 'module')
+		{
+			$packageInfo = new PackageInfo($source);
+			$moduleId = $packageInfo->getId();
+
+			if(!is_numeric($moduleId) || $moduleId < 1)
+				return false;
+
+			if(!$packageInfo->getActions($action))
+				return false;
+
+			$cronJobOrm->moduleId = $moduleId;
+
+		}elseif($type == 'location'){
+
+			if(!is_numeric($source) || $source < 1)
+				return false;
+
+			$location = new Location($source);
+			$locationId = $location->getId();
+			$model = $location->getResource();
+
+			if($model->getAction($action) == false)
+				return false;
+
+			$cronJobOrm->locationId = $locationId;
+		}else{
+			return false;
+		}
+
 		$cronJobOrm->actionName = $action;
 
 		return $cronJobOrm;
