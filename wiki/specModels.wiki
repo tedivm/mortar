@@ -1,0 +1,14 @@
+#summary Detailed analysis of models
+
+= Introduction =
+
+
+
+= Details =
+
+== Common Fields ==
+
+  * Title
+  * Content
+
+=== Location Based Fields ===
