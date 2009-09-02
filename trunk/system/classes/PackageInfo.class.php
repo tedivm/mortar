@@ -89,6 +89,7 @@ class PackageInfo
 		}else{
 			throw new TypeMismatch(array('String or Integer', $package));
 		}
+		AutoLoader::addModule($package);
 	}
 
 	/**
@@ -476,26 +477,6 @@ class PackageInfo
 				$fileInfo['name'] = $fileClassName;
 				$fileInfo['className'] = $this->name . $typeDelimiter . $fileClassName;
 				$fileInfo['path'] = $filename;
-
-				if(!class_exists($fileInfo['className'], false))
-				{
-
-					if(!include($fileInfo['path']))
-					{
-						$e = new Exception('Unable to load ' . $type . ' ' . $fileInfo['className']
-										. ' from ' . $fileInfo['path']);
-					//	RequestLog::logError($e, '3');
-						continue;
-					}
-
-					if(!class_exists($fileInfo['className'], false))
-					{
-						$e = new Exception('Unable to load ' . $type . ' ' . $fileInfo['className']
-										. ' from ' . $fileInfo['path']);
-					//	RequestLog::logError($e, '3');
-						continue;
-					}
-				}
 				$files[$fileClassName] = $fileInfo;
 			}catch(Exception $e){
 
