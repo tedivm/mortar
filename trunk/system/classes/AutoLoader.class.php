@@ -98,6 +98,7 @@ class AutoLoader
 	{
 		$classArray = array();
 		$config = Config::getInstance();
+		self::$loadedModules = array();
 
 		$packageClasses = self::loadPackageClasses();
 		$coreClasses = self::loadCoreClasses();
