@@ -24,6 +24,14 @@ class IOProcessorCli
 	protected $responseCode;
 
 	/**
+	 * This is a list of http headers to be sent out
+	 *
+	 * @access protected
+	 * @var array
+	 */
+	protected $headers = array();
+
+	/**
 	 * On construct the initialize function is run
 	 *
 	 */
@@ -132,6 +140,25 @@ class IOProcessorCli
 			throw new TypeMismatch(array('Numeric', $code));
 
 		$this->responseCode = $code;
+	}
+
+	/**
+	 * Adds a new http header to be sent out
+	 *
+	 * @param string $name
+	 * @param string $value
+	 * @return bool
+	 */
+	public function addHeader($name, $value)
+	{
+		$name = (string) $name;
+		$value = (string) $value;
+
+		if(strpos($name, "\n") || strpos($value, "\n"))
+			return false;
+
+		$this->headers[$name] = $value;
+		return true;
 	}
 
 }
