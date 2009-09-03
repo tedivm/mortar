@@ -47,7 +47,20 @@ class LocationListing extends ModelListing
 		return $cacheKey;
 	}
 
+	public function addRestriction($name, $value)
+	{
+		switch($name)
+		{
+			case 'type':
+				$name = 'resourceType';
+				break;
+			case 'id':
+				$name = 'resourceId';
+				break;
+		}
 
+		parent::addRestriction($name, $value);
+	}
 
 
 }
