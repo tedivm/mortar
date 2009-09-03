@@ -365,6 +365,11 @@ class PackageInfo
 			foreach($actionNames as $actionName => $action)
 			{
 				try {
+
+					if(!class_exists($action['className']))
+						throw new CoreWarning('Unable to load action class ' . $action['className'] .
+								' from module ' . $this->name);
+
 					$actionReflection = new ReflectionClass($action['className']);
 					$methods = $actionReflection->getMethods();
 					$engines = array();
