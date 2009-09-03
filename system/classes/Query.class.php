@@ -173,6 +173,13 @@ class Query
 				array_shift($pathArray);
 				// grab the name, drop it from the path
 				$inputArray['module'] = array_shift($pathArray);
+
+				if(isset($pathArray[0]))
+					$inputArray['action'] = array_shift($pathArray);
+
+				if(isset($pathArray[0]))
+					$inputArray['id'] = array_shift($pathArray);
+
 			}
 
 			if(isset($pathArray[0]) && strtolower($pathArray[0]) == 'resource')
