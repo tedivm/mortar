@@ -15,7 +15,7 @@
  * @package		Library
  * @subpackage	Imap
  */
-class ImapConnection
+class Imap
 {
 	/**
 	 * This is the domain or server path the class is connecting to.
@@ -318,7 +318,7 @@ class ImapConnection
 
 /**
  * This library is a wrapper around the Imap library functions included in php. This class represents a single email
- * message as retrieved from the ImapConnection.
+ * message as retrieved from the Imap.
  *
  * @package		Library
  * @subpackage	Imap
@@ -328,7 +328,7 @@ class ImapMessage
 	/**
 	 * This is the connection/mailbox class that the email came from.
 	 *
-	 * @var ImapConnection
+	 * @var Imap
 	 */
 	protected $imapConnection;
 
@@ -454,14 +454,14 @@ class ImapMessage
 	static public $charset = 'UTF-8//TRANSLIT';
 
 	/**
-	 * This constructor takes in the uid for the message and the ImapConnection class representing the mailbox the
+	 * This constructor takes in the uid for the message and the Imap class representing the mailbox the
 	 * message should be opened from. This constructor should generally not be called directly, but rather retrieved
-	 * through the apprioriate ImapConnection functions.
+	 * through the apprioriate Imap functions.
 	 *
 	 * @param int $messageUniqueId
-	 * @param ImapConnection $mailbox
+	 * @param Imap $mailbox
 	 */
-	public function __construct($messageUniqueId, ImapConnection $mailbox)
+	public function __construct($messageUniqueId, Imap $mailbox)
 	{
 		$this->imapConnection = $mailbox;
 		$this->uid = $messageUniqueId;
@@ -530,8 +530,9 @@ class ImapMessage
 	{
 		if($forceReload || !isset($this->messageOverview))
 		{
-									// returns an array, and since we just want one message we can grab the only result
-			$this->messageOverview = array_shift(imap_fetch_overview($this->imapStream, $this->uid, FT_UID));
+			// returns an array, and since we just want one message we can grab the only result
+			$results = imap_fetch_overview($this->imapStream, $this->uid, FT_UID);
+			$this->messageOverview = array_shift($results);
 		}
 		return $this->messageOverview;
 	}
@@ -673,7 +674,7 @@ class ImapMessage
 
 	/**
 	 * This function marks a message for deletion. It is important to note that the message will not be deleted form the
-	 * mailbox until the ImapConnection->expunge it run.
+	 * mailbox until the Imap->expunge it run.
 	 *
 	 * @return bool
 	 */
@@ -683,9 +684,9 @@ class ImapMessage
 	}
 
 	/**
-	 * This function returns ImapConnection this message came from.
+	 * This function returns Imap this message came from.
 	 *
-	 * @return ImapConnection
+	 * @return Imap
 	 */
 	public function getImapBox()
 	{
