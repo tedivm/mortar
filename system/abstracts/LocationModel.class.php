@@ -100,6 +100,9 @@ class LocationModel extends ModelBase
 
 		try
 		{
+
+			$isFirstSave = !isset($this->id);
+
 			if(!parent:: save())
 				throw new CoreError('Unable to save model');
 
@@ -132,6 +135,8 @@ class LocationModel extends ModelBase
 			if($parentLocation = $location->getParent())
 				Cache::clear('locations', $parentLocation->getId(), 'children');
 
+
+
 		}catch(Exception $e){
 			$db->rollback();
 			$db->autocommit(true);
@@ -139,8 +144,18 @@ class LocationModel extends ModelBase
 		}
 
 		$db->autocommit(true);
+
+		if(isset($isFirstSave) && $isFirstSave == true)
+			$this->firstSaveLocation();
+
 		return true;
 	}
+
+	protected function firstSaveLocation()
+	{
+
+	}
+
 
 	/**
 	 * This function first deletes its location and then runs the parent delete function.  This function has a high run
