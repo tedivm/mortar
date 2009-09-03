@@ -75,7 +75,8 @@ class ModelListing
 		if(!is_array($restrictions))
 			throw new TypeMismatch(array('Array', $restrictions));
 
-		$this->restrictions = $restrictions;
+		foreach($restrictions as $name => $value)
+			$this->addRestriction($name, $value);
 	}
 
 	/**
