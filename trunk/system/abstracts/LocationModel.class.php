@@ -156,14 +156,20 @@ class LocationModel extends ModelBase
 			if(isset($this->properties['status']))
 				$location->setStatus($this->properties['status']);
 
+			if(!$location->getOwnerGroup() && $parent = $location->getParent())
+			{
+				if($parentMemberGroup = $location->getOwnerGroup())
+				{
+					$location->setOwnerGroup($parentMemberGroup);
+					$location->save();
+				}
+			}
 
 			if(!$location->save())
 				throw new CoreError('Unable to save model location');
 
 			if($parentLocation = $location->getParent())
 				Cache::clear('locations', $parentLocation->getId(), 'children');
-
-
 
 		}catch(Exception $e){
 			$db->rollback();
