@@ -48,7 +48,7 @@ class LocationModel extends ModelBase
 	 *
 	 * @var string
 	 */
-	static protected $defaultStatus;
+	static public $defaultStatus;
 
 	/**
 	 * This function contains an array of strings that can be used as a status type for a model.
