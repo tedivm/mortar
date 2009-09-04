@@ -337,6 +337,11 @@ class InstallerInstaller // thats the most pathetic name ever
 			$memgroupSuperUser->save();
 
 
+			$memgroupSystem = new MemberGroup();
+			$memgroupSystem->setName('System');
+			$memgroupSystem->makeSystem();
+			$memgroupSystem->save();
+
 			// ADD USERS TO MEMBERGROUPS
 			$memgroupAdmin->addUser($userAdmin);
 			$memgroupUser->addUser($userAdmin);
@@ -356,7 +361,7 @@ class InstallerInstaller // thats the most pathetic name ever
 			$locationRoot = new Location();
 			$locationRoot->setName('root');
 			$locationRoot->setResource('Root', '0');
-
+			$locationRoot->setOwnerGroup($memgroupSystem);
 			$locationRoot->setMeta('adminTheme', 'bbAdmin');
 			$locationRoot->setMeta('htmlTheme', 'default');
 
@@ -402,6 +407,7 @@ class InstallerInstaller // thats the most pathetic name ever
 
 			$locationMembersOnly = $membersOnlyDirectory->getLocation();
 			$locationMembersOnly->setInherit(false);
+			$locationMembersOnly->setOwnerGroup($memgroupSystem);
 			$locationMembersOnly->save();
 
 
@@ -413,6 +419,7 @@ class InstallerInstaller // thats the most pathetic name ever
 
 			$locationAdminOnly = $adminOnlyDirectory->getLocation();
 			$locationAdminOnly->setInherit(false);
+			$locationAdminOnly->setOwnerGroup($memgroupSystem);
 			$locationAdminOnly->save();
 
 
@@ -423,8 +430,8 @@ class InstallerInstaller // thats the most pathetic name ever
 			$page->setParent($siteLocation);
 			$page->save();
 			$pageLocation = $page->getLocation();
-
-
+			$pageLocation->setOwnerGroup($memgroupSystem);
+			$pageLocation->save();
 			$site['defaultChild'] = $pageLocation->getId();
 			$site->save();
 
