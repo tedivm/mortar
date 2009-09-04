@@ -377,7 +377,9 @@ class SessionObserver
 		if(!isset($_SESSION['nonce']))
 			$_SESSION['nonce'] = md5($this->userId . START_TIME . rand());
 
-		$_SESSION['IPaddress'] = $_SERVER['REMOTE_ADDR'];
+		$_SESSION['IPaddress'] = isset($_SERVER['HTTP_X_FORWARDED_FOR'])
+			? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
+
 		$_SESSION['userAgent'] = $_SERVER['HTTP_USER_AGENT'];
 
 		// there's a one percent of the session id changing to help prevent session theft
@@ -433,11 +435,15 @@ class SessionObserver
 			// If the IP addresses don't match we're going to want to see if they're in the same proxy group
 			// At the moment this pretty much means just checking AOL, but that may grow
 
-			$ipHeader = substr($_SESSION['IPaddress'], 0, 7);
-			$remoteIpHeader = substr($_SERVER['REMOTE_ADDR'], 0, 7);
+			$sessionIpSegment = substr($_SESSION['IPaddress'], 0, 7);
 
-			if($_SESSION['IPaddress'] != $_SERVER['REMOTE_ADDR']
-				&& !(in_array($ipHeader, $this->aolProxies) && in_array($remoteIpHeader, $this->aolProxies)))
+			$remoteIpHeader = isset($_SERVER['HTTP_X_FORWARDED_FOR'])
+				? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
+
+			$remoteIpSegment = substr($remoteIpHeader, 0, 7);
+
+			if($_SESSION['IPaddress'] != $remoteIpHeader
+				&& !(in_array($sessionIpSegment, $this->aolProxies) && in_array($remoteIpSegment, $this->aolProxies)))
 			{
 				throw new SessionNotice('IP Address mixmatch (possible session hijacking attempt).');
 			}
