@@ -93,7 +93,7 @@ abstract class ModelActionLocationBasedBase extends ModelActionBase
 		$url->location = $model->getLocation()->getId();
 		$url->format = $format;
 
-		$modelActions = array('Edit' => 'Edit', 'Delete' => 'Delete');
+		$modelActions = array('Edit' => 'Edit', 'Delete' => 'Delete', 'Ownership' => 'Ownership');
 
 		if($location->hasChildren())
 			$modelActions['Index'] = 'Browse';
