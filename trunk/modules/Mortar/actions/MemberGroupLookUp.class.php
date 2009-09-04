@@ -32,8 +32,9 @@ class MortarActionMemberGroupLookUp extends ActionBase
 				$stmt = DatabaseConnection::getStatement('default_read_only');
 				$stmt->prepare('SELECT memgroup_id, memgroup_name
 									FROM member_group
-									WHERE memgroup_name
-									LIKE ? LIMIT ?');
+									WHERE memgroup_name	LIKE ?
+										AND is_system = 0
+									LIMIT ?');
 				$stmt->bindAndExecute('si', $searchString, $limit);
 
 				while($results = $stmt->fetch_array())
