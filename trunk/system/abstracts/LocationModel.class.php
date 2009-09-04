@@ -44,6 +44,14 @@ class LocationModel extends ModelBase
 	protected $fallbackActionString = 'ModelActionLocationBased';
 
 	/**
+	 * This array contains the list of actions that have a fall back handler in the classes/modelSupport folder. This
+	 * should be overloaded if eliminating or using different classes.
+	 *
+	 * @var array
+	 */
+	static public $fallbackModelActions = array('Read', 'Add', 'Edit', 'Delete', 'Index', 'Ownership');
+
+	/**
 	 * If set this is used as the default status for a new model.
 	 *
 	 * @var string
