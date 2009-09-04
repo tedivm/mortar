@@ -26,7 +26,6 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 	 */
 	public static $requiredPermission = 'Add';
 
-
 	/**
 	 * This is the model that the new model is going to be attached to
 	 *
@@ -71,6 +70,8 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 		$form = parent::getForm();
 		$form = ($form instanceof Form) ? $form : new Form($this->model->getType() . 'Form' . $this->actionName);
 
+		$form->changeSection('location_information')->setLegend('Location Information');
+
 		// If the parent location isn't set, there should be some form to do so.
 		if($this->model->getLocation()->getParent() === false)
 			throw new CoreError('Unspecified  parent', 400);
@@ -83,21 +84,19 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 				addRule('required');
 		}
 
+		$query = Query::getQuery();
+		if($query['format'] == 'Admin' && $statusTypes = $this->model->getStatusTypes())
+		{
+			$selectInput = $form->createInput('location_status')->
+				setLabel('Status')->
+				setType('select');
 
-		/*
+			foreach($statusTypes as $type)
+				$selectInput->setOptions($type, $type);
 
-			location_owner
-			location_ownerGroup
-			location_name
-
-
-
-
-		*/
-
-
-
-
+			if(isset($this->model->status))
+				$selectInput->setValue($this->model->status);
+		}
 
 		$locationFormName = importClass('LocationForm', 'modelSupport/Forms/LocationForm.class.php', 'mainclasses');
 		if(!isset($locationFormName))
@@ -105,7 +104,6 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 
 		$locationForm = new $locationFormName($this->type . 'Form' . $this->actionName);
 		$form->merge($locationForm);
-
 
 		return $form;
 	}
@@ -142,6 +140,15 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 			$this->model->name = $input['location_name'];
 		}
 
+		$query = Query::getQuery();
+		if($query['format'] == 'Admin')
+		{
+			$statusTypes = $this->model->getStatusTypes();
+			if(isset($input['location_status']) && in_array($input['location_status'], $statusTypes))
+			{
+				$this->model->status = $input['location_status'];
+			}
+		}
 
 		return $this->model->save();
 	}
@@ -238,7 +245,6 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 			return $this->form->getFormAs('Html');
 		}
 	}
-
 }
 
 ?>
