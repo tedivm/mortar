@@ -1,18 +1,19 @@
 <?php
 
-class MortarPluginFormInputUserCheckSubmit //implements FormToHtmlHook
+class MortarPluginFormInputUserCheckSubmit
 {
 	protected $input;
 
+	protected $inputName = 'user';
+
 	public function setInput(FormInput $input)
 	{
-		if($input->type != 'user')
+		if($input->type != $this->inputName)
 			return;
 
 		$this->input = $input;
 
 	}
-
 
 	public function processInput($inputHandler)
 	{
@@ -31,15 +32,23 @@ class MortarPluginFormInputUserCheckSubmit //implements FormToHtmlHook
 
 					$input = trim($input);
 
-					if($user = ActiveUser::getIdFromName($input))
-						$selectedMemberGroups[] = $user;
+					if($value = $this->inputToValue($input))
+						$selectedMemberGroups[] = $value;
 				}
 
 				$inputHandler[$name] = $selectedMemberGroups;
 			}else{
-				$inputHandler[$name] = ActiveUser::getIdFromName($inputHandler[$name]);
+				if($value = $this->inputToValue($inputHandler[$name]))
+					$inputHandler[$name] = $value;
 			}
 		}
+	}
+
+	protected function inputToValue($input)
+	{
+		if($user = ActiveUser::getIdFromName($input))
+			return $user;
+		return false;
 	}
 }
 
