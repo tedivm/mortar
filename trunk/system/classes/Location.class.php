@@ -437,7 +437,7 @@ class Location
 					$locationInfo['owner'] = $dbLocation->owner;
 					$locationInfo['group'] = $dbLocation->groupOwner;
 					$locationInfo['inherits'] = ($dbLocation->inherits == 1);
-					$locationInfo['status'] = $dbLocation->resrouceStatus;
+					$locationInfo['status'] = $dbLocation->resourceStatus;
 
 					$db_meta = new ObjectRelationshipMapper('location_meta');
 					$db_meta->location_id = $locationInfo['id'];
