@@ -33,6 +33,14 @@ class ModelActionAdd extends ModelActionBase
 	protected $formStatus = false;
 
 	/**
+	 * This is the model that called up the action.
+	 *
+	 * @access protected
+	 * @var LocationModel
+	 */
+	protected $model;
+
+	/**
 	 * This method checks to see if input was sent, validates that input through a subordinate class,
 	 * passes it to the processInput class to save, and then sets the formStatus to the appropriate value.
 	 *
@@ -53,10 +61,16 @@ class ModelActionAdd extends ModelActionBase
 			{
 				Cache::clear('models', $this->model->getType(), 'browseModelBy');
 				$this->formStatus = true;
+				$this->onSuccess();
 			}else{
 				$this->ioHandler->setStatusCode(400);
 			}
 		}
+	}
+
+	protected function onSuccess()
+	{
+
 	}
 
 	/**
@@ -122,11 +136,6 @@ class ModelActionAdd extends ModelActionBase
 		}
 	}
 
-
-
-
-
-
 	/**
 	 * This function seperates out the specific input groups (specified by groupname_) and adds them to the object
 	 * that uses them.
@@ -172,9 +181,6 @@ class ModelActionAdd extends ModelActionBase
 		return $inputGroups;
 	}
 
-
-
-
 	/**
 	 * This function handles the view for the admin format. If the form was not submitted, or if there is an error, it
 	 * gets displayed. Otherwise we redirect the output to the newly saved resource (as a way to prevent the backspace
@@ -199,11 +205,8 @@ class ModelActionAdd extends ModelActionBase
 				 	2. to the edit page, also with a success message
 				 	*3. to the 'read' page, which isn't really defined yet for the admin side of things
 				*/
-				$url = new Url();
-				$url->id = $this->model->getId();
-				$url->type = $this->model->getType();
-				$url->format = 'Admin';
-				$url->action = 'Read';
+
+				$url = $this->getRedirectUrl();
 
 				//add some sort of message variable so the read page can add a 'you saved' or 'you edited' thing
 
@@ -211,11 +214,22 @@ class ModelActionAdd extends ModelActionBase
 
 
 			}else{
-				return 'Unable to add ' . $this->type;
+				return $this->form->getFormAs('Html');
 			}
 		}else{
 			return $this->form->getFormAs('Html');
 		}
+	}
+
+	protected function getRedirectUrl()
+	{
+		$query = Query::getQuery();
+		$url = new Url();
+		$url->id = $this->model->getId();
+		$url->type = $this->model->getType();
+		$url->format = $query['format'];
+		$url->action = 'Read';
+		return $url;
 	}
 
 }

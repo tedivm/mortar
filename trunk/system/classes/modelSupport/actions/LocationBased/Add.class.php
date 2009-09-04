@@ -42,20 +42,11 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 	 */
 	protected $formStatus = false;
 
-	/**
-	 * This method checks to see if input was sent, validates that input through a subordinate class,
-	 * passes it to the processInput class to save, and then sets the formStatus to the appropriate value.
-	 *
-	 */
-	public function logic()
+	protected function onSuccess()
 	{
-		parent::logic();
-		if($this->formStatus)
-		{
-			$modelLocation = $this->model->getLocation();
-			$parentLocation = $modelLocation->getParent();
-			$parentLocation->save();
-		}
+		$modelLocation = $this->model->getLocation();
+		$parentLocation = $modelLocation->getParent();
+		$parentLocation->save();
 	}
 
 	/**
@@ -202,49 +193,17 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 
 	}
 
-	/**
-	 * This function handles the view for the admin format. If the form was not submitted, or if there is an error, it
-	 * gets displayed. Otherwise we redirect the output to the newly saved resource (as a way to prevent the backspace
-	 * duplicate issue).
-	 *
-	 * @return string
-	 */
-	public function viewAdmin()
+	protected function getRedirectUrl()
 	{
-		if($this->form->wasSubmitted())
-		{
-			if($this->formStatus === true)
-			{
-
-				/*
-				 where should i go after post? I need to redirect somewhere to prevent duplicate form submissions
-				 when people use the back button.
-
-				 Current options-
-
-				 	1. back to this page, with a success message
-				 	2. to the edit page, also with a success message
-				 	*3. to the 'read' page, which isn't really defined yet for the admin side of things
-				*/
-
-				$locationId = $this->model->getLocation()->getId();
-				$url = new Url();
-				$url->locationId = $locationId;
-				$url->format = 'Admin';
-				$url->action = 'Read';
-
-				//add some sort of message variable so the read page can add a 'you saved' or 'you edited' thing
-
-				$this->ioHandler->addHeader('Location', (string) $url);
-
-
-			}else{
-				return $this->makeDisplay();
-			}
-		}else{
-			return $this->form->getFormAs('Html');
-		}
+		$query = Query::getQuery();
+		$locationId = $this->model->getLocation()->getId();
+		$url = new Url();
+		$url->locationId = $locationId;
+		$url->format = $query['format'];
+		$url->action = 'Read';
+		return $url;
 	}
+
 }
 
 ?>

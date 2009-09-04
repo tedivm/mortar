@@ -21,6 +21,14 @@ abstract class ModelActionLocationBasedBase extends ModelActionBase
 	protected $lastModified;
 
 	/**
+	 * This is the model that called up the action.
+	 *
+	 * @access protected
+	 * @var LocationModel
+	 */
+	protected $model;
+
+	/**
 	 * This function sends along the Last-Modified headers, and if $this->cacheExpirationOffset is set it also sends
 	 * that to the ioHandler. This is vital for client side http caching
 	 *
