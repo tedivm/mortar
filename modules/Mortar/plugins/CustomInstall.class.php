@@ -16,8 +16,14 @@ class MortarPluginCustomInstall
 	{
 		Hook::registerPlugin('system', 'adminInterface', 'navigation', $this->packageId, 'AdminNav');
 		Hook::registerPlugin('Forms', 'HtmlConvert', 'location', $this->packageId, 'FormInputLocationToHtml');
+
 		Hook::registerPlugin('Forms', 'HtmlConvert', 'user', $this->packageId, 'FormInputUserToHtml');
 		Hook::registerPlugin('Forms', 'checkSubmit', 'user', $this->packageId, 'FormInputUserCheckSubmit');
+
+		Hook::registerPlugin('Forms', 'HtmlConvert', 'membergroup',
+									$this->packageId, 'FormInputMembergroupToHtml');
+		Hook::registerPlugin('Forms', 'checkSubmit', 'membergroup',
+									$this->packageId, 'FormInputMembergroupCheckSubmit');
 
 		CronManager::registerJob('CachePurge', 'Mortar', 'module', 30);
 	}
