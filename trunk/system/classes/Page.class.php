@@ -549,7 +549,7 @@ class Page implements ArrayAccess
 				$breadCrumb->wrapAround($breadCrumbList);
 
 				$breadCrumbClean = new HtmlObject('div');
-				$breadCrumbClean->addClass('clean');
+				$breadCrumbClean->property('style', 'clear: left');
 				$breadCrumb->wrapAround($breadCrumbClean);
 
 				foreach($urlList as $url)
