@@ -239,8 +239,13 @@ class Hook
 
 	static public function mergeResults($results)
 	{
-		if(count($results) < 2)
+		$count = count($results);
+		if($count < 1)
 			return array();
+
+		if($count == 1)
+			return $results[0];
+
 		return call_user_func_array('array_merge', $results);
 	}
 
