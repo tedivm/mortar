@@ -43,6 +43,19 @@ class LocationModel extends ModelBase
 	 */
 	protected $fallbackActionString = 'ModelActionLocationBased';
 
+	/**
+	 * If set this is used as the default status for a new model.
+	 *
+	 * @var string
+	 */
+	static protected $defaultStatus;
+
+	/**
+	 * This function contains an array of strings that can be used as a status type for a model.
+	 *
+	 * @var array
+	 */
+	static public $statusTypes = array();
 
 	/**
 	 * The constructor sets some basic properties and, if an ID is passed, initializes the model. It runs the parent
@@ -81,6 +94,10 @@ class LocationModel extends ModelBase
 			{
 				$this->location = new Location($locationId);
 				$this->properties['name'] = $this->location->getName();
+				$this->properties['status'] = $this->location->getStatus();
+			}else{
+				if(!isset($this->properties['status']) && $status = staticHack(get_class($this), 'defaultStatus'))
+					$this->properties['status'] = $status;
 			}
 		}
 	}
@@ -100,7 +117,6 @@ class LocationModel extends ModelBase
 
 		try
 		{
-
 			$isFirstSave = !isset($this->id);
 
 			if(!parent:: save())
@@ -129,6 +145,10 @@ class LocationModel extends ModelBase
 				$location->setName($this->properties['name']);
 			}
 
+			if(isset($this->properties['status']))
+				$location->setStatus($this->properties['status']);
+
+
 			if(!$location->save())
 				throw new CoreError('Unable to save model location');
 
@@ -151,11 +171,33 @@ class LocationModel extends ModelBase
 		return true;
 	}
 
+	/**
+	 * This function acts as a hook for inheriting classes. It is called the first time a model is saved, after its
+	 * location has been saved.
+	 *
+	 */
 	protected function firstSaveLocation()
 	{
 
 	}
 
+	/**
+	 * This function returns the different types of status a model can have.
+	 *
+	 * @hook *model getAllowedStatusTypes
+	 * @return array
+	 */
+	public function getStatusTypes()
+	{
+		$types = staticHack(get_class($this), 'statusTypes');
+
+		$hook = new Hook();
+		$hook->loadModelPlugins($this, 'getAllowedStatusTypes');
+		$extraTypes = Hook::mergeResults($hook->getExtraTypes());
+
+		$allTypes = array_merge($types, $extraTypes);
+		return $allTypes;
+	}
 
 	/**
 	 * This function first deletes its location and then runs the parent delete function.  This function has a high run
