@@ -513,10 +513,11 @@ class Location
 		if(is_numeric($this->group))
 		{
 			$db_location->groupOwner = $this->group;
+		}elseif($parent && $parentGroup = $parent->getOwnerGroup()){
+			$db_location->groupOwner = $parentGroup;
 		}else{
 			$db_location->querySet('groupOwner', 'NULL');
 		}
-
 
 		if(!$db_location->save())
 		{
