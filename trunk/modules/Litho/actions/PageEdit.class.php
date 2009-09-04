@@ -6,7 +6,8 @@ class LithoActionPageEdit extends ModelActionLocationBasedEdit
 	{
 		$form = parent::getForm();
 
-		$form->createInput('model_note')->
+		$form->changeSection('model_content')->
+			createInput('model_note')->
 			setLabel('Note')->
 			addRule('maxlength', 200);
 		return $form;
