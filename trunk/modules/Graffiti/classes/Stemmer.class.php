@@ -61,6 +61,8 @@ class GraffitiStemmer
 		{
 			$word = $value;
 		}else{
+			if(strlen($word) <= 2)
+				return $word;
 			$word = self::step1b($word);
 			$word = self::step1c($word);
 			$word = self::step2($word);
@@ -93,6 +95,9 @@ class GraffitiStemmer
 
 	static protected function step0($word)
 	{
+		if(substr($word, 0, 1) == '\'')
+			$word = substr($word, 1);
+
 		if(substr($word, -3) == '\'s\'')
 		{
 			$word = substr($word, 0, strlen($word) - 3);
@@ -129,16 +134,8 @@ class GraffitiStemmer
 
 		if(substr($word, -1) == 's')
 		{
-
-//			if( !self::containsVowel(substr($word, -2, 1)) )
-//				$word = substr($word, 0, strlen($word) - 1);
-
-
 			if(self::containsVowel(substr($word, 0, strlen($word) - 2)))
 				$word = substr($word, 0, strlen($word) - 1);
-
-//			if(!self::containsVowel(substr($word, -2, 1)) && self::containsVowel(substr($word, 0, strlen($word) - 2)))
-//				$word = substr($word, 0, strlen($word) - 1);
 
 			return $word;
 		}
@@ -404,17 +401,14 @@ class GraffitiStemmer
 	{
 		$chars = str_split($word);
 
-		$yChars = array_keys($chars, 'y');
-
-		if($yChars[0] === 0)
-		{
+		if($chars[0] == 'y')
 			$chars[0] = 'Y';
-			array_shift($yChars);
-		}
+
+		$yChars = array_keys($chars, 'y');
 
 		foreach($yChars as $index)
 			if(self::containsVowel($chars[$index - 1]))
-				$chars[0] = 'Y';
+				$chars[$index] = 'Y';
 
 		$word = implode('', $chars);
 		return $word;
