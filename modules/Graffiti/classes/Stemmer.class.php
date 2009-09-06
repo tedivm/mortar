@@ -13,6 +13,7 @@
  * This class takes in a word and returns a stem for that word.
  *
  * This code was based off of the English Porter2 stemming algorithm.
+ * Test against http://snowball.tartarus.org/algorithms/english/diffs.txt
  *
  * @link http://snowball.tartarus.org/algorithms/english/stemmer.html
  * @package Graffiti
@@ -46,49 +47,67 @@ class GraffitiStemmer
 
 
 	static protected $step1Brules = array(
-			'ingly' => array('count' => 5, 'rule' => '2'),
-			'eedly' => array('count' => 5, 'rule' => '1'),
-			'edly' => array('count' => 5, 'rule' => '2'),
-			'eed' => array('count' => 5, 'rule' =>  '1'),
-			'ing' => array('count' => 5, 'rule' =>  '2'),
-			'ed' => array('count' => 5, 'rule' =>  '2'));
+			'ingly' => 2,
+			'eedly' => 1,
+			'edly' => 2,
+			'eed' => 1,
+			'ing' => 2,
+			'ed' => 2);
 
 	static protected $step2rules = array(
-			'ization' => array('count' => 7, 'rule' => 'ize'),
-			'ousness' => array('count' => 7, 'rule' => 'ous'),
-			'iveness' => array('count' => 7, 'rule' => 'ive'),
-			'ational' => array('count' => 7, 'rule' => 'ate'),
-			'fulness' => array('count' => 7, 'rule' => 'ful'),
-			'tional' => array('count' => 6, 'rule' => 'tion'),
-			'lessli' => array('count' => 6, 'rule' => 'less'),
-			'biliti' => array('count' => 6, 'rule' => 'ble'),
-			'entli' => array('count' => 5, 'rule' => 'ent'),
-			'ation' => array('count' => 5, 'rule' => 'ate'),
-			'alism' => array('count' => 5, 'rule' => 'al'),
-			'aliti' => array('count' => 5, 'rule' => 'al'),
-			'ousli' => array('count' => 5, 'rule' => 'ous'),
-			'iviti' => array('count' => 5, 'rule' => 'ive'),
-			'fulli' => array('count' => 5, 'rule' => 'ful'),
-			'enci' => array('count' => 4, 'rule' => 'ence'),
-			'anci' => array('count' => 4, 'rule' => 'ance'),
-			'abli' => array('count' => 4, 'rule' => 'able'),
-			'izer' => array('count' => 4, 'rule' => 'ize'),
-			'ator' => array('count' => 4, 'rule' => 'ate'),
-			'alli' => array('count' => 4, 'rule' => 'al'),
-			'bli' => array('count' => 3, 'rule' => 'ble')
-		);
+			'ization' => 'ize',
+			'ousness' => 'ous',
+			'iveness' => 'ive',
+			'ational' => 'ate',
+			'fulness' => 'ful',
+			'tional' => 'tion',
+			'lessli' => 'less',
+			'biliti' => 'ble',
+			'entli' => 'ent',
+			'ation' => 'ate',
+			'alism' => 'al',
+			'aliti' => 'al',
+			'ousli' => 'ous',
+			'iviti' => 'ive',
+			'fulli' => 'ful',
+			'enci' => 'ence',
+			'anci' => 'ance',
+			'abli' => 'able',
+			'izer' => 'ize',
+			'ator' => 'ate',
+			'alli' => 'al',
+			'bli' => 'ble');
 
 	static protected $step3rules = array(
-			'ational' => array('count'=> 7, 'rule' => 'ate'),
-			'tional' => array('count'=> 6, 'rule' => 'tion'),
-			'ative' => array('count'=> 5, 'rule' => true),
-			'alize' => array('count'=> 5, 'rule' => 'al'),
-			'icate' => array('count'=> 5, 'rule' => 'ic'),
-			'iciti' => array('count'=> 5, 'rule' => 'ic'),
-			'ical' => array('count'=> 4, 'rule' => 'ic'),
-			'ness' => array('count'=> 4, 'rule' => false),
-			'ful' => array('count'=> 3, 'rule' => false)
-		);
+			'ational' => 'ate',
+			'tional' => 'tion',
+			'ative' => true,
+			'alize' => 'al',
+			'icate' => 'ic',
+			'iciti' => 'ic',
+			'ical' => 'ic',
+			'ness' => false,
+			'ful' => false);
+
+	static protected $step4Tests = array(
+					'ement',
+					'ance',
+					'ence',
+					'able',
+					'ible',
+					'ment',
+					'ant',
+					'ent',
+					'ism',
+					'ate',
+					'ion',
+					'iti',
+					'ous',
+					'ive',
+					'ize',
+					'er',
+					'ic',
+					'al');
 
 	static public function stem($word)
 	{
@@ -117,13 +136,9 @@ class GraffitiStemmer
 
 			$word = self::step1b($word);
 			$word = self::step1c($word);
-
 			$word = self::step2($word);
-
 			$word = self::step3($word);
-
 			$word = self::step4($word);
-
 			$word = self::step5($word);
 		}
 		$word = str_replace('Y', 'y', $word);
@@ -209,22 +224,25 @@ class GraffitiStemmer
 	static protected function step1b($word)
 	{
 		$pieces = array();
-		foreach(self::$step1Brules as $string => $info)
+
+		for($i = 5; $i > 1; $i--)
 		{
-			$method = $info['rule'];
-			$checkStringSize = $info['count'];
-			$checkStringSize = strlen($string);
+			if(!isset($pieces[$i]))
+				$pieces[$i] = substr($word, -$i);
 
-			if(!isset($pieces[$checkStringSize]))
-				$pieces[$checkStringSize] = substr($word, -$checkStringSize);
+			if(!$pieces[$i])
+				continue;
 
-			if($pieces[$checkStringSize] == $string)
+			if(isset(self::$step1Brules[$pieces[$i]]))
 			{
+				$method = self::$step1Brules[$pieces[$i]];
+				$checkStringSize = $i;
+
 				if($method == 1)
 				{
 					$segments = self::getSegments($word);
 					$r1 = (isset($segments['r1'])) ? $segments['r1'] : '';
-					if(strpos($r1, $string) !== false)
+					if(strpos($r1, $pieces[$i]) !== false)
 					{
 						$newWord = substr($word, 0, -$checkStringSize);
 						$newWord .= 'ee';
@@ -261,10 +279,11 @@ class GraffitiStemmer
 						return $newWord;
 					}
 					return $word;
-				}
 
-				return $word;
-			} // if(substr($word, -$checkStringSize) == $string)
+
+				}
+					return $word;
+			}
 		}
 		return $word;
 	}
@@ -286,27 +305,24 @@ class GraffitiStemmer
 
 	static protected function step2($word)
 	{
-		$suffixPiece = array();
 		$pieces = array();
-		$wordLen = strlen($word);
-
-		foreach(self::$step2rules as $string => $info)
+		for($i = 7; $i > 2; $i--)
 		{
-			$replacement = $info['rule'];
-			$suffixSize = $info['count'];
+			if(!isset($pieces[$i]))
+				$pieces[$i] = substr($word, -$i);
 
-			if(!isset($pieces[$suffixSize]))
-				$pieces[$suffixSize] = substr($word, -$suffixSize);
-
-			if($suffixSize > $wordLen)
+			if(!$pieces[$i])
 				continue;
 
-			if($pieces[$suffixSize] == $string)
+			if(isset(self::$step2rules[$pieces[$i]]))
 			{
+				$replacement = self::$step2rules[$pieces[$i]];
+				$suffixSize = $i;
+
 				$segments = self::getSegments($word);
 				$r1 = (isset($segments['r1'])) ? $segments['r1'] : '';
 
-				if(strpos($r1, $string) === false)
+				if(strpos($r1, $pieces[$i]) === false)
 					break;
 
 				$word = substr($word, 0, strlen($word) - $suffixSize);
@@ -339,7 +355,6 @@ class GraffitiStemmer
 
 		if($pieces[2] == 'li')
 		{
-
 			$segments = self::getSegments($word);
 			$r1 = (isset($segments['r1'])) ? $segments['r1'] : '';
 
@@ -358,26 +373,24 @@ class GraffitiStemmer
 	static protected function step3($word)
 	{
 		$pieces = array();
-		$wordLen = strlen($word);
-
-		foreach(self::$step3rules as $string => $info)
+		for($i = 7; $i > 2; $i--)
 		{
-			$rule = $info['rule'];
-			$stringLen = $info['count'];
+			if(!isset($pieces[$i]))
+				$pieces[$i] = substr($word, -$i);
 
-			if($stringLen > $wordLen)
+			if(!$pieces[$i])
 				continue;
 
-			if(!isset($pieces[$stringLen]))
-				$pieces[$stringLen] = substr($word, -$stringLen);
-
-			if($pieces[$stringLen] == $string)
+			if(isset(self::$step3rules[$pieces[$i]]))
 			{
+				$rule = self::$step3rules[$pieces[$i]];;
+				$stringLen = $i;
+
 				$segments = self::getSegments($word);
 				$r1 = (isset($segments['r1'])) ? $segments['r1'] : '';
 				$r2 = (isset($segments['r2'])) ? $segments['r2'] : '';
 
-				if(strpos($r1, $string) === false)
+				if(strpos($r1, $pieces[$i]) === false)
 					return $word;
 
 				if(is_string($rule))
@@ -385,7 +398,7 @@ class GraffitiStemmer
 					$newWord = substr($word, 0, strlen($word) - $stringLen);
 					$newWord .= $rule;
 					return $newWord;
-				}elseif($string == 'ative'){
+				}elseif($i == 5 && $pieces[$i] == 'ative'){
 					if(strpos($r2, 'ative') !== false)
 					{
 						$newWord = substr($word, 0, strlen($word) - $stringLen);
@@ -398,61 +411,43 @@ class GraffitiStemmer
 					return $newWord;
 				}
 				return $word;
+
 			}
 		}
-
 		return $word;
 	}
 
 	static protected function step4($word)
 	{
-		$step4Tests = array(
-					'ement' => 5,
-					'ance' => 4,
-					'ence' => 4,
-					'able' => 4,
-					'ible' => 4,
-					'ment' => 4,
-					'ant' => 3,
-					'ent' => 3,
-					'ism' => 3,
-					'ate' => 3,
-					'ion' => 3,
-					'iti' => 3,
-					'ous' => 3,
-					'ive' => 3,
-					'ize' => 3,
-					'er' => 2,
-					'ic' => 2,
-					'al' => 2);
-
 		$pieces = array();
-
-		foreach($step4Tests as $test => $suffixSize)
+		for($i = 5; $i > 1; $i--)
 		{
-			if(!isset($pieces[$suffixSize]))
-				$pieces[$suffixSize] = substr($word, -$suffixSize);
+			if(!isset($pieces[$i]))
+				$pieces[$i] = substr($word, -$i);
 
-			if($pieces[$suffixSize] == $test)
+			if(!$pieces[$i])
+				continue;
+
+			if(in_array($pieces[$i], self::$step4Tests))
 			{
 				$segments = self::getSegments($word);
 				$r1 = (isset($segments['r1'])) ? $segments['r1'] : '';
 				$r2 = (isset($segments['r2'])) ? $segments['r2'] : '';
 
-				if($r2 != '' && strpos($r2, $test) !== false)
+				if($r2 != '' && strpos($r2, $pieces[$i]) !== false)
 				{
-					if($test == 'ion')
+					if($pieces[$i] == 'ion')
 					{
 						$char = substr($word, -4, 1);
 						if($char == 's' || $char == 't')
 						{
-							$newWord = substr($word, 0, strlen($word) - $suffixSize);
+							$newWord = substr($word, 0, strlen($word) - $i);
 							return $newWord;
 						}
 						return $word;
 
 					}else{
-						$newWord = substr($word, 0, strlen($word) - $suffixSize);
+						$newWord = substr($word, 0, strlen($word) - $i);
 						return $newWord;
 					}
 				}
