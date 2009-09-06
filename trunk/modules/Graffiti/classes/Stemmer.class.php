@@ -39,7 +39,7 @@ class GraffitiStemmer
 								'only' => 'onli',
 								'singly' => 'singl');
 
-	static $secondLevel = array('inning', 'outing', 'canning', 'herring', 'proceed', 'exceed', 'succeed');
+	static $secondLevel = array('inning', 'outing', 'canning', 'herring','earring', 'proceed', 'exceed', 'succeed');
 
 	static $segmentExceptions = array('gener', 'commun', 'arsen');
 
@@ -54,21 +54,8 @@ class GraffitiStemmer
 			return $value;
 
 		$word = self::markVowels($word);
-
-$x = 1;
-
 		$word = self::step0($word);
-
-//		var_dump($word); echo $x++;
-
-
-		$segments = self::getSegments($word);
-		$r1 = (isset($segments['r1'])) ? $segments['r1'] : '';
-		$r2 = (isset($segments['r2'])) ? $segments['r2'] : '';
-//var_dump($segments);
-		$word = self::step1a($word, $r1, $r2);
-
-//		var_dump($word); echo $x++;
+		$word = self::step1a($word);
 
 		if($value = self::secondException($word))
 		{
@@ -77,33 +64,12 @@ $x = 1;
 			if(strlen($word) <= 2)
 				return $word;
 
-
-//			var_dump($word); echo $x++;
-
 			$word = self::step1b($word);
-
-//			var_dump($word); echo $x++;
-
 			$word = self::step1c($word);
-
-//			var_dump($word); echo $x++;
-
 			$word = self::step2($word);
-
-//			var_dump($word); echo $x++;
-
 			$word = self::step3($word);
-
-//			var_dump($word); echo $x++;
-
 			$word = self::step4($word);
-
-//			var_dump($word); echo $x++;
-
 			$word = self::step5($word);
-
-//			var_dump($word); echo $x++;
-
 		}
 		$word = str_replace('Y', 'y', $word);
 		return $word;
@@ -166,17 +132,10 @@ $x = 1;
 
 		$suffix = substr($word, -2);
 		if($suffix == 'us' || $suffix == 'ss')
-		{
 			return $word;
-		}
 
-		if(substr($word, -1) == 's')
-		{
-			if(self::containsVowel(substr($word, 0, strlen($word) - 2)))
-				$word = substr($word, 0, strlen($word) - 1);
-
-			return $word;
-		}
+		if(substr($word, -1) == 's' && self::containsVowel(substr($word, 0, strlen($word) - 2)))
+			$word = substr($word, 0, strlen($word) - 1);
 
 		return $word;
 	}
@@ -225,13 +184,9 @@ $x = 1;
 							return $newWord;
 						}
 
-						// it changed to $newWord then "baying" breaks
 						$segments = self::getSegments($newWord);
 						$r1 = (isset($segments['r1'])) ? $segments['r1'] : '';
-//var_dump($r1);
-//var_dump($string);
-//var_dump(self::isShort($newWord));
-//var_dump($newWord);
+
 						if(self::isShort($newWord) && $r1 == ''){
 							$newWord .= 'e';
 							return $newWord;
@@ -297,7 +252,6 @@ $x = 1;
 			$suffixSize = strlen($string);
 			if(substr($word, -$suffixSize) == $string && strpos($r1, $string) !== false)
 			{
-
 				$word = substr($word, 0, strlen($word) - $suffixSize);
 				$word .= $replacement;
 				return $word;
@@ -314,12 +268,12 @@ $x = 1;
 			return $word;
 		}
 
-		if(substr($word, -2) == 'li')
+		if(substr($word, -2) == 'li' && strpos($r1, 'li') !== false)
 		{
 			$char = substr($word, -3, 1);
+
 			if(strpos(self::$validLi, $char) !== false)
-				$word = substr($word, 0, strlen($word) - 2);
-			return $word;
+				return substr($word, 0, strlen($word) - 2);
 		}
 
 		return $word;
@@ -327,8 +281,10 @@ $x = 1;
 
 	static protected function step3($word)
 	{
-		$step3tests = array('tional' => 'tion',
+
+		$step3tests = array(
 				'ational' => 'ate',
+				'tional' => 'tion',
 				'ative' => true,
 				'alize' => 'al',
 				'icate' => 'ic',
@@ -406,7 +362,6 @@ $x = 1;
 			$testLen = strlen($test);
 			if(substr($word, -$testLen) == $test)
 			{
-
 				if(strpos($r2, $test) !== false)
 				{
 					if($test == 'ion')
@@ -417,7 +372,6 @@ $x = 1;
 							$newWord = substr($word, 0, strlen($word) - $testLen);
 							return $newWord;
 						}
-
 						return $word;
 
 					}else{
@@ -433,15 +387,12 @@ $x = 1;
 
 	static protected function step5($word)
 	{
-		$segments = self::getSegments($word);
-		$r1 = (isset($segments['r1'])) ? $segments['r1'] : '';
-		$r2 = (isset($segments['r2'])) ? $segments['r2'] : '';
-//var_dump($segments);
-//var_dump($word);
 		$lastChar = substr($word, -1);
-
 		if($lastChar == 'e')
 		{
+			$segments = self::getSegments($word);
+			$r1 = (isset($segments['r1'])) ? $segments['r1'] : '';
+			$r2 = (isset($segments['r2'])) ? $segments['r2'] : '';
 
 			if(strpos($r2, 'e') !== false)
 			{
@@ -454,18 +405,19 @@ $x = 1;
 
 					if(!self::isShort($subString))
 						return $subString;
-
-					return $word;
 				}
+				return $word;
 			}
 
 			return $word;
 
 		}elseif($lastChar == 'l'){
+
+			$segments = self::getSegments($word);
+			$r2 = (isset($segments['r2'])) ? $segments['r2'] : '';
+
 			if(strpos($r2, 'l') !== false && substr($word, -2, 1) == 'l')
-			{
 				return substr($word, 0, strlen($word) - 1);
-			}
 		}
 		return $word;
 	}
@@ -493,10 +445,14 @@ $x = 1;
 
 		foreach(self::$segmentExceptions as $exception)
 		{
-			if(strpos($exception, $word) === 0)
+			$exceptionLength = strlen($exception);
+			if(substr($word, 0, $exceptionLength) == $exception)
 			{
-				$output['r1'] = $exception;
+				if($word === $exception)
+					return array();
+
 				$word = substr($word, strlen($exception));
+				$output['r1'] = $word;
 				break;
 			}
 		}
@@ -506,7 +462,6 @@ $x = 1;
 		$const = false;
 		foreach($chars as $index => $char)
 		{
-
 			if($vowel && $const)
 			{
 				$vowel = false;
@@ -519,18 +474,13 @@ $x = 1;
 					$output['r2'] = substr($word, $index);
 					break;
 				}
-
 			}
 
 			if(self::containsVowel($char))
 			{
 				$vowel = true;
-			}else{
-				// if it follows a vowel
-				if($vowel)
-				{
-					$const = true;
-				}
+			}elseif($vowel){
+				$const = true;
 			}
 		}
 		return $output;
