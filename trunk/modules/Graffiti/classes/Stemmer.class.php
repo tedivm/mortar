@@ -22,7 +22,6 @@ class GraffitiStemmer
 {
 	static $vowels = 'aeiouy';
 	static $shortWordVowels = 'aeiouywxY';
-	static $double = array('bb', 'dd', 'ff', 'gg', 'mm', 'nn', 'pp', 'rr', 'tt');
 	static $validLi = 'cdeghkmnrt';
 
 	static $invariantForms = array( 'sky', 'news', 'howe', 'atlas', 'cosmos', 'bias', 'andes');
@@ -43,6 +42,54 @@ class GraffitiStemmer
 
 	static $segmentExceptions = array('gener', 'commun', 'arsen');
 
+	static $segmentCache = array();
+
+
+	static protected $step1Brules = array(
+			'ingly' => array('count' => 5, 'rule' => '2'),
+			'eedly' => array('count' => 5, 'rule' => '1'),
+			'edly' => array('count' => 5, 'rule' => '2'),
+			'eed' => array('count' => 5, 'rule' =>  '1'),
+			'ing' => array('count' => 5, 'rule' =>  '2'),
+			'ed' => array('count' => 5, 'rule' =>  '2'));
+
+	static protected $step2rules = array(
+			'ization' => array('count' => 7, 'rule' => 'ize'),
+			'ousness' => array('count' => 7, 'rule' => 'ous'),
+			'iveness' => array('count' => 7, 'rule' => 'ive'),
+			'ational' => array('count' => 7, 'rule' => 'ate'),
+			'fulness' => array('count' => 7, 'rule' => 'ful'),
+			'tional' => array('count' => 6, 'rule' => 'tion'),
+			'lessli' => array('count' => 6, 'rule' => 'less'),
+			'biliti' => array('count' => 6, 'rule' => 'ble'),
+			'entli' => array('count' => 5, 'rule' => 'ent'),
+			'ation' => array('count' => 5, 'rule' => 'ate'),
+			'alism' => array('count' => 5, 'rule' => 'al'),
+			'aliti' => array('count' => 5, 'rule' => 'al'),
+			'ousli' => array('count' => 5, 'rule' => 'ous'),
+			'iviti' => array('count' => 5, 'rule' => 'ive'),
+			'fulli' => array('count' => 5, 'rule' => 'ful'),
+			'enci' => array('count' => 4, 'rule' => 'ence'),
+			'anci' => array('count' => 4, 'rule' => 'ance'),
+			'abli' => array('count' => 4, 'rule' => 'able'),
+			'izer' => array('count' => 4, 'rule' => 'ize'),
+			'ator' => array('count' => 4, 'rule' => 'ate'),
+			'alli' => array('count' => 4, 'rule' => 'al'),
+			'bli' => array('count' => 3, 'rule' => 'ble')
+		);
+
+	static protected $step3rules = array(
+			'ational' => array('count'=> 7, 'rule' => 'ate'),
+			'tional' => array('count'=> 6, 'rule' => 'tion'),
+			'ative' => array('count'=> 5, 'rule' => true),
+			'alize' => array('count'=> 5, 'rule' => 'al'),
+			'icate' => array('count'=> 5, 'rule' => 'ic'),
+			'iciti' => array('count'=> 5, 'rule' => 'ic'),
+			'ical' => array('count'=> 4, 'rule' => 'ic'),
+			'ness' => array('count'=> 4, 'rule' => false),
+			'ful' => array('count'=> 3, 'rule' => false)
+		);
+
 	static public function stem($word)
 	{
 		if(strlen($word) <= 2)
@@ -53,6 +100,7 @@ class GraffitiStemmer
 		if($value = self::firstException($word))
 			return $value;
 
+		self::$segmentCache = array();
 		$word = self::markVowels($word);
 		$word = self::step0($word);
 		$word = self::step1a($word);
@@ -62,16 +110,24 @@ class GraffitiStemmer
 			$word = $value;
 		}else{
 			if(strlen($word) <= 2)
+			{
+				self::$segmentCache = array();
 				return $word;
+			}
 
 			$word = self::step1b($word);
 			$word = self::step1c($word);
+
 			$word = self::step2($word);
+
 			$word = self::step3($word);
+
 			$word = self::step4($word);
+
 			$word = self::step5($word);
 		}
 		$word = str_replace('Y', 'y', $word);
+		self::$segmentCache = array();
 		return $word;
 	}
 
@@ -96,15 +152,22 @@ class GraffitiStemmer
 
 	static protected function step0($word)
 	{
-		if(substr($word, 0, 1) == '\'')
+		if(strpos($word, '\'') === 0)
 			$word = substr($word, 1);
 
-		if(substr($word, -3) == '\'s\'')
+		$wordLen = strlen($word);
+		$endLength = ($wordLen < 3) ? $wordLen : 3;
+		$lastChar = substr($word, -$endLength);
+
+		if(strpos($lastChar, '\'') === false)
+			return $word;
+
+		if($lastThree == '\'s\'')
 		{
 			$word = substr($word, 0, strlen($word) - 3);
-		}elseif(substr($word, -2) == '\'s'){
+		}elseif($endLength >= 2 && substr($word, -2) == '\'s'){
 			$word = substr($word, 0, strlen($word) - 2);
-		}elseif(substr($word, -1) == '\''){
+		}elseif($endLength >= 1 && substr($word, -1) == '\''){
 			$word = substr($word, 0, strlen($word) - 1);
 		}
 
@@ -134,26 +197,28 @@ class GraffitiStemmer
 		if($suffix == 'us' || $suffix == 'ss')
 			return $word;
 
-		if(substr($word, -1) == 's' && self::containsVowel(substr($word, 0, strlen($word) - 2)))
-			$word = substr($word, 0, strlen($word) - 1);
-
+		if(substr($word, -1) == 's')
+		{
+			$front = substr($word, 0, strlen($word) - 2);
+			if(preg_match('#[aeiouy]#', $front) !== 0)
+				$word = substr($word, 0, strlen($word) - 1);
+		}
 		return $word;
 	}
 
 	static protected function step1b($word)
 	{
-		$array = array();
-		$array['ingly'] = '2';
-		$array['eedly'] = '1';
-		$array['edly'] = '2';
-		$array['eed'] = '1';
-		$array['ing'] = '2';
-		$array['ed'] = '2';
-
-		foreach($array as $string => $method)
+		$pieces = array();
+		foreach(self::$step1Brules as $string => $info)
 		{
+			$method = $info['rule'];
+			$checkStringSize = $info['count'];
 			$checkStringSize = strlen($string);
-			if(substr($word, -$checkStringSize) == $string)
+
+			if(!isset($pieces[$checkStringSize]))
+				$pieces[$checkStringSize] = substr($word, -$checkStringSize);
+
+			if($pieces[$checkStringSize] == $string)
 			{
 				if($method == 1)
 				{
@@ -168,7 +233,7 @@ class GraffitiStemmer
 
 				}elseif($method == 2){
 					$newWord = substr($word, 0, -$checkStringSize);
-					if(self::containsVowel($newWord))
+					if(preg_match('#[aeiouy]#', $newWord) != 0)
 					{
 						$end = substr($newWord, -2);
 
@@ -178,7 +243,8 @@ class GraffitiStemmer
 							return $newWord;
 						}
 
-						if(in_array($end, self::$double))
+						$double = array('bb', 'dd', 'ff', 'gg', 'mm', 'nn', 'pp', 'rr', 'tt');
+						if(in_array($end, $double))
 						{
 							$newWord = substr($newWord, 0, strlen($newWord) - 1);
 							return $newWord;
@@ -212,7 +278,7 @@ class GraffitiStemmer
 
 		$suffix = substr($word, -1);
 
-		if($suffix == 'y' || $suffix == 'Y' && !self::containsVowel(substr($word, 1, strlen($word) - 1)))
+		if($suffix == 'y' || $suffix == 'Y' && !(preg_match('#[aeiouy]#', substr($word, 1, strlen($word) - 1)) != 0))
 			$word = substr($word, 0, $strlen - 1) . 'i';
 
 		return $word;
@@ -220,46 +286,46 @@ class GraffitiStemmer
 
 	static protected function step2($word)
 	{
-		$step2replacements = array(
-			'ization' => 'ize',
-			'ousness' => 'ous',
-			'iveness' => 'ive',
-			'ational' => 'ate',
-			'fulness' => 'ful',
-			'tional' => 'tion',
-			'lessli' => 'less',
-			'biliti' => 'ble',
-			'entli' => 'ent',
-			'ation' => 'ate',
-			'alism' => 'al',
-			'aliti' => 'al',
-			'ousli' => 'ous',
-			'iviti' => 'ive',
-			'fulli' => 'ful',
-			'enci' => 'ence',
-			'anci' => 'ance',
-			'abli' => 'able',
-			'izer' => 'ize',
-			'ator' => 'ate',
-			'alli' => 'al',
-			'bli' => 'ble');
+		$suffixPiece = array();
+		$pieces = array();
+		$wordLen = strlen($word);
 
-		$segments = self::getSegments($word);
-		$r1 = (isset($segments['r1'])) ? $segments['r1'] : '';
-
-		foreach($step2replacements as $string => $replacement)
+		foreach(self::$step2rules as $string => $info)
 		{
-			$suffixSize = strlen($string);
-			if(substr($word, -$suffixSize) == $string && strpos($r1, $string) !== false)
+			$replacement = $info['rule'];
+			$suffixSize = $info['count'];
+
+			if(!isset($pieces[$suffixSize]))
+				$pieces[$suffixSize] = substr($word, -$suffixSize);
+
+			if($suffixSize > $wordLen)
+				continue;
+
+			if($pieces[$suffixSize] == $string)
 			{
+				$segments = self::getSegments($word);
+				$r1 = (isset($segments['r1'])) ? $segments['r1'] : '';
+
+				if(strpos($r1, $string) === false)
+					break;
+
 				$word = substr($word, 0, strlen($word) - $suffixSize);
 				$word .= $replacement;
 				return $word;
 			}
 		}
 
-		if(substr($word, -3) == 'ogi' && strpos($r1, 'ogi') !== false)
+		if(!isset($pieces[3]))
+			$pieces[3] = substr($word, -3);
+
+		if($pieces[3] == 'ogi')
 		{
+			$segments = self::getSegments($word);
+			$r1 = (isset($segments['r1'])) ? $segments['r1'] : '';
+
+			if(strpos($r1, 'ogi') === false)
+				return $word;
+
 			if(substr($word, -4, 1) == 'l')
 			{
 				$word = substr($word, 0, strlen($word) - 3);
@@ -268,8 +334,18 @@ class GraffitiStemmer
 			return $word;
 		}
 
-		if(substr($word, -2) == 'li' && strpos($r1, 'li') !== false)
+		if(!isset($pieces[2]))
+			$pieces[2] = substr($word, -2);
+
+		if($pieces[2] == 'li')
 		{
+
+			$segments = self::getSegments($word);
+			$r1 = (isset($segments['r1'])) ? $segments['r1'] : '';
+
+			if(strpos($r1, 'li') === false)
+				return $word;
+
 			$char = substr($word, -3, 1);
 
 			if(strpos(self::$validLi, $char) !== false)
@@ -281,23 +357,21 @@ class GraffitiStemmer
 
 	static protected function step3($word)
 	{
+		$pieces = array();
+		$wordLen = strlen($word);
 
-		$step3tests = array(
-				'ational' => 'ate',
-				'tional' => 'tion',
-				'ative' => true,
-				'alize' => 'al',
-				'icate' => 'ic',
-				'iciti' => 'ic',
-				'ical' => 'ic',
-				'ness' => false,
-				'ful' => false
-				);
-
-		foreach($step3tests as $string => $rule)
+		foreach(self::$step3rules as $string => $info)
 		{
-			$stringLen = strlen($string);
-			if(substr($word, -$stringLen) == $string)
+			$rule = $info['rule'];
+			$stringLen = $info['count'];
+
+			if($stringLen > $wordLen)
+				continue;
+
+			if(!isset($pieces[$stringLen]))
+				$pieces[$stringLen] = substr($word, -$stringLen);
+
+			if($pieces[$stringLen] == $string)
 			{
 				$segments = self::getSegments($word);
 				$r1 = (isset($segments['r1'])) ? $segments['r1'] : '';
@@ -305,7 +379,6 @@ class GraffitiStemmer
 
 				if(strpos($r1, $string) === false)
 					return $word;
-
 
 				if(is_string($rule))
 				{
@@ -333,49 +406,53 @@ class GraffitiStemmer
 
 	static protected function step4($word)
 	{
-		$segments = self::getSegments($word);
-		$r1 = (isset($segments['r1'])) ? $segments['r1'] : '';
-		$r2 = (isset($segments['r2'])) ? $segments['r2'] : '';
-
 		$step4Tests = array(
-					'ement',
-					'ance',
-					'ence',
-					'able',
-					'ible',
-					'ment',
-					'ant',
-					'ent',
-					'ism',
-					'ate',
-					'ion',
-					'iti',
-					'ous',
-					'ive',
-					'ize',
-					'er',
-					'ic',
-					'al');
+					'ement' => 5,
+					'ance' => 4,
+					'ence' => 4,
+					'able' => 4,
+					'ible' => 4,
+					'ment' => 4,
+					'ant' => 3,
+					'ent' => 3,
+					'ism' => 3,
+					'ate' => 3,
+					'ion' => 3,
+					'iti' => 3,
+					'ous' => 3,
+					'ive' => 3,
+					'ize' => 3,
+					'er' => 2,
+					'ic' => 2,
+					'al' => 2);
 
-		foreach($step4Tests as $test)
+		$pieces = array();
+
+		foreach($step4Tests as $test => $suffixSize)
 		{
-			$testLen = strlen($test);
-			if(substr($word, -$testLen) == $test)
+			if(!isset($pieces[$suffixSize]))
+				$pieces[$suffixSize] = substr($word, -$suffixSize);
+
+			if($pieces[$suffixSize] == $test)
 			{
-				if(strpos($r2, $test) !== false)
+				$segments = self::getSegments($word);
+				$r1 = (isset($segments['r1'])) ? $segments['r1'] : '';
+				$r2 = (isset($segments['r2'])) ? $segments['r2'] : '';
+
+				if($r2 != '' && strpos($r2, $test) !== false)
 				{
 					if($test == 'ion')
 					{
 						$char = substr($word, -4, 1);
 						if($char == 's' || $char == 't')
 						{
-							$newWord = substr($word, 0, strlen($word) - $testLen);
+							$newWord = substr($word, 0, strlen($word) - $suffixSize);
 							return $newWord;
 						}
 						return $word;
 
 					}else{
-						$newWord = substr($word, 0, strlen($word) - $testLen);
+						$newWord = substr($word, 0, strlen($word) - $suffixSize);
 						return $newWord;
 					}
 				}
@@ -408,7 +485,6 @@ class GraffitiStemmer
 				}
 				return $word;
 			}
-
 			return $word;
 
 		}elseif($lastChar == 'l'){
@@ -432,7 +508,7 @@ class GraffitiStemmer
 		$yChars = array_keys($chars, 'y');
 
 		foreach($yChars as $index)
-			if(self::containsVowel($chars[$index - 1]))
+			if(preg_match('#[aeiouy]#', $chars[$index - 1]) != 0)
 				$chars[$index] = 'Y';
 
 		$word = implode('', $chars);
@@ -441,6 +517,10 @@ class GraffitiStemmer
 
 	static protected function getSegments($word)
 	{
+		if(isset(self::$segmentCache[$word]))
+			return self::$segmentCache[$word];
+
+		$realWord = $word;
 		$output = array();
 
 		foreach(self::$segmentExceptions as $exception)
@@ -449,7 +529,10 @@ class GraffitiStemmer
 			if(substr($word, 0, $exceptionLength) == $exception)
 			{
 				if($word === $exception)
+				{
+					self::$segmentCache[$word] = array();
 					return array();
+				}
 
 				$word = substr($word, strlen($exception));
 				$output['r1'] = $word;
@@ -476,13 +559,15 @@ class GraffitiStemmer
 				}
 			}
 
-			if(self::containsVowel($char))
+			if((preg_match('#[aeiouy]#', $char) != 0))
 			{
 				$vowel = true;
 			}elseif($vowel){
 				$const = true;
 			}
 		}
+
+		self::$segmentCache[$realWord] = $output;
 		return $output;
 	}
 
