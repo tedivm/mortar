@@ -7,10 +7,6 @@ The goal of this document is to list isolated classes or tools that are not avai
 
 = Details =
 
-== Word Stemmer ==
-
-A simple word stemmer class would be great for tagging and other data mining type stuff. There are a ton of examples out there of how to do this, but the PHP ones are all proprietary or have strong copyleft. Here are some [http://tartarus.org/~martin/PorterStemmer/ examples] that may serve as a starting point. Do not just copy them, as they are copyrighted and such; use them as a guideline for how to make it yourself.
-
 == Diff ==
 
 A class to compare two versions of a document (say, the wiki or cms revisions) is seriously needed at this point.
