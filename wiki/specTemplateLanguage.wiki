@@ -50,6 +50,8 @@ Here is a brainstormed and completely non-binding list of tags that the language
 
 {# model_tags #}
 
+{# model_status #}
+
 {# model_propertyX #}
 
 (These elements _should_ be supplied by ModelToHtml eventually.)
@@ -113,4 +115,30 @@ Retrieves the URL for the image specified by @1 from the gallery
 
 ===Logic===
 
-Math operators, logical operators, if structure, looping structures?
+{# %+ #} {# %- #} {# %* #} {# %/ #}
+- Perform basic mathematical operations on individual arguments OR template text.
+
+{# and #} {# or #} {# not #} {# equals #}
+- Perform comparison or basic logical operators on individual arguments OR template text.
+
+{# if @1 #} {# then @2 #} {# elseif @3 #} {# then @4 #} {# else @5 #}
+
+{# switch @1 #} {# case @2 #} {# case @3 #} etc.
+-Basic conditional template switching
+
+{# foreach @1 as @2 #}
+-Looping over a set of arguments
+
+{# grab @1 #} {## grab ##}
+
+{# release @1 #}
+-Assign a portion of template text into a variable which can be released at a further downwards point, by name.
+
+===Presentation===
+
+{# textcase @1=(upper, lower, first, camel, etc.) #} {## case ##}
+-Alter the case of the contained text
+
+{# tonum @1 #}
+{# tospell @1 #}
+- Convert a written-out number to a numerical form or vice-versa, with settings.
