@@ -491,10 +491,7 @@ class GraffitiStemmer
 		$sortString = str_split($word);
 		$sortString = array_reverse($sortString);
 
-
-
 		// Remember we're testing in reverse! $sortArray[0] is the last charactor.
-
 		if( !self::containsVowel($sortString[0], true)
 			&& self::containsVowel($sortString[1]) && !self::containsVowel($sortString[2]))
 		{
@@ -509,7 +506,6 @@ class GraffitiStemmer
 	static protected function containsVowel($letter, $wxy = false)
 	{
 		$vowels = ($wxy) ? self::$shortWordVowels : self::$vowels;
-//		var_dump($vowels);
 		$searchString = "#[$vowels]#";
 		return (preg_match($searchString, $letter) != 0);
 	}
