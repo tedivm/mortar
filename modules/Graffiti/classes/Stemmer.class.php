@@ -21,13 +21,11 @@
  */
 class GraffitiStemmer
 {
-	static $vowels = 'aeiouy';
-	static $shortWordVowels = 'aeiouywxY';
-	static $validLi = 'cdeghkmnrt';
 
-	static $invariantForms = array( 'sky', 'news', 'howe', 'atlas', 'cosmos', 'bias', 'andes');
 
-	static $exceptions = array('skis' => 'ski',
+	static protected $invariantForms = array( 'sky', 'news', 'howe', 'atlas', 'cosmos', 'bias', 'andes');
+
+	static protected $exceptions = array('skis' => 'ski',
 								'skies' => 'sky',
 								'dying' => 'die',
 								'lying' => 'lie',
@@ -39,12 +37,12 @@ class GraffitiStemmer
 								'only' => 'onli',
 								'singly' => 'singl');
 
-	static $secondLevel = array('inning', 'outing', 'canning', 'herring','earring', 'proceed', 'exceed', 'succeed');
+	static protected $secondLevelExceptions = array('inning',
+			'outing', 'canning', 'herring','earring', 'proceed', 'exceed', 'succeed');
 
-	static $segmentExceptions = array('gener', 'commun', 'arsen');
+	static protected $segmentExceptions = array('gener', 'commun', 'arsen');
 
-	static $segmentCache = array();
-
+	static private $segmentCache = array();
 
 	static protected $step1Brules = array(
 			'ingly' => 2,
@@ -109,6 +107,12 @@ class GraffitiStemmer
 					'ic',
 					'al');
 
+	/**
+	 * This function takes in a word (in english) and returns its stem.
+	 *
+	 * @param string $word
+	 * @return string
+	 */
 	static public function stem($word)
 	{
 		if(strlen($word) <= 2)
@@ -128,11 +132,6 @@ class GraffitiStemmer
 		{
 			$word = $value;
 		}else{
-			if(strlen($word) <= 2)
-			{
-				self::$segmentCache = array();
-				return $word;
-			}
 
 			$word = self::step1b($word);
 			$word = self::step1c($word);
@@ -159,7 +158,7 @@ class GraffitiStemmer
 
 	static protected function secondException($word)
 	{
-		if(in_array($word, self::$secondLevel))
+		if(in_array($word, self::$secondLevelExceptions))
 			return $word;
 
 		return false;
@@ -363,7 +362,7 @@ class GraffitiStemmer
 
 			$char = substr($word, -3, 1);
 
-			if(strpos(self::$validLi, $char) !== false)
+			if(strpos('cdeghkmnrt', $char) !== false)
 				return substr($word, 0, strlen($word) - 2);
 		}
 
@@ -520,8 +519,7 @@ class GraffitiStemmer
 
 		foreach(self::$segmentExceptions as $exception)
 		{
-			$exceptionLength = strlen($exception);
-			if(substr($word, 0, $exceptionLength) == $exception)
+			if(strpos($word, $exception) === 0)
 			{
 				if($word === $exception)
 				{
@@ -538,7 +536,9 @@ class GraffitiStemmer
 		$chars = str_split($word);
 		$vowel = false;
 		$const = false;
-		foreach($chars as $index => $char)
+
+		if((preg_match('#[aeiouy]#', $word) != 0))
+			foreach($chars as $index => $char)
 		{
 			if($vowel && $const)
 			{
@@ -554,11 +554,20 @@ class GraffitiStemmer
 				}
 			}
 
-			if((preg_match('#[aeiouy]#', $char) != 0))
+			switch ($char)
 			{
-				$vowel = true;
-			}elseif($vowel){
-				$const = true;
+				case 'a':
+				case 'e':
+				case 'i':
+				case 'o':
+				case 'u':
+				case 'y':
+					$vowel = true;
+					break;
+				default:
+					if($vowel)
+						$const = true;
+					break;
 			}
 		}
 
@@ -568,26 +577,26 @@ class GraffitiStemmer
 
 	static protected function isShort($word)
 	{
+		$searchString = "#[aeiouy]#";
 		$sortString = str_split($word);
 		$sortString = array_reverse($sortString);
 
 		// Remember we're testing in reverse! $sortArray[0] is the last charactor.
-		if( !self::containsVowel($sortString[0], true)
-			&& self::containsVowel($sortString[1]) && !self::containsVowel($sortString[2]))
+		if( !(preg_match('#[aeiouywxY]#', $sortString[0]) != 0)
+			&& (preg_match($searchString, $sortString[1]) != 0)
+			&& !(preg_match($searchString, $sortString[2]) != 0))
 		{
 			return true;
-		}elseif(!self::containsVowel($sortString[0]) && self::containsVowel($sortString[1]) && !isset($sortString[2])){
+
+		}elseif( !isset($sortString[2])
+			&&! (preg_match($searchString, $sortString[0]) != 0)
+			&& (preg_match($searchString, $sortString[1]) != 0))
+		{
 			return true;
 		}
 
 		return false;
-	}
 
-	static protected function containsVowel($letter, $wxy = false)
-	{
-		$vowels = ($wxy) ? self::$shortWordVowels : self::$vowels;
-		$searchString = "#[$vowels]#";
-		return (preg_match($searchString, $letter) != 0);
 	}
 }
 
