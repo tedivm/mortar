@@ -254,6 +254,19 @@ class AutoLoader
 								'classes' => 'none',
 								'plugins' => 'Plugin');
 		$classes = array();
+
+		$path = $basePath . 'classes/*';
+		$directories = glob($path, GLOB_ONLYDIR);
+
+		foreach($directories as $directory)
+		{
+			$directory = rtrim($directory, '/');
+			$tmpArray = explode('/', $directory);
+			$directory = array_pop($tmpArray);
+			$label = $directory;
+			$moduleFolders['classes/' . $directory] = $label;
+		}
+
 		foreach($moduleFolders as $folder => $label)
 		{
 			$path = $basePath . $folder . '/';
@@ -266,6 +279,7 @@ class AutoLoader
 			foreach($unfilteredClasses as $name => $path)
 				$classes[$namePrefix . $name] = $path;
 		}
+
 		return $classes;
 	}
 
@@ -286,7 +300,6 @@ class AutoLoader
 		$classes = array();
 		foreach($paths as $path)
 		{
-
 			$tmpArray = explode('/', $path);
 			$filename = array_pop($tmpArray);
 			$tmpArray = explode('.', $filename);
