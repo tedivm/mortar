@@ -1,11 +1,11 @@
 <?php
 /**
- * GraffitiStemmer
+ * GraffitiStemmersEnglish
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package Mortar
+ * @package Graffiti
  * @subpackage Classes
  */
 
@@ -19,10 +19,8 @@
  * @package Graffiti
  * @subpackage Classes
  */
-class GraffitiStemmer
+class GraffitiStemmersEnglish
 {
-
-
 	static protected $invariantForms = array( 'sky', 'news', 'howe', 'atlas', 'cosmos', 'bias', 'andes');
 
 	static protected $exceptions = array('skis' => 'ski',
