@@ -204,7 +204,8 @@ CREATE INDEX modules_package_Idx ON modules (package, mod_id, status);
 /* Build Table Structure */
 CREATE TABLE modelsRegistered
 (
-	name VARCHAR(65) NOT NULL PRIMARY KEY,
+	modelId INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	handlerName VARCHAR(65) NOT NULL,
 	resource VARCHAR(16) NOT NULL,
 	mod_id INTEGER UNSIGNED NOT NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
@@ -213,6 +214,7 @@ CREATE TABLE modelsRegistered
 
 /* Add Indexes for: modelsRegistered */
 CREATE INDEX modelsRegistered_resource_Idx ON modelsRegistered (resource);
+CREATE UNIQUE INDEX modelsRegistered_handlerName_Idx ON modelsRegistered (handlerName);
 
 /******************** Add Table: plugins ************************/
 
@@ -221,15 +223,15 @@ CREATE TABLE plugins
 (
 	realm VARCHAR(80) NOT NULL,
 	category VARCHAR(80) NOT NULL,
-	name VARCHAR(65) NOT NULL,
-	module INTEGER UNSIGNED NOT NULL,
+	hook VARCHAR(65) NOT NULL,
+	modId INTEGER UNSIGNED NOT NULL,
 	plugin  VARCHAR(65) NOT NULL,
 	isRecursive CHAR(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: location_meta */
 ALTER TABLE plugins ADD CONSTRAINT pkplugins
-	PRIMARY KEY (realm, category, name, module, plugin);
+	PRIMARY KEY (realm, category, hook, modId, plugin);
 
 /******************** Add Table: requestLog ************************/
 
@@ -411,7 +413,7 @@ ALTER TABLE modelsRegistered ADD CONSTRAINT fk_modelsRegistered_modules
 
 /************ Foreign Key: fk_plugins_modules ***************/
 ALTER TABLE plugins ADD CONSTRAINT fk_plugins_modules
-	FOREIGN KEY (module) REFERENCES modules (mod_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+	FOREIGN KEY (modId) REFERENCES modules (mod_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_sites_locations ***************/
 ALTER TABLE sites ADD CONSTRAINT fk_sites_locations

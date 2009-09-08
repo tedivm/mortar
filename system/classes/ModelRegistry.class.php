@@ -70,7 +70,7 @@ class ModelRegistry
 
 		$db = db_connect('default');
 		$insertStmt = $db->stmt_init();
-		$insertStmt->prepare('REPLACE INTO modelsRegistered (name, resource, mod_id) VALUES (?, ?, ?)');
+		$insertStmt->prepare('REPLACE INTO modelsRegistered (handlerName, resource, mod_id) VALUES (?, ?, ?)');
 		$insertStmt->bindAndExecute('ssi', $name, $resource, $moduleInfo->getId());
 
 		Cache::clear('system', 'models', 'handlers');
@@ -142,9 +142,10 @@ class ModelRegistry
 			{
 				$moduleInfo = new PackageInfo($row['mod_id']);
 
-				$className = $moduleInfo->getName() . 'Model' . $row['name'];
+				$className = $moduleInfo->getName() . 'Model' . $row['handlerName'];
 
-				$handlers[$row['resource']] = array('name' => $row['name'],
+				$handlers[$row['resource']] = array('id' => $row['modelId'],
+													'name' => $row['handlerName'],
 													'module' => $row['mod_id'],
 													'resource' => $row['resource'],
 													'class' => $className);
