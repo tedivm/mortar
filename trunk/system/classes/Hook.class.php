@@ -92,16 +92,16 @@ class Hook
 			$pluginList = array();
 			$db = DatabaseConnection::getConnection('default_read_only');
 			$stmt = $db->stmt_init();
-			$stmt->prepare('SELECT module, plugin, isRecursive
+			$stmt->prepare('SELECT modId, plugin, isRecursive
 								FROM plugins
-								WHERE realm = ? AND category = ? AND name = ?');
+								WHERE realm = ? AND category = ? AND hook = ?');
 
 			if($stmt->bindAndExecute('sss', $realm, $category, $name))
 			{
 				while($row = $stmt->fetch_array())
 				{
 					try{
-						$className = importFromModule($row['plugin'], $row['module'], 'plugin');
+						$className = importFromModule($row['plugin'], $row['modId'], 'plugin');
 						$classReflection = new ReflectionClass($className);
 						foreach($this->interfaces as $interface)
 						{
@@ -123,7 +123,7 @@ class Hook
 			if($onlyRecursive && $plugin['isRecursive'] != 1)
 				continue;
 
-			$classList[] = importFromModule($plugin['plugin'], $plugin['module'], 'plugin');
+			$classList[] = importFromModule($plugin['plugin'], $plugin['modId'], 'plugin');
 		}
 
 		$pluginObjects = array();
@@ -226,7 +226,7 @@ class Hook
 		$db = DatabaseConnection::getConnection('default');
 		$stmt = $db->stmt_init();
 		$stmt->prepare('INSERT
-							INTO plugins (realm, category, name, module, plugin, isRecursive)
+							INTO plugins (realm, category, hook, modId, plugin, isRecursive)
 							VALUES (?, ?, ?, ?, ?, ?)');
 		$stmt->bindAndExecute('sssisi', $realm, $category, $name, $module, $plugin, $isRecursive);
 		Cache::clear('plugins', $realm, $category, $name);
