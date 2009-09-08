@@ -158,7 +158,7 @@ class Hook
 		$modelClass = get_class($model);
 		$restrict = false;
 
-		$hasPlugins = $this->loadPlugins('models', 'all', $name, $restrict);
+		$hasPlugins = $this->loadPlugins('models', 'All', $name, $restrict);
 
 		do
 		{

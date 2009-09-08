@@ -111,6 +111,10 @@ class ModelActionAdd extends ModelActionBase
 		if(!isset($baseForm))
 			return false;
 
+		$formHook = new Hook();
+		$formHook->loadModelPlugins($this->model, 'baseFrom');
+		$formHook->loadModelPlugins($this->model, $this->actionName . 'Form');
+		$formHook->adjustForm($this->model, $baseForm);
 		return $baseForm;
 	}
 
