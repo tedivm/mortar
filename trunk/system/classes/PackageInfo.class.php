@@ -325,14 +325,21 @@ class PackageInfo
 	 */
 	protected function loadMeta()
 	{
-		$cache = new Cache('packages', $this->getName(), 'meta');
-		$cache->setMemOnly();
+		$this->meta = self::getMetaInfo($this->getName());
+	}
+
+	static function getMetaInfo($package)
+	{
+		$cache = new Cache('packages', $package, 'meta');
+		$cache->setMemOnly(); // caching this would be ridiculous but memory saves us some
 		$meta = $cache->getData();
 
 		if($cache->isStale())
 		{
+			$config = Config::getInstance();
+			$metaPath = $config['path']['modules'] . $package . '/meta.php';
+
 			$meta = array();
-			$metaPath = $this->path . 'meta.php';
 
 			if(is_readable($metaPath))
 			{
@@ -340,10 +347,13 @@ class PackageInfo
 				$meta['name'] = $packageName;
 				$meta['version'] = $version;
 				$meta['description'] = $description;
+
+				if(isset($disableInstall))
+					$meta['disableInstall'] = $disableInstall;
 			}
 			$cache->storeData($meta);
 		}
-		$this->meta = $meta;
+		return $meta;
 	}
 
 	/**
