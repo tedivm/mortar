@@ -11,11 +11,6 @@ class InstallerInstallationForm extends Form
 		$this->changeSection('system')->
 				setLegend('System Information')->
 
-
-
-
-
-
 				createInput('siteName')->
 					setLabel('Site Name')->
 					addRule('required')->
@@ -35,7 +30,6 @@ class InstallerInstallationForm extends Form
 				getForm();
 
 
-
 				$timezoneHandler = $this->createInput('system_timezone');
 				$timezoneHandler->setType('select')->
 						setLabel('Time Zone');
@@ -49,8 +43,6 @@ class InstallerInstallationForm extends Form
 						$attributes = array('selected' => 'selected');
 					$timezoneHandler->setOptions($timezone, $timezone, $attributes);
 				}
-
-
 
 				$this->createInput('base')->
 					setLabel('Base Path')->
@@ -113,6 +105,13 @@ class InstallerInstallationForm extends Form
 					setLabel('Host')->
 					property('value', 'localhost')->
 					addRule('required')->
+				getForm()->
+
+				createInput('blowoutDatabase')->
+					setType('checkbox')->
+					check(false)->
+					setLabel('Purge Database')->
+					setDescription('Clear out conflicting tables in a populated database (suggested for development work only)')->
 				getForm()->
 
 			changeSection('readonlyDatabase')->

@@ -38,7 +38,8 @@ class InstallerInstaller // thats the most pathetic name ever
 					throw new Exception('Supplied Database Information Invalid', 2);
 
 				if(!$this->installDatabaseStructure())
-					throw new Exception('Unable to load database structure.', 3);
+					throw new Exception('Unable to load database structure. Please check permissions and that the
+							database is clear of existing tables.', 3);
 
 				if(!$this->setupStructure())
 					throw new Exception('Error setting up base structure', 4);
@@ -50,18 +51,20 @@ class InstallerInstaller // thats the most pathetic name ever
 		}catch (Exception $e){
 
 			$this->installed = false;
-			$this->error[] = $e->getMessage();
 			// step back through the program undoing everything up to the number
 			switch ($e->getCode()) {
 				case 5: // data
 				case 4: // structure
 				case 3: // database
-					$config = Config::getInstance();
-					$pathToSQL = $config['path']['modules'] . 'Installer/sql/system_remove.sql';
-					$db = dbConnect('default');
+					if($input['blowoutDataase'])
+					{
+						$config = Config::getInstance();
+						$pathToSQL = $config['path']['modules'] . 'Installer/sql/system_remove.sql';
+						$db = dbConnect('default');
 
-					if(!$this->dbDebug)
-						$db->runFile($pathToSQL);
+						if(!$this->dbDebug)
+							$db->runFile($pathToSQL);
+					}
 				case 2: // database files
 					unlink($config['path']['base'] . 'data/configuration/databases.php');
 				case 1: // configuration files
@@ -257,9 +260,28 @@ class InstallerInstaller // thats the most pathetic name ever
 			$config->reset();
 
 			// Set Up database structure
-			$pathToSQL = $config['path']['modules'] . 'Installer/sql/system_install.sql';
 
 			$db = dbConnect('default');
+			$input = Input::getInput();
+
+			$result = $db->query('SHOW TABLES');
+
+			if($result && $result->num_rows > 0)
+			{
+				if($input['blowoutDatabase'])
+				{
+					$config = Config::getInstance();
+					$pathToSQL = $config['path']['modules'] . 'Installer/sql/system_remove.sql';
+
+					if(!$db->runFile($pathToSQL))
+						return false;
+				}else{
+					return false;
+				}
+			}
+
+
+			$pathToSQL = $config['path']['modules'] . 'Installer/sql/system_install.sql';
 
 			if(!$db->runFile($pathToSQL))
 			{
