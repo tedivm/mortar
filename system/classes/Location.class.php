@@ -594,7 +594,7 @@ class Location
 
 			if($type != 'all')
 			{
-				$stmt->prepare('SELECT location_id FROM locations WHERE parent = ? AND resource = ?');
+				$stmt->prepare('SELECT location_id FROM locations WHERE parent = ? AND resourceType = ?');
 				$stmt->bindAndExecute('is', $this->id, $type);
 			}else{
 				$stmt->prepare('SELECT location_id FROM locations WHERE parent = ?');
