@@ -77,6 +77,7 @@ class IndexDisplayList implements DisplayList {
 		$table->addColumnLabel('model_type', 'Type');
 		$table->addColumnLabel('model_name', 'Name');
 		$table->addColumnLabel('model_title', 'Title');
+		$table->addColumnLabel('model_status', 'Status');
 		$table->addColumnLabel('model_owner', 'Owner');
 		$table->addColumnLabel('model_creationTime', 'Created');
 		$table->addColumnLabel('model_lastModified', 'Last Modified');
@@ -95,6 +96,8 @@ class IndexDisplayList implements DisplayList {
 					 isset($modelProperties['model_name']) ? "<a href='" . $modelProperties['permalink'] . "'>" . $modelProperties['model_name'] . "</a>" : "");
 			$table->addField('model_title',
 					 isset($modelProperties['model_title']) ? $modelProperties['model_title'] : "");
+			$table->addField('model_status', 
+					 isset($modelProperties['model_status']) ? $modelProperties['model_status'] : "");
 			$table->addField('model_owner',
 					 isset($modelProperties['model_owner']) ? $modelProperties['model_owner'] : "");
 			$table->addField('model_creationTime',

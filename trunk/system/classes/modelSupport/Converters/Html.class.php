@@ -98,6 +98,7 @@ class ModelToHtml
 			}
 		}
 		
+		$this->convertedProperties['model_status'] = $this->model->status;
 		$this->convertedProperties['model_type'] = $this->model->getType();
 		$this->convertedProperties['model_action_list'] = $allowedActionTypes;
 		$this->convertedProperties['model_creationTime'] = $location->getCreationDate();
