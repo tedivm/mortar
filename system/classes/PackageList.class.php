@@ -62,6 +62,12 @@ class PackageList
 			$tmp = explode('/', $packagePath);
 			$tmp = explode('.', array_pop($tmp));
 			$packageName = array_shift($tmp);
+
+			$meta = PackageInfo::getMetaInfo($packageName);
+
+			if(isset($meta['disableInstall']) && $meta['disableInstall'] == true)
+				continue;
+
 			$packageList[] = $packageName;
 		}
 
