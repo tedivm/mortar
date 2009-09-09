@@ -136,6 +136,7 @@ class FormInput
 	public function setDescription($description)
 	{
 		$this->description = $description;
+		return $this;
 	}
 
 	/**
