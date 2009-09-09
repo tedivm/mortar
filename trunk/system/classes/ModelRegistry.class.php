@@ -26,6 +26,14 @@ class ModelRegistry
 	protected static $handlerList;
 
 	/**
+	 * This is used for when a string (representing a model type) is passed to the getHandler function. This maps the
+	 * resource names to their ID.
+	 *
+	 * @var array
+	 */
+	protected static $resourceIndex;
+
+	/**
 	 * This clears the handlers
 	 *
 	 * @static
@@ -33,24 +41,41 @@ class ModelRegistry
 	static public function clearHandlers()
 	{
 		self::$handlerList = null;
+		self::$resourceIndex = null;
+	}
+
+	/**
+	 * This function returns the ID of a model type.
+	 *
+	 * @param string $resource
+	 * @return int
+	 */
+	static public function getIdFromType($resource)
+	{
+		if(isset(self::$resourceIndex[$resource]))
+			return self::$resourceIndex[$resource];
+		return false;
 	}
 
 	/**
 	 * Returns a handler for the specified resource type, or false if one doesn't exist
 	 *
 	 * @static
-	 * @param string $name
+	 * @param int|string $name
 	 * @return array|bool
 	 */
-	static public function getHandler($name)
+	static public function getHandler($id)
 	{
-		if(!is_scalar($name))
-			throw new TypeMismatch(array('String', $name));
+		if(!is_scalar($id))
+			throw new TypeMismatch(array('Integer or String', $id));
 
 		if(!is_array(self::$handlerList))
 			self::loadHandlers();
 
-		return (isset(self::$handlerList[$name])) ? self::$handlerList[$name] : false;
+		if(!is_numeric($id) && isset(self::$resourceIndex[$id]))
+			$id = self::$resourceIndex[$id];
+
+		return (isset(self::$handlerList[$id])) ? self::$handlerList[$id] : false;
 	}
 
 	/**
@@ -130,11 +155,13 @@ class ModelRegistry
 	static protected function loadHandlers()
 	{
 		$cache = new Cache('system', 'models', 'handlers');
-		$handlers = $cache->getData();
+		$data = $cache->getData();
 
 		if($cache->isStale())
 		{
+			$data = array();
 			$handlers = array();
+			$index = array();
 			$db = dbConnect('default_read_only');
 			$moduleRows = $db->query('SELECT * FROM modelsRegistered');
 
@@ -144,16 +171,20 @@ class ModelRegistry
 
 				$className = $moduleInfo->getName() . 'Model' . $row['handlerName'];
 
-				$handlers[$row['resource']] = array('id' => $row['modelId'],
+				$index[$row['resource']] = $row['modelId'];
+				$handlers[$row['modelId']] = array('id' => $row['modelId'],
 													'name' => $row['handlerName'],
 													'module' => $row['mod_id'],
 													'resource' => $row['resource'],
 													'class' => $className);
 			}
 
-			$cache->storeData($handlers);
+			$data['index'] = $index;
+			$data['handlers'] = $handlers;
+			$cache->storeData($data);
 		}
-		self::$handlerList = $handlers;
+		self::$resourceIndex = $data['index'];
+		self::$handlerList = $data['handlers'];
 	}
 
 }
