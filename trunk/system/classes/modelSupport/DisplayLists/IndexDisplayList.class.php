@@ -36,26 +36,44 @@ class IndexDisplayList implements DisplayList {
 	 * @var array
 	 */
 	protected $modelList;
-	
+
 	/**
 	 * Page instance for displaying the Html.
 	 *
 	 * @var Page
 	 */
 	protected $page;
-	
+
+	/**
+	 * This is the Theme object associated with the current page.
+	 *
+	 * @var Theme
+	 */
+	protected $theme;
+
+	/**
+	 * This is the format currently being used (this is primarily for URLs)
+	 *
+	 * @var string
+	 */
+	protected $format;
+
 	/**
 	 * Simple constructor to set the key variables.
 	 *
-	 * @param Model $m
-	 * @param array $models
-	 * @param Page $p
+	 * @param Model $mmodel
+	 * @param array $modelList
+	 * @param Page $page
 	 */
-	public function __construct(Model $m, array $models, Page $p)
+	public function __construct(Model $mmodel, array $modelList, Page $page)
 	{
-		$this->model = $m;
-		$this->modelList = $models;
-		$this->page = $p;
+		$this->model = $mmodel;
+		$this->modelList = $modelList;
+		$this->page = $page;
+		$this->theme = $this->page->getTheme();
+
+		$query = Query::getQuery();
+		$this->format = $query['format'];
 	}
 
 	/**
@@ -63,10 +81,9 @@ class IndexDisplayList implements DisplayList {
 	 *
 	 * @return String
 	 */
-	public function getListing() {
-	
-		$theme = $this->page->getTheme();
-		$themeSettings = $theme->getSettings();
+	public function getListing()
+	{
+		$themeSettings = $this->theme->getSettings();
 
 		$table = new Table($this->model->getLocation()->getName() . '_listing');
 		$table->addClass('model-listing');
@@ -74,6 +91,20 @@ class IndexDisplayList implements DisplayList {
 		$table->addClass($this->model->getLocation()->getName() . '-listing');
 		$table->enableIndex();
 
+		$this->addColumnsToTable($table);
+
+		foreach($this->modelList as $model)
+		{
+			$table->newRow();
+			$this->addModelToTable($table, $model);
+			$this->addModelActionsToRow($table, $model);
+		}
+
+		return $table->makeHtml();
+	}
+
+	protected function addColumnsToTable($table)
+	{
 		$table->addColumnLabel('model_type', 'Type');
 		$table->addColumnLabel('model_name', 'Name');
 		$table->addColumnLabel('model_title', 'Title');
@@ -82,44 +113,71 @@ class IndexDisplayList implements DisplayList {
 		$table->addColumnLabel('model_creationTime', 'Created');
 		$table->addColumnLabel('model_lastModified', 'Last Modified');
 		$table->addColumnLabel('model_actions', 'Actions');
+	}
 
-		foreach($this->modelList as $model)
+	protected function addModelToTable($table, Model $model)
+	{
+		$location = $model->getLocation();
+		$owner = $location->getOwner();
+		$createdOn = $location->getCreationDate();
+		$modifiedOn = $location->getLastModified();
+		$type = $model->getType();
+		$table->addField('model_type', $model->getType());
+		$table->addRowClass($type . '_item');
+
+		$location = $model->getLocation();
+		$url = new Url();
+		$url->location = $location->getId();
+		$url->format = $this->format;
+
+
+		$table->addField('model_name',
+				 isset($model->name) ? "<a href='" . $url . "'>" . $model->name . "</a>" : "");
+		$table->addField('model_title', isset($model['title']) ? $model['title'] : "");
+		$table->addField('model_status', isset($model->status) ? $model->status : "");
+		$table->addField('model_owner', ($owner && $owner['name']) ? $owner['name'] : "");
+		$table->addField('model_creationTime', date($this->indexDateFormat, $createdOn));
+		$table->addField('model_lastModified', date($this->indexDateFormat, $modifiedOn));
+	}
+
+	protected function addModelActionsToRow($table, $model)
+	{
+		$themeSettings = $this->theme->getSettings();
+		$modelActions = '';
+		$themeUrl = $this->theme->getUrl();
+		$location = $model->getLocation();
+
+		$baseUrl = new Url();
+		$baseUrl->locationId = $location->getId();
+		$baseUrl->format = $this->format;
+
+		$actionTypes = array('Read', 'Edit', 'Delete');
+		if(isset($location) && $location->hasChildren())
+			array_push($actionTypes, 'Index');
+
+		$allowedActionTypes = array();
+		$user = ActiveUser::getUser();
+		$userId = $user->getId();
+		$actionList = '';
+		foreach($actionTypes as $action)
 		{
-			$modelActions = '';
-			$modelData = $model->getModelAs('Html');
-			$table->newRow();
-			$modelProperties = $modelData->getProperties();
-			$table->addField('model_type',
-					 isset($modelProperties['model_type']) ? $modelProperties['model_type'] : "");
-			$table->addRowClass(isset($modelProperties['model_type']) ? $modelProperties['model_type'] . "_item" : "");
-			$table->addField('model_name',
-					 isset($modelProperties['model_name']) ? "<a href='" . $modelProperties['permalink'] . "'>" . $modelProperties['model_name'] . "</a>" : "");
-			$table->addField('model_title',
-					 isset($modelProperties['model_title']) ? $modelProperties['model_title'] : "");
-			$table->addField('model_status', 
-					 isset($modelProperties['model_status']) ? $modelProperties['model_status'] : "");
-			$table->addField('model_owner',
-					 isset($modelProperties['model_owner']) ? $modelProperties['model_owner'] : "");
-			$table->addField('model_creationTime',
-					 isset($modelProperties['model_creationTime']) ? date($this->indexDateFormat, $modelProperties['model_creationTime']) : "");
-			$table->addField('model_lastModified',
-					 isset($modelProperties['model_lastModified']) ? date($this->indexDateFormat, $modelProperties['model_lastModified']) : "");
+			$modelListAction = new DisplayMaker();
+			$modelListAction->setDisplayTemplate("<li class='action action_$action'>{# action #}</li>");
+			$actionUrl = clone $baseUrl;
+			$actionUrl->action = $action;
 
-			foreach($modelProperties['model_action_list'] as $action) 
+			if($actionUrl->checkPermission($userId))
 			{
 				$actionDisplay = (isset($themeSettings['images']['action_images']) && $themeSettings['images']['action_images'] == true) ?
-						 '<img class="tooltip action_icon ' . $action . '_icon" title="' . $action . '" alt="' . $action . '" src="' . 
-						 $theme->getUrl() . $themeSettings['images'][$action . '_image'] . '" />' : $action; 
-				$modelActions .= '<li class="action action_' . $action . '"><a href="' . $modelProperties['model_action_' . $action] . '">' . $actionDisplay . '</a></li>'; 
-			}
-				
-			$table->addField('model_actions',
-					 isset($modelProperties['model_actions']) ? "<ul class='action_list'>" . $modelActions . "</ul>" : "");
-			
+						 '<img class="tooltip action_icon ' . $action . '_icon" title="' . $action . '" alt="' . $action . '" src="' .
+						 $themeUrl . $themeSettings['images'][$action . '_image'] . '" />' : $action;
 
+				$modelActions .= '<li class="action action_' . $action . '">' . $actionUrl->getLink($actionDisplay) . '</li>';
+			}
 		}
 
-		return $table->makeHtml();	
+		$table->addField('model_actions',
+			isset($modelActions) && $modelActions != '' ? "<ul class='action_list'>" . $modelActions . "</ul>" : "");
 	}
 
 }
