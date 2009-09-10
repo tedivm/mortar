@@ -110,10 +110,13 @@ class ModelRegistry
 	 */
 	static public function getModelList()
 	{
-		if(!is_array(self::$handlerList))
+		if(!is_array(self::$resourceIndex))
 			self::loadHandlers();
 
-		return array_keys(self::$handlerList);
+		$models = array_keys(self::$resourceIndex);
+		sort($models, SORT_STRING);
+
+		return $models;
 	}
 
 	/**
