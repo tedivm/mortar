@@ -19,7 +19,10 @@ class ModelToHtml
 	protected $model;
 	protected $modelProperties = array(array('name' => 'content', 'permission' => 'Read'),
 										array('name' => 'title', 'permission' => 'Read'));
+											
+	protected $modelDefaults = array('model_title', 'model_content', 'model_owner', 'model_action_list', 'model_status', 'model_type', 'model_actionList', 'model_creationTime', 'model_lastModified', 'model_name', 'model_actions');
 	protected $template;
+	protected $modelDisplay;
 
 	protected $convertedProperties;
 
@@ -115,7 +118,11 @@ class ModelToHtml
 
 	public function useTemplate($template)
 	{
+		$matchResults = array();
+	
 		$this->template = $template;
+		$this->modelDisplay = new DisplayMaker();
+		$this->modelDisplay->setDisplayTemplate($template);				
 	}
 
 
@@ -126,13 +133,23 @@ class ModelToHtml
 	 */
 	public function getOutput()
 	{
-		$modelDisplay = new DisplayMaker();
-		$modelDisplay->setDisplayTemplate($this->template);
+
+		$this->modelDisplay->setDisplayTemplate($this->template);
 
 		foreach ($this->convertedProperties as $propName => $propValue) 
-			($propName == "model_creationTime" || $propName == "model_lastModified") ? $modelDisplay->addDate($propName, $propValue) : $modelDisplay->addContent($propName, $propValue);
-
-		$modelOutput = $modelDisplay->makeDisplay(true);
+			($propName == "model_creationTime" || $propName == "model_lastModified") ? $this->modelDisplay->addDate($propName, $propValue) : $this->modelDisplay->addContent($propName, $propValue);
+			
+		$modelTags = $this->modelDisplay->getTags();
+		foreach ($modelTags as $tag) {
+			if ((preg_match('/^model_(?!action_)(.*)/', $tag, $matchResults) && !(in_array($tag, $this->modelDefaults)))) {
+				if (isset($this->convertedProperties[$matchResults[1]])) 
+					$this->modelDisplay->addContent($tag, $this->convertedProperties[$matchResults[1]]);
+				else
+					$this->modelDisplay->addContent($tag, $this->model->$matchResults[1]);
+			}
+		}
+		
+		$modelOutput = $this->modelDisplay->makeDisplay(true);
 
 		return $modelOutput;
 	}
@@ -146,6 +163,14 @@ class ModelToHtml
 	public function getProperties()
 	{
 		return $this->convertedProperties;
+	}
+	
+	public function __get($offset)
+	{
+		if (isset($this->convertedProperties[$offset])) 
+			return $this->convertedProperties[$offset];
+		else
+			return $this->model->$offset;
 	}
 }
 
