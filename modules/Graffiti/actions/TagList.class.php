@@ -28,7 +28,7 @@ class GraffitiActionTagList extends ActionBase
 
 			if($type != 'all')
 			{
-				$stmt->prepare('SELECT DISTINCT tag
+				$stmt->prepare('SELECT DISTINCT tag, tagId, SUM(weight) AS tagWeight
 								FROM graffitiTags, graffitiLocationHasTags, locations
 								WHERE
 									locations.resourceType = ?
@@ -38,7 +38,8 @@ class GraffitiActionTagList extends ActionBase
 									graffitiLocationHasTags.tagId = graffitiTags.tagId
 								AND
 									tag LIKE ?
-								ORDER BY tag ASC
+								ORDER BY tagWeight ASC
+								GROUP BY tagId
 								LIMIT ?');
 				$stmt->bindAndExecute('ssi', $resourceType, $searchString, $limit);
 			}else{
@@ -47,7 +48,7 @@ class GraffitiActionTagList extends ActionBase
 			}
 
 			while($results = $stmt->fetch_array())
-				$tagList[] = array('name' => $results['tag'], 'id' => $results['tag']);
+				$tagList[] = array('name' => $results['tag'], 'id' => $results['tagId']);
 
 			$cache->storeData($tagList);
 		}
