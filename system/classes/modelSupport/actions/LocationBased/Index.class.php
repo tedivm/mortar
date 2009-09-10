@@ -130,6 +130,12 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		return $locationListing;
 	}
 
+	protected function getIndexDisplayList()
+	{
+		$indexList = new IndexDisplayList($this->model, $this->childModels);
+		return $indexList;
+	}
+
 	/**
 	 * Creates a listing of models along with relevant qualities and actions for use in an admin page.
 	 *
@@ -140,8 +146,9 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		$menu = $page->getMenu('actions', 'modelNav');
 		$this->makeModelActionMenu($menu, $this->model, 'Admin');
 
-		$indexList = new IndexDisplayList($this->model, $this->childModels, $page);
-		
+		$indexList = $this->getIndexDisplayList();
+		$indexList->addPage($page);
+
 		return $indexList->getListing();
 	}
 

@@ -63,18 +63,22 @@ class IndexDisplayList implements DisplayList {
 	 *
 	 * @param Model $mmodel
 	 * @param array $modelList
-	 * @param Page $page
 	 */
-	public function __construct(Model $mmodel, array $modelList, Page $page)
+	public function __construct(Model $mmodel, array $modelList)
 	{
 		$this->model = $mmodel;
 		$this->modelList = $modelList;
-		$this->page = $page;
-		$this->theme = $this->page->getTheme();
 
 		$query = Query::getQuery();
 		$this->format = $query['format'];
 	}
+
+	public function addPage(Page $page)
+	{
+		$this->page = $page;
+		$this->theme = $this->page->getTheme();
+	}
+
 
 	/**
 	 * Using the previously dictated model list and page, produces an Html listing in the Index style.
