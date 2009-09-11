@@ -32,3 +32,7 @@ If we have global settings that can be overridden on a local level, we need to i
 In order to ease module/plugin development, we should create an "empty box" template for modules that includes code for certain kinds of functionality. For example, if Graffiti includes code that lets you manually turn it on or off for Page-descendants, including this sort of selector so module authors are expected to use it where appropriate by default will allow us to help guide module author behavior in useful ways.
 
 (Similarly, certain things are possible in Wordpress plugins but not well-supported on the site -- multiple-use widgets being an obvious example. Anything like this that we have should be supported in the Empty Box so people are encouraged to use it.)
+
+== Imports ==
+
+If we want people to migrate over from competing platforms, we should provide some ability to import content from major competing platforms (Movable Type and Wordpress, at _very_ least.) 
