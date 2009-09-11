@@ -26,3 +26,9 @@ A system to actually let you define the structure for URLs (either overall or on
 == Cascading Settings ==
 
 If we have global settings that can be overridden on a local level, we need to implement a UI mechanism for clearly indicating _where_ a given setting originates, allowing someone viewing info on a given area to see which settings are set locally, which are set in a parent, and which are set globally.
+
+== "Empty Box" ==
+
+In order to ease module/plugin development, we should create an "empty box" template for modules that includes code for certain kinds of functionality. For example, if Graffiti includes code that lets you manually turn it on or off for Page-descendants, including this sort of selector so module authors are expected to use it where appropriate by default will allow us to help guide module author behavior in useful ways.
+
+(Similarly, certain things are possible in Wordpress plugins but not well-supported on the site -- multiple-use widgets being an obvious example. Anything like this that we have should be supported in the Empty Box so people are encouraged to use it.)
