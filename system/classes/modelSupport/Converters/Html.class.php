@@ -19,11 +19,12 @@ class ModelToHtml
 	protected $model;
 	protected $modelProperties = array(array('name' => 'content', 'permission' => 'Read'),
 										array('name' => 'title', 'permission' => 'Read'));
-											
-	protected $modelDefaults = array('model_title', 'model_content', 'model_owner', 'model_action_list', 'model_status', 'model_type', 'model_actionList', 'model_creationTime', 'model_lastModified', 'model_name', 'model_actions');
+
+	protected $modelDefaults = array('model_title', 'model_content', 'model_owner', 'model_action_list', 'model_status',
+										'model_type', 'model_actionList', 'model_creationTime', 'model_lastModified',
+										'model_name', 'model_actions');
 	protected $template;
 	protected $modelDisplay;
-
 	protected $convertedProperties;
 
 	/**
@@ -33,7 +34,6 @@ class ModelToHtml
 	 * @param String $template
 	 * @return string
 	 */
-
 	public function __construct(Model $model)
 	{
 		$this->model = $model;
@@ -59,28 +59,28 @@ class ModelToHtml
 				// if one property fails we don't want to abort the listing
 			}
 		}
-		
+
 		$location = $this->model->getLocation();
 		$url = new Url();
 		$url->location = $location->getId();
 
 		$query = Query::getQuery();
-		$url->format = $query['format']; 
+		$url->format = $query['format'];
 
 		$this->convertedProperties['permalink'] = (string) $url;
 
 		$locOwner = $location->getOwner();
 		$this->convertedProperties['model_owner'] = $locOwner['name'];
-		
+
 		$baseUrl = new Url();
 		$baseUrl->locationId = $location->getId();
 		/* $baseUrl->format = "Admin"; */
-		$baseUrl->format = $query['format']; 
-		
+		$baseUrl->format = $query['format'];
+
 		$actionTypes = array('Read', 'Edit', 'Delete');
 		if(isset($location) && $location->hasChildren())
 			array_push($actionTypes, 'Index');
-			
+
 		$allowedActionTypes = array();
 		$user = ActiveUser::getUser();
 		$userId = $user->getId();
@@ -100,7 +100,7 @@ class ModelToHtml
 				array_push($allowedActionTypes, $action);
 			}
 		}
-		
+
 		$this->convertedProperties['model_status'] = $this->model->status;
 		$this->convertedProperties['model_type'] = $this->model->getType();
 		$this->convertedProperties['model_action_list'] = $allowedActionTypes;
@@ -115,16 +115,14 @@ class ModelToHtml
 	 *
 	 * @param String $template
 	 */
-
 	public function useTemplate($template)
 	{
 		$matchResults = array();
-	
+
 		$this->template = $template;
 		$this->modelDisplay = new DisplayMaker();
-		$this->modelDisplay->setDisplayTemplate($template);				
+		$this->modelDisplay->setDisplayTemplate($template);
 	}
-
 
 	/**
 	 * This function outputs the loaded model into an HTML string by inserting its values into the used template
@@ -133,41 +131,48 @@ class ModelToHtml
 	 */
 	public function getOutput()
 	{
-
 		$this->modelDisplay->setDisplayTemplate($this->template);
 
-		foreach ($this->convertedProperties as $propName => $propValue) 
-			($propName == "model_creationTime" || $propName == "model_lastModified") ? $this->modelDisplay->addDate($propName, $propValue) : $this->modelDisplay->addContent($propName, $propValue);
-			
+		foreach ($this->convertedProperties as $propName => $propValue)
+			($propName == "model_creationTime" || $propName == "model_lastModified")
+				? $this->modelDisplay->addDate($propName, $propValue)
+				: $this->modelDisplay->addContent($propName, $propValue);
+
 		$modelTags = $this->modelDisplay->getTags();
-		foreach ($modelTags as $tag) {
-			if ((preg_match('/^model_(?!action_)(.*)/', $tag, $matchResults) && !(in_array($tag, $this->modelDefaults)))) {
-				if (isset($this->convertedProperties[$matchResults[1]])) 
-					$this->modelDisplay->addContent($tag, $this->convertedProperties[$matchResults[1]]);
-				else
-					$this->modelDisplay->addContent($tag, $this->model->$matchResults[1]);
+
+		if($modelTags)
+			foreach($modelTags as $tag)
+		{
+			if(!in_array($tag, $this->modelDefaults) && (strpos($tag, 'model_') === 0))
+			{
+				$customTag = substr($tag, 6);
+				if(isset($this->convertedProperties[$customTag]))
+				{
+					$this->modelDisplay->addContent($tag, $this->convertedProperties[$customTag]);
+				}elseif(isset($this->model->$customTag)){
+					$this->modelDisplay->addContent($tag, $this->model->$customTag);
+				}
 			}
 		}
-		
+
 		$modelOutput = $this->modelDisplay->makeDisplay(true);
 
 		return $modelOutput;
 	}
-	
-	
+
 	/**
 	 * This function returns the array of properties.
 	 *
 	 * @return array
-	 */	
+	 */
 	public function getProperties()
 	{
 		return $this->convertedProperties;
 	}
-	
+
 	public function __get($offset)
 	{
-		if (isset($this->convertedProperties[$offset])) 
+		if (isset($this->convertedProperties[$offset]))
 			return $this->convertedProperties[$offset];
 		else
 			return $this->model->$offset;
