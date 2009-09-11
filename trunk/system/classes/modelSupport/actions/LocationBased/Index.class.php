@@ -171,7 +171,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		if(count($this->childModels) > 0)
 		{
 			$listingHtml = new HtmlObject('div');
-			$listingHtml->property('name', 'listing-container');
+			$listingHtml->addClass('listing-container');
 			$theme = $page->getTheme();
 			$templates = array();
 			$x = 1;
