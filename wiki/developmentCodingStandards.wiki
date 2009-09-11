@@ -132,7 +132,7 @@ If you do insert data directly into an sql string, put a comment directly above 
 
 == Testing ==
 
-Always be away of caching when testing.
+Always be aware of caching when testing.
 
 Test with caching disabled and enabled/cleared.
 
