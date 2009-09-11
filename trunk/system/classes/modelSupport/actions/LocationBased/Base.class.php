@@ -98,9 +98,12 @@ abstract class ModelActionLocationBasedBase extends ModelActionBase
 		if($location->hasChildren())
 			$modelActions['Index'] = 'Browse';
 
+		$extraActions = Hook::mergeResults($plugins->getAdditionalActions());
+		$modelActions = array_merge($modelActions, $extraActions);
+
 		foreach($modelActions as $action => $label)
 		{
-			if($model->getAction($action) == false)
+			if($model->getAction($action) == false || in_array(true, $plugins->blockAction($action)))
 				continue;
 
 			$browseUrl = clone $url;
