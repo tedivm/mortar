@@ -48,3 +48,15 @@ If we want people to migrate over from competing platforms, we should provide so
 == Package Manager ==
 
 A way to remotely download and install packages from a central repository is vital to making the software fully workable out of the box.
+
+== Action Listing ==
+
+Besides the "universal" actions (Read/Edit/Delete/Index) there are numerous model-specific actions; DisplayLists need a way to easily get access to the correct URLs for all of these and possibly to generate a comprehensive list of every possible action.
+
+== Moving/Converting Models ==
+
+Models need to be able to be moved, merged together, redated, etc. to ease reordering of blog posts, merging/moving of forum threads, etc.
+
+== Pagination System ==
+
+This should probably be flexible enough to handle both individual Pages and other models that simply have their content divided into arbitrary pages _and_ things like blogs/forums that paginate based on model lists.
