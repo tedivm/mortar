@@ -687,6 +687,26 @@ class Location
 	}
 
 	/**
+	 * This function returns an array with the path from root to the current option. Running this on an unsaved location
+	 * will result in an exception.
+	 *
+	 * @return array Integers, representing location ids
+	 */
+	public function getPathToRoot()
+	{
+		if($parentLocation = $this->getParent())
+		{
+			$path = $parentLocation->getPathToRoot();
+			$path[] = $this->getId();
+		}elseif($id = $this->getId()){
+			$path = array($id);
+		}else{
+			throw new CoreError('Unable to get path for unsaved location.');
+		}
+		return $path;
+	}
+
+	/**
 	 * Returns a multidemensional tree of locations
 	 *
 	 * @param string $types
