@@ -11,6 +11,13 @@ class ChalkActionBlogRead extends ModelActionLocationBasedIndex
 		$this->makeModelActionMenu($menu, $this->model, 'Admin');
 		return parent::viewHtml($page);
 	}
+	
+	protected function getModelListingClass()
+	{
+		$locationListing = parent::getModelListingClass();
+		$locationListing->setOption('order', 'DESC');
+		return $locationListing;
+	}
 }
 
 ?>
