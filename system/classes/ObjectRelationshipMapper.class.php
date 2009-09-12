@@ -280,7 +280,7 @@ class ObjectRelationshipMapper
 		{
 			$sql_limit = 'LIMIT ' . $limit;
 			if($position > 0)
-				$sql_limit .= ',' . $position;
+				$sql_limit = 'LIMIT ' . $position . ',' . $limit;
 		}else{
 			$sql_limit = '';
 		}
