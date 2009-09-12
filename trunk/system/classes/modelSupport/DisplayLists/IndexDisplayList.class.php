@@ -14,73 +14,7 @@
  * @package System
  * @subpackage ModelSupport
  */
-class IndexDisplayList implements DisplayList {
-
-	protected $baseActionList = array('Read', 'Edit', 'Delete');
-
-	/**
-	 * This is the date format used when converting the model to an html table.
-	 *
-	 * @var string
-	 */
-	protected $indexDateFormat = 'm.d.y g:i a';
-
-	/**
-	 * Model representing the location of which the index is being taken.
-	 *
-	 * @var Model
-	 */
-	protected $model;
-
-	/**
-	 * A list of models to be iteratively processed for display.
-	 *
-	 * @var array
-	 */
-	protected $modelList;
-
-	/**
-	 * Page instance for displaying the Html.
-	 *
-	 * @var Page
-	 */
-	protected $page;
-
-	/**
-	 * This is the Theme object associated with the current page.
-	 *
-	 * @var Theme
-	 */
-	protected $theme;
-
-	/**
-	 * This is the format currently being used (this is primarily for URLs)
-	 *
-	 * @var string
-	 */
-	protected $format;
-
-	/**
-	 * Simple constructor to set the key variables.
-	 *
-	 * @param Model $mmodel
-	 * @param array $modelList
-	 */
-	public function __construct(Model $mmodel, array $modelList)
-	{
-		$this->model = $mmodel;
-		$this->modelList = $modelList;
-
-		$query = Query::getQuery();
-		$this->format = $query['format'];
-	}
-
-	public function addPage(Page $page)
-	{
-		$this->page = $page;
-		$this->theme = $this->page->getTheme();
-	}
-
+class IndexDisplayList extends ReadDisplayList {
 
 	/**
 	 * Using the previously dictated model list and page, produces an Html listing in the Index style.
@@ -148,9 +82,6 @@ class IndexDisplayList implements DisplayList {
 
 	protected function addModelActionsToRow($table, $model)
 	{
-		$themeSettings = $this->theme->getSettings();
-		$modelActions = '';
-		$themeUrl = $this->theme->getUrl();
 		$location = $model->getLocation();
 
 		$baseUrl = new Url();
@@ -159,40 +90,10 @@ class IndexDisplayList implements DisplayList {
 
 		$actionUrls = $this->getActionList($baseUrl, $location);
 
-		foreach($actionUrls as $action)
-		{
-			$modelListAction = new DisplayMaker();
-			$modelListAction->setDisplayTemplate("<li class='action action_$action[0]'>{# action #}</li>");
-
-			$actionDisplay = (isset($themeSettings['images']['action_images']) && $themeSettings['images']['action_images'] == true) ?
-					 '<img class="tooltip action_icon ' . $action[0] . '_icon" title="' . $action[0] . '" alt="' . $action[0] . '" src="' .
-					 $themeUrl . $themeSettings['images'][$action[0] . '_image'] . '" />' : $action[0];
-
-			$modelActions .= '<li class="action action_' . $action . '">' . $action[1]->getLink($actionDisplay) . '</li>';
-		}
+		$modelActions = $this->getActionIcons($actionUrls);
 
 		$table->addField('model_actions',
 			isset($modelActions) && $modelActions != '' ? "<ul class='action_list'>" . $modelActions . "</ul>" : "");
-	}
-
-	protected function getActionList(Url $baseUrl, $location = null)
-	{
-		$baseActionTypes = $this->baseActionList;
-		if(isset($location) && $location->hasChildren())
-			array_push($baseActionTypes, 'Index');
-		$actionUrls = array();
-		$user = ActiveUser::getUser();
-		$userId = $user->getId();
-		
-		foreach($baseActionTypes as $action) {
-			$actionUrl = clone $baseUrl;
-			$actionUrl->action = $action;
-
-			if($actionUrl->checkPermission($userId))
-				array_push($actionUrls, array($action, $actionUrl));
-		}
-		
-		return $actionUrls;
 	}
 
 }

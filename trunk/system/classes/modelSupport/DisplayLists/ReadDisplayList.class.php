@@ -2,6 +2,7 @@
 
 class ReadDisplayList implements DisplayList {
 
+
 	protected $baseActionList = array('Read', 'Edit', 'Delete');
 
 	/**
@@ -46,6 +47,12 @@ class ReadDisplayList implements DisplayList {
 	 */
 	protected $format;
 
+	/**
+	 * Simple constructor to set the key variables.
+	 *
+	 * @param Model $mmodel
+	 * @param array $modelList
+	 */
 	public function __construct(Model $mmodel, array $modelList)
 	{
 		$this->model = $mmodel;
@@ -60,6 +67,7 @@ class ReadDisplayList implements DisplayList {
 		$this->page = $page;
 		$this->theme = $this->page->getTheme();
 	}
+
 
 	public function getListing()
 	{
@@ -88,6 +96,47 @@ class ReadDisplayList implements DisplayList {
 		}
 		return $output;
 	}
+	
+	protected function getActionList(Url $baseUrl, $location = null)
+	{
+		$baseActionTypes = $this->baseActionList;
+		if(isset($location) && $location->hasChildren())
+			array_push($baseActionTypes, 'Index');
+		$actionUrls = array();
+		$user = ActiveUser::getUser();
+		$userId = $user->getId();
+		
+		foreach($baseActionTypes as $action) {
+			$actionUrl = clone $baseUrl;
+			$actionUrl->action = $action;
+
+			if($actionUrl->checkPermission($userId))
+				array_push($actionUrls, array($action, $actionUrl));
+		}
+		
+		return $actionUrls;
+	}
+
+	protected function getActionIcons(array $actionUrls)
+	{
+		$themeSettings = $this->theme->getSettings();
+		$themeUrl = $this->theme->getUrl();
+		$modelActions = '';
+		foreach($actionUrls as $action)
+		{
+			$modelListAction = new DisplayMaker();
+			$modelListAction->setDisplayTemplate("<li class='action action_$action[0]'>{# action #}</li>");
+
+			$actionDisplay = (isset($themeSettings['images']['action_images']) && $themeSettings['images']['action_images'] == true) ?
+					 '<img class="tooltip action_icon ' . $action[0] . '_icon" title="' . $action[0] . '" alt="' . $action[0] . '" src="' .
+					 $themeUrl . $themeSettings['images'][$action[0] . '_image'] . '" />' : $action[0];
+
+			$modelActions .= '<li class="action action_' . $action . '">' . $action[1]->getLink($actionDisplay) . '</li>';
+		}
+
+		return $modelActions;
+	}
+
 }
 
 ?>
