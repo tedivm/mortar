@@ -81,6 +81,18 @@ class ReadDisplayList implements DisplayList {
 			{
 				$type = $model->getType();
 				$template = $this->theme->getModelTemplate('Listing.html', $type);
+
+				$location = $model->getLocation();
+				$url = new Url();
+				$url->location = $location->getId();
+				$url->format = $this->format;
+				$actionUrls = $this->getActionList($url, $location);
+				
+				$actionDisplay = new DisplayMaker();
+				$actionDisplay->setDisplayTemplate($template);
+				$actionDisplay->addContent('model_actions', $this->getActionIcons($actionUrls));
+				$template = $actionDisplay->makeDisplay();				
+				
 				$htmlConverter = $model->getModelAs('Html');
 				$htmlConverter->useTemplate($template);
 				if($modelDisplay = $htmlConverter->getOutput())
@@ -124,9 +136,6 @@ class ReadDisplayList implements DisplayList {
 		$modelActions = '';
 		foreach($actionUrls as $action)
 		{
-			$modelListAction = new DisplayMaker();
-			$modelListAction->setDisplayTemplate("<li class='action action_$action[0]'>{# action #}</li>");
-
 			$actionDisplay = (isset($themeSettings['images']['action_images']) && $themeSettings['images']['action_images'] == true) ?
 					 '<img class="tooltip action_icon ' . $action[0] . '_icon" title="' . $action[0] . '" alt="' . $action[0] . '" src="' .
 					 $themeUrl . $themeSettings['images'][$action[0] . '_image'] . '" />' : $action[0];
