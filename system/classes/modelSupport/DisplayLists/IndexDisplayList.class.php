@@ -16,6 +16,8 @@
  */
 class IndexDisplayList implements DisplayList {
 
+	protected $baseActionList = array('Read', 'Edit', 'Delete');
+
 	/**
 	 * This is the date format used when converting the model to an html table.
 	 *
@@ -155,33 +157,42 @@ class IndexDisplayList implements DisplayList {
 		$baseUrl->locationId = $location->getId();
 		$baseUrl->format = $this->format;
 
-		$actionTypes = array('Read', 'Edit', 'Delete');
-		if(isset($location) && $location->hasChildren())
-			array_push($actionTypes, 'Index');
+		$actionUrls = $this->getActionList($baseUrl, $location);
 
-		$allowedActionTypes = array();
-		$user = ActiveUser::getUser();
-		$userId = $user->getId();
-		$actionList = '';
-		foreach($actionTypes as $action)
+		foreach($actionUrls as $action)
 		{
 			$modelListAction = new DisplayMaker();
-			$modelListAction->setDisplayTemplate("<li class='action action_$action'>{# action #}</li>");
-			$actionUrl = clone $baseUrl;
-			$actionUrl->action = $action;
+			$modelListAction->setDisplayTemplate("<li class='action action_$action[0]'>{# action #}</li>");
 
-			if($actionUrl->checkPermission($userId))
-			{
-				$actionDisplay = (isset($themeSettings['images']['action_images']) && $themeSettings['images']['action_images'] == true) ?
-						 '<img class="tooltip action_icon ' . $action . '_icon" title="' . $action . '" alt="' . $action . '" src="' .
-						 $themeUrl . $themeSettings['images'][$action . '_image'] . '" />' : $action;
+			$actionDisplay = (isset($themeSettings['images']['action_images']) && $themeSettings['images']['action_images'] == true) ?
+					 '<img class="tooltip action_icon ' . $action[0] . '_icon" title="' . $action[0] . '" alt="' . $action[0] . '" src="' .
+					 $themeUrl . $themeSettings['images'][$action[0] . '_image'] . '" />' : $action[0];
 
-				$modelActions .= '<li class="action action_' . $action . '">' . $actionUrl->getLink($actionDisplay) . '</li>';
-			}
+			$modelActions .= '<li class="action action_' . $action . '">' . $action[1]->getLink($actionDisplay) . '</li>';
 		}
 
 		$table->addField('model_actions',
 			isset($modelActions) && $modelActions != '' ? "<ul class='action_list'>" . $modelActions . "</ul>" : "");
+	}
+
+	protected function getActionList(Url $baseUrl, $location = null)
+	{
+		$baseActionTypes = $this->baseActionList;
+		if(isset($location) && $location->hasChildren())
+			array_push($baseActionTypes, 'Index');
+		$actionUrls = array();
+		$user = ActiveUser::getUser();
+		$userId = $user->getId();
+		
+		foreach($baseActionTypes as $action) {
+			$actionUrl = clone $baseUrl;
+			$actionUrl->action = $action;
+
+			if($actionUrl->checkPermission($userId))
+				array_push($actionUrls, array($action, $actionUrl));
+		}
+		
+		return $actionUrls;
 	}
 
 }
