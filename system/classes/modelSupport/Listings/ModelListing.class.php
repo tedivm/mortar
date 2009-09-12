@@ -128,6 +128,9 @@ class ModelListing
 	{
 		if($number > $this->maxLimit)
 			$number = $this->maxLimit;
+			
+		if($offset < 0)
+			$offset = 0;
 
 		$processedModels = array();
 
