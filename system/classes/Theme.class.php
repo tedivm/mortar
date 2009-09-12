@@ -116,7 +116,7 @@ class Theme
 				$packageUrl = $baseModuleUrl . $package . '/';
 
 				// javascript
-				$javascriptResult = $this->getFiles($packagePath . 'javascript/', $packageUrl . 'javascript/', 'js');
+				$javascriptResult = $this->getFiles($packagePath . 'javascript/', $packageUrl . 'javascript/', 'js', 25);
 				if($javascriptResult)
 					$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
 
@@ -147,7 +147,7 @@ class Theme
 			// This code loads the javascript that ships with Mortar- we load it last so it overrides any
 			// javascript in the modules. Since we only store libraries here, and all modules use those libraries,
 			// we don't want modules or themes to be able to overwrite those specific ones.
-			$javascriptResult = $this->getFiles($baseJavascriptPath, $baseJavascriptUrl, 'js');
+			$javascriptResult = $this->getFiles($baseJavascriptPath, $baseJavascriptUrl, 'js', 20);
 			if($javascriptResult)
 				$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
 
@@ -445,7 +445,7 @@ class Theme
 	 * @param string $extention
 	 * @return array
 	 */
-	protected function getFiles($path, $url, $extention = '.*')
+	protected function getFiles($path, $url, $extention = '.*', $defaultPriority = 30)
 	{
 		if(strlen($path) < 1 || strlen($url) < 1)
 			return false;
@@ -482,7 +482,7 @@ class Theme
 
 			$fileArray[$library][$name]['mainLink'] = $url . $fileName;
 			$fileArray[$library][$name]['path']  = $file;
-			$fileArray[$library][$name]['priority']  = isset($priority) ? $priority : 30;
+			$fileArray[$library][$name]['priority']  = isset($priority) ? $priority : $defaultPriority;
 		}
 		return $fileArray;
 	}
