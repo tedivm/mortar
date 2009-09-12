@@ -60,3 +60,7 @@ Models need to be able to be moved, merged together, redated, etc. to ease reord
 == Pagination System ==
 
 This should probably be flexible enough to handle both individual Pages and other models that simply have their content divided into arbitrary pages _and_ things like blogs/forums that paginate based on model lists.
+
+== Search Engine ==
+
+Hoo boy do we need a search engine. The ideal Mortar search engine would search all kinds of models by default (but allow you to fine-tune your search as desired), search all default fields individually (with optional hooks to add model-specific fields), and output results through a DisplayList. Oh, and it should also not just arbitrarily break when a forum gets big.
