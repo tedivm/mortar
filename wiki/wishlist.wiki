@@ -19,6 +19,14 @@ Right now we're mostly using the filter_var php functions, but we could use some
 
 An extendable set of classes should be created which control the content of admin pages which have no equivalent on the front end, and methods for interacting with certain key elements (users, groups, sites, configuration) should be introduced.
 
+== User/Group Interface ==
+
+Currently there is no interface for browsing or interacting with users in the Mortar system. Ideally this should come together as a specific instance of the Admin Interface classes and lean heavily on DisplayLists to do its job.
+
+== Templating Language ==
+
+Ultimately this is going to have to be built as its own separate set of classes and handled in a standardized way.
+
 == Modifiable Pretty URLs == 
 
 A system to actually let you define the structure for URLs (either overall or on a per-directory/per-group level) based on key elements of each model (to allow for automatic SEO URLs in addition to slug-based page names.)
@@ -36,3 +44,7 @@ In order to ease module/plugin development, we should create an "empty box" temp
 == Imports ==
 
 If we want people to migrate over from competing platforms, we should provide some ability to import content from major competing platforms (Movable Type and Wordpress, at _very_ least.) 
+
+== Package Manager ==
+
+A way to remotely download and install packages from a central repository is vital to making the software fully workable out of the box.
