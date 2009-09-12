@@ -136,6 +136,12 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		return $indexList;
 	}
 
+	protected function getReadDisplayList()
+	{
+		$readList = new ReadDisplayList($this->model, $this->childModels);
+		return $readList;
+	}
+
 	/**
 	 * Creates a listing of models along with relevant qualities and actions for use in an admin page.
 	 *
@@ -162,40 +168,10 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 	public function viewHtml($page)
 	{
 		$output = parent::viewHtml($page);
-		$output .= $this->childrenToHtml($page, 'Listing.html');
-		return $output;
+		$readList = $this->getReadDisplayList();
+		$readList->addPage($page);
+		return $output . $readList->getListing();
 	}
-
-	protected function childrenToHtml($page, $templateName)
-	{
-		if(count($this->childModels) > 0)
-		{
-			$listingHtml = new HtmlObject('div');
-			$listingHtml->addClass('listing-container');
-			$theme = $page->getTheme();
-			$templates = array();
-			$x = 1;
-
-			foreach($this->childModels as $model)
-			{
-				$type = $model->getType();
-
-				if($modelDisplay = $this->modelToHtml($page, $model, 'Listing.html'))
-				{
-					$listingHtml->insertNewHtmlObject('div')->
-						property('name', 'listing-container-child-' . $x)->
-						addClass('modelListing')->addClass($type)->
-						wrapAround($modelDisplay);
-					$x++;
-				}
-			}
-			$output = (string) $listingHtml;
-		}
-		return $output;
-	}
-
-
-
 
 
 	/**
