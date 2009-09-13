@@ -58,12 +58,11 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 	 */
 	public function logic()
 	{
+		$lastModified = $this->model->getLocation()->getLastModified();
 		$modelInformationArray = $this->getChildren(array());
 		$childrenModels = array();
-		$lastModified = '';
 		if(is_array($modelInformationArray))
 		{
-			$lastModified = $this->model->getLocation()->getLastModified();
 			foreach($modelInformationArray as $modelInfo)
 			{
 				$childModel = ModelRegistry::loadModel($modelInfo['type'], $modelInfo['id']);
@@ -171,7 +170,11 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		$output = parent::viewHtml($page);
 		$readList = $this->getReadDisplayList();
 		$readList->addPage($page);
-		return $output . $readList->getListing();
+
+		if($listingResults = $readList->getListing())
+			$output .= $listingResults;
+
+		return $output;
 	}
 
 
