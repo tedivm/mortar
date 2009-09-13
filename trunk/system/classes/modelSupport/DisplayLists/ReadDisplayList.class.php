@@ -87,12 +87,12 @@ class ReadDisplayList implements DisplayList {
 				$url->location = $location->getId();
 				$url->format = $this->format;
 				$actionUrls = $this->getActionList($url, $location);
-				
+
 				$actionDisplay = new DisplayMaker();
 				$actionDisplay->setDisplayTemplate($template);
 				$actionDisplay->addContent('model_actions', $this->getActionIcons($actionUrls));
-				$template = $actionDisplay->makeDisplay();				
-				
+				$template = $actionDisplay->makeDisplay();
+
 				$htmlConverter = $model->getModelAs('Html');
 				$htmlConverter->useTemplate($template);
 				if($modelDisplay = $htmlConverter->getOutput())
@@ -106,9 +106,10 @@ class ReadDisplayList implements DisplayList {
 			}
 			$output = (string) $listingHtml;
 		}
-		return $output;
+
+		return isset($output) ? $output : false;
 	}
-	
+
 	protected function getActionList(Url $baseUrl, $location = null)
 	{
 		$baseActionTypes = $this->baseActionList;
@@ -117,7 +118,7 @@ class ReadDisplayList implements DisplayList {
 		$actionUrls = array();
 		$user = ActiveUser::getUser();
 		$userId = $user->getId();
-		
+
 		foreach($baseActionTypes as $action) {
 			$actionUrl = clone $baseUrl;
 			$actionUrl->action = $action;
@@ -125,7 +126,7 @@ class ReadDisplayList implements DisplayList {
 			if($actionUrl->checkPermission($userId))
 				array_push($actionUrls, array($action, $actionUrl));
 		}
-		
+
 		return $actionUrls;
 	}
 
