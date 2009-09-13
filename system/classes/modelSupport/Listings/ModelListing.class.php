@@ -128,7 +128,7 @@ class ModelListing
 	{
 		if($number > $this->maxLimit)
 			$number = $this->maxLimit;
-			
+
 		if($offset < 0)
 			$offset = 0;
 
@@ -171,7 +171,7 @@ class ModelListing
 	 * @cache This cache is dynamically keyed, see getCacheArray()
 	 * @param int $offset
 	 * @param int $number
-	 * @return array
+	 * @return array Contains an array of associative arrays with index type and id
 	 */
 	protected function getModels($number, $offset)
 	{
@@ -212,7 +212,7 @@ class ModelListing
 	 * @param string $order
 	 * @param int $number
 	 * @param int $offset
-	 * @return array
+	 * @return array Contains an array of associative arrays with index type and id
 	 */
 	protected function getModelsFromTable($table, $restrictions, $browseBy, $order, $number, $offset)
 	{
