@@ -122,6 +122,9 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		$browseBy = (isset($query['browseBy'])) ? $query['browseBy'] : $this->indexBrowseBy;
 		$locationListing->setOption('browseBy', $browseBy);
 
+		if(isset($query['status']))
+			$locationListing->addRestriction('resourceStatus', $query['status']);
+
 		$locationListing->addRestriction('parent', $this->model->getLocation()->getId());
 
 		if(isset($query['order']))
