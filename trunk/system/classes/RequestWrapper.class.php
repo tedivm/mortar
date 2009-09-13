@@ -240,6 +240,10 @@ class RequestWrapper
 		$query = Query::getQuery();
 		$format = $query['format'];
 		$outputController = $this->loadFormatHandler($action, $format);
+
+		if(!$outputController)
+			throw new ResourceNotFoundError();
+
 		$outputController->initialize($action);
 		$output = $outputController->getFinalOutput();
 		$this->ioHandler->output($output);
