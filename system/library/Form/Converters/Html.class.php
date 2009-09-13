@@ -89,6 +89,7 @@ class FormToHtml
 					addClass('intro');
 
 
+			$hasInputs = false;
 			foreach($inputs as $input)
 			{
 				$inputId = $formId . "_" . $input->name;
@@ -146,10 +147,13 @@ class FormToHtml
 					$sectionHtml->wrapAround($labelHtml)->
 						wrapAround($inputHtml)->
 						insertNewHtmlObject('br');
+
+					$hasInputs = true;
 				}
 			}//foreach($this->inputs as $section => $inputs)
 
-			$formHtml->wrapAround($sectionHtml);
+			if($hasInputs)
+				$formHtml->wrapAround($sectionHtml);
 		}
 
 		if(!$this->submitButton)
