@@ -160,7 +160,7 @@ class LocationModel extends ModelBase
 			{
 				if($parentMemberGroup = $location->getOwnerGroup())
 				{
-					$location->setOwnerGroup($parentMemberGroup);
+					$location->setOwnerGroup($parentMemberGroup->getId());
 					$location->save();
 				}
 			}
