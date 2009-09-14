@@ -67,7 +67,7 @@ class Email
 	 */
 	public function addRecipient($email, $name = null)
 	{
-		if($this->check_email_address($email))
+		if($this->checkEmailAddress($email))
 		{
 			$recipient['email'] = $email;
 			if(isset($name))
@@ -118,7 +118,7 @@ class Email
 	 */
 	protected function setSender($email)
 	{
-		if($this->check_email_address($email))
+		if($this->checkEmailAddress($email))
 		{
 			$this->from = $email;
 			return true;
@@ -134,7 +134,7 @@ class Email
 	 */
 	protected function setSubject($subject)
 	{
-		$this->subject = $this->clean_subject($subject);
+		$this->subject = $this->cleanSubject($subject);
 	}
 
 	/**
@@ -155,7 +155,6 @@ class Email
 	 */
 	protected function cleanSubject($subject)
 	{
-
 		$subject = str_replace("\r", "", $subject);
 		$subject = str_replace("\n", "", $subject);
 
