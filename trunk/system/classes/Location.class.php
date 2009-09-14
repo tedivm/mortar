@@ -514,7 +514,9 @@ class Location
 		{
 			$db_location->groupOwner = $this->group;
 		}elseif($parent && $parentGroup = $parent->getOwnerGroup()){
-			$db_location->groupOwner = $parentGroup->getId();
+			$groupId = $parentGroup->getId();
+			$db_location->groupOwner = $groupId;
+			$this->group = $groupId;
 		}else{
 			$db_location->querySet('groupOwner', 'NULL');
 		}
