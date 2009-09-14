@@ -42,11 +42,11 @@ class CoreError extends Exception
 		if(method_exists($this, 'runAction'))
 			$this->runAction();
 
-		if(!INSTALLMODE && ERROR_LOGGING >= $this->debugLevel)
-			RequestLog::logError($this, $this->debugLevel);
-
 		if(DEBUG >= $this->debugLevel)
 			$this->debugAction();
+
+		if(!INSTALLMODE && class_exists('RequestLog') && ERROR_LOGGING >= $this->debugLevel)
+			RequestLog::logError($this, $this->debugLevel);
 	}
 
 	/**
@@ -102,7 +102,9 @@ class CoreError extends Exception
 			}
 
 			$output .= '*      ' . ($index + 1) . '. ' . $function . PHP_EOL;
-			$output .= '*          ' . $line['file'] . ':' . $line['line'] . PHP_EOL;
+
+			if(isset($line['file']) && isset($line['line']))
+				$output .= '*          ' . $line['file'] . ':' . $line['line'] . PHP_EOL;
 			$output .= '*' . PHP_EOL;
 		}
 
