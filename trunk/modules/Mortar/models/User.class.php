@@ -108,26 +108,18 @@ class MortarModelUser extends ModelBase
 
 		if($cache->isStale())
 		{
-			$userLookup = new ObjectRelationshipMapper('users');
-			$userLookup->setColumnLimits(array('user_id'));
-			$userLookup->email = $address;
+			$stmt = DatabaseConnection::getStatement('default_read_only');
+			$stmt->prepare('SELECT user_id FROM users WHERE email = ?');
+			$stmt->bindAndExecute('s', $address);
 
-			if($userLookup->select(1))
-			{
-				$userId = $userLookup->user_id;
-			}else{
-				$userId = false;
-			}
+			$userId = ($results = $stmt->fetch_array()) ? $results['user_id'] : false;
 			$cache->storeData($userId);
 		}
 
-		if(is_null($userId))
-		{
-			return $this->load($userId);
-		}else{
+		if(!is_numeric($userId))
 			return false;
-		}
 
+		return $this->load($userId);
 	}
 
 	/**
