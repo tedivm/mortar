@@ -210,7 +210,7 @@ class Location
 	/**
 	 * Returns the parent location
 	 *
-	 * @return unknown
+	 * @return Location
 	 */
 	public function getParent()
 	{
