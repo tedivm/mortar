@@ -100,6 +100,8 @@ class ReadDisplayList implements DisplayList {
 					$listingHtml->insertNewHtmlObject('div')->
 						property('name', 'listing-container-child-' . $x)->
 						addClass('modelListing')->addClass($type)->
+						addClass('listing-container-child')->
+						property('id', 'listing-container-child-' . $x)->
 						wrapAround($modelDisplay);
 					$x++;
 				}
