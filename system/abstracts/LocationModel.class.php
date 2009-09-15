@@ -412,6 +412,16 @@ class LocationModel extends ModelBase
 		return parent::__get($offset);
 	}
 	
+	public function __set($offset, $value)
+	{
+		if(!is_scalar($value))
+			throw new CoreError('Model attributes must be scalar.');
+
+		if (in_array($value, array('owner', 'ownergroup', 'createdOn', 'lastModified', 'name')))
+			return false;
+
+		return parent::__set($offset, $value);
+	}
 }
 
 ?>

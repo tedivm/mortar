@@ -543,11 +543,11 @@ abstract class ModelBase implements Model
 
 	public function __set($offset, $value)
 	{
-		if ($offset == 'type' || $offset == 'id')
-			return false;
-			
 		if(!is_scalar($value))
 			throw new CoreError('Model attributes must be scalar.');
+
+		if ($offset == 'type' || $offset == 'id')
+			return false;
 
 		return $this->properties[$offset] = $value;
 	}
