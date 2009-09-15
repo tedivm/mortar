@@ -521,15 +521,31 @@ abstract class ModelBase implements Model
 		$hook->loadModelPlugins($this, 'firstSave');
 		$hook->runFirstSave($this);
 	}
-	// class properties define attributes and meta data
+	/**
+	 * This function provides dynamic data about the model by calling overrideable functions in the ModelBase, or
+	 * checks the parameters array for the requested item. The definition of dynamic properties should be
+	 * changed by overriding those functions; descendants of this class should return Parent::__get($offset)
+	 * as a final default.
+	 *
+	 * @param String $offset
+	 */
 	public function __get($offset)
 	{
+		switch($offset) {
+			case 'id':
+				return $this->getId();
+			case 'type':
+				return $this->getType();
+		}
 		if(isset($this->properties[$offset]))
 			return $this->properties[$offset];
 	}
 
 	public function __set($offset, $value)
 	{
+		if ($offset == 'type' || $offset == 'id')
+			return false;
+			
 		if(!is_scalar($value))
 			throw new CoreError('Model attributes must be scalar.');
 
@@ -538,6 +554,9 @@ abstract class ModelBase implements Model
 
 	public function __isset($offset)
 	{
+		if ($offset == 'type' || $offset == 'id')
+			return true;
+			
 		return isset($this->properties[$offset]);
 	}
 

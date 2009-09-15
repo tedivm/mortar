@@ -387,6 +387,31 @@ class LocationModel extends ModelBase
 		$array = array_merge($array, $locationInfo);
 		return $array;
 	}
+	
+	/**
+	 * Extends the parent function, returning correct values for a variety of location-specific qualities and
+	 * otherwise passing back the parent function's results.
+	 *
+	 * @return array
+	 */
+	public function __get($offset)
+	{
+		$location = $this->getLocation();
+		switch($offset) {
+			case 'owner':
+				return $location->getOwner();
+			case 'ownergroup':
+				return $location->getOwnerGroup();
+			case 'createdOn':
+				return $location->getCreationDate();
+			case 'lastModified':
+				return $location->getLastModified();
+			case 'name':
+				return $location->getName();
+		}
+		return parent::__get($offset);
+	}
+	
 }
 
 ?>

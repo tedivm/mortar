@@ -102,11 +102,11 @@ class ModelToHtml
 		}
 
 		$this->convertedProperties['model_status'] = $this->model->status;
-		$this->convertedProperties['model_type'] = $this->model->getType();
+		$this->convertedProperties['model_type'] = $this->model->type;
 		$this->convertedProperties['model_action_list'] = $allowedActionTypes;
-		$this->convertedProperties['model_creationTime'] = $location->getCreationDate();
-		$this->convertedProperties['model_lastModified'] = $location->getLastModified();
-		$this->convertedProperties['model_name'] = $location->getName();
+		$this->convertedProperties['model_creationTime'] = $this->model->createdOn;
+		$this->convertedProperties['model_lastModified'] = $this->model->lastModified;
+		$this->convertedProperties['model_name'] = $this->model->name;
 		$this->convertedProperties['model_actions'] = $actionList;
 	}
 
