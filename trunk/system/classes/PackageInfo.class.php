@@ -398,6 +398,15 @@ class PackageInfo
 							$engines[$engineName] = $engine;
 						}
 					}
+					$modelNames = ModelRegistry::getModelList();
+					natsort($modelNames);                       // This is a hack to ensure that the longest
+					$modelNames = array_reverse($modelNames);   // possible classnames are tried first
+					foreach($modelNames as $name) {
+						if (strpos($action['name'], $name) === 0) {
+							$action['outerName'] = substr($action['name'], strlen($name));
+							$action['type'] = $name;
+						}
+					}
 					$action['engineSupport'] = $engines;
 					$action['permissions'] = staticHack($action['className'], 'requiredPermission');
 					$actions[$actionName] = $action;
