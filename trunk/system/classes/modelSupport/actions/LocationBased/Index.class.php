@@ -17,6 +17,8 @@
  */
 class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 {
+	protected $listingClass = 'LocationListing';
+
 	/**
 	 * This is the date format used when converting the model to an html table.
 	 *
@@ -115,22 +117,23 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 	 */
 	protected function getModelListingClass()
 	{
-		$locationListing = new LocationListing();
+		$listingClass = $this->listingClass;
+		$listingObject = new $listingClass();
 
 		$query = Query::getQuery();
 
 		$browseBy = (isset($query['browseBy'])) ? $query['browseBy'] : $this->indexBrowseBy;
-		$locationListing->setOption('browseBy', $browseBy);
+		$listingObject->setOption('browseBy', $browseBy);
 
 		if(isset($query['status']))
-			$locationListing->addRestriction('resourceStatus', $query['status']);
+			$listingObject->addRestriction('resourceStatus', $query['status']);
 
-		$locationListing->addRestriction('parent', $this->model->getLocation()->getId());
+		$listingObject->addRestriction('parent', $this->model->getLocation()->getId());
 
 		if(isset($query['order']))
-			$locationListing->setOption('order', $query['order']);
+			$listingObject->setOption('order', $query['order']);
 
-		return $locationListing;
+		return $listingObject;
 	}
 
 	protected function getIndexDisplayList()
