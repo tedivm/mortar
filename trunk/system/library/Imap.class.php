@@ -121,11 +121,11 @@ class Imap
 
 		switch ($port) {
 			case 143:
-				$this->addFlag('novalidate-cert');
+				$this->setFlag('novalidate-cert');
 				break;
 
 			case 993:
-				$this->addFlag('ssl');
+				$this->setFlag('ssl');
 				break;
 		}
 
@@ -174,7 +174,7 @@ class Imap
 		if(isset(self::$exclusiveFlags[$flag]))
 		{
 			$kill = $flag;
-		}elseif($index = array_search($flag, self::$exclusiveFlags[])){
+		}elseif($index = array_search($flag, self::$exclusiveFlags)){
 			$kill = $index;
 		}
 
