@@ -269,41 +269,46 @@ abstract class ModelBase implements Model
 	 */
 	public function getAction($actionName)
 	{
-		$actionInfo = self::loadActionFromResource($this->getType(), $actionName);
-		return (!$actionInfo) ? $this->loadFallbackAction($actionName) : $actionInfo;
+		$actionList = $this->getActions();
+		return isset($actionList[$actionName]) ? $actionList[$actionName] : false;
 	}
 
-	/**
-	 * This function looks for an action from a model type. If that model does not have an action and is extended from
-	 * another model the function recursively checks to see if the parent has a suitable action.
-	 *
-	 * @param string $resourceType
-	 * @param string $actionName
-	 * @return array
-	 */
-	static function loadActionFromResource($resourceType, $actionName)
+	public function getActions()
 	{
-		$moduleInfo = ModelRegistry::getHandler($resourceType);
-
-		$packageInfo = new PackageInfo($moduleInfo['module']);
-		$actionInfo = $packageInfo->getActions($resourceType . $actionName);
-
-		if($actionInfo !== false)
-		{
-			return $actionInfo;
-		}else{
-			$reflection = new ReflectionClass($moduleInfo['class']);
-			$parentClass = $reflection->getParentClass();
-
-			if($parentType = $parentClass->getStaticPropertyValue('type'))
-			{
-				return self::loadActionFromResource($parentType, $actionName);
-			}else{
-				return false;
-			}
-		}
+		$actionList = self::loadActions($this->getType());
+		
+		foreach(staticHack(get_class($this), 'fallbackModelActions') as $fallbackAction)
+			if (!isset($actionList[$fallbackAction]))
+				$actionList[$fallbackAction] = $this->loadFallbackAction($fallbackAction);
+		return $actionList;
 	}
 
+	static function loadActions($resourceType)
+	{
+		$actions = array();
+	
+		$moduleInfo = ModelRegistry::getHandler($resourceType);	
+		$packageInfo = new PackageInfo($moduleInfo['module']);
+		
+		$actionList = $packageInfo->getActions();
+
+		$reflection = new ReflectionClass($moduleInfo['class']);
+		$parentClass = $reflection->getParentClass();
+
+		if($parentType = $parentClass->getStaticPropertyValue('type'))
+			$parentActionList = self::loadActions($parentType);
+
+		if(isset($parentActionList))
+			foreach($parentActionList as $parentAction)
+				if(isset($parentAction['outerName']))
+					$actions[$parentAction['outerName']] = $parentAction;
+				
+		foreach($actionList as $action)
+			if(isset($action['outerName']))
+				$actions[$action['outerName']] = $action;
+
+		return $actions;
+	}
 
 	/**
 	 * This function is used by the getAction function when no action is available in the module.
