@@ -41,7 +41,7 @@ class Query
 	{
 		if(!self::$query)
 		{
-			$type = (defined('STDIN')) ? 'Argv' : 'Get';
+			$type = (defined('STDIN') || !isset($_SERVER['REQUEST_METHOD'])) ? 'Argv' : 'Get';
 
 			if(!class_exists($type, false))
 			{
