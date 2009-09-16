@@ -18,6 +18,28 @@
 class Imap
 {
 	/**
+	 * When SSL isn't compiled into PHP we need to make some adjustments to prevent soul crushing annoyances.
+	 *
+	 * @var bool
+	 */
+	static $sslEnable = true;
+
+	/**
+	 * These are the flags that depend on ssl support being compiled into imap.
+	 *
+	 * @var array
+	 */
+	static $sslFlags = array('ssl', 'validate-cert', 'novalidate-cert', 'tls', 'notls');
+
+	/**
+	 * This is used to prevent the class from putting up conflicting tags. Both directions- key to value, value to key-
+	 * are checked, so if "novalidate-cert" is passed then "validate-cert" is removed, and vice-versa.
+	 *
+	 * @var array
+	 */
+	static $exclusiveTags = array('validate-cert' => 'novalidate-cert', 'tls' => 'notls');
+
+	/**
 	 * This is the domain or server path the class is connecting to.
 	 *
 	 * @var string
@@ -97,8 +119,15 @@ class Imap
 
 		$this->port = $port;
 
-		if($port == 993)
-			$this->addFlag('ssl');
+		switch ($port) {
+			case 143:
+				$this->addFlag('novalidate-cert');
+				break;
+
+			case 993:
+				$this->addFlag('ssl');
+				break;
+		}
 
 		$this->service = $service;
 	}
@@ -139,6 +168,19 @@ class Imap
 	 */
 	public function setFlag($flag, $value = null)
 	{
+		if(!self::$sslEnable && in_array($flag, self::$sslFlags))
+			return;
+
+		if(isset(self::$exclusiveFlags[$flag]))
+		{
+			$kill = $flag;
+		}elseif($index = array_search($flag, self::$exclusiveFlags[])){
+			$kill = $index;
+		}
+
+		if(isset($kill) && isset($this->flags[$kill]))
+			unset($this->flags[$kill]);
+
 		if(isset($value) && $value !== true)
 		{
 			if($value == false)
@@ -1134,8 +1176,14 @@ class ImapAttachment
 
 /**
  * This is a specific exception for the Imap classes. It extends the CoreWarning class- if you want to use this library
- * outside of Mortar you can have this exception the core extension class, or whatever base exception class you use.
+ * outside of Mortar just have it extend your own exceptions, or the main Exception class itself.
  *
  */
 class ImapException extends CoreWarning  {}
+
+/**
+ * Rather than make the Imap class dependant on anything in Mortar we're going to put this dependency check here where
+ * it can easily be taken out or replaced in other libraries.
+ */
+Imap::$sslEnable = (phpInfo::getExtensionProperty('imap', 'SSL Support') == 'Enabled');
 ?>
