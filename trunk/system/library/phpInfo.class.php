@@ -4,8 +4,8 @@
  *
  * @copyright Copyright (c) 2009, Robert Hafner
  * @license http://www.mozilla.org/MPL/
- * @package System
- * @subpackage Database
+ * @package Library
+ * @subpackage Environment
  */
 
 /**
