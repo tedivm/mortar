@@ -37,7 +37,7 @@ class Imap
 	 *
 	 * @var array
 	 */
-	static $exclusiveTags = array('validate-cert' => 'novalidate-cert', 'tls' => 'notls');
+	static $exclusiveFlags = array('validate-cert' => 'novalidate-cert', 'tls' => 'notls');
 
 	/**
 	 * This is the domain or server path the class is connecting to.
@@ -187,10 +187,10 @@ class Imap
 			{
 				unset($this->flags[$flag]);
 			}else{
-				$this->flags[] = '/' . $flag . '=' . $value;
+				$this->flags[] = $flag . '=' . $value;
 			}
 		}else{
-			$this->flags[] = '/' . $flag;
+			$this->flags[] = $flag;
 		}
 	}
 
@@ -1185,5 +1185,5 @@ class ImapException extends CoreWarning  {}
  * Rather than make the Imap class dependant on anything in Mortar we're going to put this dependency check here where
  * it can easily be taken out or replaced in other libraries.
  */
-Imap::$sslEnable = (phpInfo::getExtensionProperty('imap', 'SSL Support') == 'Enabled');
+Imap::$sslEnable = (bool) phpInfo::getExtensionProperty('imap', 'SSL Support');
 ?>
