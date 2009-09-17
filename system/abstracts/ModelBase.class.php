@@ -276,7 +276,7 @@ abstract class ModelBase implements Model
 	public function getActions()
 	{
 		$actionList = self::loadActions($this->getType());
-		
+
 		foreach(staticHack(get_class($this), 'fallbackModelActions') as $fallbackAction)
 			if (!isset($actionList[$fallbackAction]))
 				$actionList[$fallbackAction] = $this->loadFallbackAction($fallbackAction);
@@ -286,10 +286,10 @@ abstract class ModelBase implements Model
 	static function loadActions($resourceType)
 	{
 		$actions = array();
-	
-		$moduleInfo = ModelRegistry::getHandler($resourceType);	
+
+		$moduleInfo = ModelRegistry::getHandler($resourceType);
 		$packageInfo = new PackageInfo($moduleInfo['module']);
-		
+
 		$actionList = $packageInfo->getActions();
 
 		$reflection = new ReflectionClass($moduleInfo['class']);
@@ -302,7 +302,7 @@ abstract class ModelBase implements Model
 			foreach($parentActionList as $parentAction)
 				if(isset($parentAction['outerName']))
 					$actions[$parentAction['outerName']] = $parentAction;
-				
+
 		foreach($actionList as $action)
 			if(isset($action['outerName']))
 				$actions[$action['outerName']] = $action;
@@ -344,7 +344,7 @@ abstract class ModelBase implements Model
 	public function getModelAs($format)
 	{
 		$className = $this->getType() . 'To' . $format;
-		if($path = $this->getModelFilePathFromPackage('Converters', $format))
+		if($path = $this->getModelFilePathFromPackage('converters', $className))
 		{
 			if(!class_exists($className, false))
 				include($path);
@@ -561,7 +561,7 @@ abstract class ModelBase implements Model
 	{
 		if ($offset == 'type' || $offset == 'id')
 			return true;
-			
+
 		return isset($this->properties[$offset]);
 	}
 
