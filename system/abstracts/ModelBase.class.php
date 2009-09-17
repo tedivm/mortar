@@ -304,7 +304,7 @@ abstract class ModelBase implements Model
 					$actions[$parentAction['outerName']] = $parentAction;
 
 		foreach($actionList as $action)
-			if(isset($action['outerName']))
+			if(isset($action['outerName']) && $action['type'] == $resourceType)
 				$actions[$action['outerName']] = $action;
 
 		return $actions;
