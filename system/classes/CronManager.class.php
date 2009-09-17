@@ -39,7 +39,7 @@ class CronManager
 		$cronJobOrm->select();
 
 		$cronJobOrm->jobPid = 1;
-		$cronJobOrm->minutesBetweenRequests = (isset($minutesBetweenRequests)) ? $minutesBetweenRequests : 5;
+		$cronJobOrm->minutesBetweenRequests = (isset($minutesBetweenRequests)) ? $minutesBetweenRequests : 0;
 
 		if(isset($start))
 		{
