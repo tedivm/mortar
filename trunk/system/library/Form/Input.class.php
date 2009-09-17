@@ -282,6 +282,10 @@ class FormInput
 	{
 		$success = true;
 		$errors = array();
+
+		if(($value == null || $value == '') && !isset($this->validationRules['required']))
+			return true;
+
 		foreach($this->validationRules as $rule => $argument)
 		{
 			$classname = FormValidationLookup::getClass($rule);
