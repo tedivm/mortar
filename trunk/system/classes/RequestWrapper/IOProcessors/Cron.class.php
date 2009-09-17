@@ -153,7 +153,7 @@ class IOProcessorCron extends IOProcessorCli
 						AND	# Check to see if the required amount of time has elapsed
 							(lastRun IS NULL
 								OR
-								( (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(lastRun)) >= (minutesBetweenRequests * 60) + 60 )
+								( (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(lastRun)) >= (minutesBetweenRequests * 60) + 15 )
 							)
 
 						AND
