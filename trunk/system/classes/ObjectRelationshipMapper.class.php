@@ -684,55 +684,13 @@ class ObjectRelationshipMapper
 	 */
 	protected function loadSchema()
 	{
+		$ormStructure = new OrmTableStructure($this->table, $this->db_write);
+		$ormStructure->columns;
+		$ormStructure->primaryKeys;
 
-		$cache = new Cache('orm', 'schema', $this->table);
-		$cache->cacheTime = self::$cacheTime;
-
-		if(!($schema = $cache->getData()))
-		{
-			$db = DatabaseConnection::getConnection($this->db_write);
-			$result = $db->query('SHOW FIELDS FROM ' . $this->table);
-			$primarykey = array();
-
-			if(!$result)
-				throw new OrmError('Database Error:' . $db->error . '    ORM unable to load table ' . $this->table);
-
-			while($results = $result->fetch_array())
-			{
-
-				$pos = strpos($results['Type'], '(');
-				if($pos)
-					$results['Type'] = substr($results['Type'], 0, $pos);
-
-				$pos = strpos($results['Type'], ' ');
-				if($pos)
-					$results['Type'] = substr($results['Type'], 0, $pos);
-
-				$results['Null'] = ($results['Null'] != 'NO');
-
-				$columns[$results['Field']] = $results;
-
-
-				if($results['Key'] == 'PRI')
-				{
-					if(isset($results['Extra']) && strpos($results['Extra'], 'auto_increment') !== false)
-					{
-						$columns[$results['Field']]['autoIncrement'] = true;
-						$primarykey[] = $results['Field'];
-					}else{
-						array_unshift($primarykey, $results['Field']);
-					}
-				}
-			}
-
-			$schema['columns'] = $columns;
-			$schema['primarykey'] = $primarykey;
-
-			$cache->storeData($schema);
-		} // end cache code
-
-		$this->columns = $schema['columns'];
-		$this->primary_keys = $schema['primarykey'];
+		$this->columns = $ormStructure->columns;
+		$this->primary_keys = $ormStructure->primaryKeys;
+		return;
 	}
 
 	/**
