@@ -220,6 +220,9 @@ class Url
 
 		$urlString = $basePath . rtrim($urlString, '/');
 
+		if(isset($attributes['ioType']) && $attributes['ioType'] == 'Http')
+			unset($attributes['ioType']);
+
 		if(count($attributes) > 0)
 		{
 			$urlString .= '?';
