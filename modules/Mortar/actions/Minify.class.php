@@ -37,7 +37,7 @@ class MortarActionMinify extends ActionBase
 		if($actualCheckSum != $requestedChecksum)
 		{
 			$url = $theme->getUrl($type);
-			if($url->id == $query['id'])
+			if(isset($query['id']) && $url->id == $query['id'])
 			{
 				Cache::clear('themes', $themeName, 'minification', $type);
 				$url = $theme->getUrl($type);
@@ -81,14 +81,14 @@ class MortarActionMinify extends ActionBase
 
 	/**
 	 * Processes JS and CSS files in order to incorporate tags. Any CSS/JS specific tags or calls to external classes for tag processing should be added here.
-	 * 
+	 *
 	 * @param String $rawtext
 	 * @return String
 	 */
 
 	protected function processTags($rawText)
 	{
-		$processedText = new DisplayMaker(); 
+		$processedText = new DisplayMaker();
 		$processedText->setDisplayTemplate($rawText);
 		$processedText->addContent('theme_path', ActiveSite::getLink('theme') . $this->processingTheme->name . '/');
 		return $processedText->makeDisplay();
