@@ -1,18 +1,18 @@
 <xml>
 
-	<modelGroups>
-		<modelGroup name="core">
+	<aliases>
+		<modelgroup name="core">
 			<model>Base</model>
-			<exclude>
-				<model>Root</model>
-			</exclude>	
-		</modelGroup>
-		<modelGroup name="admin">
+			<model include="false">Root</model>
+		</modelgroup>
+		
+		<modelgroup name="admin">
 			<model>Base</model>
 			<model>Root</model>
-		</modelGroup>		
-	</modelGroups>
+		</modelgroup>		
 
+	</aliases>
+	
 	<modules>
 		<module name="Mortar" />
 		<module name="Rubble" />
