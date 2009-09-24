@@ -53,13 +53,13 @@ class InstallerInstallationForm extends Form
 			changeSection('admin')->
 				setLegend('Administrative User')->
 
-				createInput('username')->
+				createInput('setup_user_admin_name')->
 					setLabel('Username')->
 					property('value', 'admin')->
 					addRule('required')->
 				getForm()->
 
-				createInput('password')->
+				createInput('setup_user_admin_password')->
 					setType('password')->
 					setLabel('Password')->
 					addRule('required')->
