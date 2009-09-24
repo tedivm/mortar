@@ -93,13 +93,25 @@ class ModelRegistry
 		if(is_null($name))
 			$name = $resource;
 
+		$moduleId = $moduleInfo->getId();
+
 		$db = db_connect('default');
 		$insertStmt = $db->stmt_init();
 		$insertStmt->prepare('REPLACE INTO modelsRegistered (handlerName, resource, mod_id) VALUES (?, ?, ?)');
-		$insertStmt->bindAndExecute('ssi', $name, $resource, $moduleInfo->getId());
+		$insertStmt->bindAndExecute('ssi', $name, $resource, $moduleId);
 
+		$className = $moduleInfo->getName() . 'Model' . $name;
+		$modelId = $insertStmt->insert_id;
+
+		self::$resourceIndex[$resource] = $modelId;
+		self::$handlerList[$modelId] = array('id' => $modelId,
+											'name' => $name,
+											'module' => $moduleId,
+											'resource' => $resource,
+											'class' => $className);
+
+		var_dump(self::$handlerList);
 		Cache::clear('system', 'models', 'handlers');
-		self::loadHandlers();
 	}
 
 	/**
