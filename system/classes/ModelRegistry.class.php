@@ -109,8 +109,6 @@ class ModelRegistry
 											'module' => $moduleId,
 											'resource' => $resource,
 											'class' => $className);
-
-		var_dump(self::$handlerList);
 		Cache::clear('system', 'models', 'handlers');
 	}
 
