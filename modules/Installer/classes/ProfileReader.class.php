@@ -4,7 +4,7 @@ class InstallerProfileReader
 {
 	static $path;
 
-	protected $aliases;
+	protected $aliases = array();
 	protected $modules;
 	protected $membergroups;
 	protected $users;
@@ -17,6 +17,18 @@ class InstallerProfileReader
 			$xml = $this->getXmlFromFile($name);
 			$xml = new SimpleXMLElement($xml);
 			$xml = $xml->profile;
+
+
+			if(isset($xml['extends']))
+			{
+				$parentProfile = new InstallerProfileReader();
+
+				if(!$parentProfile->loadProfile($xml['extends']))
+					throw new CoreError('Unable to load parent profile ' . $xml['extends']);
+
+				if($parentAliases = $parentProfile->getAliases())
+					$this->aliases = array_merge($parentAliases, $this->getAliases());
+			}
 
 			if(isset($xml->aliases))
 				$this->loadAliases($xml->aliases);
@@ -33,26 +45,19 @@ class InstallerProfileReader
 			if(isset($xml->locations->location))
 				$this->loadLocationInfo($xml->locations->location);
 
-			if(isset($xml['extends']))
+			if(isset($xml['extends']) && isset($parentProfile))
 			{
-				$profile = new InstallerProfileReader();
 
-				if(!$profile->loadProfile($xml['extends']))
-					throw new CoreError('Unable to load parent profile ' . $xml['extends']);
-
-				if($parentAliases = $profile->getAliases())
-					$this->aliases = array_merge($parentAliases, $this->getAliases());
-
-				if($parentModules = $profile->getModules())
+				if($parentModules = $parentProfile->getModules())
 					$this->modules = array_merge($parentModules, $this->getModules());
 
-				if($parentMembergroups = $profile->getMembergroups())
+				if($parentMembergroups = $parentProfile->getMembergroups())
 					$this->membergroups = array_merge($parentMembergroups, $this->getMembergroups());
 
-				if($parentUsers = $profile->getUsers())
+				if($parentUsers = $parentProfile->getUsers())
 					$this->users = array_merge($parentUsers, $this->getUsers());
 
-				if($parentLocationTree = $profile->getLocations())
+				if($parentLocationTree = $parentProfile->getLocations())
 					$this->locationTree = array_merge($parentLocationTree, $this->getLocations());
 			}
 
@@ -62,7 +67,6 @@ class InstallerProfileReader
 
 			throw new CoreError('Unable to load profile: ' . $e->getMessage());
 		}
-		var_dump($this);
 		return true;
 	}
 
@@ -93,18 +97,33 @@ class InstallerProfileReader
 
 	protected function loadAliases(SimpleXMLElement $xml)
 	{
-		$aliases = array();
-		if(isset($xml->modelgroup))
-			foreach($xml->modelgroup as $modelGroup)
+		$aliasTypes = array('modelGroup' => 'modelGroups',
+							'actionGroup' => 'actionGroups');
+
+		foreach($aliasTypes as $xmlLabel => $profileLabel)
+		{
+			if(!isset($xml->$xmlLabel))
+				continue;
+
+			foreach($xml->$xmlLabel as $modelGroup)
 			{
+				if(!isset($modelGroup->alias))
+					continue;
+
 				$name = (string) $modelGroup['name'];
-
-				if(isset($modelGroup->model))
-					foreach($modelGroup->model as $model)
-						$aliases['modelgroups'][$name][(string) $model] = (!isset($model['include']) || $model['include'] != 'false');
+				foreach($modelGroup->alias as $model)
+				{
+					$modelName = (string) $model;
+					if(!isset($model['include']) || $model['include'] != 'false')
+					{
+						$this->aliases[$profileLabel][$name][] = $modelName;
+					}elseif(in_array($modelName, $this->aliases[$profileLabel][$name])){
+						$index = array_search($modelName, $this->aliases[$profileLabel][$name]);
+						unset($this->aliases[$profileLabel][$index]);
+					}
+				}
 			}
-
-			$this->aliases = $aliases;
+		}
 	}
 
 	protected function loadModuleInformation(SimpleXMLElement $xml)
@@ -163,6 +182,7 @@ class InstallerProfileReader
 		{
 			$locationName = (string) $location['name'];
 
+			$locations[$locationName]['name'] = $locationName;
 			$locations[$locationName]['longname'] = $parentName . $locationName;
 
 			$locations[$locationName]['inherits'] = (!isset($location['inherits']) || $location['inherits'] == 'true');
@@ -194,6 +214,9 @@ class InstallerProfileReader
 				{
 					$processedPermission = array();
 
+					foreach($permission->resources->resourceGroup as $resource)
+						$processedPermission['resources'][] = (string) $resource;
+
 					foreach($permission->resources->resource as $resource)
 						$processedPermission['resources'][] = (string) $resource;
 
@@ -213,11 +236,9 @@ class InstallerProfileReader
 				}
 
 			if(isset($location->children))
-				foreach($location->children as $children)
-				{
-					$locations[$locationName]['children'][] = $this->getLocationInfoFromXml($children,
+					$locations[$locationName]['children'] = $this->getLocationInfoFromXml($location->children->location,
 																			$locations[$locationName]['longname']);
-				}
+
 		}
 		return $locations;
 	}
