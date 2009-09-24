@@ -478,6 +478,19 @@ class InstallerSetupUserland
 			{
 				$model = ModelRegistry::loadModel($locationInfo['type']);
 				$model->name = $locationName;
+
+				if(isset($locationInfo['content']) || isset($locationInfo['property']))
+				{
+					if(isset($locationInfo['content']))
+						foreach($locationInfo['content'] as $name => $value)
+							$model[$name] = $value;
+
+					if(isset($locationInfo['property']))
+						foreach($locationInfo['property'] as $name => $value)
+							$model->$name = $value;
+				}
+
+
 				$model->save();
 				$location = $model->getLocation();
 			}else{
@@ -489,6 +502,8 @@ class InstallerSetupUserland
 			if(isset($parent))
 				$location->setParent($parent);
 
+
+			// continue setting things up from the XML profile
 			$this->setupLocationFromProfile($location, $locationInfo);
 
 			if(isset($locationInfo['children']))
@@ -521,8 +536,10 @@ class InstallerSetupUserland
 		if(isset($locationInfo['group']))
 			$location->getOwnerGroup($groups[$locationInfo['group']]->getId());
 
+
 		$location->save();
 		$locationId = $location->getId();
+
 		if(isset($locationInfo['permissions']))
 		{
 			$aliases = $this->getAliasesInternal();
@@ -582,7 +599,7 @@ class InstallerSetupUserland
 				foreach($permissions as $permission)
 					$permission->save();
 			}
-		}
+		}//if(isset($locationInfo['permissions']))
 
 		return true;
 	}
