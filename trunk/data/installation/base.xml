@@ -1,137 +1,148 @@
 <xml>
+	<profile>
 
-	<aliases>
-		<modelgroup name="core">
-			<model>Base</model>
-			<model include="false">Root</model>
-		</modelgroup>
-		
-		<modelgroup name="admin">
-			<model>Base</model>
-			<model>Root</model>
-		</modelgroup>		
+		<aliases>
 
-	</aliases>
-	
-	<modules>
-		<module name="Mortar" />
-		<module name="Rubble" />
-		<module name="Litho" />
-	</modules>
-	
-	<membergroups>
-		<system>
-			<group>Guest</group>
-			<group>ResourceGroupOwner</group>
-			<group>ResourceOwner</group>
-			<group>SuperUser</group>
-			<group>System</group>
-		</system>
-		<user>
-			<group>Administrator</group>
-			<group>User</group>
-		</user>
-	</membergroups>
-	
-	<users>
-		<user name="Admin" login="true" form="true">
-			<group>User</group>
-			<group>Administrator</group>
-			<group>SuperUser</group>
-		</user>
-		<user name="Guest" login="false">
-			<group>Guest</group>
-		</user>
-		<user name="System" login="false">
-			<group>SuperUser</group>
-		</user>
-		<user name="Cron" login="false">
-			<group>SuperUser</group>
-		</user>		   
-	</users>
-	
-	<locations>
-		<location name="root" type="Root" id="0">
+			<modelGroup name="core">
+				<alias>Base</alias>
+				<alias include="false">Root</alias>
+			</modelGroup>
 
-			<option name="theme">default</option>
-			<option name="adminTheme">bbAdmin</option>
-			<option name="errorHandler">Rubble</option>
+			<modelGroup name="admin">
+				<alias>Universal</alias>
+				<alias>Root</alias>
+			</modelGroup>
 
-			
-			<membergroup>System</membergroup>
-			
-			
-			<children>
-				<location name="Trash" type="TrashCan" id="0" />
-				<location name="Site" form="true" type="Site">
-					<children>
-						<location name="AdminOnly" type="Directory" inherit="false">
-							<permissions>
-								<permission>
-									<resources>
-										<resourceGroup>admin</resourceGroup>
-									</resources>
-									<actions>
-										<action>All</action>
-									</actions>
-									<groups>
-										<group>Administrator</group>
-									</groups>
-								</permission>
-							</permissions>
-						</location>	
+			<actionGroup name="core">
+				<alias>Read</alias>
+				<alias>Edit</alias>
+				<alias>Add</alias>
+				<alias>Execute</alias>
+				<alias>System</alias>
+				<alias>Admin</alias>
+			</actionGroup>
 
-						<location name="MembersOnly" type="Directory" inherit="false">
-							<permissions>
-								<permission>
-									<resources>
-										<resourceGroup>core</resourceGroup>
-									</resources>
-									<actions>
-										<action>Read</action>
-									</actions>
-									<groups>
-										<group>User</group>
-									</groups>
-								</permission>
-							</permissions>
-						</location>	
-						
-					</children>
-			
-					<permissions>
-						<permission>
-							<resources>
-								<resource>core</resource>
-							</resources>
-							<actions>
-								<action>Read</action>
-							</actions>
-							<groups>
-								<group>User</group>
-							</groups>
-						</permission>
-					</permissions>
-				</location>
-			</children>
-			
-			<permissions>
-				<permission>
-					<resources>
-						<resource>All</resource>
-					</resources>
-					<actions>
-						<action>All</action>
-					</actions>
-					<groups>
-						<group>Administrator</group>
-						<group>SuperUser</group>
-						<group>System</group>
-					</groups>
-				</permission>
-			</permissions>			
-			
-		</location>
-	</locations>
+		</aliases>
 
+		<modules>
+			<module name="Mortar" />
+			<module name="Rubble" />
+			<module name="Litho" />
+		</modules>
+
+		<membergroups>
+			<system>
+				<group>Guest</group>
+				<group>ResourceGroupOwner</group>
+				<group>ResourceOwner</group>
+				<group>SuperUser</group>
+				<group>System</group>
+			</system>
+			<user>
+				<group>Administrator</group>
+				<group>User</group>
+			</user>
+		</membergroups>
+
+		<users>
+			<user name="admin" login="true" form="true">
+				<group>User</group>
+				<group>Administrator</group>
+				<group>SuperUser</group>
+			</user>
+			<user name="Guest" login="false">
+				<group>Guest</group>
+			</user>
+			<user name="System" login="false">
+				<group>SuperUser</group>
+			</user>
+			<user name="Cron" login="false">
+				<group>SuperUser</group>
+			</user>
+		</users>
+
+		<locations>
+			<location name="root" type="Root" id="0">
+
+				<option name="htmlTheme">default</option>
+				<option name="adminTheme">bbAdmin</option>
+				<option name="errorHandler">Rubble</option>
+
+
+				<membergroup>System</membergroup>
+
+
+				<children>
+					<location name="Trash" type="TrashCan" id="0" />
+					<location name="Site" form="true" type="Site">
+						<children>
+							<location name="AdminOnly" type="Directory" inherit="false">
+								<permissions>
+									<permission>
+										<resources>
+											<resourceGroup>All</resourceGroup>
+										</resources>
+										<actions>
+											<action>All</action>
+										</actions>
+										<groups>
+											<group>Administrator</group>
+										</groups>
+									</permission>
+								</permissions>
+							</location>
+
+							<location name="MembersOnly" type="Directory" inherit="false">
+								<permissions>
+									<permission>
+										<resources>
+											<resourceGroup>core</resourceGroup>
+										</resources>
+										<actions>
+											<action>Read</action>
+										</actions>
+										<groups>
+											<group>User</group>
+										</groups>
+									</permission>
+								</permissions>
+							</location>
+
+						</children>
+
+						<permissions>
+							<permission>
+								<resources>
+									<resource>core</resource>
+								</resources>
+								<actions>
+									<action>Read</action>
+								</actions>
+								<groups>
+									<group>User</group>
+								</groups>
+							</permission>
+						</permissions>
+					</location>
+				</children>
+
+				<permissions>
+					<permission>
+						<resources>
+							<resource>All</resource>
+						</resources>
+						<actions>
+							<action>All</action>
+						</actions>
+						<groups>
+							<group>Administrator</group>
+							<group>SuperUser</group>
+							<group>System</group>
+						</groups>
+					</permission>
+				</permissions>
+
+			</location>
+		</locations>
+	</profile>
 </xml>
