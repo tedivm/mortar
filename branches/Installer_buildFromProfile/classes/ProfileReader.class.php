@@ -208,6 +208,23 @@ class InstallerProfileReader
 			if(isset($location['id']))
 				$locations[$locationName]['id'] = (string) $location['id'];
 
+			if(isset($location->content))
+				foreach($location->content as $content)
+				{
+					$contentName = isset($content['name']) ? (string) $content['name'] : 'content';
+					$locations[$locationName]['content'][$contentName] = (string) $content;
+				}
+
+			if(isset($location->property))
+				foreach($location->property as $property)
+				{
+					if(!isset($property['name']))
+						continue;
+
+					$propertyName = (string) $property['name'];
+					$locations[$locationName]['property'][$propertyName] = (string) $property;
+				}
+
 
 			if(isset($location->permissions))
 				foreach($location->permissions->permission as $permission)
