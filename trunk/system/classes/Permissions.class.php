@@ -428,9 +428,9 @@ class UserPermission
 															$actionIndex,
 															$typeIndex, $saveValue, $this->id);
 				}
-			}
 
-			Cache::clear('permissions', $typeIndex, $this->id, $this->location);
+				Cache::clear('permissions', $typeIndex, $this->id, $this->location);
+			}
 
 		}catch(Exception $e){
 			$db->rollback();
@@ -662,6 +662,21 @@ class PermissionActionList
 
 		return (isset(self::$actionList[$action])) ? self::$actionList[$action] : false;
 	}
+
+	/**
+	 * Returns a list of actions as strings.
+	 *
+	 * @param bool $asStrings If false an associative array, with the actions as key, will be returned.
+	 * @return array
+	 */
+	static public function getActionList($asStrings = true)
+	{
+		if(self::$actionList === false)
+			self::loadActionList();
+
+		return ($asStrings) ? array_keys(self::$actionList) : self::$actionList;
+	}
+
 
 	/**
 	 * Adds an action to the system
