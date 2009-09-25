@@ -26,44 +26,15 @@ class MortarActionSiteRead extends ModelActionLocationBasedRead
 
 	public function viewHtml($page)
 	{
+		$location = $this->model->getLocation();
+		$indexChild = $location->getChildByName('index');
 
-		if(is_numeric($this->model['defaultChild']))
+		if($indexChild)
 		{
-
-			$childrenArray = array($this->model['defaultChild']);
-			$childId = $this->model['defaultChild'];
-
-			while($location = new Location($childId))
-			{
-				$type = $location->getType();
-
-				if($type == 'Site' || $type == 'Directory')
-				{
-					$resource = $location->getResource();
-					if(is_numeric($location['defaultChild']))
-					{
-						if(in_array($location['defaultChild'], $childrenArray))
-							throw new CoreError('Redirect look detected');
-
-						$childrenArray[] = $location['defaultChild'];
-						$childId = $location['defaultChild'];
-					}else{
-						break;
-					}
-				}else{
-					break;
-				}
-			}
-
-			// redirect
-
-
 			$url = new Url();
-			$url->location = $location;
-
+			$url->location = $indexChild;
 			$this->ioHandler->addHeader('Location', (string) $url);
 			$this->ioHandler->setStatusCode(307);
-
 			return (string) $url;
 
 		}elseif($this->model['allowIndex']){
