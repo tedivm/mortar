@@ -446,7 +446,7 @@ class InstallerInstaller // thats the most pathetic name ever
 
 
 			$page = new LithoModelPage();
-			$page->name = 'home';
+			$page->name = 'index';
 			$page['title'] = 'Welcome to Mortar';
 			$page['content'] = 'Mortar- default installation text coming soon!';
 			$page->setParent($siteLocation);
