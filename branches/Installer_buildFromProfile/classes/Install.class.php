@@ -490,8 +490,35 @@ class InstallerSetupUserland
 							$model->$name = $value;
 				}
 
-
 				$model->save();
+
+				if(isset($locationInfo['functions']))
+					foreach($locationInfo['functions'] as $function)
+					{
+						var_dump($function);
+						$functionName = $function['name'];
+
+						$passParameters = array();
+
+						if(isset($function['params']))
+							foreach($function['params'] as $index => $parameter)
+							{
+								$inputName = $inputBaseName . 'model_functions_' . $functionName . '_' . $index;
+
+								if($parameter['form'] && isset($_POST[$inputName]))
+								{
+									$value = $_POST[$inputName];
+								}else{
+									$value = $parameter['value'];
+								}
+
+								$inputBaseName . 'model_functions_' . $functionName . '_' . $index;
+								$passParameters[] = $value;
+							}
+
+						call_user_func_array(array($model, $functionName), $passParameters);
+					}
+
 				$location = $model->getLocation();
 			}else{
 				$location = new Location();

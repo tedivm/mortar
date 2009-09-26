@@ -225,6 +225,18 @@ class InstallerProfileReader
 					$locations[$locationName]['property'][$propertyName] = (string) $property;
 				}
 
+			if(isset($location->function))
+				foreach($location->function as $function)
+				{
+					$functionInfo = array();
+					$functionInfo['name'] = (string) $function['name'];
+
+					if(isset($function->param))
+						foreach($function->param as $parameter)
+							$functionInfo['params'][] = array('form' => isset($parameter['form']), 'value' => (string) $parameter);
+
+					$locations[$locationName]['functions'][] = $functionInfo;
+				}
 
 			if(isset($location->permissions))
 				foreach($location->permissions->permission as $permission)
