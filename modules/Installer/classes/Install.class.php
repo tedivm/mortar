@@ -530,7 +530,7 @@ class InstallerInstaller // thats the most pathetic name ever
 	{
 		try{
 			$rootLocation = new Location(1);
-			$defaultModules = array ('default' => 'Mortar', 'error' => 'Rubble');
+			$defaultModules = array ('default' => 'Mortar', 'errorHandler' => 'Rubble');
 
 			foreach($defaultModules as $name => $package)
 			{
