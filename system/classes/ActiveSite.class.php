@@ -59,9 +59,24 @@ class ActiveSite
 
 			if($cache->isStale() || !is_numeric($siteId))
 			{
-				$urlRecord = new ObjectRelationshipMapper('urls');
-				$urlRecord->path = $url;
-				$siteId = ($urlRecord->select(1)) ? $urlRecord->site_id : false;
+				$siteRecord = new ObjectRelationshipMapper('sites');
+				$siteRecord->primaryUrl = $url;
+				$siteId = ($siteRecord->select(1)) ? $siteRecord->site_id : false;
+
+				if(!$siteId)
+				{
+					$urlRecord = new ObjectRelationshipMapper('urls');
+					$urlRecord->path = $url;
+					$siteId = ($urlRecord->select(1)) ? $urlRecord->site_id : false;
+				}
+
+				if(!$siteId)
+				{
+					$urlRecord = new ObjectRelationshipMapper('urls');
+					$urlRecord->path = 'default';
+					$siteId = ($urlRecord->select(1)) ? $urlRecord->site_id : false;
+				}
+
 				$cache->storeData($siteId);
 			}
 
