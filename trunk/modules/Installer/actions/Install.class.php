@@ -27,9 +27,26 @@ class InstallerActionInstall implements ActionInterface //extends Action
 		$input = Input::getInput();
 		$config = Config::getInstance();
 
-		$modulePath = $config['path']['modules'] . 'Installer/';
+		$pathToInstaller = $config['path']['modules'] . 'Installer/';
+		if(!class_exists('InstallerProfileReader'))
+		{
+			$pathToProfiler = $pathToInstaller . 'classes/ProfileReader.class.php';
+			include($pathToProfiler);
+		}
 
-		include($modulePath . 'classes/InstallationForm.class.php');
+		InstallerProfileReader::$path = $config['path']['base'] . 'data/installation/';
+		$profile = new InstallerProfileReader();
+
+		if(file_exists(InstallerProfileReader::$path . 'custom.xml'))
+		{
+			$profile->loadProfile('custom');
+		}elseif(file_exists(InstallerProfileReader::$path . 'base.xml')){
+			$profile->loadProfile('base');
+		}else{
+			throw new CoreError('Unable to load installation profile.');
+		}
+
+		include($pathToInstaller . 'classes/InstallationForm.class.php');
 		$form = new InstallerInstallationForm('Installation');
 		$this->form = $form;
 
@@ -37,9 +54,9 @@ class InstallerActionInstall implements ActionInterface //extends Action
 		{
 			if($form->checkSubmit())
 			{
-				$installerPath = $modulePath . 'classes/Install.class.php';
+				$installerPath = $pathToInstaller . 'classes/Install.class.php';
 				require($installerPath);
-				$installer = new InstallerInstaller();
+				$installer = new InstallerInstaller($profile);
 
 				if($installer->install())
 				{
@@ -84,7 +101,7 @@ class InstallerActionInstall implements ActionInterface //extends Action
 
 		if($this->installed)
 		{
-
+/*
 			$input = Input::getInput();
 			$cookieName = str_replace(' ', '_', $input['siteName']) . '_Session';
 			session_name($cookieName);
@@ -95,7 +112,7 @@ class InstallerActionInstall implements ActionInterface //extends Action
 			$_SESSION['userAgent'] = $_SERVER['HTTP_USER_AGENT'];
 			$_SESSION['idExpiration'] = time() + (300);
 			$_SESSION['nonce'] = md5(1 . START_TIME);
-
+*/
 
 			$output .= file_get_contents($modulePath . 'templates/installationComplete.template.php');
 			$this->subtitle = 'Installation Complete';
@@ -104,7 +121,7 @@ class InstallerActionInstall implements ActionInterface //extends Action
 
 
 
-			$this->ioHandler->addHeader('Location', (string) $url);
+		//	$this->ioHandler->addHeader('Location', (string) $url);
 
 		}elseif($this->form){
 			$output .= $this->form->getFormAs('Html');

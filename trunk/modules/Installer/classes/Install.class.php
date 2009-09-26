@@ -2,11 +2,22 @@
 
 class InstallerInstaller // thats the most pathetic name ever
 {
+	/**
+	 * Installation profile.
+	 *
+	 * @var InstallerProfileReader
+	 */
+	protected $profile;
 	public $error = array();
 	public $installed = false;
 	protected $dbConnection;
 
 	protected $dbDebug = false;
+
+	public function __construct(InstallerProfileReader $profile)
+	{
+		$this->profile = $profile;
+	}
 
 	public function install()
 	{
@@ -294,278 +305,351 @@ class InstallerInstaller // thats the most pathetic name ever
 		return true;
 	}
 
+
 	protected function setupStructure()
 	{
-		try{
-			$config = Config::getInstance();
-			$input = Input::getInput();
+		$this->profile->getAliases();
+		$this->profile->getMembergroups();
+		$this->profile->getUsers();
+		$this->profile->getModules();
+		$this->profile->getLocations();
 
-			if(!class_exists('User', false))
+		$userLand = new InstallerSetupUserland($this->profile);
+
+
+		return $userLand->setupCoreSystem();
+
+	}
+}
+
+class InstallerSetupUserland
+{
+	/**
+	 * Installations profile
+	 *
+	 * @var InstallerProfileReader
+	 */
+	protected $profile;
+
+	protected $savedGroups;
+	protected $savedUsers;
+
+	public function __construct(InstallerProfileReader $profile)
+	{
+		$this->profile = $profile;
+	}
+
+	public function setupCoreSystem()
+	{
+		$this->savedGroups = $this->setupMembergroups($this->profile->getMembergroups());
+		$this->savedUsers = $this->setupUsers($this->profile->getUsers());
+
+		$location = $this->profile->getLocations();
+		$rootLocation = $this->createLocationBase($location['root']);
+
+		$this->setupModules($this->profile->getModules());
+
+		$this->setupLocationFromProfile($rootLocation, $location['root']);
+
+		$this->setupLocations($location['root']['children'], $rootLocation);
+		return true;
+	}
+
+	protected function createLocationBase($locationInfo)
+	{
+		$locationRoot = new Location();
+		$locationRoot->setName('root');
+		$locationRoot->setResource('Root', '0');
+		$locationRoot->setOwnerGroup($this->savedGroups['System']);
+		$locationRoot->save();
+		return $locationRoot;
+	}
+
+	protected function setupMembergroups($membergroups)
+	{
+		$savedMembergroups = array();
+		foreach($membergroups['system'] as $group)
+		{
+			$membergroup = new MemberGroup();
+			$membergroup->setName($group);
+			$membergroup->makeSystem();
+			$membergroup->save();
+			$savedMembergroups[$group] = $membergroup;
+		}
+
+		foreach($membergroups['user'] as $group)
+		{
+			$membergroup = new MemberGroup();
+			$membergroup->setName($group);
+			$membergroup->save();
+			$savedMembergroups[$group] = $membergroup;
+		}
+		return $savedMembergroups;
+	}
+
+	protected function setupUsers($userList)
+	{
+		$config = Config::getInstance();
+		$input = Input::getInput();
+		$membergroups = $this->savedGroups;
+
+		if(!class_exists('User', false))
+			include($config['path']['modules'] . 'Mortar/models/User.class.php');
+
+		foreach($userList as $name => $user)
+		{
+			$newUser = new MortarModelUser();
+
+			if($user['form'])
 			{
-				include($config['path']['modules'] . 'Mortar/models/User.class.php');
-			}
+				$inputBaseName = 'setup_user_' .$name . '_';
 
-
-			$userAdmin = new MortarModelUser();
-			$userAdmin['name'] = $input['username'];
-			$userAdmin['password'] = $input['password'];
-			$userAdmin->save();
-
-			$userGuest = new MortarModelUser();
-			$userGuest['name'] = 'Guest';
-			$userGuest->save();
-
-			$userSystem = new MortarModelUser();
-			$userSystem['name'] = 'System';
-			$userSystem->save();
-
-
-			$userCron = new MortarModelUser();
-			$userCron['name'] = 'Cron';
-			$userCron->save();
-
-			// CREATE MEMBERGROUPS
-
-
-			$memgroupAdmin = new MemberGroup();
-			$memgroupAdmin->setName('Administrator');
-			$memgroupAdmin->save();
-
-
-
-			$memgroupUser = new MemberGroup();
-			$memgroupUser->setName('User');
-			$memgroupUser->save();
-
-
-			$memgroupGuest = new MemberGroup();
-			$memgroupGuest->setName('Guest');
-			$memgroupGuest->makeSystem();
-			$memgroupGuest->save();
-
-			$memgroupResourceOwner = new MemberGroup();
-			$memgroupResourceOwner->setName('ResourceOwner');
-			$memgroupResourceOwner->makeSystem();
-			$memgroupResourceOwner->save();
-
-			$memgroupResourceGroupOwner = new MemberGroup();
-			$memgroupResourceGroupOwner->setName('ResourceGroupOwner');
-			$memgroupResourceGroupOwner->makeSystem();
-			$memgroupResourceGroupOwner->save();
-
-			$memgroupSuperUser = new MemberGroup();
-			$memgroupSuperUser->setName('SuperUser');
-			$memgroupSuperUser->makeSystem();
-			$memgroupSuperUser->save();
-
-
-			$memgroupSystem = new MemberGroup();
-			$memgroupSystem->setName('System');
-			$memgroupSystem->makeSystem();
-			$memgroupSystem->save();
-
-			// ADD USERS TO MEMBERGROUPS
-			$memgroupAdmin->addUser($userAdmin);
-			$memgroupUser->addUser($userAdmin);
-			$memgroupGuest->addUser($userGuest);
-
-			// Root Users (these guys can do anything)
-			$memgroupSuperUser->addUser($userAdmin);
-			$memgroupSuperUser->addUser($userSystem);
-			$memgroupSuperUser->addUser($userCron);
-
-
-			// CREATE ROOT LOCATION
-
-			// The root location causes a chicken and egg problem- we can't create register the first model without
-			// installing its module, but we can't install the module without the first location.
-			// So we just force it to start the system.
-			$locationRoot = new Location();
-			$locationRoot->setName('root');
-			$locationRoot->setResource('Root', '0');
-			$locationRoot->setOwnerGroup($memgroupSystem);
-			$locationRoot->setMeta('adminTheme', 'bbAdmin');
-			$locationRoot->setMeta('htmlTheme', 'default');
-
-			$locationRoot->save();
-
-			$locationTrash = new Location();
-			$locationTrash->setName('Trash');
-			$locationTrash->setResource('TrashCan', '0');
-			$locationTrash->setParent($locationRoot);
-			$locationTrash->save();
-
-
-
-
-			if(!$this->setupCoreModule())
-				return false;
-
-
-			// Make the active user the system
-			ActiveUser::changeUserById($userSystem->getId());
-
-
-			// Create Site
-
-			$site = new MortarModelSite();
-			$site->name = $input['siteName'];
-			$site['allowIndex'] = 1;
-			$site->setParent($locationRoot);
-			$site->save();
-
-			$ssl = isset($input['ssl'][0]);
-			$site->addUrl($input['domain'], $ssl, true);
-			$site->addUrl('default');
-			$siteLocation = $site->getLocation();
-
-
-
-			$membersOnlyDirectory = new MortarModelDirectory();
-			$membersOnlyDirectory->name = 'MembersOnly';
-			$membersOnlyDirectory['allowIndex'] = 1;
-			$membersOnlyDirectory->setParent($siteLocation);
-			$membersOnlyDirectory->save();
-
-			$locationMembersOnly = $membersOnlyDirectory->getLocation();
-			$locationMembersOnly->setInherit(false);
-			$locationMembersOnly->setOwnerGroup($memgroupSystem);
-			$locationMembersOnly->save();
-
-
-			$adminOnlyDirectory = new MortarModelDirectory();
-			$adminOnlyDirectory->name = 'AdminOnly';
-			$adminOnlyDirectory['allowIndex'] = 1;
-			$adminOnlyDirectory->setParent($siteLocation);
-			$adminOnlyDirectory->save();
-
-			$locationAdminOnly = $adminOnlyDirectory->getLocation();
-			$locationAdminOnly->setInherit(false);
-			$locationAdminOnly->setOwnerGroup($memgroupSystem);
-			$locationAdminOnly->save();
-
-
-			$page = new LithoModelPage();
-			$page->name = 'index';
-			$page['title'] = 'Welcome to Mortar';
-			$page['content'] = 'Mortar- default installation text coming soon!';
-			$page->setParent($siteLocation);
-			$page->save();
-			$pageLocation = $page->getLocation();
-			$pageLocation->setOwnerGroup($memgroupSystem);
-			$pageLocation->save();
-			$site['defaultChild'] = $pageLocation->getId();
-			$site->save();
-
-
-
-
-			// Add Admin permissions
-
-
-			ModelRegistry::clearHandlers();
-			$coreResources = ModelRegistry::getModelList();
-			$coreResources[] = 'Base';
-			$corePermissions = array('Read', 'Edit', 'Add', 'Execute', 'System', 'Admin');
-
-			$adminResources = $coreResources;
-			$adminResources[] = 'Universal';
-
-
-
-			$adminRootPermissions = new GroupPermission($memgroupAdmin->getId(), $locationRoot->getId());
-			$adminOnlyPermissions = new GroupPermission($memgroupAdmin->getId(), $locationAdminOnly->getId());
-			$adminMembersPermissions = new GroupPermission($memgroupAdmin->getId(), $locationMembersOnly->getId());
-
-			foreach($corePermissions as $permission)
-			{
-				// Register action type
-				PermissionActionList::addAction($permission);
-				$permissionId = PermissionActionList::getAction($permission);
-
-				// loop through resources to add permissions for eachs
-				foreach($adminResources as $resource)
+				if(isset($input[$inputBaseName . 'name']))
 				{
-					   $adminRootPermissions->setPermission($resource, $permissionId, true);
-					   $adminOnlyPermissions->setPermission($resource, $permissionId, true);
-					$adminMembersPermissions->setPermission($resource, $permissionId, true);
+					$newUser['name'] = $input[$inputBaseName . 'name'];
+				}else{
+					$newUser['name'] = $name;
 				}
 
+				if(isset($input[$inputBaseName . 'password']))
+				{
+					$newUser['password'] = $input[$inputBaseName . 'password'];
+				}
+
+				if(isset($input[$inputBaseName . 'email']))
+				{
+					$newUser['email'] = $input[$inputBaseName . 'email'];
+				}
+
+
+			}else{
+				$newUser['name'] = $name;
 			}
 
-			$adminRootPermissions->save();
-			$adminOnlyPermissions->save();
-			$adminMembersPermissions->save();
+			$newUser['allowlogin'] = $user['login'];
+			$newUser->save();
 
-			// Add user permissions
-			$userMembersPermissions = new GroupPermission($memgroupUser->getId(), $locationMembersOnly->getId());
-			$userSitePermissions = new GroupPermission($memgroupUser->getId(), $siteLocation->getId());
-			$guestSitePermissions = new GroupPermission($memgroupGuest->getId(), $siteLocation->getId());
-
-
-			$restrictedObjects = array('Root');
-			$permissionId = PermissionActionList::getAction('Read');
-			foreach($coreResources as $resource)
+			foreach($user['groups'] as $group)
 			{
-				if(in_array($resource, $restrictedObjects))
-					continue;
+				if(!isset($membergroups[$group]))
+					throw new CoreError('Unable to add user to nonexistant group ' . $group);
 
-				$userMembersPermissions->setPermission($resource, $permissionId, true);
-				$userSitePermissions->setPermission($resource, $permissionId, true);
-				$guestSitePermissions->setPermission($resource, $permissionId, true);
+				$membergroups[$group]->addUser($newUser);
+				//$membergroups[$group]->save();
 			}
-
-			$userMembersPermissions->save();
-			$userSitePermissions->save();
-			$guestSitePermissions->save();
-
-
-		}catch(Exception $e){
-			return false;
 		}
-		return true;
 	}
 
-	protected function setupCoreModule()
-	{
-		try{
-			$rootLocation = new Location(1);
-			$defaultModules = array ('default' => 'Mortar', 'errorHandler' => 'Rubble');
-
-			foreach($defaultModules as $name => $package)
-			{
-				if($this->installModule($package))
-					$rootLocation->setMeta($name, $package);
-			}
-			$rootLocation->save();
-
-			$this->installModule('Litho');
-
-		}catch(Exception $e){
-			return false;
-		}
-		return true;
-	}
-
-	protected function installModule($moduleName)
+	protected function setupModules($moduleList)
 	{
 		$config = Config::getInstance();
 		if(!class_exists('ModuleInstaller', false))
 				include($config['path']['mainclasses'] . 'ModuleInstaller.class.php');
 
-		$customInstallerName = 'moduleInstall' . $moduleName;
-		$path = $config['path']['modules'] . 'classes/hooks/moduleInstaller.class.php';
+		foreach($moduleList as $moduleName => $moduleInfo)
+		{
+			if($moduleInfo['install'] !== true)
+				continue;
 
-		if(!class_exists($customInstallerName, false) && file_exists($path))
-			include($path);
+			$customInstallerName = 'moduleInstall' . $moduleName;
+			$path = $config['path']['modules'] . 'classes/hooks/moduleInstaller.class.php';
 
-		$class = (class_exists($customInstallerName, false)) ? $customInstallerName : 'ModuleInstaller';
+			if(!class_exists($customInstallerName, false) && file_exists($path))
+				include($path);
 
-		$installation = new $class($moduleName);
-		if(!$installation->fullInstall())
-			throw new Exception('Module Installation failed.');
+			$class = (class_exists($customInstallerName, false)) ? $customInstallerName : 'ModuleInstaller';
+
+			$installation = new $class($moduleName);
+			if(!$installation->fullInstall())
+				throw new CoreError('Module ' . $moduleName . ' Installation failed.');
+		}
 
 		return true;
+	}
+
+	protected function setupLocations($locations, Location $parent = null)
+	{
+		$input = Input::getInput();
+		foreach($locations as $locationName => $locationInfo)
+		{
+			$inputBaseName = 'setup_location_' . $locationInfo['longname'] . '_';
+			if($locationInfo['form'] && isset($input[$inputBaseName . 'name']))
+				$locationName = $input[$inputBaseName . 'name'];
+
+			if(!isset($locationInfo['id']))
+			{
+				$model = ModelRegistry::loadModel($locationInfo['type']);
+				$model->name = $locationName;
+
+				if(isset($locationInfo['content']) || isset($locationInfo['property']))
+				{
+					if(isset($locationInfo['content']))
+						foreach($locationInfo['content'] as $name => $value)
+							$model[$name] = $value;
+
+					if(isset($locationInfo['property']))
+						foreach($locationInfo['property'] as $name => $value)
+							$model->$name = $value;
+				}
+
+				$model->save();
+
+				if(isset($locationInfo['functions']))
+					foreach($locationInfo['functions'] as $function)
+					{
+						$functionName = $function['name'];
+
+						$passParameters = array();
+
+						if(isset($function['params']))
+							foreach($function['params'] as $index => $parameter)
+							{
+								$inputName = $inputBaseName . 'model_functions_' . $functionName . '_' . $index;
+
+								if($parameter['form'] && isset($_POST[$inputName]))
+								{
+									$value = $_POST[$inputName];
+								}else{
+									$value = $parameter['value'];
+								}
+
+								$inputBaseName . 'model_functions_' . $functionName . '_' . $index;
+								$passParameters[] = $value;
+							}
+
+						call_user_func_array(array($model, $functionName), $passParameters);
+					}
+
+				$location = $model->getLocation();
+			}else{
+				$location = new Location();
+				$location->setName($locationName);
+				$location->setResource($locationInfo['type'], $locationInfo['id']);
+			}
+
+			if(isset($parent))
+				$location->setParent($parent);
+
+
+			// continue setting things up from the XML profile
+			$this->setupLocationFromProfile($location, $locationInfo);
+
+			if(isset($locationInfo['children']))
+				$this->setupLocations($locationInfo['children'], $location);
+		}
+	}
+
+
+	protected function setupLocationFromProfile(Location $location, $locationInfo)
+	{
+		$inputBaseName = 'setup_location_' . $locationInfo['longname'] . '_';
+
+		$users = $this->savedUsers;
+		$groups = $this->savedGroups;
+
+		if(isset($locationInfo['options']))
+			foreach($locationInfo['options'] as $name => $value)
+			{
+				$value = ($locationInfo['form'] && isset($input[$inputBaseName . 'option_' . $name]))
+									? $input[$inputBaseName . 'name'] : $value;
+
+				$location->setMeta($name, $value);
+			}
+
+		$location->setInherit($locationInfo['inherits']);
+
+		if(isset($locationInfo['owner']))
+			$location->setOwner($users[$locationInfo['owner']]->getId());
+
+		if(isset($locationInfo['group']))
+			$location->getOwnerGroup($groups[$locationInfo['group']]->getId());
+
+
+		$location->save();
+		$locationId = $location->getId();
+
+		if(isset($locationInfo['permissions']))
+		{
+			$aliases = $this->getAliasesInternal();
+
+			// run through each set of permissions
+			foreach($locationInfo['permissions'] as $permissionInfo)
+			{
+				$permissions = array();
+
+				// add user permissions
+				if(isset($locationInfo['users']))
+					foreach($locationInfo['users'] as $user)
+						$permissions[] = new UserPermission($users[$user]->getId(), $locationId);
+
+				// add group permissions
+				if(isset($permissionInfo['groups']))
+					foreach($permissionInfo['groups'] as $group)
+						$permissions[] = new GroupPermission($groups[$group]->getId(), $locationId);
+
+				if(count($permissions) < 1)
+					continue;
+
+				// Replace aliases with real values
+				$aliasTypes = array('modelGroups' => 'resources', 'actionGroups' => 'actions');
+				foreach($aliasTypes as $aliasGroup => $realGroup)
+				{
+					foreach($aliases[$aliasGroup] as $aliasName => $realMembers)
+					{
+						if(in_array($aliasName, $permissionInfo[$realGroup]))
+						{
+							$key = array_search($aliasName, $permissionInfo[$realGroup]);
+							unset($permissionInfo[$realGroup][$key]);
+
+							$permissionInfo[$realGroup] = array_merge($permissionInfo[$realGroup], $realMembers);
+						}
+					}
+					$permissionInfo[$realGroup] = array_unique($permissionInfo[$realGroup]);
+				}
+
+				// Add all of the models and their actions to the permission system
+				foreach($permissionInfo['resources'] as $resource)
+				{
+					foreach($permissionInfo['actions'] as $action)
+					{
+						if(!($actionId = PermissionActionList::getAction($action)))
+						{
+							PermissionActionList::addAction($action);
+							$actionId = PermissionActionList::getAction($action);
+						}
+
+						foreach($permissions as $permission)
+							$permission->setPermission($resource, $actionId);
+					}
+				}
+
+				// save each of the permissions
+				foreach($permissions as $permission)
+					$permission->save();
+			}
+		}//if(isset($locationInfo['permissions']))
+
+		return true;
+	}
+
+	protected function getAliasesInternal()
+	{
+		$aliases = $this->profile->getAliases();
+
+		$allActions = $aliases['actionGroups'];
+		$allActions[] = PermissionActionList::getActionList();
+		$aliases['actionGroups']['All'] = array_unique(call_user_func_array('array_merge', $allActions));
+
+		$allModels = $aliases['modelGroups'];
+		$allModels[] = ModelRegistry::getModelList();
+		//var_dump($allModels);
+		$aliases['modelGroups']['All'] = array_unique(call_user_func_array('array_merge', $allModels));
+		$aliases['modelGroups']['All'][] = 'Base';
+
+		if($key = array_search('Universal', $aliases['modelGroups']['All']))
+			unset($aliases['modelGroups']['All'][$key]);
+
+		return $aliases;
 	}
 }
 
