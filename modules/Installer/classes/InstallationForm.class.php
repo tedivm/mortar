@@ -17,7 +17,7 @@ class InstallerInstallationForm extends Form
 					addRule('letterswithbasicpunc')->
 				getForm()->
 
-				createInput('domain')->
+				createInput('setup_location_root_Site_model_functions_addUrl_0')->
 					setLabel('Domain')->
 					property('value', $_SERVER['SERVER_NAME'] . substr($_SERVER['PHP_SELF'], 0,
 														strpos($_SERVER['PHP_SELF'], DISPATCHER)))->
@@ -53,13 +53,13 @@ class InstallerInstallationForm extends Form
 			changeSection('admin')->
 				setLegend('Administrative User')->
 
-				createInput('username')->
+				createInput('setup_user_admin_name')->
 					setLabel('Username')->
 					property('value', 'admin')->
 					addRule('required')->
 				getForm()->
 
-				createInput('password')->
+				createInput('setup_user_admin_password')->
 					setType('password')->
 					setLabel('Password')->
 					addRule('required')->
