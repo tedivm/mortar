@@ -133,6 +133,11 @@ class MortarActionLogIn extends ActionBase
 
 		return $url;
 	}
+
+	public function checkAuth($action = NULL)
+	{
+		return true;
+	}
 }
 
 
