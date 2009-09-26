@@ -295,7 +295,7 @@ class RequestWrapper
 		}
 
 
-		$errorModule = $location->getMeta('error');
+		$errorModule = $location->getMeta('errorHandler');
 
 		switch(get_class($e))
 		{
