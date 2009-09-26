@@ -348,6 +348,9 @@ class InstallerSetupUserland
 		$rootLocation = $this->createLocationBase($location['root']);
 
 		$this->setupModules($this->profile->getModules());
+
+		$this->setupLocationFromProfile($rootLocation, $location['root']);
+
 		$this->setupLocations($location['root']['children'], $rootLocation);
 		return true;
 	}
@@ -359,7 +362,6 @@ class InstallerSetupUserland
 		$locationRoot->setResource('Root', '0');
 		$locationRoot->setOwnerGroup($this->savedGroups['System']);
 		$locationRoot->save();
-		$this->setupLocationFromProfile($locationRoot, $locationInfo);
 		return $locationRoot;
 	}
 
@@ -495,7 +497,6 @@ class InstallerSetupUserland
 				if(isset($locationInfo['functions']))
 					foreach($locationInfo['functions'] as $function)
 					{
-						var_dump($function);
 						$functionName = $function['name'];
 
 						$passParameters = array();
@@ -643,6 +644,11 @@ class InstallerSetupUserland
 		$allModels[] = ModelRegistry::getModelList();
 		//var_dump($allModels);
 		$aliases['modelGroups']['All'] = array_unique(call_user_func_array('array_merge', $allModels));
+		$aliases['modelGroups']['All'][] = 'Base';
+
+		if($key = array_search('Universal', $aliases['modelGroups']['All']))
+			unset($aliases['modelGroups']['All'][$key]);
+
 		return $aliases;
 	}
 }
