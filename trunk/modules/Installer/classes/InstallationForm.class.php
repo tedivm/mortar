@@ -11,7 +11,7 @@ class InstallerInstallationForm extends Form
 		$this->changeSection('system')->
 				setLegend('System Information')->
 
-				createInput('siteName')->
+				createInput('setup_location_root_Site_name')->
 					setLabel('Site Name')->
 					addRule('required')->
 					addRule('letterswithbasicpunc')->

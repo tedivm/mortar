@@ -37,7 +37,7 @@ class InstallerInstaller // thats the most pathetic name ever
 			}
 
 			// Step 2 - Present Paths, Databases and Options
-			if(!isset($input['siteName']))
+			if(!isset($input['setup_location_root_Site_name']))
 			{
 				return false;
 			}else{
