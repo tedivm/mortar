@@ -416,7 +416,7 @@ class InstallerInstaller // thats the most pathetic name ever
 
 			$ssl = isset($input['ssl'][0]);
 			$site->addUrl($input['domain'], $ssl, true);
-
+			$site->addUrl('default');
 			$siteLocation = $site->getLocation();
 
 
