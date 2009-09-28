@@ -132,7 +132,15 @@ class IniFile
 	 */
 	public function get($section, $name = null)
 	{
-		return isset($name) ? $this->content[$section][$name] : $this->content[$section];
+		if(isset($name))
+		{
+			if(isset($this->content[$section][$name]))
+				return $this->content[$section][$name];
+		}else{
+			if(isset($this->content[$section]))
+				return $this->content[$section];
+		}
+		return null;
 	}
 
 	/**
@@ -154,6 +162,24 @@ class IniFile
 	public function clear()
 	{
 		$this->content = array();
+	}
+
+	/**
+	 * Checks for the existence of sections or specific inputs.
+	 *
+	 * @param string $section
+	 * @param string|null $name
+	 * @return bool
+	 */
+	public function exists($section, $name = null)
+	{
+		if(!isset($this->content[$section]))
+			return false;
+
+		if(isset($name))
+			return isset($this->content[$section][$name]);
+
+		return true;
 	}
 }
 
