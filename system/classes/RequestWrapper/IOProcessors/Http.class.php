@@ -305,13 +305,16 @@ class IOProcessorHttp extends IOProcessorCli
 			if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || isset($_SERVER['HTTP_IF_NONE_MATCH']))
 			{
 				 if((!isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])
-				 				|| $this->headers['Last-Modified'] == $_SERVER['HTTP_IF_MODIFIED_SINCE'])
+				 				|| (isset($this->headers['Last-Modified']) && $this->headers['Last-Modified'] == $_SERVER['HTTP_IF_MODIFIED_SINCE']))
+
 					&& (!isset($_SERVER['HTTP_IF_NONE_MATCH'])
 								|| $this->headers['ETag'] == $_SERVER['HTTP_IF_NONE_MATCH']))
 				{
 					$this->setStatusCode(304);
 				}
 			}
+
+
 		}
 
 		foreach($this->headers as $name => $value)
