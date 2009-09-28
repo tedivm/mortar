@@ -73,6 +73,8 @@ class PackageInfo
 	 */
 	protected $meta;
 
+	protected $phpRequirements;
+
 	/**
 	 * Constructor takes the name of id of the package
 	 *
@@ -318,6 +320,16 @@ class PackageInfo
 		return false;
 	}
 
+
+	public function getPhpRequirements()
+	{
+		if(!isset($this->phpRequirements))
+			$this->loadMeta();
+
+		return $this->phpRequirements;
+	}
+
+
 	/**
 	 * Loads the meta data from the package
 	 *
@@ -325,31 +337,65 @@ class PackageInfo
 	 */
 	protected function loadMeta()
 	{
+		$meta = self::getMetaInfo($this->getName());
+
+		if(isset($meta['php']))
+		{
+			$this->phpRequirements = $meta['php'];
+			unset($meta['php']);
+		}else{
+			$this->phpRequirements = array();
+		}
+
 		$this->meta = self::getMetaInfo($this->getName());
 	}
 
 	static function getMetaInfo($package)
 	{
 		$cache = new Cache('packages', $package, 'meta');
-		$cache->setMemOnly(); // caching this would be ridiculous but memory saves us some
+		$cache->setMemOnly(); // storing this would be ridiculous but memory saves us some includes
 		$meta = $cache->getData();
 
 		if($cache->isStale())
 		{
 			$config = Config::getInstance();
-			$metaPath = $config['path']['modules'] . $package . '/meta.php';
+			//$metaPath = $config['path']['modules'] . $package . '/meta.php';
+
+			$metaPath = $config['path']['modules'] . $package . '/package.ini';
 
 			$meta = array();
 
 			if(is_readable($metaPath))
 			{
-				include $metaPath;
-				$meta['name'] = $packageName;
-				$meta['version'] = $version;
-				$meta['description'] = $description;
 
-				if(isset($disableInstall))
-					$meta['disableInstall'] = $disableInstall;
+				$packageIni = new IniFile($metaPath);
+				$meta['name'] = $packageIni->get('General', 'name');
+				$meta['version'] = $packageIni->get('General', 'version');
+				$meta['description'] = $packageIni->get('General', 'description');
+
+				if($disableInstall = $packageIni->get('General', 'disableInstall'))
+					$meta['disableInstall'] = (bool) $disableInstall;
+
+				if($packageIni->exists('PHP'))
+				{
+					if($packageIni->exists('PHP', 'version.min'))
+						$meta['php']['version']['min'] = $packageIni->get('PHP', 'version.min');
+
+					if($packageIni->exists('PHP', 'version.max'))
+						$meta['php']['version']['max'] = $packageIni->get('PHP', 'version.max');
+
+					if($packageIni->exists('PHP', 'required'))
+					{
+						$requiredExtensions = $packageIni->get('PHP', 'required');
+						$meta['php']['extensions']['required'] = explode(',', $requiredExtensions);
+					}
+
+					if($packageIni->exists('PHP', 'recommended'))
+					{
+						$requiredExtensions = $packageIni->get('PHP', 'recommended');
+						$meta['php']['extensions']['recommended'] = explode(',', $requiredExtensions);
+					}
+				}
 			}
 			$cache->storeData($meta);
 		}
