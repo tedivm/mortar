@@ -262,25 +262,45 @@ abstract class ModelBase implements Model
 	/**
 	 * When passed a simple action name (Read, Edit, Add, etc) this function returns the class name to perform that
 	 * action. It first checks to see if the model's module (that sounds ridiculous) has an action that can
-	 * be used, and if not it checks through the fallback action list. If nothing is found the
+	 * be used, and if not it checks through the fallback action list. If nothing is found there it ultimately
+	 * returns false.
 	 *
 	 * @param string $actionName
+	 * @param null|User $user
 	 * @return string|bool
 	 */
-	public function getAction($actionName)
+	public function getAction($actionName, $user = null)
 	{
-		$actionList = $this->getActions();
+		$actionList = $this->getActions($user);
 		return isset($actionList[$actionName]) ? $actionList[$actionName] : false;
 	}
-
-	public function getActions()
+	/**
+	 * Returns an associative array containing all actions available on the current model, with the simple action
+	 * name (Read, Edit, etc.) as the key and each action returned in identical form to getAction(); it recursively
+	 * checks through each parent model type and provides the fallback action if needed. If passed a User, it
+	 * performs an Auth check and returns only those actions which are permitted to that user.
+	 *
+	 * @param null|User $user
+	 * @return array
+	 */
+	public function getActions($user = null)
 	{
 		$actionList = self::loadActions($this->getType());
 
 		foreach(staticHack(get_class($this), 'fallbackModelActions') as $fallbackAction)
 			if (!isset($actionList[$fallbackAction]))
 				$actionList[$fallbackAction] = $this->loadFallbackAction($fallbackAction);
-		return $actionList;
+
+		if (isset($user)) {
+			$permittedActions = array();
+			foreach($actionList as $actionName => $action)
+				if ($this->checkAuth($actionName, $user))
+					$permittedActions[$actionName] = $action;
+			return $permittedActions;
+				
+		} else {
+			return $actionList;
+		}
 	}
 
 	static function loadActions($resourceType)
