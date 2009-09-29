@@ -320,7 +320,12 @@ class PackageInfo
 		return false;
 	}
 
-
+	/**
+	 * This function returns the module's requirements from the php environment. Currently this is the minimum and
+	 * maximum php version and extensions that are either required or recommended.
+	 *
+	 * @return array
+	 */
 	public function getPhpRequirements()
 	{
 		if(!isset($this->phpRequirements))
