@@ -21,14 +21,15 @@ class ModelToHtml
 										array('name' => 'title', 'permission' => 'Read'));
 
 	protected $modelDefaults = array('model_title', 'model_content', 'model_owner', 'model_action_list', 'model_status',
-										'model_type', 'model_actionList', 'model_creationTime', 'model_lastModified',
-										'model_name', 'model_actions');
+										'model_type', 'model_actionList', 'model_creationTime', 
+										'model_lastModified', 'model_name', 'model_actions');
 	protected $template;
 	protected $modelDisplay;
 	protected $convertedProperties;
 
 	/**
-	 * The constructor sets the protected vars and prepares the relevant information for Html display which can be output in a template or accessed directly
+	 * The constructor sets the protected vars and prepares the relevant information for Html display which can be output in a 
+	 * template or accessed directly
 	 *
 	 * @param Model $model
 	 * @param String $template
@@ -37,11 +38,14 @@ class ModelToHtml
 	public function __construct(Model $model)
 	{
 		$this->model = $model;
+		
 		$properties = $this->modelProperties;
 		$this->convertedProperties = array();
 
+		$location = method_exists($this->model, 'getLocation') ? $this->model->getLocation() : new Location(1);
+
 		$user = ActiveUser::getUser();
-		$permission = new Permissions($this->model->getLocation(), $user->getId());
+		$permission = new Permissions($location, $user->getId());
 
 		foreach($properties as $property)
 		{
@@ -60,7 +64,6 @@ class ModelToHtml
 			}
 		}
 
-		$location = $this->model->getLocation();
 		$url = new Url();
 		$url->location = $location->getId();
 
@@ -72,29 +75,25 @@ class ModelToHtml
 		$locOwner = $location->getOwner();
 		$this->convertedProperties['model_owner'] = $locOwner['name'];
 
-		$baseUrl = new Url();
-		$baseUrl->locationId = $location->getId();
-		/* $baseUrl->format = "Admin"; */
-		$baseUrl->format = $query['format'];
+		$actionUrls = $this->model->getActionUrls($query['format']);
+		$allowedActions = $this->model->getActions($user);
 
 		$actionTypes = array('Read', 'Edit', 'Delete');
 		if(isset($location) && $location->hasChildren())
 			array_push($actionTypes, 'Index');
 
 		$allowedActionTypes = array();
-		$user = ActiveUser::getUser();
-		$userId = $user->getId();
 		$actionList = '';
 		foreach($actionTypes as $action)
 		{
-			$modelListAction = new DisplayMaker();
-			$modelListAction->setDisplayTemplate("<li class='action action_$action'>{# action #}</li>");
-			$actionUrl = clone $baseUrl;
-			$actionUrl->action = $action;
+			if (isset($allowedActions[$action])) {
+				$actionUrl = $actionUrls[$action];
+				$actionLink = $actionUrl->getLink(ucfirst($action));
 
-			if($actionUrl->checkPermission($userId))
-			{
-				$modelListAction->addContent('action', $actionUrl->getLink(ucfirst($action)));
+				$modelListAction = new DisplayMaker();
+				$modelListAction->setDisplayTemplate("<li class='action action_$action'>{# action #}</li>");
+
+				$modelListAction->addContent('action', $actionLink);
 				$actionList .= $modelListAction->makeDisplay();
 				$this->convertedProperties['model_action_' . $action] = $actionUrl->__toString();
 				array_push($allowedActionTypes, $action);
