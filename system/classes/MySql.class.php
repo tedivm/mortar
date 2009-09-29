@@ -68,6 +68,10 @@ class DatabaseConnection
 				if(!self::$iniFile)
 				{
 					$config = Config::getInstance();
+
+					if(!isset($config['path']['config']) && defined('INSTALLMODE') && INSTALLMODE == true)
+						return false;
+
 					$path_to_dbfile = $config['path']['config'] . 'databases.php';
 					$iniFile = new IniFile($path_to_dbfile);
 					self::$iniFile = $iniFile;
