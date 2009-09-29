@@ -303,6 +303,11 @@ abstract class ModelBase implements Model
 		}
 	}
 
+	public function getActionUrls($format, $attributes = null)
+	{
+		return false; // will come back to this at a later date!
+	}
+
 	static function loadActions($resourceType)
 	{
 		$actions = array();

@@ -82,13 +82,7 @@ class IndexDisplayList extends ReadDisplayList {
 
 	protected function addModelActionsToRow($table, $model)
 	{
-		$location = $model->getLocation();
-
-		$baseUrl = new Url();
-		$baseUrl->locationId = $location->getId();
-		$baseUrl->format = $this->format;
-
-		$actionUrls = $this->getActionList($baseUrl, $location);
+		$actionUrls = $this->getActionList($model, $this->format);
 
 		$modelActions = $this->getActionIcons($actionUrls);
 

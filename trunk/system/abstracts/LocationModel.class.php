@@ -389,10 +389,42 @@ class LocationModel extends ModelBase
 	}
 	
 	/**
+	 * This extends the (placeholder) parent function and returns an array of Urls for the
+	 * various actions which can be performed by this Model.
+	 *
+	 * @param string $format
+	 * @param array|null $attributes
+	 * @return array
+	 */
+	public function getActionUrls($format, $attributes = null)
+	{
+		$actionUrls = array();
+		
+		$baseUrl = new Url();
+		$baseUrl->locationId = $this->location->getId();
+		$baseUrl->format = $format;
+
+		$actions = $this->getActions();
+		
+		foreach($actions as $actionName => $action) {
+			$actionUrl = clone $baseUrl;
+			$actionUrl->action = $actionName;
+			
+			if (isset($attributes))
+				foreach($attributes as $attName => $attValue)
+					$actionUrl->property($attName, $attValue);
+
+			$actionUrls[$actionName] = $actionUrl;
+		}
+		
+		return $actionUrls;
+	}
+
+	/**
 	 * Extends the parent function, returning correct values for a variety of location-specific qualities and
 	 * otherwise passing back the parent function's results.
 	 *
-	 * @return array
+	 * @return object
 	 */
 	public function __get($offset)
 	{
