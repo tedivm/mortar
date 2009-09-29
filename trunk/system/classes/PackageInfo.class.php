@@ -156,9 +156,8 @@ class PackageInfo
 		{
 			try {
 
-				//AutoLoader::import($this->name);
-				$db = db_connect('default_read_only');
-
+				if(!($db = db_connect('default_read_only')))
+					return;
 
 				$packageStmt = $db->stmt_init();
 				$packageStmt->prepare('SELECT * FROM modules WHERE package = ?');
