@@ -312,6 +312,8 @@ class AdminControllerResourceFilterInstallerNavigation
 		$installerUrl = clone $url;
 		$installerUrl->action = 'Install';
 
+		$htaccessUrl = clone $url;
+		$htaccessUrl->action = 'htaccess';
 
 		$page['__navbar_1'] = '
    <div id="main_sidebar_menu" class="sidebar">
@@ -320,6 +322,9 @@ class AdminControllerResourceFilterInstallerNavigation
          <ul>
             <li class="sidebar_menu last">
                ' . $requirementUrl->getLink('Check Requirements') . '
+            </li>
+            <li class="sidebar_menu last">
+               ' . $htaccessUrl->getLink('htaccess file') . '
             </li>
             <li class="sidebar_menu last">
                ' . $installerUrl->getLink('Install') . '
