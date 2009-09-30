@@ -79,25 +79,47 @@ class RequirementsCheck
 			}
 		}
 
-		if(isset($requirements['extensions']['required']) && is_array($requirements['extensions']['required']))
-		{
-			$extensions = array_merge($this->requiredExtensions, $requirements['extensions']['required']);
-			$this->requiredExtensions = array_unique($extensions);
-		}
+		$this->mergeExtensions('required', $requirements);
+		$this->mergeExtensions('recommended', $requirements);
+		$this->mergeExtensions('optional', $requirements);
 
-		if(isset($requirements['extensions']['recommended']) && is_array($requirements['extensions']['recommended']))
-		{
-			$extensions = array_merge($this->recommendedExtensions, $requirements['extensions']['recommended']);
-			$this->recommendedExtensions = array_unique($extensions);
-		}
 
-		if(isset($requirements['extensions']['optional']) && is_array($requirements['extensions']['optional']))
-		{
-			$extensions = array_merge($this->optionalExtensions, $requirements['extensions']['optional']);
-			$this->optionalExtensions = array_unique($extensions);
-		}
+		$this->removeExtensions('recommended', $this->requiredExtensions);
+
+		$otherExtensions = array_merge($this->requiredExtensions, $this->recommendedExtensions);
+		$this->removeExtensions('optional', $otherExtensions);
+
+		return;
 	}
 
+	/**
+	 * Returns an array of extensions.
+	 *
+	 * @param string $type required, recommended or optional
+	 * @return array
+	 */
+	public function getExtensions($type = 'required')
+	{
+		$propertyName = $type . 'Extensions';
+		return isset($this->$propertyName) ? $this->$propertyName : array();
+	}
+
+	/**
+	 * Returns an array containing the min and max versions the system requires.
+	 *
+	 * @return array
+	 */
+	public function getRequiredVersion()
+	{
+		$version = array();
+		if(isset($this->maxVersion))
+			$version['max'] = $this->maxVersion;
+
+		if(isset($this->minVersion))
+			$version['min'] = $this->minVersion;
+
+		return $version;
+	}
 
 	/**
 	 * This function checks against all of the requirements. Optional and recommended packages are only included if
@@ -197,6 +219,44 @@ class RequirementsCheck
 
 		return (count($missingExtensions) > 0) ? $missingExtensions : true;
 	}
+
+	/**
+	 * This function merges new extensions into one of the extension lists while preventing duplicates.
+	 *
+	 * @param string $type
+	 * @param array $requirements This should be the requirements array returned by PackageInfo->getPhpRequirements()
+	 */
+	protected function mergeExtensions($type, $requirements)
+	{
+		if(isset($requirements['extensions'][$type]) && is_array($requirements['extensions'][$type]))
+		{
+			$propertyName = $type . 'Extensions';
+			$extensions = array_merge($this->$propertyName, $requirements['extensions'][$type]);
+			$this->$propertyName = array_unique($extensions);
+		}
+	}
+
+	/**
+	 * This function purges extensions from  list. Its primarily used to keep an extension from being listed in multiple
+	 * requirement levels (so things can't be both optional and required).
+	 *
+	 * @param string $type
+	 * @param array $extensions
+	 */
+	protected function removeExtensions($type, $extensions)
+	{
+		$propertyName = $type . 'Extensions';
+
+		if($intersectingExtensions = array_intersect($extensions, $this->$propertyName))
+		{
+			foreach($intersectingExtensions as $extension)
+			{
+				$key = array_search($extension, $this->$propertyName);
+				unset($this->{$propertyName}[$key]);
+			}
+		}
+	}
+
 }
 
 ?>
