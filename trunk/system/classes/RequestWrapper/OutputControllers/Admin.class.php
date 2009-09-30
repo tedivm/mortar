@@ -302,13 +302,27 @@ class AdminControllerResourceFilterInstallerNavigation
 
 	//	$menu->setMenuLabel('Installation Links');
 
+		$url = new Url();
+		$url->format = 'admin';
+		$url->module = 'Installer';
+
+		$requirementUrl = clone $url;
+		$requirementUrl->action = 'Requirements';
+
+		$installerUrl = clone $url;
+		$installerUrl->action = 'Install';
+
+
 		$page['__navbar_1'] = '
    <div id="main_sidebar_menu" class="sidebar">
       <div class="sidebar_menu">
-         <h2>Menu</h2>
+         <h2>Installation</h2>
          <ul>
             <li class="sidebar_menu last">
-               <a href="#">Menu Item</a>
+               ' . $requirementUrl->getLink('Check Requirements') . '
+            </li>
+            <li class="sidebar_menu last">
+               ' . $installerUrl->getLink('Install') . '
             </li>
          </ul>
       </div>
@@ -316,7 +330,7 @@ class AdminControllerResourceFilterInstallerNavigation
 ';
 
 		$page['__navbar_2'] = '
-   <div id="modelNav_sidebar_menu" class="sidebar">
+<!--   <div id="modelNav_sidebar_menu" class="sidebar">
       <div class="sidebar_menu">
          <h2>Menu</h2>
          <ul>
@@ -326,6 +340,8 @@ class AdminControllerResourceFilterInstallerNavigation
          </ul>
       </div>
    </div>
+
+-->
 ';
 
 
