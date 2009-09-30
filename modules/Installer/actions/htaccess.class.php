@@ -51,9 +51,8 @@ class InstallerActionhtaccess implements ActionInterface //extends Action
 			$path = '/';
 		}
 
-		$htaccessContent = 'Options FollowSymLinks
+		$htaccessContent = '
 RewriteEngine On
-
 RewriteBase ' . $path . '
 
 # If the file is real, skip this rule
