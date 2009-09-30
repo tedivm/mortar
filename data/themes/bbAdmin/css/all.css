@@ -310,3 +310,9 @@ color: #930;
 .requirement_recommended .requirementLevel {
 color: #d80;
 }
+
+/* Install .htaccess */
+
+#thing_htaccess {
+width: 500px;
+}
