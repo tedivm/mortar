@@ -25,6 +25,8 @@ class InstallerActionInstall implements ActionInterface //extends Action
 			exit();
 
 		$input = Input::getInput();
+		$query = Query::getQuery();
+
 		$config = Config::getInstance();
 
 		$pathToInstaller = $config['path']['modules'] . 'Installer/';
@@ -44,6 +46,25 @@ class InstallerActionInstall implements ActionInterface //extends Action
 			$profile->loadProfile('base');
 		}else{
 			throw new CoreError('Unable to load installation profile.');
+		}
+
+		if(!isset($query['skipRequirements']))
+		{
+			$requirementsCheck = new RequirementsCheck();
+			$modulesToInstall = $profile->getModules();
+			foreach($modulesToInstall as $module => $moduleInfo)
+				$requirementsCheck->addModule($module);
+
+			$optionalValues = isset($query['skipRecommendations']);
+			if(!$requirementsCheck->checkRequirements($optionalValues))
+			{
+				$url = new Url();
+				$url->format = 'admin';
+				$url->module = 'Installer';
+				$url->action = 'Requirements';
+				$this->ioHandler->addHeader('Location', (string) $url);
+				// redirect away to the requirements page
+			}
 		}
 
 		include($pathToInstaller . 'classes/InstallationForm.class.php');
