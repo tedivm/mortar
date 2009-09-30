@@ -46,12 +46,12 @@ class Table
 		$this->index = count($this->rows);
 		return $this;
 	}
-	
+
 	public function addRowClass($name)
 	{
 		$this->classes[$this->index][] = $name;
 	}
-	
+
 	public function addColumnLabel($column, $label)
 	{
 		$column = str_replace(' ', '_', $column);
@@ -103,8 +103,9 @@ class Table
 		$tableId = 'table_' . $this->name;
 		$tableHtml->property('id', $tableId);
 
-		foreach($this->classes['main'] as $class)
-			$tableHtml->addClass($class);
+		if(isset($this->classes['main']))
+			foreach($this->classes['main'] as $class)
+				$tableHtml->addClass($class);
 
 		if(isset($this->caption))
 		{
