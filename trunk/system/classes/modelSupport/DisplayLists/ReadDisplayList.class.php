@@ -3,7 +3,7 @@
 class ReadDisplayList implements DisplayList {
 
 
-	protected $baseActionList = array('Read', 'Edit', 'Delete');
+	protected $baseActionList = array('Read', 'Edit', 'Delete', 'Index');
 
 	/**
 	 * This is the date format used when converting the model to an html table.
@@ -120,11 +120,15 @@ class ReadDisplayList implements DisplayList {
 			array_push($baseActionTypes, 'Index');
 
 		$actionUrls = $model->getActionUrls($format);
+		var_dump($actionUrls);
+		echo "<br /><br />";
 		$allowedUrls = array();
 
 		foreach($baseActionTypes as $action) {
-			$actionUrl = $actionUrls[$action];
-			array_push($allowedUrls, array($action, $actionUrl));
+			if(isset($actionUrls[$action])) {
+				$actionUrl = $actionUrls[$action];
+				array_push($allowedUrls, array($action, $actionUrl));
+			}
 		}
 
 		return $allowedUrls;

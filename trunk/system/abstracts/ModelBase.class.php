@@ -288,7 +288,7 @@ abstract class ModelBase implements Model
 		$actionList = self::loadActions($this->getType());
 
 		foreach(staticHack(get_class($this), 'fallbackModelActions') as $fallbackAction)
-			if (!isset($actionList[$fallbackAction]))
+			if ((!isset($actionList[$fallbackAction])) && !(in_array($fallbackAction, $this->excludeFallbackActions)))
 				$actionList[$fallbackAction] = $this->loadFallbackAction($fallbackAction);
 
 		if (isset($user)) {
