@@ -120,7 +120,6 @@ class ReadDisplayList implements DisplayList {
 			array_push($baseActionTypes, 'Index');
 
 		$actionUrls = $model->getActionUrls($format);
-		var_dump($actionUrls);
 		echo "<br /><br />";
 		$allowedUrls = array();
 
