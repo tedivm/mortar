@@ -78,9 +78,10 @@ class ModelToHtml
 		$actionUrls = $this->model->getActionUrls($query['format']);
 		$allowedActions = $this->model->getActions($user);
 
-		$actionTypes = array('Read', 'Edit', 'Delete');
-		if(isset($location) && $location->hasChildren())
-			array_push($actionTypes, 'Index');
+		$actionTypes = array();
+		foreach(array('Read', 'Edit', 'Delete', 'Index') as $action) 
+			if(isset($allowedActions[$action]))
+				array_push($actionTypes, $action);
 
 		$allowedActionTypes = array();
 		$actionList = '';
