@@ -115,7 +115,6 @@ class ReadDisplayList implements DisplayList {
 	protected function getActionList($model, $format)
 	{
 		$baseActionTypes = $this->baseActionList;
-		if (method_exists($model, 'getLocation')) $location = $model->getLocation();
 
 		$actionUrls = $model->getActionUrls($format);
 		$allowedUrls = array();
