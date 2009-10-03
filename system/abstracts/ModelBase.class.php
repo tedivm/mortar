@@ -74,6 +74,8 @@ abstract class ModelBase implements Model
 	 */
 	static public $fallbackModelActions = array('Read', 'Add', 'Edit', 'Delete', 'Index');
 
+	static public $fallbackModelActionNames = array('Index' => 'Browse');
+
 	/**
 	 * If an inheriting model wants to exclude one or more of the fallback actions it should extend this property with
 	 * an array of those actions.

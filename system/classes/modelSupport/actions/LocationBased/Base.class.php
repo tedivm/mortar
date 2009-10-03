@@ -93,7 +93,17 @@ abstract class ModelActionLocationBasedBase extends ModelActionBase
 		$url->location = $model->getLocation()->getId();
 		$url->format = $format;
 
-		$modelActions = array('Edit' => 'Edit', 'Delete' => 'Delete', 'Ownership' => 'Ownership');
+		$basicActions = staticHack(get_class($model), 'fallbackModelActions');
+		$basicActionNames = staticHack(get_class($model), 'fallbackModelActionNames');
+		$allowedActions = $model->getActions();
+		$disallowedActions = array('Read', 'Add');
+		$modelActions = array();
+		
+		foreach($basicActions as $action) {
+			$actionName = isset($basicActionNames[$action]) ? $basicActionNames[$action] : $action;
+			if ((isset($allowedActions[$action])) && !(in_array($action, $disallowedActions)))
+				$modelActions[$action] = $actionName;
+		}
 
 		if($location->hasChildren())
 			$modelActions['Index'] = 'Browse';
