@@ -84,7 +84,7 @@ class IndexDisplayList extends ReadDisplayList {
 	{
 		$actionUrls = $this->getActionList($model, $this->format);
 
-		$modelActions = $this->getActionIcons($actionUrls);
+		$modelActions = $this->getActionIcons($actionUrls, $model);
 
 		$table->addField('model_actions',
 			isset($modelActions) && $modelActions != '' ? "<ul class='action_list'>" . $modelActions . "</ul>" : "");

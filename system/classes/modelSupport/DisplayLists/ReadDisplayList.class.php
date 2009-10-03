@@ -90,7 +90,7 @@ class ReadDisplayList implements DisplayList {
 
 				$actionDisplay = new DisplayMaker();
 				$actionDisplay->setDisplayTemplate($template);
-				$actionDisplay->addContent('model_actions', $this->getActionIcons($actionUrls));
+				$actionDisplay->addContent('model_actions', $this->getActionIcons($actionUrls, $model));
 				$template = $actionDisplay->makeDisplay();
 
 				$htmlConverter = $model->getModelAs('Html');
@@ -116,8 +116,6 @@ class ReadDisplayList implements DisplayList {
 	{
 		$baseActionTypes = $this->baseActionList;
 		if (method_exists($model, 'getLocation')) $location = $model->getLocation();
-		if(isset($location) && $location->hasChildren())
-			array_push($baseActionTypes, 'Index');
 
 		$actionUrls = $model->getActionUrls($format);
 		$allowedUrls = array();
@@ -132,16 +130,18 @@ class ReadDisplayList implements DisplayList {
 		return $allowedUrls;
 	}
 
-	protected function getActionIcons(array $actionUrls)
+	protected function getActionIcons(array $actionUrls, model $model = null)
 	{
 		$themeSettings = $this->theme->getSettings();
 		$themeUrl = $this->theme->getUrl();
+		if (isset($model)) $location = $model->getLocation();
 		$modelActions = '';
 		foreach($actionUrls as $action)
 		{
+			$fadeClass = ((isset($location)) && ($action[0] == 'Index') && !($location->getChildren())) ? 'iconFade' : '';
 			$actionDisplay = (isset($themeSettings['images']['action_images']) && $themeSettings['images']['action_images'] == true) ?
-					 '<img class="tooltip action_icon ' . $action[0] . '_icon" title="' . $action[0] . '" alt="' . $action[0] . '" src="' .
-					 $themeUrl . $themeSettings['images'][$action[0] . '_image'] . '" />' : $action[0];
+					 '<img class="tooltip action_icon ' . $fadeClass . ' ' . $action[0] . '_icon" title="' . $action[0] . '" alt="' . $action[0] . 
+					 '" src="' . $themeUrl . $themeSettings['images'][$action[0] . '_image'] . '" />' : $action[0];
 
 			$modelActions .= '<li class="action action_' . $action . '">' . $action[1]->getLink($actionDisplay) . '</li>';
 		}
