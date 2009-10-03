@@ -104,11 +104,11 @@ class Permissions
 		{
 			$memgroupPermissions = new GroupPermission($memberGroup, $this->location->getId());
 			$memberGroupPermissionsArray = $this->mergePermissions($memberGroupPermissionsArray,
-															$memgroupPermissions->getPermissions());
+															$memgroupPermissions->getPermissionsList());
 		}
 
 		$userPermissions = new UserPermission($this->user->getId(), $this->location->getId());
-		$userPermissionsArray = $userPermissions->getPermissions();
+		$userPermissionsArray = $userPermissions->getPermissionsList();
 		return $this->mergePermissions($memberGroupPermissionsArray, $userPermissionsArray);
 	}
 
@@ -216,7 +216,7 @@ class Permissions
 	 *
 	 * @return array
 	 */
-	public function getPermissions()
+	public function getPermissionsList()
 	{
 		return $this->permissions;
 	}
@@ -340,7 +340,7 @@ class UserPermission
 	 *
 	 * @return array
 	 */
-	public function getPermissions()
+	public function getPermissionsList()
 	{
 		return $this->permissions;
 	}
