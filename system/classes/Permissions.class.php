@@ -212,6 +212,16 @@ class Permissions
 	}
 
 	/**
+	 * Returns the permission array
+	 *
+	 * @return array
+	 */
+	public function getPermissions()
+	{
+		return $this->permissions;
+	}
+
+	/**
 	 * This is depreciated. Use isAllowed.
 	 *
 	 * @deprecated
