@@ -5,6 +5,7 @@ class LithoModelPage extends LocationModel
 	static public $type = 'Page';
 	protected $table = 'Litho_Pages';
 	public $allowedChildrenTypes = array();
+	protected $excludeFallbackActions = array('Index');
 
 	protected $activeRevision;
 	protected $filters = array();
