@@ -102,12 +102,12 @@ class Permissions
 
 		foreach($memberGroups as $memberGroup)
 		{
-			$memgroupPermissions = new GroupPermission($memberGroup, $this->location->getId());
+			$memgroupPermissions = new GroupPermission($this->location->getId(), $memberGroup);
 			$memberGroupPermissionsArray = $this->mergePermissions($memberGroupPermissionsArray,
 															$memgroupPermissions->getPermissionsList());
 		}
 
-		$userPermissions = new UserPermission($this->user->getId(), $this->location->getId());
+		$userPermissions = new UserPermission($this->location->getId(), $this->user->getId());
 		$userPermissionsArray = $userPermissions->getPermissionsList();
 		return $this->mergePermissions($memberGroupPermissionsArray, $userPermissionsArray);
 	}
@@ -289,7 +289,7 @@ class UserPermission
 	 * @param int $id
 	 * @param Location|int $location
 	 */
-	public function __construct($id, $location)
+	public function __construct($location, $id)
 	{
 		if(!is_numeric($id))
 			throw new TypeMismatch(array('Integer', $id));
@@ -713,7 +713,7 @@ class PermissionActionList
 			$id = $stmt->insert_id;
 
 			// All new permissions should be granted to the administrator membergroup.
-			$adminPermissions = new GroupPermission(MemberGroup::lookupIdbyName('Administrator'), 1);
+			$adminPermissions = new GroupPermission(1, MemberGroup::lookupIdbyName('Administrator'));
 			$adminPermissions->setPermission('Universal', $id, true);
 			$adminPermissions->save();
 
