@@ -580,12 +580,12 @@ class InstallerSetupUserland
 				// add user permissions
 				if(isset($locationInfo['users']))
 					foreach($locationInfo['users'] as $user)
-						$permissions[] = new UserPermission($users[$user]->getId(), $locationId);
+						$permissions[] = new UserPermission($locationId, $users[$user]->getId());
 
 				// add group permissions
 				if(isset($permissionInfo['groups']))
 					foreach($permissionInfo['groups'] as $group)
-						$permissions[] = new GroupPermission($groups[$group]->getId(), $locationId);
+						$permissions[] = new GroupPermission($locationId, $groups[$group]->getId());
 
 				if(count($permissions) < 1)
 					continue;
