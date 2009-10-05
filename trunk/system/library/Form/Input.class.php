@@ -38,6 +38,13 @@ class FormInput
 	public $description;
 
 	/**
+	 * This is a string of arbitrary text to be inserted after the input.
+	 *
+	 * @var string
+	 */
+	public $posttext;
+
+	/**
 	 * This is an array of properties about the input. Examples include the value of the input, although any html tag
 	 * can be here.
 	 *
@@ -136,6 +143,17 @@ class FormInput
 	public function setDescription($description)
 	{
 		$this->description = $description;
+		return $this;
+	}
+
+	/**
+	 * This function sets the posttext, a hint on the type of input expected from the user.
+	 *
+	 * @param string $posttext
+	 */
+	public function setPosttext($posttext)
+	{
+		$this->posttext = $posttext;
 		return $this;
 	}
 
