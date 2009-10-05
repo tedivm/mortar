@@ -24,7 +24,7 @@ class ModelActionLocationBasedOwnership extends ModelActionLocationBasedEdit
 	 * @access public
 	 * @var string
 	 */
-	public static $requiredPermission = 'Owner';
+	public static $requiredPermission = 'Admin';
 
 
 	protected function getForm()
