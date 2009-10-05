@@ -145,12 +145,13 @@ class FormToHtml
 							$labelHtml->property('title', $input->description);
 					}
 
-					$br = new HtmlObject('br');
-					$br->noClose();
-
 					$sectionHtml->wrapAround($labelHtml)->
-						wrapAround($inputHtml)->
-						insertNewHtmlObject('br');
+						wrapAround($inputHtml);
+
+					if(isset($input->posttext))
+						$sectionHtml->wrapAround($input->posttext);
+
+					$sectionHtml->insertNewHtmlObject('br');
 
 					$hasInputs = true;
 				}
