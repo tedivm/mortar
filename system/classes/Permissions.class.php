@@ -104,7 +104,7 @@ class Permissions
 		{
 			$memgroupPermissions = new GroupPermission($this->location->getId(), $memberGroup);
 			$memberGroupPermissionsArray = $this->mergePermissions($memberGroupPermissionsArray,
-															$memgroupPermissions->getPermissionsList());
+				$memgroupPermissions->getPermissionsList());
 		}
 
 		$userPermissions = new UserPermission($this->location->getId(), $this->user->getId());
@@ -142,17 +142,18 @@ class Permissions
 			{
 				switch (true)
 				{
-					case ($current[$typeIndex][$actionIndex] === true):
+					case (isset($current[$typeIndex][$actionIndex]) && ($current[$typeIndex][$actionIndex] === true)):
 					case ($actionValue === true):
 						$current[$typeIndex][$actionIndex] = true;
 						break;
 
-					case ($current[$typeIndex][$actionIndex] == false):
+					case (isset($current[$typeIndex][$actionIndex]) && ($current[$typeIndex][$actionIndex] == false)):
 					case($actionValue == false):
 						$current[$typeIndex][$actionIndex] = false;
 						break;
 
-					case ($current[$typeIndex][$actionIndex] == 'inherit'):
+					case (isset($current[$typeIndex][$actionIndex]) 
+						&& ($current[$typeIndex][$actionIndex] == 'inherit')):
 					case ($actionValue == 'inherit'):
 					default:
 						unset($current[$typeIndex][$actionIndex]);
