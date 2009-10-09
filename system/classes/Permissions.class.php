@@ -321,11 +321,11 @@ class UserPermission
 		if(!is_numeric($action))
 			throw new TypeMismatch(array('Integer', $action));
 
-		if($permission == 1 || $permission == true)
+		if($permission === 1 || $permission === true)
 		{
 			$this->permissions[$resource][$action] = true;
 
-		}elseif($permission == 0 || $permission === false){
+		}elseif($permission === 0 || $permission === false){
 
 			$this->permissions[$resource][$action] = false;
 
