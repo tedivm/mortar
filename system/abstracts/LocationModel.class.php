@@ -49,7 +49,11 @@ class LocationModel extends ModelBase
 	 *
 	 * @var array
 	 */
-	static public $fallbackModelActions = array('Read', 'Add', 'Edit', 'Delete', 'Index', 'Ownership');
+	static public $fallbackModelActions = array('Read', 'Add', 'Edit', 'Delete', 'Ownership', 'GroupPermissions',
+		'EditGroupPermissions', 'UserPermissions', 'EditUserPermissions', 'Index');
+
+	static public $fallbackModelActionNames = array('Index' => 'Browse', 'GroupPermissions' => 'Group Permissions',
+		'UserPermissions' => 'User Permissions');
 
 	/**
 	 * If set this is used as the default status for a new model.

@@ -96,7 +96,7 @@ abstract class ModelActionLocationBasedBase extends ModelActionBase
 		$basicActions = staticHack(get_class($model), 'fallbackModelActions');
 		$basicActionNames = staticHack(get_class($model), 'fallbackModelActionNames');
 		$allowedActions = $model->getActions();
-		$disallowedActions = array('Read', 'Add');
+		$disallowedActions = array('Read', 'Add', 'EditGroupPermissions', 'EditUserPermissions');
 		$modelActions = array();
 		
 		foreach($basicActions as $action) {
