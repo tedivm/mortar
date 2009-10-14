@@ -21,6 +21,9 @@
  * @property-read Array $Input
  * @property-read Array $Query
  */
+
+
+
 class InfoRegistry
 {
 
@@ -40,7 +43,7 @@ class InfoRegistry
 		return self::$instance;
 	}
 
-	protected function __get($offset)
+	public function __get($offset)
 	{
 		switch ($offset) {
 			case 'User':
