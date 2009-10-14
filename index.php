@@ -8,7 +8,10 @@
 
 define('START_TIME', microtime(true));
 define('BASE_PATH', dirname(__FILE__) . '/');
-define('DISPATCHER', array_pop(explode('/', __FILE__)));
+
+$pathArray = explode('/', __FILE__);
+$dispatcher = array_pop($pathArray);
+define('DISPATCHER', $dispatcher);
 
 require('data/profiles/runtime.php');
 
