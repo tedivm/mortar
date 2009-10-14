@@ -36,12 +36,25 @@ class InstallerInstallationForm extends Form
 
 				$timezones = DateTimeZone::listIdentifiers();
 				$currentTimezone = 'US/Eastern';
+
+				if(in_array('US/Eastern', $timezones))
+				{
+					$currentTimezone = 'US/Eastern';
+				}elseif(in_array('America/New_York', $timezones)){
+					$currentTimezone = 'America/New_York';
+				}else{
+					$currentTimezone = 'UTC';
+				}
+
 				foreach($timezones as $timezone)
 				{
+
 					$attributes = array();
 					if($currentTimezone == $timezone)
 						$attributes = array('selected' => 'selected');
-					$timezoneHandler->setOptions($timezone, $timezone, $attributes);
+
+					$timezoneLabel = str_replace('_', ' ', $timezone);
+					$timezoneHandler->setOptions($timezone, $timezoneLabel, $attributes);
 				}
 
 				$this->createInput('base')->
