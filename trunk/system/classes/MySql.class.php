@@ -385,7 +385,24 @@ class Mystmt extends mysqli_stmt
      */
 	public function bindAndExecute()
 	{
-		$params = func_get_args();
+
+		//$params = func_get_args();
+
+		// The only way to get the parameters by reference is to use the debug_backtrace functions rather than
+		// func_get_args. I'm not a fan of this but it works.
+
+        $params = array();
+
+		$stack = debug_backtrace();
+		if(isset($stack[0]["args"]))
+			for($i=0; $i < count($stack[0]["args"]); $i++)
+				$params[$i] = & $stack[0]["args"][$i];
+
+
+
+
+
+
 		MysqlBase::$queryCount++;
 
 		$arrayIndex = $this->myQuery . '  ' . implode('::', $params);
@@ -395,6 +412,7 @@ class Mystmt extends mysqli_stmt
 		}else{
 			MysqlBase::$queryArray[$arrayIndex] = 1;
 		}
+
 
 		if(!call_user_func_array(array($this, 'bind_param'), $params))
 			$this->throwError();
