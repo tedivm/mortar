@@ -253,7 +253,7 @@ class HtmlObject
 		{
 			foreach($this->encloses as $item)
 			{
-				if(get_class($item) == 'HtmlObject')
+				if(is_object($item) && get_class($item) == 'HtmlObject')
 				{
 					$item->tabLevel = $this->tabLevel + 1;
 				}else{
