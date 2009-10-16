@@ -107,7 +107,7 @@ class Twig_Node_Module extends Twig_Node implements Twig_NodeListInterface
 
     $compiler
       ->write("/* $this->filename */\n")
-      ->write('class __TwigTemplate_'.$this->classname)
+      ->write('class '.$this->classname)
     ;
 
     if (!is_null($this->extends))

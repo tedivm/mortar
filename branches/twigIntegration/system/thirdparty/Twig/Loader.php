@@ -59,43 +59,78 @@ abstract class Twig_Loader implements Twig_LoaderInterface
    */
   public function load($name)
   {
-    $cls = $this->getTemplateName($name);
+
+	list($template, $mtime) = $this->getSource($name);
+
+	if(preg_match('{\{% extends "(.*?)" %\}}', $template, $subs) === 1)
+	{
+		$parent = $this->load($subs[1]);
+		$cls = $this->getTemplateName($template . $parent);
+	}else{
+		$parent = null;
+		$cls = $this->getTemplateName($template);
+	}
 
     if (class_exists($cls, false))
     {
       return $cls;
     }
 
-    list($template, $mtime) = $this->getSource($name);
-
     if (false === $this->cache)
     {
-      $this->evalString($template, $name);
+      $this->evalString($template, $name, $cls);
 
       return $cls;
     }
 
+
+	if($this->loadFromCache($name, $cls, $parent))
+		return $cls;
+
     $cache = $this->getCacheFilename($name);
-    if (!file_exists($cache) || false === $mtime || ($this->autoReload && (filemtime($cache) < $mtime)))
-    {
-      // compile first to avoid empty files when an Exception occurs
-      $content = $this->compile($template, $name);
+	$content = $this->compile($template, $name, $cls);
 
-      $fp = @fopen($cache, 'wb');
-      if (!$fp)
-      {
-        eval('?>'.$content);
-
-        return $cls;
-      }
-      fclose($fp);
-
-      file_put_contents($cache, $content);
-    }
-
-    require_once $cache;
+	if(file_put_contents($cache, $content))
+	{
+		include($cache);
+	}else{
+		$this->evalString($template, $md5);
+	}
 
     return $cls;
+  }
+
+
+  public function loadFromCache($name, $className, $parent = null)
+  {
+    $cache = $this->getCacheFilename($name);
+
+    if(!file_exists($cache))
+      return false;
+
+    $fp = @fopen($cache, r);
+
+    if(!$fp)
+        return false;
+
+	$classLine = 'class ' . $className;
+	$lineNumber = isset($parent) ? 5 : 3;
+
+    for($i = 0; $i <= $lineNumber; $i++)
+    {
+        if(feof($fp))
+            break;
+
+        $line = fgets($fp);
+    }
+
+	fclose($fp);
+
+	if(!isset($line) || strpos($line, $classLine) !== 0)
+		return false;
+
+    include($cache);
+    return class_exists($className, false);
   }
 
   public function setEnvironment(Twig_Environment $env)
@@ -113,14 +148,14 @@ abstract class Twig_Loader implements Twig_LoaderInterface
     return $this->cache.'/twig_'.md5($name).'.cache';
   }
 
-  protected function compile($source, $name)
+  protected function compile($source, $name, $classname = null)
   {
-    return $this->env->compile($this->env->parse($this->env->tokenize($source, $name)));
+    return $this->env->compile($this->env->parse($this->env->tokenize($source, $name, $classname)));
   }
 
-  protected function evalString($source, $name)
+  protected function evalString($source, $name, $classname = null)
   {
-    eval('?>'.$this->compile($source, $name));
+    eval('?>'.$this->compile($source, $name, $classname));
   }
 
   /**

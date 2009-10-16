@@ -26,7 +26,7 @@ class Twig_TokenStream
     $this->originalTokens = $tokens;
     $this->tokens = $tokens;
     $this->filename = $filename;
-	$this->classname = isset($classname) ? $classname : md5($this->filename);
+	$this->classname = isset($classname) ? $classname : '__TwigTemplate_' . md5($this->filename);
     $this->trimBlocks = $trimBlocks;
     $this->next();
   }
