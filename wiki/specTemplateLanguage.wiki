@@ -1,144 +1,54 @@
-#summary A specification for logic/design decisions in the template engine.
+#summary A specification for integrating Twig into Mortar
 #labels Specification
 
 = Introduction =
 
+Mortar is going to rely on the [http://www.twig-project.org/ Twig] template system for the logic behind templates. This enables us to give powerful, yet fast, options to designers.
+
+The purpose of this document is to design how we are going to utilize and extend Twig to suite the needs of Mortar.
 
 = Details =
 
+= Extensions =
 
-Here is a brainstormed and completely non-binding list of tags that the language should support:
+Twig extensions are enhancements to the language itself. 
 
-===Page Segments===
+== Environment ==
 
-{# head #}
-- Retrieves the HTML head, complete with all relevant information provided by the system.
+This is probably the most simple of the extensions. Its basically going to expose environmental variables to the templates.
 
-{# footer #}
-- Retrieves footer content.
+=== Variables ===
 
-{# menu @1 #}
-- Retrieves the HTML contents of the menu or sidebar designated by @1, in _ul_ form.
+  * Site Name
+  * Active User Name
+  * Path data (such as the path to the theme files)
 
-===Location Content===
+== Date/Time ==
 
-{# posts @1 @2 etc. #}
-- Retrieves X posts from the current location, with optional filters, and displays each in template @1. (Maybe have a capture -> dupe mechanism for this?)
+Various date and time functions should be exposed to templates. This extension is not really Mortar specific and should be shared back with Twig. Formatting is already handled by Twig.
 
-{# query_posts @1 @2 etc. #}
-- Retrieves posts from anywhere, based on a list of filter/search criteria, and displays each in template (as above).
+=== Variables ===
 
-===Model Content===
+  * Current TIme
+  * Current Timezone
 
-{# model_name #}
+=== Expressions ===
 
-{# model_title #}
+I'm not sure how feasible this is, but I'd like to be able to use expressions (addition, subtraction, comparison, etc) on date and time objects. I'm thinking the easiest way to do this would be to store them as timestamps until they're displayed.
 
-{# model_content #}
+== Models ==
 
-{# model_owner #}
+The goal of this extension is to expose the content and properties of models to designers. This should include locations for models that use them.
 
-{# model_type #}
+== Urls ==
 
-{# model_creationTime #}
+This extension should provide designers with a simple way to manage Urls. Url attributes should be accessible as variable attributes for both accessing and changing.
 
-{# model_lastModified #}
+=== Variables ===
 
-{# model_actions #}
+  * Current URL
+  * Site URL
 
-(These elements are currently supplied by ModelToHtml.)
+=== Tags ===
 
-{# model_tags #}
-
-{# model_status #}
-
-{# model_propertyX #}
-
-(These elements _should_ be supplied by ModelToHtml eventually.)
-
-===Navigation===
-
-{# next @1 @2 etc. #}
--Returns the URL for the "next" item. (By default the next item by date with the same parent, but can be filtered or expanded by args.)
-
-{# prev @1 @2 etc. #}
--Returns the URL for the "previous" item. (By default the previous item by date with the same parent, but can be filtered or expanded by args.)
-
-{# first @1 @2 etc. #}
--Returns the URL for the "first" item. (By default the first item by date with the same parent, but can be filtered or expanded by args.)
-
-{# last @1 @2 etc. #}
--Returns the URL for the "last" item. (By default the last item by date with the same parent, but can be filtered or expanded by args.)
-
-===Local Info===
-
-{# current_url #}
-- The fully-qualified, canonical URL for the resource currently being viewed.
-
-===Site Info===
-
-{# site_name #}
-- Name of the current site.
-
-{# site_url #}
-- The fully-qualified, canonical URL for the root of the current site.
-
-===Theme Info===
-
-{# theme_name #}
-- Name of the theme used to render the current page.
-
-{# theme_url #}
-- The fully-qualified, canonical URL for the home directory of the current display theme.
-
-{# theme_setting @1 @2 etc... #}
-- The value of a setting from the theme's settings.ini file.
-
-===Feeds===
-
-{# feed @1 etc. #}
-- Link to the root site feed, with optional filters.
-
-{# feed_loc @1 @2 etc. #}
-- Link to the feed for content located at @1, with optional filters. 
-
-===Gallery/Media===
-
-{# image @1 #}
-
-Retrieves the URL for the image specified by @1 from the gallery
-
-===Meta===
-
-{# login #}
--Displays currently logged in user, or login box if no user is logged in.
-
-===Logic===
-
-{# %+ #} {# %- #} {# %* #} {# %/ #}
-- Perform basic mathematical operations on individual arguments OR template text.
-
-{# and #} {# or #} {# not #} {# equals #}
-- Perform comparison or basic logical operators on individual arguments OR template text.
-
-{# if @1 #} {# then @2 #} {# elseif @3 #} {# then @4 #} {# else @5 #}
-
-{# switch @1 #} {# case @2 #} {# case @3 #} etc.
--Basic conditional template switching
-
-{# foreach @1 as @2 #}
--Looping over a set of arguments
-
-{# grab @1 #} {## grab ##}
-
-{# release @1 #}
--Assign a portion of template text into a variable which can be released at a further downwards point, by name.
-
-===Presentation===
-
-{# textcase @1=(upper, lower, first, camel, etc.) #} {## case ##}
--Alter the case of the contained text
-
-{# tonum @1 #}
-{# tospell @1 #}
-- Convert a written-out number to a numerical form or vice-versa, with settings.
+  * New URL
