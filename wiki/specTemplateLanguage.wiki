@@ -7,11 +7,17 @@ Mortar is going to rely on the [http://www.twig-project.org/ Twig] template syst
 
 The purpose of this document is to design how we are going to utilize and extend Twig to suite the needs of Mortar.
 
-= Details =
+= Integration =
+
+The actual interface/api for how developers will interact with Twig is still up in the air. A custom loader is a given, since Mortar already has a system for loading templates.
+
+Error handling has been managed by defining the "!Twig_Error" class as an extension of !CoreError.
+
+The Autoloader now has a function for loading external classes and the !Twig_Autoloader class has been integrated into that.
 
 = Extensions =
 
-Twig extensions are enhancements to the language itself. 
+Twig extensions are enhancements to the language itself. These are still being defined.
 
 == Environment ==
 
