@@ -107,7 +107,7 @@ class Twig_Environment
   {
     if (null === $this->parser)
     {
-      return new Twig_Parser($this);
+      $this->parser = new Twig_Parser($this);
     }
 
     return $this->parser;
