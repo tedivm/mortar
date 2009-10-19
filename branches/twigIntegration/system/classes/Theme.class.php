@@ -217,6 +217,39 @@ class Theme
 		return isset($this->settings) ? $this->settings : false;
 	}
 
+
+	/**
+	 * Returns the parent theme or false if there isn't one.
+	 *
+	 * @return Theme|false
+	 */
+	public function getParentTheme()
+	{
+		if(isset($this->settings['meta']['extends']))
+			return false;
+
+		return new Theme($this->settings['meta']['extends']);
+	}
+
+	/**
+	 * Returns the file path to the theme.
+	 *
+	 * @return string
+	 */
+	public function getPath()
+	{
+		return $this->pathToTheme;
+	}
+
+	/**
+	 * Returns the name of the theme.
+	 *
+	 * @return string
+	 */
+	public function getName()
+	{
+		return $this->name;
+	}
 	/**
 	 * This function returns the requested template for a package. This first checks the theme/packages/PackageName
 	 * (where PackageName is the name of the package) then, if no template is present, checks to see if a template
