@@ -28,7 +28,12 @@ class AutoLoader
 	 *
 	 * @var array
 	 */
-	protected static $baseDirectories = array('interfaces', 'abstracts', 'mainclasses', 'library', 'thirdparty');
+	protected static $baseDirectories = array('interfaces',
+											  'abstracts',
+											  'mainclasses',
+											  'library',
+											  'thirdparty',
+											  'View' => 'views');
 
 	protected static $loadedModules = array();
 
@@ -156,9 +161,12 @@ class AutoLoader
 		$classArray = $cache->getData();
 		if($cache->isStale())
 		{
-			foreach(self::$baseDirectories as $folder)
+			foreach(self::$baseDirectories as $index => $folder)
 			{
-				$lookupClasses = self::loadDirectory($config['path'][$folder]);
+				$label = is_numeric($index) ? 'none' : $index;
+				$lookupClasses = self::loadDirectoryAndFilter('', array($config['path'][$folder] => $label));
+
+				//$lookupClasses = self::loadDirectory($config['path'][$folder]);
 				$classArray[] = $lookupClasses;
 			}
 			$cache->storeData($classArray);
