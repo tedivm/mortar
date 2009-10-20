@@ -225,7 +225,7 @@ class Theme
 	 */
 	public function getParentTheme()
 	{
-		if(isset($this->settings['meta']['extends']))
+		if(!isset($this->settings['meta']['extends']))
 			return false;
 
 		return new Theme($this->settings['meta']['extends']);
