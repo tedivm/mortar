@@ -2,11 +2,22 @@
 
 class ViewThemeTemplate
 {
-	static $twigLoader = 'ViewTemplateTwigLoader';
-
+	protected $twigLoader = 'ViewTemplateTwigLoader';
 	protected $theme;
 	protected $name;
+
 	protected $content = array();
+
+	public function __construct(Theme $theme, $name)
+	{
+		$this->theme = $theme;
+		$this->name = $name;
+	}
+
+	public function addContent($array)
+	{
+		$this->content = array_merge($this->content, $array);
+	}
 
 	public function getDisplay()
 	{
@@ -26,10 +37,10 @@ class ViewThemeTemplate
 
 		$basePaths = $this->getThemePaths();
 		$basePaths['system'] = $config['path']['templates'];
-
 		$cachePath = $config['path']['temp'] . '/twigCache';
 
-		$loaderClass = staticHack(get_class($this), 'twigLoader');
+
+		$loaderClass = $this->twigLoader;
 
 		$loader = new $loaderClass($basePaths, $cachePath);
 		return $loader;
@@ -57,52 +68,28 @@ class ViewTemplateTwigLoader extends Twig_Loader_Filesystem
 
 	public function load($name)
 	{
-
 		if($name == 'parent')
 		{
-			if(!isset($this->lastLoadedTemplates) || !isset($this->lastLoaded))
-				throw new CoreError('Templates can not be named parent.');
+			throw new CoreError('Templates can not be named parent.');
+		}
 
-			$found = false;
-			$parentClass = false;
-			foreach($this->lastLoadedList as $className => $path)
-			{
-				if($found)
-				{
-					$parentClass = $className;
-					break;
-				}
+		if($generationDelimiterPosition = strpos($name, $this->generationDelimiter))
+		{
+			$generation = substr($name, 0, $generationDelimiterPosition);
+			$name = substr($name, $generationDelimiterPosition);
+		}
 
-				if($className == $this->lastLoaded);
-					$found = true;
-			}
+		$name = ltrim($name, $this->generationDelimiter);
 
-			if($parentClass)
-			{
-				$this->lastLoaded = $parentClass;
+		if(!($this->lastLoadedList = $this->loadTemplateSet($name)))
+			throw new CoreError('Unable to load template ' . $name);
 
-			}else{
-				throw new CoreError('No parent class found for template.');
-			}
+		// if no generation is set assume its the highest level available
+		if(!isset($generation))
+		{
+			$templates = array_keys($this->lastLoadedList);
+			$className = array_shift($templates);
 		}else{
-
-			if($generationDelimiterPosition = strpos($name, $this->generationDelimiter))
-			{
-				$generation = substr($name, 0, $generationDelimiterPosition);
-				$name = substr($name, $generationDelimiterPosition);
-			}
-
-			$name = ltrim($name, $this->generationDelimiter);
-
-			if($this->lastLoadedList = $this->loadTemplateSet($name))
-				throw new CoreError('Unable to load template ' . $name);
-
-			if(!isset($generation))
-			{
-				$themeNames = array_keys($this->lastLoadedList);
-				$generation = $themeNames[0];
-			}
-
 			$className = $generation . $this->generationDelimiter . $name;
 		}
 
@@ -123,9 +110,12 @@ class ViewTemplateTwigLoader extends Twig_Loader_Filesystem
 			$templateSet = array();
 			foreach($this->paths as $generation => $basepath)
 			{
-				$path = realpath($basepath . $name);
+				$path = realpath($basepath . '/' . $name);
 
-				if(0 !== strpos($file, $path))
+				if($path === false)
+					continue;
+
+				if(0 !== strpos($path, $basepath))
 					throw new CoreSecurity('Template ' . $name . ' is attempting to load files outside its directory.');
 
 				if(!file_exists($path))
@@ -137,7 +127,6 @@ class ViewTemplateTwigLoader extends Twig_Loader_Filesystem
 
 			$cache->storeData($templateSet);
 		}
-
 		return $templateSet;
 	}
 
@@ -150,14 +139,55 @@ class ViewTemplateTwigLoader extends Twig_Loader_Filesystem
    *               and the last modification time as the second one
    *               or false if it's not relevant
    */
-  public function getSource($name)
-  {
-	if(isset($this->lastLoaded[$name]))
+	public function getSource($name)
 	{
-		return array(file_get_contents($this->lastLoaded[$name]), filemtime($this->lastLoaded[$name]));
-	}else{
-		new CoreInfo('Unable to load template ' . $name);
+		if(isset($this->lastLoadedList[$name]))
+		{
+			$fileContents = file_get_contents($this->lastLoadedList[$name]);
+
+			$found = false;
+			foreach($this->lastLoadedList as $className => $path)
+			{
+				if($found && $className != $name)
+				{
+					$fileContents =
+						str_replace('{% extends "parent" %}', '{% extends "' . $className . '" %}', $fileContents);
+
+
+					break;
+				}
+
+				if($className == $name);
+					$found = true;
+
+			}
+
+			return array($fileContents, filemtime($this->lastLoadedList[$name]));
+		}else{
+			throw new CoreInfo('Unable to load template ' . $name);
+		}
 	}
+
+
+  /**
+   * Sets the paths where templates are stored.
+   *
+   * @param string|array $paths A path or an array of paths where to look for templates
+   */
+  public function setPaths($paths)
+  {
+		if(!is_array($paths))
+		{
+			$paths = array($paths);
+		}
+
+		$this->paths = array();
+		foreach ($paths as $label => $path)
+		{
+			$this->paths[$label] = realpath($path);
+		}
+	}
+
 }
 
 ?>
