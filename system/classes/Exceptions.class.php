@@ -273,6 +273,18 @@ class CoreWarning extends CoreError
 }
 
 /**
+ * CoreSecurity exception handler
+ *
+ * This exception handler is called when an error is encountered that has security implications, such as when a file
+ * path is found to have been manipulated load files it shouldn't.
+ *
+ * @package System
+ * @subpackage ErrorHandling
+ */
+class CoreSecurity extends CoreError
+{ }
+
+/**
  * CoreNotice exception handler
  *
  * This is an exception handler that deals with Notice-level errors
@@ -441,6 +453,9 @@ class AuthenticationError extends CoreUserError {}
 class ResourceNotFoundError extends CoreUserError {}
 
 
+
+// External error handlers
+class Twig_Error extends CoreError {}
 
 
 

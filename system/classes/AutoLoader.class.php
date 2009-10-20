@@ -28,7 +28,12 @@ class AutoLoader
 	 *
 	 * @var array
 	 */
-	protected static $baseDirectories = array('interfaces', 'abstracts', 'mainclasses', 'library', 'thirdparty');
+	protected static $baseDirectories = array('interfaces',
+											  'abstracts',
+											  'mainclasses',
+											  'library',
+											  'thirdparty',
+											  'View' => 'views');
 
 	protected static $loadedModules = array();
 
@@ -48,6 +53,19 @@ class AutoLoader
 										'Form' => 'Form',
 										'Filters' => 'Filter');
 
+	static function registerAutoloader()
+	{
+		spl_autoload_register(array(new self, 'loadClass'));
+
+		$config = Config::getInstance();
+
+		if(!class_exists('Twig_Autoloader', false))
+		{
+			$path = $config['path']['thirdparty'] . 'Twig/Autoloader.php';
+			include($path);
+		}
+
+	}
 
 	/**
 	 * This function is called by the system when it is unable to locate a class.
@@ -66,6 +84,9 @@ class AutoLoader
 		// if the class name doesn't exist clear out the cache and reload.
 		if(!isset(self::$classIndex[$classname]))
 		{
+			if(self::loadExternal($classname))
+				return true;
+
 			Cache::clear('system', 'classLookup');
 			Cache::clear('modules');
 			self::$classIndex = null;
@@ -80,6 +101,15 @@ class AutoLoader
 			return false;
 		}
 	}
+
+	static function loadExternal($class)
+	{
+		if(strpos($class, 'Twig') === 0 && Twig_Autoloader::autoload($class))
+			return true;
+
+		return false;
+	}
+
 
 	static function addModule($moduleName)
 	{
@@ -131,9 +161,12 @@ class AutoLoader
 		$classArray = $cache->getData();
 		if($cache->isStale())
 		{
-			foreach(self::$baseDirectories as $folder)
+			foreach(self::$baseDirectories as $index => $folder)
 			{
-				$lookupClasses = self::loadDirectory($config['path'][$folder]);
+				$label = is_numeric($index) ? 'none' : $index;
+				$lookupClasses = self::loadDirectoryAndFilter('', array($config['path'][$folder] => $label));
+
+				//$lookupClasses = self::loadDirectory($config['path'][$folder]);
 				$classArray[] = $lookupClasses;
 			}
 			$cache->storeData($classArray);
@@ -312,7 +345,5 @@ class AutoLoader
 	}
 }
 
-
-spl_autoload_register(array('AutoLoader', 'loadClass'));
-
+Autoloader::registerAutoloader();
 ?>

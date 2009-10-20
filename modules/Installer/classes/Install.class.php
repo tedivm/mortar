@@ -127,6 +127,7 @@ class InstallerInstaller // thats the most pathetic name ever
 			$path['javascript'] = ($input['javascript']) ? $input['javascript'] : $path['base'] . 'javascript/';
 			$path['interfaces'] = ($input['interfaces']) ? $input['interfaces'] : $path['base'] . 'system/interfaces/';
 			$path['templates'] = ($input['templates']) ? $input['templates'] : $path['base'] . 'system/templates/';
+			$path['views'] = ($input['templates']) ? $input['templates'] : $path['base'] . 'system/views/';
 			$path['thirdparty'] = ($input['thirdparty']) ? $input['thirdparty'] : $path['base'] . 'system/thirdparty/';
 
 
@@ -158,6 +159,7 @@ class InstallerInstaller // thats the most pathetic name ever
 				$configFile->set('path', 'javascript', $path['javascript']);
 				$configFile->set('path', 'interfaces', $path['interfaces']);
 				$configFile->set('path', 'templates', $path['templates']);
+				$configFile->set('path', 'views', $path['views']);
 				$configFile->set('path', 'thirdparty', $path['thirdparty']);
 
 				$configFile->set('url', 'theme', $url['theme']);
