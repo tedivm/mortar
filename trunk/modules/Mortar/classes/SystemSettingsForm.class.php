@@ -5,7 +5,7 @@ class MortarSystemSettingsForm extends Form
 	protected function define()
 	{
 		$info = InfoRegistry::getInstance();
-		$configIni = new IniFile($info->Configuration['path']['config'] . 'configuration.php');
+		$configIni = new ConfigFile($info->Configuration['path']['config'] . 'configuration.php');
 
 
 
