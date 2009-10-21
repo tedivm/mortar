@@ -70,7 +70,7 @@ class Config implements ArrayAccess
 			if(!file_exists($path))
 				throw new Exception($path . ' does not exist.');
 
-			$iniFile = new IniFile($path);
+			$iniFile = new ConfigFile($path);
 			$this->config = $iniFile->getArray();
 			$this->baseUrls = $iniFile->getArray('url'); // $config['url'];
 

@@ -73,7 +73,7 @@ class DatabaseConnection
 						return false;
 
 					$path_to_dbfile = $config['path']['config'] . 'databases.php';
-					$iniFile = new IniFile($path_to_dbfile);
+					$iniFile = new ConfigFile($path_to_dbfile);
 					self::$iniFile = $iniFile;
 				}
 

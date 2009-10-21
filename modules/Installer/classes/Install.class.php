@@ -145,7 +145,7 @@ class InstallerInstaller // thats the most pathetic name ever
 			$directory = $config['path']['base'] . 'data/configuration/';
 			if(is_writable($directory) && !file_exists($directory . 'configuration.php'))
 			{
-				$configFile = new IniFile($directory . 'configuration.php');
+				$configFile = new ConfigFile($directory . 'configuration.php');
 				$configFile->set('path', 'base', $path['base']);
 				$configFile->set('path', 'theme', $path['theme']);
 				$configFile->set('path', 'config', $path['config']);
@@ -190,7 +190,7 @@ class InstallerInstaller // thats the most pathetic name ever
 			$input = Input::getInput();
 
 			$directory = $config['path']['base'] . 'data/configuration/';
-			$dbIniFile = new IniFile($directory . 'databases.php');
+			$dbIniFile = new ConfigFile($directory . 'databases.php');
 
 			if(!isset($input['DBhost']) || !isset($input['DBusername']) || !isset($input['DBpassword'])
 				|| !isset($input['DBname']))
