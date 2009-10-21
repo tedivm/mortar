@@ -76,6 +76,7 @@ if(ini_get('register_globals'))
 require('system/classes/Exceptions.class.php');
 require('system/classes/Config.class.php');
 require('system/library/IniFile.class.php');
+require('system/library/ConfigFile.class.php');
 require('system/classes/MySql.class.php');
 require('system/classes/Sqlite.class.php');
 require('system/functions/general.functions.php');
