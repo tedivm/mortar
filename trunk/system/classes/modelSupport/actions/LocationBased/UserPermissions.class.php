@@ -9,8 +9,9 @@
  */
 
 /**
- * This class handles editing resources that are already present in the system. It is largely based on the
- * ModelActionEdit class.
+ * This action is the portal action for managing User Permissions. It creates a form which
+ * allows the user to select a User, and then redirects to the EditUserPermissions action.
+ * It extends from the GroupPermissions action.
  *
  * @package System
  * @subpackage ModelSupport
@@ -27,6 +28,12 @@ class ModelActionLocationBasedUserPermissions extends ModelActionLocationBasedGr
 	 */
 	public static $requiredPermission = 'Admin';
 
+	/**
+	 * This function produces a simple form for selecting a User.
+	 *
+	 * @access protected
+	 * @return Form
+	 */
 	protected function getForm()
 	{
 		$form = new Form('user_permissions');
@@ -38,6 +45,14 @@ class ModelActionLocationBasedUserPermissions extends ModelActionLocationBasedGr
 		return $form;
 	}
 
+	/**
+	 * On submitting the action, this function overrides the standard redirection;
+	 * it redirects back to itself if no group is selected, otherwise it contructs
+	 * a URL for the EditUserPermissions action for the selected group.
+	 *
+	 * @access protected
+	 * @return Url
+	 */
 	protected function getRedirectUrl()
 	{
 		$query = Query::getQuery();
@@ -53,7 +68,7 @@ class ModelActionLocationBasedUserPermissions extends ModelActionLocationBasedGr
                 	$url->property('user', $user);
                 return $url;
 	}
-	
+
 }
 
 ?>

@@ -11,6 +11,13 @@ class ModelActionLocationBasedEditUserPermissions extends ModelActionLocationBas
 	 */
 	public static $requiredPermission = 'Admin';
 
+	/**
+	 * If this action is loaded without a group property set as a number, it redirects back to the
+	 * GroupPermissions action to select a group; then, it calls the logicPass() function of
+	 * the parent to access the grandparent's logic() function.
+	 *
+	 * @access public
+	 */
 	public function logic()
 	{
 		$query = Query::getQuery();
@@ -23,6 +30,14 @@ class ModelActionLocationBasedEditUserPermissions extends ModelActionLocationBas
 		parent::logicPass();
 	}
 
+	/**
+	 * This sets the mode ('user') and specific group number for the permission form which
+	 * needs to be generated, then passes these off to the parent function which actually
+	 * generates the form.
+	 *
+	 * @access protected
+	 * @return Form
+	 */
 	protected function getForm()
 	{
 		$query = Query::getQuery();
