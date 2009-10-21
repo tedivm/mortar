@@ -13,6 +13,13 @@ class ModelActionLocationBasedEditGroupPermissions extends ModelActionLocationBa
 	 */
 	public static $requiredPermission = 'Admin';
 
+	/**
+	 * If this action is loaded without a group property set as a number, it redirects back to the
+	 * GroupPermissions action to select a group; then, it redirects to perform the Edit action's
+	 * logic function.
+	 *
+	 * @access public
+	 */
 	public function logic()
 	{
 		$query = Query::getQuery();
@@ -25,11 +32,25 @@ class ModelActionLocationBasedEditGroupPermissions extends ModelActionLocationBa
 		$this->logicPass();
 	}
 
+	/**
+	 * This function calls back to the Edit logic function so that UserPermissions can call back
+	 * to it without also executing the GroupPermissions redirect.
+	 *
+	 * @access protected
+	 */
 	protected function logicPass()
 	{
 		parent::logic();
 	}
 
+	/**
+	 * This sets the mode ('group') and specific group number for the permission form which
+	 * needs to be generated, then passes these off to a function that actually generates 
+	 * the form. This function is overloaded by EditUserPermissions.
+	 *
+	 * @access protected
+	 * @return Form
+	 */
 	protected function getForm()
 	{
 		$query = Query::getQuery();
@@ -42,7 +63,20 @@ class ModelActionLocationBasedEditGroupPermissions extends ModelActionLocationBa
 
 		return $this->getPermissionsForm($mode, $form, $user);
 	}
-
+	/**
+	 * This action loads two sets of permissions: the local permissions from a UserPermission or
+	 * GroupPermission action, and the full set of cascading permissions in the form of a
+	 * Permission Matrix. It then generates a series of form sections, each containing select boxes
+	 * that default to the current local permission, plus text describing all cascading permissions
+	 * which apply to the chosen action and model at the current location. The hidden data encodes
+	 * the mode and user/group ID to enable saving of Permissions in the correct place.
+	 *
+	 * @access protected
+	 * @var $mode string
+	 * @var $form Form
+	 * @var $user int
+	 * @return Form
+	 */
 	protected function getPermissionsForm($mode, $form, $user)
 	{	
 		$location = $this->model->getLocation();
@@ -97,6 +131,14 @@ class ModelActionLocationBasedEditGroupPermissions extends ModelActionLocationBa
 		return $form;
 	}
 
+	/**
+	 * This sets the mode ('group') and specific group number for the permission form which
+	 * needs to be generated, then passes these off to a function that actually generates 
+	 * the form. This function is overloaded by EditUserPermissions.
+	 *
+	 * @access protected
+	 * @return Form
+	 */
 	protected function processInput($input)
 	{
 		$location = $this->model->getLocation();
@@ -171,7 +213,17 @@ class ModelActionLocationBasedEditGroupPermissions extends ModelActionLocationBa
 		return $permissionMatrix;
 
 	}
-	
+
+
+	/**
+	 * Using a permission list extracted from the larger PermissionMatrix, this generates a list which describes each
+	 * cascading permission set for the resource/action combination in question, which is folded into the permission
+	 * form.
+	 *
+	 * @access protected
+	 * @var $permissionList array
+	 * @return Form
+	 */
 	protected function distillPermissionsList($permissionList)
 	{
 		$list = '';

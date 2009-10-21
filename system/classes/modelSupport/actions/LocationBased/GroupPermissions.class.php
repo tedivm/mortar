@@ -9,8 +9,8 @@
  */
 
 /**
- * This class handles editing resources that are already present in the system. It is largely based on the
- * ModelActionEdit class.
+ * This action is the portal action for managing Group Permissions. It creates a form which
+ * allows the user to select a Group, and then redirects to the EditGroupPermissions action.
  *
  * @package System
  * @subpackage ModelSupport
@@ -18,8 +18,22 @@
 
 class ModelActionLocationBasedGroupPermissions extends ModelActionLocationBasedAdd {
 
+	/**
+	 * This defines the permission action that the user needs to run this. Permissions are based off of an action and
+	 * a resource type, so this value is used with the model type to generate a permissions object
+	 *
+	 * @access public
+	 * @var string
+	 */
 	public static $requiredPermission = 'Admin';
 
+
+	/**
+	 * This function produces a simple form for selecting a Group.
+	 *
+	 * @access protected
+	 * @return Form
+	 */
 	protected function getForm()
 	{
 		$form = new Form('group_permissions');
@@ -36,6 +50,15 @@ class ModelActionLocationBasedGroupPermissions extends ModelActionLocationBasedA
                 return $this->model->save();
 	}
 
+
+	/**
+	 * On submitting the action, this function overrides the standard redirection;
+	 * it redirects back to itself if no group is selected, otherwise it contructs
+	 * a URL for the EditGroupPermissions action for the selected group.
+	 *
+	 * @access protected
+	 * @return Url
+	 */
 	protected function getRedirectUrl()
 	{
 		$query = Query::getQuery();
