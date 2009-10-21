@@ -100,7 +100,6 @@ class ViewTemplateTwigLoader extends Twig_Loader_Filesystem
 	protected function loadTemplateSet($name)
 	{
 		$availableThemes = array_keys($this->paths);
-		$activeTheme = $availableThemes[0];
 
 		$cache = new Cache('templates', $activeTheme, $name);
 		$templateSet = $cache->getData();
@@ -124,10 +123,17 @@ class ViewTemplateTwigLoader extends Twig_Loader_Filesystem
 				$classname = $generation . ':' . $name;
 				$templateSet[$classname] = $path;
 			}
+			$extras = $this->loadExtraClasses($name);
+			$templateSet = array_merge($templateSet, $extras);
 
 			$cache->storeData($templateSet);
 		}
 		return $templateSet;
+	}
+
+	protected function loadExtraClasses($name)
+	{
+		return array();
 	}
 
   /**
