@@ -165,6 +165,9 @@ class Config implements ArrayAccess
 		if(is_dir(BASE_PATH . 'system/interfaces/'))
 			$this->config['path']['interfaces'] = BASE_PATH . 'system/interfaces/';
 
+		if(is_dir(BASE_PATH . 'system/views/'))
+			$this->config['path']['views'] = BASE_PATH . 'system/views/';
+
 		if(is_dir(BASE_PATH . 'system/thirdparty/'))
 			$this->config['path']['thirdparty'] = BASE_PATH . 'system/thirdparty/';
 
