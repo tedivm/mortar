@@ -63,6 +63,7 @@ class Location
 	 * @var int
 	 */
 	protected $createdOn;
+	protected $publishDate;
 
 	/**
 	 * This is a timestampe representing the date the location was last saved
@@ -195,6 +196,16 @@ class Location
 	public function getCreationDate()
 	{
 		return $this->createdOn;
+	}
+
+	public function getPublishDate()
+	{
+		return $this->publishDate;
+	}
+
+	public function setPublishDate($date)
+	{
+		$this->publishDate = $date;
 	}
 
 	/**
@@ -434,6 +445,7 @@ class Location
 					$locationInfo['resourceId'] = $dbLocation->resourceId;
 					$locationInfo['createdOn'] = strtotime($dbLocation->creationDate . 'UTC');
 					$locationInfo['lastModified'] = strtotime($dbLocation->lastModified . 'UTC');
+					$locationInfo['publishDate'] = strtotime($dbLocation->publishDate . 'UTC');
 					$locationInfo['owner'] = $dbLocation->owner;
 					$locationInfo['group'] = $dbLocation->groupOwner;
 					$locationInfo['inherits'] = ($dbLocation->inherits == 1);
@@ -483,6 +495,7 @@ class Location
 		}else{
 			// should only run when id isn't set (so new objects only)
 			$db_location->creationDate = gmdate('Y-m-d H:i:s');
+			$db_location->publishDate = gmdate('Y-m-d H:i:s');
 		}
 		$db_location->lastModified = gmdate('Y-m-d H:i:s');
 

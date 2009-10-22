@@ -132,7 +132,8 @@ CREATE TABLE locations
 	groupOwner INTEGER UNSIGNED,
 	inherits CHAR(1) NOT NULL DEFAULT 1,
 	creationDate DATETIME NOT NULL,
-	lastModified TIMESTAMP ON UPDATE CURRENT_TIMESTAMP /* This will update on each save */
+	lastModified TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, /* This will update on each save */
+	publishDate DATETIME NOT NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: locations */
