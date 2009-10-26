@@ -16,3 +16,6 @@ The "Mural" module handles theme-specific functionality, aimed primarily at desi
   * Theme preview functionality
   * Color theme designer
   * Template viewer/sidebar
+  * "theme extend"-> make a "child" theme with a skeleton structure
+  * "package theme" -> basically compress a theme and download it
+  * "register theme" -> ping the Mortar repository (when we finish Quarry) with the theme information, screen shots, and links to their authors hosting theme/site
