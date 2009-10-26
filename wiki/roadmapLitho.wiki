@@ -1,0 +1,14 @@
+#summary roadmap for Litho, th CMS
+
+= Introduction =
+
+Litho is a basic CMS.
+
+= Litho =
+
+== 1.0 ==
+
+  * Page History
+  * Compare Versions
+  * Highlight changes
+  * View "blame"
