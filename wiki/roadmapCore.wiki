@@ -25,6 +25,9 @@ This document lists the features required for Mortar to be considered "version 1
   * Menu/Sidebar Management
   * Admin Dashboard view
   * !MortarShell (Interactive Shell)
+  * Theme Options Page
+  * Theme Icon Sets (select and use)
+  * Markup/formatting?
 
 === Modules ===
 
@@ -35,3 +38,4 @@ Each of these modules should be at version one for launch.
   * Wiki
   * Chalk
   * Rubble
+  * Mural
