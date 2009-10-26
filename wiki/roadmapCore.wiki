@@ -27,11 +27,11 @@ This document lists the features required for Mortar to be considered "version 1
   * !MortarShell (Interactive Shell)
   * Theme Options -- manage themes, select default themes for sites/areas, configuring themes for user skinning
   * Theme Icon Sets (select and use)
-  * Markup/formatting?
+  * Twig Extensions
 
-=== Modules ===
+= Module Roadmaps =
 
-Each of these modules should be at version one for launch.
+Each of these modules has their own roadmap. The goal is for each of them to be at 1.0 for Mortar itself to reach version 1.0.
 
   * [roadmapQuarry Quarry]
   * [roadmapLitho Litho]
