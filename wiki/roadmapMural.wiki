@@ -1,0 +1,18 @@
+#summary road map for the Mural module.
+
+= Introduction =
+
+The "Mural" module handles theme-specific functionality, aimed primarily at designers. This document lists the features required for Mural to be considered "version 1", with the next few versions mapped up explicitly. It is by no means set in stone, and features are expected to be added.
+
+= Mural Features =
+
+== 0.4 ==
+
+  * Exist.
+
+== 1.0 ==
+
+  * Theme Tree
+  * Theme preview functionality
+  * Color theme designer
+  * Template viewer/sidebar
