@@ -151,6 +151,9 @@ class ViewTemplateTwigLoader extends Twig_Loader_Filesystem
 		{
 			$fileContents = file_get_contents($this->lastLoadedList[$name]);
 
+			// We're iterating through the path list looking for the current class and then getting the name of the
+			// template after that, which is the parent template. We then takes the current template and replaces the
+			// call to parent with a call to the proper template name.
 			$found = false;
 			foreach($this->lastLoadedList as $className => $path)
 			{
