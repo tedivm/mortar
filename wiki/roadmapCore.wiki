@@ -1,0 +1,37 @@
+#summary roadmap for the Mortar system and the Mortar module
+
+= Introduction =
+
+This document lists the features required for Mortar to be considered "version 1", with the next few versions mapped up explicitly. It is by no means set in stone, and features are expected to be added.
+
+= Core/System =
+
+== 0.4 ==
+
+  * Twig Integration
+
+== 0.5 ==
+
+  * Advanced ORM
+
+== 1.0 ==
+
+  * Multilingual support
+  * REST-Interface (partially complete)
+  * RSS format
+  * URL Extension mapping to Format 
+  * User Management Interface
+  * Site Management Interface
+  * Menu/Sidebar Management
+  * Admin Dashboard view
+  * !MortarShell (Interactive Shell)
+
+=== Modules ===
+
+Each of these modules should be at version one for launch.
+
+  * Quarry
+  * Litho
+  * Wiki
+  * Chalk
+  * Rubble
