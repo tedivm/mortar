@@ -28,6 +28,7 @@ This document lists the features required for Mortar to be considered "version 1
   * Theme Options -- manage themes, select default themes for sites/areas, configuring themes for user skinning
   * Theme Icon Sets (select and use)
   * Twig Extensions
+  * Permissions-setting for optional modules
 
 = Module Roadmaps =
 
