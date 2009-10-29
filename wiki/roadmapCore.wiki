@@ -29,6 +29,7 @@ This document lists the features required for Mortar to be considered "version 1
   * Theme Icon Sets (select and use)
   * Twig Extensions
   * Permissions-setting for optional modules
+  * Memcache cache storage engine
 
 = Module Roadmaps =
 
