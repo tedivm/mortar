@@ -21,6 +21,16 @@
 
 			$(this).validate({meta: opts.validationMetaClass});
 
+			$('.datetime').datepicker({  
+					duration: '',
+					showTime: true,
+					constrainInput: false,
+					stepMinutes: 1,
+					stepHours: 1,
+					altTimeField: '',
+					time24h: false
+			});
+
 			if(opts.validateOnLoad)
 				$(this).valid();
 

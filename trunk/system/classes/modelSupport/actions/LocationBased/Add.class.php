@@ -89,6 +89,10 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 				$selectInput->setValue($this->model->status);
 		}
 
+		$form->createInput('publishDate')->
+			setType('datetime')->
+			setLabel('Publish Date');
+
 		$locationFormName = importClass('LocationForm', 'modelSupport/Forms/LocationForm.class.php', 'mainclasses');
 		if(!isset($locationFormName))
 			throw new CoreError('Unable to load LocationForm');
