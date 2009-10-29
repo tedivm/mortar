@@ -30,6 +30,7 @@ This document lists the features required for Mortar to be considered "version 1
   * Twig Extensions
   * Permissions-setting for optional modules
   * Memcache cache storage engine
+  * sqlite3 cache storage engines
 
 = Module Roadmaps =
 
