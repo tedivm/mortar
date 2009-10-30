@@ -64,8 +64,12 @@ class ModelActionLocationBasedEdit extends ModelActionLocationBasedAdd
 				$input = $form->getInput('location_groupOwner');
 				$input->setValue($this->model->getLocation()->getOwnerGroup());
 			}
-
-
+			if(in_array('publishDate', $inputGroups['location']))
+			{
+				$input = $form->getInput('location_publishDate');
+				$pubdate = date( 'm/d/y h:i a' , $this->model->getLocation()->getPublishDate()); 
+				$input->setValue($pubdate);
+			}
 		}
 
 		return $form;
