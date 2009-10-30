@@ -442,6 +442,8 @@ class LocationModel extends ModelBase
 				return $location->getCreationDate();
 			case 'lastModified':
 				return $location->getLastModified();
+			case 'publishDate':
+				return $location->getPublishDate();
 			case 'name':
 				return $location->getName();
 		}
@@ -453,7 +455,7 @@ class LocationModel extends ModelBase
 		if(!is_scalar($value))
 			throw new CoreError('Model attributes must be scalar.');
 
-		if (in_array($value, array('owner', 'ownergroup', 'createdOn', 'lastModified', 'name')))
+		if (in_array($value, array('owner', 'ownergroup', 'createdOn', 'lastModified', 'publishDate', 'name')))
 			return false;
 
 		return parent::__set($offset, $value);

@@ -106,6 +106,7 @@ class ModelToHtml
 		$this->convertedProperties['model_action_list'] = $allowedActionTypes;
 		$this->convertedProperties['model_creationTime'] = $this->model->createdOn;
 		$this->convertedProperties['model_lastModified'] = $this->model->lastModified;
+		$this->convertedProperties['model_publishDate'] = $this->model->lastModified;
 		$this->convertedProperties['model_name'] = $this->model->name;
 		$this->convertedProperties['model_actions'] = $actionList;
 	}
@@ -134,7 +135,7 @@ class ModelToHtml
 		$this->modelDisplay->setDisplayTemplate($this->template);
 
 		foreach ($this->convertedProperties as $propName => $propValue)
-			($propName == "model_creationTime" || $propName == "model_lastModified")
+			($propName == "model_creationTime" || $propName == "model_lastModified" || $propName == "model_publishDate")
 				? $this->modelDisplay->addDate($propName, $propValue)
 				: $this->modelDisplay->addContent($propName, $propValue);
 
