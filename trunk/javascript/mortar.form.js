@@ -24,10 +24,13 @@
 			$('.datetime').datepicker({  
 					duration: '',
 					showTime: true,
-					constrainInput: false,
-					stepMinutes: 1,
+					constrainInput: true,
+					stepMinutes: 5,
 					stepHours: 1,
 					altTimeField: '',
+					currentText: 'Now',
+					prevText: '<',
+					nextText: '>',	
 					time24h: false
 			});
 
