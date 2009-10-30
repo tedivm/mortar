@@ -21,19 +21,6 @@
 
 			$(this).validate({meta: opts.validationMetaClass});
 
-			$('.datetime').datepicker({  
-					duration: '',
-					showTime: true,
-					constrainInput: true,
-					stepMinutes: 5,
-					stepHours: 1,
-					altTimeField: '',
-					currentText: 'Now',
-					prevText: '<',
-					nextText: '>',	
-					time24h: false
-			});
-
 			if(opts.validateOnLoad)
 				$(this).valid();
 
@@ -43,7 +30,6 @@
 
 				var inputOpts = $(this).metadata();
 
-
 				if(inputOpts.autocomplete && inputOpts.autocomplete.data)
 				{
 					autocompleteOpts = $.extend({},
@@ -51,6 +37,15 @@
 												inputOpts.autocomplete.options);
 
 					$(this).autocomplete(inputOpts.autocomplete.data, autocompleteOpts)
+				}
+
+				if(inputOpts.datetime && inputOpts.datetime.data)
+				{
+					datetimeOpts = $.extend({},
+												$.fn.MorterForm.defaults.datetime,
+												inputOpts.datetime.options);
+
+					$(this).datepicker(datetimeOpts)
 				}
 
 				// Setup WYSIWYG editor
@@ -86,4 +81,17 @@
 									return parsed;
 								}
   						};
+
+	$.fn.MorterForm.defaults.datetime = {
+					duration: '',
+					showTime: true,
+					constrainInput: true,
+					stepMinutes: 5,
+					stepHours: 1,
+					altTimeField: '',
+					currentText: 'Now',
+					prevText: '<',
+					nextText: '>',	
+					time24h: false
+	};
 })(jQuery);

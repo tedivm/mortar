@@ -324,6 +324,12 @@ class FormToHtml
 			unset($input->properties['autocomplete']);
 		}
 
+		if(isset($input->properties['datetime']) && $input->properties['datetime'])
+		{
+			$inputOptions['datetime']['data'] = $input->properties['datetime'];
+			unset($input->properties['datetime']);
+		}
+
 		return (count($inputOptions > 0)) ? $inputOptions : false;
 	}
 
