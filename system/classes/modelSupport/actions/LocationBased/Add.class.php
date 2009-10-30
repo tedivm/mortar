@@ -89,9 +89,10 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 				$selectInput->setValue($this->model->status);
 		}
 
-		$form->createInput('publishDate')->
+		$form->createInput('location_publishDate')->
 			setType('datetime')->
-			setLabel('Publish Date');
+			setLabel('Publish Date')->
+			setValue(date( 'm/d/y h:i a'));
 
 		$locationFormName = importClass('LocationForm', 'modelSupport/Forms/LocationForm.class.php', 'mainclasses');
 		if(!isset($locationFormName))
@@ -133,6 +134,11 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 		if(isset($input['location_name']))
 		{
 			$this->model->name = $input['location_name'];
+		}
+		
+		if(isset($input['location_publishDate']))
+		{
+			$location->setPublishDate($input['location_publishDate']);
 		}
 
 		$query = Query::getQuery();

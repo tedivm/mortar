@@ -26,6 +26,8 @@ class MortarPluginCustomInstall
 									$this->packageId, 'FormInputMembergroupCheckSubmit');
 		Hook::registerPlugin('Forms', 'HtmlConvert', 'datetime', 
 									$this->packageId, 'FormInputDatetimeToHtml');
+		Hook::registerPlugin('Forms', 'checkSubmit', 'datetime', 
+									$this->packageId, 'FormInputDatetimeCheckSubmit');
 
 		CronManager::registerJob('CachePurge', 'Mortar', 'module', 30);
 	}
