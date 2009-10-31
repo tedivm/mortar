@@ -58,3 +58,7 @@ This extension should provide designers with a simple way to manage Urls. Url at
 === Tags ===
 
   * New URL
+
+== Multilingual Support ==
+
+ * Ability to switch between languages for displayed text.
