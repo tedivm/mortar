@@ -15,6 +15,7 @@ class ChalkActionBlogRead extends ModelActionLocationBasedIndex
 	protected function getModelListingClass()
 	{
 		$locationListing = parent::getModelListingClass();
+		$locationListing->setOption('browseBy', 'publishDate');
 		$locationListing->setOption('order', 'DESC');
 		return $locationListing;
 	}

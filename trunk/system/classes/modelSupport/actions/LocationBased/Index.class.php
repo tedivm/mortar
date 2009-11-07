@@ -130,6 +130,14 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 
 		$listingObject->addRestriction('parent', $this->model->getLocation()->getId());
 
+		if(isset($query['browseBy']))
+			if($query['browseBy'] === 'date')
+				$listingObject->setOption('browseBy', 'publishDate');
+			else
+				$listingObject->setOption('browseBy', $query['browseBy']);
+		else
+			$listingObject->setOption('browseBy', 'name');
+
 		if(isset($query['order']))
 			$listingObject->setOption('order', $query['order']);
 

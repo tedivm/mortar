@@ -57,6 +57,8 @@ class LocationListing extends ModelListing
 			case 'id':
 				$name = 'resourceId';
 				break;
+			case 'date':
+				$name = 'publishDate';
 		}
 
 		parent::addRestriction($name, $value);
