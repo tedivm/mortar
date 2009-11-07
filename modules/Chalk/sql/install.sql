@@ -1,7 +1,7 @@
-/******************** Add Table: Chalk_Blog ************************/
+/******************** Add Table: chalkBlog ************************/
 
 /* Build Table Structure */
-CREATE TABLE Chalk_Blog
+CREATE TABLE chalkBlog
 (
 	id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	title TINYTEXT NULL,
