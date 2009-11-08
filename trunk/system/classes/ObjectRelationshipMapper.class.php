@@ -44,6 +44,13 @@ class ObjectRelationshipMapper
 	protected $direct_values = array();
 
 	/**
+	 * This is an array containing function names which are to be applied to the value of a column before comparison.
+	 *
+	 * @var array The index is the column
+	 */
+	protected $column_functions = array();
+
+	/**
 	 * This is an array of columns that the current table has, with information about each of those columns.
 	 *
 	 * @var array
@@ -235,6 +242,21 @@ class ObjectRelationshipMapper
 
 			$sql_input[] = $value;
 			$sql_where .= $column . ' = ? ';
+
+			if(!isset($this->columns[$column]['Type']))
+				throw new OrmError('Column ' . $column . ' not found in table ' . $this->table);
+
+			$sql_typestring .= self::getType($this->columns[$column]['Type']);
+			$where_loop++;
+		}
+
+		foreach($this->column_functions as $func)
+		{
+			if($where_loop > 0)
+				$sql_where .= 'AND ';
+
+			$sql_input[] = $func['value'];
+			$sql_where .= $func['function'] . '(' . $func['column'] . ')' . ' = ? ';
 
 			if(!isset($this->columns[$column]['Type']))
 				throw new OrmError('Column ' . $column . ' not found in table ' . $this->table);
@@ -545,6 +567,18 @@ class ObjectRelationshipMapper
 	public function querySet($column, $string)
 	{
 		$this->direct_values[$column] = $string;
+	}
+
+	/**
+	 * This function adds a comparison of a column modified by a function to a select query.
+	 *
+	 * @param string $column
+	 * @param string $string
+	 */
+	public function addFunction($column, $function, $value)
+	{
+		$function = ereg_replace("[^A-Za-z]", "", $function);
+		$this->column_functions[] = array('column' => $column, 'function' => $function, 'value' => $value);
 	}
 
 	/**
