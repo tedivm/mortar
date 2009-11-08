@@ -140,6 +140,15 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 
 		if(isset($query['order']))
 			$listingObject->setOption('order', $query['order']);
+			
+		if(isset($query['day']))
+			$listingObject->addFunction('publishDate', 'day', $query['day']);
+
+		if(isset($query['month']))
+			$listingObject->addFunction('publishDate', 'month', $query['month']);
+
+		if(isset($query['year']))
+			$listingObject->addFunction('publishDate', 'year', $query['year']);		
 
 		return $listingObject;
 	}

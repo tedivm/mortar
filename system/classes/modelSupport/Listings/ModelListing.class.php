@@ -48,6 +48,13 @@ class ModelListing
 	protected $restrictions = array();
 
 	/**
+	 * This array contains a list of function calls which need to be included in the WHERE clause of the select statement.
+	 *
+	 * @var array
+	 */
+	protected $functions = array();
+
+	/**
 	 * This contains the name of the table being used to retrieve the models.
 	 *
 	 * @var string
@@ -89,6 +96,19 @@ class ModelListing
 	public function addRestriction($name, $value)
 	{
 		$this->restrictions[$name] = $value;
+	}
+
+	/**
+	 * This function adds a function/column pairing to the list which need to be included in the selection for
+	 * this list. 
+	 *
+	 * @param string $name
+	 * @param string $function
+	 * @param string|int $value
+	 */
+	public function addFunction($name, $function, $value)
+	{
+		$this->functions[] = array('name' => $name, 'function' => $function, 'value' => $value);
 	}
 
 	/**
@@ -178,12 +198,14 @@ class ModelListing
 		$order = (isset($this->options['order']) && strtolower($this->options['order']) == 'desc') ? 'DESC' : 'ASC';
 		$browseBy = isset($this->options['browseBy']) ? $this->options['browseBy'] : null;
 
-
 		if(!($cacheKey = $this->getCacheArray()))
 			return false;
 
 		if($restrictionString = $this->getRestrictionString($this->restrictions))
 			$cacheKey[] = $restrictionString;
+		
+		if($functionString = $this->getFunctionString($this->functions))
+			$cacheKey[] = $functionString;
 
 		// we put order before offset because anything in descending isn't likely to change as often
 		$cacheKey[] = 'browseChildrenBy';
@@ -195,8 +217,8 @@ class ModelListing
 
 		if($cache->isStale() || true)
 		{
-			$modelList = $this->getModelsFromTable($this->table, $this->restrictions, $browseBy,
-															$order, $number, $offset);
+			$modelList = $this->getModelsFromTable($this->table, $this->restrictions, $this->functions, $browseBy,
+								$order, $number, $offset);
 			$cache->storeData($modelList);
 		}
 		return $modelList;
@@ -214,13 +236,16 @@ class ModelListing
 	 * @param int $offset
 	 * @return array Contains an array of associative arrays with index type and id
 	 */
-	protected function getModelsFromTable($table, $restrictions, $browseBy, $order, $number, $offset)
+	protected function getModelsFromTable($table, $restrictions, $functions, $browseBy, $order, $number, $offset)
 	{
 		$orm = new ObjectRelationshipMapper($table);
 		$orm->setColumnLimits(array_keys($this->lookupColumns));
 
 		foreach($restrictions as $restrictionName => $restrictionValue)
 			$orm->$restrictionName = $restrictionValue;
+		
+		foreach($functions as $func)
+			$orm->addFunction($func['name'], $func['function'], $func['value']);
 
 		$orm->select($number, $offset, $browseBy, $order);
 
@@ -268,6 +293,21 @@ class ModelListing
 			$restrictionString .= $rName . ':' . $rValue . '::';
 
 		return ($restrictionString != '') ? $restrictionString : false;
+	}
+
+	/**
+	 * This function takes in the function array and returns a string.
+	 *
+	 * @param array $functions
+	 * @return string
+	 */
+	protected function getFunctionString($functions)
+	{
+		$functionString = '';
+		foreach($functions as $val)
+			$functionString .= $val['name'] . ':' . $val['function'] . ':' . $val['value'] . '::';
+
+		return ($functionString != '') ? $functionString : false;
 	}
 
 }
