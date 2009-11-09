@@ -19,10 +19,10 @@ class ViewModelTemplate extends ViewThemeTemplate
 	{
 		$parentPaths = parent::getThemePaths();
 
-		$model = new Model();
+		$model = $this->model;
 		$module = $model->getModule();
 		$package = new PackageInfo($module);
-		$packagePath = $package->getPath();
+		$packagePath = $package->getPath() . 'templates/';
 
 		$parentPaths['module'] = $packagePath;
 		return $parentPaths;
@@ -41,7 +41,7 @@ class ViewModelTemplateTwigLoader extends ViewTemplateTwigLoader
 
 
 		$tmp = substr($name, 7);
-		$baseName = substr($tmp, strpos($name, '/'));
+		$baseName = substr($tmp, strpos($name, '/') - 1);
 
 		$baseTemplates = $this->loadTemplateSet('models/base/' . $baseName);
 		$this->__runtimeLoopProtection = false;
