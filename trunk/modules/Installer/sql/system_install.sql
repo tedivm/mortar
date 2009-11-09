@@ -103,18 +103,18 @@ CREATE TABLE groupPermissions
 ALTER TABLE groupPermissions ADD CONSTRAINT pkgroupPermissions
 	PRIMARY KEY (memgroup_id, location_id, action_id, resource);
 
-/******************** Add Table: location_meta ************************/
+/******************** Add Table: locationMeta ************************/
 
 /* Build Table Structure */
-CREATE TABLE location_meta
+CREATE TABLE locationMeta
 (
 	location_id INTEGER UNSIGNED NOT NULL,
 	name VARCHAR(45) NOT NULL,
 	value VARCHAR(45) NOT NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
-/* Table Items: location_meta */
-ALTER TABLE location_meta ADD CONSTRAINT pklocation_meta
+/* Table Items: locationMeta */
+ALTER TABLE locationMeta ADD CONSTRAINT pklocationMeta
 	PRIMARY KEY (location_id, name);
 
 /******************** Add Table: locations ************************/
@@ -147,25 +147,25 @@ CREATE INDEX locations_resourceType_resourceId ON locations (resourceType, resou
 CREATE INDEX locations_creationDate ON locations (creationDate, location_id);
 CREATE INDEX locations_lastModified ON locations (lastModified, location_id);
 
-/******************** Add Table: member_group ************************/
+/******************** Add Table: memberGroup ************************/
 
 /* Build Table Structure */
-CREATE TABLE member_group
+CREATE TABLE memberGroup
 (
 	memgroup_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	memgroup_name VARCHAR(35) NOT NULL,
 	is_system CHAR(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
-/* Table Items: member_group */
+/* Table Items: memberGroup */
 
-/* Add Indexes for: member_group */
-CREATE INDEX member_group_memgroup_name_Idx ON member_group (memgroup_name, memgroup_id, is_system);
+/* Add Indexes for: memberGroup */
+CREATE INDEX memberGroup_memgroup_name_Idx ON memberGroup (memgroup_name, memgroup_id, is_system);
 
-/******************** Add Table: mod_config ************************/
+/******************** Add Table: modConfig ************************/
 
 /* Build Table Structure */
-CREATE TABLE mod_config
+CREATE TABLE modConfig
 (
 	config_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	mod_id INTEGER UNSIGNED NOT NULL,
@@ -173,11 +173,11 @@ CREATE TABLE mod_config
 	value VARCHAR(125) NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
-/* Table Items: mod_config */
+/* Table Items: modConfig */
 
-/* Add Indexes for: mod_config */
-CREATE INDEX mod_config_mod_id_Idx ON mod_config (mod_id);
-CREATE UNIQUE INDEX mod_config_mod_id_name_Idx ON mod_config (mod_id, name);
+/* Add Indexes for: modConfig */
+CREATE INDEX modConfig_mod_id_Idx ON modConfig (mod_id);
+CREATE UNIQUE INDEX modConfig_mod_id_name_Idx ON modConfig (mod_id, name);
 
 /******************** Add Table: modules ************************/
 
@@ -230,7 +230,7 @@ CREATE TABLE plugins
 	isRecursive CHAR(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
-/* Table Items: location_meta */
+/* Table Items: locationMeta */
 ALTER TABLE plugins ADD CONSTRAINT pkplugins
 	PRIMARY KEY (realm, category, hook, modId, plugin);
 
@@ -384,12 +384,12 @@ ALTER TABLE groupPermissions ADD CONSTRAINT fk_groupPermissions_locations
 ALTER TABLE groupPermissions ADD CONSTRAINT fk_groupPermissions_actions
 	FOREIGN KEY (action_id) REFERENCES actions (action_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-/************ Foreign Key: fk_groupPermissions_member_group ***************/
-ALTER TABLE groupPermissions ADD CONSTRAINT fk_groupPermissions_member_group
-	FOREIGN KEY (memgroup_id) REFERENCES member_group (memgroup_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+/************ Foreign Key: fk_groupPermissions_memberGroup ***************/
+ALTER TABLE groupPermissions ADD CONSTRAINT fk_groupPermissions_memberGroup
+	FOREIGN KEY (memgroup_id) REFERENCES memberGroup (memgroup_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-/************ Foreign Key: fk_location_meta_locations ***************/
-ALTER TABLE location_meta ADD CONSTRAINT fk_location_meta_locations
+/************ Foreign Key: fk_locationMeta_locations ***************/
+ALTER TABLE locationMeta ADD CONSTRAINT fk_locationMeta_locations
 	FOREIGN KEY (location_id) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_locations_locations ***************/
@@ -400,12 +400,12 @@ ALTER TABLE locations ADD CONSTRAINT fk_locations_locations
 ALTER TABLE locations ADD CONSTRAINT fk_locations_users
 	FOREIGN KEY (owner) REFERENCES users (user_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-/************ Foreign Key: fk_locations_member_group ***************/
-ALTER TABLE locations ADD CONSTRAINT fk_locations_member_group
-	FOREIGN KEY (groupOwner) REFERENCES member_group (memgroup_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+/************ Foreign Key: fk_locations_memberGroup ***************/
+ALTER TABLE locations ADD CONSTRAINT fk_locations_memberGroup
+	FOREIGN KEY (groupOwner) REFERENCES memberGroup (memgroup_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-/************ Foreign Key: fk_mod_config_modules ***************/
-ALTER TABLE mod_config ADD CONSTRAINT fk_mod_config_modules
+/************ Foreign Key: fk_modConfig_modules ***************/
+ALTER TABLE modConfig ADD CONSTRAINT fk_modConfig_modules
 	FOREIGN KEY (mod_id) REFERENCES modules (mod_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_modelsRegistered_modules ***************/
@@ -432,9 +432,9 @@ ALTER TABLE trash ADD CONSTRAINT fk_trash_locations
 ALTER TABLE urls ADD CONSTRAINT fk_domains_sites
 	FOREIGN KEY (site_id) REFERENCES sites (site_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-/************ Foreign Key: fk_userInMemberGroup_member_group ***************/
-ALTER TABLE userInMemberGroup ADD CONSTRAINT fk_userInMemberGroup_member_group
-	FOREIGN KEY (memgroup_id) REFERENCES member_group (memgroup_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+/************ Foreign Key: fk_userInMemberGroup_memberGroup ***************/
+ALTER TABLE userInMemberGroup ADD CONSTRAINT fk_userInMemberGroup_memberGroup
+	FOREIGN KEY (memgroup_id) REFERENCES memberGroup (memgroup_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_userInMemberGroup_users ***************/
 ALTER TABLE userInMemberGroup ADD CONSTRAINT fk_userInMemberGroup_users

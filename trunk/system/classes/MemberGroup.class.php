@@ -220,7 +220,7 @@ class MemberGroup
 		if(!isset($this->id))
 		{
 			$insertStmt = $dbWrite->stmt_init();
-			$insertStmt->prepare('INSERT INTO member_group (memgroup_name, is_system) VALUES (?, ?)');
+			$insertStmt->prepare('INSERT INTO memberGroup (memgroup_name, is_system) VALUES (?, ?)');
 			if($insertStmt->bindAndExecute('si', $this->name, ($this->isSystem ? 1 : 0)))
 			{
 				$this->id = $insertStmt->insert_id;
@@ -231,7 +231,7 @@ class MemberGroup
 		}else{
 
 			$insertStmt = $dbWrite->stmt_init();
-			$insertStmt->prepare('UPDATE member_group SET memgroup_name = ? AND is_system = ? WHERE memgroup_id = ?');
+			$insertStmt->prepare('UPDATE memberGroup SET memgroup_name = ? AND is_system = ? WHERE memgroup_id = ?');
 			return $insertStmt->bindAndExecute('sii', $this->name, ($this->isSystem ? 1 : 0), $this->id);
 		}
 	}
@@ -254,7 +254,7 @@ class MemberGroup
 		{
 			$db = DatabaseConnection::getConnection('default_read_only');
 			$stmt = $db->stmt_init();
-			$stmt->prepare('SELECT memgroup_name, is_system FROM member_group WHERE memgroup_id = ?');
+			$stmt->prepare('SELECT memgroup_name, is_system FROM memberGroup WHERE memgroup_id = ?');
 			$stmt->bindAndExecute('i', $id);
 
 			if($stmt->num_rows == 1)
@@ -298,7 +298,7 @@ class MemberGroup
 		{
 			$db = DatabaseConnection::getConnection('default_read_only');
 			$stmt = $db->stmt_init();
-			$stmt->prepare('SELECT memgroup_id FROM member_group WHERE memgroup_name = ?');
+			$stmt->prepare('SELECT memgroup_id FROM memberGroup WHERE memgroup_name = ?');
 			$stmt->bindAndExecute('s', $name);
 
 			if($stmt->num_rows == 1)
