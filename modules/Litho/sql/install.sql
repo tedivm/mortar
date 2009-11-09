@@ -1,7 +1,7 @@
 /******************** Add Table: cmsContent ************************/
 
 /* Build Table Structure */
-CREATE TABLE Litho_Content
+CREATE TABLE lithoContent
 (
 	pageId INTEGER UNSIGNED NOT NULL,
 	revisionId INTEGER UNSIGNED NOT NULL,
@@ -14,13 +14,13 @@ CREATE TABLE Litho_Content
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: cmsContent */
-ALTER TABLE Litho_Content ADD CONSTRAINT pkLitho_Content
+ALTER TABLE lithoContent ADD CONSTRAINT pklithoContent
 	PRIMARY KEY (pageId, revisionId);
 
 /******************** Add Table: cmsPages ************************/
 
 /* Build Table Structure */
-CREATE TABLE Litho_Pages
+CREATE TABLE lithoPages
 (
 	id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	activeRevision INTEGER UNSIGNED NULL,
@@ -28,18 +28,18 @@ CREATE TABLE Litho_Pages
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: cmsPages */
-CREATE INDEX Litho_Pages_id_activeRevision_status_Idx ON Litho_Pages (id, activeRevision);
+CREATE INDEX lithoPages_id_activeRevision_status_Idx ON lithoPages (id, activeRevision);
 
 
-/************ Foreign Key: fk_Litho_Content_Litho_Pages ***************/
-ALTER TABLE Litho_Content ADD CONSTRAINT fk_Litho_Content_Litho_Pages
-	FOREIGN KEY (pageId) REFERENCES Litho_Pages (id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+/************ Foreign Key: fk_lithoContent_lithoPages ***************/
+ALTER TABLE lithoContent ADD CONSTRAINT fk_lithoContent_lithoPages
+	FOREIGN KEY (pageId) REFERENCES lithoPages (id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-/************ Foreign Key: fk_Litho_Content_users ***************/
-ALTER TABLE Litho_Content ADD CONSTRAINT fk_Litho_Content_users
+/************ Foreign Key: fk_lithoContent_users ***************/
+ALTER TABLE lithoContent ADD CONSTRAINT fk_lithoContent_users
 	FOREIGN KEY (author) REFERENCES users (user_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-/************ Foreign Key: fk_Litho_Pages_Litho_Content ***************/
-ALTER TABLE Litho_Pages ADD CONSTRAINT fk_Litho_Pages_Litho_Content
-	FOREIGN KEY (id, activeRevision) REFERENCES Litho_Content (pageId, revisionId)
+/************ Foreign Key: fk_lithoPages_lithoContent ***************/
+ALTER TABLE lithoPages ADD CONSTRAINT fk_lithoPages_lithoContent
+	FOREIGN KEY (id, activeRevision) REFERENCES lithoContent (pageId, revisionId)
 		ON UPDATE NO ACTION ON DELETE NO ACTION;

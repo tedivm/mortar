@@ -3,7 +3,7 @@
 class LithoModelPage extends LocationModel
 {
 	static public $type = 'Page';
-	protected $table = 'Litho_Pages';
+	protected $table = 'lithoPages';
 	public $allowedChildrenTypes = array();
 	protected $excludeFallbackActions = array('Index');
 
@@ -94,7 +94,7 @@ class LithoModelPage extends LocationModel
 			return 0;
 
 		$stmt = DatabaseConnection::getStatement('default_read_only');
-		$stmt->prepare('SELECT COUNT(revisionId) FROM Litho_Content WHERE pageId = ?');
+		$stmt->prepare('SELECT COUNT(revisionId) FROM lithoContent WHERE pageId = ?');
 		$stmt->bindAndExecute('i', $pageId);
 		$results = $stmt->fetch_array();
 
@@ -115,7 +115,7 @@ class LithoModelPage extends LocationModel
 		{
 			$stmt = DatabaseConnection::getStatement('default_read_only');
 			$stmt->prepare('SELECT revisionId
-									FROM Litho_Content
+									FROM lithoContent
 									WHERE pageId = ?
 									ORDER BY updateTime DESC
 									LIMIT ?,?');
@@ -222,7 +222,7 @@ class PageRevision
 			{
 				$db = dbConnect('default_read_only');
 				$contentStmt = $db->stmt_init();
-				$contentStmt->prepare('SELECT * FROM Litho_Content WHERE pageId = ? AND revisionId = ?');
+				$contentStmt->prepare('SELECT * FROM lithoContent WHERE pageId = ? AND revisionId = ?');
 				$contentStmt->bindAndExecute('ii', $this->pageId, $revisionId);
 
 
@@ -265,7 +265,7 @@ class PageRevision
 
 		$db = dbConnect('default');
 		$insertStmt = $db->stmt_init();
-		$insertStmt->prepare('INSERT INTO Litho_Content
+		$insertStmt->prepare('INSERT INTO lithoContent
 										(pageId,
 										revisionId,
 										author, updateTime, note,
@@ -274,7 +274,7 @@ class PageRevision
 										 (?,
 										(IFNULL(
 											((SELECT revisionId
-													FROM Litho_Content AS tempContent
+													FROM lithoContent AS tempContent
 													WHERE tempContent.pageId = ?
 													ORDER BY tempContent.revisionId DESC LIMIT 1) + 1),
 											1)
@@ -287,7 +287,7 @@ class PageRevision
 														$this->title, $this->filteredContent, $this->rawContent);
 
 		$getStmt = $db->stmt_init();
-		$getStmt->prepare('SELECT revisionId FROM Litho_Content
+		$getStmt->prepare('SELECT revisionId FROM lithoContent
 								WHERE pageId = ? AND author = ? AND title = ?
 								ORDER BY revisionId DESC LIMIT 1');
 		$getStmt->bindAndExecute('iis', $this->pageId, $this->author, $this->title);
@@ -304,7 +304,7 @@ class PageRevision
 
 		$db = DatabaseConnection::getConnection('default');
 		$stmt = $db->stmt_init();
-		$stmt->prepare('UPDATE Litho_Pages SET activeRevision = ? WHERE id = ?');
+		$stmt->prepare('UPDATE lithoPages SET activeRevision = ? WHERE id = ?');
 		return $stmt->bindAndExecute('ii', $this->revisionId, $this->pageId);
 	}
 
