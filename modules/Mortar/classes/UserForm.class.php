@@ -32,7 +32,7 @@ class MortarUserForm extends Form
 								// Set to the actual ID until I figure out a better way to handle that
 
 
-		$memberGroupRecords = new ObjectRelationshipMapper('member_group');
+		$memberGroupRecords = new ObjectRelationshipMapper('memberGroup');
 		$memberGroupRecords->is_system = 0;
 		$memberGroupRecords->select();
 		$membergroups = $memberGroupRecords->resultsToArray();

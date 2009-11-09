@@ -451,7 +451,7 @@ class Location
 					$locationInfo['inherits'] = ($dbLocation->inherits == 1);
 					$locationInfo['status'] = $dbLocation->resourceStatus;
 
-					$db_meta = new ObjectRelationshipMapper('location_meta');
+					$db_meta = new ObjectRelationshipMapper('locationMeta');
 					$db_meta->location_id = $locationInfo['id'];
 					$meta = array();
 
@@ -543,13 +543,13 @@ class Location
 			$this->id = $db_location->location_id;
 
 		// Erase all current values, since they are going to be replaced anyways
-		$metaDelete = new ObjectRelationshipMapper('location_meta');
+		$metaDelete = new ObjectRelationshipMapper('locationMeta');
 		$metaDelete->location_id = $this->id;
 		$metaDelete->delete(0);
 
 		foreach($this->meta as $name => $value)
 		{
-			$metaAdd = new ObjectRelationshipMapper('location_meta');
+			$metaAdd = new ObjectRelationshipMapper('locationMeta');
 			$metaAdd->location_id = $this->id;
 			$metaAdd->name = $name;
 			$metaAdd->value = $value;
