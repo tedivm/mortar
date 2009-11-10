@@ -23,7 +23,7 @@ class AdminOutputController extends AbstractOutputController
 	protected function start()
 	{
 		$page = ActivePage::getInstance();
-		$page->addRegion('title', 'Mortar Admin');
+		$page->addRegion('pagetitle', 'Mortar Admin');
 
 		$this->activeResource = $page;
 
@@ -312,7 +312,7 @@ class AdminControllerResourceFilterInstallerNavigation
 		$htaccessUrl = clone $url;
 		$htaccessUrl->action = 'htaccess';
 
-		$page['__navbar_1'] = '
+		$page['mainNav'] = '
    <div id="main_sidebar_menu" class="sidebar">
       <div class="sidebar_menu">
          <h2>Installation</h2>
@@ -331,7 +331,7 @@ class AdminControllerResourceFilterInstallerNavigation
    </div>
 ';
 
-		$page['__navbar_2'] = '
+		$page['modelNav'] = '
 <!--   <div id="modelNav_sidebar_menu" class="sidebar">
       <div class="sidebar_menu">
          <h2>Menu</h2>

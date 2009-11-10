@@ -30,7 +30,7 @@ class HtmlOutputController extends AbstractOutputController
 	protected function start()
 	{
 		$page = ActivePage::getInstance();
-		$page->addRegion('title', 'Mortar');
+		$page->addRegion('pagetitle', 'Mortar');
 		$page->setTemplate('index.html', 'default');
 
 		$this->activeResource = $page;

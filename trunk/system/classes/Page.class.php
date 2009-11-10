@@ -59,7 +59,7 @@ class Page implements ArrayAccess
 	 * The template processor for the page
 	 *
 	 * @access protected
-	 * @var DisplayMaker
+	 * @var ViewThemeTemplate
 	 */
 	protected $display;
 
@@ -138,22 +138,22 @@ class Page implements ArrayAccess
 	 * @var string
 	 */
 	protected $headerTemplate = '
-	<title>{# title #}</title>
-	{# cssIncludes #}
+	<title>{{ title }}</title>
+	{{ cssIncludes }}
 	<script type="text/javascript">
-	{# preStartupJs #}
+	{{ preStartupJs }}
 	</script>
-	{# meta #}
-	{# headerContent #}
+	{{ meta }}
+	{{ headerContent }}
 ';
 
 	protected $footerTemplate = '
-	{# jsIncludes #}
+	{{ jsIncludes }}
 	<script type="text/javascript">
 		$(function(){
-			{# scriptStartup #}
+			{{ scriptStartup }}
 		});
-		{# script #}
+		{{ script }}
 	</script>';
 
 
@@ -181,63 +181,18 @@ class Page implements ArrayAccess
 
 		if($cache->isStale())
 		{
-			$template = array();
-			$template['menuLookup'] = array();
-			$template['reverseLookup'] = array();
+			$templateProcess = new ViewThemeTemplate(new Theme($theme), $file);
 
-			$basePath = $config['path']['theme'] . $this->theme . '/';
-			$path = $basePath . $file;
+			$this->menuLookup = array("main" => "mainNav", "modelNav" => "modelNav");
+			$this->menuReverseLookup = array("mainNav" => "main", "modelNav" => "modelNav");
 
-			if(!file_exists($path))
-				$path = $config['path']['theme'] . $this->theme . 'index.html';
+			$templateProcess->addContent(array('currentDate' => date('l jS \of F Y h:i:s A')));
 
-			$rawTemplate = file_get_contents($path);
-
-			$templateProcess = new DisplayMaker();
-			$templateProcess->setDisplayTemplate($rawTemplate, $path);
-
-			$tags = $templateProcess->tagsUsed(true);
-
-			foreach($tags as $index => $tagArray)
-			{
-				if(isset($tagArray['type']) && $tagArray['type'] == 'navbar')
-				{
-					(!isset($navCount)) ? $navCount = 1 : $navCount++;
-					$newName = '__navbar_' . $navCount;
-
-					$templateProcess->addContent($tagArray['name'], '{# ' . $newName . ' #}');
-
-					$template['reverseLookup'][$newName] = $tagArray['name'];
-					$template['menuLookup'][$tagArray['name']] = $newName;
-
-					if(isset($tagArray['menus']))
-					{
-						$menus = explode(',', $tagArray['menus']);
-
-						foreach($menus as $menuName)
-						{
-							$template['menuLookup'][$menuName] = $newName;
-						}
-					}elseif(!isset($template['menuLookup']['main'])){
-						$template['menuLookup']['main'] = $newName;
-					}
-
-
-				}
-			}
-
-			$templateProcess->addDate('currentDate', time());
-			$templateProcess->addContent('head', $this->headerTemplate);
-
-			$template['string'] = $templateProcess->makeDisplay(false);
-			$template['string'] .= PHP_EOL . $this->footerTemplate;
+			$template['string'] = $templateProcess->getDisplay();
 			$cache->storeData($template);
 		}
 
-		$this->menuLookup = $template['menuLookup'];
-		$this->menuReverseLookup = $template['reverseLookup'];
-		$this->display = new DisplayMaker();
-		$this->display->setDisplayTemplate($template['string']);
+		$this->display = $templateProcess;
 	}
 
 	/**
@@ -252,19 +207,19 @@ class Page implements ArrayAccess
 	public function getMenu($subtype, $menu = 'main')
 	{
 		switch (true) {
-			case isset($this->menuLookup[$subtype]):
+			case isset($this->menuLookup[$subtype]): 
 				$finalMenu = $this->menuLookup[$subtype];
 				break;
 
-			case $menu == false:
+			case $menu == false: 
 				return false;
 				break;
 
-			case isset($this->menuLookup[$menu]):
+			case isset($this->menuLookup[$menu]): 
 				$finalMenu = $this->menuLookup[$menu];
 				break;
 
-			default:
+			default: 
 				$finalMenu = $this->menuLookup['main'];
 				break;
 		}
@@ -410,14 +365,11 @@ class Page implements ArrayAccess
 	{
 		$config = Config::getInstance();
 
-		if(!($this->display instanceof DisplayMaker))
-		{
-			$this->setTemplate();
-		}
-
 		$this->runtimeProcessTemplate();
 		$display = $this->display;
-		$tags = $display->tagsUsed(false);
+		
+		$headerTemplate = new ViewStringTemplate($this->headerTemplate);
+		$footerTemplate = new ViewStringTemplate($this->footerTemplate);
 
 		// This is a list of all of the 'array' items that need to be cycled through and added as a single items
 		$groups = array('script',
@@ -433,22 +385,26 @@ class Page implements ArrayAccess
 		{
 			$content = '';
 			$output = '';
-			if(in_array($variable, $tags))
+			foreach($this->$variable as $content)
 			{
-				foreach($this->$variable as $content)
-				{
-					$output .= $content . PHP_EOL;
-				}
-				$display->addContent($variable, $output);
+				$output .= $content . PHP_EOL;
 			}
+			$headerTemplate->addContent(array($variable => $output));
+			$footerTemplate->addContent(array($variable => $output));
 		}
-
+		
 		foreach($this->regions as $name => $content)
 		{
-			$display->addContent($name, $content);
+
+			$display->addContent(array($name => $content));
 		}
 
-		return $this->postProcessTemplate($display->makeDisplay(false));
+		$jsInclude = ActiveSite::getLink() . 'javascript/';
+		$headerFinal = $headerTemplate->getDisplay();
+
+		$display->addContent(array('js_path' => $jsInclude, 'theme_path' => $this->getThemeUrl(), 'head' => $headerFinal));
+
+		return $display->getDisplay() . PHP_EOL . $footerTemplate->getDisplay();	
 	}
 
 	/**
@@ -574,27 +530,6 @@ class Page implements ArrayAccess
 			}
 			$this->addRegion('messages', (string) $outputMessage);
 		}
-	}
-
-	/**
-	 * This acts as a final processing point, allow some tags to 'float' to the top through other replacement cycles
-	 * before being processed. This function also takes care of the final cleanup of tags (assuming CLEAN_TEMPLATES
-	 * constant is not set to false)
-	 *
-	 * @param string $templateString
-	 * @return string
-	 */
-	protected function postProcessTemplate($templateString)
-	{
-		$template = new DisplayMaker();
-		$template->setDisplayTemplate($templateString);
-		$template->addContent('theme_path', $this->getThemeUrl());
-
-		$jsInclude = ActiveSite::getLink() . 'javascript/';
-
-		$template->addContent('js_path', $jsInclude);
-
-		return $template->makeDisplay(!(defined('CLEAN_TEMPLATES') && CLEAN_TEMPLATES === FALSE));
 	}
 
 	public function offsetGet($offset)
