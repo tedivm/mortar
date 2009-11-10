@@ -140,9 +140,9 @@ abstract class ModelActionLocationBasedBase extends ModelActionBase
 	protected function modelToHtml($page, $model, $templateName)
 	{
 		$theme = $page->getTheme();
-		$template = $theme->getModelTemplate($templateName, $model->getType());
+		$view = new ViewModelTemplate($theme, $model, $templateName);
 		$htmlConverter = $model->getModelAs('Html');
-		$htmlConverter->useTemplate($template);
+		$htmlConverter->useView($view);
 		return $htmlConverter->getOutput();
 	}
 
