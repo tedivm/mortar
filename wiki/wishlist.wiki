@@ -23,10 +23,6 @@ An extendable set of classes should be created which control the content of admi
 
 Currently there is no interface for browsing or interacting with users in the Mortar system. Ideally this should come together as a specific instance of the Admin Interface classes and lean heavily on DisplayLists to do its job.
 
-== Templating Language ==
-
-Ultimately this is going to have to be built as its own separate set of classes and handled in a standardized way.
-
 == Modifiable Pretty URLs == 
 
 A system to actually let you define the structure for URLs (either overall or on a per-directory/per-group level) based on key elements of each model (to allow for automatic SEO URLs in addition to slug-based page names.)
