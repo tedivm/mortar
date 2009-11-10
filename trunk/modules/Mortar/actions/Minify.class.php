@@ -88,10 +88,9 @@ class MortarActionMinify extends ActionBase
 
 	protected function processTags($rawText)
 	{
-		$processedText = new DisplayMaker();
-		$processedText->setDisplayTemplate($rawText);
-		$processedText->addContent('theme_path', ActiveSite::getLink('theme') . $this->processingTheme->name . '/');
-		return $processedText->makeDisplay();
+		$processedText = new ViewStringTemplate($rawText);
+		$processedText->addContent(array('theme_path' => ActiveSite::getLink('theme') . $this->processingTheme->name . '/'));
+		return $processedText->getDisplay();
 	}
 
 }

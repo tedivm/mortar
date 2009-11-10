@@ -103,12 +103,9 @@ class AdminControllerContentFilter
 		$title = (isset($action->AdminSettings['headerTitle'])) ? $action->AdminSettings['headerTitle'] : '';
 		$subTitle = (isset($action->AdminSettings['headerSubTitle'])) ? $action->AdminSettings['headerSubTitle'] : '';
 
-		$processedOutput = new DisplayMaker();
-		$processedOutput->setDisplayTemplate($text);
-		$processedOutput->addContent('content', $output);
-		$processedOutput->addContent('title', $title);
-		$processedOutput->addContent('subtitle', $subTitle);
-		$output = $processedOutput->makeDisplay();
+		$processedOutput = new ViewStringTemplate($text);
+		$processedOutput->addContent(array('content' => $output, 'title' => $title, 'subtitle' => $subTitle));
+		$output = $processedOutput->getDisplay();
 
 		return $output;
 	}
