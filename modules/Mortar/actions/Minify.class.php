@@ -67,7 +67,7 @@ class MortarActionMinify extends ActionBase
 		{
 			Cache::clear('themes', $themeName, 'minification', $type, 'url');
 			$minifiedData['checksum'] = $actualCheckSum;
-			$minifiedData['data'] = $this->processTags($minifier->minifyFiles());
+			$minifiedData['data'] = $minifier->minifyFiles();
 			$cache->storeData($minifiedData);
 		}
 
@@ -78,21 +78,6 @@ class MortarActionMinify extends ActionBase
 	{
 		return $this->output;
 	}
-
-	/**
-	 * Processes JS and CSS files in order to incorporate tags. Any CSS/JS specific tags or calls to external classes for tag processing should be added here.
-	 *
-	 * @param String $rawtext
-	 * @return String
-	 */
-
-	protected function processTags($rawText)
-	{
-		$processedText = new ViewStringTemplate($rawText);
-		$processedText->addContent(array('theme_path' => ActiveSite::getLink('theme') . $this->processingTheme->name . '/'));
-		return $processedText->getDisplay();
-	}
-
 }
 
 ?>
