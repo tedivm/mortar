@@ -174,6 +174,9 @@ class Config implements ArrayAccess
 		if(is_dir(BASE_PATH . 'data/themes/'))
 			$this->config['path']['theme'] = BASE_PATH . 'data/themes/';
 
+		if(is_dir(BASE_PATH . 'temp/'))
+			$this->config['path']['temp'] = BASE_PATH . 'temp/';
+
 		$this->config['url']['theme'] = 'data/themes/';
 
 		$this->config['url']['javascript'] = 'javascript/';
