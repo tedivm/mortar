@@ -91,11 +91,10 @@ class ModelToHtml
 				$actionUrl = $actionUrls[$action];
 				$actionLink = $actionUrl->getLink(ucfirst($action));
 
-				$modelListAction = new DisplayMaker();
-				$modelListAction->setDisplayTemplate("<li class='action action_$action'>{# action #}</li>");
+				$modelListAction = new ViewStringTemplate("<li class='action action_$action'>{{ action }}</li>");
 
-				$modelListAction->addContent('action', $actionLink);
-				$actionList .= $modelListAction->makeDisplay();
+				$modelListAction->addContent(array('action' => $actionLink));
+				$actionList .= $modelListAction->getDisplay();
 				$this->convertedProperties['model_action_' . $action] = $actionUrl->__toString();
 				array_push($allowedActionTypes, $action);
 			}
@@ -108,7 +107,7 @@ class ModelToHtml
 		$this->convertedProperties['model_lastModified'] = $this->model->lastModified;
 		$this->convertedProperties['model_publishDate'] = $this->model->publishDate;
 		$this->convertedProperties['model_name'] = $this->model->name;
-		$this->convertedProperties['model_actions'] = $actionList;
+		$this->convertedProperties['model_actionList'] = $actionList;
 	}
 
 	/**
@@ -118,11 +117,18 @@ class ModelToHtml
 	 */
 	public function useTemplate($template)
 	{
-		$matchResults = array();
-
 		$this->template = $template;
-		$this->modelDisplay = new DisplayMaker();
-		$this->modelDisplay->setDisplayTemplate($template);
+		$this->modelDisplay = new ViewStringTemplate($template);
+	}
+	
+	public function useView($view)
+	{
+		$this->modelDisplay = $view;
+	}
+
+	public function addContent($content)
+	{
+		return is_array($content) ? $this->modelDisplay->addContent($content) : false;
 	}
 
 	/**
@@ -131,15 +137,13 @@ class ModelToHtml
 	 * @return string
 	 */
 	public function getOutput()
-	{
-		$this->modelDisplay->setDisplayTemplate($this->template);
-
+	{ 
 		foreach ($this->convertedProperties as $propName => $propValue)
 			($propName == "model_creationTime" || $propName == "model_lastModified" || $propName == "model_publishDate")
-				? $this->modelDisplay->addDate($propName, $propValue)
-				: $this->modelDisplay->addContent($propName, $propValue);
+				? $this->modelDisplay->addContent(array($propName => date('l jS \of F Y h:i:s A', $propValue)))
+				: $this->modelDisplay->addContent(array($propName => $propValue));
 
-		$modelTags = $this->modelDisplay->getTags();
+/*		$modelTags = $this->modelDisplay->getTags();
 
 		if($modelTags)
 			foreach($modelTags as $tag)
@@ -154,9 +158,9 @@ class ModelToHtml
 					$this->modelDisplay->addContent($tag, $this->model->$customTag);
 				}
 			}
-		}
+		}*/
 
-		$modelOutput = $this->modelDisplay->makeDisplay(true);
+		$modelOutput = $this->modelDisplay->getDisplay();
 
 		return $modelOutput;
 	}

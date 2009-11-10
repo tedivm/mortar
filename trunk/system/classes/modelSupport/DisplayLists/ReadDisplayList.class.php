@@ -79,27 +79,22 @@ class ReadDisplayList implements DisplayList {
 
 			foreach($this->modelList as $model)
 			{
-				$type = $model->getType();
-				$template = $this->theme->getModelTemplate('Listing.html', $type);
-
 				$location = $model->getLocation();
 				$url = new Url();
 				$url->location = $location->getId();
 				$url->format = $this->format;
 				$actionUrls = $this->getActionList($model, $this->format);
 
-				$actionDisplay = new DisplayMaker();
-				$actionDisplay->setDisplayTemplate($template);
-				$actionDisplay->addContent('model_actions', $this->getActionIcons($actionUrls, $model));
-				$template = $actionDisplay->makeDisplay();
+				$actionView = new ViewModelTemplate($this->theme, $model, 'Listing.html');
+				$actionView->addContent(array('model_actions' => $this->getActionIcons($actionUrls, $model)));
 
 				$htmlConverter = $model->getModelAs('Html');
-				$htmlConverter->useTemplate($template);
+				$htmlConverter->useView($actionView);
 				if($modelDisplay = $htmlConverter->getOutput())
 				{
 					$listingHtml->insertNewHtmlObject('div')->
 						property('name', 'listing-container-child-' . $x)->
-						addClass('modelListing')->addClass($type)->
+						addClass('modelListing')->addClass($model->getType())->
 						addClass('listing-container-child')->
 						property('id', 'listing-container-child-' . $x)->
 						wrapAround($modelDisplay);
