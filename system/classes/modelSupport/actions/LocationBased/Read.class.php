@@ -50,7 +50,7 @@ class ModelActionLocationBasedRead extends ModelActionLocationBasedBase
 	public function viewHtml($page)
 	{
 		if(isset($this->model['title']))
-			$page->addRegion('title', htmlentities($this->model['title']));
+			$page->addRegion('pagetitle', htmlentities($this->model['title']));
 
 		return $this->modelToHtml($page, $this->model, 'Display.html');
 	}

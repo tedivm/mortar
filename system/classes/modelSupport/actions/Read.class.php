@@ -61,7 +61,7 @@ class ModelActionRead extends ModelActionBase
 		$page = ActivePage::getInstance();
 
 		if(isset($this->model['title']))
-			$page->addRegion('title', $this->model['title']);
+			$page->addRegion('pagetitle', $this->model['title']);
 
 		if(isset($this->model->keywords))
 			$page->addMeta('keywords', $this->model->keywords);
