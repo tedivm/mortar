@@ -1,4 +1,5 @@
 #summary A list of things we want.
+#labels Featured
 
 = Introduction =
 
