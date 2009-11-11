@@ -13,3 +13,4 @@ This covers wiki-specific features required for 1.0.
   * Merging of cross-changes
   * User-created navigation tools (wikitrails, etc.)
   * Change-tracking variables (commit log, minor/hidden changes, reversion controls, etc.)
+  * Revision Removal-The ability to "pluck" an edit out while still keeping future edits in place.
