@@ -11,12 +11,14 @@
 
 class Twig_Environment
 {
-  const VERSION = '0.9.2-DEV';
+  const VERSION = '0.9.4-DEV';
 
   protected $charset;
   protected $loader;
   protected $trimBlocks;
   protected $debug;
+  protected $autoReload;
+  protected $cache;
   protected $lexer;
   protected $parser;
   protected $compiler;
@@ -25,7 +27,36 @@ class Twig_Environment
   protected $parsers;
   protected $transformers;
   protected $filters;
+  protected $runtimeInitialized;
+  protected $loadedTemplates;
 
+  /**
+   * Constructor.
+   *
+   * Available options:
+   *
+   *  * debug: When set to `true`, the generated templates have a __toString()
+   *    method that you can use to display the generated nodes (default to
+   *    false).
+   *
+   *  * trim_blocks: Mimicks the behavior of PHP by removing the newline that
+   *    follows instructions if present (default to false).
+   *
+   *  * charset: The charset used by the templates (default to utf-8).
+   *
+   *  * base_template_class: The base template class to use for generated
+   *    templates (default to Twig_Template).
+   *
+   *  * cache: Can be one of three values:
+   *             * null (the default): Twig will create a sub-directory under the system tmp directory
+   *               (not recommended as templates from two projects with the same name will share the cache)
+   *             * false: disable the compile cache altogether
+   *             * An absolute path where to store the compiled templates
+   *
+   *  * auto_reload: Whether to reload the template is the original source changed.
+   *    If you don't provide the auto_reload option, it will be
+   *    determined automatically base on the debug value.
+   */
   public function __construct(Twig_LoaderInterface $loader = null, $options = array())
   {
     if (null !== $loader)
@@ -33,11 +64,14 @@ class Twig_Environment
       $this->setLoader($loader);
     }
 
-    $this->debug             = isset($options['debug']) ? (bool) $options['debug'] : false;
-    $this->trimBlocks        = isset($options['trim_blocks']) ? (bool) $options['trim_blocks'] : false;
-    $this->charset           = isset($options['charset']) ? $options['charset'] : 'UTF-8';
-    $this->baseTemplateClass = isset($options['base_template_class']) ? $options['base_template_class'] : 'Twig_Template';
-    $this->extensions        = array(new Twig_Extension_Core());
+    $this->debug              = isset($options['debug']) ? (bool) $options['debug'] : false;
+    $this->trimBlocks         = isset($options['trim_blocks']) ? (bool) $options['trim_blocks'] : false;
+    $this->charset            = isset($options['charset']) ? $options['charset'] : 'UTF-8';
+    $this->baseTemplateClass  = isset($options['base_template_class']) ? $options['base_template_class'] : 'Twig_Template';
+    $this->autoReload         = isset($options['auto_reload']) ? (bool) $options['auto_reload'] : $this->debug;
+    $this->extensions         = array(new Twig_Extension_Core());
+    $this->runtimeInitialized = false;
+    $this->setCache(isset($options['cache']) ? $options['cache'] : null);
   }
 
   public function getBaseTemplateClass()
@@ -65,6 +99,36 @@ class Twig_Environment
     return $this->debug;
   }
 
+  public function isAutoReload()
+  {
+    return $this->autoReload;
+  }
+
+  public function setAutoReload($autoReload)
+  {
+    $this->autoReload = (Boolean) $autoReload;
+  }
+
+  public function getCache()
+  {
+    return $this->cache;
+  }
+
+  public function setCache($cache)
+  {
+    $this->cache = null === $cache ? sys_get_temp_dir().DIRECTORY_SEPARATOR.'twig_'.md5(dirname(__FILE__)) : $cache;
+
+    if (false !== $this->cache && !is_dir($this->cache))
+    {
+      mkdir($this->cache, 0755, true);
+    }
+  }
+
+  public function getCacheFilename($name)
+  {
+    return $this->getCache() ? $this->getCache().'/twig_'.md5($name).'.php' : false;
+  }
+
   public function getTrimBlocks()
   {
     return $this->trimBlocks;
@@ -75,11 +139,40 @@ class Twig_Environment
     $this->trimBlocks = (bool) $bool;
   }
 
+  /**
+   * Gets the template class associated with the given string.
+   *
+   * @param string $name The name for which to calculate the template class name
+   *
+   * @return string The template class name
+   */
+  public function getTemplateClass($name)
+  {
+    return '__TwigTemplate_'.md5($name);
+  }
+
   public function loadTemplate($name)
   {
+    if (!$this->runtimeInitialized)
+    {
+      $this->initRuntime();
+
+      $this->runtimeInitialized = true;
+    }
+
+    if (isset($this->loadedTemplates[$name]))
+    {
+      return $this->loadedTemplates[$name];
+    }
+
     $cls = $this->getLoader()->load($name, $this);
 
-    return new $cls($this);
+    return $this->loadedTemplates[$name] = new $cls($this);
+  }
+
+  public function clearTemplateCache()
+  {
+    $this->loadedTemplates = array();
   }
 
   public function getLexer()
@@ -98,9 +191,9 @@ class Twig_Environment
     $lexer->setEnvironment($this);
   }
 
-  public function tokenize($source, $name = null, $classname = null)
+  public function tokenize($source, $name = null)
   {
-    return $this->getLexer()->tokenize($source, null === $name ? $source : $name, $classname);
+    return $this->getLexer()->tokenize($source, null === $name ? $source : $name);
   }
 
   public function getParser()
@@ -121,7 +214,6 @@ class Twig_Environment
 
   public function parse(Twig_TokenStream $tokens)
   {
-
     return $this->getParser()->parse($tokens);
   }
 

@@ -30,7 +30,8 @@ class Twig_SyntaxError extends Twig_Error
     $this->rawMessage = $message;
 
     $this->updateRepr();
-	parent::__construct($this->message, $lineno);
+
+    parent::__construct($this->message, $lineno);
   }
 
   public function getFilename()

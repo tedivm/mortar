@@ -18,7 +18,6 @@ class Twig_Extension_Core extends Twig_Extension
   public function initRuntime()
   {
     require_once dirname(__FILE__).'/../runtime.php';
-    require_once dirname(__FILE__).'/../runtime_for.php';
   }
 
   /**
@@ -37,6 +36,10 @@ class Twig_Extension_Core extends Twig_Extension
       new Twig_TokenParser_Parent(),
       new Twig_TokenParser_Display(),
       new Twig_TokenParser_Filter(),
+      new Twig_TokenParser_Macro(),
+      new Twig_TokenParser_Import(),
+      new Twig_TokenParser_Set(),
+      new Twig_TokenParser_Debug(),
     );
   }
 

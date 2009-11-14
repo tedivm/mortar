@@ -22,28 +22,22 @@ class Twig_Node_Module extends Twig_Node implements Twig_NodeListInterface
   protected $body;
   protected $extends;
   protected $blocks;
+  protected $macros;
   protected $filename;
   protected $usedFilters;
   protected $usedTags;
 
-  protected $classname;
-  protected $parentclass;
-
-  public function __construct(Twig_NodeList $body, $extends, $blocks, $filename, $classname, $parentclass = null)
+  public function __construct(Twig_NodeList $body, $extends, array $blocks, array $macros, $filename)
   {
     parent::__construct(1);
 
     $this->body = $body;
     $this->extends = $extends;
     $this->blocks = array_values($blocks);
+    $this->macros = $macros;
     $this->filename = $filename;
     $this->usedFilters = array();
     $this->usedTags = array();
-
-	$this->classname = $classname;
-
-	if(isset($this->extends))
-		$this->parentclass = isset($parentclass) ? $parentclass : '__TwigTemplate_'.md5($this->extends);
   }
 
   public function __toString()
@@ -92,6 +86,12 @@ class Twig_Node_Module extends Twig_Node implements Twig_NodeListInterface
 
   public function compile($compiler)
   {
+    $this->compileTemplate($compiler);
+    $this->compileMacros($compiler);
+  }
+
+  protected function compileTemplate($compiler)
+  {
     $sandboxed = $compiler->getEnvironment()->hasExtension('sandbox');
 
     $compiler->write("<?php\n\n");
@@ -99,7 +99,7 @@ class Twig_Node_Module extends Twig_Node implements Twig_NodeListInterface
     if (!is_null($this->extends))
     {
       $compiler
-        ->write('$this->load(')
+        ->write('$this->env->loadTemplate(')
         ->repr($this->extends)
         ->raw(");\n\n")
       ;
@@ -107,36 +107,47 @@ class Twig_Node_Module extends Twig_Node implements Twig_NodeListInterface
 
     $compiler
       ->write("/* $this->filename */\n")
-      ->write('class '.$this->classname)
+      ->write('class '.$compiler->getTemplateClass($this->filename))
     ;
 
-    if (!is_null($this->extends))
-    {
+    $parent = null === $this->extends ? $compiler->getEnvironment()->getBaseTemplateClass() : $compiler->getTemplateClass($this->extends);
 
-      $parent = $this->parentclass;
+    $compiler
+      ->raw(" extends $parent\n")
+      ->write("{\n")
+      ->indent()
+      ->write("public function display(array \$context)\n", "{\n")
+      ->indent()
+    ;
+
+    if (null !== $this->extends)
+    {
+      // remove all but import nodes
+      $nodes = array();
+      foreach ($this->body->getNodes() as $node)
+      {
+        if ($node instanceof Twig_Node_Import)
+        {
+          $nodes[] = $node;
+        }
+      }
 
       $compiler
-        ->raw(" extends $parent\n")
-        ->write("{\n")
-        ->indent()
+        ->subcompile(new Twig_NodeList($nodes))
+        ->write("\n")
+        ->write("parent::display(\$context);\n")
+        ->outdent()
+        ->write("}\n\n")
       ;
     }
     else
     {
-      $compiler
-        ->write(" extends ".$compiler->getEnvironment()->getBaseTemplateClass()."\n", "{\n")
-        ->indent()
-        ->write("public function display(array \$context)\n", "{\n")
-        ->indent()
-      ;
-
       if ($sandboxed)
       {
         $compiler->write("\$this->checkSecurity();\n");
       }
 
       $compiler
-        ->write("\$this->env->initRuntime();\n\n")
         ->subcompile($this->body)
         ->outdent()
         ->write("}\n\n")
@@ -178,6 +189,32 @@ class Twig_Node_Module extends Twig_Node implements Twig_NodeListInterface
         ->outdent()
         ->write("}\n\n")
       ;
+    }
+
+    $compiler
+      ->outdent()
+      ->write("}\n")
+    ;
+  }
+
+  protected function compileMacros($compiler)
+  {
+    if (!$this->macros)
+    {
+      return;
+    }
+
+    $compiler
+      ->write("\n")
+      ->write('class '.$compiler->getTemplateClass($this->filename).'_Macro extends Twig_Macro'."\n")
+      ->write("{\n")
+      ->indent()
+    ;
+
+    // macros
+    foreach ($this->macros as $node)
+    {
+      $compiler->subcompile($node);
     }
 
     $compiler

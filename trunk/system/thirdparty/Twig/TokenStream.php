@@ -18,15 +18,13 @@ class Twig_TokenStream
   protected $current;
   protected $filename;
   protected $trimBlocks;
-  protected $classname;
 
-  public function __construct(array $tokens, $filename, $classname = null, $trimBlocks = true)
+  public function __construct(array $tokens, $filename, $trimBlocks = true)
   {
     $this->pushed = array();
     $this->originalTokens = $tokens;
     $this->tokens = $tokens;
     $this->filename = $filename;
-	$this->classname = isset($classname) ? $classname : '__TwigTemplate_' . md5($this->filename);
     $this->trimBlocks = $trimBlocks;
     $this->next();
   }
@@ -157,10 +155,5 @@ class Twig_TokenStream
   public function getFilename()
   {
     return $this->filename;
-  }
-
-  public function getClassname()
-  {
-	return $this->classname;
   }
 }
