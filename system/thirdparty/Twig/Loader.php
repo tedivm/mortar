@@ -19,36 +19,7 @@
  */
 abstract class Twig_Loader implements Twig_LoaderInterface
 {
-  protected $cache;
-  protected $autoReload;
   protected $env;
-
-  /**
-   * Constructor.
-   *
-   * The cache can be one of three values:
-   *
-   *  * null (the default): Twig will create a sub-directory under the system tmp directory
-   *         (not recommended as templates from two projects with the same name will share the cache)
-   *
-   *  * false: disable the compile cache altogether
-   *
-   *  * An absolute path where to store the compiled templates
-   *
-   * @param string  $cache      The compiler cache directory
-   * @param Boolean $autoReload Whether to reload the template is the original source changed
-   */
-  public function __construct($cache = null, $autoReload = true)
-  {
-    $this->cache = null === $cache ? sys_get_temp_dir().DIRECTORY_SEPARATOR.'twig_'.md5(dirname(__FILE__)) : $cache;
-
-    if (false !== $this->cache && !is_dir($this->cache))
-    {
-      mkdir($this->cache, 0755, true);
-    }
-
-    $this->autoReload = $autoReload;
-  }
 
   /**
    * Loads a template by name.
@@ -59,103 +30,81 @@ abstract class Twig_Loader implements Twig_LoaderInterface
    */
   public function load($name)
   {
-
-	list($template, $mtime) = $this->getSource($name);
-
-	if(preg_match('{\{% extends "(.*?)" %\}}', $template, $subs) === 1)
-	{
-		$parent = $this->load($subs[1]);
-		$cls = $this->getTemplateName($template . $parent);
-	}else{
-		$parent = null;
-		$cls = $this->getTemplateName($template);
-	}
+    $cls = $this->env->getTemplateClass($name);
 
     if (class_exists($cls, false))
     {
       return $cls;
     }
 
-    if (false === $this->cache)
+    if (false === $cache = $this->env->getCacheFilename($name))
     {
-      $this->evalString($template, $name, $cls);
+      list($source, ) = $this->getSource($name);
+      $this->evalString($source, $name);
 
       return $cls;
     }
 
+    if (!file_exists($cache))
+    {
+      list($source, $mtime) = $this->getSource($name);
+      if (false === $mtime)
+      {
+        $this->evalString($source, $name);
 
-	if($this->loadFromCache($name, $cls, $parent))
-		return $cls;
+        return $cls;
+      }
 
-    $cache = $this->getCacheFilename($name);
-	$content = $this->compile($template, $name, $cls);
+      $this->save($this->compile($source, $name), $cache);
+    }
+    elseif ($this->env->isAutoReload())
+    {
+      list($source, $mtime) = $this->getSource($name);
+      if (filemtime($cache) < $mtime)
+      {
+        $this->save($this->compile($source, $name), $cache);
+      }
+    }
 
-	if(file_put_contents($cache, $content))
-	{
-		include($cache);
-	}else{
-		$this->evalString($template, $md5);
-	}
+    require_once $cache;
 
     return $cls;
   }
 
-
-  public function loadFromCache($name, $className, $parent = null)
+  /**
+   * Saves a PHP string in the cache.
+   *
+   * If the cache file cannot be written, then the PHP string is evaluated.
+   *
+   * @param string $content The PHP string
+   * @param string $cache   The absolute path of the cache
+   */
+  protected function save($content, $cache)
   {
-    $cache = $this->getCacheFilename($name);
-
-    if(!file_exists($cache))
-      return false;
-
-    $fp = @fopen($cache, r);
-
-    if(!$fp)
-        return false;
-
-	$classLine = 'class ' . $className;
-	$lineNumber = isset($parent) ? 5 : 3;
-
-    for($i = 0; $i <= $lineNumber; $i++)
+    if (false === file_put_contents($cache, $content, LOCK_EX))
     {
-        if(feof($fp))
-            break;
-
-        $line = fgets($fp);
+      eval('?>'.$content);
     }
-
-	fclose($fp);
-
-	if(!isset($line) || strpos($line, $classLine) !== 0)
-		return false;
-
-    include($cache);
-    return class_exists($className, false);
   }
 
+  /**
+   * Sets the Environment related to this loader.
+   *
+   * @param Twig_Environment $env A Twig_Environment instance
+   */
   public function setEnvironment(Twig_Environment $env)
   {
     $this->env = $env;
   }
 
-  public function getTemplateName($name)
+  protected function compile($source, $name)
   {
-    return '__TwigTemplate_'.md5($name);
+    return $this->env->compile($this->env->parse($this->env->tokenize($source, $name)));
   }
 
-  public function getCacheFilename($name)
+  protected function evalString($source, $name)
   {
-    return $this->cache.'/twig_'.md5($name).'.cache.php';
-  }
-
-  protected function compile($source, $name, $classname = null)
-  {
-    return $this->env->compile($this->env->parse($this->env->tokenize($source, $name, $classname)));
-  }
-
-  protected function evalString($source, $name, $classname = null)
-  {
-    eval('?>'.$this->compile($source, $name, $classname));
+    eval('?>'.$this->compile($source, $name));
   }
 
   /**

@@ -37,15 +37,9 @@ function twig_default_filter($value, $default = '')
 
 function twig_get_array_keys_filter($array)
 {
-  if (is_object($array) && $array instanceof Iterator)
+  if (is_object($array) && $array instanceof Traversable)
   {
-    $keys = array();
-    foreach ($array as $key => $value)
-    {
-      $keys[] = $key;
-    }
-
-    return $keys;
+    return array_keys(iterator_to_array($array));
   }
 
   if (!is_array($array))
@@ -58,15 +52,9 @@ function twig_get_array_keys_filter($array)
 
 function twig_reverse_filter($array)
 {
-  if (is_object($array) && $array instanceof Iterator)
+  if (is_object($array) && $array instanceof Traversable)
   {
-    $values = array();
-    foreach ($array as $value)
-    {
-      $values[] = $value;
-    }
-
-    return array_reverse($values);
+    return array_reverse(iterator_to_array($array));
   }
 
   if (!is_array($array))
@@ -99,70 +87,115 @@ function twig_sort_filter($array)
   return $array;
 }
 
-function twig_escape_filter(Twig_TemplateInterface $template, $string)
+/*
+ * Each type specifies a way for applying a transformation to a string
+ * The purpose is for the string to be "escaped" so it is suitable for
+ * the format it is being displayed in.
+ *
+ * For example, the string: "It's required that you enter a username & password.\n"
+ * If this were to be displayed as HTML it would be sensible to turn the
+ * ampersand into '&amp;' and the apostrophe into '&aps;'. However if it were
+ * going to be used as a string in JavaScript to be displayed in an alert box
+ * it would be right to leave the string as-is, but c-escape the apostrophe and
+ * the new line.
+ */
+function twig_escape_filter(Twig_Environment $env, $string, $type = 'html')
 {
   if (!is_string($string))
   {
     return $string;
   }
 
-  return htmlspecialchars($string, ENT_QUOTES, $template->getEnvironment()->getCharset());
+  switch ($type)
+  {
+    case 'js':
+      // a function the c-escapes a string, making it suitable to be placed in a JavaScript string
+      return str_replace(array("\\"  , "\n"  , "\r" , "\""  , "'"),
+                         array("\\\\", "\\n" , "\\r", "\\\"", "\\'"),
+                         $string);
+    case 'html':
+    default:
+      return htmlspecialchars($string, ENT_QUOTES, $env->getCharset());
+  }
 }
 
 // add multibyte extensions if possible
 if (function_exists('mb_get_info'))
 {
-  function twig_upper_filter(Twig_TemplateInterface $template, $string)
+  function twig_upper_filter(Twig_Environment $env, $string)
   {
-    if (!is_null($template->getEnvironment()->getCharset()))
+    if (!is_null($env->getCharset()))
     {
-      return mb_strtoupper($string, $template->getEnvironment()->getCharset());
+      return mb_strtoupper($string, $env->getCharset());
     }
 
     return strtoupper($string);
   }
 
-  function twig_lower_filter(Twig_TemplateInterface $template, $string)
+  function twig_lower_filter(Twig_Environment $env, $string)
   {
-    if (!is_null($template->getEnvironment()->getCharset()))
+    if (!is_null($env->getCharset()))
     {
-      return mb_strtolower($string, $template->getEnvironment()->getCharset());
+      return mb_strtolower($string, $env->getCharset());
     }
 
     return strtolower($string);
   }
 
-  function twig_title_string_filter(Twig_TemplateInterface $template, $string)
+  function twig_title_string_filter(Twig_Environment $env, $string)
   {
-    if (is_null($template->getEnvironment()->getCharset()))
+    if (is_null($env->getCharset()))
     {
       return ucwords(strtolower($string));
     }
 
-    return mb_convert_case($string, MB_CASE_TITLE, $template->getEnvironment()->getCharset());
+    return mb_convert_case($string, MB_CASE_TITLE, $env->getCharset());
   }
 
-  function twig_capitalize_string_filter(Twig_TemplateInterface $template, $string)
+  function twig_capitalize_string_filter(Twig_Environment $env, $string)
   {
-    if (is_null($template->getEnvironment()->getCharset()))
+    if (is_null($env->getCharset()))
     {
       return ucfirst(strtolower($string));
     }
 
-    return mb_strtoupper(mb_substr($string, 0, 1, $template->getEnvironment()->getCharset())).
-           mb_strtolower(mb_substr($string, 1, mb_strlen($string), $template->getEnvironment()->getCharset()));
+    return mb_strtoupper(mb_substr($string, 0, 1, $env->getCharset())).
+           mb_strtolower(mb_substr($string, 1, mb_strlen($string), $env->getCharset()));
   }
 }
 // and byte fallback
 else
 {
-  function twig_title_string_filter(Twig_TemplateInterface $template, $string)
+  function twig_title_string_filter(Twig_Environment $env, $string)
   {
     return ucwords(strtolower($string));
   }
 
-  function twig_capitalize_string_filter(Twig_TemplateInterface $template, $string)
+  function twig_capitalize_string_filter(Twig_Environment $env, $string)
   {
     return ucfirst(strtolower($string));
   }
+}
+
+function twig_iterator_to_array($seq)
+{
+  if (is_array($seq))
+  {
+    return $seq;
+  }
+  elseif (is_object($seq) && $seq instanceof Traversable)
+  {
+    return $seq instanceof Countable ? $seq : iterator_to_array($seq);
+  }
+  else
+  {
+    return array();
+  }
+}
+
+// only for backward compatibility
+function twig_get_array_items_filter($array)
+{
+  // noop
+  return $array;
 }

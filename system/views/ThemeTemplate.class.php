@@ -5,7 +5,7 @@ class ViewThemeTemplate
 	protected $twigLoader = 'ViewTemplateTwigLoader';
 	protected $theme;
 	protected $name;
-
+	protected $cacheSubdirectory = '';
 	protected $content = array();
 
 	public function __construct(Theme $theme, $name)
@@ -22,8 +22,7 @@ class ViewThemeTemplate
 	public function getDisplay()
 	{
 		try{
-			$loader = $this->getTwigLoader();
-			$twig = new Twig_Environment($loader);
+			$twig = $this->getTwigLoader();
 			$template = $twig->loadTemplate($this->name);
 			return $template->render($this->content);
 		}catch(Exception $e){
@@ -37,13 +36,15 @@ class ViewThemeTemplate
 
 		$basePaths = $this->getThemePaths();
 		$basePaths['system'] = $config['path']['templates'];
-		$cachePath = $config['path']['temp'] . '/twigCache';
+		$cachePath = $config['path']['temp'] . '/twigCache' . $this->cacheSubdirectory;
 
 
 		$loaderClass = $this->twigLoader;
 
-		$loader = new $loaderClass($basePaths, $cachePath);
-		return $loader;
+		$loader = new $loaderClass($basePaths);
+
+		$twig = new Twig_Environment($loader, array('cache' => $cachePath));
+		return $twig;
 	}
 
 	protected function getThemePaths()

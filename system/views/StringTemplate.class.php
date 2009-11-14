@@ -5,6 +5,7 @@ class ViewStringTemplate extends ViewThemeTemplate
 {
 	protected $twigLoader = 'Twig_Loader_String';
 
+
 	public function __construct($template)
 	{
 		$this->name = $template;
@@ -14,11 +15,12 @@ class ViewStringTemplate extends ViewThemeTemplate
 	{
 		$config = Config::getInstance();
 
-		$cachePath = $config['path']['temp'] . '/twigCache/strings';
-		$loaderClass = $this->twigLoader;
+		$cachePath = $config['path']['temp'] . '/twigCache/strings' . $this->cacheSubdirectory;
 
-		$loader = new $loaderClass($cachePath);
-		return $loader;
+		$loaderClass = $this->twigLoader;
+		$loader = new $loaderClass();
+		$twig = new Twig_Environment($loader, array('cache' => $cachePath));
+		return $twig;
 	}
 
 }

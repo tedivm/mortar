@@ -23,17 +23,11 @@ class Twig_Loader_Filesystem extends Twig_Loader
   /**
    * Constructor.
    *
-   * @param string|array $paths    A path or an array of paths where to look for templates
-   * @param string       $cache      The compiler cache directory
-   * @param Boolean      $autoReload Whether to reload the template is the original source changed
-   *
-   * @see Twig_Loader
+   * @param string|array $paths A path or an array of paths where to look for templates
    */
-  public function __construct($paths, $cache = null, $autoReload = true)
+  public function __construct($paths)
   {
     $this->setPaths($paths);
-
-    parent::__construct($cache, $autoReload);
   }
 
   /**
@@ -61,6 +55,11 @@ class Twig_Loader_Filesystem extends Twig_Loader
     $this->paths = array();
     foreach ($paths as $path)
     {
+      if (!is_dir($path))
+      {
+        throw new InvalidArgumentException(sprintf('The "%s" directory does not exist.', $path));
+      }
+
       $this->paths[] = realpath($path);
     }
   }
@@ -80,7 +79,7 @@ class Twig_Loader_Filesystem extends Twig_Loader
     {
       $file = realpath($path.DIRECTORY_SEPARATOR.$name);
 
-      if (0 !== strpos($file, $path))
+      if (false === $file)
       {
         continue;
       }
@@ -94,6 +93,6 @@ class Twig_Loader_Filesystem extends Twig_Loader
       return array(file_get_contents($file), filemtime($file));
     }
 
-    throw new RuntimeException(sprintf('Unable to find template "%s".', $name));
+    throw new RuntimeException(sprintf('Unable to find template "%s" (looked into: %s).', $name, implode(', ', $this->paths)));
   }
 }
