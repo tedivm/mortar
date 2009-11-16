@@ -207,19 +207,19 @@ class Page implements ArrayAccess
 	public function getMenu($subtype, $menu = 'main')
 	{
 		switch (true) {
-			case isset($this->menuLookup[$subtype]): 
+			case isset($this->menuLookup[$subtype]):
 				$finalMenu = $this->menuLookup[$subtype];
 				break;
 
-			case $menu == false: 
+			case $menu == false:
 				return false;
 				break;
 
-			case isset($this->menuLookup[$menu]): 
+			case isset($this->menuLookup[$menu]):
 				$finalMenu = $this->menuLookup[$menu];
 				break;
 
-			default: 
+			default:
 				$finalMenu = $this->menuLookup['main'];
 				break;
 		}
@@ -367,7 +367,7 @@ class Page implements ArrayAccess
 
 		$this->runtimeProcessTemplate();
 		$display = $this->display;
-		
+
 		$headerTemplate = new ViewStringTemplate($this->headerTemplate);
 		$footerTemplate = new ViewStringTemplate($this->footerTemplate);
 
@@ -392,7 +392,7 @@ class Page implements ArrayAccess
 			$headerTemplate->addContent(array($variable => $output));
 			$footerTemplate->addContent(array($variable => $output));
 		}
-		
+
 		foreach($this->regions as $name => $content)
 		{
 
@@ -402,9 +402,12 @@ class Page implements ArrayAccess
 		$jsInclude = ActiveSite::getLink() . 'javascript/';
 		$headerFinal = $headerTemplate->getDisplay();
 
-		$display->addContent(array('js_path' => $jsInclude, 'theme_path' => $this->getThemeUrl(), 'head' => $headerFinal));
+		$theme = $this->getTheme();
+		$themeImageViewer = new ThemeImageWrapper($theme);
 
-		return $display->getDisplay() . PHP_EOL . $footerTemplate->getDisplay();	
+		$display->addContent(array('images' => $themeImageViewer, 'js_path' => $jsInclude, 'theme_path' => $this->getThemeUrl(), 'head' => $headerFinal));
+
+		return $display->getDisplay() . PHP_EOL . $footerTemplate->getDisplay();
 	}
 
 	/**
