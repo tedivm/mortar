@@ -343,21 +343,28 @@ class Theme
 
 	public function getImageUrl($imageName)
 	{
-		$imagePath = $this->pathToTheme . 'images/' . $imageName;
+		$cache = new Cache('theme', $this->name, 'imagepath', $imageName);
+		$url = $cache->getData();
 
-		if($realPath = realpath($imagePath))
+		if($cache->isStale())
 		{
-			if(!strpos($realPath, $this->pathToTheme . 'images/') === 0)
-				throw new CoreSecurity('Attempted to load image outside the image directory.');
+			$imagePath = $this->pathToTheme . 'images/' . $imageName;
 
-			$themeUrl = $this->getUrl();
-			return $themeUrl . 'images/' . $imageName;
-		}elseif($parent = $this->getParentTheme()){
-			return $parent->getImageUrl($imageName);
-		}else{
-			return false;
+			if($realPath = realpath($imagePath))
+			{
+				if(!strpos($realPath, $this->pathToTheme . 'images/') === 0)
+					throw new CoreSecurity('Attempted to load image outside the image directory.');
+
+				$themeUrl = $this->getUrl();
+				$url = $themeUrl . 'images/' . $imageName;
+			}elseif($parent = $this->getParentTheme()){
+				$url = $parent->getImageUrl($imageName);
+			}else{
+				$url = false;
+			}
+			$cache->storeData($url);
 		}
-
+		return $url;
 	}
 
 	public function getMinifier($type = 'js')
@@ -365,6 +372,18 @@ class Theme
 		$type = ($type == 'js') ? 'js' : 'css';
 		$minifier = new Minifier($type);
 		$minifier->addFiles($this->getPaths($type));
+
+		$baseString = $minifier->getBaseString();
+		$fileTemplate = new ViewStringTemplate($baseString);
+
+
+		$imageLookup = new ThemeImageWrapper($this);
+		$fileTemplate->addContent(array('images' => $imageLookup));
+		
+		$baseString = $fileTemplate->getDisplay();
+		$minifier->setBaseString($baseString);
+
+
 		return $minifier;
 	}
 
@@ -440,5 +459,37 @@ class Theme
 		}
 	}
 }
+
+class ThemeImageWrapper implements ArrayAccess
+{
+	protected $theme;
+
+	public function __construct(Theme $theme)
+	{
+		$this->theme = $theme;
+	}
+
+	public function offsetGet($offset)
+	{
+		return $this->theme->getImageUrl($offset);
+	}
+
+	public function offsetExists($offset)
+	{
+		return (bool) $this->theme->getImageUrl($offset);
+	}
+
+	public function offsetUnset($offset)
+	{
+
+	}
+
+	public function offsetSet($offset, $value)
+	{
+
+	}
+
+}
+
 
 ?>

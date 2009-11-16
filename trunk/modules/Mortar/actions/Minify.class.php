@@ -31,6 +31,7 @@ class MortarActionMinify extends ActionBase
 		$theme = new Theme($themeName);
 		$this->processingTheme = $theme;
 		$minifier = $theme->getMinifier($type);
+
 		$actualCheckSum = $minifier->getInitialChecksum();
 
 		// if the checksum from the url doesn't match the checksum of the base url
@@ -51,6 +52,8 @@ class MortarActionMinify extends ActionBase
 		$this->ioHandler->addHeader('Content-Type', $mimetype);
 		$this->ioHandler->addHeader('Last-Modified', gmdate('D, d M y H:i:s T', 0));
 		$this->ioHandler->addHeader('Expires', gmdate('D, d M y H:i:s T', mktime(0, 0, 0, 0, 0, date('Y') + 20)));
+
+
 
 		if(defined('DISABLE_MINIFICATION') && DISABLE_MINIFICATION === true)
 		{
