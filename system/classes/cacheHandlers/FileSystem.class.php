@@ -85,24 +85,13 @@ class cacheHandlerFileSystem implements cacheHandler
 	{
 		if(file_exists($path))
 		{
-			$file = fopen($path, 'r');
-			$filesize = filesize($path);
-			if(flock($file, LOCK_SH | LOCK_NB))
-			{
-				$data = fread($file, $filesize);
-				flock($file, LOCK_UN);
-				fclose($file);
+			include($path);
 
-				// When we store the data we put it in php tags behind a comment, preventing people from opening it
-				// if it happens to be web accessable. This line strips that initial php off so the data can be
-				// unserialized
-				$data = substr($data, 9);
-				$store = unserialize($data);
-				return $store;
+			if(!isset($data) || !isset($expiration))
+				throw new CacheError('Unable to load cache from filesystem');
 
-			}else{
-				fclose($file);
-			}
+
+			return array('data' => $data, 'expiration' => $expiration);
 		}
 		return false;
 	}
@@ -128,15 +117,32 @@ class cacheHandlerFileSystem implements cacheHandler
 				return false;
 		}
 
-		$store['expiration'] = $expiration;
-		$store['data'] = $data;
-
 		$file = fopen($this->path, 'w+');
 		if(flock($file, LOCK_EX))
 		{
 			// by dumping this behind a php tag and comment, we make it inaccessible should it happen to become web
 			// accessible
-			$storeString = '<?php // ' . serialize($store);
+
+			switch(Cache::encoding($data))
+			{
+				case 'bool':
+					$dataString = (bool) $data ? 'true' : 'false';
+					break;
+
+				case 'serialize':
+					$dataString = 'unserialize("' . addslashes(serialize($data)) . '")';
+					break;
+
+				case 'none':
+				default :
+					$dataString = '\'' . addslashes($data) . '\'';
+					break;
+			}
+
+			$storeString = '<?php ' . PHP_EOL .
+			'$expiration = ' . $expiration . ';' . PHP_EOL .
+			'$data = ' . $dataString . ';' . PHP_EOL;
+
 			if(!fwrite($file, $storeString))
 			{
 				$success = false;

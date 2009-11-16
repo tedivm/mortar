@@ -81,7 +81,8 @@ class cacheHandlerSqlite implements cacheHandler
 
 		if($resultArray = $query->fetch(SQLITE_ASSOC))
 		{
-			$results = array('expiration' => $resultArray['expires'], 'data' => unserialize($resultArray['data']));
+			$returnData = Cache::decode($resultArray['data'], $resultArray['encoding']);
+			$results = array('expiration' => $resultArray['expires'], 'data' => $returnData);
 		}else{
 			$results = false;
 		}
@@ -97,7 +98,9 @@ class cacheHandlerSqlite implements cacheHandler
 	 */
 	public function storeData($data, $expiration)
 	{
-		$data = sqlite_escape_string(serialize($data));
+		$encoding = Cache::encoding($data);
+		$data = Cache::encode($data);
+		$data = sqlite_escape_string($data);
 		$sqlResource = staticFunctionHack(get_class($this), 'getSqliteHandler', $this->section);
 
 		$resetBusy = false;
@@ -108,8 +111,8 @@ class cacheHandlerSqlite implements cacheHandler
 			$sqlResource->busyTimeout(self::$busyTimeout * (ceil($contentLength/100000))); // half a second per 100k
 		}
 
-		$query = $sqlResource->query("INSERT INTO cacheStore (key, expires, data)
-											VALUES ('{$this->key}', '{$expiration}', '{$data}')");
+		$query = $sqlResource->query("INSERT INTO cacheStore (key, expires, data, encoding)
+											VALUES ('{$this->key}', '{$expiration}', '{$data}', '{$encoding}')");
 
 		if($resetBusy)
 			$sqlResource->busyTimeout(self::$busyTimeout);
@@ -194,6 +197,7 @@ class cacheHandlerSqlite implements cacheHandler
 						CREATE TABLE cacheStore (
 							key TEXT UNIQUE ON CONFLICT REPLACE,
 							expires FLOAT,
+							encoding TEXT,
 							data BLOB
 						);
 						CREATE INDEX keyIndex ON cacheStore (key);', false, $filePath);
