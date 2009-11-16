@@ -58,9 +58,6 @@ class MortarActionInstallModule extends ActionBase
 		$output = '';
 		if(isset($this->installablePackages) && !isset($this->form))
 		{
-			$theme = $page->getTheme();
-			$template = $theme->getTemplateFromPackage('adminInstallModuleListing', $this->package);
-
 			$linkToSelf = Query::getUrl();
 			unset($linkToSelf->locationId);
 
