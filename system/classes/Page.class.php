@@ -176,21 +176,11 @@ class Page implements ArrayAccess
 			}
 		}
 
-		$cache = new Cache('theme', $this->theme, $file);
-		$template = $cache->getData();
+		$this->menuLookup = array("main" => "mainNav", "modelNav" => "modelNav");
+		$this->menuReverseLookup = array("mainNav" => "main", "modelNav" => "modelNav");
 
-		if($cache->isStale())
-		{
-			$templateProcess = new ViewThemeTemplate(new Theme($theme), $file);
-
-			$this->menuLookup = array("main" => "mainNav", "modelNav" => "modelNav");
-			$this->menuReverseLookup = array("mainNav" => "main", "modelNav" => "modelNav");
-
-			$templateProcess->addContent(array('currentDate' => date('l jS \of F Y h:i:s A')));
-
-			$template['string'] = $templateProcess->getDisplay();
-			$cache->storeData($template);
-		}
+		$templateProcess = new ViewThemeTemplate(new Theme($theme), $file);
+		$templateProcess->addContent(array('currentDate' => date('l jS \of F Y h:i:s A')));
 
 		$this->display = $templateProcess;
 	}
