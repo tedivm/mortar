@@ -31,7 +31,15 @@ class HtmlOutputController extends AbstractOutputController
 	{
 		$page = ActivePage::getInstance();
 		$page->addRegion('pagetitle', 'Mortar');
-		$page->setTemplate('index.html', 'default');
+		
+		$query = Query::getQuery();
+		if(isset($query['location'])) {
+			$location = new Location($query['location']);
+		} else { 
+			$site = ActiveSite::getSite();
+			$location = $site->getLocation();
+		}		
+		$page->setTemplate('index.html', $location->getMeta('htmlTheme'));
 
 		$this->activeResource = $page;
 
