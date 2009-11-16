@@ -11,9 +11,13 @@ height: 100%;
 width: 960px;
 background: #fff;
 margin: 0 auto;
-padding: 10px 10px 0;
+padding: 0 10px;
 position: relative;
 min-height: 100%;
+}
+
+#header {
+padding-top: 10px;
 }
 
 #content {
@@ -24,4 +28,6 @@ padding-bottom: 2em;
 position: absolute;
 bottom: 0;
 height: 2em;
+width: 100%;
+text-align: center;
 }
