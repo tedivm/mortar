@@ -340,6 +340,26 @@ class Theme
 	 * @param string $type js or css
 	 * @return Minifier
 	 */
+
+	public function getImageUrl($imageName)
+	{
+		$imagePath = $this->pathToTheme . 'images/' . $imageName;
+
+		if($realPath = realpath($imagePath))
+		{
+			if(!strpos($realPath, $this->pathToTheme . 'images/') === 0)
+				throw new CoreSecurity('Attempted to load image outside the image directory.');
+
+			$themeUrl = $this->getUrl();
+			return $themeUrl . 'images/' . $imageName;
+		}elseif($parent = $this->getParentTheme()){
+			return $parent->getImageUrl($imageName);
+		}else{
+			return false;
+		}
+
+	}
+
 	public function getMinifier($type = 'js')
 	{
 		$type = ($type == 'js') ? 'js' : 'css';
