@@ -97,48 +97,73 @@ class Theme
 
 		if($cache->isStale())
 		{
-			$baseModulePath = $config['path']['modules'];
-			$baseModuleUrl = $config['url']['modules'];
+			$settingsPath = $this->pathToTheme . 'settings.ini';
 
-			$baseModulePath = $config['path']['modules'];
-			$baseModuleUrl = $config['url']['modules'];
-
-
-			$packageList = new PackageList();
-			$packages = $packageList->getInstalledPackages();
-
-			$javascriptLinks = array();
-			$cssLinks = array();
-
-			foreach($packages as $package)
+			if(is_readable($settingsPath))
 			{
-				$packagePath = $baseModulePath . $package . '/';
-				$packageUrl = $baseModuleUrl . $package . '/';
+				$iniFile = new IniFile($settingsPath);
+				$data['settings'] = $iniFile->getArray();
+			}
+
+			if(isset($data['settings']['meta']['extends']))
+			{
+				$parentTheme = new Theme($data['settings']['meta']['extends']);
+				$cssLinks = $parentTheme->getCssFiles();
+				$javascriptLinks = $parentTheme->getJsFiles();
+
+				$parentSettings = $parentTheme->getSettings();
+
+				// the meta settings are things like author, name and license and shouldn't inherit
+				if(isset($parentSettings['meta'])) unset($parentSettings['meta']);
+
+				$data['settings'] = array_merge_recursive($parentSettings, $data['settings']);
+
+
+			}else{
+
+				$baseModulePath = $config['path']['modules'];
+				$baseModuleUrl = $config['url']['modules'];
+
+				$baseModulePath = $config['path']['modules'];
+				$baseModuleUrl = $config['url']['modules'];
+
+
+				$packageList = new PackageList();
+				$packages = $packageList->getInstalledPackages();
+
+				$javascriptLinks = array();
+				$cssLinks = array();
+
+				foreach($packages as $package)
+				{
+					$packagePath = $baseModulePath . $package . '/';
+					$packageUrl = $baseModuleUrl . $package . '/';
+
+					// javascript
+					$javascriptResult = $this->getFiles($packagePath . 'javascript/', $packageUrl . 'javascript/', 'js', 25);
+					if($javascriptResult)
+						$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
+
+					// css
+					$cssResult = $this->getFiles($packagePath . 'css/', $packageUrl . 'css/', 'css');
+					if($cssResult)
+						$cssLinks = array_merge_recursive($cssLinks, $cssResult);
+
+				}
+
+				$themeUrl = $this->url;
 
 				// javascript
-				$javascriptResult = $this->getFiles($packagePath . 'javascript/', $packageUrl . 'javascript/', 'js', 25);
+				$javascriptResult = $this->getFiles($themePath . 'javascript/', $themeUrl . 'javascript/', 'js');
 				if($javascriptResult)
 					$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
 
 				// css
-				$cssResult = $this->getFiles($packagePath . 'css/', $packageUrl . 'css/', 'css');
+				$cssResult = $this->getFiles($themePath . 'css/', $themeUrl . 'css/', 'css');
 				if($cssResult)
 					$cssLinks = array_merge_recursive($cssLinks, $cssResult);
-
 			}
 
-			$themeUrl = $this->url;
-
-
-			// javascript
-			$javascriptResult = $this->getFiles($themePath . 'javascript/', $themeUrl . 'javascript/', 'js');
-			if($javascriptResult)
-				$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
-
-			// css
-			$cssResult = $this->getFiles($themePath . 'css/', $themeUrl . 'css/', 'css');
-			if($cssResult)
-				$cssLinks = array_merge_recursive($cssLinks, $cssResult);
 
 			$baseJavascriptPath = $config['path']['javascript'];
 			$baseJavascriptUrl = ActiveSite::getLink('javascript');
@@ -151,22 +176,15 @@ class Theme
 			if($javascriptResult)
 				$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
 
-
-			$settingsPath = $this->pathToTheme . 'settings.ini';
-
-			if(is_readable($settingsPath))
-			{
-				$iniFile = new IniFile($settingsPath);
-				$data['settings'] = $iniFile->getArray();
-			}
-
 			$data['cssLinks'] = $cssLinks;
 			$data['jsLinks'] = $javascriptLinks;
 
 			$cache->storeData($data);
 		}
+
 		if(isset($data['settings']))
 			$this->settings = $data['settings'];
+
 		$this->jsUrls = $data['jsLinks'];
 		$this->cssUrls = $data['cssLinks'];
 	}
@@ -392,6 +410,16 @@ class Theme
 		ksort($paths);
 		$finalPaths = call_user_func_array('array_merge', $paths);
 		return $finalPaths;
+	}
+
+	public function getCssFiles()
+	{
+		return isset($this->cssUrls) ? $this->cssUrls : array();
+	}
+
+	public function getJsFiles()
+	{
+		return isset($this->jsUrl) ? $this->jsUrl : array();
 	}
 
 
