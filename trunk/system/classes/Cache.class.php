@@ -431,6 +431,49 @@ class Cache
 		}
 		return $this->handler;
 	}
+
+	static function encoding($data)
+	{
+		if(is_bool($data))
+			return 'bool';
+
+		if(is_scalar($data))
+			return 'none';
+
+		return 'serialize';
+	}
+
+	static function encode($data)
+	{
+		switch(self::encoding($data))
+		{
+			case 'bool':
+				return $data ? true : false;
+
+			case 'serialize':
+				return serialize($data);
+
+			case 'none':
+			default:
+				return data;
+		}
+	}
+
+	static function decode($data, $method)
+	{
+		switch($method)
+		{
+			case 'bool':
+				return $data == 'true' ? true : false;
+
+			case 'serialize':
+				return unserialize($data);
+
+			case 'none':
+			default:
+				return $data;
+		}
+	}
 }
 
 /**
