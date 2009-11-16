@@ -36,6 +36,12 @@ class Minifier
 		return $this->scriptString;
 	}
 
+	public function setBaseString($string)
+	{
+		$this->scriptString = $string;
+		$this->initialCheckSum = hash('crc32', $string);
+	}
+
 	public function addFiles($files)
 	{
 		$this->paths = array_merge($this->paths, $files);
@@ -77,8 +83,7 @@ class Minifier
 		if($bigFile == '')
 			return false;
 
-		$this->scriptString = $bigFile;
-		$this->initialCheckSum = hash('crc32', $bigFile);
+		$this->setBaseString($bigFile);
 		return true;
 	}
 }
