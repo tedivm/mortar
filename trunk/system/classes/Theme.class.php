@@ -117,52 +117,50 @@ class Theme
 				if(isset($parentSettings['meta'])) unset($parentSettings['meta']);
 
 				$data['settings'] = array_merge_recursive($parentSettings, $data['settings']);
-
-
 			}else{
-
-				$baseModulePath = $config['path']['modules'];
-				$baseModuleUrl = $config['url']['modules'];
-
-				$baseModulePath = $config['path']['modules'];
-				$baseModuleUrl = $config['url']['modules'];
-
-
-				$packageList = new PackageList();
-				$packages = $packageList->getInstalledPackages();
-
 				$javascriptLinks = array();
 				$cssLinks = array();
+			}
 
-				foreach($packages as $package)
-				{
-					$packagePath = $baseModulePath . $package . '/';
-					$packageUrl = $baseModuleUrl . $package . '/';
+			$baseModulePath = $config['path']['modules'];
+			$baseModuleUrl = $config['url']['modules'];
 
-					// javascript
-					$javascriptResult = $this->getFiles($packagePath . 'javascript/', $packageUrl . 'javascript/', 'js', 25);
-					if($javascriptResult)
-						$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
+			$baseModulePath = $config['path']['modules'];
+			$baseModuleUrl = $config['url']['modules'];
 
-					// css
-					$cssResult = $this->getFiles($packagePath . 'css/', $packageUrl . 'css/', 'css');
-					if($cssResult)
-						$cssLinks = array_merge_recursive($cssLinks, $cssResult);
 
-				}
+			$packageList = new PackageList();
+			$packages = $packageList->getInstalledPackages();
 
-				$themeUrl = $this->url;
+			foreach($packages as $package)
+			{
+				$packagePath = $baseModulePath . $package . '/';
+				$packageUrl = $baseModuleUrl . $package . '/';
 
 				// javascript
-				$javascriptResult = $this->getFiles($themePath . 'javascript/', $themeUrl . 'javascript/', 'js');
+				$javascriptResult = $this->getFiles($packagePath . 'javascript/', $packageUrl . 'javascript/', 'js', 25);
 				if($javascriptResult)
 					$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
 
 				// css
-				$cssResult = $this->getFiles($themePath . 'css/', $themeUrl . 'css/', 'css');
+				$cssResult = $this->getFiles($packagePath . 'css/', $packageUrl . 'css/', 'css');
 				if($cssResult)
 					$cssLinks = array_merge_recursive($cssLinks, $cssResult);
+
 			}
+
+			$themeUrl = $this->url;
+
+			// javascript
+			$javascriptResult = $this->getFiles($themePath . 'javascript/', $themeUrl . 'javascript/', 'js');
+			if($javascriptResult)
+				$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
+
+			// css
+			$cssResult = $this->getFiles($themePath . 'css/', $themeUrl . 'css/', 'css');
+			if($cssResult)
+				$cssLinks = array_merge_recursive($cssLinks, $cssResult);
+
 
 
 			$baseJavascriptPath = $config['path']['javascript'];
