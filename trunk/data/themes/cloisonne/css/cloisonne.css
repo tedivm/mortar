@@ -1,0 +1,27 @@
+/* OVERALL LAYOUT */
+
+html, body {
+background: #D4D5D7;
+margin: 0;
+padding: 0;
+height: 100%;
+}
+
+#container {
+width: 960px;
+background: #fff;
+margin: 0 auto;
+padding: 10px 10px 0;
+position: relative;
+min-height: 100%;
+}
+
+#content {
+padding-bottom: 2em;
+}
+
+#footer {
+position: absolute;
+bottom: 0;
+height: 2em;
+}
