@@ -54,7 +54,7 @@ class MortarActionMinify extends ActionBase
 
 		if(defined('DISABLE_MINIFICATION') && DISABLE_MINIFICATION === true)
 		{
-			$this->output = $this->processTags($minifier->getBaseString());
+			$this->output = $minifier->getBaseString();
 			return;
 		}
 
