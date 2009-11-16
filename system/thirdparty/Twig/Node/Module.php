@@ -105,8 +105,10 @@ class Twig_Node_Module extends Twig_Node implements Twig_NodeListInterface
       ;
     }
 
+    $filename = (strpos($this->filename, '*/') === false) ? $this->filename : 'String';
+
     $compiler
-      ->write("/* $this->filename */\n")
+      ->write("/* $filename */\n")
       ->write('class '.$compiler->getTemplateClass($this->filename))
     ;
 
