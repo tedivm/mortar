@@ -113,8 +113,8 @@ class Twig_Compiler implements Twig_CompilerInterface
    */
   public function string($value)
   {
-    $this->source .= sprintf('"%s"', str_replace('\\\n', "\n", addcslashes($value, "\t\"\$\\")));
-
+    $this->source .= sprintf('"%s"', addcslashes($value, "\t\"\$\\"));
+    
     return $this;
   }
 
