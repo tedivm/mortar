@@ -59,7 +59,7 @@ class Twig_Lexer implements Twig_LexerInterface
    */
   public function tokenize($code, $filename = 'n/a')
   {
-    $this->code = preg_replace('/(\r\n|\r|\n)/', '\n', $code);
+    $this->code = preg_replace('/(\r\n|\r|\n)/', PHP_EOL, $code);
     $this->filename = $filename;
     $this->cursor = 0;
     $this->lineno = 1;
