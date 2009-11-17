@@ -371,16 +371,16 @@ class Theme
 		$minifier = new Minifier($type);
 		$minifier->addFiles($this->getPaths($type));
 
-		$baseString = $minifier->getBaseString();
-		$fileTemplate = new ViewStringTemplate($baseString);
+		if($type !== 'js')
+		{
+			$baseString = $minifier->getBaseString();
+			$fileTemplate = new ViewStringTemplate($baseString);
+			$imageLookup = new ThemeImageWrapper($this);
+			$fileTemplate->addContent(array('images' => $imageLookup));
 
-
-		$imageLookup = new ThemeImageWrapper($this);
-		$fileTemplate->addContent(array('images' => $imageLookup));
-		
-		$baseString = $fileTemplate->getDisplay();
-		$minifier->setBaseString($baseString);
-
+			$baseString = $fileTemplate->getDisplay();
+			$minifier->setBaseString($baseString);
+		}
 
 		return $minifier;
 	}
