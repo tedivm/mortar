@@ -59,7 +59,7 @@ class Twig_Lexer implements Twig_LexerInterface
    */
   public function tokenize($code, $filename = 'n/a')
   {
-    $this->code = preg_replace('/(\r\n|\r|\n)/', PHP_EOL, $code);
+    $this->code = preg_replace('/(\r\n|\r|\n)/', '\n', $code);
     $this->filename = $filename;
     $this->cursor = 0;
     $this->lineno = 1;
@@ -72,7 +72,6 @@ class Twig_Lexer implements Twig_LexerInterface
     while (!$end)
     {
       $token = $this->nextToken();
-
       $tokens[] = $token;
 
       $end = $token->getType() === Twig_Token::EOF_TYPE;
@@ -151,7 +150,9 @@ class Twig_Lexer implements Twig_LexerInterface
 
     // if no matches are left we return the rest of the template
     // as simple text token
-    if (!preg_match('/(.*?)('.preg_quote($this->options['tag_comment'][0], '/').'|'.preg_quote($this->options['tag_variable'][0], '/').'|'.preg_quote($this->options['tag_block'][0], '/').')/A', $this->code, $match, null, $this->cursor))
+    $pattern = '/(.*?)('.preg_quote($this->options['tag_comment'][0], '/').'|'.preg_quote($this->options['tag_variable'][0], '/').'|'.preg_quote($this->options['tag_block'][0], '/').')/A';
+
+    if (!preg_match($pattern, $this->code, $match, null, $this->cursor))
     {
       $rv = new Twig_Token(Twig_Token::TEXT_TYPE, substr($this->code, $this->cursor), $this->lineno);
       $this->cursor = $this->end;
