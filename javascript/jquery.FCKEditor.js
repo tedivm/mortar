@@ -25,7 +25,7 @@ $.extend($, {
   editors: [], // array of editor instances
   loaded: false, // flag indicating whether FCK script is loaded
   intercepted: null, // variable to store intercepted method(s)
-  
+
   // utility method to read contents of FCK editor
   content: function(i, v){
    //try{
@@ -47,7 +47,7 @@ $.extend($, {
     return x.GetXHTML(true);
    //}catch(e){ return 'OOPS!'; };
   }, // fck.content function
-  
+
   // inspired by Sebastián Barrozo <sbarrozo@b-soft.com.ar>
   setHTML: function(i, v){
    if(typeof i=='object'){
@@ -56,7 +56,7 @@ $.extend($, {
    };
    return $.fck.content(i, v);
   },
-  
+
   // utility method to update textarea contents before ajax submission
   update: function(){
 			// Ignore missing editors
@@ -71,11 +71,11 @@ $.extend($, {
     //if(window.console) console.log(['fck.update','ht',ht]);
     ta.val(ht).filter('textarea').text(ht);
     if(ht!=ta.val())
-     alert('Critical error in FCK plugin:'+'\n'+'Unable to update form data');
+     alert('Critical error in FCK plugin: Unable to update form data');
    }
    //if(window.console) console.log(['fck.update','done']);
   }, // fck.update
-  
+
   // utility method to non-existing instances from memory
   clean: function(){
    //if(window.console) console.log(['fck.clean',$.fck.editors]);
@@ -92,7 +92,7 @@ $.extend($, {
 			$.fck.editors = c;
    //if(window.console) console.log(['fck.clean',$.fck.editors]);
   }, // fck.clean
-  
+
   // utility method to create instances of FCK editor (if any)
   create: function(option){
 			// Create a new options object
@@ -109,7 +109,7 @@ $.extend($, {
 			// Accept settings from metadata plugin
 			o = $.extend({}, o,
 				($.meta ? e.data()/*NEW metadata plugin*/ :
-				($.metadata ? e.metadata()/*OLD metadata plugin*/ : 
+				($.metadata ? e.metadata()/*OLD metadata plugin*/ :
 				null/*metadata plugin not available*/)) || {}
 			);
    // Load script and create instances
@@ -141,7 +141,7 @@ $.extend($, {
    // Return matched elements...
    return e;
   },
-  
+
   // utility method to integrate this plugin with others...
   intercept: function(){
    if($.fck.intercepted) return;
@@ -160,7 +160,7 @@ $.extend($, {
    // $.fck.update(); // update html
    //});
   },
-  
+
   // utility method to create an instance of FCK editor
   editor: function(e /* elements */, o /* options */){
    //if(window.console) console.log(['fck.editor','OPTIONS',o]);
@@ -184,7 +184,7 @@ $.extend($, {
      function(i,t){
 						if((t.tagName||'').toLowerCase()!='textarea')
 							return alert(['An invalid parameter has been passed to the $.fckeditor.editor function','tagName:'+t.tagName,'name:'+t.name,'id:'+t.id].join('\n'));
-      
+
       var T = $(t);// t = element, T = jQuery
       if(!t.fck/* not already installed */){
 							t.id = t.id || 'fck'+($.fck.editors.length+1);
@@ -216,7 +216,7 @@ $.extend($, {
    // return jQuery array of elements
    return e;
   }, // fck.editor function
-  
+
   // start-up method
   start: function(o/* options */){
    // Attach itself to known plugins...
@@ -224,10 +224,10 @@ $.extend($, {
 			// Create FCK editors
    return $.fck.create(o);
   } // fck.start
-  
+
  } // fck object
  //##############################
- 
+
 });
 // extend $
 //##############################
