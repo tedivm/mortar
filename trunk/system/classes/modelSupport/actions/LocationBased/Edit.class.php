@@ -70,6 +70,18 @@ class ModelActionLocationBasedEdit extends ModelActionLocationBasedAdd
 				$pubdate = date( 'm/d/y h:i a' , $this->model->getLocation()->getPublishDate()); 
 				$input->setValue($pubdate);
 			}
+			if(in_array('theme', $inputGroups['location']))
+			{
+				$input = $form->getInput('location_theme');
+				$locTheme = $this->model->getLocation()->getMeta('htmlTheme', true);
+				$input->setValue($locTheme);
+			}
+			if(in_array('template', $inputGroups['location']))
+			{
+				$input = $form->getInput('location_template');
+				$locTemp = $this->model->getLocation()->getMeta('pageTemplate', true);
+				$input->setValue($locTemp);
+			}
 		}
 
 		return $form;

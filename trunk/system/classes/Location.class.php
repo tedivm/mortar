@@ -296,6 +296,11 @@ class Location
 		$this->meta[$name] = $value;
 	}
 
+	public function unsetMeta($name)
+	{
+		unset($this->meta[$name]);
+	}
+
 	/**
 	 * This function is used to set the status of the location. Generally it should be called through its attached
 	 * resource to allow any filtering or other custom status handling to take place, although it can certainly be used
