@@ -262,21 +262,21 @@ class Location
 	 * @param null|string $name
 	 * @return string|array
 	 */
-	public function getMeta($name = null)
+	public function getMeta($name = null, $local = false)
 	{
 		if($name)
 		{
 			if(isset($this->meta[$name]))
 			{
 				return $this->meta[$name];
-			}else{
+			}elseif (!($local)) {
 				$parent = $this->getParent();
 				if($parent = $this->getParent())
 					return $parent->getMeta($name);
 				return false;
-			}
+			}else return false;
 		}else{
-			if($parent = $this->getParent())
+			if(($parent = $this->getParent()) && !($local))
 			{
 				return array_merge($parent->getMeta(), $this->meta);
 			}else{
