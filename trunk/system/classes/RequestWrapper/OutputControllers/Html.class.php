@@ -38,8 +38,9 @@ class HtmlOutputController extends AbstractOutputController
 		} else { 
 			$site = ActiveSite::getSite();
 			$location = $site->getLocation();
-		}		
-		$page->setTemplate('index.html', $location->getMeta('htmlTheme'));
+		}
+		$pageTemplate = $location->getMeta('pageTemplate') ? $location->getMeta('pageTemplate') : 'index.html';
+		$page->setTemplate($pageTemplate, $location->getMeta('htmlTheme'));
 
 		$this->activeResource = $page;
 
