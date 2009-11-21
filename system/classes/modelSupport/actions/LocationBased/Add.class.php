@@ -94,6 +94,14 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 			setLabel('Publish Date')->
 			setValue(date( 'm/d/y h:i a'));
 
+		$form->createInput('location_theme')->
+			setLabel('Theme')->
+			addRule('alphanumeric');
+		
+		$form->createInput('location_template')->
+			setLabel('Template')->
+			addRule('alphanumeric');
+
 		$locationFormName = importClass('LocationForm', 'modelSupport/Forms/LocationForm.class.php', 'mainclasses');
 		if(!isset($locationFormName))
 			throw new CoreError('Unable to load LocationForm');
@@ -139,6 +147,20 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 		if(isset($input['location_publishDate']))
 		{
 			$location->setPublishDate($input['location_publishDate']);
+		}
+		if(isset($input['location_theme']))
+		{
+			if($input['location_theme'] === '')
+				$location->unsetMeta('htmlTheme');
+			else
+				$location->setMeta('htmlTheme', $input['location_theme']);
+		}
+		if(isset($input['location_template']))
+		{
+			if($input['location_template'] === '')
+				$location->unsetMeta('pageTemplate');
+			else
+				$location->setMeta('pageTemplate', $input['location_template']);
 		}
 
 		$query = Query::getQuery();
