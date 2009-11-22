@@ -143,23 +143,6 @@ class ModelToHtml
 				? $this->modelDisplay->addContent(array($propName => date('l jS \of F Y h:i:s A', $propValue)))
 				: $this->modelDisplay->addContent(array($propName => $propValue));
 
-/*		$modelTags = $this->modelDisplay->getTags();
-
-		if($modelTags)
-			foreach($modelTags as $tag)
-		{
-			if(!in_array($tag, $this->modelDefaults) && (strpos($tag, 'model_') === 0))
-			{
-				$customTag = substr($tag, 6);
-				if(isset($this->convertedProperties[$customTag]))
-				{
-					$this->modelDisplay->addContent($tag, $this->convertedProperties[$customTag]);
-				}elseif(isset($this->model->$customTag)){
-					$this->modelDisplay->addContent($tag, $this->model->$customTag);
-				}
-			}
-		}*/
-
 		$modelOutput = $this->modelDisplay->getDisplay();
 
 		return $modelOutput;
