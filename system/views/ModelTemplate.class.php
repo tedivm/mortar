@@ -41,7 +41,7 @@ class ViewModelTemplateTwigLoader extends ViewTemplateTwigLoader
 
 
 		$tmp = substr($name, 7);
-		$baseName = substr($tmp, strpos($name, '/') - 1);
+		$baseName = substr($tmp, strpos($tmp, '/'));
 
 		$baseTemplates = $this->loadTemplateSet('models/base/' . $baseName);
 		$this->__runtimeLoopProtection = false;
