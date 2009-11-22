@@ -257,9 +257,11 @@ class Location
 	}
 
 	/**
-	 * This function returns the asked for meta setting, or the entire meta array
+	 * This function returns the asked for meta setting, or the entire meta array. If local is true, it
+	 * returns only the locally-set setting(s) rather than the inherited setting(s).
 	 *
 	 * @param null|string $name
+	 * @param bool $local
 	 * @return string|array
 	 */
 	public function getMeta($name = null, $local = false)
