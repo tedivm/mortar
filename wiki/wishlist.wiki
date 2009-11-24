@@ -73,3 +73,11 @@ We should have a big list of custom form controls implemented by default. Just o
 == Per-Control Permissions ==
 
 Much like we have for actions, we need to be able to set unique permissions for individual form controls, and have only those the current user is permitted to use display. Examples of utility for this: allowing admins to edit/delete posts but not users; allowing users to alter certain parts of their own user model (avatar, signature, profile info) without being able to change their groups or delete themselves.
+
+== Full Status System ==
+
+Statuses would be very useful for many purposes: letting us "soft-delete" content, ban or suspend users, hide "draft" content, etc. We need to define a set of statuses usable for each model, create the tools to set those statuses on those models, and then hook those statuses into the system such that they can be used as a basis for determining behavior.
+
+== Default Page Setting ==
+
+Directory-style modules need a way to specify what their "default" content is. Right now, there's a single "default" page hard-coded at the root and everyplace else there's nothing. You should be able to specify any page as the default _or_ specify that the page act as a listing instead. One specific key element for the model-moving/converting system should be the ability to turn a page into a directory-with-home-page or vice versa.
