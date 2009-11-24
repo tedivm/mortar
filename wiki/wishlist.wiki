@@ -12,7 +12,7 @@ The goal of this document is to list isolated classes or tools that are not avai
 
 A class to compare two versions of a document (say, the wiki or cms revisions) is seriously needed at this point.
 
-== EOT @font-fact support ==
+== EOT @font-face support ==
 
 A way to upload TTF or OTF fonts and have them converted for both functional and MS @font-face use. (This is a huge way to differentiate Mortar from other such projects for designers. Huge.)
 
@@ -69,3 +69,7 @@ Hoo boy do we need a search engine. The ideal Mortar search engine would search 
 == More Form Controls ==
 
 We should have a big list of custom form controls implemented by default. Just off the top of my head: three-state checkbox, combo box, array (i.e. multiple expanding fields).
+
+== Per-Control Permissions ==
+
+Much like we have for actions, we need to be able to set unique permissions for individual form controls, and have only those the current user is permitted to use display. Examples of utility for this: allowing admins to edit/delete posts but not users; allowing users to alter certain parts of their own user model (avatar, signature, profile info) without being able to change their groups or delete themselves.
