@@ -12,6 +12,10 @@ The goal of this document is to list isolated classes or tools that are not avai
 
 A class to compare two versions of a document (say, the wiki or cms revisions) is seriously needed at this point.
 
+== EOT @font-fact support ==
+
+A way to upload TTF or OTF fonts and have them converted for both functional and MS @font-face use. (This is a huge way to differentiate Mortar from other such projects for designers. Huge.)
+
 == Filters ==
 
 Right now we're mostly using the filter_var php functions, but we could use something more flexible. This shouldn't just filter but also validate, so using the form validation classes as a starting point may be a good idea.
