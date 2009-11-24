@@ -61,3 +61,7 @@ This should probably be flexible enough to handle both individual Pages and othe
 == Search Engine ==
 
 Hoo boy do we need a search engine. The ideal Mortar search engine would search all kinds of models by default (but allow you to fine-tune your search as desired), search all default fields individually (with optional hooks to add model-specific fields), and output results through a DisplayList. Oh, and it should also not just arbitrarily break when a forum gets big.
+
+== More Form Controls ==
+
+We should have a big list of custom form controls implemented by default. Just off the top of my head: three-state checkbox, combo box, array (i.e. multiple expanding fields).
