@@ -264,6 +264,24 @@ class PageRevision
 		}
 
 		$db = dbConnect('default');
+
+		$selectStmt = $db->stmt_init();
+		$selectStmt->prepare('SELECT revisionId
+									FROM lithoContent AS tempContent
+									WHERE tempContent.pageId = ?
+									ORDER BY tempContent.revisionId DESC LIMIT 1');
+
+		$selectStmt->bindAndExecute('i', $this->pageId);
+
+
+		if($selectStmt->num_rows === 0)
+		{
+			$revisionId = 1;
+		}else{
+			$results = $selectStmt->fetch_array();
+			$revisionId = $results['revisionId'] + 1;
+		}
+
 		$insertStmt = $db->stmt_init();
 		$insertStmt->prepare('INSERT INTO lithoContent
 										(pageId,
@@ -271,28 +289,15 @@ class PageRevision
 										author, updateTime, note,
 										title, filteredContent, rawContent)
 									VALUES
-										 (?,
-										(IFNULL(
-											((SELECT revisionId
-													FROM lithoContent AS tempContent
-													WHERE tempContent.pageId = ?
-													ORDER BY tempContent.revisionId DESC LIMIT 1) + 1),
-											1)
-										),
-										?, ?, ?,
-										?, ?, ?)');
+										 (?, ?,
+											?, ?, ?,
+											?, ?, ?)');
 
-		$insertStmt->bindAndExecute('iiisssss', $this->pageId, $this->pageId,
+		$insertStmt->bindAndExecute('iiisssss', $this->pageId, $revisionId,
 														$this->author, gmdate('Y-m-d H:i:s'), $this->note,
 														$this->title, $this->filteredContent, $this->rawContent);
 
-		$getStmt = $db->stmt_init();
-		$getStmt->prepare('SELECT revisionId FROM lithoContent
-								WHERE pageId = ? AND author = ? AND title = ?
-								ORDER BY revisionId DESC LIMIT 1');
-		$getStmt->bindAndExecute('iis', $this->pageId, $this->author, $this->title);
-		$newRow = $getStmt->fetch_array();
-		$this->revisionId = $newRow['revisionId'];
+		$this->revisionId = $revisionId;
 
 		return is_numeric($this->revisionId);
 	}
