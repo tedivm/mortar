@@ -106,7 +106,7 @@ class IniFile
 
 		}elseif(is_scalar($value)){
 
-			return '"' . str_replace("\n", "\\\n", $value) . '"';
+			return '\'' . str_replace("\n", "\\\n", $value) . '\'';
 		}
 	}
 
