@@ -173,7 +173,7 @@ class InstallerInstaller // thats the most pathetic name ever
 				$configFile->write();
 
 			}else{
-				throw new CoreError('Configuration filed to save');
+				throw new CoreError('Configuration failed to save');
 			}
 			$config->reset();
 		}catch(Exception $e){
