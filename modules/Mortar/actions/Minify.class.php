@@ -17,9 +17,12 @@ class MortarActionMinify extends ActionBase
 		{
 			$tmp = explode('-', $query['id']);
 			$themeName = $tmp[0];
+			$requestedChecksum = $tmp[1];
+
 			$tmp = explode('.', $tmp[1]);
 			$requestedChecksum = $tmp[0];
-			$type = $tmp[1];
+
+
 		}elseif(isset($query['location'])){
 
 			// if no filename was sent we'll load up the default theme for the site to redirect to the appropriate file
@@ -27,6 +30,8 @@ class MortarActionMinify extends ActionBase
 			$themeName = $location->getMeta('htmlTheme');
 			$checksum = 0;
 		}
+
+		$type = strtolower($query['format']);
 
 		$theme = new Theme($themeName);
 		$this->processingTheme = $theme;
@@ -75,6 +80,16 @@ class MortarActionMinify extends ActionBase
 		}
 
 		$this->output = $minifiedData['data'];
+	}
+
+	public function viewCss()
+	{
+		return $this->output;
+	}
+
+	public function viewJs()
+	{
+		return $this->output;
 	}
 
 	public function viewDirect()

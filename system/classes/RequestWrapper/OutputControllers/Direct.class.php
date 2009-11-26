@@ -27,7 +27,7 @@ class DirectOutputController extends AbstractOutputController
 
 	static protected $formatToMimetype = array();
 
-	static $acceptedFormats = array('Text');
+	static $acceptedFormats = array('Text', 'Css', 'Js');
 
 
 	protected function makeDisplayFromResource()
