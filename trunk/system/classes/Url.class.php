@@ -49,6 +49,20 @@ class Url
 		if(defined('XDEBUG_PROFILE') && XDEBUG_PROFILE)
 			$attributes['XDEBUG_PROFILE'] = 1;
 
+
+		if(isset($attributes['model']) && $attributes['model'] instanceof Model)
+		{
+			$model = $attributes['model'];
+			if($model instanceof LocationModel)
+			{
+				$location = $model->getLocation();
+				$attributes['locationId'] == $location->getId();
+			}else{
+				$attributes['type'] = $model->getType();
+				$attributes['id'] = $model->getId();
+			}
+		}
+
 		$urlString = '';
 
 		if(!isset($info->Configuration['url']['modRewrite']) || !$info->Configuration['url']['modRewrite'])
