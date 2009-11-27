@@ -10,8 +10,8 @@ class BootStrapper
 {
 	static function main()
 	{
-		self::setEnvironmentalConstants();
 		self::clearGlobals();
+		self::setEnvironmentalConstants();
 		self::loadClasses();
 		self::setErrorLevels();
 		self::run();
