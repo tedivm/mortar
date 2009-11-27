@@ -8,7 +8,16 @@
 
 class BootStrapper
 {
-	static function setEnvironmentalConstants()
+	static function main()
+	{
+		self::setEnvironmentalConstants();
+		self::clearGlobals();
+		self::loadClasses();
+		self::setErrorLevels();
+		self::run();
+	}
+
+	static protected function setEnvironmentalConstants()
 	{
 		define('START_TIME', microtime(true));
 		define('BASE_PATH', dirname(__FILE__) . '/');
@@ -42,16 +51,25 @@ class BootStrapper
 		{
 			$names = array_merge(array_keys($_GET),
 									array_keys($_POST),
+									array_keys($_REQUEST),
 									array_keys($_COOKIE),
 									array_keys($_SERVER),
 									array_keys($_ENV));
 			foreach($names as $name)
-				if(isset($name))
-					unset($name);
+				if(isset($GLOBALS[$name]))
+					unset($GLOBALS[$name]);
+
+			foreach($_FILES as $fileInput => $fileAttributes)
+				foreach($fileAttributes as $attributeName => $attibuteValue)
+				{
+					$variableName = $fileInput . '_' . $attributeName;
+					if(isset($GLOBALS[$variableName]))
+						unset($GLOBALS[$variableName]);
+				}
 		}
 	}
 
-	static function setErrorLevels()
+	static protected function setErrorLevels()
 	{
 		if(defined('STDIN'))
 			define('EXCEPTION_OUTPUT', 'Text');
@@ -88,7 +106,7 @@ class BootStrapper
 		error_reporting($errorLevel);
 	}
 
-	static function loadClasses()
+	static protected function loadClasses()
 	{
 		require('system/classes/Exceptions.class.php');
 		require('system/classes/Config.class.php');
@@ -105,7 +123,7 @@ class BootStrapper
 		require('system/classes/AutoLoader.class.php');
 	}
 
-	static function run()
+	static protected function run()
 	{
 		try{
 
@@ -119,20 +137,20 @@ class BootStrapper
 				// disable cache, since we can't load the settings for it anyways
 				Cache::$runtimeDisable = true;
 
-				// If the blockinstall file is there, or the install class file is not, we shouldn't attempt an install
+				// If the install class file is not, we shouldn't attempt an install
 				if(!file_exists($config['path']['modules'] . 'Installer/actions/Install.class.php'))
 				{
 					define('INSTALLMODE', false);
 					throw new CoreError('Unable to load configuration file.');
 				}else{
-					// there is no block file, no configuration or block install file, so lets set this into install mode
+					// there is no config and the installer is present so we install
 					define('INSTALLMODE', true);
 					$requestWrapperName = 'RequestWrapperInstaller';
 					require('system/classes/RequestWrapperInstaller.class.php');
 				}
 
 			}else{
-				// config loaded, so lets take the redundent step of setting install mode to false
+				// config loaded, so lets set install mode to false
 				define('INSTALLMODE', false);
 			}
 
@@ -149,10 +167,6 @@ class BootStrapper
 	}
 }
 
-BootStrapper::setEnvironmentalConstants();
-BootStrapper::clearGlobals();
-BootStrapper::loadClasses();
-BootStrapper::setErrorLevels();
-BootStrapper::run();
+BootStrapper::main();
 
 ?>
