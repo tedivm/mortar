@@ -36,14 +36,17 @@ class ViewThemeTemplate
 
 		$basePaths = $this->getThemePaths();
 		$basePaths['system'] = $config['path']['templates'];
-		$cachePath = $config['path']['temp'] . '/twigCache' . $this->cacheSubdirectory;
 
+		$options = array();
+
+		if(!defined('DISABLECACHE') || DISABLECACHE !== true)
+			$options['cache'] = $config['path']['temp'] . '/twigCache' . $this->cacheSubdirectory;
 
 		$loaderClass = $this->twigLoader;
 
 		$loader = new $loaderClass($basePaths);
 
-		$twig = new Twig_Environment($loader, array('cache' => $cachePath));
+		$twig = new Twig_Environment($loader, $options);
 		return $twig;
 	}
 
