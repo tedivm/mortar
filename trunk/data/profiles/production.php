@@ -51,4 +51,9 @@ define('XDEBUG_PROFILE', false);
 // This setting appends an attribute to enable xdebug profiling to all URLs
 
 define('DISABLE_MINIFICATION', false);
+// When set to true, the system will output JS and CSS in its original form, rather than minified.
+
+define('REBUILD_TEMPLATES', false);
+// When set to true, any template file whose source has changed on disk will be recompiled before it's rendered.
+
 ?>
