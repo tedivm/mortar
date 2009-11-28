@@ -41,6 +41,8 @@ class ViewThemeTemplate
 
 		if(!defined('DISABLECACHE') || DISABLECACHE !== true)
 			$options['cache'] = $config['path']['temp'] . '/twigCache' . $this->cacheSubdirectory;
+		else
+			$options['cache'] = false;
 
 		$loaderClass = $this->twigLoader;
 
