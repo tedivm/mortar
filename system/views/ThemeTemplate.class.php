@@ -44,6 +44,11 @@ class ViewThemeTemplate
 		else
 			$options['cache'] = false;
 
+		if(defined('REBUILD_TEMPLATES'))
+			$options['cache'] = REBUILD_TEMPLATES;
+		else
+			$options['cache'] = true;
+
 		$loaderClass = $this->twigLoader;
 
 		$loader = new $loaderClass($basePaths);

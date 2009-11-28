@@ -10,4 +10,5 @@ define('OUTPUT_COMPRESSION', false);
 define('OUTPUT_COMPRESSION_HEADERS', false);
 define('CONCISE_HTML', false);
 define('DISABLE_MINIFICATION', true);
+define('REBUILD_TEMPLATES', true);
 ?>
