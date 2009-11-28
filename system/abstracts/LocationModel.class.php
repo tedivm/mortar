@@ -383,8 +383,9 @@ class LocationModel extends ModelBase
 		$location = $this->getLocation();
 		$locationInfo['id'] = $location->getId();
 		$locationInfo['type'] = $location->getType();
-		$locationInfo['createdOn'] = strtotime($location->getCreationDate());
-		$locationInfo['lastModified'] = strtotime($location->getLastModified());
+		$locationInfo['createdOn'] = $location->getCreationDate();
+		$locationInfo['lastModified'] = $location->getLastModified();
+		$locationInfo['publishDate'] = $location->getPublishDate();
 		$locationInfo['owner'] = $location->getOwner();
 		$locationInfo['group'] = $location->getOwnerGroup();
 		$locationInfo['name'] = $location->getName();
