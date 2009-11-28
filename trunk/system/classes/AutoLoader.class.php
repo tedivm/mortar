@@ -39,14 +39,15 @@ class AutoLoader
 
 	protected static $extraClassDirectories = array('modelSupport/actions' => 'ModelAction',
 										'modelSupport/actions/LocationBased' => 'ModelActionLocationBased',
-										'modelSupport/converters' => 'ModelTo',
+										'modelSupport/Converters' => 'ModelTo',
 										'modelSupport/Listings' => 'none',
 										'modelSupport/Forms' => 'none',
 										'modelSupport/DisplayLists' => 'none',
 										'Orm' => 'Orm',
 										'InputHandlers' => 'none',
 										'cacheHandlers' => 'cacheHandler',
-										'RequestWrapper/IOProcessors' => 'IOProcessor');
+										'RequestWrapper/IOProcessors' => 'IOProcessor',
+										'templateSupport' => 'TagBox');
 
 	protected static $extraLibraryDirectories = array('Form/Converters' => 'FormTo',
 										'Form/ValidationRules' => 'FormValidation',

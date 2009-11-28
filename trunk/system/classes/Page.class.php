@@ -180,9 +180,31 @@ class Page implements ArrayAccess
 		$this->menuReverseLookup = array("mainNav" => "main", "modelNav" => "modelNav");
 
 		$templateProcess = new ViewThemeTemplate(new Theme($theme), $file);
-		$templateProcess->addContent(array('currentDate' => date('l jS \of F Y h:i:s A')));
+		$templateProcess = $this->addTemplateContent($templateProcess);
 
 		$this->display = $templateProcess;
+	}
+
+	/**
+	 * This function contains all content tags which are universally applied to the page view template. This will 
+	 * almost certainly eventually be expanded to include a Hook so new tags can be added.
+	 *
+	 * @param ViewModelTemplate $template
+	 * @return ViewModelTemplate
+	 */
+	protected function addTemplateContent($template)
+	{
+		$query = Query::getQuery();
+		if(isset($query['location']) && is_numeric($query['location'])) {
+			$location = new Location($query['location']);
+			$nav = new TagBoxNav($location);
+			$template->addContent(array('nav' => $nav));
+			$template->addContent(array('testVar' => 'Hey there!'));
+		}
+		
+		$template->addContent(array('currentDate' => date('l jS \of F Y h:i:s A')));
+		
+		return $template;
 	}
 
 	/**
