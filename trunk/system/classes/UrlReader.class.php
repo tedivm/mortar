@@ -98,7 +98,7 @@ class UrlReader
 				}
 				break;
 
-			case 'resource':
+			case 'resources':
 				if(isset($pathPieces[1]))
 				{
 					$this->setAttribute('type', $pathPieces[1]);
