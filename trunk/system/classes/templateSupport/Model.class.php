@@ -63,10 +63,9 @@ class TagBoxModel
 				$actionUrl = $actionUrls[$action];
 				$actionLink = $actionUrl->getLink(ucfirst($action));
 
-				$modelListAction = new ViewStringTemplate("<li class='action action_$action'>{{ action }}</li>");
+				$modelListAction = "<li class='action action_$action'>$actionLink</li>";
 
-				$modelListAction->addContent(array('action' => $actionLink));
-				$actionList .= $modelListAction->getDisplay();
+				$actionList .= $modelListAction;
 			}
 		}
 		
