@@ -17,6 +17,7 @@ Release Owner : *charlequin*
   * Twig Integration
   * RSS Support
   * TagBox Support
+  * URL Extension mapping to Format 
   * Canonical URLs
 
 == 0.5 ==
@@ -48,8 +49,6 @@ Release Owner : *charlequin*
 
   * Multilingual support
   * REST-Interface (partially complete)
-  * RSS format
-  * URL Extension mapping to Format 
   * User Management Interface
   * Site Management Interface
   * Menu/Sidebar Management
