@@ -1,8 +1,8 @@
 <hr class="blog_entry_divider" />
 <div class="blog_entry">
-<h2 class="blog_entry_title"><a href="{{ permalink }}">{{ model_title }}</a></h2>
-<p class="blog_entry_meta meta">Posted by <span class="blog_entry_owner">{{ model_owner }}</span> on <span class="blog_entry_date">
-{{ model_publishDate }}</span>
-<span class="separator">|</span> <span class="blog_entry_actions"><ul>{{ model_actions }}</ul></span></p>
-<p class="content">{{ model_content }}</p>
+<h2 class="blog_entry_title"><a href="{{ model.permalink }}">{{ model.title }}</a></h2>
+<p class="blog_entry_meta meta">Posted by <span class="blog_entry_owner">{{ model.owner }}</span> on <span class="blog_entry_date">
+{{ model.publishDate }}</span>
+<span class="separator">|</span> <span class="blog_entry_actions"><ul>{{ model.actionList }}</ul></span></p>
+<p class="content">{{ model.content }}</p>
 </div>
