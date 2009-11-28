@@ -449,6 +449,20 @@ class LocationModel extends ModelBase
 		}
 		return parent::__get($offset);
 	}
+
+	public function __isset($offset)
+	{
+		switch($offset) {
+			case 'owner':
+			case 'ownergroup':
+			case 'createdOn':
+			case 'lastModified':
+			case 'publishDate':
+			case 'name':
+				return true;
+		}
+		return parent::__isset($offset);
+	}
 	
 	public function __set($offset, $value)
 	{
