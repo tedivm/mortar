@@ -37,24 +37,31 @@ class ViewThemeTemplate
 		$basePaths = $this->getThemePaths();
 		$basePaths['system'] = $config['path']['templates'];
 
-		$options = array();
-
-		if(!defined('DISABLECACHE') || DISABLECACHE !== true)
-			$options['cache'] = $config['path']['temp'] . '/twigCache' . $this->cacheSubdirectory;
-		else
-			$options['cache'] = false;
-
-		if(defined('REBUILD_TEMPLATES'))
-			$options['cache'] = REBUILD_TEMPLATES;
-		else
-			$options['cache'] = true;
-
 		$loaderClass = $this->twigLoader;
 
 		$loader = new $loaderClass($basePaths);
 
+		$options = $this->checkOptions($config['path']['temp'] . '/twigCache' . $this->cacheSubdirectory);
+
 		$twig = new Twig_Environment($loader, $options);
 		return $twig;
+	}
+
+	protected function checkOptions($cachePath)
+	{
+		$options = array();
+
+		if(!defined('DISABLECACHE') || DISABLECACHE !== true)
+			$options['cache'] = $cachePath;
+		else
+			$options['cache'] = false;
+
+		if(defined('REBUILD_TEMPLATES'))
+			$options['auto_reload'] = REBUILD_TEMPLATES;
+		else
+			$options['auto_reload'] = true;
+
+		return $options;
 	}
 
 	protected function getThemePaths()
