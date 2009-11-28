@@ -375,8 +375,8 @@ class Theme
 		{
 			$baseString = $minifier->getBaseString();
 			$fileTemplate = new ViewStringTemplate($baseString);
-			$imageLookup = new ThemeImageWrapper($this);
-			$fileTemplate->addContent(array('images' => $imageLookup));
+			$themeBox = new TagBoxTheme($this);
+			$fileTemplate->addContent(array('theme' => $themeBox));
 
 			$baseString = $fileTemplate->getDisplay();
 			$minifier->setBaseString($baseString);

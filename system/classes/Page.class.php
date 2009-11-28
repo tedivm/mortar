@@ -195,15 +195,24 @@ class Page implements ArrayAccess
 	protected function addTemplateContent($template)
 	{
 		$query = Query::getQuery();
+		$content = array();
+
 		if(isset($query['location']) && is_numeric($query['location'])) {
 			$location = new Location($query['location']);
-			$nav = new TagBoxNav($location);
-			$template->addContent(array('nav' => $nav));
-			$template->addContent(array('testVar' => 'Hey there!'));
+			$navBox = new TagBoxNav($location);
+			$content['nav'] = $navBox;
+
+			$model = $location->getResource();
+			$modelBox = new TagBoxModel($model);
+			$content['model'] = $modelBox;
 		}
-		
-		$template->addContent(array('currentDate' => date('l jS \of F Y h:i:s A')));
-		
+
+		$theme = $this->getTheme();
+		$themeBox = new TagBoxTheme($theme);
+		$content['theme'] = $themeBox;
+
+		$template->addContent($content);
+
 		return $template;
 	}
 
@@ -414,10 +423,7 @@ class Page implements ArrayAccess
 		$jsInclude = ActiveSite::getLink() . 'javascript/';
 		$headerFinal = $headerTemplate->getDisplay();
 
-		$theme = $this->getTheme();
-		$themeImageViewer = new ThemeImageWrapper($theme);
-
-		$display->addContent(array('images' => $themeImageViewer, 'js_path' => $jsInclude, 'theme_path' => $this->getThemeUrl(), 'head' => $headerFinal));
+		$display->addContent(array('js_path' => $jsInclude, 'head' => $headerFinal));
 
 		return $display->getDisplay() . PHP_EOL . $footerTemplate->getDisplay();
 	}
