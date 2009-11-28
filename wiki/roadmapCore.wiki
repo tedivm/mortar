@@ -3,17 +3,46 @@
 
 = Introduction =
 
-This document lists the features required for Mortar to be considered "version 1", with the next few versions mapped up explicitly. It is by no means set in stone, and features are expected to be added.
+This document is the official roadmap for the project. Features for upcoming versions, their expected release dates, and their owners are listed below. This document is focused purely on new features- bug fixes and smaller changes are ongoing and should be expected with every release.
+
+As this document is the official Roadmap it should only be updated by release owners. Feature requests can be added through the issue tracker (and please feel free to add any ideas you might have), and discussion of the roadmap (or anything else for that matter) should be directed to the development list.
 
 = Core/System =
 
 == 0.4 ==
 
+Release Date : *December 4th, 2009*<br>
+Release Owner : *charlequin*
+
   * Twig Integration
+  * RSS Support
+  * TagBox Support
+  * Canonical URLs
 
 == 0.5 ==
 
+Release Date : *December 25th, 2009*<br>
+Release Owner : *tedivm*
+
+  * Core Updater
+  * Non-location Model Routing 
+  * User Listing/Read
+  * Group Listing/Read
+
+== 0.6 ==
+
+Release Date : *tbd*<br>
+Release Owner : *charlequin*
+
   * Advanced ORM
+  * Diff Algorithm
+  * User Add/Edit
+  * Group Add/Edit
+
+== 0.7 ==
+
+  * Initial Mural Creation (theme module)
+  * Theme Preview
 
 == 1.0 ==
 
