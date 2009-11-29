@@ -6,7 +6,7 @@ class MortarModelSite extends LocationModel
 	protected $table = 'sites';
 	public $allowedChildrenTypes = array('Directory');
 
-	public function addUrl($url, $ssl = false, $primary = false)
+	public function addDomainUrl($url, $ssl = false, $primary = false)
 	{
 		$id = $this->getId();
 
@@ -44,7 +44,7 @@ class MortarModelSite extends LocationModel
 		}
 	}
 
-	public function removeUrl($url)
+	public function removeDomainUrl($url)
 	{
 		$id = $this->getId();
 		if(!is_numeric($id))
@@ -65,7 +65,7 @@ class MortarModelSite extends LocationModel
 		return $domainRecord->delete(1);
 	}
 
-	public function getUrl($ssl = false)
+	public function getDomainUrl($ssl = false)
 	{
 		$cache = new Cache('models', 'site', $this->id, 'url', ($ssl) ? 1:0);
 		$url = $cache->getData();

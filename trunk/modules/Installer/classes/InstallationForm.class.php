@@ -17,7 +17,7 @@ class InstallerInstallationForm extends Form
 					addRule('letterswithbasicpunc')->
 				getForm()->
 
-				createInput('setup_location_root_Site_model_functions_addUrl_0')->
+				createInput('setup_location_root_Site_model_functions_addDomainUrl_0')->
 					setLabel('Domain')->
 					property('value', $_SERVER['SERVER_NAME'] . substr($_SERVER['PHP_SELF'], 0,
 														strpos($_SERVER['PHP_SELF'], DISPATCHER)))->

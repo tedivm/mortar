@@ -47,10 +47,10 @@ exit();
 			$location = new Location($attributes['locationId']);
 			$siteId = $location->getSite();
 			$site = ModelRegistry::loadModel('Site', $siteId);
-			$url = $site->getUrl($ssl);
+			$url = $site->getDomainUrl($ssl);
 		}else{
 			$site = ActiveSite::getSite();
-			$url = $site->getUrl($ssl);
+			$url = $site->getDomainUrl($ssl);
 		}
 
 		if(!self::$enableRewrite)
@@ -116,7 +116,7 @@ exit();
 			}
 
 		}
-		
+
 		/*
 
 		if(isset($attributes['action']))
