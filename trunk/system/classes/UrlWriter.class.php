@@ -21,15 +21,6 @@ class UrlWriter
 		}
 
 		return $url;
-
-var_dump($attributes);
-var_dump($base);
-var_dump($path);
-var_dump($url);
-exit();
-
-		$delimiter = (self::$enableRewrite) ? '?' : '&';
-		return $base . $path . $delimiter . $query;
 	}
 
 	static protected function getBase(&$attributes)
@@ -40,6 +31,13 @@ exit();
 			unset($attributes['ssl']);
 		}else{
 			$ssl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on');
+		}
+
+		if(defined('INSTALLMODE') && INSTALLMODE == true)
+		{
+			$url = $ssl ? 'https://' : 'http://';
+			$url .= BASE_URL . 'index.php?p=';
+			return $url;
 		}
 
 		if(isset($attributes['locationId']))
