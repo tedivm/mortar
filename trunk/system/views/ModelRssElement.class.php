@@ -4,16 +4,16 @@ class ViewModelRssElement
 {
 	static public function getDisplay(Model $model, SimpleXMLElement $parentXml)
 	{
-		$url = new Url();
-		$url['model'] = $model;
-
-
 		$xmlItem = simplexml_load_string('<item></item>');
 
+		if(isset($model['title']))
+			$parentXml->addChild('title', $model['title']);
 
-		$parentXml->addChild('title', $model['title']);
+		$url = $model->getUrl();
 		$parentXml->addChild('link', (string) $url);
-		$parentXml->addChild('description', $model['content']);
+
+		if(isset($model['content']))
+			$parentXml->addChild('description', $model['content']);
 
 		if($model instanceof LocationModel)
 		{
@@ -40,7 +40,7 @@ class ViewModelRssElement
 		//category
 		//comments
 
-		return $this->parentXml;
+		return $parentXml;
 	}
 }
 
