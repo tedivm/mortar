@@ -4,6 +4,7 @@ class ViewModelRssFeed
 {
 	protected $modelList;
 	protected $model;
+	protected $channelElements = array();
 
 	public function __construct($modelList, Model $baseModel = null)
 	{
@@ -12,6 +13,14 @@ class ViewModelRssFeed
 
 		$this->modelList = $modelList;
 		$this->model = $baseModel;
+	}
+
+	public function addChannelElement($name, $value)
+	{
+		if($name == 'lastBuildDate')
+			$value = gmdate('D, d M y H:i:s T', $value);
+
+		$this->channelElements[$name] = $value;
 	}
 
 	public function getDisplay()
@@ -24,11 +33,15 @@ class ViewModelRssFeed
 		$url = $baseModel->getUrl();
 
 		$url->format = 'html';
-		$rssFeed = simplexml_load_string("<rss><channel></channel></rss>");
+		$rssFeed = simplexml_load_string('<rss version="2.0"><channel></channel></rss>');
 
 		//$rssFeed->channel[0]->addChild('title', $title);
 
 		$rssFeed->channel[0]->addChild('link', (string) $url);
+		$rssFeed->channel[0]->addChild('generator', PROGRAM_NAME);
+
+		foreach($this->channelElements as $name => $value)
+			$rssFeed->channel[0]->addChild($name, $value);
 
 		//$rssFeed->channel[0]->addChild('description', $feedContent);
 

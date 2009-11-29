@@ -20,7 +20,7 @@ class ViewModelRssElement
 			$location = $model->getLocation();
 
 			$publishedDate = $location->getPublishDate();
-			$parentXml->addChild('pubDate', gmdate(DATE_RFC822, $publishedDate));
+			$parentXml->addChild('pubDate', gmdate('D, d M y H:i:s T', $publishedDate));
 
 			if($author = $location->getOwner())
 				$parentXml->addChild('author', $author['name']);
