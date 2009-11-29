@@ -129,7 +129,7 @@ exit();
 
 		$path = rtrim($path, '/');
 
-		if(isset($attributes['format']))
+		if(strlen($path) > 1 && isset($attributes['format']))
 		{
 			$path .= '.' . strtolower($attributes['format']);
 			unset($attributes['format']);

@@ -40,7 +40,15 @@ class Url
 	 */
 	public function __toString()
 	{
-		return UrlWriter::getUrl($this->attributes);
+		$attributes = $this->attributes;
+
+		if(( isset($attributes['format']) && $attributes['format'] == 'html')
+			&& (!isset($attributes['ioHandler']) || $attributes['ioHandler'] == 'http'))
+		{
+			unset($attributes['format']);
+		}
+
+		return UrlWriter::getUrl($attributes);
 	}
 
 	/**
