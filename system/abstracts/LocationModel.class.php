@@ -313,6 +313,14 @@ class LocationModel extends ModelBase
 		return call_user_func_array('array_merge', $pluginChildren);
 	}
 
+	public function getUrl()
+	{
+		$url = new Url();
+		$location = $this->getLocation();
+		$url->locationId = $location->getId();
+		return $url;
+	}
+
 	/**
 	 * This function takes in a model type and checks to see if it is allowed to be attached to this model.
 	 *
@@ -392,7 +400,7 @@ class LocationModel extends ModelBase
 		$array = array_merge($array, $locationInfo);
 		return $array;
 	}
-	
+
 	/**
 	 * This extends the (placeholder) parent function and returns an array of Urls for the
 	 * various actions which can be performed by this Model.
@@ -404,24 +412,24 @@ class LocationModel extends ModelBase
 	public function getActionUrls($format, $attributes = null)
 	{
 		$actionUrls = array();
-		
+
 		$baseUrl = new Url();
 		$baseUrl->locationId = $this->location->getId();
 		$baseUrl->format = $format;
 
 		$actions = $this->getActions();
-		
+
 		foreach($actions as $actionName => $action) {
 			$actionUrl = clone $baseUrl;
 			$actionUrl->action = $actionName;
-			
+
 			if (isset($attributes))
 				foreach($attributes as $attName => $attValue)
 					$actionUrl->property($attName, $attValue);
 
 			$actionUrls[$actionName] = $actionUrl;
 		}
-		
+
 		return $actionUrls;
 	}
 
@@ -464,7 +472,7 @@ class LocationModel extends ModelBase
 		}
 		return parent::__isset($offset);
 	}
-	
+
 	public function __set($offset, $value)
 	{
 		if(!is_scalar($value))
