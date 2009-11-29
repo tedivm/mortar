@@ -20,6 +20,18 @@ class BootStrapper
 	static protected function setEnvironmentalConstants()
 	{
 		define('START_TIME', microtime(true));
+		require('data/profiles/runtime.php');
+
+		if(BENCHMARK && function_exists('getrusage'))
+		{
+			$startdat = getrusage();
+			$startProcTime = $startdat["ru_utime.tv_usec"];
+			define('START_PROCESS_TIME', $startdat['ru_utime.tv_usec']);
+		}
+
+		if(!defined('PROGRAM_NAME'))
+			define('PROGRAM_NAME', 'Mortar');
+
 		define('BASE_PATH', dirname(__FILE__) . '/');
 		$pathArray = explode('/', __FILE__);
 		$dispatcher = array_pop($pathArray);
@@ -30,16 +42,6 @@ class BootStrapper
 			$base = $_SERVER['HTTP_HOST']
 					. substr($_SERVER['SCRIPT_NAME'], 0, strlen($_SERVER['SCRIPT_NAME']) - strlen(DISPATCHER));
 			define('BASE_URL', $base);
-		}
-
-		require('data/profiles/runtime.php');
-
-
-		if(BENCHMARK && function_exists('getrusage'))
-		{
-			$startdat = getrusage();
-			$startProcTime = $startdat["ru_utime.tv_usec"];
-			define('START_PROCESS_TIME', $startdat['ru_utime.tv_usec']);
 		}
 	}
 
