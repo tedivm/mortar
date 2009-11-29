@@ -299,7 +299,7 @@ abstract class ModelBase implements Model
 				if ($this->checkAuth($actionName, $user))
 					$permittedActions[$actionName] = $action;
 			return $permittedActions;
-				
+
 		} else {
 			return $actionList;
 		}
@@ -490,6 +490,14 @@ abstract class ModelBase implements Model
 	public function getModule()
 	{
 		return $this->module;
+	}
+
+	public function getUrl()
+	{
+		$url = new Url();
+		$url->type = $this->getType();
+		$url->id = $this->getId();
+		return $url;
 	}
 
 	/**
