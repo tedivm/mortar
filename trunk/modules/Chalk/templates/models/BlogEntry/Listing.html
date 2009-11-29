@@ -2,7 +2,7 @@
 <div class="blog_entry">
 <h2 class="blog_entry_title"><a href="{{ model.permalink }}">{{ model.title }}</a></h2>
 <p class="blog_entry_meta meta">Posted by <span class="blog_entry_owner">{{ model.owner }}</span> on <span class="blog_entry_date">
-{{ model.publishDate }}</span>
+{{ model.publishDate|date('h:i:s a m/d/y') }}</span>
 <span class="separator">|</span> <span class="blog_entry_actions"><ul>{{ model.actionList }}</ul></span></p>
 <p class="content">{{ model.content }}</p>
 </div>
