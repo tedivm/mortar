@@ -2,4 +2,4 @@
 <div class="content">
 {{ model.content }}
 </div>
-<div class="meta">Created at {{ model.createdOn|date('h:i:s a m/d/y') }}. <ul>{{ model.actionList }}</ul></div>
+<div class="meta">Last modified at {{ model.lastModified|date('h:i:s a m/d/y') }}. <ul>{{ model.actionList }}</ul></div>
