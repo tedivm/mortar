@@ -105,7 +105,7 @@ class RequestWrapper
 
 			if($query['module'] == 'Mortar')
 			{
-				if($query['action'] == 'LogIn')
+				if($query['action'] == 'LogIn' && $query['format'] == 'Admin')
 					return false;
 
 				if($query['action'] == 'Minify' && $query['id'] && 'css')
