@@ -74,19 +74,19 @@
 
 				<children>
 					<location name="Trash" type="TrashCan" id="0" />
-					
+
 					<location name="Site" form="true" type="Site">
-						
-						<function name="addUrl">
+
+						<function name="addDomainUrl">
 							<param form="yes" />
 							<param>false</param>
 							<param>false</param>
 						</function>
-						
-						<function name="addUrl">
+
+						<function name="addDomainUrl">
 							<param>default</param>
-						</function>						
-						
+						</function>
+
 						<children>
 							<location name="AdminOnly" type="Directory" inherit="false">
 								<content name="allowIndex">1</content>
