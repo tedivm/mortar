@@ -341,6 +341,17 @@ class CoreInfo extends CoreError
 	protected $debugLevel = 5;
 }
 
+class MaintenanceMode extends CoreInfo
+{
+	/**
+	 * This is the minimal debug level that this exception class will output with.
+	 *
+	 * @access protected
+	 * @var int
+	 */
+	protected $debugLevel = 5;
+}
+
 /**
  * Depreciation exception handler
  *

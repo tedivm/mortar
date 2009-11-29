@@ -58,6 +58,11 @@ class RequestWrapper
 			$this->ioHandler = new $handlerClass();
 			do{
 				try{
+
+					//// check for maintenance mode
+					if($this->checkForMaintenanceMode())
+						throw new MaintenanceMode();
+
 					$action = $this->getAction();
 					$this->runAction($action);
 					$this->logRequest();
@@ -89,6 +94,43 @@ class RequestWrapper
 	public function getHandler()
 	{
 		return $this->ioHandler;
+	}
+
+	protected function checkForMaintenanceMode()
+	{
+		$config = Config::getInstance();
+		if(isset($config['system']['maintenance']) && $config['system']['maintenance'])
+		{
+			$query = Query::getQuery();
+
+			if($query['module'] == 'Mortar')
+			{
+				if($query['action'] == 'LogIn')
+					return false;
+
+				if($query['action'] == 'Minify' && $query['id'] && 'css')
+					return false;
+
+			}
+
+			if(!ActiveUser::isLoggedIn())
+				return true;
+
+			$user = ActiveUser::getUser();
+			$userId = $user->getId();
+
+			$admin = new MemberGroup(MemberGroup::lookupIdbyName('Administrator'));
+			if($admin->containsUser($userId))
+				return false;
+
+			$system = new MemberGroup(MemberGroup::lookupIdbyName('SuperUser'));
+			if($system->containsUser($userId))
+				return false;
+
+			return true;
+		}else{
+			return false;
+		}
 	}
 
 	/**
@@ -309,6 +351,10 @@ class RequestWrapper
 
 			case 'ResourceNotFoundError':
 				$action = 'ResourceNotFound';
+				break;
+
+			case 'MaintenanceMode':
+				$action = 'MaintenanceMode';
 				break;
 
 			case 'CoreWarning':
