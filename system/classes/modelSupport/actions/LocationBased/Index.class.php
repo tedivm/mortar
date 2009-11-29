@@ -210,8 +210,9 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 	{
 		if(count($this->childModels) > 0)
 		{
-			$Rss = new ViewModelRssFeed($this->childModels, $this->model);
-			return $Rss->getDisplay();
+			$rss = new ViewModelRssFeed($this->childModels, $this->model);
+			$rss->addChannelElement('lastBuildDate', $this->lastModified);
+			return $rss->getDisplay();
 		}else{
 
 		}
