@@ -140,7 +140,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 
 		if(isset($query['order']))
 			$listingObject->setOption('order', $query['order']);
-			
+
 		if(isset($query['day']))
 			$listingObject->addFunction('publishDate', 'day', $query['day']);
 
@@ -148,7 +148,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 			$listingObject->addFunction('publishDate', 'month', $query['month']);
 
 		if(isset($query['year']))
-			$listingObject->addFunction('publishDate', 'year', $query['year']);		
+			$listingObject->addFunction('publishDate', 'year', $query['year']);
 
 		return $listingObject;
 	}
@@ -202,15 +202,16 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 
 
 	/**
-	 * This will convert the model into XML for outputting.
+	 * This will convert the model into RSS for outputting.
 	 *
-	 * @return string XML
+	 * @return string Rss
 	 */
-	public function viewXml()
+	public function viewRss()
 	{
 		if(count($this->childModels) > 0)
 		{
-
+			$Rss = new ViewModelRssFeed($this->childModels, $this->model);
+			return $Rss->getDisplay();
 		}else{
 
 		}
