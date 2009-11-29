@@ -502,9 +502,12 @@ class Location
 		}else{
 			// should only run when id isn't set (so new objects only)
 			$db_location->creationDate = gmdate('Y-m-d H:i:s');
+			$db_location->publishDate = gmdate('Y-m-d H:i:s');
 		}
 		$db_location->lastModified = gmdate('Y-m-d H:i:s');
-		$db_location->publishDate = gmdate('Y-m-d H:i:s', $this->publishDate);
+
+		if(isset($this->publishDate))
+			$db_location->publishDate = gmdate('Y-m-d H:i:s', $this->publishDate);
 
 		if($parent = $this->getParent())
 		{
