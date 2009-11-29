@@ -8,6 +8,10 @@ class RubbleActionAuthenticationError extends ActionBase
 
 	static $requiredPermission = 'Read';
 
+	protected $authenticatedErrorCode = 403;
+	protected $unauthenticatedErrorCode = 401;
+
+	protected $errorMessage = 'You do not have the appropriate permissions to access this resource.';
 	public function logic()
 	{
 		if(isset($this->argument) && is_numeric($this->argument))
@@ -16,9 +20,10 @@ class RubbleActionAuthenticationError extends ActionBase
 		}else{
 			if(ActiveUser::isLoggedIn())
 			{
-				$this->ioHandler->setStatusCode(403);
+				$this->ioHandler->setStatusCode($this->authenticatedErrorCode);
+
 			}else{
-				$this->ioHandler->setStatusCode(401);
+				$this->ioHandler->setStatusCode($this->unauthenticatedErrorCode);
 			}
 		}
 	}
@@ -32,8 +37,7 @@ class RubbleActionAuthenticationError extends ActionBase
 			$this->ioHandler->addHeader('Location', (string) $redirectUrl);
 		}
 
-		$output = 'You do not have the appropriate permissions to access this resource.';
-		return $output;
+		return $this->errorMessage;
 	}
 
 	public function viewAdmin()
@@ -44,19 +48,17 @@ class RubbleActionAuthenticationError extends ActionBase
 			$redirectUrl = $this->redirectUrl('Admin');
 			$this->ioHandler->addHeader('Location', (string) $redirectUrl);
 		}
-		$output = 'You do not have the appropriate permissions to access this resource.';
-		return $output;
+		return $this->errorMessage;
 	}
 
 	public function viewJson()
 	{
-
-		return $output;
+		return array('error' => $this->errorMessage);
 	}
 
 	public function viewText()
 	{
-		return 'You do not have permission to perform that action.';
+		return $this->errorMessage;
 	}
 
 	protected function redirectUrl()
