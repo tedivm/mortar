@@ -19,6 +19,7 @@ Release Owner : *charlequin*
   * TagBox Support
   * URL Extension mapping to Format 
   * Canonical URLs
+  * Maintenance Mode
 
 == 0.5 ==
 
