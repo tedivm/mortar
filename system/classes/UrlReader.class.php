@@ -115,7 +115,7 @@ class UrlReader
 
 		if(isset(self::$resourceMaps[$rootPiece]))
 		{
-			$this->setAttribute('type', $rootPiece);
+			$this->setAttribute('type', self::$resourceMaps[$rootPiece]);
 			if(isset($pathPieces[1]))
 			{
 				$this->setAttribute('id', $pathPieces[1]);
