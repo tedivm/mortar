@@ -22,5 +22,10 @@ class RubbleActionMaintenanceMode extends RubbleActionAuthenticationError
 		return parent::logic();
 	}
 
+	public function viewHtml()
+	{
+		return $this->errorMessage;
+	}
+
 }
 ?>
