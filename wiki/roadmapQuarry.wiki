@@ -1,0 +1,26 @@
+#summary roadmap for the Quarry package manage
+
+= Introduction =
+
+Quarry will handle installing modules and keeping them up to date.
+
+= Quarry =
+
+== 0.1 ==
+
+Release Date : *December 25th, 2009*<br>
+Release Owner : *tedivm*
+
+  * Update modules from a package (zip file?)
+  * Update system from a package
+
+== 1.0 ==
+
+  * Verify file integrity
+  * Verify file authenticity (key signing)
+  * Version "Sticky"
+  * Update Notification
+  * Meta Packages (one name with multiple possible modules)
+  * Suites (groups of packages)
+  * Search for Modules
+  * Manage Repositories
