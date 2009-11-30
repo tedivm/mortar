@@ -66,11 +66,7 @@ class Config implements ArrayAccess
 		$this->error = false;
 
 		try {
-			$path = BASE_PATH . 'data/configuration/configuration.php';
-			if(!file_exists($path))
-				throw new Exception($path . ' does not exist.');
-
-			$iniFile = new ConfigFile($path);
+			$iniFile = $this->getSettingsFile();
 			$this->config = $iniFile->getArray();
 			$this->baseUrls = $iniFile->getArray('url'); // $config['url'];
 
@@ -89,6 +85,21 @@ class Config implements ArrayAccess
 			}
 		}
 
+	}
+
+	/**
+	 * Returns a ConfigFile primed with the current configuration file.
+	 *
+	 * @return ConfigFile
+	 */
+	public function getSettingsFile()
+	{
+		$path = BASE_PATH . 'data/configuration/configuration.php';
+		if(!file_exists($path))
+			throw new Exception($path . ' does not exist.');
+
+		$iniFile = new ConfigFile($path);
+		return $iniFile;
 	}
 
 	/**
