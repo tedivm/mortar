@@ -150,8 +150,15 @@ class IniFile
 	 * @param string $name
 	 * @param bool|int|string $value
 	 */
-	public function set($section, $name, $value)
+	public function set($section, $name, $value = null)
 	{
+		if(is_null($value))
+		{
+			if(isset($this->content[$section][$name]))
+				unset($this->content[$section][$name]);
+
+			return;
+		}
 		$this->content[$section][$name] = $value;
 	}
 
