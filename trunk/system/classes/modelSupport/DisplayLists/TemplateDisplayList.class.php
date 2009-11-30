@@ -85,8 +85,14 @@ class TemplateDisplayList implements DisplayList {
 				$url->format = $this->format;
 				$actionUrls = $this->getActionList($model, $this->format);
 
+				if ($x > 1) {
+					$separatorView = new ViewModelTemplate($this->theme, $this->model, 'Separator.html');
+					$separatorView->addContent(array('count', $x));
+					$listingHtml->wrapAround($separatorView->getDisplay());
+				}
+
 				$actionView = new ViewModelTemplate($this->theme, $model, 'Listing.html');
-				$actionView->addContent(array('model_actions' => $this->getActionIcons($actionUrls, $model)));
+				$actionView->addContent(array('model_actions' => $this->getActionIcons($actionUrls, $model), 'count' => $x));
 
 				$htmlConverter = $model->getModelAs('Html');
 				$htmlConverter->useView($actionView);
