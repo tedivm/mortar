@@ -14,7 +14,7 @@
  * @package System
  * @subpackage ModelSupport
  */
-class IndexDisplayList extends ReadDisplayList {
+class TableDisplayList extends TemplateDisplayList {
 
 	/**
 	 * Using the previously dictated model list and page, produces an Html listing in the Index style.

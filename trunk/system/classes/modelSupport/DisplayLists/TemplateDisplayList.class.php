@@ -1,6 +1,6 @@
 <?php
 
-class ReadDisplayList implements DisplayList {
+class TemplateDisplayList implements DisplayList {
 
 
 	protected $baseActionList = array('Read', 'Edit', 'Delete', 'Index');
