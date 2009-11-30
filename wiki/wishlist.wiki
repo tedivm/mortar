@@ -77,3 +77,7 @@ Directory-style modules need a way to specify what their "default" content is. R
 == Symbolic Links ==
 
 We need to be able to locate the same piece of content in more than one place. This is going to be tricky: ideally you need a model to inherit permissions and settings differently based on where it's being accessed, but to otherwise act "real" in all contexts -- i.e. if you have content mirrored in five places, you shouldn't have to find the "real" model in order to delete it or something.
+
+== Custom Fields ==
+
+The system will eventually need the ability to define both additional revisionable content fields (such as secondary content blocks for CMS pages) and non-revisionable "tags" (to handle unique content attached to users, extra "note" fields that can be used in templates, etc.) The best way to handle the former, at least, might be to define them at a location, set restrictions on which models they apply to, and then have them load up automatically in the add/edit fields of applicable locations.
