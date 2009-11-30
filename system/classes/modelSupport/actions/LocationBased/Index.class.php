@@ -153,15 +153,15 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		return $listingObject;
 	}
 
-	protected function getIndexDisplayList()
+	protected function getTableDisplayList()
 	{
-		$indexList = new IndexDisplayList($this->model, $this->childModels);
+		$indexList = new TableDisplayList($this->model, $this->childModels);
 		return $indexList;
 	}
 
-	protected function getReadDisplayList()
+	protected function getTemplateDisplayList()
 	{
-		$readList = new ReadDisplayList($this->model, $this->childModels);
+		$readList = new TemplateDisplayList($this->model, $this->childModels);
 		return $readList;
 	}
 
@@ -175,7 +175,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		$menu = $page->getMenu('actions', 'modelNav');
 		$this->makeModelActionMenu($menu, $this->model, 'Admin');
 
-		$indexList = $this->getIndexDisplayList();
+		$indexList = $this->getTableDisplayList();
 		$indexList->addPage($page);
 
 		return $indexList->getListing();
@@ -191,7 +191,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 	public function viewHtml($page)
 	{
 		$output = parent::viewHtml($page);
-		$readList = $this->getReadDisplayList();
+		$readList = $this->getTemplateDisplayList();
 		$readList->addPage($page);
 
 		if($listingResults = $readList->getListing())
