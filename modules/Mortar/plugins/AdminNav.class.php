@@ -25,6 +25,10 @@ class MortarPluginAdminNav
 		$this->addStaticLink('Clear Cache', $url, 'System', 'Environment');
 
 		$url = clone $url;
+		$url->action = 'MaintenanceMode';
+		$this->addStaticLink('Maintenance Mode', $url, 'System', 'Environment');
+
+		$url = clone $url;
 		$url->action = 'InstallModule';
 		$this->addStaticLink('Install Module', $url, 'System', 'Modules');
 
