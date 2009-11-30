@@ -127,17 +127,20 @@ class ReadDisplayList implements DisplayList {
 	protected function getActionIcons(array $actionUrls, model $model = null)
 	{
 		$themeSettings = $this->theme->getSettings();
-		$themeUrl = $this->theme->getUrl();
+		$iconset = $this->theme->getIconset();
+
 		if (isset($model)) $location = $model->getLocation();
 		$modelActions = '';
 		foreach($actionUrls as $action)
 		{
 			$fadeClass = ((isset($location)) && ($action[0] == 'Index') && !($location->getChildren())) ? 'iconFade' : '';
-			$actionDisplay = (isset($themeSettings['images']['action_images']) && $themeSettings['images']['action_images'] == true) ?
-					 '<img class="tooltip action_icon ' . $fadeClass . ' ' . $action[0] . '_icon" title="' . $action[0] . '" alt="' . $action[0] . 
-					 '" src="' . $themeUrl . $themeSettings['images'][$action[0] . '_image'] . '" />' : $action[0];
+			$iconClass = 'tooltip action_icon ' . $fadeClass;
 
-			$modelActions .= '<li class="action action_' . $action . '">' . $action[1]->getLink($actionDisplay) . '</li>';
+			$actionDisplay = (isset($themeSettings['images']['action_images']) && $themeSettings['images']['action_images'] == true)
+					? $iconset->getIcon($action[0], $iconClass)
+					: $action[0];
+
+			$modelActions .= '<li class="action action_' . $action[0] . '">' . $action[1]->getLink($actionDisplay) . '</li>';
 		}
 
 		return $modelActions;

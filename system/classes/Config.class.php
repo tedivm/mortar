@@ -168,8 +168,6 @@ class Config implements ArrayAccess
 		if(is_dir(BASE_PATH . 'javascript/'))
 			$this->config['path']['javascript'] = BASE_PATH . 'javascript/';
 
-		$this->config['url']['modules'] = 'modules/';
-
 		if(is_dir(BASE_PATH . 'system/classes/'))
 			$this->config['path']['mainclasses'] = BASE_PATH . 'system/classes/';
 
@@ -185,13 +183,20 @@ class Config implements ArrayAccess
 		if(is_dir(BASE_PATH . 'data/themes/'))
 			$this->config['path']['theme'] = BASE_PATH . 'data/themes/';
 
+		if(is_dir(BASE_PATH . 'data/icons/'))
+			$this->config['path']['icons'] = BASE_PATH . 'data/icons/';
+
 		if(is_dir(BASE_PATH . 'temp/'))
 			$this->config['path']['temp'] = BASE_PATH . 'temp/';
 
-                if(is_dir(BASE_PATH . 'system/templates'))
-                        $this->config['path']['templates'] = BASE_PATH . 'system/templates';
+		if(is_dir(BASE_PATH . 'system/templates'))
+			$this->config['path']['templates'] = BASE_PATH . 'system/templates';
+
+		$this->config['url']['modules'] = 'modules/';
 
 		$this->config['url']['theme'] = 'data/themes/';
+
+		$this->config['url']['icons'] = 'data/icons/';
 
 		$this->config['url']['javascript'] = 'javascript/';
 	}

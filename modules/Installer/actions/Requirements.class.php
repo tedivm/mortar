@@ -76,8 +76,10 @@ class InstallerActionRequirements implements ActionInterface //extends Action
 	public function viewAdmin($page)
 	{
 		$theme = $page->getTheme();
-                $themeSettings = $theme->getSettings();
-                $themeUrl = $theme->getUrl();
+		$iconset = $theme->getIconset();
+
+		$successIcon = $iconset->getIcon('success');
+		$failureIcon = $iconset->getIcon('failure');
 
 		$jsMin = $theme->getMinifier('js');
 		$cssMin = $theme->getMinifier('css');
@@ -106,9 +108,8 @@ class InstallerActionRequirements implements ActionInterface //extends Action
 		$versionTable->addField('label', 'PHP Version:');
 		$versionTable->addField('version', PHP_VERSION);
 		$class = ($this->tests['version']['test']) ? 'test_passed' : 'test_failed';
-		$resultImage = ($this->tests['version']['test']) ? $themeUrl . $themeSettings['images']['success_image'] : 
-								   $themeUrl . $themeSettings['images']['failure_image'];
-		$versionTable->addField('result', '<img src="'.$resultImage.'" />');
+		$resultImage = ($this->tests['version']['test']) ? $successIcon : $failureIcon;
+		$versionTable->addField('result', $resultImage);
 		$versionTable->addRowClass($class);
 
 		$output = $versionTable->makeHtml();
@@ -134,14 +135,12 @@ class InstallerActionRequirements implements ActionInterface //extends Action
 				{
 					$extensionsTable->addField('status', 'Installed');
 					$extensionsTable->addRowClass('test_passed');
-					$extensionsTable->addField('result', '<img src="'.$themeUrl.
-								   $themeSettings['images']['success_image'].'" />');
+					$extensionsTable->addField('result', $successIcon);
 
 				}else{
 					$extensionsTable->addField('status', 'Not Found');
 					$extensionsTable->addRowClass('test_failed');
-					$extensionsTable->addField('result', '<img src="'.$themeUrl.
-								   $themeSettings['images']['failure_image'].'" />');
+					$extensionsTable->addField('result', $failureIcon);
 				}
 
 
