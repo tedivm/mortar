@@ -18,14 +18,8 @@
  * @package System
  * @subpackage Display
  */
-class Theme
+class Theme extends ContentBase
 {
-	/**
-	 * name of the current theme
-	 *
-	 * @var string
-	 */
-	public $name;
 
 	/**
 	 * Urls for all of the CSS files
@@ -44,21 +38,6 @@ class Theme
 	protected $jsUrls;
 
 	/**
-	 * Url for the active website
-	 *
-	 * @access protected
-	 * @var string
-	 */
-	protected $url;
-
-	/**
-	 * Directory of the current active theme.
-	 *
-	 * @var string
-	 */
-	protected $pathToTheme;
-
-	/**
 	 * Whether js and css minification is enabled
 	 *
 	 * @access protected
@@ -67,11 +46,15 @@ class Theme
 	protected $allowMin = true;
 
 	/**
-	 * Settings from the INI file in the theme folder.
+	 * The iconset currently in use by this theme
 	 *
-	 * @var array
+	 * @access protected
+	 * @var Iconset
 	 */
-	protected $settings;
+	protected $iconset;
+
+	protected $contentType = 'theme';
+	protected $imagePath = 'images/';
 
 	/**
 	 * Constructor takes the name of the theme and loads the initial information
@@ -89,7 +72,7 @@ class Theme
 		$this->name = $name;
 		$this->url = ActiveSite::getLink('theme') . $name . '/';
 		$themePath = $config['path']['theme'] . $name . '/';
-		$this->pathToTheme = $themePath;
+		$this->contentPath = $themePath;
 		$themeUrl = $this->url;
 
 		$cache = new Cache('theme', $this->name, ActiveSite::getLink('theme'));
@@ -97,7 +80,7 @@ class Theme
 
 		if($cache->isStale())
 		{
-			$settingsPath = $this->pathToTheme . 'settings.ini';
+			$settingsPath = $this->contentPath . 'settings.ini';
 
 			if(is_readable($settingsPath))
 			{
@@ -149,8 +132,6 @@ class Theme
 
 			}
 
-			$themeUrl = $this->url;
-
 			// javascript
 			$javascriptResult = $this->getFiles($themePath . 'javascript/', $themeUrl . 'javascript/', 'js');
 			if($javascriptResult)
@@ -183,20 +164,12 @@ class Theme
 		if(isset($data['settings']))
 			$this->settings = $data['settings'];
 
+		if(isset($this->settings['images']['iconset']))
+			$this->iconset = new Iconset($this->settings['images']['iconset']);
+
 		$this->jsUrls = $data['jsLinks'];
 		$this->cssUrls = $data['cssLinks'];
 	}
-
-	/**
-	 * Returns the theme-specific settings found in the settings.ini theme file.
-	 *
-	 * @return array
-	 */
-	public function getSettings()
-	{
-		return isset($this->settings) ? $this->settings : false;
-	}
-
 
 	/**
 	 * Returns the parent theme or false if there isn't one.
@@ -212,23 +185,16 @@ class Theme
 	}
 
 	/**
-	 * Returns the file path to the theme.
+	 * Returns the current iconset or false if there isn't one.
 	 *
-	 * @return string
+	 * @return Iconset|false
 	 */
-	public function getPath()
+	public function getIconset()
 	{
-		return $this->pathToTheme;
-	}
-
-	/**
-	 * Returns the name of the theme.
-	 *
-	 * @return string
-	 */
-	public function getName()
-	{
-		return $this->name;
+		if(isset($this->iconset))
+			return $this->iconset;
+		else
+			return false;
 	}
 
 	public function getPaths($type = 'css')
@@ -271,7 +237,6 @@ class Theme
 		return isset($this->jsUrl) ? $this->jsUrl : array();
 	}
 
-
 	/**
 	 * Returns the matching url
 	 *
@@ -308,7 +273,7 @@ class Theme
 
 		if($type == 'js' || $type == 'css')
 		{
-			$cache = new Cache('themes', $this->name, 'minification', $type, 'url');
+			$cache = new Cache($this->contentType, $this->name, 'minification', $type, 'url');
 			$url = $cache->getData();
 
 			if($cache->isStale())
@@ -328,41 +293,6 @@ class Theme
 			return false;
 		}
 
-
-
-	}
-
-	/**
-	 * This function returns a Minifier object which contains either the Javascript or CSS paths.
-	 *
-	 * @param string $type js or css
-	 * @return Minifier
-	 */
-
-	public function getImageUrl($imageName)
-	{
-		$cache = new Cache('theme', $this->name, 'imagepath', $imageName);
-		$url = $cache->getData();
-
-		if($cache->isStale())
-		{
-			$imagePath = $this->pathToTheme . 'images/' . $imageName;
-
-			if($realPath = realpath($imagePath))
-			{
-				if(!strpos($realPath, $this->pathToTheme . 'images/') === 0)
-					throw new CoreSecurity('Attempted to load image outside the image directory.');
-
-				$themeUrl = $this->getUrl();
-				$url = $themeUrl . 'images/' . $imageName;
-			}elseif($parent = $this->getParentTheme()){
-				$url = $parent->getImageUrl($imageName);
-			}else{
-				$url = false;
-			}
-			$cache->storeData($url);
-		}
-		return $url;
 	}
 
 	public function getMinifier($type = 'js')
@@ -385,56 +315,6 @@ class Theme
 		return $minifier;
 	}
 
-	/**
-	 * Returns all of the urls for the files in the requested directory
-	 *
-	 * @access protected
-	 * @param string $path
-	 * @param string $url This is the base url that the files are called from
-	 * @param string $extention
-	 * @return array
-	 */
-	protected function getFiles($path, $url, $extention = '.*', $defaultPriority = 30)
-	{
-		if(strlen($path) < 1 || strlen($url) < 1)
-			return false;
-
-		$pattern = glob($path . '*' . $extention);
-		$fileArray = array();
-		foreach($pattern as $file)
-		{
-			unset($priority);
-			$tmpArray = explode('/', $file);
-			$fileName = array_pop($tmpArray);
-			$fileDetails = explode('.', $fileName);
-			$min = false;
-			$extension = array_pop($fileDetails);
-			$library = array_shift($fileDetails);
-
-			switch (count($fileDetails))
-			{
-				case 0:
-					$name = $library;
-					$library = 'none';
-					break;
-
-				case 2:
-					$option = array_pop($fileDetails);
-					if(is_numeric($option))
-						$priority = $option;
-
-				case 1:
-					$name = array_pop($fileDetails);
-					break;
-
-			}
-
-			$fileArray[$library][$name]['mainLink'] = $url . $fileName;
-			$fileArray[$library][$name]['path']  = $file;
-			$fileArray[$library][$name]['priority']  = isset($priority) ? $priority : $defaultPriority;
-		}
-		return $fileArray;
-	}
 
 	/**
 	 * This function attempts to return the URL for the requested resource. If minification is enabled, and a minified
