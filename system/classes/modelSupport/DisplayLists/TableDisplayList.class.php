@@ -16,6 +16,53 @@
  */
 class TableDisplayList extends TemplateDisplayList {
 
+	protected $tableColumns;
+	protected $modelData;
+
+	protected $allowedColumns = array('type' 	=> 'Type',
+					'name' 		=> 'Name',
+					'title' 	=> 'Title',
+					'status'	=> 'Status',
+					'owner'		=> 'Owner',
+					'createdOn'	=> 'Created',
+					'lastModified'	=> 'Last Modified',
+					'publishDate'	=> 'Published');
+
+	public function __construct(Model $mmodel, array $modelList)
+	{
+		parent::__construct($mmodel, $modelList);		
+
+		$this->extractTableData();
+	}
+
+	protected function extractTableData()
+	{
+		$columnList = array();
+		$x = 0;
+
+		foreach ($this->modelList as $model)
+		{
+			$properties = $model->__toArray();
+			
+			foreach($this->allowedColumns as $propName => $propLabel) {
+				if (isset($properties[$propName])) {
+					$propData = $properties[$propName];
+					$columnList[$propName] = $propLabel;
+					if ($propName === 'owner')
+						$this->modelData[$x][$propName] = $propData['name'];
+					elseif (($propName === 'createdOn') || ($propName === 'lastModified') ||
+						($propName === 'publishDate'))
+						$this->modelData[$x][$propName] = 
+							date($this->indexDateFormat, $propData);
+					else
+						$this->modelData[$x][$propName] = $propData;
+				}
+			}
+			$x++;
+		}
+		$this->tableColumns = $columnList;
+	}
+
 	/**
 	 * Using the previously dictated model list and page, produces an Html listing in the Index style.
 	 *
@@ -33,10 +80,11 @@ class TableDisplayList extends TemplateDisplayList {
 
 		$this->addColumnsToTable($table);
 
+		$x = 0;
 		foreach($this->modelList as $model)
 		{
 			$table->newRow();
-			$this->addModelToTable($table, $model);
+			$this->addModelToTable($table, $this->modelData[$x++]);
 			$this->addModelActionsToRow($table, $model);
 		}
 
@@ -45,39 +93,16 @@ class TableDisplayList extends TemplateDisplayList {
 
 	protected function addColumnsToTable($table)
 	{
-		$table->addColumnLabel('model_type', 'Type');
-		$table->addColumnLabel('model_name', 'Name');
-		$table->addColumnLabel('model_title', 'Title');
-		$table->addColumnLabel('model_status', 'Status');
-		$table->addColumnLabel('model_owner', 'Owner');
-		$table->addColumnLabel('model_creationTime', 'Created');
-		$table->addColumnLabel('model_lastModified', 'Last Modified');
+		foreach ($this->tableColumns as $name => $label) 
+			$table->addColumnLabel('model_' . $name, $label);
+
 		$table->addColumnLabel('model_actions', 'Actions');
 	}
 
-	protected function addModelToTable($table, Model $model)
+	protected function addModelToTable($table, $modelArray)
 	{
-		$location = $model->getLocation();
-		$owner = $location->getOwner();
-		$createdOn = $location->getCreationDate();
-		$modifiedOn = $location->getLastModified();
-		$type = $model->getType();
-		$table->addField('model_type', $model->getType());
-		$table->addRowClass($type . '_item');
-
-		$location = $model->getLocation();
-		$url = new Url();
-		$url->location = $location->getId();
-		$url->format = $this->format;
-
-
-		$table->addField('model_name',
-				 isset($model->name) ? "<a href='" . $url . "'>" . $model->name . "</a>" : "");
-		$table->addField('model_title', isset($model['title']) ? $model['title'] : "");
-		$table->addField('model_status', isset($model->status) ? $model->status : "");
-		$table->addField('model_owner', ($owner && $owner['name']) ? $owner['name'] : "");
-		$table->addField('model_creationTime', date($this->indexDateFormat, $createdOn));
-		$table->addField('model_lastModified', date($this->indexDateFormat, $modifiedOn));
+		foreach($this->tableColumns as $name => $label)
+			$table->addField('model_' . $name, $modelArray[$name]);
 	}
 
 	protected function addModelActionsToRow($table, $model)
