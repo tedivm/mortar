@@ -186,36 +186,46 @@ abstract class ModelBase implements Model
 		{
 			if(isset($this->table))
 			{
-				$record = new ObjectRelationshipMapper($this->table);
+				$tables = $this->table;
 
-				if(isset($this->id))
-				{
-					$record->primaryKey = $this->id;
-					$newItem = false;
-				}else{
-					$newItem = true;
-				}
+				if(is_scalar($tables))
+					$tables = array($tables);
 
-				$columns = $record->getColumns(false, false);
-				foreach($columns as $columnName)
+				foreach($tables as $tableName)
 				{
-					if(isset($this->content[$columnName]))
+					$record = new ObjectRelationshipMapper($tableName);
+
+					if(isset($this->id))
 					{
-						if(is_bool($this->content[$columnName]))
-						{
-							$value = ($this->content[$columnName]) ? 1 : 0;
-						}else{
-							$value = $this->content[$columnName];
-						}
-						$record->$columnName = $value;
+						$record->primaryKey = $this->id;
+						$newItem = false;
+					}else{
+						$newItem = true;
 					}
+
+					$columns = $record->getColumns(false, false);
+					foreach($columns as $columnName)
+					{
+						if(isset($this->content[$columnName]))
+						{
+							if(is_bool($this->content[$columnName]))
+							{
+								$value = ($this->content[$columnName]) ? 1 : 0;
+							}else{
+								$value = $this->content[$columnName];
+							}
+							$record->$columnName = $value;
+						}
+					}
+
+					if(!$record->save())
+						throw new CoreError('Unable to save model information to table');
+
+					if(!isset($this->id))
+						$this->id = $record->primaryKey;
+
 				}
 
-				if(!$record->save())
-					throw new CoreError('Unable to save model information to table');
-
-				if(!isset($this->id))
-					$this->id = $record->primaryKey;
 
 				if($newItem && method_exists($this, 'firstSave'))
 					$this->firstSave();
@@ -246,19 +256,29 @@ abstract class ModelBase implements Model
 		if(!isset($id))
 			throw new CoreError('Attempted to delete unsaved model.');
 
+		$status = true;
+
 		if(isset($this->table))
 		{
-			$record = new ObjectRelationshipMapper($this->table);
-			$record->primaryKey($id);
+			$tables = $this->table;
 
-			if($record->select(1))
+			if(is_scalar($tables))
+				$tables = array($tables);
+
+			$tables = array_reverse($tables);
+
+			foreach($tables as $table)
 			{
-				return $record->delete(1);
-			}else{
-				return true;
+				$record = new ObjectRelationshipMapper($this->table);
+				$record->primaryKey($id);
+
+				if($record->select(1))
+				{
+					$status = ($record->delete(1) && $status);
+				}
 			}
 		}
-		return false;
+		return $status;
 	}
 
 	/**
@@ -517,18 +537,33 @@ abstract class ModelBase implements Model
 		{
 			if(isset($this->table))
 			{
-				$record = new ObjectRelationshipMapper($this->table);
-				$record->primaryKey = $id;
+				$tables = $this->table;
 
-				if($record->select(1))
+				if(is_scalar($tables))
+					$tables = array($tables);
+
+				$filled = false;
+
+				foreach($tables as $tableName)
+				{
+					$record = new ObjectRelationshipMapper($tableName);
+					$record->primaryKey = $id;
+
+					if($record->select(1))
+					{
+						$filled = true;
+						$columns = $record->getColumns(false, false);
+
+						foreach($columns as $columnName)
+						{
+							$info['content'][$columnName] = $record->$columnName;
+						}
+					}
+				}
+
+				if($filled)
 				{
 					$info['id'] = $id;
-					$columns = $record->getColumns(false, false);
-
-					foreach($columns as $columnName)
-					{
-						$info['content'][$columnName] = $record->$columnName;
-					}
 				}else{
 					$info = false;
 				}
