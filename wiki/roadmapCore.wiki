@@ -17,9 +17,13 @@ Release Owner : *charlequin*
   * Twig Integration
   * RSS Support
   * TagBox Support
+  * Rewrite of the URL subsystem.
   * URL Extension mapping to Format 
   * Canonical URLs
   * Maintenance Mode
+  * User Listings
+  * Support for mapping models to multiple tables.
+
 
 == 0.5 ==
 
@@ -28,7 +32,7 @@ Release Owner : *tedivm*
 
   * Core Updater
   * Non-location Model Routing 
-  * User Listing/Read
+  * User Read
   * Group Listing/Read
 
 == 0.6 ==
