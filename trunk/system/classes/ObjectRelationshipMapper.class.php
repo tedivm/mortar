@@ -326,7 +326,7 @@ class ObjectRelationshipMapper
 		}
 
 	// process results
-		if($select_stmt->errno > 0)
+		if(isset($select_stmt) && $select_stmt->errno > 0)
 		{
 			$this->sql_errno = $select_stmt->errno;
 			$this->errorString = $select_stmt->error;

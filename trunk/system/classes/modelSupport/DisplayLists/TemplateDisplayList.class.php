@@ -132,10 +132,15 @@ class TemplateDisplayList implements DisplayList {
 
 	protected function getActionIcons(array $actionUrls, model $model = null)
 	{
+		if(!isset($model))
+			return false;
+
 		$themeSettings = $this->theme->getSettings();
 		$iconset = $this->theme->getIconset();
 
-		if (isset($model)) $location = $model->getLocation();
+		if (isset($model) && method_exists($model, 'getLocation'))
+			$location = $model->getLocation();
+
 		$modelActions = '';
 		foreach($actionUrls as $action)
 		{

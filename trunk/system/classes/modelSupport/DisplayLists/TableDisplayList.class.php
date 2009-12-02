@@ -71,11 +71,14 @@ class TableDisplayList extends TemplateDisplayList {
 	public function getListing()
 	{
 		$themeSettings = $this->theme->getSettings();
+		
+		$name = method_exists($this->model, 'getLocation')	? $this->model->getLocation()->getName()
+									: $this->model->getType();
 
-		$table = new Table($this->model->getLocation()->getName() . '_listing');
+		$table = new Table($name . '_listing');
 		$table->addClass('model-listing');
 		$table->addClass('index-listing');
-		$table->addClass($this->model->getLocation()->getName() . '-listing');
+		$table->addClass($name . '-listing');
 		$table->enableIndex();
 
 		$this->addColumnsToTable($table);

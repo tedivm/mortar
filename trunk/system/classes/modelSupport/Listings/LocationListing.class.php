@@ -64,6 +64,10 @@ class LocationListing extends ModelListing
 		parent::addRestriction($name, $value);
 	}
 
+	public function __construct()
+	{
+
+	}
 
 }
 

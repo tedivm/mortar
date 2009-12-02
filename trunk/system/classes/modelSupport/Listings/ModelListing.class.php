@@ -61,6 +61,7 @@ class ModelListing
 	 */
 	protected $table;
 
+	protected $type;
 	/**
 	 * This function sets an option (browseBy, order) for retrieving the models.
 	 *
@@ -125,6 +126,8 @@ class ModelListing
 		{
 			try
 			{
+				if(!isset($modelInfo['type']))
+					$modelInfo['type'] = $this->type;
 				$model = ModelRegistry::loadModel($modelInfo['type'], $modelInfo['id']);
 
 				if($model->checkAuth('Read', $user))
@@ -182,6 +185,11 @@ class ModelListing
 	public function setTable($table)
 	{
 		$this->table = $table;
+	}
+
+	public function setType($type)
+	{
+		$this->type = $type;
 	}
 
 	/**
@@ -273,10 +281,7 @@ class ModelListing
 	 */
 	protected function getCacheArray()
 	{
-		if(!isset($this->restrictions['type']))
-			return false;
-
-		$cacheKey = array('models', $this->restrictions['type'], 'browseModelBy');
+		$cacheKey = array('models', $this->type, 'browseModelBy');
 		return $cacheKey;
 	}
 
@@ -308,6 +313,12 @@ class ModelListing
 			$functionString .= $val['name'] . ':' . $val['function'] . ':' . $val['value'] . '::';
 
 		return ($functionString != '') ? $functionString : false;
+	}
+
+	public function __construct($table, $type)
+	{
+		$this->table = $table;
+		$this->type = $type;
 	}
 
 }
