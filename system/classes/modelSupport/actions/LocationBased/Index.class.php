@@ -113,7 +113,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 	 * This function initiates and sets up the Listing class used by the getChildren class. When overloading this class
 	 * this function is an ideal starting place.
 	 *
-	 * @return ModelListing
+	 * @return LocationListing
 	 */
 	protected function getModelListingClass()
 	{

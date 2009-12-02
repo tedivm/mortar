@@ -327,7 +327,28 @@ abstract class ModelBase implements Model
 
 	public function getActionUrls($format, $attributes = null)
 	{
-		return false; // will come back to this at a later date!
+		$actionUrls = array();
+		$baseUrl = new Url();
+		$baseUrl->format = $format;
+		$baseUrl->property('id', $this->id);
+		$baseUrl->property('type', $this->getType());
+
+		$actions = $this->getActions();
+		unset($actions['Index']);
+
+		foreach($actions as $actionName => $action) {
+			$actionUrl = clone $baseUrl;
+			$actionUrl->action = $actionName;
+
+			if (isset($attributes))
+				foreach($attributes as $attName => $attValue)
+					$actionUrl->property($attName, $attValue);
+
+			$actionUrls[$actionName] = $actionUrl;
+		}
+
+		return $actionUrls;
+
 	}
 
 	static function loadActions($resourceType)
@@ -500,6 +521,11 @@ abstract class ModelBase implements Model
 			$this->currentType = staticHack(get_class($this), 'type');
 
 		return $this->currentType;
+	}
+
+	public function getTable()
+	{
+		return $this->table;
 	}
 
 	/**

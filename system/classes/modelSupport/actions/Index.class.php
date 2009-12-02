@@ -18,57 +18,114 @@
 class ModelActionIndex extends ModelActionBase
 {
 
-	/**
-	 * This literally does nothing at all.
-	 *
-	 */
+	protected $listingClass = 'ModelListing';
+
+	protected $indexDateFormat = 'm.d.y g:i a';
+
+	public $indexBrowseBy = 'name';
+
+	public $indexMaxLimit = 100;
+
+	public $indexLimit = 10;
+
+	public $childModels = array();
+
 	public function logic()
 	{
+		$modelInformationArray = $this->getChildren(array());
+		$childrenModels = array();
+		if(is_array($modelInformationArray))
+		{
+			foreach($modelInformationArray as $modelInfo)
+			{
+				$childModel = ModelRegistry::loadModel($this->model->getType(), $modelInfo['id']);
+				$childrenModels[] = $childModel;
+			}
+		}
 
+		$this->childModels = $childrenModels;
+	}
+
+	protected function getChildren($restrictions)
+	{
+		$query = Query::getQuery();
+
+		$offset = isset($query['start']) ? $query['start'] : 0;
+		$numberChildren = isset($query['limit']) && is_numeric($query['limit'])
+							? $query['limit']
+							: $this->indexLimit;
+
+		if($numberChildren > $this->indexMaxLimit)
+			$numberChildren = $this->indexMaxLimit;
+
+		$modelListing = $this->getModelListingClass();
+
+		foreach($restrictions as $restrictionName => $restrictionValue)
+			$modelListing->addRestriction($restrictionName, $restrictionValue);
+
+		$listing = $modelListing->getListing($numberChildren, $offset);
+		return $listing;
+	}
+
+	protected function getModelListingClass()
+	{
+		$listingClass = $this->listingClass;
+		$listingObject = new $listingClass($this->model->getTable(), $this->model->getType());
+		return $listingObject;
 	}
 
 
-	/**
-	 * This is incredibly basic right now, but thats because I'm working woth the Joshes on getting the interface
-	 * for it set up.
-	 *
-	 * @return string
-	 */
-	public function viewAdmin()
+	protected function getTableDisplayList()
+	{
+		$indexList = new TableDisplayList($this->model, $this->childModels);
+		return $indexList;
+	}
+
+	protected function getTemplateDisplayList()
+	{
+		$readList = new TemplateDisplayList($this->model, $this->childModels);
+		return $readList;
+	}
+
+	public function viewAdmin($page)
 	{
 
+		$indexList = $this->getTableDisplayList();
+		$indexList->addPage($page);
+
+		return $indexList->getListing();
 	}
 
-	/**
-	 * This function takes the model's data and puts it into a template, which gets injected into the active page. It
-	 * also takes out some model data to place in the rest of the template (title, keywords, descriptions).
-	 *
-	 * @return string This is the html that will get injected into the template.
-	 */
-	public function viewHtml()
+	public function viewHtml($page)
 	{
+		$output = parent::viewHtml($page);
+		$readList = $this->getTemplateDisplayList();
+		$readList->addPage($page);
 
+		if($listingResults = $readList->getListing())
+			$output .= $listingResults;
+
+		return $output;
 	}
 
-	/**
-	 * This will convert the model into XML for outputting.
-	 *
-	 * @return string XML
-	 */
 	public function viewXml()
 	{
 
 	}
 
-	/**
-	 * This takes the model and turns it into an array. The output controller converts that to json, which gets
-	 * outputted.
-	 *
-	 * @return array
-	 */
 	public function viewJson()
 	{
-
+		$children = array();
+		if(count($this->childModels) > 0)
+		{
+			foreach($this->childModels as $model)
+			{
+				$children[] = $model->__toArray();
+			}
+			return $children;
+		}else{
+			return false;
+		}
 	}
 }
 
