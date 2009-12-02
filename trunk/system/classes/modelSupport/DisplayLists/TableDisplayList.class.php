@@ -22,6 +22,8 @@ class TableDisplayList extends TemplateDisplayList {
 	protected $allowedColumns = array('type' 	=> 'Type',
 					'name' 		=> 'Name',
 					'title' 	=> 'Title',
+					'email'		=> 'Email Address',
+					'membergroups'	=> 'Groups',
 					'status'	=> 'Status',
 					'owner'		=> 'Owner',
 					'createdOn'	=> 'Created',
@@ -54,6 +56,8 @@ class TableDisplayList extends TemplateDisplayList {
 						($propName === 'publishDate'))
 						$this->modelData[$x][$propName] = 
 							date($this->indexDateFormat, $propData);
+					elseif ($propName === 'membergroups')
+						$this->modelData[$x][$propName] = $this->formatGroups($propData);
 					else
 						$this->modelData[$x][$propName] = $propData;
 				}
@@ -121,6 +125,24 @@ class TableDisplayList extends TemplateDisplayList {
 			isset($modelActions) && $modelActions != '' ? "<ul class='action_list'>" . $modelActions . "</ul>" : "");
 	}
 
+	protected function formatGroups($groups)
+	{
+		$first = true;
+		$groupList = '';
+
+		foreach($groups as $groupId) {
+			$group = new MemberGroup($groupId);
+			
+			if (!$first) 
+				$groupList .= ', ';
+			else
+				$first = false;
+			
+			$groupList .= $group->getName();
+		}
+		
+		return $groupList;
+	}
 }
 
 ?>
