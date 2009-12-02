@@ -21,6 +21,12 @@ class UrlReader
 			unset($getValues['path']);
 		}
 
+		if(isset($getValues['action']))
+		{
+			$this->setAttribute('action', $getValues['action'], true);
+			unset($getValues['action']);
+		}
+
 		foreach($getValues as $name => $value)
 			$this->setAttribute($name, $value);
 
@@ -106,6 +112,8 @@ class UrlReader
 					{
 						$this->setAttribute('id', $pathPieces[2]);
 						array_shift($pathPieces);
+					}else{
+						$this->setAttribute('action', 'Index');
 					}
 					array_shift($pathPieces);
 					array_shift($pathPieces);
@@ -120,16 +128,16 @@ class UrlReader
 			{
 				$this->setAttribute('id', $pathPieces[1]);
 				array_shift($pathPieces);
+			}else{
+				$this->setAttribute('action', 'Index');
 			}
+
 			array_shift($pathPieces);
 			return true;
 		}
 
 		return false;
 	}
-
-
-
 
 	protected function getLocation(&$pathArray)
 	{
