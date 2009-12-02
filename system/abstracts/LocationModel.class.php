@@ -1,6 +1,6 @@
 <?php
 
-class LocationModel extends ModelBase
+abstract class LocationModel extends ModelBase
 {
 	/**
 	 * This array contains a list (currently empty) of all children that the current model can inherit. This is empty
