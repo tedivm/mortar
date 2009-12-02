@@ -102,7 +102,10 @@ class TableDisplayList extends TemplateDisplayList {
 	protected function addModelToTable($table, $modelArray)
 	{
 		foreach($this->tableColumns as $name => $label)
-			$table->addField('model_' . $name, $modelArray[$name]);
+			if(isset($modelArray[$name]))
+				$table->addField('model_' . $name, $modelArray[$name]);
+			else
+				$table->addField('model_' . $name, '');
 	}
 
 	protected function addModelActionsToRow($table, $model)
