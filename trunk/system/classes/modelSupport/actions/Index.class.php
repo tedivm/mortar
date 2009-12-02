@@ -69,8 +69,11 @@ class ModelActionIndex extends ModelActionBase
 
 	protected function getModelListingClass()
 	{
+		if(!($tables = $this->model->getTables()))
+			throw new CoreError('Models using the core ModelListingClass need to have a base table defined.');
+
 		$listingClass = $this->listingClass;
-		$listingObject = new $listingClass($this->model->getTable(), $this->model->getType());
+		$listingObject = new $listingClass($tables[0], $this->model->getType());
 		return $listingObject;
 	}
 

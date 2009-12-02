@@ -184,13 +184,8 @@ abstract class ModelBase implements Model
 
 		try
 		{
-			if(isset($this->table))
+			if($tables = $this->getTables())
 			{
-				$tables = $this->table;
-
-				if(is_scalar($tables))
-					$tables = array($tables);
-
 				foreach($tables as $tableName)
 				{
 					$record = new ObjectRelationshipMapper($tableName);
@@ -258,13 +253,8 @@ abstract class ModelBase implements Model
 
 		$status = true;
 
-		if(isset($this->table))
+		if($tables = $this->getTables())
 		{
-			$tables = $this->table;
-
-			if(is_scalar($tables))
-				$tables = array($tables);
-
 			$tables = array_reverse($tables);
 
 			foreach($tables as $table)
@@ -523,9 +513,50 @@ abstract class ModelBase implements Model
 		return $this->currentType;
 	}
 
-	public function getTable()
+	public function getTables()
 	{
-		return $this->table;
+		$cache = new Cache('models', $this->getType(), 'tables');
+		$cache->setMemOnly();
+
+		$tables = $cache->getData();
+
+		if($cache->isStale())
+		{
+			$tables = array();
+
+			$classReflection = new ReflectionClass(get_class($this));
+			if($parentClass = $classReflection->getParentClass())
+			{
+				if(!$parentClass->isAbstract())
+				{
+					$className = $parentClass->getName();
+					$parentModel = new $className();
+					if($tempTables = $parentModel->getTables())
+						$parentTables = $tempTables;
+				}
+			}
+
+			if(isset($this->table))
+			{
+				if(is_array($tables = $this->table))
+				{
+					$tables = $this->table;
+				}elseif(is_scalar($this->table)){
+					$tables = array($this->table);
+				}
+			}
+
+			if(isset($parentTables))
+				$tables = array_merge($parentTables, $tables);
+
+			$tables = array_unique($tables);
+
+			if(count($tables) < 1)
+				$tables = false;
+
+			$cache->storeData($tables);
+		}
+		return $tables;
 	}
 
 	/**
@@ -561,13 +592,8 @@ abstract class ModelBase implements Model
 
 		if($cache->isStale())
 		{
-			if(isset($this->table))
+			if($tables = $this->getTables())
 			{
-				$tables = $this->table;
-
-				if(is_scalar($tables))
-					$tables = array($tables);
-
 				$filled = false;
 
 				foreach($tables as $tableName)
