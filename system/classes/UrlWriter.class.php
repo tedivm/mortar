@@ -111,6 +111,8 @@ class UrlWriter
 			{
 				$path .= $attributes['id'] . '/';
 				unset($attributes['id']);
+			}elseif(isset($attributes['action']) && $attributes['action'] == 'Index'){
+				unset($attributes['action']);
 			}
 
 		}
