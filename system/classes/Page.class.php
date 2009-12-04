@@ -138,7 +138,6 @@ class Page implements ArrayAccess
 	 * @var string
 	 */
 	protected $headerTemplate = '
-	<title>{{ title }}</title>
 	{{ cssIncludes }}
 	<script type="text/javascript">
 	{{ preStartupJs }}

@@ -186,6 +186,9 @@ class Config implements ArrayAccess
 		if(is_dir(BASE_PATH . 'data/icons/'))
 			$this->config['path']['icons'] = BASE_PATH . 'data/icons/';
 
+		if(is_dir(BASE_PATH . 'data/fonts/'))
+			$this->config['path']['fonts'] = BASE_PATH . 'data/fonts/';
+
 		if(is_dir(BASE_PATH . 'temp/'))
 			$this->config['path']['temp'] = BASE_PATH . 'temp/';
 
@@ -197,6 +200,8 @@ class Config implements ArrayAccess
 		$this->config['url']['theme'] = 'data/themes/';
 
 		$this->config['url']['icons'] = 'data/icons/';
+		
+		$this->config['url']['fonts'] = 'data/fonts/';
 
 		$this->config['url']['javascript'] = 'javascript/';
 	}

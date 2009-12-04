@@ -303,10 +303,13 @@ class Theme extends ContentBase
 
 		if($type !== 'js')
 		{
-			$baseString = $minifier->getBaseString();
+			$baseString = "{{ fonts.all }}\n" . $minifier->getBaseString();
 			$fileTemplate = new ViewStringTemplate($baseString);
+
 			$themeBox = new TagBoxTheme($this);
-			$fileTemplate->addContent(array('theme' => $themeBox));
+			$fontBox = new TagBoxFonts();
+
+			$fileTemplate->addContent(array('theme' => $themeBox, 'fonts' => $fontBox));
 
 			$baseString = $fileTemplate->getDisplay();
 			$minifier->setBaseString($baseString);
