@@ -117,6 +117,7 @@ class InstallerInstaller // thats the most pathetic name ever
 			$path['base'] = rtrim(trim($path['base']), '/') . '/';
 			$path['theme'] = ($input['theme']) ? $input['theme'] : $path['base'] . 'data/themes/';
 			$path['icons'] = ($input['icons']) ? $input['icons'] : $path['base'] . 'data/icons/';
+			$path['fonts'] = ($input['fonts']) ? $input['fonts'] : $path['base'] . 'data/fonts/';
 			$path['config'] = ($input['config']) ? $input['config'] : $path['base'] . 'data/configuration/';
 			$path['mainClasses'] = ($input['mainClasses']) ? $input['mainClasses'] : $path['base'] . 'system/classes/';
 			$path['packages'] = ($input['packages']) ? $input['packages'] : $path['base'] . 'modules/';
@@ -134,6 +135,7 @@ class InstallerInstaller // thats the most pathetic name ever
 
 			$url['theme'] = 'data/themes/';
 			$url['icons'] = 'data/icons/';
+			$url['fonts'] = 'data/fonts/';
 			$url['modules'] = 'bin/modules/';
 			$url['javascript'] = 'javascript/';
 			$url['modRewrite'] = (isset($input['url_modRewrite']));
@@ -151,6 +153,7 @@ class InstallerInstaller // thats the most pathetic name ever
 				$configFile->set('path', 'base', $path['base']);
 				$configFile->set('path', 'theme', $path['theme']);
 				$configFile->set('path', 'icons', $path['icons']);
+				$configFile->set('path', 'fonts', $path['fonts']);
 				$configFile->set('path', 'config', $path['config']);
 				$configFile->set('path', 'mainclasses', $path['mainClasses']);
 				$configFile->set('path', 'modules', $path['packages']);
@@ -167,6 +170,7 @@ class InstallerInstaller // thats the most pathetic name ever
 
 				$configFile->set('url', 'theme', $url['theme']);
 				$configFile->set('url', 'icons', $url['icons']);
+				$configFile->set('url', 'fonts', $url['fonts']);
 				$configFile->set('url', 'modules', $url['modules']);
 				$configFile->set('url', 'javascript', $url['javascript']);
 

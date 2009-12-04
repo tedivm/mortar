@@ -42,7 +42,8 @@ padding: 1em 0 0 0;
 /* TEXT */
 
 body {
-font-family: 'Georgia', 'Times New Roman', serif;
+font-family: 'TendernessRegular', 'Georgia', 'Times New Roman', serif;
+font-size: 12pt;
 color: #46484A
 }
 
@@ -63,5 +64,5 @@ color: #FF1430;
 }
 
 h1, h2, h3, h4, h5, h6 {
-font-family: 'Verdana', 'Helvetica', 'Arial', sans-serif;
+font-family: 'VegurLight', 'Verdana', 'Helvetica', 'Arial', sans-serif;
 }
