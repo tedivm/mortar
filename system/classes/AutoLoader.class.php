@@ -54,17 +54,16 @@ class AutoLoader
 										'Form' => 'Form',
 										'Filters' => 'Filter');
 
+	protected static $thirdPartyIncludes;
+
 	static function registerAutoloader()
 	{
 		spl_autoload_register(array(new self, 'loadClass'));
 
 		$config = Config::getInstance();
+		self::$thirdPartyIncludes = $config['path']['thirdparty'];
 
-		if(!class_exists('Twig_Autoloader', false))
-		{
-			$path = $config['path']['thirdparty'] . 'Twig/Autoloader.php';
-			include($path);
-		}
+
 
 	}
 
@@ -88,8 +87,7 @@ class AutoLoader
 			if(self::loadExternal($classname))
 				return true;
 
-			Cache::clear('system', 'classLookup');
-			Cache::clear('modules');
+			Cache::clear('system', 'autoloader');
 			self::$classIndex = null;
 			self::createClassIndex();
 		}
@@ -105,10 +103,16 @@ class AutoLoader
 
 	static function loadExternal($class)
 	{
-		if(strpos($class, 'Twig') === 0 && Twig_Autoloader::autoload($class))
-			return true;
 
-		return false;
+		if(strpos($class, 'Twig') === 0) //&& Twig_Autoloader::autoload($class))
+		{
+			$twigPath = self::$thirdPartyIncludes . 'Twig' . '/../'.str_replace('_', '/', $class).'.php';
+			include($twigPath);
+			//require dirname(__FILE__).'/../'.str_replace('_', '/', $class).'.php';
+			return true;
+		}
+
+		return class_exists($class);
 	}
 
 
@@ -128,23 +132,35 @@ class AutoLoader
 	 */
 	static protected function createClassIndex()
 	{
-		$classArray = array();
-		$config = Config::getInstance();
-		self::$loadedModules = array();
+		$cache = new Cache('system', 'autoloader', 'classindex');
+		$cacheData = $cache->getData();
 
-		$packageClasses = self::loadPackageClasses();
-		$coreClasses = self::loadCoreClasses();
-		$systemClasses = self::loadExtraSystemClasses();
-		$classArray = array_merge($classArray,
-								$packageClasses,
-								$coreClasses,
-								$systemClasses);
+		if($cache->isStale())
+		{
+			$classArray = array();
+			$config = Config::getInstance();
+			self::$loadedModules = array();
 
-		$classes = call_user_func_array('array_merge', $classArray);
+			$packageClasses = self::loadPackageClasses();
+			$coreClasses = self::loadCoreClasses();
+			$systemClasses = self::loadExtraSystemClasses();
+			$classArray = array_merge($classArray,
+									$packageClasses,
+									$coreClasses,
+									$systemClasses);
 
-		// the active page class exists in the page file
-		$classes['ActivePage'] = $classes['Page'];
-		self::$classIndex = $classes;
+			$classes = call_user_func_array('array_merge', $classArray);
+
+			// the active page class exists in the page file
+			$classes['ActivePage'] = $classes['Page'];
+
+			$cacheData['loadedModules'] = self::$loadedModules;
+			$cacheData['classes'] = $classes;
+			$cache->storeData($cacheData);
+		}
+
+		self::$loadedModules = $cacheData['loadedModules'];
+		self::$classIndex = $cacheData['classes'];
 	}
 
 
@@ -158,19 +174,14 @@ class AutoLoader
 	{
 		$classArray = array();
 		$config = Config::getInstance();
-		$cache = new Cache('system', 'classLookup', 'coreIndex');
-		$classArray = $cache->getData();
-		if($cache->isStale())
-		{
-			foreach(self::$baseDirectories as $index => $folder)
-			{
-				$label = is_numeric($index) ? 'none' : $index;
-				$lookupClasses = self::loadDirectoryAndFilter('', array($config['path'][$folder] => $label));
 
-				//$lookupClasses = self::loadDirectory($config['path'][$folder]);
-				$classArray[] = $lookupClasses;
-			}
-			$cache->storeData($classArray);
+		foreach(self::$baseDirectories as $index => $folder)
+		{
+			$label = is_numeric($index) ? 'none' : $index;
+			$lookupClasses = self::loadDirectoryAndFilter('', array($config['path'][$folder] => $label));
+
+			//$lookupClasses = self::loadDirectory($config['path'][$folder]);
+			$classArray[] = $lookupClasses;
 		}
 
 		return $classArray;
@@ -190,13 +201,7 @@ class AutoLoader
 
 		foreach($installedPackages as $package)
 		{
-			$cache = new Cache('modules', $package, 'classLookup');
-			$lookupClasses = $cache->getData();
-			if($cache->isStale())
-			{
-				$lookupClasses = self::loadModule($package);
-				$cache->storeData($lookupClasses);
-			}
+			$lookupClasses = self::loadModule($package);
 			$classArray[] = $lookupClasses;
 		}
 		return $classArray;
@@ -209,27 +214,21 @@ class AutoLoader
 	 */
 	static protected function loadExtraSystemClasses()
 	{
-		$cache = new Cache('system', 'classLookup', 'extraSystemClasses');
-		$classes = $cache->getData();
-		if($cache->isStale())
-		{
-			$classes = array();
+		$config = Config::getInstance();
 
-			$config = Config::getInstance();
+		$classes = array();
+		$classes[] = self::loadDirectoryAndFilter($config['path']['mainclasses'], self::$extraClassDirectories);
+		$classes[] = self::loadDirectoryAndFilter($config['path']['library'], self::$extraLibraryDirectories);
 
-			$classes[] = self::loadDirectoryAndFilter($config['path']['mainclasses'], self::$extraClassDirectories);
-			$classes[] = self::loadDirectoryAndFilter($config['path']['library'], self::$extraLibraryDirectories);
+		$outputControllers = self::loadDirectoryAndFilter($config['path']['mainclasses'],
+									array('RequestWrapper/OutputControllers' => 'none'));
 
-			$outputControllers = self::loadDirectoryAndFilter($config['path']['mainclasses'],
-										array('RequestWrapper/OutputControllers' => 'none'));
+		$outputClasses = array();
+		foreach($outputControllers as $outputBaseName => $classPath)
+			$outputClasses[$outputBaseName . 'OutputController'] = $classPath;
 
-			$outputClasses = array();
-			foreach($outputControllers as $outputBaseName => $classPath)
-				$outputClasses[$outputBaseName . 'OutputController'] = $classPath;
+		$classes[] = $outputClasses;
 
-			$classes[] = $outputClasses;
-			$cache->storeData($classes);
-		}
 		return $classes;
 	}
 
