@@ -1,0 +1,15 @@
+== 0.4 ==
+
+Release Date : *December 4th, 2009*
+
+  * Major rewrites of core systems
+  * Nomenclature fixes
+  * Twig Integration
+  * RSS Support
+  * Tagbox system for templates
+  * Rewrite of the URL subsystem
+  * URL Extension mapping to Format
+  * Maintenance Mode
+  * User Listings
+  * Support for mapping models to multiple tables
+  * Font functionality

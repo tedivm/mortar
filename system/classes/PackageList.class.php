@@ -85,19 +85,14 @@ class PackageList
 		if(INSTALLMODE)
 			return array();
 
-		$cache = new Cache('system', 'modules', 'installed');
-		$packageList = $cache->getData();
-
-		if($cache->isStale())
+		$db = dbConnect('default_read_only');
+		$results = $db->query('SELECT package FROM modules WHERE status LIKE \'installed\'');
+		$packageList = array();
+		while($row = $results->fetch_assoc())
 		{
-			$packageList = array();
-			$db = dbConnect('default_read_only');
-			$results = $db->query('SELECT package FROM modules WHERE status LIKE \'installed\'');
-			while($row = $results->fetch_assoc())
-				$packageList[] = $row['package'];
-
-			$cache->storeData($packageList);
+			$packageList[] = $row['package'];
 		}
+
 		return $packageList;
 	}
 
