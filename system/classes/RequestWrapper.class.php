@@ -300,7 +300,8 @@ class RequestWrapper
 	protected function loadFormatHandler($action, $format)
 	{
 		$formatFilter = $format . 'OutputController';
-		if(!class_exists($formatFilter))
+		$outputControllerList = array('Admin', 'Direct', 'Html', 'Json', 'Xml');
+		if(!in_array($format, $outputControllerList))
 		{
 			if(DirectOutputController::acceptsFormat($format))
 			{
@@ -430,15 +431,19 @@ class RequestWrapper
 	 */
 	protected function logRequest()
 	{
-		$query = Query::getQuery();
-		$userId = ActiveUser::getUser()->getId();
-		$location = isset($query['location']) ? $query['location'] : false;
-		$action = isset($query['action']) ? $query['action'] : false;
-		$iohandler = self::$ioHandlerType;
-		$format = isset($query['format']) ? $query['format'] : false;
-		$module = isset($query['module']) ? $query['module'] : false;
-		$siteId = ($site = ActiveSite::getSite()) ? $site->getId() : 0;
-		return RequestLog::logRequest($userId, $siteId, $location, $module, $action, $iohandler, $format);
+		if(defined('LOG_REQUESTS') && LOG_REQUESTS)
+		{
+			$query = Query::getQuery();
+			$userId = ActiveUser::getUser()->getId();
+			$location = isset($query['location']) ? $query['location'] : false;
+			$action = isset($query['action']) ? $query['action'] : false;
+			$iohandler = self::$ioHandlerType;
+			$format = isset($query['format']) ? $query['format'] : false;
+			$module = isset($query['module']) ? $query['module'] : false;
+			$siteId = ($site = ActiveSite::getSite()) ? $site->getId() : 0;
+			return RequestLog::logRequest($userId, $siteId, $location, $module, $action, $iohandler, $format);
+		}
+		return false;
 	}
 
 }
