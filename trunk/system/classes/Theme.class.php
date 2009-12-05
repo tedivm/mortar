@@ -282,7 +282,6 @@ class Theme extends ContentBase
 				$initialCheckSum = $minifier->getInitialChecksum();
 				$url = new Url();
 				$url->module = 'Mortar';
-				$url->format = 'direct';
 				$url->action = 'Minify';
 				$url->id = $this->name . '-' . $initialCheckSum . '.' . $type;
 				$cache->storeData($url);
