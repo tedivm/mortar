@@ -16,6 +16,7 @@ Release Owner : *tedivm*
 
   * Canonical URLs
   * Core Updater
+  * Moving key Location fields out to their own table (re: site name, etc.)
   * Non-location Model Routing 
   * User Read
   * Group Listing/Read
