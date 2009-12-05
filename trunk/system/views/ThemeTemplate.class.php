@@ -119,7 +119,7 @@ class ViewTemplateTwigLoader extends Twig_Loader_Filesystem
 	{
 		$availableThemes = array_keys($this->paths);
 
-		$cache = new Cache('templates', $name);
+		$cache = new Cache('templates', $name, $availableThemes);
 		$templateSet = $cache->getData();
 
 		if($cache->isStale())
