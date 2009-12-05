@@ -297,17 +297,34 @@ abstract class ModelBase implements Model
 	 */
 	public function getActions($user = null)
 	{
-		$actionList = self::loadActions($this->getType());
+		$actionListCache = new Cache('models', $this->getType(), 'actionList');
+		$actionList = $actionListCache->getData();
 
-		foreach(staticHack(get_class($this), 'fallbackModelActions') as $fallbackAction)
-			if ((!isset($actionList[$fallbackAction])) && !(in_array($fallbackAction, $this->excludeFallbackActions)))
-				$actionList[$fallbackAction] = $this->loadFallbackAction($fallbackAction);
+		if($actionListCache->isStale())
+		{
+			$actionList = self::loadActions($this->getType());
+			foreach(staticHack(get_class($this), 'fallbackModelActions') as $fallbackAction)
+				if ((!isset($actionList[$fallbackAction])) && !(in_array($fallbackAction, $this->excludeFallbackActions)))
+					$actionList[$fallbackAction] = $this->loadFallbackAction($fallbackAction);
+
+			$actionListCache->storeData($actionList);
+		}
 
 		if (isset($user)) {
-			$permittedActions = array();
-			foreach($actionList as $actionName => $action)
-				if ($this->checkAuth($actionName, $user))
-					$permittedActions[$actionName] = $action;
+
+			$permittedActionListCache = new Cache('user', $user->getId(), 'models', $this->getType(), 'actionList');
+			$permittedActions = $permittedActionListCache->getData();
+
+			if($permittedActionListCache->isStale())
+			{
+				$permittedActions = array();
+				foreach($actionList as $actionName => $action)
+					if ($this->checkAuth($actionName, $user))
+						$permittedActions[$actionName] = $action;
+
+				$permittedActionListCache->storeData($permittedActions);
+			}
+
 			return $permittedActions;
 
 		} else {
