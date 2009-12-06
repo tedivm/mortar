@@ -13,7 +13,7 @@ class Font extends ContentBase
 		$fontPath = $config['path']['fonts'] . $name . '/';
 		$this->contentPath = $fontPath;
 
-		$cache = new Cache('font', $this->name);
+		$cache = new Cache('fonts', 'typefaces', $this->name);
 		$data = $cache->getData();
 
 		if($cache->isStale())

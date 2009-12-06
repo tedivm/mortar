@@ -19,7 +19,7 @@ class TagBoxFonts
 
 	protected function getAtDeclarations()
 	{
-		$cache = new Cache('fonts', 'tagbox');
+		$cache = new Cache('fonts', 'tagbox', 'all');
 		$data = $cache->getData();
 
 		if($cache->isStale())
