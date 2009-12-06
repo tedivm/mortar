@@ -118,20 +118,19 @@ function importFromModule($name, $module, $classType, $require = false)
 		'plugin' => 'plugins',
 		'plugins' => 'plugins');
 
-
+	$classType = strtolower($classType);
 	if($classType == 'class')
 	{
 		$classDivider = '';
-	}elseif(isset($moduleFolders[strtolower($classType)])){
-		$classDivider = ucwords(strtolower($classType));
-	}elseif($classDivider = array_search(strtolower($classType), $moduleFolders)){
+	}elseif(isset($moduleFolders[$classType])){
+		$classDivider = ucwords($classType);
+	}elseif($classDivider = array_search($classType, $moduleFolders)){
 		$classDivider = ucwords($classDivider);
 	}
 
 	$packageInfo = new PackageInfo($module);
-	$path = $packageInfo->getPath() . $moduleFolders[strtolower($classType)] . '/' . $name . '.class.php';
 	$className = $packageInfo->getName() . $classDivider . $name;
-	return importClass($className, $path, $basePath = null, $require);
+	return $className;
 }
 
 function staticHack($className, $memberName)
