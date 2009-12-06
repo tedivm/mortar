@@ -130,7 +130,7 @@ class cacheHandlerFileSystem implements cacheHandler
 					break;
 
 				case 'serialize':
-					$dataString = 'unserialize("' . addslashes(serialize($data)) . '")';
+					$dataString = 'unserialize(base64_decode(\'' . base64_encode(serialize($data)) . '\'))'; //sprintf('"%s"', addslashes(serialize($data))) .
 					break;
 
 				case 'none':
