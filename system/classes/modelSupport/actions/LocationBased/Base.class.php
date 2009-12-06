@@ -64,7 +64,7 @@ abstract class ModelActionLocationBasedBase extends ModelActionBase
 			}
 		}
 
-		$this->ioHandler->addHeader('Last-Modified', gmdate('D, d M y H:i:s T', $modifiedDate));
+		$this->ioHandler->addHeader('Last-Modified', gmdate(HTTP_DATE, $modifiedDate));
 
 		if(isset($this->cacheExpirationOffset) && !isset($this->ioHandler->cacheExpirationOffset))
 			$this->ioHandler->cacheExpirationOffset = $this->cacheExpirationOffset;
