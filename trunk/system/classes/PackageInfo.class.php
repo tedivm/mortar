@@ -86,6 +86,7 @@ class PackageInfo
 		if(is_numeric($package))
 		{
 			$this->loadById($package);
+			$package = $this->getName();
 		}elseif(is_string($package)){
 			$this->loadByName($package);
 		}else{
