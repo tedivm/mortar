@@ -12,66 +12,79 @@ class TagBoxNav
 
 	protected function navList($children, $marker = true)
 	{
+		if(!($children)) return false;
+
 		$childList = new HtmlObject('ul');
 		$childList->addClass('navList');
 
-		$navList = '';
+		$cacheKey = '';
+		foreach($children as $child)
+			$cacheKey .= $child->getId() . "_";
 
-		if(!($children)) return false;
+		$cache = new Cache('tagboxes', $this->location->getId(), 'nav', 'navList', $cacheKey);
 
-		foreach($children as $child) {
+		$navList = $cache->getData();
 
-			$url = new Url();
-			$url->location = $child->getId();
-			$url->format = 'html';
+		if ($cache->isStale()) {
+			foreach($children as $child) {
 
-			$model = $child->getResource();
+				$url = new Url();
+				$url->location = $child->getId();
+				$url->format = 'html';
 
-			$childLink = new HtmlObject('a');
-			$childLink->property('href', (string) $url)->
-				addClass('navLink');
+				$model = $child->getResource();
 
-			$childItem = new HtmlObject('li');
-			$childItem->addClass('navItem');
+				$childLink = new HtmlObject('a');
+				$childLink->property('href', (string) $url)->
+					addClass('navLink');
+			
+				$childItem = new HtmlObject('li');
+				$childItem->addClass('navItem');
+			
+				$childName = $model['title'];
+			
+				if(($marker) && ($child->getId() === $this->location->getId()))
+					$childItem->wrapAround($childName)->
+						addClass('navItemSelect');
+				else
+					$childItem->wrapAround($childLink->wrapAround($childName));
 
-			$childName = $model['title'];
+				$childList->wrapAround($childItem);
+			}
 
-			if(($marker) && ($child->getId() === $this->location->getId()))
-				$childItem->wrapAround($childName)->
-					addClass('navItemSelect');
-			else
-				$childItem->wrapAround($childLink->wrapAround($childName));
-
-			$childList->wrapAround($childItem);
+			$navList = (string) $childList;
+			$cache->storeData($navList);
 		}
 
-		return (string) $childList;
+		return $navList;
 	}
 
 	protected function siblingNav($marker = true)
 	{
 		$children = $this->location->getParent()->getChildren();
-
+		
 		$navList = $this->navList($children, $marker);
-
+		
 		return (string) $navList;
 	}
 
 	protected function childrenNav()
 	{
-		$children = $this->location->getChildren();
+		$children = $this->location->getChildren();	
 
 		$navList = $this->navList($children);
-
+		
 		return (string) $navList;
 	}
-
+	
 	protected function navByMonth()
 	{
-		$cache = new Cache('tagBoxNav', 'navByMonth', $this->location->getId());
+		$cache = new Cache('tagboxes', $this->location->getId(), 'nav', 'navByMonth');
+
 		$dateList = $cache->getData();
+
 		if($cache->isStale())
-		{
+		{ 
 			$db = db_connect('default_read_only');
 			$stmt = $db->stmt_init();
 
@@ -80,7 +93,7 @@ class TagBoxNav
 
 			$stmt->prepare($sql);
 			$stmt->bindAndExecute('i', $this->location->getId());
-
+			
 			$dateList = new HtmlObject('ul');
 			$dateList->addClass('dateList');
 
@@ -99,20 +112,20 @@ class TagBoxNav
 				$dateLink = new HtmlObject('a');
 				$dateLink->property('href', (string) $url)->
 					wrapAround($formattedDate);
-
+				
 				$dateItem = new HtmlObject('li');
 				$dateItem->addClass('dateItem')->
 					wrapAround($dateLink);
-
+				
 				$dateList->wrapAround($dateItem);
 			}
-
+			
 			$cache->storeData($dateList);
 		}
-
+		
 		return (string) $dateList;
 	}
-
+	
 	public function __get($tagname) {
 
 		switch ($tagname) {
@@ -126,7 +139,7 @@ class TagBoxNav
 				return false;
 		}
 	}
-
+	
 	public function __isset($tagname) {
 		switch ($tagname) {
 			case "siblingList":
