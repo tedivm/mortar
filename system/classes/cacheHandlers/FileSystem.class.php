@@ -67,33 +67,28 @@ class cacheHandlerFileSystem implements cacheHandler
 	 */
 	public function getData()
 	{
-		if(file_exists($this->path))
-		{
-			if($data = self::getDataFromFile($this->path))
-			{
-				return $data;
-			}else{
-				$this->cache_enabled = false;
-				// the only way to get here is if there is a write lock already in place
-				// so we disable caching to make sure this one doesn't attempt to write to the file
-			}
-		}
+		if(!file_exists($this->path))
+			return false;
+
+		$data = self::getDataFromFile($this->path);
+
+		if($data !== false)
+			return $data;
+
 		return false;
 	}
 
-	static function getDataFromFile($path)
+	static protected function getDataFromFile($path)
 	{
-		if(file_exists($path))
+		include($path);
+
+		if(!isset($data) || !isset($expiration))
 		{
-			include($path);
-
-			if(!isset($data) || !isset($expiration))
-				throw new CacheError('Unable to load cache from filesystem');
-
-
-			return array('data' => $data, 'expiration' => $expiration);
+			$this->cache_enabled = false;
+			throw new CacheError('Unable to load cache from filesystem');
 		}
-		return false;
+
+		return array('data' => $data, 'expiration' => $expiration);
 	}
 
 
