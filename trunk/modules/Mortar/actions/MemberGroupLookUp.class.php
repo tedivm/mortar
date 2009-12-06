@@ -10,7 +10,7 @@ class MortarActionMemberGroupLookUp extends ActionBase
 	public function logic()
 	{
 		$offset = 43200;
-		$this->ioHandler->addHeader('Expires', gmdate('D, d M y H:i:s T', time() + $offset));
+		$this->ioHandler->addHeader('Expires', gmdate(HTTP_DATE, time() + $offset));
 
 		$query = Query::getQuery();
 		if(isset($query['q'])

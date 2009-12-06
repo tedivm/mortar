@@ -55,8 +55,8 @@ class MortarActionMinify extends ActionBase
 
 		$mimetype = ($type == 'js') ? 'application/x-javascript; charset=utf-8' : 'text/css; charset=utf-8';
 		$this->ioHandler->addHeader('Content-Type', $mimetype);
-		$this->ioHandler->addHeader('Last-Modified', gmdate('D, d M y H:i:s T', 0));
-		$this->ioHandler->addHeader('Expires', gmdate('D, d M y H:i:s T', mktime(0, 0, 0, 0, 0, date('Y') + 20)));
+		$this->ioHandler->addHeader('Last-Modified', gmdate(HTTP_DATE, 0));
+		$this->ioHandler->addHeader('Expires', gmdate(HTTP_DATE, mktime(0, 0, 0, 0, 0, date('Y') + 20)));
 
 
 

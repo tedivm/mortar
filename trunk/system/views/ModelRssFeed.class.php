@@ -18,7 +18,7 @@ class ViewModelRssFeed
 	public function addChannelElement($name, $value)
 	{
 		if($name == 'lastBuildDate')
-			$value = gmdate('D, d M y H:i:s T', $value);
+			$value = gmdate(HTTP_DATE, $value);
 
 		$this->channelElements[$name] = $value;
 	}

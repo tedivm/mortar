@@ -253,7 +253,7 @@ class IOProcessorHttp extends IOProcessorCli
 	{
 		// basic clickjacking protection
 		$this->addHeader('X-FRAME-OPTIONS', 'SAMEORIGIN');
-		$this->addHeader('Date',gmdate('D, d M y H:i:s T'));
+		$this->addHeader('Date',gmdate(HTTP_DATE));
 
 		if(isset($this->headers['Content-MD5']))
 			$contentMd5 = $this->headers['Content-MD5'];
@@ -291,7 +291,7 @@ class IOProcessorHttp extends IOProcessorCli
 				{
 					$offset = strtotime($this->headers['Expires']) - $time;
 				}else{
-					$this->addHeader('Expires', gmdate('D, d M y H:i:s T', $time + $offset ));
+					$this->addHeader('Expires', gmdate(HTTP_DATE, $time + $offset ));
 				}
 
 				$cacheControl = 'must-revalidate,max-age=' . $offset;
