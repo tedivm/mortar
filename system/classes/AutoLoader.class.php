@@ -118,7 +118,7 @@ class AutoLoader
 
 	static function addModule($moduleName)
 	{
-		if(in_array($module, self::$loadedModules))
+		if(in_array($moduleName, self::$loadedModules))
 			return;
 
 		$classes = self::loadModule($moduleName);
