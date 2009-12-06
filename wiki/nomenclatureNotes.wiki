@@ -1,0 +1,25 @@
+#summary List of current names for sub-modules of the Mortar architecture, along with potential names in consideration for others.
+
+= Current Names =
+
+  * *Core*: Mortar
+  * *CMS*: Litho
+  * *Blog*: Chalk
+  * *Wiki*: Graphite
+  * *Forum*: ??
+  * *Store*: ??
+
+  * *Packages (Server)*: Quarry
+  * *Packages (Client)*: Foundry
+  * *Errors*: Rubble
+  * *Tags*: Graffiti 
+  * *Webcomics*: Panel
+  * *Gallery*: ??
+  * *Theming*: Mural
+
+
+= Unused Possibilities =
+
+  * Obelisk
+  * Ashlar (lol)
+  * Agate (both a stone and a typeface size)
