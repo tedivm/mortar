@@ -101,7 +101,7 @@ class ModelListing
 
 	/**
 	 * This function adds a function/column pairing to the list which need to be included in the selection for
-	 * this list. 
+	 * this list.
 	 *
 	 * @param string $name
 	 * @param string $function
@@ -211,7 +211,7 @@ class ModelListing
 
 		if($restrictionString = $this->getRestrictionString($this->restrictions))
 			$cacheKey[] = $restrictionString;
-		
+
 		if($functionString = $this->getFunctionString($this->functions))
 			$cacheKey[] = $functionString;
 
@@ -223,7 +223,7 @@ class ModelListing
 		$cache = new Cache($cacheKey);
 		$modelList = $cache->getData();
 
-		if($cache->isStale() || true)
+		if($cache->isStale())
 		{
 			$modelList = $this->getModelsFromTable($this->table, $this->restrictions, $this->functions, $browseBy,
 								$order, $number, $offset);
@@ -251,7 +251,7 @@ class ModelListing
 
 		foreach($restrictions as $restrictionName => $restrictionValue)
 			$orm->$restrictionName = $restrictionValue;
-		
+
 		foreach($functions as $func)
 			$orm->addFunction($func['name'], $func['function'], $func['value']);
 
