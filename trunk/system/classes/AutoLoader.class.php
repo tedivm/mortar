@@ -78,7 +78,7 @@ class AutoLoader
 		if(class_exists($classname, false))
 			return true;
 
-		if(is_null(self::$classIndex))
+		if(!isset(self::$classIndex))
 			self::createClassIndex();
 
 		// if the class name doesn't exist clear out the cache and reload.
@@ -92,7 +92,7 @@ class AutoLoader
 			self::createClassIndex();
 		}
 
-		if(isset(self::$classIndex[$classname]) && is_readable(self::$classIndex[$classname]))
+		if(isset(self::$classIndex[$classname]))
 		{
 			include(self::$classIndex[$classname]);
 			return true;
@@ -118,6 +118,9 @@ class AutoLoader
 
 	static function addModule($moduleName)
 	{
+		if(in_array($module, self::$loadedModules))
+			return;
+
 		$classes = self::loadModule($moduleName);
 		if(is_array($classes) && count($classes) > 0)
 			self::$classIndex = array_merge(self::$classIndex, $classes);
