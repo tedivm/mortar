@@ -71,6 +71,12 @@ class IOProcessorHttp extends IOProcessorCli
 	 */
 	static $cookieTimeLimit = 0;
 
+	/**
+	 * Length of each "chunk" to be echo'd, since massive blocks tend to slow the php echo function down
+	 *
+	 * @var int
+	 */
+	static $echoBufferSize = 2048;
 
 	/**
 	 * This function sets the programming environment to match that of the system and method calling it
@@ -239,7 +245,9 @@ class IOProcessorHttp extends IOProcessorCli
 
 		if($sendOutput)
 		{
-			echo $output;
+			for ($chars = strlen($output) - 1, $start = 0; $start <= $chars; $start += self::$echoBufferSize)
+				echo substr($output, $start, self::$echoBufferSize);
+
 			flush();
 		}
 	}
