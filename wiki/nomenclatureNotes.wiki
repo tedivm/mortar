@@ -6,7 +6,7 @@
   * *CMS*: Litho
   * *Blog*: Chalk
   * *Wiki*: Graphite
-  * *Forum*: ??
+  * *Forum*: Tessera (?)
   * *Store*: ??
 
   * *Packages (Server)*: Quarry
@@ -23,3 +23,8 @@
   * Obelisk
   * Ashlar (lol)
   * Agate (both a stone and a typeface size)
+  * Brick
+  * Masonry
+  * Kiln
+  * Cobblestone
+  * Tile
