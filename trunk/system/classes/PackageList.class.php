@@ -82,7 +82,7 @@ class PackageList
 	 */
 	protected function loadInstalledPackages()
 	{
-		if(INSTALLMODE)
+		if(defined('INSTALLMODE') && INSTALLMODE)
 			return array();
 
 		$cache = new Cache('system', 'modules', 'installed');
