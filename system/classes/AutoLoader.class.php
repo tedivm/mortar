@@ -59,13 +59,18 @@ class AutoLoader
 	static function registerAutoloader()
 	{
 		spl_autoload_register(array(new self, 'loadClass'));
+		if(!isset(self::$classIndex))
+			self::createClassIndex();
 
 		$config = Config::getInstance();
 		self::$thirdPartyIncludes = $config['path']['thirdparty'];
-
-
-
 	}
+
+	static function internalClassExists($classname)
+	{
+		return isset(self::$classIndex[$classname]);
+	}
+
 
 	/**
 	 * This function is called by the system when it is unable to locate a class.
