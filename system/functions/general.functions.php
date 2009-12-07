@@ -129,10 +129,8 @@ function importFromModule($name, $module, $classType, $require = false)
 	}
 
 	$packageInfo = new PackageInfo($module);
-	$path = $packageInfo->getPath() . $moduleFolders[strtolower($classType)] . '/' . $name . '.class.php';
 	$className = $packageInfo->getName() . $classDivider . $name;
-
-	return importClass($className, $path, $basePath = null, $require);
+	return AutoLoader::internalClassExists($className) ? $className : false;
 }
 
 function staticHack($className, $memberName)
