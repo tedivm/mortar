@@ -96,6 +96,7 @@ class TemplateDisplayList implements DisplayList {
 
 				$htmlConverter = $model->getModelAs('Html');
 				$htmlConverter->useView($actionView);
+				$htmlConverter->useTheme($this->theme);
 				if($modelDisplay = $htmlConverter->getOutput())
 				{
 					$listingHtml->insertNewHtmlObject('div')->

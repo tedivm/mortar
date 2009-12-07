@@ -210,6 +210,9 @@ class Page implements ArrayAccess
 		$themeBox = new TagBoxTheme($theme);
 		$content['theme'] = $themeBox;
 
+		$envBox = new TagBoxEnv();
+		$content['env'] = $envBox;
+
 		$template->addContent($content);
 
 		return $template;

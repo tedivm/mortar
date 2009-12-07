@@ -19,6 +19,7 @@ class ModelToHtml
 	protected $model;
 	protected $template;
 	protected $modelDisplay;
+	protected $theme;
 
 	/**
 	 * The constructor sets the protected vars and prepares the relevant information for Html display which can be output in a 
@@ -49,6 +50,11 @@ class ModelToHtml
 		$this->modelDisplay = $view;
 	}
 
+	public function useTheme($theme)
+	{
+		$this->theme = $theme;
+	}
+
 	public function addContent($content)
 	{
 		return is_array($content) ? $this->modelDisplay->addContent($content) : false;
@@ -61,9 +67,23 @@ class ModelToHtml
 	 */
 	public function getOutput()
 	{
-		$modelTags = new TagBoxModel($this->model);
-		
-		$this->modelDisplay->addContent(array('model' => $modelTags));
+		$content = array();
+
+		$modelBox = new TagBoxModel($this->model);
+		$content['model'] = $modelBox;
+
+		$envBox = new TagBoxEnv();
+		$content['env'] = $envBox;
+
+		$navBox = new TagBoxNav($this->model->getLocation());
+		$content['nav'] = $navBox;
+
+		if(isset($this->theme))	{
+			$themeBox = new TagBoxTheme($this->theme);
+			$content['theme'] = $themeBox;
+		}
+
+		$this->modelDisplay->addContent($content);
 
 		$modelOutput = $this->modelDisplay->getDisplay();
 
