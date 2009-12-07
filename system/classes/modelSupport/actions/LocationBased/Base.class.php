@@ -143,6 +143,7 @@ abstract class ModelActionLocationBasedBase extends ModelActionBase
 		$view = new ViewModelTemplate($theme, $model, $templateName);
 		$htmlConverter = $model->getModelAs('Html');
 		$htmlConverter->useView($view);
+		$htmlConverter->useTheme($theme);
 		return $htmlConverter->getOutput();
 	}
 
