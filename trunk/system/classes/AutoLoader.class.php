@@ -59,8 +59,6 @@ class AutoLoader
 	static function registerAutoloader()
 	{
 		spl_autoload_register(array(new self, 'loadClass'));
-		if(!isset(self::$classIndex))
-			self::createClassIndex();
 
 		$config = Config::getInstance();
 		self::$thirdPartyIncludes = $config['path']['thirdparty'];
@@ -68,6 +66,8 @@ class AutoLoader
 
 	static function internalClassExists($classname)
 	{
+		if(!isset(self::$classIndex))
+			self::createClassIndex();
 		return isset(self::$classIndex[$classname]);
 	}
 
