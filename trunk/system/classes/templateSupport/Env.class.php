@@ -8,10 +8,13 @@ class TagBoxEnv
 
 	public function __construct ()
 	{
+		if(defined('INSTALLMODE') && INSTALLMODE === true)
+			return;
+		
 		$this->site = ActiveSite::getSite();
 		$this->user = ActiveUser::getUser();
 	}
-	
+
 	public function __get($tagname)
 	{
 		switch($tagname) {
@@ -25,7 +28,7 @@ class TagBoxEnv
 				return false;
 		}
 	}
-	
+
 	public function __isset($tagname)
 	{
 		switch($tagname) {
@@ -34,7 +37,7 @@ class TagBoxEnv
 			case "user":
 				return true;
 			default:
-				return false;		
+				return false;
 		}
 	}
 }
