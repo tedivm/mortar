@@ -45,6 +45,9 @@ class cacheHandlerFileSystem implements cacheHandler
 	 */
 	protected static $cachePath;
 
+	protected $currentKey;
+
+
 	/**
 	 * This function takes the key and creates the path. If it is unable to create a path using that key, it returns
 	 * false.
@@ -54,6 +57,12 @@ class cacheHandlerFileSystem implements cacheHandler
 	 */
 	public function setup($key)
 	{
+		$memkey = '';
+		foreach($key as $group)
+			$memkey .= $group . '/' ;
+
+		$this->currentKey = $memkey;
+
 		$this->path = self::makePath($key);
 		return ($this->path !== false);
 	}
@@ -130,13 +139,16 @@ class cacheHandlerFileSystem implements cacheHandler
 
 				case 'none':
 				default :
-					$dataString = '\'' . addslashes($data) . '\'';
+					$dataString = 'base64_decode(\'' . base64_encode($data) . '\')';
 					break;
 			}
 
 			$storeString = '<?php ' . PHP_EOL .
+			'/* Cachekey: ' . $this->currentKey . ' */' . PHP_EOL .
+			'/* Type: ' . gettype($data) . ' */' . PHP_EOL .
 			'$expiration = ' . $expiration . ';' . PHP_EOL .
-			'$data = ' . $dataString . ';' . PHP_EOL;
+			'$data = ' . $dataString . ';' . PHP_EOL .
+			'?>';
 
 			if(!fwrite($file, $storeString))
 			{
@@ -174,9 +186,7 @@ class cacheHandlerFileSystem implements cacheHandler
 		// This is probably due to the small size of the arrays and the overhead from function calls
 		$memkey = '';
 		foreach($key as $group)
-		{
 			$memkey .= $group . '/' ;
-		}
 
 		if(isset(self::$memStore['keys'][$memkey]))
 		{
@@ -202,7 +212,7 @@ class cacheHandlerFileSystem implements cacheHandler
 
 					foreach($key as $group)
 					{
-						$path .= ($group[0]) ? $group . '/' : '';
+						$path .= $group . '/';
 					}
 					$path .= $name . '.php';
 					break;
