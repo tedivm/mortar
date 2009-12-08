@@ -74,9 +74,23 @@ class IOProcessorHttp extends IOProcessorCli
 	/**
 	 * Length of each "chunk" to be echo'd, since massive blocks tend to slow the php echo function down
 	 *
-	 * @var int
+	 * @var int Size in kilobytes
 	 */
-	static $echoBufferSize = 2048;
+	static $echoBufferSize = 2;
+
+	/**
+	 * Length (in kilobytes) at which the results of gzip/deflate encoding should be stored instead of run on the fly
+	 *
+	 * @var int Size in kilobytes
+	 */
+	static $storeCompressionMinimumSize = 10;
+
+	/**
+	 * Max kilobytes per second for a script- this is disabled (value = 0) by default
+	 *
+	 * @var int Size in kilobytes, 0 meaning no limit
+	 */
+	static $maxTransferSpeed = 0;
 
 	/**
 	 * This function sets the programming environment to match that of the system and method calling it
@@ -177,15 +191,7 @@ class IOProcessorHttp extends IOProcessorCli
 		if($encoding)
 		{
 			$start = microtime(true);
-			if($encoding == 'deflate' && function_exists('gzdeflate'))
-			{
-				$this->addHeader('Content-Encoding', 'deflate');
-				$output = gzdeflate($output, self::$compressionLevel);
-			}elseif($encoding == 'gzip' && function_exists('gzencode')){
-				$this->addHeader('Vary', 'Accept-Encoding');
-				$this->addHeader('Content-Encoding', 'gzip');
-				$output = gzencode($output, self::$compressionLevel);
-			}
+			$output = $this->encodeOutput($encoding, $output);
 			$compressedSize = strlen($output);
 			$stop = microtime(true);
 
@@ -245,8 +251,24 @@ class IOProcessorHttp extends IOProcessorCli
 
 		if($sendOutput)
 		{
-			for ($chars = strlen($output) - 1, $start = 0; $start <= $chars; $start += self::$echoBufferSize)
-				echo substr($output, $start, self::$echoBufferSize);
+			$bufferSize = self::$echoBufferSize * 1024;
+
+			if(self::$maxTransferSpeed)
+				$breakAt = floor((self::$maxTransferSpeed * 1024) / self::$echoBufferSize);
+
+			$x = 1;
+
+			for ($chars = strlen($output) - 1, $start = 0; $start <= $chars; $start += $bufferSize)
+			{
+				echo substr($output, $start, $bufferSize);
+
+				if(isset($breakAt) && ($breakAt % $x) === 0)
+				{
+					$x = 1;
+					sleep(1);
+				}
+				$x++;
+			}
 
 			flush();
 		}
@@ -327,6 +349,48 @@ class IOProcessorHttp extends IOProcessorCli
 
 		foreach($this->headers as $name => $value)
 			header($name . ':' . $value);
+	}
+
+
+
+	protected function encodeOutput($encoding, $output)
+	{
+		$cacheOuput = (strlen($output) > 1024 * self::$storeCompressionMinimumSize);
+
+		$this->addHeader('Content-Encoding', $encoding);
+
+		if($cacheOuput)
+		{
+			$config = Config::getInstance();
+			$cachePath = $config['path']['temp'] . 'outputCompression/' . md5($output) . '.' . $encoding;
+
+			if(file_exists($cachePath))
+			{
+				$storedOutput = file_get_contents($cachePath);
+				return $storedOutput;
+			}
+		}
+
+		if($encoding == 'deflate' && function_exists('gzdeflate'))
+		{
+			$output = gzdeflate($output, self::$compressionLevel);
+		}elseif($encoding == 'gzip' && function_exists('gzencode')){
+			$output = gzencode($output, self::$compressionLevel);
+		}
+
+		if($cacheOuput)
+		{
+			$dir = dirname($cachePath);
+			if(!is_dir($dir))
+			{
+				if(!mkdir($dir, 0700, true))
+					return $output;
+			}
+
+			file_put_contents($cachePath, $output);
+		}
+
+		return $output;
 	}
 
 }
