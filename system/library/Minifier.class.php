@@ -39,7 +39,7 @@ class Minifier
 	public function setBaseString($string)
 	{
 		$this->scriptString = $string;
-		$this->initialCheckSum = hash('crc32', $string);
+		$this->initialCheckSum = md5($string);
 	}
 
 	public function addFiles($files)
