@@ -83,7 +83,7 @@ class IOProcessorHttp extends IOProcessorCli
 	 *
 	 * @var int Size in kilobytes
 	 */
-	static $storeCompressionMinimumSize = 10;
+	static $storeCompressionMinimumSize = 2;
 
 	/**
 	 * Max kilobytes per second for a script- this is disabled (value = 0) by default
@@ -355,7 +355,8 @@ class IOProcessorHttp extends IOProcessorCli
 
 	protected function encodeOutput($encoding, $output)
 	{
-		$cacheOuput = (strlen($output) > 1024 * self::$storeCompressionMinimumSize);
+		$cacheOuput = (strlen($output) > 1024 * self::$storeCompressionMinimumSize)
+						&& (!defined('OUTPUT_COMPRESSION_CACHE') || OUTPUT_COMPRESSION_CACHE);
 
 		$this->addHeader('Content-Encoding', $encoding);
 
