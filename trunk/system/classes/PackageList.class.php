@@ -31,19 +31,6 @@ class PackageList
 	protected $installablePackages = array();
 
 	/**
-	 * The constructor calls the functions to load the installedPackages and installablePackages lists
-	 *
-	 */
-	public function __construct()
-	{
-		$this->installedPackages = $this->loadInstalledPackages();
-			sort($this->installedPackages, SORT_STRING);
-
-		$this->installablePackages = array_diff($this->loadInstallablePackages(), $this->installedPackages);
-			sort($this->installablePackages, SORT_STRING);
-	}
-
-	/**
 	 * This function loads a list of installable packages
 	 *
 	 * @access protected
@@ -108,7 +95,7 @@ class PackageList
 	 */
 	public function getPackageList()
 	{
-		$fullSet = array_merge($this->installedPackages, $this->installablePackages);
+		$fullSet = array_merge($this->getInstalledPackages(), $this->getInstallablePackages());
 		sort($fullSet, SORT_STRING);
 		return $fullSet;
 	}
@@ -120,6 +107,12 @@ class PackageList
 	 */
 	public function getInstalledPackages()
 	{
+		if(!isset($this->installedPackages))
+		{
+			$this->installedPackages = $this->loadInstalledPackages();
+				sort($this->installedPackages, SORT_STRING);
+		}
+
 		return $this->installedPackages;
 	}
 
@@ -130,6 +123,11 @@ class PackageList
 	 */
 	public function getInstallablePackages()
 	{
+		if(!isset($this->installablePackages))
+		{
+			$this->installablePackages = array_diff($this->loadInstallablePackages(), $this->installedPackages);
+				sort($this->installablePackages, SORT_STRING);
+		}
 		return $this->installablePackages;
 	}
 
