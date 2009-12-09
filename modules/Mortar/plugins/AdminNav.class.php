@@ -39,6 +39,10 @@ class MortarPluginAdminNav
 		$url->format = 'Admin';
 		$this->addStaticLink('Add User', $url, 'Users', 'Manage Users');
 
+		$url = clone $url;
+		$url->action = 'Index';
+		$this->addStaticLink('List Users', $url, 'Users', 'Manage Users');
+
 //		$url = new Url();
 //		$url->type = 'User';
 //		$url->action = 'Add';
