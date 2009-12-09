@@ -2,7 +2,7 @@ RewriteEngine On
 
 # If the system is in a folder, as opposed to the domain root, then the rewrite base needs to be updated.
 # RewriteBase /URL/PATH/TO/INSTALL/
-RewriteBase /MortarTest/
+RewriteBase /
 
 # If the file is real, skip this rule
 RewriteCond %{REQUEST_FILENAME} !-f
