@@ -1,6 +1,6 @@
 <?php
 
-class QuarryPackageRequirements
+class FoundryPackageRequirements
 {
 
 	public function getDependencies()
