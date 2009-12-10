@@ -1,4 +1,3 @@
-
 <?php
 
 class TesseraPluginAllowForumType
@@ -10,4 +9,3 @@ class TesseraPluginAllowForumType
 }
 
 ?>
-
