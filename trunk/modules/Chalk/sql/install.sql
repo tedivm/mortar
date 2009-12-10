@@ -7,3 +7,7 @@ CREATE TABLE chalkBlog
 	title TINYTEXT NULL,
 	subtitle TINYTEXT NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+/**** update version ****/
+REPLACE INTO schemaVersion (package, lastupdated, majorVersion, minorVersion, microVersion)
+						VALUES ( 'Chalk', NOW(), 0, 1, 0);

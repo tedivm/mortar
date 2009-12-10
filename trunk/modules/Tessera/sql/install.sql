@@ -26,3 +26,7 @@ CREATE TABLE tesseraMessages
 	id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	replyTo INTEGER UNSIGNED
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+/**** update version ****/
+REPLACE INTO schemaVersion (package, lastupdated, majorVersion, minorVersion, microVersion)
+						VALUES ( 'Tessera', NOW(), 0, 1, 0);
