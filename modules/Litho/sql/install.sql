@@ -43,3 +43,8 @@ ALTER TABLE lithoContent ADD CONSTRAINT fk_lithoContent_users
 ALTER TABLE lithoPages ADD CONSTRAINT fk_lithoPages_lithoContent
 	FOREIGN KEY (id, activeRevision) REFERENCES lithoContent (pageId, revisionId)
 		ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+
+/**** update version ****/
+REPLACE INTO schemaVersion (package, lastupdated, majorVersion, minorVersion, microVersion)
+						VALUES ( 'Litho', NOW(), 0, 1, 0);

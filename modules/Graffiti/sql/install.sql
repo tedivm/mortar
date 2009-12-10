@@ -46,3 +46,7 @@ ALTER TABLE graffitiLocationHasTags ADD CONSTRAINT fk_graffitiLocationHasWeighte
 /************ Foreign Key: fk_graffitiLocationHasWeightedTags_users ***************/
 ALTER TABLE graffitiLocationHasTags ADD CONSTRAINT fk_graffitiLocationHasTags_users
 	FOREIGN KEY (userId) REFERENCES users (user_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/**** update version ****/
+REPLACE INTO schemaVersion (package, lastupdated, majorVersion, minorVersion, microVersion)
+						VALUES ( 'Graffiti', NOW(), 0, 1, 0);
