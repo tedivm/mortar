@@ -1,6 +1,6 @@
 <?php
 
-class QuarryBuildQueue
+class FoundryBuildQueue
 {
 
 	/**
