@@ -31,6 +31,20 @@ class PackageList
 	protected $installablePackages = array();
 
 	/**
+	 * Measures whether this instance has already loaded the set of installed packages once
+	 *
+	 * @var bool
+	 */	
+	protected $installedPackagesLoaded = false;
+
+	/**
+	 * Measures whether this instance has already loaded the set of installable packages once
+	 *
+	 * @var bool
+	 */	
+	protected $installablePackagesLoaded = false;
+
+	/**
 	 * This function loads a list of installable packages
 	 *
 	 * @access protected
@@ -107,10 +121,12 @@ class PackageList
 	 */
 	public function getInstalledPackages()
 	{
-		if(!isset($this->installedPackages))
+		if($this->installedPackagesLoaded === false)
 		{
 			$this->installedPackages = $this->loadInstalledPackages();
 				sort($this->installedPackages, SORT_STRING);
+
+			$this->installedPackagesLoaded = true;
 		}
 
 		return $this->installedPackages;
@@ -123,10 +139,12 @@ class PackageList
 	 */
 	public function getInstallablePackages()
 	{
-		if(!isset($this->installablePackages))
+		if($this->installedPackagesLoaded === false)
 		{
 			$this->installablePackages = array_diff($this->loadInstallablePackages(), $this->installedPackages);
 				sort($this->installablePackages, SORT_STRING);
+
+			$this->installablePackagesLoaded = true;
 		}
 		return $this->installablePackages;
 	}
