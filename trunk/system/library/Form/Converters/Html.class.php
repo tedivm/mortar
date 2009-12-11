@@ -316,6 +316,7 @@ class FormToHtml
 		$plugins = new Hook();
 		$plugins->enforceInterface('FormMetadataHook');
 		$plugins->loadPlugins('Forms', 'Metadata', 'Base');
+		$plugins->loadPlugins('Forms', 'Metadata', $input->type);
 		$pluginInput = $plugins->getMetadataOptions($input);
 
 		foreach($pluginInput as $inputItem)
