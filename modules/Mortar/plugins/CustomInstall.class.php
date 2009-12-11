@@ -28,6 +28,8 @@ class MortarPluginCustomInstall
 									$this->packageId, 'FormInputDatetimeToHtml');
 		Hook::registerPlugin('Forms', 'checkSubmit', 'datetime', 
 									$this->packageId, 'FormInputDatetimeCheckSubmit');
+		Hook::registerPlugin('Forms', 'Metadata', 'Base', $this->packageId, 'FormInputAutocompleteMetadata');
+		Hook::registerPlugin('Forms', 'Metadata', 'Base', $this->packageId, 'FormInputDatetimeMetadata');
 
 		CronManager::registerJob('CachePurge', 'Mortar', 'module', 30);
 	}
