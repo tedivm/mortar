@@ -313,22 +313,13 @@ class FormToHtml
 		if($input->type == 'html')
 			$inputOptions['html'] = true;
 
+		$plugins = new Hook();
+		$plugins->enforceInterface('FormMetadataHook');
+		$plugins->loadPlugins('Forms', 'Metadata', 'Base');
+		$pluginInput = $plugins->getMetadataOptions($input);
 
-		if(isset($input->properties['autocomplete']) && $input->properties['autocomplete'])
-		{
-			$inputOptions['autocomplete']['data'] = $input->properties['autocomplete'];
-			if(isset($input->properties['multiple']))
-			{
-				$inputOptions['autocomplete']['options']['multiple'] = true;
-			}
-			unset($input->properties['autocomplete']);
-		}
-
-		if(isset($input->properties['datetime']) && $input->properties['datetime'])
-		{
-			$inputOptions['datetime']['data'] = $input->properties['datetime'];
-			unset($input->properties['datetime']);
-		}
+		foreach($pluginInput as $inputItem)
+			$inputOptions = array_merge($inputOptions, $inputItem);
 
 		return (count($inputOptions > 0)) ? $inputOptions : false;
 	}
@@ -355,6 +346,11 @@ interface FormToHtmlHook
 	public function overrideHtml();
 	public function createOverriddingHtml($sectionHtml);
 	public function setCustomHtml($inputHtml);
+}
+
+interface FormMetadataHook
+{
+	public function getMetadataOptions(FormInput $input);
 }
 
 ?>
