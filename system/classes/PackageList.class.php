@@ -21,28 +21,14 @@ class PackageList
 	 *
 	 * @var array
 	 */
-	protected $installedPackages = array();
+	protected $installedPackages;
 
 	/**
 	 * This is a list of all packages that can be installed
 	 *
 	 * @var array
 	 */
-	protected $installablePackages = array();
-
-	/**
-	 * Measures whether this instance has already loaded the set of installed packages once
-	 *
-	 * @var bool
-	 */	
-	protected $installedPackagesLoaded = false;
-
-	/**
-	 * Measures whether this instance has already loaded the set of installable packages once
-	 *
-	 * @var bool
-	 */	
-	protected $installablePackagesLoaded = false;
+	protected $installablePackages;
 
 	/**
 	 * This function loads a list of installable packages
@@ -121,12 +107,10 @@ class PackageList
 	 */
 	public function getInstalledPackages()
 	{
-		if($this->installedPackagesLoaded === false)
+                if(!isset($this->installedPackages))
 		{
 			$this->installedPackages = $this->loadInstalledPackages();
 				sort($this->installedPackages, SORT_STRING);
-
-			$this->installedPackagesLoaded = true;
 		}
 
 		return $this->installedPackages;
@@ -139,12 +123,10 @@ class PackageList
 	 */
 	public function getInstallablePackages()
 	{
-		if($this->installedPackagesLoaded === false)
+                if(!isset($this->installablePackages))
 		{
-			$this->installablePackages = array_diff($this->loadInstallablePackages(), $this->installedPackages);
+			$this->installablePackages = array_diff($this->loadInstallablePackages(), $this->getInstalledPackages());
 				sort($this->installablePackages, SORT_STRING);
-
-			$this->installablePackagesLoaded = true;
 		}
 		return $this->installablePackages;
 	}
