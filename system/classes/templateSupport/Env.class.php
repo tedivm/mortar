@@ -10,7 +10,7 @@ class TagBoxEnv
 	{
 		if(defined('INSTALLMODE') && INSTALLMODE === true)
 			return;
-		
+
 		$this->site = ActiveSite::getSite();
 		$this->user = ActiveUser::getUser();
 	}
@@ -19,8 +19,16 @@ class TagBoxEnv
 	{
 		switch($tagname) {
 			case "siteLink":
+
+				if(!isset($this->site))
+					return BASE_URL;
+
 				return $this->site->getUrl();
 			case "siteName":
+
+				if(!isset($this->site))
+					return 'Mortar Installation';
+
 				return str_replace('_', ' ', $this->site->getLocation()->getName());
 			case "user":
 				return $this->user['name'];
