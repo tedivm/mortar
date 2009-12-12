@@ -21,14 +21,14 @@ class MortarPluginCustomInstall
 		Hook::registerPlugin('Forms', 'checkSubmit', 'user', $this->packageId, 'FormInputUserCheckSubmit');
 
 		Hook::registerPlugin('Forms', 'HtmlConvert', 'membergroup',
-									$this->packageId, 'FormInputMembergroupToHtml');
+								$this->packageId, 'FormInputMembergroupToHtml');
 		Hook::registerPlugin('Forms', 'checkSubmit', 'membergroup',
-									$this->packageId, 'FormInputMembergroupCheckSubmit');
+								$this->packageId, 'FormInputMembergroupCheckSubmit');
+
 		Hook::registerPlugin('Forms', 'HtmlConvert', 'datetime', 
-									$this->packageId, 'FormInputDatetimeToHtml');
+								$this->packageId, 'FormInputDatetimeToHtml');
 		Hook::registerPlugin('Forms', 'checkSubmit', 'datetime', 
-									$this->packageId, 'FormInputDatetimeCheckSubmit');
-		Hook::registerPlugin('Forms', 'Metadata', 'Base', $this->packageId, 'FormInputAutocompleteMetadata');
+								$this->packageId, 'FormInputDatetimeCheckSubmit');
 		Hook::registerPlugin('Forms', 'Metadata', 'Base', $this->packageId, 'FormInputDatetimeMetadata');
 
 		CronManager::registerJob('CachePurge', 'Mortar', 'module', 30);
