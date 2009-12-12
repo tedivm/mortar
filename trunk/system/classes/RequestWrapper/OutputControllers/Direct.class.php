@@ -43,13 +43,11 @@ class DirectOutputController extends AbstractOutputController
 	 * @return bool
 	 * @todo Write format-specific permissions
 	 */
-	public function checkAction($action, $format = null)
+	public function checkAction($action, $format)
 	{
-		$query = Query::getQuery();
-		if(parent::checkAction($action, $query['format']))
+		if(parent::checkAction($action, $format))
 		{
-			$query = Query::getQuery();
-			$this->setFormat($query['format']);
+			$this->setFormat($format);
 			return true;
 		}elseif(parent::checkAction($action, 'Raw')){
 			return true;

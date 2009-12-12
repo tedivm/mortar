@@ -51,7 +51,7 @@ class JsonOutputController extends AbstractOutputController
 	{
 		$query = Query::getQuery();
 		$json = json_encode($this->activeResource);
-		if(isset($query['callback']) || self::$jsonpEnable)
+		if(isset($query['callback']) && self::$jsonpEnable)
 		{
 			$this->mimeType = 'application/javascript';
 			$callback = preg_replace('[^A-Za-z0-9]', '', $query['callback']);
