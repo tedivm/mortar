@@ -313,6 +313,16 @@ class FormToHtml
 		if($input->type == 'html')
 			$inputOptions['html'] = true;
 
+		if(isset($input->properties['autocomplete']) && $input->properties['autocomplete'])
+		{
+			$inputOptions['autocomplete']['data'] = $input->properties['autocomplete'];
+			if(isset($input->properties['multiple']))
+			{
+				$inputOptions['autocomplete']['options']['multiple'] = true;
+			}
+			unset($input->properties['autocomplete']);
+		}
+
 		$plugins = new Hook();
 		$plugins->enforceInterface('FormMetadataHook');
 		$plugins->loadPlugins('Forms', 'Metadata', 'Base');
