@@ -24,6 +24,8 @@ class IOProcessorRest extends IOProcessorHttp
 	 */
 	static public $postOverrides = array('put', 'delete', 'options');
 
+	protected $errorFormat = 'Rss';
+
 	/**
 	 * This function sets the programming environment to match that of the system and method calling it
 	 *

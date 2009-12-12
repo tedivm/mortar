@@ -58,17 +58,18 @@ class RequestWrapper
 			$this->ioHandler = new $handlerClass();
 			do{
 				try{
-
+					$query = Query::getQuery();
 					//// check for maintenance mode
 					if($this->checkForMaintenanceMode())
 						throw new MaintenanceMode();
 
 					$action = $this->getAction();
-					$this->runAction($action);
+					$this->runAction($action, $query['format']);
 					$this->logRequest();
 				}catch(Exception $e){
 					$errorAction = $this->handleError($e);
-					$this->runAction($errorAction);
+					$errorFormat = $this->ioHandler->getErrorFormat();
+					$this->runAction($errorAction, $errorFormat);
 				}
 			// If the io handler says it can handle another request, loop around and go for it
 			}while($this->ioHandler->nextRequest());
@@ -277,13 +278,14 @@ class RequestWrapper
 	 * @access protected
 	 * @param Action $action
 	 */
-	protected function runAction(ActionInterface $action)
+	protected function runAction(ActionInterface $action, $format)
 	{
-		$query = Query::getQuery();
-		$format = $query['format'];
 		$outputController = $this->loadFormatHandler($action, $format);
 
 		if(!$outputController)
+			throw new ResourceNotFoundError();
+
+		if(!$outputController->checkAction($action, $format))
 			throw new ResourceNotFoundError();
 
 		$outputController->initialize($action);
@@ -339,7 +341,6 @@ class RequestWrapper
 
 
 		$errorModule = $location->getMeta('errorHandler');
-
 		switch(get_class($e))
 		{
 			case 'AuthenticationError':
