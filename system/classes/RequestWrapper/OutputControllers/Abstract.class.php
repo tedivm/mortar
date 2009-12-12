@@ -105,9 +105,6 @@ abstract class AbstractOutputController
 			$this->format = substr($class, 0, strpos($class, 'OutputController'));
 		}
 
-		if(!$this->checkAction($action))
-			throw new TypeMismatch(array('Action', $action));
-
 		$this->action = $action;
 
 		$this->start();
@@ -241,18 +238,12 @@ abstract class AbstractOutputController
 	 * @return bool
 	 * @todo Write format-specific permissions
 	 */
-	public function checkAction($action, $format = null)
+	public function checkAction($action, $format)
 	{
 		try
 		{
 			if(!$action)
 				throw new TypeMismatch(array('Action', $action));
-
-			if(!isset($format))
-			{
-				$query = Query::getQuery();
-				$format = $query['format'];
-			}
 
 			$settingsArrayName = $format . 'Settings';
 

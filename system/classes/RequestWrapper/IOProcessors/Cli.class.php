@@ -31,6 +31,8 @@ class IOProcessorCli
 	 */
 	protected $headers = array();
 
+	protected $errorFormat = 'Text';
+
 	/**
 	 * On construct the initialize function is run
 	 *
@@ -140,6 +142,11 @@ class IOProcessorCli
 			throw new TypeMismatch(array('Numeric', $code));
 
 		$this->responseCode = $code;
+	}
+
+	public function getErrorFormat()
+	{
+		return $this->errorFormat;
 	}
 
 	/**
