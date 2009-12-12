@@ -39,14 +39,6 @@
 					$(this).autocomplete(inputOpts.autocomplete.data, autocompleteOpts)
 				}
 
-				if(inputOpts.datetime && inputOpts.datetime.data)
-				{
-					datetimeOpts = $.extend({},
-												$.fn.MorterForm.defaults.datetime,
-												inputOpts.datetime.options);
-
-					$(this).datepicker(datetimeOpts)
-				}
 
 				// Setup WYSIWYG editor
 				if(inputOpts.html)
@@ -82,16 +74,4 @@
 								}
   						};
 
-	$.fn.MorterForm.defaults.datetime = {
-					duration: '',
-					showTime: true,
-					constrainInput: true,
-					stepMinutes: 5,
-					stepHours: 1,
-					altTimeField: '',
-					currentText: 'Now',
-					prevText: '<',
-					nextText: '>',	
-					time24h: false
-	};
 })(jQuery);

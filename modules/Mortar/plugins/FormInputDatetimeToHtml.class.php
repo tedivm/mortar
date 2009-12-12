@@ -15,7 +15,11 @@ class MortarPluginFormInputDatetimeToHtml implements FormToHtmlHook
 		$this->input = $input;
 	}
 
-	public function getCustomJavaScript(){}
+	public function getCustomJavaScript()
+	{
+		$form = $this->input->getForm();
+		return array('$("#'.$form->name.'").MortarFormDatepicker();');
+	}
 	public function overrideHtml(){}
 	public function createOverriddingHtml($sectionHtml){}
 	public function setCustomHtml($inputHtml){}
