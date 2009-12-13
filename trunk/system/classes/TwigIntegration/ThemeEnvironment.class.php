@@ -2,20 +2,19 @@
 
 class TwigIntegrationThemeEnvironment extends Twig_Environment
 {
-	protected $generationDelimiter = ':';
 
 	public function loadTemplate($name)
 	{
 		if($name == 'parent')
 			throw new CoreError('Templates can not be named parent.');
 
-		if($generationDelimiterPosition = strpos($name, $this->generationDelimiter))
-		{
-			$generation = substr($name, 0, $generationDelimiterPosition);
-			$name = substr($name, $generationDelimiterPosition);
-		}
+		$namePieces = $this->loader->getNamePieces($name);
 
-		$name = ltrim($name, $this->generationDelimiter);
+		if(isset($namePieces['generation']))
+		{
+			$generation = $namePieces['generation'];
+			$name = $namePieces['name'];
+		}
 
 		if(!($templateSet = $this->loader->loadTemplateSet($name)))
 			throw new CoreError('Unable to load template ' . $name);

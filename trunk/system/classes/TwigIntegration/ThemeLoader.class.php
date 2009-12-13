@@ -2,13 +2,17 @@
 
 class TwigIntegrationThemeLoader implements Twig_LoaderInterface
 {
-	protected $lastLoadedList;
+	protected $lastLoadedList = array();
 	protected $lastLoaded;
 	protected $generationDelimiter = ':';
 	protected $paths;
 
 	public function loadTemplateSet($name)
 	{
+		if(isset($this->lastLoadedList[$name]))
+			return $this->lastLoadedList[$name];
+
+
 		$availableThemes = array_keys($this->paths);
 
 		$cache = new Cache('themes', $availableThemes[0], 'templates', $name);
@@ -39,8 +43,22 @@ class TwigIntegrationThemeLoader implements Twig_LoaderInterface
 			$cache->storeData($templateSet);
 		}
 
-		$this->lastLoadedList = $templateSet;
+		$this->lastLoadedList[$name] = $templateSet;
 		return $templateSet;
+	}
+
+
+	public function getNamePieces($name)
+	{
+		if($generationDelimiterPosition = strpos($name, $this->generationDelimiter))
+		{
+			$generation = substr($name, 0, $generationDelimiterPosition);
+			$name = substr($name, $generationDelimiterPosition);
+			$name = ltrim($name, ':');
+			return array('name' => $name, 'generation' => $generation);
+		}else{
+			return array('name' => $name);
+		}
 	}
 
 	protected function loadExtraClasses($name)
@@ -59,14 +77,17 @@ class TwigIntegrationThemeLoader implements Twig_LoaderInterface
    */
 	public function getSource($name)
 	{
-		if(isset($this->lastLoadedList[$name]))
+		$namePieces = $this->getNamePieces($name);
+		$genericName = $namePieces['name'];
+
+		if(isset($this->lastLoadedList[$genericName][$name]))
 		{
-			$fileContents = file_get_contents($this->lastLoadedList[$name]);
+			$fileContents = file_get_contents($this->lastLoadedList[$genericName][$name]);
 			// We're iterating through the path list looking for the current class and then getting the name of the
 			// template after that, which is the parent template. We then takes the current template and replace the
 			// call to parent with a call to the proper template name.
 			$found = false;
-			foreach($this->lastLoadedList as $className => $path)
+			foreach($this->lastLoadedList[$genericName] as $className => $path)
 			{
 				if($found && $className != $name)
 				{
