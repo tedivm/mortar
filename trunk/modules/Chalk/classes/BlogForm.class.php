@@ -8,6 +8,7 @@ class ChalkBlogForm extends Form {
 			setlegend('Blog Information')->
 			createInput('model_title')->
 			setLabel('Title')->
+			setType('title')->
 			addRule('required');
 
 
