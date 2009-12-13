@@ -48,6 +48,10 @@ class MortarActionMinify extends ActionBase
 				Cache::clear('themes', $themeName, 'minification', $type);
 				$url = $theme->getUrl($type);
 			}
+
+			if(isset($query['raw']) && $query['raw'] == true)
+				$url->raw = true;
+
 			$this->ioHandler->addHeader('Location', (string) $url);
 			$this->ioHandler->setStatusCode(301);
 			return;
@@ -60,7 +64,8 @@ class MortarActionMinify extends ActionBase
 
 
 
-		if(defined('DISABLE_MINIFICATION') && DISABLE_MINIFICATION === true)
+		if((defined('DISABLE_MINIFICATION') && DISABLE_MINIFICATION === true)
+			|| (isset($query['raw']) && $query['raw'] == true))
 		{
 			$this->output = $minifier->getBaseString();
 			return;
@@ -79,7 +84,19 @@ class MortarActionMinify extends ActionBase
 			$cache->storeData($minifiedData);
 		}
 
-		$this->output = $minifiedData['data'];
+		$rawUrl = Query::getUrl();
+		$rawUrl->raw = true;
+
+		$rawUrl = new Url();
+		$rawUrl->action = 'Minify';
+		$rawUrl->id = $query['id'];
+		$rawUrl->format = $type;
+		$rawUrl->module = 'Mortar';
+		$rawUrl->raw = true;
+
+		$output = '/* Raw Source: ' . (string) $rawUrl . ' */' . PHP_EOL;
+		$output .= $minifiedData['data'];
+		$this->output = $output;
 	}
 
 	public function viewCss()

@@ -69,6 +69,36 @@ class Minifier
 
 	protected function processFiles()
 	{
+ 		/* Since we're merging the files together we want to make it easier for designers to find the css they're
+		  looking for. However, we don't want to give out path data, which could be used to identify the os and other
+		  crap, out to anyone looking so we're replacing those paths with useful, but non-identifying, path
+		  abbreviations. At some point this will have to be changed around to allow this class to be used outside
+		  of Mortar.
+		*/
+		$config = Config::getInstance();
+		$config['path']['modules']; // theme javascript templates fonts icons
+
+		$search = array();
+		$replace = array();
+
+		$search[] = $config['path']['modules'];
+		$replace[] = 'mortar/modules/';
+
+		$search[] = $config['path']['theme'];
+		$replace[] = 'mortar/themes/';
+
+		$search[] = $config['path']['javascript'];
+		$replace[] = 'mortar/javascript/';
+
+		$search[] = $config['path']['templates'];
+		$replace[] = 'mortar/templates/';
+
+		$search[] = $config['path']['fonts'];
+		$replace[] = 'mortar/fonts/';
+
+		$search[] = $config['path']['icons'];
+		$replace[] = 'mortar/icons/';
+
 		$bigFile = '';
 		foreach($this->paths as $path)
 		{
@@ -76,7 +106,7 @@ class Minifier
 				continue;
 
 
-			$bigFile .= PHP_EOL  . '/* ' . $path . ' */' . PHP_EOL;
+			$bigFile .= PHP_EOL  . '/* ' . str_replace($search, $replace, $path) . ' */' . PHP_EOL;
 			$bigFile .= file_get_contents($path) . PHP_EOL . PHP_EOL;
 		}
 
