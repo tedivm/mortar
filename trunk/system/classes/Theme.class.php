@@ -123,24 +123,24 @@ class Theme extends ContentBase
 				// javascript
 				$javascriptResult = $this->getFiles($packagePath . 'javascript/', $packageUrl . 'javascript/', 'js', 25);
 				if($javascriptResult)
-					$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
+					$javascriptLinks = array_merge($javascriptLinks, $javascriptResult);
 
 				// css
 				$cssResult = $this->getFiles($packagePath . 'css/', $packageUrl . 'css/', 'css');
 				if($cssResult)
-					$cssLinks = array_merge_recursive($cssLinks, $cssResult);
+					$cssLinks = array_merge($cssLinks, $cssResult);
 
 			}
 
 			// javascript
 			$javascriptResult = $this->getFiles($themePath . 'javascript/', $themeUrl . 'javascript/', 'js');
 			if($javascriptResult)
-				$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
+				$javascriptLinks = array_merge($javascriptLinks, $javascriptResult);
 
 			// css
 			$cssResult = $this->getFiles($themePath . 'css/', $themeUrl . 'css/', 'css');
 			if($cssResult)
-				$cssLinks = array_merge_recursive($cssLinks, $cssResult);
+				$cssLinks = array_merge($cssLinks, $cssResult);
 
 
 
@@ -153,7 +153,7 @@ class Theme extends ContentBase
 			// we don't want modules or themes to be able to overwrite those specific ones.
 			$javascriptResult = $this->getFiles($baseJavascriptPath, $baseJavascriptUrl, 'js', 20);
 			if($javascriptResult)
-				$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
+				$javascriptLinks = array_merge($javascriptLinks, $javascriptResult);
 
 			$data['cssLinks'] = $cssLinks;
 			$data['jsLinks'] = $javascriptLinks;
