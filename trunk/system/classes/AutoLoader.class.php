@@ -118,6 +118,15 @@ class AutoLoader
 			return true;
 		}
 
+		if(strpos($class, 'HTMLPurifier') === 0)
+		{
+			if(!class_exists('HTMLPurifier_Bootstrap', false))
+				include(self::$thirdPartyIncludes . 'HTMLPurifier/Bootstrap.php');
+
+			if(HTMLPurifier_Bootstrap::autoload($class))
+				return true;
+		}
+
 		return class_exists($class);
 	}
 

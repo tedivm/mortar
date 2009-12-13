@@ -11,3 +11,18 @@ JSMin.class.php
 	MIT License
 	PHP port of Douglas Crockford's JSMin JavaScript minifier
 	http://code.google.com/p/jsmin-php/
+
+
+Twig/
+	Twig
+	v0.9.4
+	3-Clause BSD
+	Templating library
+	http://www.twig-project.org/
+
+HTMLPurifier/
+	HTMLPurifier
+	v4.0.0
+	LGPL
+	Standards-compliant HTML filter, filters out XSS.
+	http://htmlpurifier.org/
