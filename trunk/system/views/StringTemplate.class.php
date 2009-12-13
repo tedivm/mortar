@@ -3,7 +3,7 @@
 
 class ViewStringTemplate extends ViewThemeTemplate
 {
-	protected $twigLoader = 'Twig_Loader_String';
+	protected $twigLoader = 'TwigIntegrationStringLoader';
 
 
 	public function __construct($template)

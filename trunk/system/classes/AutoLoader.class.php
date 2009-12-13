@@ -44,6 +44,7 @@ class AutoLoader
 										'modelSupport/Forms' => 'none',
 										'modelSupport/DisplayLists' => 'none',
 										'Orm' => 'Orm',
+										'TwigIntegration' => 'TwigIntegration',
 										'InputHandlers' => 'none',
 										'cacheHandlers' => 'cacheHandler',
 										'RequestWrapper/IOProcessors' => 'IOProcessor',
