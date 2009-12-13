@@ -19,7 +19,9 @@ class MortarPluginFormInputTitleToHtml implements FormToHtmlHook
 		} else {
 			$form = $input->getForm();
 			$nameBox = $form->getInput('location_name', 'location_information');
-			$this->nameBox = $nameBox->property('id');
+			$this->nameBox 	= (isset($nameBox) && $nameBox !== false) 
+					? $nameBox->property('id')
+					: '';
 		}
 
 		$this->input = $input;
@@ -29,7 +31,10 @@ class MortarPluginFormInputTitleToHtml implements FormToHtmlHook
 	{
                 $form = $this->input->getForm();
                 $name = '"#' . $this->nameBox . '"';
-                return array('$("#'.$form->name.'").MortarFormSlugify('.$name.');');
+                $js = (isset($this->nameBox) && ($this->nameBox !== '')) 
+                	? array('$("#'.$form->name.'").MortarFormSlugify('.$name.');')
+                	: null;
+                return $js;
 	}
 	public function overrideHtml(){}
 	public function createOverriddingHtml($sectionHtml){}

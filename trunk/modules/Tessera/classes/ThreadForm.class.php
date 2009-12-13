@@ -8,6 +8,7 @@ class TesseraThreadForm extends Form
 			setLegend('Thread')->
 			createInput('model_title')->
 			setLabel('Title')->
+			setType('title')->
 			addRule('Required');
 	}
 }
