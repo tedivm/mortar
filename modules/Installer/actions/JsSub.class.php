@@ -21,11 +21,22 @@ class InstallerActionJsSub implements ActionInterface
 
 	public function viewDirect()
 	{
+		$query = Query::getQuery();
 		$this->ioHandler->addHeader('Content-Type', 'application/x-javascript; charset=utf-8');
 		$page = ActivePage::getInstance();
 		$theme = $page->getTheme();
-		$minifier = $theme->getMinifier('js');
+		$minifier = $theme->getMinifier(strtolower($query['format']));
 		return $minifier->getBaseString();
+	}
+
+	public function viewJs()
+	{
+		return $this->viewDirect();
+	}
+
+	public function viewCss()
+	{
+		return $this->viewDirect();
 	}
 
 	public function checkAuth($action = NULL)
