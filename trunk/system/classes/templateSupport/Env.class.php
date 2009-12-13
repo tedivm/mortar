@@ -31,6 +31,10 @@ class TagBoxEnv
 
 				return str_replace('_', ' ', $this->site->getLocation()->getName());
 			case "user":
+
+				if(!isset($this->user))
+					return 'Installer';
+
 				return $this->user['name'];
 			default:
 				return false;
