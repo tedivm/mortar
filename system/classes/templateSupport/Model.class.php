@@ -9,6 +9,9 @@ class TagBoxModel
 
 	public function __construct(Model $model)
 	{
+		if(defined('INSTALLMODE') && INSTALLMODE === true)
+			return true;
+
 		$this->model = $model;
 		$this->location = method_exists($this->model, 'getLocation') ? $this->model->getLocation() : new Location(1);
 		$modelArray = $model->__toArray();
@@ -74,6 +77,9 @@ class TagBoxModel
 	
 	public function __get($key)
 	{
+		if(defined('INSTALLMODE') && INSTALLMODE === true)
+			return true;
+
 		switch($key) {
 			case 'permalink':
 				return $this->getPermalink();

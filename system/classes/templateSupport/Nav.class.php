@@ -126,7 +126,11 @@ class TagBoxNav
 		return (string) $dateList;
 	}
 	
-	public function __get($tagname) {
+	public function __get($tagname)
+	{
+
+		if(defined('INSTALLMODE') && INSTALLMODE === true)
+			return true;
 
 		switch ($tagname) {
 			case "siblingList":
@@ -140,7 +144,8 @@ class TagBoxNav
 		}
 	}
 	
-	public function __isset($tagname) {
+	public function __isset($tagname)
+	{
 		switch ($tagname) {
 			case "siblingList":
 			case "childrenList":
