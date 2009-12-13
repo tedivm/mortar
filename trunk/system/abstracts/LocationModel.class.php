@@ -151,7 +151,7 @@ abstract class LocationModel extends ModelBase
 					|| $this->properties['name'] == 'tmp'
 					|| staticHack($this, 'autoName') === true)
 			{
-				$name = $this->getType() . $this->getId();
+				$name = strtolower($this->getType()) . '_' . $this->getId();
 				$location->setName($name);
 			}elseif(isset($this->properties['name'])){
 				$location->setName($this->properties['name']);
