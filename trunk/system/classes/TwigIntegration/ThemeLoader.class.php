@@ -86,20 +86,41 @@ class TwigIntegrationThemeLoader implements Twig_LoaderInterface
 			// We're iterating through the path list looking for the current class and then getting the name of the
 			// template after that, which is the parent template. We then takes the current template and replace the
 			// call to parent with a call to the proper template name.
-			$found = false;
-			foreach($this->lastLoadedList[$genericName] as $className => $path)
-			{
-				if($found && $className != $name)
-				{
-					$fileContents =
-						str_replace('{% extends "parent" %}', '{% extends "' . $className . '" %}', $fileContents);
 
-					break;
+			if(preg_match('{\{% extends "(.*?)" %\}}', substr($fileContents, 0, 1024), $subs) === 1)
+			{
+				$parentTemplate = $subs[1];
+
+				if($parentTemplate == 'parent' || $parentTemplate == $genericName)
+				{
+					$found = false;
+					foreach($this->lastLoadedList[$genericName] as $className => $path)
+					{
+						if($found && $className != $name)
+						{
+							$parentTemplateRealName = $className;
+							break;
+						}
+
+						$found = ($className == $name);
+					}
+
+				}else{
+
+					$parentTemplatePieces = $this->getNamePieces($parentTemplate);
+
+					if(isset($parentTemplatePieces['generation']))
+					{
+						$parentTemplateRealName = $parentTemplate;
+					}else{
+						$parentTemplateSet = $this->loadTemplateSet($parentTemplatePieces['name']);
+						$parentTemplateTemp = array_keys($parentTemplateSet);
+						$parentTemplateRealName = $parentTemplateTemp[0];
+					}
 				}
 
-				if($className == $name);
-					$found = true;
-
+				$fileContents =	str_replace('{% extends "' . $parentTemplate . '" %}',
+											'{% extends "' . $parentTemplateRealName . '" %}', $fileContents);
 			}
 
 			return $fileContents;
