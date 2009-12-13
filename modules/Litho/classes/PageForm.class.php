@@ -8,6 +8,7 @@ class LithoPageForm extends Form
 			setlegend('Page Information')->
 			createInput('model_title')->
 				setLabel('Title')->
+				setType('title')->
 				addRule('required');
 
 			$this->createInput('model_description')->

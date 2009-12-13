@@ -74,6 +74,13 @@ class FormToHtml
 
 		$jsStartup = array();
 
+		foreach($this->inputs as $inputs) {
+			foreach($inputs as $input) {
+				$inputId = $formId . "_" . $input->name;
+				$input->property('id', $inputId);
+			}
+		}
+
 		foreach($this->inputs as $section => $inputs)
 		{
 			$sectionHtml = new HtmlObject('fieldset');
@@ -90,14 +97,11 @@ class FormToHtml
 
 
 			$hasInputs = false;
+
 			foreach($inputs as $input)
 			{
-				$inputId = $formId . "_" . $input->name;
-
 				if($input->type == 'checkbox' && isset($input->properties['value']))
 					$inputId .= '_' . $input->properties['value'];
-
-				$input->property('id', $inputId);
 
 				$plugins = new Hook();
 				$plugins->enforceInterface('FormToHtmlHook');
