@@ -1,0 +1,30 @@
+.blog_entry .blog_entry_title {
+margin-bottom: 0;
+}
+
+.blog_entry .blog_entry_meta {
+font-style: italic;
+margin-top: 0;
+}
+
+.blog_entry .blog_entry_actions ul {
+display: inline;
+list-style: none;
+padding: 0;
+}
+
+.blog_entry .blog_entry_actions ul * {
+display: inline;
+}
+
+.blog_entry .separator {
+padding: 0 10px;
+}
+
+.blog_entry .blog_entry_actions ul li {
+padding: 0 10px 0 0;
+}
+
+.blog_entry_divider {
+width: 50%;
+}

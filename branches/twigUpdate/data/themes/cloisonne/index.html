@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" >
+<head>
+<title>{{ pagetitle }}</title>
+{{ head }}
+<link rel="icon" type="image/png" href="{{ env.siteLink }}/system/assets/images/favicon.png" />
+
+</head>
+<body>
+
+<div id="container">
+
+    <div id="header">
+	<img src="{{ theme.images['mortar-logo.png'] }}" alt="Mortar" />
+        <h1>{{ sitename }}</h1>
+    </div> <!-- header -->
+
+    <div id="content">
+
+	<div id="subnav">
+		<ul>
+
+		</ul>
+	</div> <!-- subnav -->
+
+	{{ content }}
+    </div> <!-- content -->
+
+    <div id="footer">
+    This site is Held Together By <a href="http://code.google.com/p/mortar/">Mortar</a>.
+    </div> <!-- footer -->
+
+</div>
+</body>
+</html>
