@@ -2,7 +2,7 @@
 
 class ViewModelTemplate extends ViewThemeTemplate
 {
-	protected $twigLoader = 'ViewModelTemplateTwigLoader';
+	protected $twigLoader = 'TwigIntegrationModelLoader';
 	protected $model;
 
 	public function __construct(Theme $theme, Model $model, $name)
@@ -26,26 +26,6 @@ class ViewModelTemplate extends ViewThemeTemplate
 
 		$parentPaths['module'] = $packagePath;
 		return $parentPaths;
-	}
-}
-
-class ViewModelTemplateTwigLoader extends ViewTemplateTwigLoader
-{
-	protected $__runtimeLoopProtection = false;
-
-	protected function loadExtraClasses($name)
-	{
-		if($this->__runtimeLoopProtection)
-			return array();
-		$this->__runtimeLoopProtection = true;
-
-
-		$tmp = substr($name, 7);
-		$baseName = substr($tmp, strpos($tmp, '/'));
-
-		$baseTemplates = $this->loadTemplateSet('models/base/' . $baseName);
-		$this->__runtimeLoopProtection = false;
-		return $baseTemplates;
 	}
 }
 
