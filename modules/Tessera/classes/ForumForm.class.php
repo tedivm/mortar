@@ -8,6 +8,7 @@ class TesseraForumForm extends Form
 			setLegend('Forum Information')->
 			createInput('model_title')->
 			setLabel('Title')->
+			setType('title')->
 			addRule('Required');
 
 		$this->createInput('model_description')->
