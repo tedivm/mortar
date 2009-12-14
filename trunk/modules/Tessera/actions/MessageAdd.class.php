@@ -12,10 +12,11 @@ class TesseraActionMessageAdd extends ModelActionLocationBasedAdd
 		if(isset($inputGroups['model'])) {
 			$input = $form->getInput('model_title');
 			$parent = $this->model->getLocation()->getParent()->getResource();
-			$input->setValue('Re: ' . $parent['title']);
+			if($input !== false)
+				$input->setValue('Re: ' . $parent['title']);
 
 			$input = $form->getInput('model_replyTo');
-			if (isset($query['replyTo']))
+			if(isset($query['replyTo']) && $input !== false)
 				$input->setValue($query['replyTo']);
 		}
 
