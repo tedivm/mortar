@@ -152,6 +152,9 @@ class ModelRegistry
 			}
 
 			$model = new $handler($id);
+			if(isset($id) && $model->getId() === false)
+				return false;
+
 			return $model;
 
 		}catch(Exception $e){

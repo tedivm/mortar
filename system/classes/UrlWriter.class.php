@@ -40,15 +40,33 @@ class UrlWriter
 			return $url;
 		}
 
-		if(isset($attributes['locationId']))
-		{
-			$location = new Location($attributes['locationId']);
-			$siteId = $location->getSite();
-			$site = ModelRegistry::loadModel('Site', $siteId);
-			$url = $site->getDomainUrl($ssl);
-		}else{
-			$site = ActiveSite::getSite();
-			$url = $site->getDomainUrl($ssl);
+		try{
+
+
+			if(isset($attributes['locationId']))
+			{
+				$location = new Location($attributes['locationId']);
+				$siteId = $location->getSite();
+
+				if(!$siteId)
+					throw new Exception('Unable to get Site ID');
+
+				$site = ModelRegistry::loadModel('Site', $siteId);
+				$url = $site->getDomainUrl($ssl);
+			}else{
+				$site = ActiveSite::getSite();
+				$url = $site->getDomainUrl($ssl);
+			}
+
+		}catch(Exception $e){
+
+			if(isset($attributes['locationId']))
+			{
+				$site = ActiveSite::getSite();
+				$url = $site->getDomainUrl($ssl);
+			}else{
+				$url = BASE_URL;
+			}
 		}
 
 		if(!self::$enableRewrite)
