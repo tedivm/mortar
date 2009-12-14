@@ -100,6 +100,8 @@ class FormToHtml
 
 			foreach($inputs as $input)
 			{
+				$inputId = $formId . "_" . $input->name;
+
 				if($input->type == 'checkbox' && isset($input->properties['value']))
 					$inputId .= '_' . $input->properties['value'];
 
