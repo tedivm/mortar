@@ -1,6 +1,6 @@
 <?php
 
-class TesseraActionThreadEdit extends ModelActionLocationBasedEdit
+class TesseraActionMessageEdit extends ModelActionLocationBasedEdit
 {
 
 	protected function getForm()
