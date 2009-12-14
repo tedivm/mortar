@@ -76,7 +76,10 @@ class FormToHtml
 
 		foreach($this->inputs as $inputs) {
 			foreach($inputs as $input) {
-				$inputId = $formId . "_" . $input->name;
+				if($input->type == 'checkbox' && isset($input->properties['value']))
+					$inputId .= '_' . $input->properties['value'];
+				else
+					$inputId = $formId . "_" . $input->name;
 				$input->property('id', $inputId);
 			}
 		}
@@ -100,10 +103,7 @@ class FormToHtml
 
 			foreach($inputs as $input)
 			{
-				$inputId = $formId . "_" . $input->name;
-
-				if($input->type == 'checkbox' && isset($input->properties['value']))
-					$inputId .= '_' . $input->properties['value'];
+				$inputId = $input->property('id');
 
 				$plugins = new Hook();
 				$plugins->enforceInterface('FormToHtmlHook');
