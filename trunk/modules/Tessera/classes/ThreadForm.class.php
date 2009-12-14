@@ -10,6 +10,7 @@ class TesseraThreadForm extends Form
 			setLabel('Title')->
 			setType('title')->
 			addRule('Required');
+
 	}
 }
 
