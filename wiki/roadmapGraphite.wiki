@@ -1,4 +1,4 @@
-#summary roadmap for our wiki module "Graphite"
+#summary roadmap for our wiki module Graphite
 
 = Introduction =
 
