@@ -19,10 +19,6 @@ class MortarActionMinify extends ActionBase
 			$themeName = $tmp[0];
 			$requestedChecksum = $tmp[1];
 
-			$tmp = explode('.', $tmp[1]);
-			$requestedChecksum = $tmp[0];
-
-
 		}elseif(isset($query['location'])){
 
 			// if no filename was sent we'll load up the default theme for the site to redirect to the appropriate file
@@ -40,7 +36,7 @@ class MortarActionMinify extends ActionBase
 		$actualCheckSum = $minifier->getInitialChecksum();
 
 		// if the checksum from the url doesn't match the checksum of the base url
-		if($actualCheckSum != $requestedChecksum)
+		if(!isset($requestedChecksum) || $actualCheckSum != $requestedChecksum)
 		{
 			$url = $theme->getUrl($type);
 			if(isset($query['id']) && $url->id == $query['id'])
