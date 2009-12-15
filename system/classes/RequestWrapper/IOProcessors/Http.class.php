@@ -144,6 +144,14 @@ class IOProcessorHttp extends IOProcessorCli
 		$url = Query::getUrl();
 		$url->format = $query['format'];
 
+		if(isset($url->locationId) && isset($url->module))
+		{
+			$site = ActiveSite::getSite();
+			$location = $site->getLocation();
+			if($location->getId() == $url->locationId)
+				unset($url->locationId);
+		}
+
 		$rawUrl = Query::getRawUrl();
 
 		if((string) $url != $rawUrl)
