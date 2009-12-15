@@ -138,6 +138,19 @@ class IOProcessorHttp extends IOProcessorCli
 		}
 	}
 
+	public function systemCheck()
+	{
+		$query = Query::getQuery();
+		$url = Query::getUrl();
+		$url = Query::getUrl();
+		$url->format = $query['format'];
+
+		$rawUrl = Query::getRawUrl();
+
+		if((string) $url != $rawUrl)
+			throw new ResourceMoved('Non-Cannonical url used.');
+	}
+
 	/**
 	 * Adds a new http header to be sent out
 	 *
