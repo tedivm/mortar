@@ -78,7 +78,7 @@ class RequestWrapper
 
 		}catch(Exception $e){
 			// If we're here we bailed out of the program loop due to an error with the error handler
-			echo 'There was an error, and when attempting to deal with that error there was another error.';
+			echo 'There was an error with the system followed by a problem with the error handler.';
 		}
 
 
