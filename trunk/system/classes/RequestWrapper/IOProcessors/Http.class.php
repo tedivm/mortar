@@ -142,7 +142,6 @@ class IOProcessorHttp extends IOProcessorCli
 	{
 		$query = Query::getQuery();
 		$url = Query::getUrl();
-		$url = Query::getUrl();
 		$url->format = $query['format'];
 
 		$rawUrl = Query::getRawUrl();
