@@ -24,12 +24,20 @@ class Query
 	 * @var FilteredArray
 	 */
 	static protected $query;
+	static protected $rawUrl = '';
 
 	static public function setQuery($query)
 	{
 		if(is_array($query))
 			self::$query = new FilteredArray($query);
 	}
+
+	static public function getRawUrl()
+	{
+		return self::$rawUrl;
+	}
+
+
 
 	/**
 	 * This function returns the current Query (Arguments or Get values)
@@ -41,6 +49,9 @@ class Query
 	{
 		if(!self::$query)
 		{
+			if(isset($_SERVER['HTTP_HOST']) && isset($_SERVER['REQUEST_URI']))
+				self::$rawUrl =  'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+
 			$type = (defined('STDIN') || !isset($_SERVER['REQUEST_METHOD'])) ? 'Argv' : 'Get';
 
 			if(!class_exists($type, false))
