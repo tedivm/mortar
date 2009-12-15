@@ -26,6 +26,11 @@ class RubbleActionResourceMoved extends ActionBase
 		return '';
 	}
 
+	public function checkAuth($action = NULL)
+	{
+		return true;
+	}
+
 }
 
 ?>
