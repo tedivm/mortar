@@ -75,6 +75,11 @@ class IOProcessorCli
 		echo $output;
 	}
 
+	public function systemCheck()
+	{
+		
+	}
+
 	/**
 	 * This is called by the request handler during the last phase of execution
 	 *

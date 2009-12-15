@@ -63,6 +63,8 @@ class RequestWrapper
 					if($this->checkForMaintenanceMode())
 						throw new MaintenanceMode();
 
+					$this->ioHandler->systemCheck();
+
 					$action = $this->getAction();
 					$this->runAction($action, $query['format']);
 					$this->logRequest();
@@ -349,6 +351,10 @@ class RequestWrapper
 
 				//$action = 'LogIn';
 				//$errorModule = $location->getMeta('default');
+				break;
+
+			case 'ResourceMoved':
+				$action = 'ResourceMoved';
 				break;
 
 			case 'ResourceNotFoundError':
