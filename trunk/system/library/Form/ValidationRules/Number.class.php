@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class FormValidationNumber extends FormValidationFilter
+class FormValidationNumber extends FormValidationAbstract
 {
 	/**
 	 * This is the default error message if the input doesn't validate.
@@ -24,12 +24,18 @@ class FormValidationNumber extends FormValidationFilter
 	protected $error = 'Not a valid number';
 
 	/**
-	 * This filter specifies that the input should be a float.
+	 * This make sure the input is less than or equal to the specified value.
 	 *
-	 * @var int
+	 * @return bool
 	 */
-	protected $filter = FILTER_VALIDATE_FLOAT;
+	public function validate()
+	{
+		if(is_numeric($this->value))
+			return true;
 
+		return false;
+	}
 }
+
 
 ?>
