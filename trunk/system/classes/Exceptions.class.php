@@ -463,7 +463,7 @@ class AuthenticationError extends CoreUserError {}
  */
 class ResourceNotFoundError extends CoreUserError {}
 
-
+class ResourceMoved extends ResourceNotFoundError {}
 
 // External error handlers
 class Twig_Error extends CoreError {}
