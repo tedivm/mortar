@@ -29,7 +29,6 @@ class UrlReader
 
 		foreach($getValues as $name => $value)
 			$this->setAttribute($name, $value);
-
 		return $this->attributes;
 	}
 
@@ -94,6 +93,13 @@ class UrlReader
 					if(isset($pathPieces[2]))
 					{
 						$this->setAttribute('action', $pathPieces[2]);
+
+						if(isset($pathPieces[3]))
+						{
+							$this->setAttribute('id', $pathPieces[3]);
+							array_shift($pathPieces);
+						}
+
 						array_shift($pathPieces);
 					}
 					array_shift($pathPieces);

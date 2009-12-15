@@ -81,10 +81,14 @@ class UrlWriter
 
 		if(isset($attributes['iohandler']) && $attributes['iohandler'] === 'rest')
 		{
-			$path = 'rest/';
-			unset($attributes['iohandler']);
+			if($attributes['iohandler'] === 'rest')
+			{
+				$path = 'rest/';
+				unset($attributes['iohandler']);
+			}elseif($attributes['iohandler'] === 'http'){
+				unset($attributes['iohandler']);
+			}
 		}
-
 
 		if(isset($attributes['format']) && strtolower($attributes['format']) === 'admin')
 		{
@@ -94,56 +98,12 @@ class UrlWriter
 
 		if(isset($attributes['module']))
 		{
-			$path .= 'module/' . $attributes['module'];
-			unset($attributes['module']);
-
+			$path = self::buildModulePath($path, $attributes);
 		}elseif(isset($attributes['locationId'])){
-
-			$location = new Location($attributes['locationId']);
-			unset($attributes['locationId']);
-
-			// here we will iterate back to the site, creating the path to the model in reverse.
-			$tempLoc = $location;
-			$locationString = '';
-			while($tempLoc->getType() != 'Site')
-			{
-				$locationString = str_replace(' ', '-', $tempLoc->getName()) . '/' . $locationString;
-				if(!$parent = $tempLoc->getParent())
-					break;
-				$tempLoc = $parent;
-			}
-
-			if(strlen($locationString) > 0)
-				$path .= $locationString . '/';
+			$path = self::buildLocationPath($path, $attributes);
 		}elseif(isset($attributes['type'])){
-
-			if(in_array($attributes['type'], UrlReader::$resourceMaps))
-			{
-				$path .= array_search($attributes['type'], UrlReader::$resourceMaps) . '/';
-			}else{
-				$path .= 'resources/' . $attributes['type'] . '/';
-			}
-			unset($attributes['type']);
-
-			if(isset($attributes['id']))
-			{
-				$path .= $attributes['id'] . '/';
-				unset($attributes['id']);
-			}elseif(isset($attributes['action']) && $attributes['action'] == 'Index'){
-				unset($attributes['action']);
-			}
-
+			$path = self::buildResourcePath($path, $attributes);
 		}
-
-		/*
-
-		if(isset($attributes['action']))
-		{
-			if($attributes['action'] !== 'Read')
-				$path .= $attributes['action'] . '/';
-			unset($attributes['action']);
-		}
-		*/
 
 		$path = rtrim($path, '/');
 
@@ -156,6 +116,77 @@ class UrlWriter
 		return $path;
 	}
 
+	static function buildLocationPath($path, &$attributes)
+	{
+		$location = new Location($attributes['locationId']);
+		unset($attributes['locationId']);
+
+		// here we will iterate back to the site, creating the path to the model in reverse.
+		$tempLoc = $location;
+		$locationString = '';
+		while($tempLoc->getType() != 'Site')
+		{
+			$locationString = str_replace(' ', '-', $tempLoc->getName()) . '/' . $locationString;
+			if(!$parent = $tempLoc->getParent())
+				break;
+			$tempLoc = $parent;
+		}
+
+		if(strlen($locationString) > 0)
+			$path .= $locationString . '/';
+
+		if(isset($attributes['action']) && $attributes['action'] == 'Read'){
+			unset($attributes['action']);
+		}
+
+		return $path;
+	}
+
+
+
+	static function buildResourcePath($path, &$attributes)
+	{
+		if(in_array($attributes['type'], UrlReader::$resourceMaps))
+		{
+			$path .= array_search($attributes['type'], UrlReader::$resourceMaps) . '/';
+		}else{
+			$path .= 'resources/' . $attributes['type'] . '/';
+		}
+		unset($attributes['type']);
+
+		if(isset($attributes['id']))
+		{
+			if($attributes['action'] != 'Index')
+				$path .= $attributes['id'] . '/';
+
+			$path .= $attributes['id'] . '/';
+			unset($attributes['id']);
+		}elseif(isset($attributes['action']) && $attributes['action'] == 'Index'){
+			unset($attributes['action']);
+		}
+
+		return $path;
+	}
+
+	static function buildModulePath($path, &$attributes)
+	{
+		$path .= 'module/' . $attributes['module'];
+		unset($attributes['module']);
+
+		if(isset($attributes['action']))
+		{
+			$path .= '/' . $attributes['action'];
+			unset($attributes['action']);
+
+			if(isset($attributes['id']))
+			{
+				$path .= '/' . $attributes['id'];
+				unset($attributes['id']);
+			}
+		}
+
+		return $path;
+	}
 
 }
 
