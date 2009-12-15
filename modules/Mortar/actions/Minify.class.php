@@ -84,9 +84,6 @@ class MortarActionMinify extends ActionBase
 			$cache->storeData($minifiedData);
 		}
 
-		$rawUrl = Query::getUrl();
-		$rawUrl->raw = true;
-
 		$rawUrl = new Url();
 		$rawUrl->action = 'Minify';
 		$rawUrl->id = $query['id'];
