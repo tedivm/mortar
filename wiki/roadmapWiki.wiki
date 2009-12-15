@@ -7,6 +7,10 @@ This covers wiki-specific features required for 1.0.
 
 = Wiki =
 
+== 0.7 == 
+
+  * Exist
+
 == 1.0 ==
 
   * Simultaneous changes (crossing streams) management
