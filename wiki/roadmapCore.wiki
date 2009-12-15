@@ -14,13 +14,13 @@ As this document is the official Roadmap it should only be updated by release ow
 Release Date : *December 25th, 2009*<br>
 Release Owner : *tedivm*
 
-  * Canonical URLs
+  * ~~Canonical URLs~~
   * Core Updater
   * Moving key Location fields out to their own table (re: site name, etc.)
-  * Non-location Model Routing 
+  * ~~Non-location Model Routing~~
   * User Read
   * Group Listing/Read
-  * Update Twig to newest release
+  * ~~Update Twig to newest release~~
 
 == 0.6 ==
 
