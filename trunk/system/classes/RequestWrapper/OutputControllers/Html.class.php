@@ -21,7 +21,7 @@ class HtmlOutputController extends AbstractOutputController
 	 *
 	 * @var string
 	 */
-	public $mimeType = 'text/html';
+	public $mimeType = 'text/html; charset=UTF-8';
 
 	/**
 	 * This function sets the template, the active page, and adds the HtmlControllerContentFilter content filter.
@@ -31,11 +31,11 @@ class HtmlOutputController extends AbstractOutputController
 	{
 		$page = ActivePage::getInstance();
 		$page->addRegion('pagetitle', 'Mortar');
-		
+
 		$query = Query::getQuery();
 		if(isset($query['location'])) {
 			$location = new Location($query['location']);
-		} else { 
+		} else {
 			$site = ActiveSite::getSite();
 			$location = $site->getLocation();
 		}
