@@ -2,6 +2,8 @@
 
 class RubbleActionResourceMoved extends ActionBase
 {
+	protected $redirectUrl;
+
 	public function logic()
 	{
 		$query = Query::getQuery();
@@ -17,13 +19,16 @@ class RubbleActionResourceMoved extends ActionBase
 				unset($redirectUrl->locationId);
 		}
 
+		$this->redirectUrl = $redirectUrl;
 		$this->ioHandler->setStatusCode(301);
 		$this->ioHandler->addHeader('Location', (string) $redirectUrl);
 	}
 
 	public function viewHtml()
 	{
-		return '';
+		$link = $this->redirectUrl->getLink('new location');
+		return '<p>This page has been moved to a ' . trim($link, PHP_EOL) .
+				', please wait a moment while we redirect you.</p>';
 	}
 
 	public function checkAuth($action = NULL)
