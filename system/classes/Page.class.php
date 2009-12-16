@@ -142,6 +142,7 @@ class Page implements ArrayAccess
 	<script type="text/javascript">
 	{{ preStartupJs }}
 	</script>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	{{ meta }}
 	{{ headerContent }}
 ';
@@ -185,7 +186,7 @@ class Page implements ArrayAccess
 	}
 
 	/**
-	 * This function contains all content tags which are universally applied to the page view template. This will 
+	 * This function contains all content tags which are universally applied to the page view template. This will
 	 * almost certainly eventually be expanded to include a Hook so new tags can be added.
 	 *
 	 * @param ViewModelTemplate $template
