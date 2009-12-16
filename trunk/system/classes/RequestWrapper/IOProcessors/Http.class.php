@@ -140,6 +140,9 @@ class IOProcessorHttp extends IOProcessorCli
 
 	public function systemCheck()
 	{
+		if(defined('INSTALLMODE') && INSTALLMODE)
+			return true;
+		
 		$query = Query::getQuery();
 		$url = Query::getUrl();
 		$url->format = $query['format'];
