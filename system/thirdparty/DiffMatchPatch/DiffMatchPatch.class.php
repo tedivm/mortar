@@ -1,19 +1,25 @@
 	<?php
-		// Diff_Match_Patch v1.5
+	
+	// Diff_Match_Patch v1.5
 	// Computes the difference between two texts to create a patch.
 	// Applies the patch onto another text, allowing for errors.
 	// Copyright (C) 2006 Neil Fraser
 	// http://neil.fraser.name/software/diff_match_patch/
-		// This program is free software you can redistribute it and/or
+	
+	// This program is free software you can redistribute it and/or
 	// modify it under the terms of the GNU Lesser General Public
 	// License as published by the Free Software Foundation.
-		// This program is distributed in the hope that it will be useful,
+	
+	// This program is distributed in the hope that it will be useful,
 	// but WITHOUT ANY WARRANTY without even the implied warranty of
 	// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	// GNU Lesser General Public License (www.gnu.org) for more details.
-			// Defaults.
+	
+	
+	// Defaults.
 	// Redefine these in your program to override the defaults.
-	class DiffMatchPatch
+	
+class DiffMatchPatch
 {
 	// Number of seconds to map a diff before giving up. (0 for infinity)
 	protected $_DIFF_TIMEOUT = 1.0;
@@ -28,10 +34,13 @@
 	/* $_MATCH_MAXLENGTH = 1000; */
 	// Chunk size for context length.
 	/* $_PATCH_MARGIN = 4; */
-			//////////////////////////////////////////////////////////////////////
+	
+	
+	//////////////////////////////////////////////////////////////////////
 	// Diff                              //
 	//////////////////////////////////////////////////////////////////////
-		// The data structure representing a diff is an array of tuples:
+	
+	// The data structure representing a diff is an array of tuples:
 	// [[DIFF_DELETE, "Hello"], [DIFF_INSERT, "Goodbye"], [DIFF_EQUAL, " world."]]
 	// which means: delete "Hello", add "Goodbye" and keep " world."
 	protected $_DIFF_DELETE = -1;
@@ -44,25 +53,32 @@
 		if(isset($opts['editcost']))
 			$this->_DIFF_EDIT_COST = $opts['editcost'];
 	}
-		public function diff_main( $text1, $text2, $checkLines = true ) {
+	
+	public function diff_main( $text1, $text2, $checkLines = true ) {
 		// Find the differences between two texts. Return an array of changes.
 		// If checkLines is present and false, then don't run a line-level diff first to identify the changed areas.
-				// Check for equality (speedup)
+	
+	
+		// Check for equality (speedup)
 		if (strcmp( $text1, $text2 ) == 0) {
 			return array( array( $this->_DIFF_EQUAL, $text1 ) );
 		}
-			// Trim off common prefix (speedup)
+	
+		// Trim off common prefix (speedup)
 		list( $text1, $text2, $commonPrefix ) = $this->diff_prefix( $text1, $text2 );
-			// Trim off common suffix (speedup)
+	
+		// Trim off common suffix (speedup)
 		list( $text1, $text2, $commonSuffix ) = $this->diff_suffix( $text1, $text2 );
-			if (strlen( $text1 ) > strlen( $text2 )) {
+	
+		if (strlen( $text1 ) > strlen( $text2 )) {
 			$longText = $text1;
 			$shortText = $text2;
 		} else {
 			$longText = $text2;
 			$shortText = $text1;
 		}
-			if (strlen( $text1 ) == 0) {
+	
+		if (strlen( $text1 ) == 0) {
 			// Just add some text (speedup)
 			$diff = array( array( $this->_DIFF_INSERT, $text2 ) );
 		} else if (strlen( $text2 ) == 0) {
@@ -80,7 +96,8 @@
 		} else {
 			unset( $longText ); // Garbage collect
 			unset( $shortText ); // Garbage collect
-				// Check to see if the problem can be split in two.
+	
+			// Check to see if the problem can be split in two.
 			$hm = $this->diff_halfmatch( $text1, $text2 );
 			if (! is_null( $hm )) {
 				// A half-match was found, sort out the return data.
@@ -160,7 +177,9 @@
 		$this->diff_cleanupMerge( $diff );
 		return $diff;
 	}
-			public function diff_lines2charsMunge( $text, &$linearr, &$linehh ) {
+	
+	
+	public function diff_lines2charsMunge( $text, &$linearr, &$linehh ) {
 		$chars = array();
 		while (strlen( $text ) > 0) {
 			$i = strpos( $text, "\n" );
@@ -178,15 +197,19 @@
 		}
 		return $chars;
 	}
-		public function diff_lines2chars( $text1, $text2 ) {
+	
+	public function diff_lines2chars( $text1, $text2 ) {
 		// Split text into an array of strings.
 		// Reduce the texts to a string of hashes where each character represents one line.
 		$lineArray = array(); // lineArray[4] == "Hello\n"
 		$lineHash = array(); // lineHash["Hello\n"] == 4
 		$lineArray[] = '';
-			return array( $this->diff_lines2charsMunge( $text1, $lineArray, $lineHash ), $this->diff_lines2charsMunge( $text2, $lineArray, $lineHash ), $lineArray );
+	
+		return array( $this->diff_lines2charsMunge( $text1, $lineArray, $lineHash ), $this->diff_lines2charsMunge( $text2, $lineArray, $lineHash ), $lineArray );
 	}
-			public function diff_chars2lines( &$diff, &$lineArray ) {
+	
+	
+	public function diff_chars2lines( &$diff, &$lineArray ) {
 		// Rehydrate the text in a diff from a string of line hashes to real lines of text.
 		for ($i = 0; $i < count( $diff ); $i++) {
 			$chars = $diff[ $i ][ 1 ];
@@ -202,8 +225,11 @@
 			$diff[ $i ][ 1 ] = $text;
 		}
 	}
-			public function diff_map( $text1, $text2, $textIsArray = false ) {
-			// Explore the intersection points between the two texts.
+	
+	
+	public function diff_map( $text1, $text2, $textIsArray = false ) {
+	
+		// Explore the intersection points between the two texts.
 		$ms_end = microtime() + $this->_DIFF_TIMEOUT * 1000000; // Don't run for too long.
 		$t1len = $textIsArray ? count( $text1 ) : strlen( $text1 );
 		$t2len = $textIsArray ? count( $text2 ) : strlen( $text2 );
@@ -222,7 +248,8 @@
 			if ($this->_DIFF_TIMEOUT > 0 && microtime() > $ms_end) { // Timeout reached
 				return NULL;
 			}
-				// Walk the front path one step.
+	
+			// Walk the front path one step.
 			$v_map1[ $d ] = array();
 			for ($k = -$d; $k <= $d; $k += 2) {
 				if ($k == -$d || $k != $d && $v1[ $k - 1 ] < $v1[ $k + 1 ]) {
@@ -244,7 +271,8 @@
 					}
 					$x++; $y++;
 				}
-					$v1[ $k ] = $x;
+	
+				$v1[ $k ] = $x;
 				$v_map1[ $d ][ "{$x},{$y}" ] = true;
 				if ($done) {
 					// Front path ran over reverse path.
@@ -258,7 +286,8 @@
 					}
 				}
 			}
-				// Walk the reverse path one step.
+	
+			// Walk the reverse path one step.
 			$v_map2[ $d ] = array();
 			for ($k = -$d; $k <= $d; $k += 2) {
 				if ($k == -$d || $k != $d && $v2[ $k - 1 ] < $v2[ $k + 1 ]) {
@@ -267,7 +296,8 @@
 					$x = $v2[ $k - 1 ] + 1;
 				}
 				$y = $x - $k;
-					while (true) {
+	
+				while (true) {
 					$footstep = ($t1len - $x) . ',' . ($t2len - $y);
 					if (! $front && isset( $footsteps[ $footstep ] )) {
 						$done = true;
@@ -279,7 +309,8 @@
 					}
 					$x++; $y++;
 				}
-					$v2[ $k ] = $x;
+	
+				$v2[ $k ] = $x;
 				$v_map2[ $d ][ "{$x},{$y}" ] = true;
 				if ($done) {
 					// Reverse path ran over front path.
@@ -297,8 +328,11 @@
 		// Number of diffs equals number of characters, no commonality at all.
 		return NULL;
 	}
-			public function diff_path1( &$v_map, $text1, $text2, $textIsArray = false ) {
-			// Work from the middle back to the start to determine the path.
+	
+	
+	public function diff_path1( &$v_map, $text1, $text2, $textIsArray = false ) {
+	
+		// Work from the middle back to the start to determine the path.
 		$path = array();
 		$x = $textIsArray ? count( $text1 ) : strlen( $text1 );
 		$y = $textIsArray ? count( $text2 ) : strlen( $text2 );
@@ -340,8 +374,11 @@
 		}
 		return $path;
 	}
-			public function diff_path2( &$v_map, $text1, $text2, $textIsArray = false ) {
-			// Work from the middle back to the end to determine the path.
+	
+	
+	public function diff_path2( &$v_map, $text1, $text2, $textIsArray = false ) {
+	
+		// Work from the middle back to the end to determine the path.
 		$path = array();
 		$x = $t1len = $textIsArray ? count( $text1 ) : strlen( $text1 );
 		$y = $t2len = $textIsArray ? count( $text2 ) : strlen( $text2 );
@@ -386,7 +423,9 @@
 		}
 		return $path;
 	}
-			public function diff_prefix( $text1, $text2 ) {
+	
+	
+	public function diff_prefix( $text1, $text2 ) {
 		// Trim off common prefix
 		$max = min( strlen( $text1 ), strlen( $text2 ) );
 		for ($i = 0; $i < $max; $i++) {
@@ -396,7 +435,9 @@
 		}
 		return array( substr( $text1, $i ), substr( $text2, $i ), substr( $text1, 0, $i ) );
 	}
-			public function diff_suffix( $text1, $text2 ) {
+	
+	
+	public function diff_suffix( $text1, $text2 ) {
 		// Trim off common suffix
 		for ($i = strlen( $text1 ) - 1, $j = strlen( $text2 ) - 1; $i >= 0 && $j >= 0; $i--, $j--) {
 			if ($text1[$i] != $text2[$j]) {
@@ -405,7 +446,8 @@
 		}
 		return array( substr( $text1, 0, $i + 1 ), substr( $text2, 0, $j + 1 ), substr( $text1, $i + 1 ) );
 	}
-		public function diff_halfmatch_i( $longer, $shorter, $i ) {
+	
+	public function diff_halfmatch_i( $longer, $shorter, $i ) {
 		// Start with a 1/4 length substring at position i as a seed.
 		$seed = substr( $longer, $i, floor( strlen( $longer ) / 4 ) );
 		$j = -1;
@@ -426,7 +468,8 @@
 		}
 		return $best;
 	}
-		public function diff_halfmatch( $text1, $text2 ) {
+	
+	public function diff_halfmatch( $text1, $text2 ) {
 		// Do the two texts share a substring which is at least half the length of the longer text?
 		if (strlen( $text1 ) > strlen( $text2 )) {
 			$longText = $text1;
@@ -438,7 +481,8 @@
 		if (strlen( $longText ) < 10 || strlen( $shortText ) < 1) {
 				return NULL; // Pointless
 		}
-			// First check if the second quarter is the seed for a half-match.
+	
+		// First check if the second quarter is the seed for a half-match.
 		$hm1 = $this->diff_halfmatch_i( $longText, $shortText, ceil( strlen( $longText ) / 4 ) );
 		// Check again based on the third quarter.
 		$hm2 = $this->diff_halfmatch_i( $longText, $shortText, ceil( strlen( $longText ) / 2 ) );
@@ -451,15 +495,19 @@
 		} else { // Both matched. Select the longest.
 			$hm = (strlen( $hm1[4] ) > strlen( $hm2[4] ) ? $hm1 : $hm2);
 		}
-			// A half-match was found, sort out the return data.
+	
+		// A half-match was found, sort out the return data.
 		if (strlen( $text1 ) > strlen( $text2 )) {
 			return $hm;
 		} else {
 			return array( $hm[2], $hm[3], $hm[0], $hm[1], $hm[4] );
 		}
 	}
-			public function diff_cleanupSemantic( &$diff ) {
-			// Reduce the number of edits by eliminating semantically trivial equalities.
+	
+	
+	public function diff_cleanupSemantic( &$diff ) {
+	
+		// Reduce the number of edits by eliminating semantically trivial equalities.
 		$changes = false;
 		$equalities = array(); // Stack of indices where equalities are found.
 		$lastequality = NULL; // Always equal to equalities[equalities.length-1][1]
@@ -489,12 +537,16 @@
 			}
 			$pointer++;
 		}
-			if ($changes) {
+	
+		if ($changes) {
 			$this->diff_cleanupMerge( $diff );
 		}
 	}
-			public function diff_cleanupEfficiency( &$diff ) {
-			// Reduce the number of edits by eliminating operationally trivial equalities.
+	
+	
+	public function diff_cleanupEfficiency( &$diff ) {
+	
+		// Reduce the number of edits by eliminating operationally trivial equalities.
 		$changes = false;
 		$equalities = array(); // Stack of indices where equalities are found.
 		$lastequality = ''; // Always equal to equalities[equalities.length-1][1]
@@ -552,12 +604,16 @@
 			}
 			$pointer++;
 		}
-			if ($changes) {
+	
+		if ($changes) {
 			$this->diff_cleanupMerge( $diff );
 		} 
 	}
-			public function diff_cleanupMerge( &$diff ) {
-			// Reorder and merge like edit sections. Merge equalities.
+	
+	
+	public function diff_cleanupMerge( &$diff ) {
+	
+		// Reorder and merge like edit sections. Merge equalities.
 		// Any edit section can move as long as it doesn't cross an equality.
 		array_push( $diff, array( $this->_DIFF_EQUAL, '' ) ); // Add a dummy entry at the end.
 		$pointer = 0;
@@ -625,8 +681,11 @@
 			array_pop( $diff ); // Remove the dummy entry at the end.
 		}
 	}
-			public function diff_addIndex( &$diff ) {
-			// Add an index to each tuple, represents where the tuple is located in text2.
+	
+	
+	public function diff_addIndex( &$diff ) {
+	
+		// Add an index to each tuple, represents where the tuple is located in text2.
 		// e.g. [[DIFF_DELETE, 'h', 0], [DIFF_INSERT, 'c', 0], [DIFF_EQUAL, 'at', 1]]
 		$i = 0;
 		for ($x = 0; $x < count( $diff ); $x++) {
@@ -636,8 +695,11 @@
 			}
 		}
 	}
-			public function diff_xIndex( &$diff, $loc ) {
-			// loc is a location in text1, compute and return the equivalent location in text2.
+	
+	
+	public function diff_xIndex( &$diff, $loc ) {
+	
+		// loc is a location in text1, compute and return the equivalent location in text2.
 		// e.g. "The cat" vs "The big cat", 1->1, 5->8
 		$chars1 = 0;
 		$chars2 = 0;
@@ -662,8 +724,11 @@
 		// Add the remaining character length.
 		return $last_chars2 + ($loc - $last_chars1);
 	}
-			public function diff_prettyHtml( &$diff ) {
-			// Convert a diff array into a pretty HTML report.
+	
+	
+	public function diff_prettyHtml( &$diff ) {
+	
+		// Convert a diff array into a pretty HTML report.
 		$this->diff_addIndex( $diff );
 		$html = '';
 		for ($x = 0; $x < count( $diff ); $x++) {
@@ -683,5 +748,7 @@
 		}
 		return $html;
 	}
-	}
-	?>
+	
+}
+	
+?>
