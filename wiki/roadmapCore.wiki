@@ -14,11 +14,12 @@ As this document is the official Roadmap it should only be updated by release ow
 Release Date : *December 25th, 2009*<br>
 Release Owner : *tedivm*
 
-  * ~~Canonical URLs~~
   * Core Updater
-  * ~~Non-location Model Routing~~
   * User Read
   * Group Listing/Read
+  * ~~User Add/Edit~~
+  * ~~Canonical URLs~~
+  * ~~Non-location Model Routing~~
   * ~~Update Twig to newest release~~
   * ~~Diff Algorithm~~
   * ~~Form Control Updates~~
@@ -28,24 +29,23 @@ Release Owner : *tedivm*
 Release Date : *tbd*<br>
 Release Owner : *charlequin*
 
-  * Advanced ORM
-  * User Add/Edit
   * Group Add/Edit
   * Moving key Location fields out to their own table (re: site name, etc.)
   * Menu/Sidebar Management
-  * Multilingual support
-  * Permissions-setting for optional modules
+  * Multilingual support part 1 (base class, after which we need to do a mass upgrade of all strings in the system)
+  * Setting permissions for models after installing a new module.
 
 == 0.7 ==
 
   * Initial Mural Creation (theme module)
   * Theme Preview
+  * Upgrade to the CKEditor from the FKCEditor.
+  * Site Management Interface
 
 == 1.0 ==
 
   * REST-Interface (partially complete)
   * User Management Interface
-  * Site Management Interface
   * Admin Dashboard view
   * !MortarShell (Interactive Shell)
   * Theme Options -- manage themes, select default themes for sites/areas, configuring themes for user skinning
@@ -53,6 +53,7 @@ Release Owner : *charlequin*
   * Twig Extensions
   * Memcache cache storage engine
   * sqlite3 cache storage engines
+  * Advanced ORM
 
 = Module Roadmaps =
 
