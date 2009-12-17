@@ -16,11 +16,12 @@ Release Owner : *tedivm*
 
   * ~~Canonical URLs~~
   * Core Updater
-  * Moving key Location fields out to their own table (re: site name, etc.)
   * ~~Non-location Model Routing~~
   * User Read
   * Group Listing/Read
   * ~~Update Twig to newest release~~
+  * ~~Diff Algorithm~~
+  * ~~Form Control Updates~~
 
 == 0.6 ==
 
@@ -28,10 +29,9 @@ Release Date : *tbd*<br>
 Release Owner : *charlequin*
 
   * Advanced ORM
-  * Diff Algorithm
   * User Add/Edit
   * Group Add/Edit
-  * Form Control Updates
+  * Moving key Location fields out to their own table (re: site name, etc.)
 
 == 0.7 ==
 
