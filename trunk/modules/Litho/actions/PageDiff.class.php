@@ -24,6 +24,10 @@ class LithoActionPageDiff extends LithoActionPageRead
 			$errors[] = $query['rev2'] . " is not an existing revision.<br />";
 		}
                 
+                if(isset($rev1n) && isset($rev2n) && ($rev2n < $rev1n)) {
+                	$rev1n = $query['rev2'];
+                	$rev2n = $query['rev1'];
+                }
              
                 if(isset($rev1n)) {
                         try {

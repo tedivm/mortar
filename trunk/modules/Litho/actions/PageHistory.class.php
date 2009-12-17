@@ -27,16 +27,13 @@ class LithoActionPageHistory extends ModelActionLocationBasedRead
 
 		foreach($this->revisionList as $revision)
 		{
-			$revision->author;
-			$revision->updateTime;
-			$revision->title;
-			$revision->rawContent;
-			$revision->filteredContent;
-			
 			$url = new Url();
 			$url->location = $this->model->getLocation()->getId();
 			$url->format = $format;
 			$url->revision = $revision->getId();
+
+			$radioButton  = "<input type='radio' name='rev1' value='" . $revision->getId() . "' />";
+			$radioButton .= "<input type='radio' name='rev2' value='" . $revision->getId() . "' />";
 
 			if(!isset($users[$revision->author]))
 				$users[$revision->author] = ModelRegistry::loadModel('User', $revision->author);
@@ -47,10 +44,20 @@ class LithoActionPageHistory extends ModelActionLocationBasedRead
 			$table->addField('revision_time', $revision->updateTime);
 			if(isset($revision->note) && strlen($revision->note) > 0)
 				$table->addField('revision_note', $revision->note);
+			$table->addField('revision_actions', $radioButton);
 			$table->newRow();
 		}
+		$url = new Url();
+		$url->location = $this->model->getLocation()->getId();
+		$url->format = $format;
+		
+		$diffAction = '<input type="submit" value="Diff" />';
+		
+		$table->addField('revision_actions', $diffAction);
 
-		return $table->makeHtml();
+		$formOpener = '<form name="Diff" action="'.(string) $url.'" method="get"><input type="hidden" name="action" value="Diff" />';
+
+		return $formOpener . $table->makeHtml() . "</form>";
 	}
 
 	public function viewAdmin($page)
