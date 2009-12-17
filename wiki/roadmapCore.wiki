@@ -32,6 +32,9 @@ Release Owner : *charlequin*
   * User Add/Edit
   * Group Add/Edit
   * Moving key Location fields out to their own table (re: site name, etc.)
+  * Menu/Sidebar Management
+  * Multilingual support
+  * Permissions-setting for optional modules
 
 == 0.7 ==
 
@@ -40,17 +43,14 @@ Release Owner : *charlequin*
 
 == 1.0 ==
 
-  * Multilingual support
   * REST-Interface (partially complete)
   * User Management Interface
   * Site Management Interface
-  * Menu/Sidebar Management
   * Admin Dashboard view
   * !MortarShell (Interactive Shell)
   * Theme Options -- manage themes, select default themes for sites/areas, configuring themes for user skinning
   * Theme Icon Sets (select and use)
   * Twig Extensions
-  * Permissions-setting for optional modules
   * Memcache cache storage engine
   * sqlite3 cache storage engines
 
