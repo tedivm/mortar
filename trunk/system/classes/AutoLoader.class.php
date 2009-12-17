@@ -126,6 +126,12 @@ class AutoLoader
 			if(HTMLPurifier_Bootstrap::autoload($class))
 				return true;
 		}
+		
+		if(strpos($class, 'DiffMatchPatch') === 0)
+		{
+			include(self::$thirdPartyIncludes . 'DiffMatchPatch/' . $class . '.class.php');
+			return true;
+		}
 
 		return class_exists($class);
 	}
