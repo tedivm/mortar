@@ -11,7 +11,7 @@ class RubbleActionResourceMoved extends ActionBase
 		$redirectUrl = Query::getUrl();
 		$redirectUrl->format = $query['format'];
 
-		if(isset($redirectUrl->locationId) && isset($redirectUrl->module))
+		if(isset($redirectUrl->locationId) && (isset($redirectUrl->module) || isset($redirectUrl->type)))
 		{
 			$site = ActiveSite::getSite();
 			$location = $site->getLocation();
