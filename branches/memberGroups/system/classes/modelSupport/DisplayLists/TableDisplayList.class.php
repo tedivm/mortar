@@ -130,9 +130,8 @@ class TableDisplayList extends TemplateDisplayList {
 		$first = true;
 		$groupList = '';
 
-		foreach($groups as $groupId) {
-			if(!($group = ModelRegistry::loadModel('MemberGroup', $id)));
-				return false;
+		foreach($groups as $groupId) { 
+			$group = ModelRegistry::loadModel('MemberGroup', $groupId);
 
 			if (!$first) 
 				$groupList .= ', ';
