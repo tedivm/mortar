@@ -69,8 +69,7 @@ class ModelActionLocationBasedOwnership extends ModelActionLocationBasedEdit
 
 		if(isset($input['ownerGroup']) && is_numeric($input['ownerGroup']))
 		{
-			$membergroup = new MemberGroup($input['ownerGroup']);
-			if(!$membergroup->getId())
+			if(!($membergroup = ModelRegistry::loadModel('MemberGroup', $input['ownerGroup'])))
 				return false;
 
 			$location->setOwnerGroup($membergroup);

@@ -122,11 +122,13 @@ class RequestWrapper
 			$user = ActiveUser::getUser();
 			$userId = $user->getId();
 
-			$admin = new MemberGroup(MemberGroup::lookupIdbyName('Administrator'));
+			$admin = ModelRegistry::loadModel('MemberGroup');
+			$admin->loadByName('Administrator');
 			if($admin->containsUser($userId))
 				return false;
 
-			$system = new MemberGroup(MemberGroup::lookupIdbyName('SuperUser'));
+			$system = ModelRegistry::loadModel('MemberGroup');
+			$system->loadByName('SuperUser');
 			if($system->containsUser($userId))
 				return false;
 

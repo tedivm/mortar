@@ -6,7 +6,9 @@ class MortarPluginFormInputMembergroupCheckSubmit extends MortarPluginFormInputU
 
 	protected function inputToValue($input)
 	{
-		if($id = MemberGroup::lookupIdbyName($input))
+		$model = ModelRegistry::loadModel('MemberGroup');
+		$model->loadByName($input);
+		if($id = $model->getId())
 			return $id;
 		return false;
 	}

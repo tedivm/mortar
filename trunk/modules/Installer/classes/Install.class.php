@@ -378,19 +378,25 @@ class InstallerSetupUserland
 	protected function setupMembergroups($membergroups)
 	{
 		$savedMembergroups = array();
+		$config = Config::getInstance();
+		$input = Input::getInput();
+
+		if(!class_exists('MortarModelMemberGroup', false))
+			include($config['path']['modules'] . 'Mortar/models/MemberGroup.class.php');
+
 		foreach($membergroups['system'] as $group)
 		{
-			$membergroup = new MemberGroup();
-			$membergroup->setName($group);
-			$membergroup->makeSystem();
+			$membergroup = new MortarModelMemberGroup();
+			$membergroup->name = $group;
+			$membergroup['is_system'] = 1;
 			$membergroup->save();
 			$savedMembergroups[$group] = $membergroup;
 		}
 
 		foreach($membergroups['user'] as $group)
 		{
-			$membergroup = new MemberGroup();
-			$membergroup->setName($group);
+			$membergroup = new MortarModelMemberGroup();
+			$membergroup->name = $group;
 			$membergroup->save();
 			$savedMembergroups[$group] = $membergroup;
 		}
@@ -403,7 +409,7 @@ class InstallerSetupUserland
 		$input = Input::getInput();
 		$membergroups = $this->savedGroups;
 
-		if(!class_exists('User', false))
+		if(!class_exists('MortarModelUser', false))
 			include($config['path']['modules'] . 'Mortar/models/User.class.php');
 
 		foreach($userList as $name => $user)

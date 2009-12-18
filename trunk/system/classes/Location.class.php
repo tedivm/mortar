@@ -359,7 +359,7 @@ class Location
 	 *
 	 * @param MemberGroup $memberGroup
 	 */
-	public function setOwnerGroup(MemberGroup $memberGroup)
+	public function setOwnerGroup(MortarModelMemberGroup $memberGroup)
 	{
 		$this->group = $memberGroup->getId();
 	}
@@ -372,7 +372,7 @@ class Location
 	public function getOwnerGroup()
 	{
 		if(isset($this->group))
-			return new MemberGroup($this->group);
+			return ModelRegistry::loadModel('MemberGroup', $this->group);
 
 		return false;
 	}
