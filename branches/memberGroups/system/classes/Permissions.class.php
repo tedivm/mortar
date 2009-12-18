@@ -91,20 +91,20 @@ class Permissions
 		$memberGroups = $this->user['membergroups'];
 
 		$resourceOwner = $this->location->getOwner();
-		if($resourceOwner && $resourceOwner->getId() == $this->user->getId()) {
-			$mg = ModelRegistry::loadModel('MemberGroup');
-			$mg->loadByName('ResourceOwner');
-			$memberGroups[] = $mg->getId();
+		if(!(defined('INSTALLMODE') && INSTALLMODE)) {
+			if($resourceOwner && $resourceOwner->getId() == $this->user->getId()) {
+				$mg = ModelRegistry::loadModel('MemberGroup');
+				$mg->loadByName('ResourceOwner');
+				$memberGroups[] = $mg->getId();
+			}
+
+			$memberGroup = $this->location->getOwnerGroup();
+			if($memberGroup && in_array($memberGroup->getId(), $memberGroups)) {
+				$mg = ModelRegistry::loadModel('MemberGroup');
+				$mg->loadByName('ResourceGroupOwner');
+				$memberGroups[] = $mg->getId();
+			}
 		}
-
-		$memberGroup = $this->location->getOwnerGroup();
-		if($memberGroup && in_array($memberGroup->getId(), $memberGroups)) {
-			$mg = ModelRegistry::loadModel('MemberGroup');
-			$mg->loadByName('ResourceGroupOwner');
-			$memberGroups[] = $mg->getId();
-		}
-
-
 
 		foreach($memberGroups as $memberGroup)
 		{
@@ -721,7 +721,11 @@ class PermissionActionList
 			$id = $stmt->insert_id;
 
 			// All new permissions should be granted to the administrator membergroup.
-			$adminGroup = ModelRegistry::loadModel('MemberGroup');
+			if(defined('INSTALLMODE') && INSTALLMODE) {
+				$adminGroup = new MortarModelMemberGroup();
+			} else {
+				$adminGroup = ModelRegistry::loadModel('MemberGroup');
+			}
 			$adminGroup->loadByName('Administrator');
 			$adminPermissions = new GroupPermission(1, $adminGroup->getId());
 			$adminPermissions->setPermission('Universal', $id, true);
