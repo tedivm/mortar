@@ -99,10 +99,10 @@ class UrlWriter
 		if(isset($attributes['module']))
 		{
 			$path = self::buildModulePath($path, $attributes);
-		}elseif(isset($attributes['locationId'])){
-			$path = self::buildLocationPath($path, $attributes);
 		}elseif(isset($attributes['type'])){
 			$path = self::buildResourcePath($path, $attributes);
+		}elseif(isset($attributes['locationId'])){
+			$path = self::buildLocationPath($path, $attributes);
 		}
 
 		$path = rtrim($path, '/');
