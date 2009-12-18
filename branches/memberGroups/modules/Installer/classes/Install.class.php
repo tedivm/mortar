@@ -388,7 +388,7 @@ class InstallerSetupUserland
 		{
 			$membergroup = new MortarModelMemberGroup();
 			$membergroup->name = $group;
-			$membergroup->is_system = 1;
+			$membergroup['is_system'] = 1;
 			$membergroup->save();
 			$savedMembergroups[$group] = $membergroup;
 		}
