@@ -73,8 +73,7 @@ class TemplateDisplayList implements DisplayList {
 	{
 		if(count($this->modelList) > 0)
 		{
-			$listingHtml = new HtmlObject('div');
-			$listingHtml->addClass('listing-container');
+			$listingHtml = '';
 			$x = 1;
 
 			foreach($this->modelList as $model)
@@ -88,7 +87,7 @@ class TemplateDisplayList implements DisplayList {
 				if ($x > 1) {
 					$separatorView = new ViewModelTemplate($this->theme, $this->model, 'Separator.html');
 					$separatorView->addContent(array('count', $x));
-					$listingHtml->wrapAround($separatorView->getDisplay());
+					$listingHtml .= $separatorView->getDisplay();
 				}
 
 				$actionView = new ViewModelTemplate($this->theme, $model, 'Listing.html');
@@ -99,16 +98,11 @@ class TemplateDisplayList implements DisplayList {
 				$htmlConverter->useTheme($this->theme);
 				if($modelDisplay = $htmlConverter->getOutput())
 				{
-					$listingHtml->insertNewHtmlObject('div')->
-						property('name', 'listing-container-child-' . $x)->
-						addClass('modelListing')->addClass($model->getType())->
-						addClass('listing-container-child')->
-						property('id', 'listing-container-child-' . $x)->
-						wrapAround($modelDisplay);
+					$listingHtml .= $modelDisplay;
 					$x++;
 				}
 			}
-			$output = (string) $listingHtml;
+			$output = $listingHtml;
 		}
 
 		return isset($output) ? $output : false;
