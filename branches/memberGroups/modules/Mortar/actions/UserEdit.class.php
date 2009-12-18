@@ -15,7 +15,7 @@ class MortarActionUserEdit extends ModelActionEdit
 				$value = $memberGroupInput->properties['value'];
 				if(is_numeric($value))
 				{
-					$membergroup = new MemberGroup($value);
+					$membergroup = ModelRegistry::loadModel('MemberGroup', $value);
 					if($membergroup->containsUser($this->model->getId()))
 					{
 						$memberGroupInput->check(true);

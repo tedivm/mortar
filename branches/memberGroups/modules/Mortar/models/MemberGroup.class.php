@@ -126,7 +126,7 @@ class MortarModelMemberGroup extends ModelBase
 	}
 
 	/**
-	 * Returns the ID of a membergroup based on its name
+	 * Loads the membergroup whose name is provided into this model
 	 *
 	 * @cache membergroups lookup name *name id
 	 * @static

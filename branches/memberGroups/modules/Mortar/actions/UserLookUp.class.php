@@ -22,7 +22,9 @@ class MortarActionUserLookUp extends ActionBase
 				{
 					$membergroup = $query['m'];
 				}else{
-					$membergroup = ($membergroupId = MemberGroup::lookupIdbyName($query['m'])) ? $membergroupId : 'all';
+					$mg = ModelRegistry::loadModel('MemberGroup');
+					$mgLoaded = $mg->loadByName($query['m']);
+					$membergroup = ($mgLoaded) ? $mg->getId() : 'all';
 				}
 			}else{
 				$membergroup = 'all';
