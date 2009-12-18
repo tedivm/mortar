@@ -16,7 +16,7 @@ class RubbleActionMaintenanceMode extends RubbleActionAuthenticationError
 	public function logic()
 	{
 		$config = Config::getInstance();
-		if(isset($config['system']['maintenanceMessage']))
+		if(isset($config['system']['maintenanceMessage']) && strlen($config['system']['maintenanceMessage']))
 			$this->errorMessage = $config['system']['maintenanceMessage'];
 
 		return parent::logic();
