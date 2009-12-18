@@ -190,14 +190,18 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 	 */
 	public function viewHtml($page)
 	{
-		$output = parent::viewHtml($page);
+		if(isset($this->model['title']))
+			$page->addRegion('pagetitle', htmlentities($this->model['title']));
+
 		$readList = $this->getTemplateDisplayList();
 		$readList->addPage($page);
 
-		if($listingResults = $readList->getListing())
-			$output .= $listingResults;
+		$content = array();
 
-		return $output;
+		if($listingResults = $readList->getListing())
+			$content['listing'] = $listingResults;
+
+		return $this->modelToHtml($page, $this->model, 'Display.html', $content);
 	}
 
 

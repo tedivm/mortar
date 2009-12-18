@@ -1,3 +1,5 @@
-<div class="Thread_{{ model.id }}_{{ model.name }}_listing" class="Thread_listing">
-<a href="{{ model.permalink }}">{{ model.title }}</a>
-</div>
+<tr id="Thread_{{ model.id }}_{{ model.name }}_listing" class="Thread_listing Thread_listing_row_{{ count % 2 + 1 }}">
+	<td class="Thread_title"><a href="{{ model.permalink }}">{{ model.title }}</a></td>
+	<td class="Thread_poster">{{ model.owner }}</td>
+	<td class="Thread_date">{{ model.createdOn|date('h:i:s a m/d/y') }}</td>
+</tr>
