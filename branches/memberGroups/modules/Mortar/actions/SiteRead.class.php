@@ -34,6 +34,7 @@ class MortarActionSiteRead extends ModelActionLocationBasedRead
 		if($indexChild)
 		{
 			$url = new Url();
+			$url->format = 'Html';
 			$url->location = $indexChild;
 			$this->ioHandler->addHeader('Location', (string) $url);
 			$this->ioHandler->setStatusCode(307);

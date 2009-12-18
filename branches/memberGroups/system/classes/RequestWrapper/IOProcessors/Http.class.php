@@ -106,6 +106,9 @@ class IOProcessorHttp extends IOProcessorCli
 		if(!isset($query['format']))
 			$query['format'] = 'Html';
 
+		if($query['format'] == 'Admin')
+			$this->errorFormat = 'Admin';
+
 		if(INSTALLMODE === true && $query['format'] == 'Html')
 			$query['format'] = 'Admin';
 
@@ -142,12 +145,12 @@ class IOProcessorHttp extends IOProcessorCli
 	{
 		if(defined('INSTALLMODE') && INSTALLMODE)
 			return true;
-		
+
 		$query = Query::getQuery();
 		$url = Query::getUrl();
 		$url->format = $query['format'];
 
-		if(isset($url->locationId) && isset($url->module))
+		if(isset($url->locationId) && (isset($url->module) || isset($url->type)))
 		{
 			$site = ActiveSite::getSite();
 			$location = $site->getLocation();

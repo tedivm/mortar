@@ -14,15 +14,27 @@ class UrlWriter
 			unset($attributes['ioType']);
 		}
 
-		$base = self::getBase($attributes);
+		$url = self::getBase($attributes);
 		$path = self::makePath($attributes);
-		$url = $base . $path;
+
+		if(strlen($path))
+		{
+			if(!self::$enableRewrite)
+				$url .= '?p=';
+
+			$url .= $path;
+		}
+
+		if(isset($attributes['format']) && $attributes['format'] = 'Html')
+			unset($attributes['format']);
 
 		if(count($attributes) > 0)
 		{
 			$query = http_build_query($attributes);
-			$delimiter = (self::$enableRewrite) ? '?' : '&';
-			$url .= $delimiter . $query;
+			$url .= (self::$enableRewrite) ? '?' : '&';
+			$url .= $query;
+		}elseif(substr($url, -9) == 'index.php'){
+			$url = substr($url, 0, strpos($url, 'index.php'));
 		}
 
 		return $url;
@@ -75,7 +87,7 @@ class UrlWriter
 		}
 
 		if(!self::$enableRewrite)
-			$url .= 'index.php?p=';
+			$url .= 'index.php';
 
 		return $url;
 	}
@@ -99,10 +111,10 @@ class UrlWriter
 		if(isset($attributes['module']))
 		{
 			$path = self::buildModulePath($path, $attributes);
-		}elseif(isset($attributes['locationId'])){
-			$path = self::buildLocationPath($path, $attributes);
 		}elseif(isset($attributes['type'])){
 			$path = self::buildResourcePath($path, $attributes);
+		}elseif(isset($attributes['locationId'])){
+			$path = self::buildLocationPath($path, $attributes);
 		}
 
 		$path = rtrim($path, '/');
@@ -156,8 +168,8 @@ class UrlWriter
 
 		if(isset($attributes['id']))
 		{
-			if($attributes['action'] != 'Index')
-				$path .= $attributes['id'] . '/';
+//			if($attributes['action'] != 'Index')
+	//			$path .= $attributes['id'] . '/';
 
 			$path .= $attributes['id'] . '/';
 			unset($attributes['id']);
