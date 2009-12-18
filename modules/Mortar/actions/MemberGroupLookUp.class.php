@@ -13,8 +13,7 @@ class MortarActionMemberGroupLookUp extends ActionBase
 		$this->ioHandler->addHeader('Expires', gmdate(HTTP_DATE, time() + $offset));
 
 		$query = Query::getQuery();
-		if(isset($query['q'])
-			&& ActiveUser::isLoggedIn())
+		if(isset($query['q']) && ActiveUser::isLoggedIn())
 		{
 			$limit = isset($query['limit']) && is_numeric($query['limit']) ? $query['limit'] : $this->limit;
 

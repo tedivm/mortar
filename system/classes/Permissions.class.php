@@ -91,14 +91,20 @@ class Permissions
 		$memberGroups = $this->user['membergroups'];
 
 		$resourceOwner = $this->location->getOwner();
-		if($resourceOwner && $resourceOwner->getId() == $this->user->getId())
-			$memberGroups[] = MemberGroup::lookupIdbyName('ResourceOwner');
+		if(!(defined('INSTALLMODE') && INSTALLMODE)) {
+			if($resourceOwner && $resourceOwner->getId() == $this->user->getId()) {
+				$mg = ModelRegistry::loadModel('MemberGroup');
+				$mg->loadByName('ResourceOwner');
+				$memberGroups[] = $mg->getId();
+			}
 
-		$memberGroup = $this->location->getOwnerGroup();
-		if($memberGroup && in_array($memberGroup->getId(), $memberGroups))
-			$memberGroups[] = MemberGroup::lookupIdbyName('ResourceGroupOwner');
-
-
+			$memberGroup = $this->location->getOwnerGroup();
+			if($memberGroup && in_array($memberGroup->getId(), $memberGroups)) {
+				$mg = ModelRegistry::loadModel('MemberGroup');
+				$mg->loadByName('ResourceGroupOwner');
+				$memberGroups[] = $mg->getId();
+			}
+		}
 
 		foreach($memberGroups as $memberGroup)
 		{
@@ -182,7 +188,8 @@ class Permissions
 			$action = PermissionActionList::getAction($action);
 
 		// Check to see if user is in the superuser group
-		$adminMemberGroup = new MemberGroup(MemberGroup::lookupIdbyName('SuperUser'));
+		$adminMemberGroup = ModelRegistry::loadModel('MemberGroup');
+		$adminMemberGroup->loadByName('SuperUser');
 		if($adminMemberGroup->containsUser($this->user->getId()))
 			return true;
 
@@ -714,7 +721,13 @@ class PermissionActionList
 			$id = $stmt->insert_id;
 
 			// All new permissions should be granted to the administrator membergroup.
-			$adminPermissions = new GroupPermission(1, MemberGroup::lookupIdbyName('Administrator'));
+			if(defined('INSTALLMODE') && INSTALLMODE) {
+				$adminGroup = new MortarModelMemberGroup();
+			} else {
+				$adminGroup = ModelRegistry::loadModel('MemberGroup');
+			}
+			$adminGroup->loadByName('Administrator');
+			$adminPermissions = new GroupPermission(1, $adminGroup->getId());
 			$adminPermissions->setPermission('Universal', $id, true);
 			$adminPermissions->save();
 
