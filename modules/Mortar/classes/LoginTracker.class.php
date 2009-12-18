@@ -103,11 +103,11 @@ class MortarLoginTracker
 			return false;
 
 		$ip = sqlite_escape_string($ipAddress);
-		$username = ($userId) ? sqlite_escape_string($username) : 0;
+		$username = ($userId) ? sqlite_escape_string($userId) : 0;
 		$timestamp = time();
 
 		$result = $db->query("INSERT INTO failedLoginAttempts (user, ip, time)
-									VALUES ('{$username}', '{$ip}', '{$timestamp}')");
+									VALUES ('{$userId}', '{$ip}', '{$timestamp}')");
 
 		return ($result !== false);
 	}
