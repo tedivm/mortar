@@ -106,6 +106,9 @@ class IOProcessorHttp extends IOProcessorCli
 		if(!isset($query['format']))
 			$query['format'] = 'Html';
 
+		if($query['format'] == 'Admin')
+			$this->errorFormat = 'Admin';
+
 		if(INSTALLMODE === true && $query['format'] == 'Html')
 			$query['format'] = 'Admin';
 
