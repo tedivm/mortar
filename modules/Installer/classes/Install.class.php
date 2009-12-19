@@ -387,7 +387,7 @@ class InstallerSetupUserland
 		foreach($membergroups['system'] as $group)
 		{
 			$membergroup = new MortarModelMemberGroup();
-			$membergroup->name = $group;
+			$membergroup['name'] = $group;
 			$membergroup['is_system'] = 1;
 			$membergroup->save();
 			$savedMembergroups[$group] = $membergroup;
@@ -396,7 +396,7 @@ class InstallerSetupUserland
 		foreach($membergroups['user'] as $group)
 		{
 			$membergroup = new MortarModelMemberGroup();
-			$membergroup->name = $group;
+			$membergroup['name'] = $group;
 			$membergroup->save();
 			$savedMembergroups[$group] = $membergroup;
 		}

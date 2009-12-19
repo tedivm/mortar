@@ -233,7 +233,7 @@ class ModelActionLocationBasedEditGroupPermissions extends ModelActionLocationBa
 				if (isset($perm['groupId'])) {
 					$mg = ModelRegistry::loadModel('MemberGroup', $perm['groupId']);
 					$group = (isset($mg) && $mg)
-						? '<a href="' . $mg->getUrl() . '">' . $mg->name . '</a>'
+						? '<a href="' . $mg->getUrl() . '">' . $mg['name'] . '</a>'
 						: $perm['groupId'];
 				}
 				if ($loc = new Location($locale)) {

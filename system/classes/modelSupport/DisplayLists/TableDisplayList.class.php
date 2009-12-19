@@ -139,7 +139,7 @@ class TableDisplayList extends TemplateDisplayList {
 			else
 				$first = false;
 			
-			$groupList .= $group->name;
+			$groupList .= $group['name'];
 		}
 		
 		return $groupList;
