@@ -1,6 +1,7 @@
-$.siteSetting.defaults.url = baseUrl + 'index.php?format=json&action=jsSettings&module=Mortar';
+$.siteSetting.defaults.url = baseUrl + 'module/Mortar/jsSettings.json';
 
-if(typeof($.fck) == 'object')
+if(typeof($.ckeditor) == 'object')
 {
-	$.fck.config.path = $.siteSetting('url').javascript + 'fckeditor/';
+	$.ckeditor.config.path = $.siteSetting('url').javascript + 'ckeditor/';
+	window.CKEDITOR_BASEPATH = $.siteSetting('url').javascript + 'ckeditor/';
 }
