@@ -150,7 +150,9 @@ class IOProcessorHttp extends IOProcessorCli
 		$url = Query::getUrl();
 		$url->format = $query['format'];
 
-		if(isset($url->locationId) && (isset($url->module) || isset($url->type)))
+
+		if((isset($url->locationId) && isset($url->module))
+				|| (isset($url->type) && (!isset($url->action) || $url->action !== 'Add')))
 		{
 			$site = ActiveSite::getSite();
 			$location = $site->getLocation();
@@ -161,7 +163,9 @@ class IOProcessorHttp extends IOProcessorCli
 		$rawUrl = Query::getRawUrl();
 
 		if((string) $url != $rawUrl)
+		{
 			throw new ResourceMoved('Non-Cannonical url used.');
+		}
 	}
 
 	/**

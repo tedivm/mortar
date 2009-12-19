@@ -111,7 +111,7 @@ class UrlWriter
 		if(isset($attributes['module']))
 		{
 			$path = self::buildModulePath($path, $attributes);
-		}elseif(isset($attributes['type'])){
+		}elseif(isset($attributes['type']) && (!isset($attributes['action']) || $attributes['action'] != 'Add') ){
 			$path = self::buildResourcePath($path, $attributes);
 		}elseif(isset($attributes['locationId'])){
 			$path = self::buildLocationPath($path, $attributes);
