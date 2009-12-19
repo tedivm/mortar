@@ -16,15 +16,6 @@
 class Url
 {
 	/**
-	 * This is an array of strings that, when used in the path as the first value, refers to a model type (with the id
-	 * being the second path variable). This is primarily used for models that don't have an associated location, such
-	 * as Users.
-	 *
-	 * @var array
-	 */
-	static public $specialDirectories = array('Users' => 'User');
-
-	/**
 	 * This array contains the values that need to be passed via the url
 	 *
 	 * @access protected

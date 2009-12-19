@@ -588,9 +588,13 @@ abstract class ModelBase implements Model
 
 	public function getUrl()
 	{
+		$query = Query::getQuery();
+
 		$url = new Url();
 		$url->type = $this->getType();
 		$url->id = $this->getId();
+		$url->action = "Read";
+		$url->format = $query['format'];
 		return $url;
 	}
 
