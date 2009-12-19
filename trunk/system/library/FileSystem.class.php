@@ -82,7 +82,8 @@ class FileSystem
 						continue;
 
 					$fileName = basename($file);
-					if(strpos(realpath($dest . $fileName), $dest) !== 0)
+					$testDir = dirname($dest . $fileName) . '/';
+					if(strpos(realpath($testDir) . '/', $dest) !== 0)
 						continue;
 
 					self::copyRecursive($src . $fileName, $dest . $fileName, $dirPerm, $filePerm, $stopOnError);
@@ -134,6 +135,11 @@ class FileSystem
 	}
 }
 
-class FileSystemError extends CoreError {}
-class FileSystemWarning extends FileSystemWarning {}
+
+class FileSystemError extends Exception {} //CoreError {}
+class FileSystemWarning extends Exception {} //FileSystemWarning {}
+
+//class FileSystemError extends CoreError {}
+//class FileSystemWarning extends FileSystemWarning {}
+
 ?>
