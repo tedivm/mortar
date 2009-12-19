@@ -136,10 +136,6 @@ class FileSystem
 }
 
 
-class FileSystemError extends Exception {} //CoreError {}
-class FileSystemWarning extends Exception {} //FileSystemWarning {}
-
-//class FileSystemError extends CoreError {}
-//class FileSystemWarning extends FileSystemWarning {}
-
+class FileSystemError extends CoreError {}
+class FileSystemWarning extends FileSystemWarning {}
 ?>
