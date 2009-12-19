@@ -6,7 +6,7 @@ class UrlReader
 
 	protected $attributes = array();
 
-	static $resourceMaps = array('users' => 'User');
+	static $resourceMaps = array('users' => 'User', 'groups' => 'MemberGroup');
 	static $endingAttributes = array('module', 'type', 'id', 'action');
 
 	public function readUrl($getValues, $domain = null)
