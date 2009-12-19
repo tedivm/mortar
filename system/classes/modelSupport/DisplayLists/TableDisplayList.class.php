@@ -21,6 +21,7 @@ class TableDisplayList extends TemplateDisplayList {
 
 	protected $allowedColumns = array('type' 	=> 'Type',
 					'name' 		=> 'Name',
+					'memgroup_name' => 'Name',
 					'title' 	=> 'Title',
 					'email'		=> 'Email Address',
 					'membergroups'	=> 'Groups',
