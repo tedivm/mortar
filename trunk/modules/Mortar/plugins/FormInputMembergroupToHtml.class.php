@@ -24,7 +24,7 @@ class MortarPluginFormInputMembergroupToHtml extends MortarPluginFormInputUserTo
 	{
 		$memberGroup = ModelRegistry::loadModel('MemberGroup', $id);
 		if($memberGroup->getId())
-			$baseString .= $memberGroup->name . ', ';
+			$baseString .= $memberGroup['name'] . ', ';
 
 		return $baseString;
 	}

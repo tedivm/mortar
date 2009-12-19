@@ -158,29 +158,37 @@ class MortarModelMemberGroup extends ModelBase
 		return $this->load($id);
 	}
 
-	public function __get($offset)
+	public function offsetGet($offset)
 	{
 		if($offset === 'name')
 			return $this->content['memgroup_name'];
 		
-		return parent::__get($offset);
+		return parent::offsetGet($offset);
 	}
 
-	public function __set($offset, $value)
+	public function offsetSet($offset, $value)
 	{
 		if($offset === 'name')
 			$this->content['memgroup_name'] = $value;
 		else
-			return parent::__set($offset, $value);
+			return parent::offsetGet($offset, $value);
 	}
 
-	public function __isset($offset)
+	public function offsetExists($offset)
 	{
 		if($offset === 'name')
 			$offset = 'memgroup_name';
 		
-		return parent::__isset($offset);
+		return parent::offsetExists($offset);
 	}
+
+        public function offsetUnset($offset)
+        {
+		if($offset === 'name')
+			unset($this->content['memgroup_name']);
+
+		return parent::offsetUnset($offset);
+        }
 
 }
 
