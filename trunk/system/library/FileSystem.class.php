@@ -54,6 +54,7 @@ class FileSystem
 
 				$bytes = stream_copy_to_stream($srcHandler, $destHandler);
 				chmod($filePath, $filePerm);
+				return true;
 
 			}elseif(is_dir($src)){
 
@@ -72,10 +73,18 @@ class FileSystem
 					$dest .= '/';
 
 				$filesInDir = glob($src . '*');
+				$tempfilesInDir = glob($src . '.*');
+				$filesInDir = array_merge($filesInDir, $tempfilesInDir);
 
 				foreach($filesInDir as $file)
 				{
+					if(substr($file, -2) == '/.' || substr($file, -3) == '/..')
+						continue;
+
 					$fileName = basename($file);
+					if(strpos(realpath($dest . $fileName), $dest) !== 0)
+						continue;
+
 					self::copyRecursive($src . $fileName, $dest . $fileName, $dirPerm, $filePerm, $stopOnError);
 				}
 
@@ -125,8 +134,6 @@ class FileSystem
 	}
 }
 
-
 class FileSystemError extends CoreError {}
 class FileSystemWarning extends FileSystemWarning {}
-
 ?>
