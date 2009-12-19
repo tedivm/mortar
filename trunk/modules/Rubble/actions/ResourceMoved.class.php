@@ -31,6 +31,12 @@ class RubbleActionResourceMoved extends ActionBase
 				', please wait a moment while we redirect you.</p>';
 	}
 
+	public function viewAdmin()
+	{
+		return $this->viewHtml();
+	}
+
+
 	public function checkAuth($action = NULL)
 	{
 		return true;
