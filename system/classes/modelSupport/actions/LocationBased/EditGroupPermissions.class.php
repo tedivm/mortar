@@ -226,18 +226,33 @@ class ModelActionLocationBasedEditGroupPermissions extends ModelActionLocationBa
 	 */
 	protected function distillPermissionsList($permissionList)
 	{
-		$list = '';
+		$list = '<span class="permission_details">';
 		foreach($permissionList as $locale => $perms) {
 			foreach($perms as $perm) {
 				$value = ($perm['value']) ? 'true' : 'false';
-				if (isset($perm['groupId'])) $group = $perm['groupId'];
+				if (isset($perm['groupId'])) {
+					$mg = ModelRegistry::loadModel('MemberGroup', $perm['groupId']);
+					$group = (isset($mg) && $mg)
+						? '<a href="' . $mg->getUrl() . '">' . $mg->name . '</a>'
+						: $perm['groupId'];
+				}
+				if ($loc = new Location($locale)) {
+					$locName = $loc->getName();
+					if ($locName === 'root')
+						$locale = $locName;
+					else
+						$locale = '<a href="' . $loc->getResource()->getUrl() . '">' . $locName . '</a>';
+				}
 				$list .= ($perm['source'] === 'user')
-					? "Set <span class='permission_$value'>$value</span> for user at location $locale. "
-					: "Set <span class='permission_$value'>$value</span> for group $group at location $locale. ";
+					? "Set <span class='permission_$value'>$value</span> for user at "
+					. "location <span class='permissions_location'>$locale</span>. "
+					: "Set <span class='permission_$value'>$value</span> for group " 
+					. "<span class='permissions_group'>$group</span> at location " 
+					. "<span class='permissions_location'>$locale</span>. ";
 			}
 		}
 
-		return $list;
+		return $list . '</span>';
 	}
 	
 }

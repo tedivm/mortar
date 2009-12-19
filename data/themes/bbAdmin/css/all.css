@@ -281,3 +281,7 @@ color: #33cc00;
 font-weight: bold;
 color: #ff3300;
 }
+
+.permissions_group, .permissions_location {
+font-weight: bold;
+}
