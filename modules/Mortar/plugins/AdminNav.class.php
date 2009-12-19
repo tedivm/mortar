@@ -43,11 +43,15 @@ class MortarPluginAdminNav
 		$url->action = 'Index';
 		$this->addStaticLink('List Users', $url, 'Users', 'Manage Users');
 
-//		$url = new Url();
-//		$url->type = 'User';
-//		$url->action = 'Add';
-//		$url->action = 'EditUser';
-//		$this->addStaticLink('Edit User', $url, 'Users', 'Manage Users');
+		$url = new Url();
+		$url->type = 'MemberGroup';
+		$url->action = 'Add';
+		$url->format = 'Admin';
+		$this->addStaticLink('Add Group', $url, 'Users', 'Manage Groups');
+
+		$url = clone $url;
+		$url->action = 'Index';
+		$this->addStaticLink('List Groups', $url, 'Users', 'Manage Groups');
 
 		//$url->action = '';
 		//$this->addDynamicLink('name', 'label', $url, 'tab', 'category');
