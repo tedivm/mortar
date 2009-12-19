@@ -43,8 +43,11 @@
 				// Setup WYSIWYG editor
 				if(inputOpts.html)
 				{
+					$('#' + $(this).attr('id') + '_label').remove();
+					$(this).width('99%');
+					$(this).height(400);
+					$(this).ckeditor();
 					// Unfortunately the fck plugin doesn't work well with the validation stuff
-					$(this).fck();
 					$(this).rules("remove");
 				}
 			});
