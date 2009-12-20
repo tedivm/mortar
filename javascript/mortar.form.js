@@ -46,7 +46,7 @@
 					$('#' + $(this).attr('id') + '_label').remove();
 					$(this).width('99%');
 					$(this).height(400);
-					$(this).ckeditor();
+					$(this).ckeditor( {customConfig : $.ckeditor.config.path + 'customconfig.js'} );
 					// Unfortunately the fck plugin doesn't work well with the validation stuff
 					$(this).rules("remove");
 				}
