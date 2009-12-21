@@ -124,6 +124,20 @@ class Font extends ContentBase
 		return $fontCss;
 	}
 
+	public function getNames()
+	{
+		$fontNames = array();
+		foreach ($this->settings['fonts'] as $font) {
+			if(isset($this->settings[$font]))
+				$fontData = $this->settings[$font];
+
+			if(isset($fontData['fullname']))
+				$fontNames[] = str_replace(' ', '', $fontData['fullname']);
+		}
+
+		return $fontNames;
+	}
+
 }
 
 ?>
