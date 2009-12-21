@@ -33,12 +33,13 @@ Release Owner : *charlequin*
 
   * Core Updater
   * Moving key Location fields out to their own table (re: site name, etc.)
-  * Menu/Sidebar Management
+  * Menu/Sidebar Management and refactoring of Html conversion code
   * Multilingual support part 1 (base class, after which we need to do a mass upgrade of all strings in the system)
   * Setting permissions for models after installing a new module.
 
 == 0.7 ==
 
+  * "Hook Day" (full assignment of hooks throughout code)
   * Initial Mural Creation (theme module)
   * Theme Preview
   * Site Management Interface
