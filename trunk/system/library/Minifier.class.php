@@ -19,7 +19,11 @@ class Minifier
 			return false;
 		if($this->type == 'js')
 		{
-			$output = JSMin::minify($string);
+			try{
+			$output = JShrink::minify($string);
+			}catch(Exception $e){
+				var_dump($e->getMessage());
+			}
 		}elseif($this->type == 'css'){
 			$output = cssmin::minify($string);
 		}
