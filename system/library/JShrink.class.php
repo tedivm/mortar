@@ -1,20 +1,66 @@
 <?php
+/*
 
+ JShrink
+
+ Copyright (c) 2009, Robert Hafner
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+	* Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+		disclaimer.
+	* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+		following disclaimer in the documentation and/or other materials provided with the distribution.
+	* Neither the name of the <ORGANIZATION> nor the names of its contributors may be used to endorse or promote
+		products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+  Ph'nglui Mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn
+*/
+
+
+/**
+ * JShrink
+ *
+ * @package JShrink
+ * @author Robert Hafner <tedivm@tedivm.com>
+ * @license http://www.opensource.org/licenses/bsd-license.php
+ */
 class JShrink
 {
 	protected $input;
 	protected $inputLength;
 	protected $index = 0;
 
-	protected $output = '';
-
 	protected $a = '';
 	protected $b = '';
-	protected $c = null;
+	protected $c;
 
-	function minify($js, $options = array())
+	static public function minify($js)
 	{
+		try{
+			ob_start();
+			$me = new JShrink();
+			$me->breakdownScript($js);
+			$output = ob_get_clean();
+			return $output;
+		}catch(Exception $e){
+			ob_end_clean();
+			throw $e;
+		}
+	}
 
+	protected function breakdownScript($js)
+	{
 		$js = str_replace("\r\n", "\n", $js);
 		$this->input = str_replace("\r", "\n", $js);
 		$this->inputLength = strlen($this->input);
@@ -22,59 +68,58 @@ class JShrink
 		$this->a = $this->getReal();
 		$this->b = $this->getReal();
 
-		while($this->a !== false)
+		while($this->a !== false && !is_null($this->a) && $this->a !== '')
 		{
 			switch($this->a)
 			{
 				// new lines
 				case "\n":
-					$this->output .= "\n";
+					// if the next line is something that can't stand alone preserver the newline
 					if(strpos('(-+{[', $this->b) !== false)
 					{
-						$this->output .= $this->a;
+						echo $this->a;
 						$this->saveString();
 						break;
 					}
 
-					// if this is spaces continue to the one below
-					if($this->b != ' ')
+					// if its a space we move down to the string test below
+					if($this->b === ' ')
 						break;
 
-//echo 1111 . '<hr>';
-
+					// otherwise we treat the newline like a space
 
 				// spaces
 				case ' ':
-					if($this->isAlphaNumeric($this->b))
-						$this->output .= $this->a;
+					if(self::isAlphaNumeric($this->b))
+						echo $this->a;
 
 					$this->saveString();
 					break;
 
 				default:
-
 					switch($this->b)
 					{
 						case "\n":
 							if(strpos('}])+-"\'', $this->a) !== false)
 							{
-								$this->output .= $this->a;
+								echo $this->a;
+								$this->saveString();
 								break;
 							}else{
-								if($this->isAlphaNumeric($this->a))
+								if(self::isAlphaNumeric($this->a))
 								{
-									$this->output .= $this->a;
+									echo $this->a;
 									$this->saveString();
 								}
 							}
 							break;
 
 						case ' ':
-							if(!$this->isAlphaNumeric($this->a))
+							if(!self::isAlphaNumeric($this->a))
 								break;
 
 						default:
-							$this->output .= $this->a;
+							echo $this->a;
 							$this->saveString();
 							break;
 					}
@@ -86,7 +131,7 @@ class JShrink
 			if($this->b == '/' && strpos('(,=:[!&|?', $this->a) !== false)
 			{
 
-				$this->output .= $this->a . $this->b;
+				echo $this->a . $this->b;
 
 				while(($this->a = $this->getChar()) !== false)
 				{
@@ -95,14 +140,14 @@ class JShrink
 
 					if($this->a == '\\')
 					{
-						$this->output .= $this->a;
+						echo $this->a;
 						$this->a = $this->getChar();
 					}
 
 					if($this->a == "\n")
 						throw new JShrinkException('Stray regex pattern. ' . $this->index);
 
-					$this->output .= $this->a;
+					echo $this->a;
 				}
 				$this->b = $this->getReal();
 			}
@@ -110,7 +155,7 @@ class JShrink
 		return $this->output;
 	}
 
-	function getChar()
+	protected function getChar()
 	{
 		if(isset($this->c))
 		{
@@ -132,7 +177,7 @@ class JShrink
 		return ' ';
 	}
 
-	function getReal()
+	protected function getReal()
 	{
 		$char = $this->getChar();
 
@@ -170,7 +215,7 @@ class JShrink
 		return $char;
 	}
 
-	function getNext($string)
+	protected function getNext($string)
 	{
 		$pos = strpos($this->input, $string, $this->index);
 
@@ -181,7 +226,7 @@ class JShrink
 		return $this->input[$this->index];
 	}
 
-	function saveString()
+	protected function saveString()
 	{
 		$this->a = $this->b;
 		if($this->a == '\'' || $this->a == '"')
@@ -191,7 +236,7 @@ class JShrink
 
 			while(1)
 			{
-				$this->output .= $this->a;
+				echo $this->a;
 				$this->a = $this->getChar();
 
 				switch($this->a)
@@ -204,16 +249,15 @@ class JShrink
 						break;
 
 					case '\\':
-						$this->output .= $this->a;
+						echo $this->a;
 						$this->a = $this->getChar();
 				}
 			}
 		}
 	}
 
-	public function isAlphaNumeric($char)
+	static protected function isAlphaNumeric($char)
 	{
-		return ord($char) > 126 || $char === '\\' || preg_match('/^[\w\$]$/', $char) === 1;
 		return preg_match('/^[\w\$]$/', $char) === 1;
 	}
 
