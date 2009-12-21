@@ -61,8 +61,8 @@ Each of these modules has their own roadmap. The goal is for each of them to be 
 
   * [roadmapQuarry Quarry]
   * [roadmapLitho Litho]
-  * [roadmapWiki Wiki]
+  * [roadmapGraphite Graphite]
   * [roadmapChalk Chalk]
   * [roadmapRubble Rubble]
   * [roadmapMural Mural]
-  * [roadmapForum Forum]
+  * [roadmapTessera Tessera]
