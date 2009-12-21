@@ -37,12 +37,14 @@ class MortarActionFontLookUp extends ActionBase
 
 	public function viewCss()
 	{
+		$this->ioHandler->addHeader('Content-Type', 'text/css; charset=utf-8');
 		$fb = new TagBoxFonts();
-		return $fb->all;
+		return $fb->all . "\n\n\n";
 	}
 
 	public function viewJs()
 	{
+		$this->ioHandler->addHeader('Content-Type', 'application/x-javascript; charset=utf-8');
 		$results  = "CKEDITOR.editorConfig = function( config )\n{\n";
 		$results .= "config.font_names='";
 		foreach($this->fontList as $font) 
