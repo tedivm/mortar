@@ -14,7 +14,6 @@ As this document is the official Roadmap it should only be updated by release ow
 Release Date : *December 25th, 2009*<br>
 Release Owner : *tedivm*
 
-  * Core Updater
   * ~~User Read~~
   * ~~Group Listing/Read~~
   * ~~User Add/Edit~~
@@ -32,6 +31,7 @@ Release Owner : *tedivm*
 Release Date : *tbd*<br>
 Release Owner : *charlequin*
 
+  * Core Updater
   * Moving key Location fields out to their own table (re: site name, etc.)
   * Menu/Sidebar Management
   * Multilingual support part 1 (base class, after which we need to do a mass upgrade of all strings in the system)
