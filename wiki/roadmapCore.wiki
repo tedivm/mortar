@@ -15,21 +15,22 @@ Release Date : *December 25th, 2009*<br>
 Release Owner : *tedivm*
 
   * Core Updater
-  * User Read
-  * Group Listing/Read
+  * ~~User Read~~
+  * ~~Group Listing/Read~~
   * ~~User Add/Edit~~
+  * ~~Group Add/Edit~~
   * ~~Canonical URLs~~
   * ~~Non-location Model Routing~~
   * ~~Update Twig to newest release~~
   * ~~Diff Algorithm~~
   * ~~Form Control Updates~~
+  * ~~Upgrade to the CKEditor from the FKCEditor~~
 
 == 0.6 ==
 
 Release Date : *tbd*<br>
 Release Owner : *charlequin*
 
-  * Group Add/Edit
   * Moving key Location fields out to their own table (re: site name, etc.)
   * Menu/Sidebar Management
   * Multilingual support part 1 (base class, after which we need to do a mass upgrade of all strings in the system)
@@ -39,7 +40,6 @@ Release Owner : *charlequin*
 
   * Initial Mural Creation (theme module)
   * Theme Preview
-  * Upgrade to the CKEditor from the FKCEditor.
   * Site Management Interface
 
 == 1.0 ==
