@@ -25,6 +25,7 @@ Release Owner : *tedivm*
   * ~~Diff Algorithm~~
   * ~~Form Control Updates~~
   * ~~Upgrade to the CKEditor from the FKCEditor~~
+  * ~~Switch to brand new JShrink minifier~~
 
 == 0.6 ==
 
