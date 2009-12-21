@@ -36,18 +36,9 @@ class ModelActionRead extends ModelActionBase
 	 */
 	public function viewAdmin()
 	{
-		$output = 'Model Type: ' . $this->model->getType() . '<br>' . PHP_EOL;
-		$output .= 'Model Id: ' . $this->model->getId() . '<br>';
+		$page = ActivePage::getInstance();
 
-		$url = new Url();
-		$url->id = $this->model->getId();
-		$url->type = $this->model->getType();
-		$url->format = 'Admin';
-		$url->action = 'Read';
-
-		$output .= 'Model Url: ' . (string) $url;
-
-		return $output;
+		return $this->modelToHtml($page, $this->model, 'Display.html');
 	}
 
 	/**
@@ -69,11 +60,7 @@ class ModelActionRead extends ModelActionBase
 		if(isset($this->model->description))
 			$page->addMeta('description', $this->model->description);
 
-		$html = ModelToHtml::convert($this->model, $this->ioHandler);
-		$html = $this->model['name'];
-
-
-		return $html;
+		return $this->modelToHtml($page, $this->model, 'Display.html');
 	}
 
 	/**
@@ -95,7 +82,8 @@ class ModelActionRead extends ModelActionBase
 	 */
 	public function viewJson()
 	{
-		return $this->model->__toArray();;
+                $htmlConverter = $this->model->getModelAs('Array');
+                return $htmlConverter->getOutput();
 	}
 }
 

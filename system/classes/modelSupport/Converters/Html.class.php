@@ -75,8 +75,10 @@ class ModelToHtml
 		$envBox = new TagBoxEnv();
 		$content['env'] = $envBox;
 
-		$navBox = new TagBoxNav($this->model->getLocation());
-		$content['nav'] = $navBox;
+		if(method_exists($this->model, 'getLocation')) {
+			$navBox = new TagBoxNav($this->model->getLocation());
+			$content['nav'] = $navBox;
+		}
 
 		if(isset($this->theme))	{
 			$themeBox = new TagBoxTheme($this->theme);

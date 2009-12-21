@@ -179,6 +179,19 @@ abstract class ModelActionBase implements ActionInterface
 		$this->permissionObject = new Permissions(1, $user);
 	}
 
+
+	protected function modelToHtml($page, $model, $templateName, $content = array())
+	{
+		$theme = $page->getTheme();
+		$view = new ViewModelTemplate($theme, $model, $templateName);
+		$view->addContent($content);
+		$htmlConverter = $model->getModelAs('Html');
+		$htmlConverter->useView($view);
+		$htmlConverter->useTheme($theme);
+		return $htmlConverter->getOutput();
+	}
+
+
 	/*
 	public function viewAdmin()
 	{
