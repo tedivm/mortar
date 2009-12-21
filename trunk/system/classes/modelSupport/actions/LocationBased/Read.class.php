@@ -52,6 +52,12 @@ class ModelActionLocationBasedRead extends ModelActionLocationBasedBase
 		if(isset($this->model['title']))
 			$page->addRegion('pagetitle', htmlentities($this->model['title']));
 
+		if(isset($this->model->keywords))
+			$page->addMeta('keywords', $this->model->keywords);
+
+		if(isset($this->model->description))
+			$page->addMeta('description', $this->model->description);
+
 		return $this->modelToHtml($page, $this->model, 'Display.html');
 	}
 

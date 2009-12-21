@@ -4,7 +4,6 @@ class TagBoxModel
 {
 
 	protected $model;
-	protected $location;
 	protected $modelArray;
 
 	public function __construct(Model $model)
@@ -13,7 +12,6 @@ class TagBoxModel
 			return true;
 
 		$this->model = $model;
-		$this->location = method_exists($this->model, 'getLocation') ? $this->model->getLocation() : new Location(1);
 		$modelArray = $model->__toArray();
 
 		if(isset($modelArray['properties']))
@@ -29,6 +27,9 @@ class TagBoxModel
 			else
 				unset($modelArray['owner']);
 
+		if(isset($modelArray['membergroups']))
+			$modelArray['membergroups'] = $this->formatGroups($modelArray['membergroups']);
+
 		unset($modelArray['group']);
 		unset($modelArray['rawContent']);
 		
@@ -37,15 +38,28 @@ class TagBoxModel
 
 	protected function getPermalink()
 	{
-		$url = new Url();
-		$url->location = $this->location->getId();
-
-		$query = Query::getQuery();
-		$url->format = $query['format'];
-
-		return (string) $url;
+		return $this->model->getUrl();
 	}
-	
+
+	protected function formatGroups($groups)
+	{
+		$first = true;
+		$groupList = '';
+
+		foreach($groups as $groupId) {
+			$group = ModelRegistry::loadModel('MemberGroup', $groupId);
+
+			if (!$first) 
+				$groupList .= ', ';
+			else
+				$first = false;
+			
+			$groupList .= '<a href="' . $group->getUrl() . '">' . $group['name'] . '</a>';
+		}
+		
+		return $groupList;
+	}
+
 	protected function getActionList()
 	{
 		$query = Query::getQuery();
@@ -57,7 +71,10 @@ class TagBoxModel
 		$actionTypes = array();
 		foreach(array('Read', 'Edit', 'Delete', 'Index') as $action) 
 			if(isset($allowedActions[$action]))
-				array_push($actionTypes, $action);
+				array_push($actionTypes, $action); 
+
+		if(!method_exists($this->model, 'getLocation'))
+			$allowedActions = array_pop($allowedActions);
 
 		$actionList = '';
 		foreach($actionTypes as $action)
