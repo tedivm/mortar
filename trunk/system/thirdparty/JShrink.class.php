@@ -21,9 +21,6 @@
   SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
   WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
-  Ph'nglui Mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn
 */
 
 
@@ -31,7 +28,10 @@
  * JShrink
  *
  * Usage - JShrink::minify($js);
+ * Usage - JShrink::minify($js, $options);
+ * Usage - JShrink::minify($js, array('flaggedComments' => false));
  *
+ * @version 0.2
  * @package JShrink
  * @author Robert Hafner <tedivm@tedivm.com>
  * @license http://www.opensource.org/licenses/bsd-license.php
@@ -39,44 +39,71 @@
 class JShrink
 {
 	protected $input;
-	protected $inputLength;
 	protected $index = 0;
 
 	protected $a = '';
 	protected $b = '';
 	protected $c;
 
-	static public function minify($js)
+	protected $options;
+
+	static protected $defaultOptions = array('flaggedComments' => true);
+
+	static public function minify($js, $options = array())
 	{
 		try{
+			$currentOptions = array_merge(self::$defaultOptions, $options);
+
 			ob_start();
+			$currentOptions = array_merge(self::$defaultOptions, $options);
 			$me = new JShrink();
-			$me->breakdownScript($js);
+			$me->breakdownScript($js, $currentOptions);
 			$output = ob_get_clean();
 			return $output;
+
 		}catch(Exception $e){
 			ob_end_clean();
 			throw $e;
 		}
 	}
 
-	protected function breakdownScript($js)
+	protected function breakdownScript($js, $currentOptions)
 	{
+		$this->options = $currentOptions;
+
 		$js = str_replace("\r\n", "\n", $js);
 		$this->input = str_replace("\r", "\n", $js);
-		$this->inputLength = strlen($this->input);
 
 		$this->a = $this->getReal();
+
+		// the only time the length can be higher than 1 is if a conditional comment needs to be displayed
+		// and the only time that can happen for $a is on the very first run
+		while(strlen($this->a) > 1)
+		{
+			echo $this->a;
+			$this->a = $this->getReal();
+		}
+
 		$this->b = $this->getReal();
 
 		while($this->a !== false && !is_null($this->a) && $this->a !== '')
 		{
+
+			// now we give $b the same check for conditional comments we gave $a before we began looping
+			if(strlen($this->b) > 1)
+			{
+				echo $this->a . $this->b;
+				$this->a = $this->getReal();
+				$this->b = $this->getReal();
+				continue;
+			}
+
 			switch($this->a)
 			{
 				// new lines
 				case "\n":
 					// if the next line is something that can't stand alone preserver the newline
-					if(strpos('(-+{[', $this->b) !== false)
+					if(strpos('(-+{[@', $this->b) !== false)
 					{
 						echo $this->a;
 						$this->saveString();
@@ -89,7 +116,6 @@ class JShrink
 
 					// otherwise we treat the newline like a space
 
-				// spaces
 				case ' ':
 					if(self::isAlphaNumeric($this->b))
 						echo $this->a;
@@ -120,6 +146,13 @@ class JShrink
 								break;
 
 						default:
+							// check for some regex that breaks stuff
+							if($this->a == '/' && ($this->b == '\'' || $this->b == '"'))
+							{
+								$this->saveRegex();
+								continue;
+							}
+
 							echo $this->a;
 							$this->saveString();
 							break;
@@ -129,29 +162,8 @@ class JShrink
 			// do reg check of doom
 			$this->b = $this->getReal();
 
-			if($this->b == '/' && strpos('(,=:[!&|?', $this->a) !== false)
-			{
-
-				echo $this->a . $this->b;
-
-				while(($this->a = $this->getChar()) !== false)
-				{
-					if($this->a == '/')
-						break;
-
-					if($this->a == '\\')
-					{
-						echo $this->a;
-						$this->a = $this->getChar();
-					}
-
-					if($this->a == "\n")
-						throw new JShrinkException('Stray regex pattern. ' . $this->index);
-
-					echo $this->a;
-				}
-				$this->b = $this->getReal();
-			}
+			if(($this->b == '/' && strpos('(,=:[!&|?', $this->a) !== false))
+				$this->saveRegex();
 		}
 	}
 
@@ -179,29 +191,57 @@ class JShrink
 
 	protected function getReal()
 	{
+		$startIndex = $this->index;
 		$char = $this->getChar();
 
 		if($char == '/')
 		{
 			$this->c = $this->getChar();
+
 			if($this->c == '/')
 			{
+				$thirdCommentString = $this->input[$this->index];
+
 				// kill rest of line
 				$char = $this->getNext("\n");
-				$char = $this->getChar();
-				$char = $this->getChar();
 
-				unset($this->c);
+				if($thirdCommentString == '@')
+				{
+					$endPoint = ($this->index) - $startIndex;
+					unset($this->c);
+					$char = "\n" . substr($this->input, $startIndex, $endPoint);// . "\n";
+				}else{
+					$char = $this->getChar();
+					$char = $this->getChar();
+				}
 
 			}elseif($this->c == '*'){
 
-				// kill everything up to the next */
-				if($this->getNext('*/'))
+				$this->getChar(); // current C
+				$thirdCommentString = $this->getChar();
+
+				if($thirdCommentString == '@')
 				{
-					$char = $this->getChar(); // *
-					$char = $this->getChar(); // /
-					$char = $this->getChar();
-					$char = $this->getChar();
+					// we're gonna back up a bit and and send the comment back, where the first
+					// char will be echoed and the rest will be treated like a string
+					$this->index = $this->index-2;
+					return '/';
+
+				}elseif($this->getNext('*/')){
+				// kill everything up to the next */
+
+					$this->getChar(); // get *
+					$this->getChar(); // get /
+
+					$char = $this->getChar(); // get next real charactor
+
+					// if YUI-style comments are enabled we reinsert it into the stream
+					if($this->options['flaggedComments'] && $thirdCommentString == '!')
+					{
+						$endPoint = ($this->index - 1) - $startIndex;
+						echo "\n" . substr($this->input, $startIndex, $endPoint) . "\n";
+					}
+
 				}else{
 					$char = false;
 				}
@@ -209,7 +249,9 @@ class JShrink
 				if($char === false)
 					throw new JShrinkException('Stray comment. ' . $this->index);
 
-				unset($this->c);
+				// if we're here c is part of the comment and therefore tossed
+				if(isset($this->c))
+					unset($this->c);
 			}
 		}
 		return $char;
@@ -256,9 +298,32 @@ class JShrink
 		}
 	}
 
+	protected function saveRegex()
+	{
+		echo $this->a . $this->b;
+
+		while(($this->a = $this->getChar()) !== false)
+		{
+			if($this->a == '/')
+				break;
+
+			if($this->a == '\\')
+			{
+				echo $this->a;
+				$this->a = $this->getChar();
+			}
+
+			if($this->a == "\n")
+				throw new JShrinkException('Stray regex pattern. ' . $this->index);
+
+			echo $this->a;
+		}
+		$this->b = $this->getReal();
+	}
+
 	static protected function isAlphaNumeric($char)
 	{
-		return preg_match('/^[\w\$]$/', $char) === 1;
+		return preg_match('/^[\w\$]$/', $char) === 1 || $char == '/';
 	}
 
 }
