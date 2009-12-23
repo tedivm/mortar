@@ -21,7 +21,7 @@ HTMLPurifier/
 
 JShrink.class.php
 	JShrink
-	0.1
+	0.2
 	BSD License
 	A Javascript Minifier written in PHP
 	http://code.google.com/p/jshrink-/
