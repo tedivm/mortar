@@ -1,0 +1,8 @@
+<?
+
+class TesseraActionThreadRead extends TesseraActionForumRead
+{
+
+}
+
+?>
