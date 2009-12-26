@@ -81,3 +81,5 @@ At bare minimum, this should deal with meta descriptions and keywords, page titl
 == AJAX Save and Auto-Save ==
 
 Updating to CKeditor has prompted me: we should have a feature whereby one can save changes via an AJAX submit to a model they're currently editing, and whereby changes can be autosaved periodically. (This probably would involve some fancy database hoodoo to get working.)
+
+We should also futz with the save, new page, and preview buttons in the editor and tie them into Mortar-specific functionality.
