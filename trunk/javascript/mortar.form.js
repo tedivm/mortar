@@ -47,9 +47,11 @@
 					$(this).width('99%');
 					$(this).height(400);
 					$(this).ckeditor( {customConfig : $.ckeditor.config.path + 'customconfig.js'} );
-					// Unfortunately the fck plugin doesn't work well with the validation stuff
-					$(this).rules("remove");
 				}
+			});
+
+			$(this).find("input[name='Submit']").click(function() {
+				$.ckeditor.update();
 			});
 		});
 	};
