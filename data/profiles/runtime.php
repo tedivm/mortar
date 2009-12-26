@@ -1,3 +1,3 @@
 <?php
-include('development.php');
+include('production.php');
 ?>
