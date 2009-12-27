@@ -5,7 +5,8 @@ class ChalkActionBlogEntryComment extends ModelActionLocationBasedRead
 
 	public function logic()
 	{
-		$children = $this->model->getChildren();
+		$location = $this->model->getLocation();
+		$children = $location->getChildren();
 
 		if(count($children) === 0)
 			$this->message = "This entry does not have comments enabled.";
@@ -13,18 +14,18 @@ class ChalkActionBlogEntryComment extends ModelActionLocationBasedRead
 		foreach($children as $child) {
 			if($child->getType() == 'Discussion') {
 				$discussion = $child;
-				break 2;
+				break;
 			}
 		}
 
 		if(isset($discussion)) {
-			$location = $discussion->getLocation();
 			$query = Query::getQuery();
 
 			$url = new Url();
-			$url->locationId = $location->getId();
+			$url->locationId = $discussion->getId();
 			$url->format = $query['format'];
 			$this->ioHandler->addHeader('Location', (string) $url);
+			$this->message = "Redirecting...";
 		} else {
 			$this->message = "This entry does not have comments enabled.";
 		}

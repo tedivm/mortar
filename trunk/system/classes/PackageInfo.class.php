@@ -456,6 +456,7 @@ class PackageInfo
 						if (strpos($action['name'], $name) === 0) {
 							$action['outerName'] = substr($action['name'], strlen($name));
 							$action['type'] = $name;
+							break;
 						}
 					}
 					$action['engineSupport'] = $engines;

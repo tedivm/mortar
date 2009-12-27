@@ -10,11 +10,11 @@ class TesseraPluginAddDiscussionChild
 
 		$discussion->setParent($model->getLocation());
 		$discussion['title'] = 'Re: ' . $model['title'];
+		$discussion->name = 'discussion';
 
 		$user = ActiveUser::getUser();
 		$location->setOwner($user);
 		$location->setPublishDate($model->getLocation()->getPublishDate());
-		$location->setName('discussion');
 
 		return $discussion->save();
 	}
