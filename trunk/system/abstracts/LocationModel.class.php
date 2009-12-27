@@ -183,8 +183,13 @@ abstract class LocationModel extends ModelBase
 
 		$db->autocommit(true);
 
-		if(isset($isFirstSave) && $isFirstSave == true)
+		if(isset($isFirstSave) && $isFirstSave == true) {
 			$this->firstSaveLocation();
+
+			$hook = new Hook();
+			$hook->loadModelPlugins($this, 'firstSave');
+			$hook->runFirstSave($this);
+		}
 
 		return true;
 	}

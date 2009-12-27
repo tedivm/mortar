@@ -221,9 +221,6 @@ abstract class ModelBase implements Model
 
 				}
 
-
-				if($newItem && method_exists($this, 'firstSave'))
-					$this->firstSave();
 			}
 
 			Cache::clear('models', $this->getType(), $this->id);
@@ -235,6 +232,15 @@ abstract class ModelBase implements Model
 		}
 
 		$db->autocommit(true);
+
+		if($newItem) {
+			$this->firstSave();
+
+			$hook = new Hook();
+			$hook->loadModelPlugins($this, 'firstSave');
+			$hook->runFirstSave($this);
+		}
+
 		return true;
 	}
 
@@ -665,10 +671,9 @@ abstract class ModelBase implements Model
 	 */
 	protected function firstSave()
 	{
-		$hook = new Hook();
-		$hook->loadModelPlugins($this, 'firstSave');
-		$hook->runFirstSave($this);
+
 	}
+
 	/**
 	 * This function provides dynamic data about the model by calling overrideable functions in the ModelBase, or
 	 * checks the parameters array for the requested item. The definition of dynamic properties should be
