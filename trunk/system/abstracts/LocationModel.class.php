@@ -187,7 +187,7 @@ abstract class LocationModel extends ModelBase
 			$this->firstSaveLocation();
 
 			$hook = new Hook();
-			$hook->loadModelPlugins($this, 'firstSave');
+			$hook->loadModelPlugins($this, 'firstSaveLocation');
 			$hook->runFirstSave($this);
 		}
 
