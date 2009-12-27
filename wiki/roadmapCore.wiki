@@ -9,23 +9,6 @@ As this document is the official Roadmap it should only be updated by release ow
 
 = Core/System =
 
-== 0.5 ==
-
-Release Date : *December 25th, 2009*<br>
-Release Owner : *tedivm*
-
-  * ~~User Read~~
-  * ~~Group Listing/Read~~
-  * ~~User Add/Edit~~
-  * ~~Group Add/Edit~~
-  * ~~Canonical URLs~~
-  * ~~Non-location Model Routing~~
-  * ~~Update Twig to newest release~~
-  * ~~Diff Algorithm~~
-  * ~~Form Control Updates~~
-  * ~~Upgrade to the CKEditor from the FKCEditor~~
-  * ~~Switch to brand new JShrink minifier~~
-
 == 0.6 ==
 
 Release Date : *tbd*<br>
