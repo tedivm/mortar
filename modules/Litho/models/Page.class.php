@@ -52,6 +52,12 @@ class LithoModelPage extends LocationModel
 		return true;
 	}
 
+	protected function firstSaveLocation()
+	{
+		$revision = new PageRevision($this->getId());
+		$this->saveRevision($revision);
+	}
+
 	protected function saveRevision($revision)
 	{
 		$revision->rawContent = $this->content['rawContent'];

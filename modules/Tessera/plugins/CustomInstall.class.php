@@ -17,6 +17,7 @@ class TesseraPluginCustomInstall
 		Hook::registerModelPlugin('Directory', 'getAllowedChildrenTypes', $this->packageId, 'AllowForumType', true);
 		Hook::registerModelPlugin('Site', 'getAllowedChildrenTypes', $this->packageId, 'AllowForumType', true);
 		Hook::registerModelPlugin('BlogEntry', 'getAllowedChildrenTypes', $this->packageId, 'AllowDiscussionType', true);
+		Hook::registerModelPlugin('BlogEntry', 'firstSave', $this->packageId, 'AddDiscussionChild', true);
 	}
 }
 ?>
