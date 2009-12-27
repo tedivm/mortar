@@ -16,8 +16,7 @@ class TesseraPluginCustomInstall
 	{
 		Hook::registerModelPlugin('Directory', 'getAllowedChildrenTypes', $this->packageId, 'AllowForumType', true);
 		Hook::registerModelPlugin('Site', 'getAllowedChildrenTypes', $this->packageId, 'AllowForumType', true);
-		if (ModelRegistry::loadModel('BlogEntry') !== false)
-			Hook::registerModelPlugin('BlogEntry', 'getAllowedChildrenTypes', $this->packageId, 'AllowThreadType', true);
+		Hook::registerModelPlugin('BlogEntry', 'getAllowedChildrenTypes', $this->packageId, 'AllowThreadType', true);
 	}
 }
 ?>
