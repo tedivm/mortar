@@ -16,6 +16,7 @@ class ChalkPluginCustomInstall
 	{
 		Hook::registerModelPlugin('Directory', 'getAllowedChildrenTypes', $this->packageId, 'AllowBlogType', true);
 		Hook::registerModelPlugin('Site', 'getAllowedChildrenTypes', $this->packageId, 'AllowBlogType', true);
+		Hook::registerModelPlugin('BlogEntry', 'ActionMenu', $this->packageId, 'BlogEntryActionMenu', true);
 	}
 }
 
