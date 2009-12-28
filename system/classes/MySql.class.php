@@ -65,19 +65,10 @@ class DatabaseConnection
 		}else{
 			try
 			{
-				if(!self::$iniFile)
-				{
-					$config = Config::getInstance();
+				$connectionInfo = self::getDatabaseSettings($database);
 
-					if(!isset($config['path']['config']) && defined('INSTALLMODE') && INSTALLMODE == true)
-						return false;
-
-					$path_to_dbfile = $config['path']['config'] . 'databases.php';
-					$iniFile = new ConfigFile($path_to_dbfile);
-					self::$iniFile = $iniFile;
-				}
-
-				$connectionInfo = self::$iniFile->getArray($database);
+				if($connectionInfo == false)
+					return false;
 
 				$dbConnection = new MysqlBase($connectionInfo['host'],
 								$connectionInfo['username'],
@@ -119,6 +110,23 @@ class DatabaseConnection
 	{
 		$db = DatabaseConnection::getConnection($database, $useSaved);
 		return $db->stmt_init();
+	}
+
+	static public function getDatabaseSettings($database)
+	{
+		if(!self::$iniFile)
+		{
+			$config = Config::getInstance();
+
+			if(!isset($config['path']['config']) && defined('INSTALLMODE') && INSTALLMODE == true)
+				return false;
+
+			$path_to_dbfile = $config['path']['config'] . 'databases.php';
+			$iniFile = new ConfigFile($path_to_dbfile);
+			self::$iniFile = $iniFile;
+		}
+
+		return self::$iniFile->getArray($database);
 	}
 
 	/**
