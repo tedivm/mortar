@@ -131,7 +131,7 @@ class InstallerInstaller // thats the most pathetic name ever
 			$path['templates'] = ($input['templates']) ? $input['templates'] : $path['base'] . 'system/templates/';
 			$path['views'] = ($input['templates']) ? $input['templates'] : $path['base'] . 'system/views/';
 			$path['thirdparty'] = ($input['thirdparty']) ? $input['thirdparty'] : $path['base'] . 'system/thirdparty/';
-
+			$path['actions'] = ($input['actions']) ? $input['actions'] : $path['base'] . 'system/actions/';
 
 			$url['theme'] = 'data/themes/';
 			$url['icons'] = 'data/icons/';
@@ -167,6 +167,7 @@ class InstallerInstaller // thats the most pathetic name ever
 				$configFile->set('path', 'templates', $path['templates']);
 				$configFile->set('path', 'views', $path['views']);
 				$configFile->set('path', 'thirdparty', $path['thirdparty']);
+				$configFile->set('path', 'actions', $path['actions']);
 
 				$configFile->set('url', 'theme', $url['theme']);
 				$configFile->set('url', 'icons', $url['icons']);

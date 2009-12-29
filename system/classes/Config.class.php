@@ -195,12 +195,17 @@ class Config implements ArrayAccess
 		if(is_dir(BASE_PATH . 'system/templates'))
 			$this->config['path']['templates'] = BASE_PATH . 'system/templates';
 
+		if(is_dir(BASE_PATH . 'system/actions'))
+			$this->config['path']['actions'] = BASE_PATH . 'system/actions';
+
+
+
 		$this->config['url']['modules'] = 'modules/';
 
 		$this->config['url']['theme'] = 'data/themes/';
 
 		$this->config['url']['icons'] = 'data/icons/';
-		
+
 		$this->config['url']['fonts'] = 'data/fonts/';
 
 		$this->config['url']['javascript'] = 'javascript/';
