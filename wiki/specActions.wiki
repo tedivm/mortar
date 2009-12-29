@@ -86,3 +86,21 @@ I would propose that we structure our action descent chain more like this:
   * Actions that display the content of a model and/or its children descend from Read.
 
 == Workflow ==
+
+By breaking action workflow into small pieces and executing it through a series of consecutive method calls, the ActionBase can make it significantly easier to create new action functionality by simply overriding the calls in question. Here is my proposal for a universal action workflow (primarily a result of combining the overloadable functions from throughout our current tree):
+
+  * checkAuth() -- is the user authorized to perform this action?
+  * checkInput() -- is the correct query information to utilize this action set?
+  * checkSubmit() -- has this action been reloaded because it was submitted as a form and is now coming back around to process the results?
+
+    * wasSubmitted() -- actions to take to prepare for dealing with inputs
+    * processInputs() -- deal with inputs from the form
+    * onInputSuccess() -- onInputFailure() -- what to do after inputs are scanned
+
+    * notSubmitted() -- actions taken to deal with preparing the form
+    * getForm() -- fetch the form to be displayed by this action
+
+  * logic() -- any algorithmic process the action needs to take before display begins (i.e. is format-inspecific)
+  * viewX() -- producing the final output format
+
+Ideally at _each_ stage, the action could specify one of three possible process-ending states (a redirect to a different location/resource, an HTTP error code, or a Mortar-specific error message) which would cause action execution to abort and prevent any future steps from being performed.
