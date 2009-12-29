@@ -33,6 +33,7 @@ class AutoLoader
 											  'mainclasses',
 											  'library',
 											  'thirdparty',
+											  'Action' => 'actions',
 											  'View' => 'views');
 
 	protected static $loadedModules = array();
@@ -126,7 +127,7 @@ class AutoLoader
 			if(HTMLPurifier_Bootstrap::autoload($class))
 				return true;
 		}
-		
+
 		if(strpos($class, 'DiffMatchPatch') === 0)
 		{
 			include(self::$thirdPartyIncludes . 'DiffMatchPatch/' . $class . '.class.php');
