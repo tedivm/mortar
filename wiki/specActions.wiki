@@ -14,9 +14,9 @@ At the moment our chain for model actions looks like this:
 
                     ActionInterface
                            |
-                           |
-                           |
                        ActionBase
+                           |
+                    ModelActionBase
                        /  |  |  \
                    /---   /  \   ---\
                   /      /    \      \
@@ -60,9 +60,9 @@ I would propose that we structure our action descent chain more like this:
 
                     ActionInterface
                            |
+                       ActionBase
                            |
-                           |
-                       ActionBase---------
+                    ModelActionBase-------
                       /    |    \         \
                      /     |     \         \
                     /      |      \         \
