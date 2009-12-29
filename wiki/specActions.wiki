@@ -1,0 +1,44 @@
+#summary A consistent API and structure for actions.
+
+= Introduction =
+
+Right now our action system is a weird hodgepodge -- there are several different base classes and chains of descent that criss-cross in odd ways, several fairly key features are added to the descent chain at lower points than is ideal, and determining what methods can be overloaded in order to add functionality to a new action is almost impossible. This spec will attempt to express our possible options for 
+
+= Descent =
+
+The first step in building a sensible action system is to create a comprehensible and *consistent* chain of descent that clearly implements a set of interfaces that developers can rely on for guidance in creating their own actions.
+
+At the moment our chain looks like this:
+
+{{{
+
+                    ActionInterface
+                           |
+                           |
+                           |
+                       ActionBase
+                       /  |  |  \
+                   /---   /  \   ---\
+                  /      /    \      \
+                 /      /      \      \
+              Add    Read      Index   LBBase
+             / |                          |
+            /  |                          |
+           /   |                          |
+       Edit  LBAdd                     LBRead
+               |  \                       |
+               |   \                      |
+               |    \                     |
+             LBEdit  LBGP              LBIndex
+            /  |  \      \
+           /   |   \      \
+          /    |    \      \
+    LBOwn.   LBDel.  LBEGP  LBUP
+                       |
+                       |
+                       |
+                     LBEUP
+
+}}}
+
+This... is stupid.
