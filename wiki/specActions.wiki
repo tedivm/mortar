@@ -8,7 +8,7 @@ Right now our action system is a weird hodgepodge -- there are several different
 
 The first step in building a sensible action system is to create a comprehensible and *consistent* chain of descent that clearly implements a set of interfaces that developers can rely on for guidance in creating their own actions.
 
-At the moment our chain looks like this:
+At the moment our chain for model actions looks like this:
 
 {{{
 
@@ -42,3 +42,47 @@ At the moment our chain looks like this:
 }}}
 
 This... is stupid.
+
+_Why_ is it this way? Because tactical choices regarding code reuse have dictated where actions descend, without consideration of the broader structure:
+
+  * The "Add" action includes a large amount of relevant code specific to the process of adding models, so LBAdd piggybacks off of it in order to not duplicate that code.
+  * LBBase actually only defines new code dealing with client-side caching headers (plus a makeModelActionMenu method that shouldn't even *be* in the action code in the first place) so the only actions that actually need to descend from it are those that involve displaying model content.
+  * Redirect tricks are extremely useful in action workflow, but the "getRedirectUrl" method is defined in LBAdd, so the mostly-unrelated Permissions helper actions descend from it.
+  * Read and Index are basically backported for non-LB Models and so are just slapped onto the ActionBase.
+
+What we need is a better descent chain that's built around _base classes that correctly define the needed functionality_.
+
+== Proposed Chain ==
+
+I would propose that we structure our action descent chain more like this:
+
+{{{
+
+                    ActionInterface
+                           |
+                           |
+                           |
+                       ActionBase---------
+                      /    |    \         \
+                     /     |     \         \
+                    /      |      \         \
+                 Add    Delete     Read      --------
+               /   |       |        |  \             \
+              /    |       |        |   \             \
+             /     |       |        |    \             \
+          LBAdd   Edit   LBDel.   Index   LBRead     LBOwnership,
+                 /                      \           LBPermissions,
+                /                        \               etc.
+               /                          \
+          LBEdit                           LBIndex
+
+}}}
+
+  * All non-LB model actions descend directly from ModelBase.
+  * All LB model actions with non-LB equivalents descend _directly_ from those equivalents.
+  * LB model actions with no non-LB equivalent descend directly from ActionBase (or one another).
+  * There is no LocationBasedBase action; all its functionality is rolled into the ActionBase or into other classes where appropriate.
+  * Actions that adjust a model's content descend from Add.
+  * Actions that display the content of a model and/or its children descend from Read.
+
+== Workflow ==
