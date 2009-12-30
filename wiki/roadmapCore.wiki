@@ -15,23 +15,25 @@ Release Date : *tbd*<br>
 Release Owner : *charlequin*
 
   * Core Updater
-  * Moving key Location fields out to their own table (re: site name, etc.)
   * Menu/Sidebar Management and refactoring of Html conversion code
-  * Multilingual support part 1 (base class, after which we need to do a mass upgrade of all strings in the system)
   * Setting permissions for models after installing a new module.
 
 == 0.7 ==
 
   * "Hook Day" (full assignment of hooks throughout code)
-  * Initial Mural Creation (theme module)
-  * Theme Preview
-  * Site Management Interface
+  * Docblock day (go through, document every file in the code) 
+  * Revised action API
+  * Moving key Location fields out to their own table (re: site name, etc.)
 
 == 1.0 ==
 
+  * Site Management Interface
+  * Multilingual support part 1
+  * Initial Mural Creation (theme module)
+  * Theme Preview
   * REST-Interface (partially complete)
   * User Management Interface
-  * Admin Dashboard view
+  * Dashboard
   * !MortarShell (Interactive Shell)
   * Theme Options -- manage themes, select default themes for sites/areas, configuring themes for user skinning
   * Theme Icon Sets (select and use)
