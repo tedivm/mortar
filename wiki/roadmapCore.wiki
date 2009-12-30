@@ -22,6 +22,7 @@ Release Owner : *charlequin*
 
   * "Hook Day" (full assignment of hooks throughout code)
   * Docblock day (go through, document every file in the code) 
+  * Define and use more accurate custom exceptions throughout code
   * Revised action API
   * Moving key Location fields out to their own table (re: site name, etc.)
 
