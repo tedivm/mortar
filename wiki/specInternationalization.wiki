@@ -6,13 +6,13 @@ This incredibly blank page is a space holder for specification proposals for our
 
 Things to discuss-
 
-Background
-Basic features - dynamic/printf, plurals
-Our special needs - model variance, abstraction, plugins/extensions
-Existing systems- gettext, zend_translate
-Formats- gettext, flatfile, sqlite
-Performance - memory tradeoffs 
-Dictionary Creation
-Translator Tools
+  * Background
+  * Basic features - dynamic/printf, plurals
+  * Our special needs - model variance, abstraction, plugins/extensions
+  * Existing systems- gettext, zend_translate
+  * Formats- gettext, flatfile, sqlite
+  * Performance - memory tradeoffs 
+  * Dictionary Creation
+  * Translator Tools
 
 = Details =
