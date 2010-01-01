@@ -14,7 +14,7 @@
  * @package System
  * @subpackage ModelSupport
  */
-class TableDisplayList extends TemplateDisplayList {
+class ViewTableDisplayList extends ViewTemplateDisplayList {
 
 	protected $tableColumns;
 	protected $modelData;
@@ -66,6 +66,11 @@ class TableDisplayList extends TemplateDisplayList {
 			$x++;
 		}
 		$this->tableColumns = $columnList;
+	}
+
+	public function getDisplay()
+	{
+		return $this->getListing();
 	}
 
 	/**
