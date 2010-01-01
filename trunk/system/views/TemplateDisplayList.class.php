@@ -1,6 +1,6 @@
 <?php
 
-class TemplateDisplayList implements DisplayList {
+class ViewTemplateDisplayList {
 
 
 	protected $baseActionList = array('Read', 'Edit', 'Delete', 'Index');
@@ -68,6 +68,10 @@ class TemplateDisplayList implements DisplayList {
 		$this->theme = $this->page->getTheme();
 	}
 
+	public function getDisplay()
+	{
+		return $this->getListing();
+	}
 
 	public function getListing()
 	{

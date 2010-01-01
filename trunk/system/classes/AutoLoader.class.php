@@ -43,7 +43,6 @@ class AutoLoader
 										'modelSupport/Converters' => 'ModelTo',
 										'modelSupport/Listings' => 'none',
 										'modelSupport/Forms' => 'none',
-										'modelSupport/DisplayLists' => 'none',
 										'Orm' => 'Orm',
 										'TwigIntegration' => 'TwigIntegration',
 										'InputHandlers' => 'none',

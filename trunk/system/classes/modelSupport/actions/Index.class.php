@@ -80,13 +80,13 @@ class ModelActionIndex extends ModelActionBase
 
 	protected function getTableDisplayList()
 	{
-		$indexList = new TableDisplayList($this->model, $this->childModels);
+		$indexList = new ViewTableDisplayList($this->model, $this->childModels);
 		return $indexList;
 	}
 
 	protected function getTemplateDisplayList()
 	{
-		$readList = new TemplateDisplayList($this->model, $this->childModels);
+		$readList = new ViewTemplateDisplayList($this->model, $this->childModels);
 		return $readList;
 	}
 
