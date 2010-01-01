@@ -1,0 +1,27 @@
+cssmin.class.php
+	cssmin
+	v1.0
+	MIT License
+	cssmin reduces the size of stylesheet definitions by removing all unneeded whitespaces and comments.
+	http://code.google.com/p/cssmin/
+
+Twig/
+	Twig
+	v0.9.4
+	3-Clause BSD
+	Templating library
+	http://www.twig-project.org/
+
+HTMLPurifier/
+	HTMLPurifier
+	v4.0.0
+	LGPL
+	Standards-compliant HTML filter, filters out XSS.
+	http://htmlpurifier.org/
+
+JShrink.class.php
+	JShrink
+	0.2
+	BSD License
+	A Javascript Minifier written in PHP
+	http://code.google.com/p/jshrink-/
