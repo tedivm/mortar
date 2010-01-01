@@ -48,17 +48,20 @@ class MortarActionMinify extends ActionBase
 			if(isset($query['raw']) && $query['raw'] == true)
 				$url->raw = true;
 
-			$this->ioHandler->addHeader('Location', (string) $url);
-			$this->ioHandler->setStatusCode(301);
-			return;
+			$redirectUrl = (string) $url;
+			$rawUrl = Query::getRawUrl();
+			if($rawUrl != $redirectUrl)
+			{
+				$this->ioHandler->addHeader('Location', $redirectUrl);
+				$this->ioHandler->setStatusCode(301);
+				return;
+			}
 		}
 
 		$mimetype = ($type == 'js') ? 'application/x-javascript; charset=utf-8' : 'text/css; charset=utf-8';
 		$this->ioHandler->addHeader('Content-Type', $mimetype);
 		$this->ioHandler->addHeader('Last-Modified', gmdate(HTTP_DATE, 0));
 		$this->ioHandler->addHeader('Expires', gmdate(HTTP_DATE, mktime(0, 0, 0, 0, 0, date('Y') + 20)));
-
-
 
 		if((defined('DISABLE_MINIFICATION') && DISABLE_MINIFICATION === true)
 			|| (isset($query['raw']) && $query['raw'] == true))
@@ -74,10 +77,28 @@ class MortarActionMinify extends ActionBase
 
 		if($cache->isStale() || $minifiedData['checksum'] != $requestedChecksum)
 		{
-			Cache::clear('themes', $themeName, 'minification', $type, 'url');
-			$minifiedData['checksum'] = $actualCheckSum;
-			$minifiedData['data'] = $minifier->minifyFiles();
-			$cache->storeData($minifiedData);
+			// we make sure only one process is working on this at a time to prevent multiple concurrent expensive
+			// minification calls and to deliver the fastest possible output to users
+			if(!ProcessPool::getProcesses('minification-' . $type, true))
+			{
+				$pid = ProcessPool::addProcess('minification-' . $type);
+				Cache::clear('themes', $themeName, 'minification', $type, 'url');
+				$minifiedData['checksum'] = $actualCheckSum;
+				$minifiedData['data'] = $minifier->minifyFiles();
+				$cache->storeData($minifiedData);
+				ProcessPool::removeProcess('minification-' . $type, $pid);
+
+			}else{
+
+				// in the event another process is running the minification code we want to just display the output
+				// directly. There's no point forcing the user to redownload this later, since the only difference
+				// will be minification and they've already downloaded the thing, so we leave the expires/last-modified
+				// alone.
+
+				$this->output = $minifier->getBaseString();
+				return;
+			}
+
 		}
 
 		$rawUrl = new Url();
