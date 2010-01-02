@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * ShellExec
+ *
+ * This class acts as a wrapper for shell commands- it locates binaries, escapes arguments, handles formating/displaying
+ * of flags and options, and even handles piping output to files or other ShellExec instances.
+ */
 class ShellExec
 {
 	protected $longOpts = array();
