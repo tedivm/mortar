@@ -142,7 +142,7 @@ abstract class ModelBase implements Model
 		}elseif($user instanceof Model && $user->getType() == 'User'){
 			$userId = $user->getId();
 		}else{
-			throw new CoreError('Attempted to check permissions on a non user item.');
+			throw new ModelError('Attempted to check permissions on a non user item.');
 		}
 
 		$location = new Location(1); // zee root
@@ -214,7 +214,7 @@ abstract class ModelBase implements Model
 					}
 
 					if(!$record->save())
-						throw new CoreError('Unable to save model information to table');
+						throw new ModelError('Unable to save model information to table');
 
 					if(!isset($this->id))
 						$this->id = $record->primaryKey;
@@ -255,7 +255,7 @@ abstract class ModelBase implements Model
 	{
 		$id = $this->getId();
 		if(!isset($id))
-			throw new CoreError('Attempted to delete unsaved model.');
+			throw new ModelError('Attempted to delete unsaved model.');
 
 		$status = true;
 
@@ -697,7 +697,7 @@ abstract class ModelBase implements Model
 	public function __set($offset, $value)
 	{
 		if(!is_scalar($value))
-			throw new CoreError('Model attributes must be scalar.');
+			throw new ModelError('Model attributes must be scalar.');
 
 		if ($offset == 'type' || $offset == 'id')
 			return false;
@@ -741,4 +741,5 @@ abstract class ModelBase implements Model
 
 }
 
+class ModelError extends CoreError {}
 ?>

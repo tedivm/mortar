@@ -7,7 +7,7 @@ class TwigIntegrationThemeEnvironment extends Twig_Environment
 	public function loadTemplate($name)
 	{
 		if($name == 'parent')
-			throw new CoreError('Templates can not be named parent.');
+			throw new TwigThemeError('Templates can not be named parent.');
 
 		$namePieces = $this->loader->getNamePieces($name);
 
@@ -18,7 +18,7 @@ class TwigIntegrationThemeEnvironment extends Twig_Environment
 		}
 
 		if(!($templateSet = $this->loader->loadTemplateSet($name)))
-			throw new CoreError('Unable to load template ' . $name);
+			throw new TwigThemeError('Unable to load template ' . $name);
 
 		// if no generation is set assume its the highest level available
 		if(!isset($generation))
@@ -28,10 +28,11 @@ class TwigIntegrationThemeEnvironment extends Twig_Environment
 		}elseif(isset($templateSet[$generation . $this->generationDelimiter . $name])){
 			$className = $generation . $this->generationDelimiter . $name;
 		}else{
-			throw new CoreError('Unable to load template ' . $name . ' from collection ' . $generation);
+			throw new TwigThemeError('Unable to load template ' . $name . ' from collection ' . $generation);
 		}
 		return parent::loadTemplate($className);
 	}
 }
 
+class TwigThemeError extends CoreError {}
 ?>

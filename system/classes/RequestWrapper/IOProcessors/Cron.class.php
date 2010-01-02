@@ -26,7 +26,7 @@ class IOProcessorCron extends IOProcessorCli
 	{
 		self::$pid = getmypid();
 		if(!is_numeric(self::$pid))
-			throw new CoreError('Unable to retrieve process id for cron handler.');
+			throw new CronError('Unable to retrieve process id for cron handler.');
 
 		ActiveUser::changeUserByName('Cron');
 		$pidPath = $this->getPidPath();
@@ -40,7 +40,7 @@ class IOProcessorCron extends IOProcessorCli
 		mkdir($pidDir, 0700);
 
 		if(!touch($pidPath))
-			throw new CoreError('Unable to set pid file for the cron handler.');
+			throw new CronError('Unable to set pid file for the cron handler.');
 	}
 
 	/**
@@ -230,4 +230,5 @@ class IOProcessorCron extends IOProcessorCli
 
 }
 
+class CronError extends CoreError {}
 ?>

@@ -428,7 +428,7 @@ class PackageInfo
 				try {
 
 					if(!class_exists($action['className']))
-						throw new CoreInfo('Unable to load action class ' . $action['className'] .
+						throw new PackageInfoInfo('Unable to load action class ' . $action['className'] .
 								' from module ' . $this->name);
 
 					$actionReflection = new ReflectionClass($action['className']);
@@ -580,4 +580,5 @@ class PackageInfo
 }
 
 class PackageInfoError extends CoreError {}
+class PackageInfoInfo extends CoreInfo {}
 ?>
