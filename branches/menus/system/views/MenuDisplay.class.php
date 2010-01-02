@@ -4,11 +4,14 @@ class ViewMenuDisplay
 {
 
 	protected $menu;
+	protected $theme;
+	protected $level;
 
-	public function __construct(Menu $menu, Theme $theme)
+	public function __construct(Menu $menu, Theme $theme, $level = 1)
 	{
 		$this->menu = $menu;
 		$this->theme = $theme;
+		$this->level = $level;
 	}
 
 	public function getDisplay()
@@ -19,7 +22,7 @@ class ViewMenuDisplay
 
 		foreach($menuItems as $item) {
 			if ($item['isMenu']) {
-				$itemView = new ViewMenuDisplay($item['item'], $this->theme);
+				$itemView = new ViewMenuDisplay($item['item'], $this->theme, $this->level + 1);
 			} else {
 				$itemView = new ViewThemeTemplate($this->theme, 'MenuItem.html');
 				$itemView->addContent(array('name' => $item['name'], 'item' => $item['item']));
@@ -29,7 +32,7 @@ class ViewMenuDisplay
 		}
 
 		$menuView = new ViewThemeTemplate($this->theme, 'Menu.html');
-		$menuView->addContent(array('content' => $menuContent));
+		$menuView->addContent(array('name' => $this->menu->getName(), 'content' => $menuContent, 'level' => $this->level));
 
 		return $menuView->getDisplay();
 	}
