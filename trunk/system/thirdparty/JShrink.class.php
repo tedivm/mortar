@@ -329,5 +329,6 @@ class JShrink
 }
 
 // Adding a custom exception handler for your own projects just means changing this line
-class JShrinkException extends Exception {}
+// class JShrinkException extends Exception {}
+class JShrinkException extends CoreError {}
 ?>
