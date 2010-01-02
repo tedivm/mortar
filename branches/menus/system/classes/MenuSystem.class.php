@@ -46,7 +46,7 @@ class MenuSystem
 	public function addItem($menu, $item, $name, $location = null)
 	{
 		if(!isset($this->menus[$menu]))
-			$this->menus[] = new Menu($menu);
+			$this->menus[$menu] = new Menu($menu);
 
 		$curMenu = $this->menus[$menu];
 		$curMenu->addItem($item, $name, $location);
@@ -54,9 +54,12 @@ class MenuSystem
 
 	public function getMenu($menu)
 	{
-		isset($this->menus[$menu])
-			? return $this->menus[$menu]
-			: return false;
+		return isset($this->menus[$menu]) ? $this->menus[$menu] : false;
+	}
+
+	public function getMenus()
+	{
+		return $this->menus;
 	}
 
 	public function getMenuNames()

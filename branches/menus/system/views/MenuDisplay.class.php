@@ -21,15 +21,15 @@ class ViewMenuDisplay
 			if ($item['isMenu']) {
 				$itemView = new ViewMenuDisplay($item['item'], $this->theme);
 			} else {
-				$itemView = new ViewThemeTemplate($this->theme, 'MenuItem.html')
-				$itemView->addContent(array('name' => $item['name'], 'item' => $item['item']))
+				$itemView = new ViewThemeTemplate($this->theme, 'MenuItem.html');
+				$itemView->addContent(array('name' => $item['name'], 'item' => $item['item']));
 			}
 			
 			$menuContent .= $itemView->getDisplay();
 		}
 
 		$menuView = new ViewThemeTemplate($this->theme, 'Menu.html');
-		$menuView->addContent('content' => $menuContent);
+		$menuView->addContent(array('content' => $menuContent));
 
 		return $menuView->getDisplay();
 	}

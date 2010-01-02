@@ -28,7 +28,7 @@ class Menu
 	 *
 	 * @var array
 	 */
-	protected $menuItems;
+	protected $menuItems = array();
 
 	/**
 	 * Create the menu, passing a name and optionally an array of items
@@ -45,7 +45,7 @@ class Menu
 	 *
 	 * @param string|Menu $item
 	 */
-	public function addItem($item, $name, $location = null);
+	public function addItem($item, $name, $location = null)
 	{
 		$menuItem = array('name' => $name);
 		if ($item instanceof Menu) {

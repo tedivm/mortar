@@ -9,10 +9,10 @@ class TagBoxMenu
 
 	public function __construct(MenuSystem $menus, Theme $theme)
 	{
-		$this->menus = $menus;
+		$this->menus = $menus->getMenus();
 		$this->theme = $theme;
 
-		$menuList = $this->menus->getMenuNames();
+		$menuList = $menus->getMenuNames();
 		foreach($menuList as $name)
 			$this->menusUsed[$name] = false;
 	}
@@ -27,13 +27,13 @@ class TagBoxMenu
 			default:
 				if(is_numeric($key)) {
 					$menu = array_slice($this->menus, 0, $key);
-					$menusUsed[$menu->getName()] = true;
+					$this->menusUsed[$menu->getName()] = true;
 					break;
 				}
 
 				if(isset($this->menus[$key])) {
 					$menu = $this->menus[$key];
-					$menusUsed[$key] = true;
+					$this->menusUsed[$key] = true;
 					break;
 				}
 		}
