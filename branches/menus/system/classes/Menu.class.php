@@ -83,6 +83,11 @@ class Menu
 	{
 		return $this->menuItems;
 	}
+
+	public function getName()
+	{
+		return $this->name;
+	}
 }
 
 ?>

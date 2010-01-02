@@ -58,6 +58,17 @@ class MenuSystem
 			? return $this->menus[$menu]
 			: return false;
 	}
+
+	public function getMenuNames()
+	{
+		$menuNames = array();
+
+		foreach($this->menus as $menu)
+			$menuNames[] = $menu->getName();
+
+		return $menuNames;
+	}
+
 }
 
 ?>
