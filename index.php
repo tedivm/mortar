@@ -21,7 +21,7 @@ class BootStrapper
 	{
 		define('START_TIME', microtime(true));
 		require('data/profiles/runtime.php');
-		require('system/Environment.constants.php');
+		require('system/data/Main.constants.php');
 
 		if(BENCHMARK && function_exists('getrusage'))
 		{
@@ -171,5 +171,5 @@ class BootStrapper
 }
 
 BootStrapper::main();
-
+exit(); // some hosts apparently append javascript to php requests, and this prevents that idiocy
 ?>
