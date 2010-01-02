@@ -31,11 +31,18 @@ class Menu
 	protected $menuItems = array();
 
 	/**
-	 * A list of submenus currently installed in this menu
+	 * The highest sort number currently used in this menu
+	 *
+	 * @var int
+	 */
+	protected $highSort = 10;
+
+	/**
+	 * Whether the menu needs to be sorted before it's returned.
 	 *
 	 * @var array
 	 */
-	 protected $submenus = array();
+	protected $shouldSort = false;
 
 	/**
 	 * Create the menu, passing a name and optionally an array of items
@@ -65,10 +72,17 @@ class Menu
 			$menuItem['isMenu'] = false;
 			$menuItem['item'] = (string) $item;
 		}
-			
-		(isset($location) && is_numeric($location))
-			? array_splice($this->menuItems, $location, 0, array($menuItem))
-			: $this->menuItems[] = $menuItem;
+
+		if(isset($location)) {
+			$menuItem['sort'] = $location;
+			if($location > $this->highSort)
+				$this->highSort = $location;			
+		} else {
+			$menuItem['sort'] = ++$this->highSort;
+		}
+
+		$this->shouldSort = true;
+		$this->menuItems[$name] = $menuItem;
 	}
 
 	/**
@@ -81,36 +95,52 @@ class Menu
 	 */
 	public function addItemToSubmenu($submenu, $item, $name, $location = null)
 	{
-		if (!isset($this->submenus[$submenu]))
+		if (!isset($this->menuItems[$submenu]))
 			$this->addItem(new Menu($submenu), $submenu);
+		elseif (!$this->menuItems[$submenu]['isMenu'])
+			return false;
 
 		$menu = $this->submenus[$submenu];
 		$menu->addItem($item, $name, $location);
 	}
 
 	/**
-	 * Sorts the current list of menu items by name
+	 * Sorts the current list of menu items by priority and then by name.
 	 *
 	 * @param string|Menu $item
 	 */
 	public function sort()
 	{
-		foreach($this->menuItems as $key => $row)
-			$name[$key] = $row['name'];
+		$sort = array();
+		$name = array();
 
-		array_multisort($name, SORT_ASC, $this->menuItems);
+		foreach($this->menuItems as $row) {
+			$sort[] = $row['sort'];
+			$name[] = $row['name'];
+		}
+
+		array_multisort($sort, SORT_ASC, $name, SORT_ASC, $this->menuItems);
 	}
 
 	/**
-	 * Return the full list of current menu items
+	 * Returns the full list of current menu items, sorting the menu first if an item has been added since the
+	 * last time this menu was sorted.
 	 *
 	 * @param array $items
 	 */
 	public function getItems()
 	{
+		if ($this->shouldSort) {
+			$this->shouldSort = false;
+			$this->sort();
+		}
 		return $this->menuItems;
 	}
 
+	/**
+	 * Returns the name of this menu.
+	 *
+	 */
 	public function getName()
 	{
 		return $this->name;

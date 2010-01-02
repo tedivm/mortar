@@ -2,7 +2,6 @@
 
 class ViewMenuDisplay
 {
-
 	protected $menu;
 	protected $theme;
 	protected $level;
