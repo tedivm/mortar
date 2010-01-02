@@ -207,7 +207,7 @@ class RequirementsCheck
 		$propertyName = $extensionType . 'Extensions';
 
 		if(!property_exists($this, $propertyName))
-			throw new CoreError('Unexpected extension type ' . $extensionType);
+			throw new RequirementsCheckError('Unexpected extension type ' . $extensionType);
 
 		$missingExtensions = array();
 
@@ -259,4 +259,5 @@ class RequirementsCheck
 
 }
 
+class RequirementsCheckError extends CoreError {}
 ?>

@@ -81,7 +81,7 @@ class ShellExec
 	public function getShellString()
 	{
 		if(!isset($this->binary))
-			throw new CoreError('Binary needs to be set');
+			throw new ShellExecError('Binary needs to be set');
 
 		$string = $this->binary;
 
@@ -132,4 +132,5 @@ class ShellExec
 	}
 }
 
+class ShellExecError extends CoreError {}
 ?>
