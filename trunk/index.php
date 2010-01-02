@@ -20,8 +20,13 @@ class BootStrapper
 	static protected function setEnvironmentalConstants()
 	{
 		define('START_TIME', microtime(true));
+
+		if(file_exists('data/configuration/system.php'))
+			include('data/configuration/system.php');
+
 		require('data/profiles/runtime.php');
 		require('system/data/Main.constants.php');
+
 
 		if(BENCHMARK && function_exists('getrusage'))
 		{
