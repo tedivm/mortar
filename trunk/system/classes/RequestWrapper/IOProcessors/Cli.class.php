@@ -33,6 +33,8 @@ class IOProcessorCli
 
 	protected $errorFormat = 'Text';
 
+	protected $autoSubmit = true;
+
 	/**
 	 * On construct the initialize function is run
 	 *
@@ -77,7 +79,7 @@ class IOProcessorCli
 
 	public function systemCheck()
 	{
-		
+
 	}
 
 	/**
@@ -117,7 +119,7 @@ class IOProcessorCli
 				break;
 
 			case ($isRoot):
-				ActiveUser::changeUserById(1);
+				ActiveUser::changeUserById(1); // first user is always super user
 				break;
 
 			default:
@@ -152,6 +154,11 @@ class IOProcessorCli
 	public function getErrorFormat()
 	{
 		return $this->errorFormat;
+	}
+
+	public function autoSubmit()
+	{
+		return $this->autoSubmit;
 	}
 
 	/**

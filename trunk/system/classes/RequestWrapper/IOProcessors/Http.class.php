@@ -26,7 +26,7 @@ class IOProcessorHttp extends IOProcessorCli
 	protected $headers = array();
 
 	protected $errorFormat = 'Html';
-
+	protected $autoSubmit = false;
 	/**
 	 * The amount of time, in seconds, to give as the max age and expiration for a resource
 	 *
