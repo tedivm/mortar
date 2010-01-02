@@ -52,6 +52,15 @@ class MenuSystem
 		$curMenu->addItem($item, $name, $location);
 	}
 
+	public function addItemToSubmenu($menu, $submenu, $item, $name, $location = null)
+	{
+		if(!isset($this->menus[$menu]))
+			$this->menus[$menu] = new Menu($menu);
+
+		$curMenu = $this->menus[$menu];
+		$curMenu->addItemToSubmenu($submenu, $item, $name, $location);	
+	}
+
 	public function getMenu($menu)
 	{
 		return isset($this->menus[$menu]) ? $this->menus[$menu] : false;

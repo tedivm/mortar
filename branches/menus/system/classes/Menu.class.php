@@ -31,6 +31,13 @@ class Menu
 	protected $menuItems = array();
 
 	/**
+	 * A list of submenus currently installed in this menu
+	 *
+	 * @var array
+	 */
+	 protected $submenus = array();
+
+	/**
 	 * Create the menu, passing a name and optionally an array of items
 	 *
 	 * @param string $name
@@ -44,6 +51,8 @@ class Menu
 	 * Add an array of items
 	 *
 	 * @param string|Menu $item
+	 * @param string $name
+	 * @param int|null $location
 	 */
 	public function addItem($item, $name, $location = null)
 	{
@@ -51,6 +60,7 @@ class Menu
 		if ($item instanceof Menu) {
 			$menuItem['isMenu'] = true;
 			$menuItem['item'] = $item;
+			$this->submenus[$name] = $item;
 		} else {
 			$menuItem['isMenu'] = false;
 			$menuItem['item'] = (string) $item;
@@ -59,6 +69,23 @@ class Menu
 		(isset($location) && is_numeric($location))
 			? array_splice($this->menuItems, $location, 0, array($menuItem))
 			: $this->menuItems[] = $menuItem;
+	}
+
+	/**
+	 * Add an item to a named submenu
+	 *
+	 * @param string $submenu
+	 * @param string|Menu $item
+	 * @param string $name
+	 * @param int|null $location
+	 */
+	public function addItemToSubmenu($submenu, $item, $name, $location = null)
+	{
+		if (!isset($this->submenus[$submenu]))
+			$this->addItem(new Menu($submenu), $submenu);
+
+		$menu = $this->submenus[$submenu];
+		$menu->addItem($item, $name, $location);
 	}
 
 	/**
