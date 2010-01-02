@@ -31,15 +31,17 @@ class MenuSystem
 		$query = Query::getQuery();
 	
 		$hook = new Hook();
-		$hook->loadPlugins('menus', $query['format'], 'base');
+		$hook->loadPlugins('system', 'menus', $query['format']);
 		if(isset($model))
-			$hook->loadPlugins('menus', $query['format'], $model->getType());
+			$hook->loadModelPlugins($model, $query['format'] . 'Menus');
 
 		$menuItems = $hook->getMenuItems();
 		
-		foreach($menuItems as $item) {
-			$loc = isset($item['location']) ? $item['location'] : null;
-			$this->addItem($item['menu'], $item['item'], $item['name'], $loc);
+		foreach($menuItems as $set) {
+			foreach($set as $item) {
+				$loc = isset($item['sort']) ? $item['sort'] : null;
+				$this->addItem($item['menu'], $item['item'], $item['name'], $loc);
+			}
 		}
 	}
 

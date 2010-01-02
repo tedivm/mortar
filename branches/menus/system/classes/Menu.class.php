@@ -63,7 +63,7 @@ class Menu
 	 */
 	public function addItem($item, $name, $location = null)
 	{
-		$menuItem = array('name' => $name);
+		$menuItem = array('name' => $name, 'menu' => $this->name);
 		if ($item instanceof Menu) {
 			$menuItem['isMenu'] = true;
 			$menuItem['item'] = $item;
