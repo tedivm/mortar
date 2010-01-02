@@ -132,13 +132,13 @@ abstract class LocationModel extends ModelBase
 			$isFirstSave = !isset($this->id);
 
 			if(!parent:: save())
-				throw new CoreError('Unable to save model');
+				throw new LocationModelError('Unable to save model');
 
 			$location = $this->getLocation();
 
 			if(!$location)
 			{
-				throw new CoreError('There is no location');
+				throw new LocationModelError('There is no location');
 			}
 
 			$location->setResource($this->getType(), $this->getId());
@@ -170,7 +170,7 @@ abstract class LocationModel extends ModelBase
 			}
 
 			if(!$location->save())
-				throw new CoreError('Unable to save model location');
+				throw new LocationModelError('Unable to save model location');
 
 			if($parentLocation = $location->getParent())
 				Cache::clear('locations', $parentLocation->getId(), 'children');
@@ -234,7 +234,7 @@ abstract class LocationModel extends ModelBase
 	public function delete()
 	{
 		if(!isset($this->id))
-			throw new CoreError('Attempted to delete unsaved model of the type ' . $this->getType());
+			throw new LocationModelError('Attempted to delete unsaved model of the type ' . $this->getType());
 
 		try
 		{
@@ -253,15 +253,15 @@ abstract class LocationModel extends ModelBase
 				{
 					$childModel = $child->getResource();
 					if(!$childModel->delete())
-						throw new CoreError('Unable to delete child location ' . (string) $child);
+						throw new LocationModelError('Unable to delete child location ' . (string) $child);
 				}
 			}
 
 			if(!parent::delete())
-				throw new CoreError('Unable to delete model information location ' . (string) $child);
+				throw new LocationModelError('Unable to delete model information location ' . (string) $child);
 
 			if(!$location->delete())
-				throw new CoreError('Unable to delete child location ' . (string) $child);
+				throw new LocationModelError('Unable to delete child location ' . (string) $child);
 
 			$db->autocommit(true);
 			Cache::clear('locations', $location->getId());
@@ -292,7 +292,7 @@ abstract class LocationModel extends ModelBase
 	{
 		$parentModel = $parent->getResource();
 		if(!(defined('INSTALLMODE') && INSTALLMODE) && !$parentModel->canHaveChildType($this->getType()))
-			throw new CoreError('Attempted to save ' . $this->getType() . ' to incompatible parent location.', 409);
+			throw new LocationModelError('Attempted to save ' . $this->getType() . ' to incompatible parent location.', 409);
 
 		$location = $this->getLocation();
 		$location->setParent($parent);
@@ -481,7 +481,7 @@ abstract class LocationModel extends ModelBase
 	public function __set($offset, $value)
 	{
 		if(!is_scalar($value))
-			throw new CoreError('Model attributes must be scalar.');
+			throw new LocationModelError('Model attributes must be scalar.');
 
 		if (in_array($value, array('owner', 'ownergroup', 'createdOn', 'lastModified', 'publishDate', 'name')))
 			return false;
@@ -490,4 +490,5 @@ abstract class LocationModel extends ModelBase
 	}
 }
 
+class LocationModelError extends CoreError {}
 ?>

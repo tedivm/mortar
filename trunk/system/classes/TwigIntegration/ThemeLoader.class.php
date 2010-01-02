@@ -125,7 +125,7 @@ class TwigIntegrationThemeLoader implements Twig_LoaderInterface
 
 			return $fileContents;
 		}else{
-			throw new CoreInfo('Unable to load template ' . $name);
+			throw new TwigThemeLoaderInfo('Unable to load template ' . $name);
 		}
 	}
 
@@ -159,4 +159,6 @@ class TwigIntegrationThemeLoader implements Twig_LoaderInterface
 	}
 
 }
+
+class TwigThemeLoaderInfo extends CoreInfo {}
 ?>

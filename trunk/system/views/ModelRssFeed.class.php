@@ -51,7 +51,7 @@ class ViewModelRssFeed
 			{
 				// no need to through it since we'd just catch it in the loop and continue, but we want the error to be
 				// logged or displayed.
-				new CoreWarning('ViewModelRssFeed can not take non-model items.');
+				new ViewModelRssFeedException('ViewModelRssFeed can not take non-model items.');
 				continue;
 			}
 
@@ -68,4 +68,5 @@ class ViewModelRssFeed
 	}
 }
 
+class ViewModelRssFeedException extends CoreWarning {}
 ?>

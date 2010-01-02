@@ -720,7 +720,7 @@ class Location
 	public function getPathToRoot()
 	{
 		if(!($id = $this->getId()))
-			throw new CoreError('Unable to get path for unsaved location.');
+			throw new LocationError('Unable to get path for unsaved location.');
 
 		$path = ($parentLocation = $this->getParent()) ? $parentLocation->getPathToRoot() : array();
 		$path[] = $id;
