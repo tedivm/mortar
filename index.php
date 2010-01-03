@@ -36,19 +36,25 @@ class BootStrapper
 		}
 
 		if(!defined('PROGRAM_NAME'))
-			define('PROGRAM_NAME', 'Mortar');
+			BootStrapper::define('PROGRAM_NAME', 'Mortar');
 
-		define('BASE_PATH', dirname(__FILE__) . '/');
+		BootStrapper::define('BASE_PATH', dirname(__FILE__) . '/');
 		$pathArray = explode('/', __FILE__);
 		$dispatcher = array_pop($pathArray);
-		define('DISPATCHER', $dispatcher);
+		BootStrapper::define('DISPATCHER', $dispatcher);
 
 		if(isset($_SERVER['SCRIPT_NAME']) && isset($_SERVER['HTTP_HOST']))
 		{
 			$base = $_SERVER['HTTP_HOST']
 					. substr($_SERVER['SCRIPT_NAME'], 0, strlen($_SERVER['SCRIPT_NAME']) - strlen(DISPATCHER));
-			define('BASE_URL', $base);
+			BootStrapper::define('BASE_URL', $base);
 		}
+	}
+
+	static function define($name, $value)
+	{
+		if(!defined($name))
+			define($name, $value);
 	}
 
 	static function clearGlobals()
