@@ -61,22 +61,19 @@ class Menu
 	 * @param string $name
 	 * @param int|null $location
 	 */
-	public function addItem($item, $name, $location = null)
+	public function addItem($item, $name, $sort = null)
 	{
 		$menuItem = array('name' => $name, 'menu' => $this->name);
 		if ($item instanceof Menu) {
-			$menuItem['isMenu'] = true;
 			$menuItem['item'] = $item;
-			$this->submenus[$name] = $item;
 		} else {
-			$menuItem['isMenu'] = false;
 			$menuItem['item'] = (string) $item;
 		}
 
-		if(isset($location)) {
-			$menuItem['sort'] = $location;
-			if($location > $this->highSort)
-				$this->highSort = $location;			
+		if(isset($sort)) {
+			$menuItem['sort'] = $sort;
+			if($sort > $this->highSort)
+				$this->highSort = $sort;			
 		} else {
 			$menuItem['sort'] = ++$this->highSort;
 		}
@@ -93,15 +90,15 @@ class Menu
 	 * @param string $name
 	 * @param int|null $location
 	 */
-	public function addItemToSubmenu($submenu, $item, $name, $location = null)
+	public function addItemToSubmenu($submenu, $item, $name, $sort = null)
 	{
 		if (!isset($this->menuItems[$submenu]))
 			$this->addItem(new Menu($submenu), $submenu);
-		elseif (!$this->menuItems[$submenu]['isMenu'])
+		elseif (!($this->menuItems[$submenu]['item'] instanceof Menu))
 			return false;
 
-		$menu = $this->submenus[$submenu];
-		$menu->addItem($item, $name, $location);
+		$menu = $this->menuItems[$submenu]['item'];
+		$menu->addItem($item, $name, $sort);
 	}
 
 	/**

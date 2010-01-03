@@ -20,7 +20,7 @@ class ViewMenuDisplay
 		$menuContent = '';
 
 		foreach($menuItems as $item) {
-			if ($item['isMenu']) {
+			if ($item['item'] instanceof Menu) {
 				$itemView = new ViewMenuDisplay($item['item'], $this->theme, $this->level + 1);
 			} else {
 				$itemView = new ViewThemeTemplate($this->theme, 'support/MenuItem.html');

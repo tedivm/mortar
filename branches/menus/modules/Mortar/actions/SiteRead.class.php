@@ -2,8 +2,6 @@
 
 class MortarActionSiteRead extends ModelActionLocationBasedRead
 {
-	public $adminSettings = array( 'headerTitle' => 'Read' );
-
 	public function logic()
 	{
 		$query = Query::getQuery();
