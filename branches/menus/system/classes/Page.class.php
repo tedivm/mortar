@@ -64,27 +64,6 @@ class Page implements ArrayAccess
 	protected $display;
 
 	/**
-	 * This contains an associative array used to link submenus to their containers.
-	 *
-	 * @var array
-	 */
-	protected $menuLookup;
-
-	/**
-	 * This contains an array of NavigationMenu objects.
-	 *
-	 * @var unknown_type
-	 */
-	protected $menuObjects = array();
-
-	/**
-	 * This is an associative array used to link container names back to their origin name.
-	 *
-	 * @var array
-	 */
-	protected $menuReverseLookup;
-
-	/**
 	 * This contains an array of strings (or string convertable objects) that are passed to the system as messages
 	 *
 	 * @var array
@@ -205,6 +184,8 @@ class Page implements ArrayAccess
 			$model = $location->getResource();
 			$modelBox = new TagBoxModel($model);
 			$content['model'] = $modelBox;
+		} else {
+			$model = null;
 		}
 
 		$theme = $this->getTheme();
@@ -214,46 +195,14 @@ class Page implements ArrayAccess
 		$envBox = new TagBoxEnv();
 		$content['env'] = $envBox;
 
+		$menuSys = new MenuSystem();
+		$menuSys->initMenus($model);
+		$menuBox = new TagBoxMenu($menuSys, $theme);
+		$content['menu'] = $menuBox;
+
 		$template->addContent($content);
 
 		return $template;
-	}
-
-	/**
-	 * This function returns a NavigationMenu specified by the subtype, menu and specific template settings. This
-	 * function should be called instead of the NavigationMenu::setMenu() function, as the needed subtype may be in a
-	 * different container if the template designer desires.
-	 *
-	 * @param string $subtype
-	 * @param string $menu
-	 * @return NavigationMenu
-	 */
-	public function getMenu($subtype, $menu = 'main')
-	{
-		switch (true) {
-			case isset($this->menuLookup[$subtype]):
-				$finalMenu = $this->menuLookup[$subtype];
-				break;
-
-			case $menu == false:
-				return false;
-				break;
-
-			case isset($this->menuLookup[$menu]):
-				$finalMenu = $this->menuLookup[$menu];
-				break;
-
-			default:
-				$finalMenu = $this->menuLookup['main'];
-				break;
-		}
-
-		if(!isset($this->menuObjects[$finalMenu]))
-			$this->menuObjects[$finalMenu] = new NavigationMenu($this->menuReverseLookup[$finalMenu]);
-
-		$menuObject = $this->menuObjects[$finalMenu];
-		$menuObject->setMenu($subtype);
-		return $menuObject;
 	}
 
 	/**

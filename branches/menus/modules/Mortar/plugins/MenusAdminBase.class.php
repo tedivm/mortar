@@ -6,8 +6,17 @@ class MortarPluginMenusAdminBase
 	public function addMenuItems($menuSys)
 	{
 		$url = new Url();
-		$url->module = 'Mortar';
 		$url->format = 'Admin';
+
+		$site = ActiveSite::getSite();
+		$loc = $site->getLocation();
+		$url->location = $loc;		
+		$link = $url->getLink('Home');
+		$menuSys->addItemToSubmenu('primary', 'Meta', $link, 'Home');
+
+		$url = new Url();
+		$url->format = 'Admin';
+		$url->module = 'Mortar';
 
 		if(!ActiveUser::isLoggedIn())
 		{

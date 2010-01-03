@@ -6,7 +6,7 @@ min-width: 960px;
 }
 
 body {
-font-family: "Gill Sans", "Gill MT", GillSans, sans-serif;
+font-family: "VegurRegular", sans-serif;
 color: #2D5F8A;
 }
 
@@ -32,14 +32,15 @@ clear: both;
 
 #BB_header {
 display: block;
-height: 180px;
+height: 80px;
 position: relative;
 }
 
 #BB_header h1 {
+font-family: 'VegurBold', sans-serif;
 position: absolute;
-top: -70px;
-font-size: 180pt;
+top: -40px;
+font-size: 100pt;
 color: #91BEE5;
 margin: 0;
 padding: 0;
@@ -118,12 +119,12 @@ background: #2D5F8A;
 color: #fff;
 }
 
-#main_sidebar_menu, #BB_left_sidebar {
+.sidebar_primary {
 display: block;
 float: left;
 }
 
-#modelNav_sidebar_menu, #BB_right_sidebar {
+.sidebar_secondary {
 display: block;
 float: right;
 }

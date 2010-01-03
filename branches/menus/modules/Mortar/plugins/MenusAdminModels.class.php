@@ -5,6 +5,9 @@ class MortarPluginMenusAdminModels
 
 	public function addModelMenuItems($menuSys, $model)
 	{
+		if(!method_exists($model, 'getLocation'))
+			return false;
+
 		$location = $model->getLocation();
 
 		$url = new Url();

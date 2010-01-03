@@ -45,8 +45,8 @@ class AdminOutputController extends AbstractOutputController
 
 
 			// This filter adds our navigational bars
-			$navigation = new AdminControllerResourceFilterNavigation();
-			$this->addOutputFilter($navigation);
+//			$navigation = new AdminControllerResourceFilterNavigation();
+//			$this->addOutputFilter($navigation);
 		}
 	}
 
