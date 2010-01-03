@@ -16,6 +16,8 @@
  */
 class ModelActionAdd extends ModelActionBase
 {
+	public static $requiredPermission = 'Add';
+
         public $adminSettings = array( 'headerTitle' => 'Add' );
 
 	/**

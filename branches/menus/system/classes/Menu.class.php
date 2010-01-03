@@ -61,8 +61,15 @@ class Menu
 	 * @param string $name
 	 * @param int|null $location
 	 */
-	public function addItem($item, $name, $sort = null)
+	public function addItem($item, $name, $sort = null, $perm = null)
 	{
+		if(isset($perm) && ($perm instanceof Url) ) {
+			$user = ActiveUser::getUser();
+			$permVal = $perm->checkPermission($user->getId());
+			if(!$permVal)
+				return false;
+		}
+
 		$menuItem = array('name' => $name, 'menu' => $this->name);
 		if ($item instanceof Menu) {
 			$menuItem['item'] = $item;
@@ -70,7 +77,7 @@ class Menu
 			$menuItem['item'] = (string) $item;
 		}
 
-		if(isset($sort)) {
+		if(isset($sort) && ($sort !== 'auto')) {
 			$menuItem['sort'] = $sort;
 			if($sort > $this->highSort)
 				$this->highSort = $sort;			
@@ -90,7 +97,7 @@ class Menu
 	 * @param string $name
 	 * @param int|null $location
 	 */
-	public function addItemToSubmenu($submenu, $item, $name, $sort = null)
+	public function addItemToSubmenu($submenu, $item, $name, $sort = null, $perm = null)
 	{
 		if (!isset($this->menuItems[$submenu]))
 			$this->addItem(new Menu($submenu), $submenu);
@@ -98,7 +105,7 @@ class Menu
 			return false;
 
 		$menu = $this->menuItems[$submenu]['item'];
-		$menu->addItem($item, $name, $sort);
+		$menu->addItem($item, $name, $sort, $perm);
 	}
 
 	/**

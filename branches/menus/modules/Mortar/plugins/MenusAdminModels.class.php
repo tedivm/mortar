@@ -37,7 +37,7 @@ class MortarPluginMenusAdminModels
 			$browseUrl = clone $url;
 			$browseUrl->action = $action;
 			$link = $browseUrl->getLink($label);
-			$menuSys->addItemToSubmenu('secondary', $model->getType(), $link, $label, 0);
+			$menuSys->addItemToSubmenu('secondary', $model->getType(), $link, $label, 0, $browseUrl);
 		}
 
 		$listOfAllowedModels = $model->getAllowedChildrenTypes();
@@ -50,7 +50,7 @@ class MortarPluginMenusAdminModels
 			$addUrl = clone $addUrlBase;
 			$addUrl->type = $modelType;
 			$link = $addUrl->getLink($modelType);
-			$menuSys->addItemToSubmenu('secondary', 'Add', $link, $modelType, 0);
+			$menuSys->addItemToSubmenu('secondary', 'Add', $link, $modelType, 0, $addUrl);
 		}
 	}
 }

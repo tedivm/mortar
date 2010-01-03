@@ -41,22 +41,22 @@ class MenuSystem
 		}
 	}
 
-	public function addItem($menu, $item, $name, $location = null)
+	public function addItem($menu, $item, $name, $sort = null, $perm = null)
 	{
 		if(!isset($this->menus[$menu]))
 			$this->menus[$menu] = new Menu($menu);
 
 		$curMenu = $this->menus[$menu];
-		$curMenu->addItem($item, $name, $location);
+		$curMenu->addItem($item, $name, $sort, $perm);
 	}
 
-	public function addItemToSubmenu($menu, $submenu, $item, $name, $location = null)
+	public function addItemToSubmenu($menu, $submenu, $item, $name, $sort = null, $perm = null)
 	{
 		if(!isset($this->menus[$menu]))
 			$this->menus[$menu] = new Menu($menu);
 
 		$curMenu = $this->menus[$menu];
-		$curMenu->addItemToSubmenu($submenu, $item, $name, $location);	
+		$curMenu->addItemToSubmenu($submenu, $item, $name, $sort, $perm);
 	}
 
 	public function removeItem($menu, $name)

@@ -9,7 +9,7 @@ class LithoPluginPageMenu
 		$url->format = 'admin';
 		$url->action = 'History';
 		$link = $url->getLink('History');
-		$menuSys->addItemToSubmenu('secondary', 'Page', $link, 'History', 0);
+		$menuSys->addItemToSubmenu('secondary', 'Page', $link, 'History', 0, $url);
 	}
 }
 
