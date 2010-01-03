@@ -1,14 +1,14 @@
 <?php
-define('DEBUG', 2);
-define('ERROR_LOGGING', 5);
-define('STRICT', false);
-define('IGNOREPERMISSIONS', false);	//FOR TESTING ONLY!!!!
-define('BENCHMARK', true);
-define('DISABLECACHE', false);
-define('DEPRECIATION_WARNINGS', false);
-define('OUTPUT_COMPRESSION', true);
-define('OUTPUT_COMPRESSION_HEADERS', true);
-define('CONCISE_HTML', false);
-define('DISABLE_MINIFICATION', true);
-define('REBUILD_TEMPLATES', true);
+BootStrapper::define('DEBUG', 2);
+BootStrapper::define('ERROR_LOGGING', 5);
+BootStrapper::define('STRICT', false);
+BootStrapper::define('IGNOREPERMISSIONS', false);	//FOR TESTING ONLY!!!!
+BootStrapper::define('BENCHMARK', true);
+BootStrapper::define('DISABLECACHE', false);
+BootStrapper::define('DEPRECIATION_WARNINGS', false);
+BootStrapper::define('OUTPUT_COMPRESSION', true);
+BootStrapper::define('OUTPUT_COMPRESSION_HEADERS', true);
+BootStrapper::define('CONCISE_HTML', false);
+BootStrapper::define('DISABLE_MINIFICATION', true);
+BootStrapper::define('REBUILD_TEMPLATES', true);
 ?>
