@@ -7,8 +7,6 @@ class TesseraActionForumRead extends ModelActionLocationBasedIndex
 		if(isset($this->model['title']))
 			$page->addRegion('pagetitle', htmlentities($this->model['title']));
 
-		$menu = $page->getMenu('actions', 'modelNav');
-		$this->makeModelActionMenu($menu, $this->model, 'Admin');
 		return parent::viewHtml($page);
 	}
 

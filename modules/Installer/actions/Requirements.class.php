@@ -3,7 +3,7 @@
 class InstallerActionRequirements implements ActionInterface //extends Action
 {
 
-	public $AdminSettings = array('headerTitle' => 'Installer');
+	public $adminSettings = array('headerTitle' => 'Install Requirements');
 	protected $dbConnection;
 	protected $ioHandler;
 	public $subtitle = '';

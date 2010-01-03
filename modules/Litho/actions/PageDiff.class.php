@@ -2,6 +2,8 @@
 
 class LithoActionPageDiff extends LithoActionPageRead
 {
+        public $adminSettings = array( 'headerTitle' => 'Revision Difference' );
+
 	public function logic()
 	{
 
