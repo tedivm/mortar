@@ -2,8 +2,7 @@
 
 class MortarActionSiteRead extends ModelActionLocationBasedRead
 {
-	public $adminSettings = array('headerTitle' => 'Installer',
-									'tab' => 'Main');
+	public $adminSettings = array( 'headerTitle' => 'Read' );
 
 	public function logic()
 	{

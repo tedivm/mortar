@@ -4,10 +4,7 @@ class MortarActionInstallModule extends ActionBase
 {
 	static $requiredPermission = 'System';
 
-	public $AdminSettings = array('linkLabel' => 'Install',
-									'linkTab' => 'System',
-									'headerTitle' => 'Install Module',
-									'linkContainer' => 'Modules');
+	public $adminSettings = array( 'headerTitle' => 'Install Module' );
 
 	protected $form;
 

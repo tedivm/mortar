@@ -17,6 +17,8 @@
  */
 class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 {
+        public $adminSettings = array( 'headerTitle' => 'Index' );
+
 	protected $listingClass = 'LocationListing';
 
 	/**

@@ -16,6 +16,8 @@
  */
 class ModelActionAdd extends ModelActionBase
 {
+        public $adminSettings = array( 'headerTitle' => 'Add' );
+
 	/**
 	 * This is the model that the new model is going to be attached to
 	 *

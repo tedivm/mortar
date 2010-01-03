@@ -4,10 +4,7 @@ class MortarActionLogIn extends ActionBase
 {
 	static $requiredPermission = 'Read';
 
-	public $AdminSettings = array('linkLabel' => 'Log In',
-									'linkTab' => 'Universal',
-									'headerTitle' => 'Log In',
-									'EnginePermissionOverride' => true);
+	public $adminSettings = array( 'headerTitle' => 'Log In', 'EnginePermissionOverride' => true);
 
 	protected $form;
 	protected $loginSuccessful = false;

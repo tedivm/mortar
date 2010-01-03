@@ -477,10 +477,6 @@ class Page implements ArrayAccess
 				$breadCrumbList->addClass('breadcrumblist');
 				$breadCrumb->wrapAround($breadCrumbList);
 
-				$breadCrumbClean = new HtmlObject('div');
-				$breadCrumbClean->property('style', 'clear: left');
-				$breadCrumb->wrapAround($breadCrumbClean);
-
 				foreach($urlList as $url)
 				{
 					$listItem = $breadCrumbList->insertNewHtmlObject('li');
