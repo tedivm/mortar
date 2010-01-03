@@ -17,6 +17,9 @@ class ViewMenuDisplay
 	{
 		$menuItems = $this->menu->getItems();
 
+		if (count($menuItems) === 0)
+			return '';
+
 		$menuContent = '';
 
 		foreach($menuItems as $item) {
