@@ -19,7 +19,7 @@ class UrlWriter
 
 		if(strlen($path))
 		{
-			if(!self::$enableRewrite)
+			if(!self::$enableRewrite || (defined('INSTALLMODE') && INSTALLMODE == true))
 				$url .= '?p=';
 
 			$url .= $path;
@@ -53,7 +53,7 @@ class UrlWriter
 		if(defined('INSTALLMODE') && INSTALLMODE == true)
 		{
 			$url = $ssl ? 'https://' : 'http://';
-			$url .= BASE_URL . 'index.php?p=';
+			$url .= BASE_URL . 'index.php';
 			return $url;
 		}
 
