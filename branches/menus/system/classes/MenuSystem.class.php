@@ -35,14 +35,7 @@ class MenuSystem
 		if(isset($model))
 			$hook->loadModelPlugins($model, $query['format'] . 'Menus');
 
-		$menuItems = $hook->getMenuItems();
-		
-		foreach($menuItems as $set) {
-			foreach($set as $item) {
-				$loc = isset($item['sort']) ? $item['sort'] : null;
-				$this->addItem($item['menu'], $item['item'], $item['name'], $loc);
-			}
-		}
+		$hook->addMenuItems($this);
 	}
 
 	public function addItem($menu, $item, $name, $location = null)
