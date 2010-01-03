@@ -15,6 +15,8 @@ class MortarPluginCustomInstall
 	public function run()
 	{
 		Hook::registerPlugin('system', 'menus', 'admin', $this->packageId, 'MenusAdminBase');
+		Hook::registerPlugin('model', 'All', 'adminMenu', $this->packageId, 'MenusAdminModels');
+
 		Hook::registerPlugin('Forms', 'HtmlConvert', 'location', $this->packageId, 'FormInputLocationToHtml');
 
 		Hook::registerPlugin('Forms', 'HtmlConvert', 'user', $this->packageId, 'FormInputUserToHtml');

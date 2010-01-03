@@ -32,10 +32,13 @@ class MenuSystem
 	
 		$hook = new Hook();
 		$hook->loadPlugins('system', 'menus', $query['format']);
-		if(isset($model))
-			$hook->loadModelPlugins($model, $query['format'] . 'Menus');
-
 		$hook->addMenuItems($this);
+
+		if(isset($model)) {
+			$hook = new Hook();
+			$hook->loadModelPlugins($model, $query['format'] . 'Menu'); 
+			$hook->addModelMenuItems($this, $model);
+		}
 	}
 
 	public function addItem($menu, $item, $name, $location = null)
@@ -54,6 +57,24 @@ class MenuSystem
 
 		$curMenu = $this->menus[$menu];
 		$curMenu->addItemToSubmenu($submenu, $item, $name, $location);	
+	}
+
+	public function removeItem($menu, $name)
+	{
+		if(!isset($this->menus[$menu]))
+			return false;
+
+		$curMenu = $this->menus[$menu];
+		$curMenu->removeItem($name);
+	}
+
+	public function removeItemFromSubmenu($menu, $submenu, $name)
+	{
+		if(!isset($this->menus[$menu]))
+			return false;
+
+		$curMenu = $this->menus[$menu];
+		$curMenu->removeItemFromSubmenu($submenu, $name);
 	}
 
 	public function getMenu($menu)

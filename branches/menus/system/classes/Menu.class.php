@@ -105,6 +105,31 @@ class Menu
 	}
 
 	/**
+	 * Remove an item from the menu by name.
+	 *
+	 * @param string $name
+	 */
+	public function removeItem($name)
+	{
+		unset($this->menuItems[$name]);
+	}
+
+	/**
+	 * Remove an item from a submenu by name.
+	 *
+	 * @param string $submenu
+	 * @param string $name
+	 */
+	public function removeItemFromSubmenu($submenu, $name)
+	{
+		if ( (!isset($this->menuItems[$submenu])) || (!$this->menuItems[$submenu]['isMenu']) )
+			return false;
+
+		$menu = $this->menuItems[$submenu];
+		$menu->removeItem($name);
+	}
+
+	/**
 	 * Sorts the current list of menu items by priority and then by name.
 	 *
 	 * @param string|Menu $item
