@@ -16,7 +16,7 @@ class LithoPluginCustomInstall
 	{
 		Hook::registerModelPlugin('Directory', 'getAllowedChildrenTypes', $this->packageId, 'AllowPageType', true);
 		Hook::registerModelPlugin('Site', 'getAllowedChildrenTypes', $this->packageId, 'AllowPageType', true);
-		Hook::registerModelPlugin('Page', 'ActionMenu', $this->packageId, 'PageActionMenu', true);
+		Hook::registerModelPlugin('Page', 'adminMenu', $this->packageId, 'PageMenu', true);
 	}
 }
 
