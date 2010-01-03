@@ -195,10 +195,11 @@ class Page implements ArrayAccess
 		$envBox = new TagBoxEnv();
 		$content['env'] = $envBox;
 
+		$menuSys = new MenuSystem();
+
 		if(defined('INSTALLMODE') && INSTALLMODE) {
-			$menuSys = new InstallMenuSystem();
+			$menuSys->installMode();
 		} else {
-			$menuSys = new MenuSystem();
 			$menuSys->initMenus($model);
 		}
 		$menuBox = new TagBoxMenu($menuSys, $theme);
