@@ -2,6 +2,8 @@
 
 class LithoActionPageHistory extends ModelActionLocationBasedRead
 {
+        public $adminSettings = array( 'headerTitle' => 'Revision History' );
+
 	protected $revisionCount;
 	protected $revisionList;
 	public function logic()

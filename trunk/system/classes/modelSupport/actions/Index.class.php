@@ -18,6 +18,8 @@
 class ModelActionIndex extends ModelActionBase
 {
 
+        public $adminSettings = array( 'headerTitle' => 'Index' );
+
 	protected $listingClass = 'ModelListing';
 
 	protected $indexDateFormat = 'm.d.y g:i a';

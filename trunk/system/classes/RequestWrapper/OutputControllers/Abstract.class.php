@@ -245,7 +245,7 @@ abstract class AbstractOutputController
 			if(!$action)
 				throw new TypeMismatch(array('Action', $action));
 
-			$settingsArrayName = $format . 'Settings';
+			$settingsArrayName = strtolower($format) . 'Settings';
 
 			$viewMethod = 'view' . $format;
 

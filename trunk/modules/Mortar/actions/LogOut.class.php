@@ -4,9 +4,7 @@ class MortarActionLogOut extends ActionBase
 {
 	static $requiredPermission = 'Read';
 
-	public $AdminSettings = array('linkLabel' => 'Log Out',
-									'linkTab' => 'Universal',
-									'headerTitle' => 'Log Out');
+	public $adminSettings = array( 'headerTitle' => 'Log Out' );
 
 	public function logic()
 	{

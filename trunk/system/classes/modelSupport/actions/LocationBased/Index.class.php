@@ -17,6 +17,8 @@
  */
 class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 {
+        public $adminSettings = array( 'headerTitle' => 'Index' );
+
 	protected $listingClass = 'LocationListing';
 
 	/**
@@ -172,9 +174,6 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 	 */
 	public function viewAdmin($page)
 	{
-		$menu = $page->getMenu('actions', 'modelNav');
-		$this->makeModelActionMenu($menu, $this->model, 'Admin');
-
 		$indexList = $this->getTableDisplayList();
 		$indexList->addPage($page);
 

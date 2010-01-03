@@ -36,8 +36,6 @@ class ModelActionLocationBasedRead extends ModelActionLocationBasedBase
 	 */
 	public function viewAdmin($page)
 	{
-		$menu = $page->getMenu('actions', 'modelNav');
-		$this->makeModelActionMenu($menu, $this->model, 'Admin');
 		return $this->modelToHtml($page, $this->model, 'Display.html');
 	}
 

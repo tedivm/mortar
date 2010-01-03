@@ -16,6 +16,10 @@
  */
 class ModelActionAdd extends ModelActionBase
 {
+	public static $requiredPermission = 'Add';
+
+        public $adminSettings = array( 'headerTitle' => 'Add' );
+
 	/**
 	 * This is the model that the new model is going to be attached to
 	 *

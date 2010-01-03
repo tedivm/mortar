@@ -4,6 +4,8 @@
 class ModelActionLocationBasedEditGroupPermissions extends ModelActionLocationBasedEdit
 {
 
+        public $adminSettings = array( 'headerTitle' => 'Edit Group Permissions' );
+
 	/**
 	 * This defines the permission action that the user needs to run this. Permissions are based off of an action and
 	 * a resource type, so this value is used with the model type to generate a permissions object
