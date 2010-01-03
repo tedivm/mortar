@@ -11,6 +11,9 @@ class UrlReader
 
 	public function readUrl($getValues, $domain = null)
 	{
+		if(isset($getValues['XDEBUG_PROFILE']))
+			unset($getValues['XDEBUG_PROFILE']);
+			
 		if(isset($getValues['p']))
 		{
 			$this->readPath($getValues['p']);
