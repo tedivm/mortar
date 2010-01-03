@@ -33,8 +33,6 @@ class AdminOutputController extends AbstractOutputController
 
 		if(INSTALLMODE)
 		{
-			$navigation = new AdminControllerResourceFilterInstallerNavigation();
-			$this->addOutputFilter($navigation);
 			$page->setTemplate('index.html', 'bbAdmin');
 		}else{
 
@@ -43,10 +41,6 @@ class AdminOutputController extends AbstractOutputController
 			$siteLocation = $site->getLocation();
 			$page->setTemplate('index.html', $siteLocation->getMeta('adminTheme'));
 
-
-			// This filter adds our navigational bars
-//			$navigation = new AdminControllerResourceFilterNavigation();
-//			$this->addOutputFilter($navigation);
 		}
 	}
 
