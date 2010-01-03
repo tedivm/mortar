@@ -155,11 +155,7 @@ class Page implements ArrayAccess
 			}
 		}
 
-		$this->menuLookup = array("main" => "mainNav", "modelNav" => "modelNav");
-		$this->menuReverseLookup = array("mainNav" => "main", "modelNav" => "modelNav");
-
 		$templateProcess = new ViewThemeTemplate(new Theme($theme), $file);
-		$templateProcess = $this->addTemplateContent($templateProcess);
 
 		$this->display = $templateProcess;
 	}
@@ -381,6 +377,7 @@ class Page implements ArrayAccess
 		$headerFinal = $headerTemplate->getDisplay();
 
 		$display->addContent(array('js_path' => $jsInclude, 'head' => $headerFinal));
+		$this->addTemplateContent($display);
 
 		return $display->getDisplay() . PHP_EOL . $footerTemplate->getDisplay();
 	}
