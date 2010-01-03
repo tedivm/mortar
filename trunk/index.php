@@ -24,7 +24,7 @@ class BootStrapper
 		if(file_exists('data/configuration/system.php'))
 			include('data/configuration/system.php');
 
-		$runtimeProfile = defined('RUNTIME_PROFILE') ? RUNTIME_PROFILE : 'runtime';
+		$runtimeProfile = defined('RUNTIME_PROFILE') ? strtolower(RUNTIME_PROFILE) : 'runtime';
 
 		require('system/data/profiles/' . $runtimeProfile . '.php');
 		require('system/data/Main.constants.php');
