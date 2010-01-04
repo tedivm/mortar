@@ -125,7 +125,7 @@ class TagBoxNav
 		
 		return (string) $dateList;
 	}
-	
+
 	public function __get($tagname)
 	{
 
@@ -143,7 +143,7 @@ class TagBoxNav
 				return false;
 		}
 	}
-	
+
 	public function __isset($tagname)
 	{
 		switch ($tagname) {
