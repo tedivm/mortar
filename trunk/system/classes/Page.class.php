@@ -174,14 +174,24 @@ class Page implements ArrayAccess
 
 		if(isset($query['location']) && is_numeric($query['location'])) {
 			$location = new Location($query['location']);
+			$model = $location->getResource();
+		} elseif ($query['type'] && $query['id']) {
+			$model = ModelRegistry::loadModel($query['type'], $query['id']);
+		} else {
+			$model = null;
+		}
+
+		if(isset($location)) {
 			$navBox = new TagBoxNav($location);
 			$content['nav'] = $navBox;
 
-			$model = $location->getResource();
+			$breadBox = new TagBoxBreadcrumbs($location);
+			$content['breadcrumbs'] = $breadBox;
+		}
+
+		if(isset($model)) {
 			$modelBox = new TagBoxModel($model);
 			$content['model'] = $modelBox;
-		} else {
-			$model = null;
 		}
 
 		$theme = $this->getTheme();
@@ -192,7 +202,6 @@ class Page implements ArrayAccess
 		$content['env'] = $envBox;
 
 		$menuSys = new MenuSystem();
-
 		if(defined('INSTALLMODE') && INSTALLMODE) {
 			$menuSys->installMode();
 		} else {
@@ -441,53 +450,9 @@ class Page implements ArrayAccess
 			$this->addRegion($name, $menuDisplay->makeDisplay());
 		}
 
-	// Since breadcrumbs rely on database access we bail out here during install mode.
+	// This line ensures that any additional content we add below that requires a fully-functional system doesn't
+	// choke the installer.
 		if(defined('INSTALLMODE') && INSTALLMODE) return true;
-		$user = ActiveUser::getUser();
-		$userId = $user->getId();
-		$query = Query::getQuery();
-
-	// if the location is set we'll attempt to add breadcrumbs
-		if(isset($query['location']) && is_numeric($query['location']))
-		{
-			$location = new Location($query['location']);
-			$urlList = array();
-			$x = 1;
-			do
-			{
-				if($location->getType() == 'Root')
-					break;
-
-				$url = new Url();
-				$url->location = $location->getId();
-				$url->format = $query['format'];
-
-				if($url->checkPermission($userId))
-					$urlList[] = $url->getLink(str_replace('_', ' ', $location->getName()));
-
-			}while($location = $location->getParent());
-
-			if(count($urlList) > 1)
-			{
-				$urlList = array_reverse($urlList);
-
-				$breadCrumb = new HtmlObject('div');
-				$breadCrumb->property('id', count($urlList)."_level_breadcrumbs");
-				$breadCrumb->addClass('breadcrumbs');
-
-				$breadCrumbList = new HtmlObject('ul');
-				$breadCrumbList->addClass('breadcrumblist');
-				$breadCrumb->wrapAround($breadCrumbList);
-
-				foreach($urlList as $url)
-				{
-					$listItem = $breadCrumbList->insertNewHtmlObject('li');
-					$listItem->wrapAround($url);
-				}
-				$listItem->addClass('current');
-				$this->addRegion('breadcrumbs', (string) $breadCrumb);
-			}
-		}
 
 	// Add the messages to the page.
 		if(count($this->messages) > 0)
