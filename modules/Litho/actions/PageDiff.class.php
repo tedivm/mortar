@@ -2,7 +2,7 @@
 
 class LithoActionPageDiff extends LithoActionPageRead
 {
-        public $adminSettings = array( 'headerTitle' => 'Revision Difference' );
+        public $adminSettings = array( 'headerTitle' => 'Revision Difference', 'useRider' => true );
 
 	public function logic()
 	{
@@ -30,7 +30,7 @@ class LithoActionPageDiff extends LithoActionPageRead
                 	$rev1n = $query['rev2'];
                 	$rev2n = $query['rev1'];
                 }
-             
+
                 if(isset($rev1n)) {
                         try {
                                 $this->model->loadRevision((int) $rev1n);
@@ -53,6 +53,9 @@ class LithoActionPageDiff extends LithoActionPageRead
 			foreach($errors as $error) $errorText .= $error;
 			throw new ResourceNotFoundError($errorText);
 		}
+
+		$this->adminSettings['titleRider'] = " - r$rev1n : r$rev2n";
+
 		$diff = new DiffMatchPatch();
 		$diffs = $diff->diff_main($rev1, $rev2);
 		$diff->diff_cleanupSemantic($diffs);
