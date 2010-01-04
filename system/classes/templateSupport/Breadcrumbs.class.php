@@ -29,7 +29,8 @@ class TagBoxBreadcrumbs
 			$url->format = $this->query['format'];
 
 			if($url->checkPermission($userId)) {
-				$name = str_replace('_', ' ', $location->getName());
+				$model = $location->getResource();
+				$name = isset($model['title']) ? $model['title'] : str_replace('_', ' ', $location->getName());
 
 				if($html)
 					$nameList[] = $url->getLink($name);
