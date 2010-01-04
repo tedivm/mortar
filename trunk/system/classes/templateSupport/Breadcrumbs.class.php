@@ -20,6 +20,16 @@ class TagBoxBreadcrumbs
 		$location = $this->location;
 		$urlList = array();
 		$x = 1;
+
+		if(isset($this->query['action']) && $this->query['action'] !== 'Read') {
+			if($html) {
+				$url = Query::getUrl();
+				$nameList[] = $url->getLink($this->query['action']);
+			} else {
+				$nameList[] = $this->query['action'];
+			}
+		}
+
 		do {
 			if($location->getType() == 'Root')
 				break;
