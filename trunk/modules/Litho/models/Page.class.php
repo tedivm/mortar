@@ -7,6 +7,8 @@ class LithoModelPage extends LocationModel
 	public $allowedChildrenTypes = array();
 	protected $excludeFallbackActions = array('Index');
 
+	protected $firstSave;
+
 	protected $activeRevision;
 	protected $filters = array();
 
@@ -22,7 +24,6 @@ class LithoModelPage extends LocationModel
 			return false;
 		}
 	}
-
 
 	public function save($parent = null)
 	{
@@ -45,7 +46,7 @@ class LithoModelPage extends LocationModel
 				$revision->makeActive();
 			}
 
-		}else{
+		}elseif (!isset($this->firstSave) || !$this->firstSave) {
 				$revision = new PageRevision($this->getId());
 				$this->saveRevision($revision);
 		}
@@ -56,6 +57,7 @@ class LithoModelPage extends LocationModel
 	{
 		$revision = new PageRevision($this->getId());
 		$this->saveRevision($revision);
+		$this->firstSave = true;
 	}
 
 	protected function saveRevision($revision)
