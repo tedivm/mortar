@@ -104,3 +104,11 @@ By breaking action workflow into small pieces and executing it through a series 
   * viewX() -- producing the final output format
 
 Ideally at _each_ stage, the action could specify one of three possible process-ending states (a redirect to a different location/resource, an HTTP error code, or a Mortar-specific error message) which would cause action execution to abort and prevent any future steps from being performed.
+
+== Settings ==
+
+Action settings are very useful for providing semi-dynamic titles for actions and whatnot, but right now they're a bit rickety. How it should work instead:
+
+  * actionSettings is an array, with potential subarrays for each format and also a 'default' subarray.
+  * getSettings($format, $setting) checks if a format-specific setting is set, returns that if so, then checks if a default setting is set, and returns _that_ if so.
+  * setSettings($format, $setting) just sets the specific setting for the specific format and doesn't worry about the default.
