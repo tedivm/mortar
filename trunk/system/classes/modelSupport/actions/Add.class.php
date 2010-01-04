@@ -18,7 +18,7 @@ class ModelActionAdd extends ModelActionBase
 {
 	public static $requiredPermission = 'Add';
 
-        public $adminSettings = array( 'headerTitle' => 'Add' );
+        public $adminSettings = array( 'headerTitle' => 'Add', 'useRider' => true );
 
 	/**
 	 * This is the model that the new model is going to be attached to
@@ -198,6 +198,8 @@ class ModelActionAdd extends ModelActionBase
 	 */
 	public function viewAdmin()
 	{
+		$this->adminSettings['titleRider'] = " New " . $this->model->getType();
+
 		if($this->form->wasSubmitted())
 		{
 			if($this->formStatus === true)

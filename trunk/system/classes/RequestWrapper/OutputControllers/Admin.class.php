@@ -96,10 +96,10 @@ class AdminControllerContentFilter
 		$processedOutput = new ViewThemeTemplate($theme, 'adminContent.html');
 
 		$title = (isset($action->adminSettings['headerTitle'])) ? $action->adminSettings['headerTitle'] : '';
-		$subTitle = (isset($action->adminSettings['headerSubTitle'])) ? $action->adminSettings['headerSubTitle'] : '';
+		$title .= (isset($action->adminSettings['useRider']) && $action->adminSettings['useRider'] 
+			&& isset($action->adminSettings['titleRider'])) ? $action->adminSettings['titleRider'] : '';
 
-
-		$processedOutput->addContent(array('content' => $output, 'title' => $title, 'subtitle' => $subTitle));
+		$processedOutput->addContent(array('content' => $output, 'title' => $title));
 		$output = $processedOutput->getDisplay();
 
 		return $output;
