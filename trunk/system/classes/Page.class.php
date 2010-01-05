@@ -187,7 +187,7 @@ class Page implements ArrayAccess
 
 			$breadBox = new TagBoxBreadcrumbs($location);
 			$content['breadcrumbs'] = $breadBox;
-		} elseif(!(defined(INSTALLMODE) && INSTALLMODE)) {
+		} elseif(!(defined('INSTALLMODE') && INSTALLMODE)) {
 			$site = ActiveSite::getSite();
 			$location = $site->getLocation();
 
