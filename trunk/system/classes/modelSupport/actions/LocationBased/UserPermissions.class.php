@@ -71,6 +71,13 @@ class ModelActionLocationBasedUserPermissions extends ModelActionLocationBasedGr
                 return $url;
 	}
 
+	public function viewAdmin()
+	{
+		$output = parent::viewAdmin();
+		$this->setTitle('User Permissions');
+		return $output;
+	}
+
 }
 
 ?>

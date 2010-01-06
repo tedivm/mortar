@@ -5,6 +5,7 @@ class MortarActionLogIn extends ActionBase
 	static $requiredPermission = 'Read';
 
 	public $adminSettings = array( 'headerTitle' => 'Log In', 'EnginePermissionOverride' => true);
+	public $htmlSettings = array( 'headerTitle' => 'Log In' );
 
 	protected $form;
 	protected $loginSuccessful = false;
@@ -71,6 +72,8 @@ class MortarActionLogIn extends ActionBase
 
 	public function viewHtml()
 	{
+		$this->setTitle($this->htmlSettings['headerTitle']);
+
 		$output = '';
 		if($this->loginSuccessful)
 		{
@@ -92,7 +95,9 @@ class MortarActionLogIn extends ActionBase
 
 	public function viewAdmin()
 	{
-		return $this->viewHtml();
+		$output = $this->viewHtml();
+		$this->setTitle($this->adminSettings['headerTitle']);
+		return $output;
 	}
 
 	protected function getUrl()

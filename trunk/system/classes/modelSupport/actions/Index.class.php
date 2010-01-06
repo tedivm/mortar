@@ -19,6 +19,7 @@ class ModelActionIndex extends ModelActionBase
 {
 
         public $adminSettings = array( 'headerTitle' => 'Index' );
+        public $htmlSettings = array( 'headerTitle' => 'Index' );
 
 	protected $listingClass = 'ModelListing';
 
@@ -94,6 +95,7 @@ class ModelActionIndex extends ModelActionBase
 
 	public function viewAdmin($page)
 	{
+		$this->setTitle($this->adminSettings['headerTitle']);
 
 		$indexList = $this->getTableDisplayList();
 		$indexList->addPage($page);
@@ -103,6 +105,8 @@ class ModelActionIndex extends ModelActionBase
 
 	public function viewHtml($page)
 	{
+		$this->setTitle($this->htmlSettings['headerTitle']);
+
 		$output = parent::viewHtml($page);
 		$readList = $this->getTemplateDisplayList();
 		$readList->addPage($page);

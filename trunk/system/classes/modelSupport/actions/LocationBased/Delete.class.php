@@ -19,6 +19,7 @@ class ModelActionLocationBasedDelete extends ModelActionLocationBasedEdit
 {
 
         public $adminSettings = array( 'headerTitle' => 'Delete' );
+        public $htmlSettings = array( 'headerTitle' => 'Delete' );
 
 	/**
 	 * This defines the permission action that the user needs to run this. Permissions are based off of an action and
@@ -76,6 +77,8 @@ class ModelActionLocationBasedDelete extends ModelActionLocationBasedEdit
 
 	public function viewAdmin()
 	{
+	        $this->setTitle($this->adminSettings['headerTitle']);
+
 		if($this->formStatus)
 		{
 			if(isset($this->originalParent) && is_numeric($this->originalParent))

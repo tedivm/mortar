@@ -3,6 +3,7 @@
 class LithoActionPageHistory extends ModelActionLocationBasedRead
 {
         public $adminSettings = array( 'headerTitle' => 'Revision History' );
+        public $htmlSettings = array( 'headerTitle' => 'Revision History' );
 
 	protected $revisionCount;
 	protected $revisionList;
@@ -64,6 +65,7 @@ class LithoActionPageHistory extends ModelActionLocationBasedRead
 
 	public function viewAdmin($page)
 	{
+		$this->setTitle($this->adminSettings['headerTitle']);
 		parent::viewAdmin($page);
 		$table = $this->revisionsToTable('Admin');
 		return $table;
@@ -71,6 +73,7 @@ class LithoActionPageHistory extends ModelActionLocationBasedRead
 
 	public function viewHtml($page)
 	{
+		$this->setTitle($this->htmlSettings['headerTitle']);
 		$table = $this->revisionsToTable('Html');
 		return $table;
 	}

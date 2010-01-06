@@ -41,6 +41,14 @@ class Page implements ArrayAccess
 	protected $scriptStartup = array();
 
 	/**
+	 * The title of the page currently being displayed.
+	 *
+	 * @access protected
+	 * @var string
+	 */
+	protected $title;
+
+	/**
 	 * These are the template tags which are being replaced and their replacements
 	 *
 	 * @access protected
@@ -135,6 +143,25 @@ class Page implements ArrayAccess
 		{{ script }}
 	</script>';
 
+	/**
+	 * Sets the page title.
+	 *
+	 * @param string $title
+	 */
+	public function setTitle($title)
+	{
+		$this->title = $title;
+	}
+
+	/**
+	 * Returns the current page title
+	 *
+	 * @return string
+	 */
+	public function getTitle()
+	{
+		return $this->title;
+	}
 
 	/**
 	 * This function changes the current theme and template
@@ -215,6 +242,8 @@ class Page implements ArrayAccess
 		}
 		$menuBox = new TagBoxMenu($menuSys, $theme);
 		$content['menu'] = $menuBox;
+
+		$content['pagetitle'] = $this->title;
 
 		$template->addContent($content);
 

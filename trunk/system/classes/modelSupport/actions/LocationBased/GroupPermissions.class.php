@@ -77,6 +77,13 @@ class ModelActionLocationBasedGroupPermissions extends ModelActionLocationBasedA
                 return $url;
 	}
 
+	public function viewAdmin()
+	{
+		$output = parent::viewAdmin();
+		$this->setTitle('Group Permissions');
+		return $output;
+	}
+
 }
 
 
