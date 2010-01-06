@@ -14,7 +14,7 @@ class MortarActionClearCache extends ActionBase
 
 	public function viewAdmin()
 	{
-		$this->setTitle($this->htmlSettings['headerTitle']);
+		$this->setTitle($this->adminSettings['headerTitle']);
 
 		return 'Cache has been cleared.';
 	}
