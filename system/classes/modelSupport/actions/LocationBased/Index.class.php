@@ -174,6 +174,8 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 	 */
 	public function viewAdmin($page)
 	{
+		$this->setTitle($this->adminSettings['headerTitle']);
+
 		$indexList = $this->getTableDisplayList();
 		$indexList->addPage($page);
 
@@ -190,7 +192,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 	public function viewHtml($page)
 	{
 		if(isset($this->model['title']))
-			$page->addRegion('pagetitle', htmlentities($this->model['title']));
+			$this->setTitle($this->model['title']);
 
 		$readList = $this->getTemplateDisplayList();
 		$readList->addPage($page);

@@ -55,6 +55,9 @@ class LithoActionPageDiff extends LithoActionPageRead
 		}
 
 		$this->adminSettings['titleRider'] = " - r$rev1n : r$rev2n";
+		$title = $this->adminSettings['headerTitle'];
+		$title .= ($this->adminSettings['useRider']) ? 	$this->adminSettings['titleRider'] : '';
+		$this->setTitle($title);
 
 		$diff = new DiffMatchPatch();
 		$diffs = $diff->diff_main($rev1, $rev2);

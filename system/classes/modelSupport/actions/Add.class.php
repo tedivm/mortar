@@ -19,6 +19,7 @@ class ModelActionAdd extends ModelActionBase
 	public static $requiredPermission = 'Add';
 
         public $adminSettings = array( 'headerTitle' => 'Add', 'useRider' => true );
+        public $htmlSettings = array( 'headerTitle' => 'Add', 'useRider' => true );
 
 	/**
 	 * This is the model that the new model is going to be attached to
@@ -199,6 +200,11 @@ class ModelActionAdd extends ModelActionBase
 	public function viewAdmin()
 	{
 		$this->adminSettings['titleRider'] = " New " . $this->model->getType();
+		$title = $this->adminSettings['headerTitle'];
+		$title .= (isset($this->adminSettings['useRider']) && $this->adminSettings['useRider'])
+			? $this->adminSettings['titleRider']
+			: '';
+		$this->setTitle($title);
 
 		if($this->form->wasSubmitted())
 		{
@@ -229,6 +235,16 @@ class ModelActionAdd extends ModelActionBase
 		}else{
 			return $this->form->getFormAs('Html');
 		}
+	}
+
+	public function viewHtml()
+	{
+		$form = $this->viewAdmin();
+		$title = $htmlSettings['headerTitle'];
+		$title .= (isset($htmlSettings['useRider']) && $htmlSettings['useRider'])
+			? $htmlSettings['titleRider']
+			: '';
+		$this->setTitle($title);
 	}
 
 	protected function getRedirectUrl()

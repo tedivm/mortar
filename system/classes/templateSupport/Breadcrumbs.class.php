@@ -22,11 +22,14 @@ class TagBoxBreadcrumbs
 		$x = 1;
 
 		if(isset($this->query['action']) && $this->query['action'] !== 'Read') {
+			$page = ActivePage::getInstance();
+			$title = $page->getTitle();
+
 			if($html) {
 				$url = Query::getUrl();
-				$nameList[] = $url->getLink($this->query['action']);
+				$nameList[] = $url->getLink($title);
 			} else {
-				$nameList[] = $this->query['action'];
+				$nameList[] = $title;
 			}
 		}
 

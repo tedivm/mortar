@@ -38,6 +38,9 @@ class ModelActionRead extends ModelActionBase
 	{
 		$page = ActivePage::getInstance();
 
+		if(isset($this->model['title']))
+			$this->setTitle($this->model['title']);
+
 		return $this->modelToHtml($page, $this->model, 'Display.html');
 	}
 
@@ -52,7 +55,7 @@ class ModelActionRead extends ModelActionBase
 		$page = ActivePage::getInstance();
 
 		if(isset($this->model['title']))
-			$page->addRegion('pagetitle', $this->model['title']);
+			$this->setTitle($this->model['title']);
 
 		if(isset($this->model->keywords))
 			$page->addMeta('keywords', $this->model->keywords);

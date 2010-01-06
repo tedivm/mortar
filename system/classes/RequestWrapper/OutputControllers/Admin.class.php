@@ -23,7 +23,6 @@ class AdminOutputController extends AbstractOutputController
 	protected function start()
 	{
 		$page = ActivePage::getInstance();
-		$page->addRegion('pagetitle', 'Mortar Admin');
 
 		$this->activeResource = $page;
 

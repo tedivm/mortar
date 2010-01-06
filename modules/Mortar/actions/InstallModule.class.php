@@ -52,6 +52,8 @@ class MortarActionInstallModule extends ActionBase
 
 	public function viewAdmin($page)
 	{
+		$this->setTitle($this->htmlSettings['headerTitle']);
+
 		$output = '';
 		if(isset($this->installablePackages) && !isset($this->form))
 		{
