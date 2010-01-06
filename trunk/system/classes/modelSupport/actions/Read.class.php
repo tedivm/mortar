@@ -40,6 +40,8 @@ class ModelActionRead extends ModelActionBase
 
 		if(isset($this->model['title']))
 			$this->setTitle($this->model['title']);
+		elseif(isset($this->model['name']))
+			$this->setTitle($this->model['name']);
 
 		return $this->modelToHtml($page, $this->model, 'Display.html');
 	}
@@ -56,6 +58,8 @@ class ModelActionRead extends ModelActionBase
 
 		if(isset($this->model['title']))
 			$this->setTitle($this->model['title']);
+		elseif(isset($this->model['name']))
+			$this->setTitle($this->model['name']);
 
 		if(isset($this->model->keywords))
 			$page->addMeta('keywords', $this->model->keywords);
