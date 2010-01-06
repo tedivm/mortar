@@ -33,15 +33,16 @@ class TagBoxBreadcrumbs
 			}
 		}
 
-		if( ($location->getType() === 'Site') && isset($this->query['type']) && 
-			($this->query['type'] !== 'Site') ) {
+		if( !isset($this->query['location']) ) {
 
-			if(isset($this->query['id'])) {
-				$page = ActivePage::getInstance();
-				$title = $page->getTitle();
+			if( isset($this->query['id']) && isset($this->query['type']) ) {
+				$model = ModelRegistry::loadModel($this->query['type'], $this->query['id']);
+				$title = isset($model['title']) ? $model['title'] :
+					isset($model['name']) ? $model['name'] : 'Model';
 
 				if($html) {
 					$url = Query::getUrl();
+					$url->action = 'Read';
 					$nameList[] = $url->getLink($title);
 				} else {
 					$nameList[] = $title;
