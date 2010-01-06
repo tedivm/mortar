@@ -33,6 +33,30 @@ class TagBoxBreadcrumbs
 			}
 		}
 
+		if( ($location->getType() === 'Site') && isset($this->query['type']) && 
+			($this->query['type'] !== 'Site') ) {
+
+			if(isset($this->query['id'])) {
+				$page = ActivePage::getInstance();
+				$title = $page->getTitle();
+
+				if($html) {
+					$url = Query::getUrl();
+					$nameList[] = $url->getLink($title);
+				} else {
+					$nameList[] = $title;
+				}
+			}
+
+			if($html) {
+				$url = new Url();
+				$url->type = $this->query['type'];
+				$nameList[] = $url->getLink($this->query['type']);
+			} else {
+				$nameList[] = $this->query['type'];
+			}
+		}
+
 		do {
 			if($location->getType() == 'Root')
 				break;
