@@ -292,3 +292,17 @@ color: #ff3300;
 .permissions_group, .permissions_location {
 font-weight: bold;
 }
+
+/* FONT SUPPORT */
+
+#BB_main strong, #BB_main b {
+font-family: "VegurBold";
+}
+
+#BB_main a {
+color: #719EC5;
+}
+
+#BB_main a:hover {
+color: #91BEE5;
+}
