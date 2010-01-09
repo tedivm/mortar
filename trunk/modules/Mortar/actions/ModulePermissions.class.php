@@ -25,6 +25,7 @@ class MortarActionModulePermissions extends ActionBase
 		$this->module = $query['id'];
 
 		$packageInfo = new PackageInfo($this->module);
+
 		$this->moduleName = $packageInfo->getName();
 		$this->models = $packageInfo->getModels();
 
@@ -32,7 +33,7 @@ class MortarActionModulePermissions extends ActionBase
 
 		if( count($this->models) === 0 ) {
 			$this->redirectAway();
-			return false;		
+			return false;
 		}
 
 		$this->form = $this->getForm();
@@ -71,6 +72,9 @@ class MortarActionModulePermissions extends ActionBase
 						$group['memgroup_name'])->
 						setType('checkbox')->
 						setLabel($group['memgroup_name']);
+
+					if( ($group['memgroup_name'] === 'Administrator') || ($action === 'Read') )
+						$input->check(1);
 
 					if($first) {
 						$input->setPretext("<fieldset><legend>$action</legend>");
@@ -129,7 +133,6 @@ class MortarActionModulePermissions extends ActionBase
 
 	public function viewAdmin()
 	{
-	
 		$this->setTitle($this->adminSettings['headerTitle'] . $this->adminSettings['titleRider']);
 
 		return $this->form->getFormAs('Html');
