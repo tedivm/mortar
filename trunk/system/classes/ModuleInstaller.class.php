@@ -176,6 +176,15 @@ class ModuleInstaller
 		$models = $this->packageInfo->getModels();
 		foreach($models as $model)
 		{
+			if(!class_exists($model['className']))
+				throw new ModuleInstallerError('Unable to register model '
+											   . $model['name'] . ' because class '
+											   . $model['className'] . ' does not exist.');
+
+			$class = new ReflectionClass($model['className']);
+			if($class->isAbstract())
+				continue;
+
 			ModelRegistry::setHandler($model['type'], $this->package, $model['name']);
 		}
 	}
