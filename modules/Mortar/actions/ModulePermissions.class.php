@@ -53,7 +53,16 @@ class MortarActionModulePermissions extends ActionBase
 		$memberGroupRecords = new ObjectRelationshipMapper('memberGroup');
 		$memberGroupRecords->is_system = 0;
 		$memberGroupRecords->select();
-		$membergroups = $memberGroupRecords->resultsToArray();
+		$memgroups = $memberGroupRecords->resultsToArray();
+		$membergroups = array();
+
+		foreach($memgroups as $group) {
+			if($group['memgroup_name'] === 'Guest')
+				$guestGroup = $group;
+			else
+				$membergroups[] = $group;
+		}
+		$membergroups[] = $guestGroup;
 
 		foreach($this->models as $model) {
 			$form->changeSection('model_' . $model['name'])->
