@@ -12,11 +12,11 @@ form fieldset > label {
 	width: 160px;
 	float: left;
 	margin-bottom: 10px;
-	clear: left;
 }
 
-form fieldset > label.formError {
+form fieldset > label.error {
 	color: red;
+	font-family: "VegurBold";
 }
 
 form br {
@@ -26,4 +26,10 @@ form br {
 form div.intro {
 	margin-left: 10px;
 	margin-bottom: 10px;
+}
+
+form fieldset fieldset {
+	width: 33%;
+	float: left;
+	display: block;
 }
