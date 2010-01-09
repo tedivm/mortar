@@ -144,6 +144,9 @@ class FormToHtml
 					$labelHtml->property('for', $inputId)->
 						property('id', $inputId . '_label');
 
+					if(isset($input->pretext))
+						$sectionHtml->wrapAround($input->pretext);
+
 					if(isset($input->label))
 					{
 						$labelHtml->wrapAround($input->label);
