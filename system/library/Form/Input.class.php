@@ -147,7 +147,18 @@ class FormInput
 	}
 
 	/**
-	 * This function sets the posttext, a hint on the type of input expected from the user.
+	 * This function sets the pretext, arbitrary HTML to be inserted before the form element.
+	 *
+	 * @param string $pretext
+	 */
+	public function setPretext($pretext)
+	{
+		$this->pretext = $pretext;
+		return $this;
+	}
+
+	/**
+	 * This function sets the posttext, arbitrary HTML to be inserted after the form element.
 	 *
 	 * @param string $posttext
 	 */
