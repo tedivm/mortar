@@ -83,6 +83,7 @@ class MortarActionModulePermissions extends ActionBase
 
 					if($last) {
 						$input->setPosttext("</fieldset>");
+						$input->noBreak(true);
 					}
 				}
 			}

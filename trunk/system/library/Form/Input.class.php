@@ -169,6 +169,17 @@ class FormInput
 	}
 
 	/**
+	 * When noBreak is set to true, the form element won't have a <br> element inserted after it.
+	 *
+	 * @param string $posttext
+	 */
+	public function noBreak($br)
+	{
+		$this->noBreak = $br;
+		return $this;
+	}
+
+	/**
 	 * Returns the input's label.
 	 *
 	 * @return unknown
