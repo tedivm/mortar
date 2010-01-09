@@ -160,7 +160,8 @@ class FormToHtml
 					if(isset($input->posttext))
 						$sectionHtml->wrapAround($input->posttext);
 
-					$sectionHtml->insertNewHtmlObject('br');
+					if(!isset($input->noBreak) || $input->noBreak === false)
+						$sectionHtml->insertNewHtmlObject('br');
 
 					$hasInputs = true;
 				}

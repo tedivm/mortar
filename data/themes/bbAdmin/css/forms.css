@@ -29,7 +29,8 @@ form div.intro {
 }
 
 form fieldset fieldset {
-	width: 33%;
+	width: 30%;
 	float: left;
 	display: block;
+	margin: 10px;
 }
