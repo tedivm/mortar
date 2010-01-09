@@ -59,25 +59,26 @@ class MortarActionModulePermissions extends ActionBase
 			$form->changeSection('model_' . $model['name'])->
 				setLegend($model['name']);
 
-			foreach($actionList as $action) {
+			foreach($membergroups as $group) {
 				$x = 0;
 				$first = true;
 				$last = false;
 
-				foreach($membergroups as $group) {
-					if(++$x === count($membergroups))
+				foreach($actionList as $action) {
+					if(++$x === count($actionList))
 						$last = true;
 
-					$input = $form->createInput($model['name'] . '_' . $action . '_' .
-						$group['memgroup_name'])->
+					$input = $form->createInput($model['name'] . '_' . $group['memgroup_name'] . 
+						'_' . $action)->
 						setType('checkbox')->
-						setLabel($group['memgroup_name']);
+						setLabel($action);
 
 					if( ($group['memgroup_name'] === 'Administrator') || ($action === 'Read') )
 						$input->check(1);
 
 					if($first) {
-						$input->setPretext("<fieldset><legend>$action</legend>");
+						$input->setPretext("<fieldset><legend>".
+							$group['memgroup_name']."</legend>");
 						$first = false;
 					}
 
@@ -108,9 +109,9 @@ class MortarActionModulePermissions extends ActionBase
 			$permissions[$group['memgroup_name']] = new GroupPermission($location, $group['memgroup_id']);
 
 		foreach($this->models as $model)
-			foreach($actionList as $action)
-				foreach($membergroups as $group)
-					if(isset($input[$model['name'].'_'.$action.'_'.$group['memgroup_name']]))
+			foreach($membergroups as $group)
+				foreach($actionList as $action)
+					if(isset($input[$model['name'].'_'.$group['memgroup_name'].'_'.$action]))
 						$permissions[$group['memgroup_name']]->
 							setPermission($model['name'], $action, true);
 
