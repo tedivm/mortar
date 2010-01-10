@@ -139,12 +139,14 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 		foreach($groups as $groupId) { 
 			$group = ModelRegistry::loadModel('MemberGroup', $groupId);
 
-			if (!$first) 
-				$groupList .= ', ';
-			else
-				$first = false;
+			if(!$group['is_system']) {
+				if (!$first)
+					$groupList .= ', ';
+				else
+					$first = false;
 			
-			$groupList .= $group['name'];
+				$groupList .= $group['name'];
+			}
 		}
 		
 		return $groupList;
