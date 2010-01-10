@@ -44,6 +44,7 @@ class MortarActionInstallModule extends ActionBase
 				}
 			}else{
 				//redirect to listing
+
 				unset($this->form);
 				$this->installablePackages = $installablePackages;
 			}
@@ -72,6 +73,21 @@ class MortarActionInstallModule extends ActionBase
 		}elseif($this->form){
 			if($this->success)
 			{
+				$query = Query::getQuery();
+
+				if(isset($query['id'])) {
+					$packageInfo = new PackageInfo($query['id']);
+					$models = $packageInfo->getModels();
+
+					if(count($models) > 0) {
+						$url = Query::getUrl();
+						$url->id = $packageInfo->getId();
+						$url->action = 'ModulePermissions';
+						$this->ioHandler->addHeader('Location', (string) $url);
+						return true;
+					}
+				}
+				
 				$output = 'Module successfully installed';
 			}else{
 				$output = $this->form->getFormAs('Html');
