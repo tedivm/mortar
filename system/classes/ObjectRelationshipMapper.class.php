@@ -619,7 +619,7 @@ class ObjectRelationshipMapper
 	 *
 	 * @param string $name
 	 * @param string|int $value
-	 * @return unknown
+	 * @return mixed
 	 */
 	public function __set($name, $value)
 	{
@@ -628,6 +628,56 @@ class ObjectRelationshipMapper
 
 		return ($this->values[$name] = $value);
 	}
+
+	/**
+	 * Returns whether a value exists or not.
+	 *
+	 * @param string $name
+	 * @return boolean
+	 */
+	public function __isset($name)
+	{
+		switch(strtolower($name))
+		{
+			case 'num_rows':
+				return isset($this->num_rows);
+
+			case 'errno':
+				return($this->sql_errno);
+
+			case 'primarykey':
+				if(count($this->primary_keys) !== 1 || !isset($this->primary_keys[0]))
+					return false;
+
+				return isset($this->values[$this->primary_keys[0]]);
+
+			default:
+				return isset($this->values[$name]);
+		}
+	}
+
+	/**
+	 * Unsets a value if it is set.
+	 *
+	 * @param string $name
+	 */
+	public function __unset($name)
+	{
+		$lname = strtolower($name);
+
+		switch($lname)
+		{
+			case('num_rows'):
+			case('errno'):
+			case('primarykey'):
+				return;
+		}
+
+		if($this->__isset($name))
+			unset($this->values[$name]);
+	}
+
+
 
 	/**
 	 * Returns all of the current values as an array
