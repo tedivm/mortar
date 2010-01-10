@@ -171,7 +171,7 @@ class MortarModelMemberGroup extends ModelBase
 		if($offset === 'name')
 			$this->content['memgroup_name'] = $value;
 		else
-			return parent::offsetGet($offset, $value);
+			return parent::offsetSet($offset, $value);
 	}
 
 	public function offsetExists($offset)
