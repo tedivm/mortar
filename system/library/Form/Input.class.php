@@ -64,7 +64,7 @@ class FormInput
 	 *
 	 * @var array
 	 */
-	public $options;
+	public $options = array();
 
 	/**
 	 * This is a flag to see if the value is required by the form.
