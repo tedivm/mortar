@@ -182,7 +182,7 @@ class ModuleInstaller
 											   . $model['className'] . ' does not exist.');
 
 			$class = new ReflectionClass($model['className']);
-			if($class->isAbstract())
+			if($class->isAbstract() && !isset($model['type']))
 				continue;
 
 			ModelRegistry::setHandler($model['type'], $this->package, $model['name']);
