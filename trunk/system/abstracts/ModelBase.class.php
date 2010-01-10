@@ -216,8 +216,17 @@ abstract class ModelBase implements Model
 					if(!$record->save())
 						throw new ModelError('Unable to save model information to table');
 
+					if($record->sql_errno > 0)
+						throw new ModelError('Unable to Save: ' . $record->sql_errno . ' : ' . $record->errorString);
+
 					if(!isset($this->id))
+					{
+						//$record->sql_errno . ' : ' . $record->errorString;
+						if(!isset($record->primaryKey))
+							throw new ModelError('Unable to save model due to missing id.');
+
 						$this->id = $record->primaryKey;
+					}
 
 				}
 
@@ -547,17 +556,38 @@ abstract class ModelBase implements Model
 		{
 			$tables = array();
 
-			$classReflection = new ReflectionClass(get_class($this));
-			if($parentClass = $classReflection->getParentClass())
+			try
 			{
-				if(!$parentClass->isAbstract())
+				$classReflection = new ReflectionClass(get_class($this));
+				if($parentClass = $classReflection->getParentClass())
 				{
-					$className = $parentClass->getName();
-					$parentModel = new $className();
-					if($tempTables = $parentModel->getTables())
-						$parentTables = $tempTables;
+					if($parentClass = $classReflection->getParentClass())
+					{
+						if(!$parentClass->isAbstract())
+						{
+							$className = $parentClass->getName();
+							$parentModel = new $className();
+							if($tempTables = $parentModel->getTables())
+								$parentTables = $tempTables;
+						}elseif($parentClass->hasProperty('abstractTable')){
+
+								$property = $parentClass->getStaticPropertyValue('abstractTable');
+
+								if(is_array($property) && count($property) > 0)
+									$parentTables = $property;
+						}
+					}
 				}
+
+
+
+
+			}catch(CoreError $e){
+				throw $e;
+			}catch(Exception $e){
+				throw new ModelError(get_class($e) . ': ' . $e->getMessage() . ' Line: ' . $e->getLine());
 			}
+
 
 			if(isset($this->table))
 			{
