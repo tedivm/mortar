@@ -193,6 +193,11 @@ abstract class ModelBase implements Model
 					if(isset($this->id))
 					{
 						$record->primaryKey = $this->id;
+						if(!$record->select())
+						{
+							$record = new ObjectRelationshipMapper($tableName);
+							$record->primaryKey = $this->id;
+						}
 						$newItem = false;
 					}else{
 						$newItem = true;
