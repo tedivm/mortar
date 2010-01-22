@@ -6,7 +6,7 @@ class GraffitiPluginFormInputTagCheckSubmit extends MortarPluginFormInputUserChe
 
 	protected function inputToValue($input)
 	{
-		if(TagLookUp::getTagId($input))
+		if($id = TagLookUp::getTagId($input))
 			return $id;
 		return false;
 	}
