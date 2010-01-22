@@ -81,23 +81,11 @@ class Minifier
 		$search = array();
 		$replace = array();
 
-		$search[] = $config['path']['modules'];
-		$replace[] = 'mortar/modules/';
-
-		$search[] = $config['path']['theme'];
-		$replace[] = 'mortar/themes/';
-
-		$search[] = $config['path']['javascript'];
-		$replace[] = 'mortar/javascript/';
-
-		$search[] = $config['path']['templates'];
-		$replace[] = 'mortar/templates/';
-
-		$search[] = $config['path']['fonts'];
-		$replace[] = 'mortar/fonts/';
-
-		$search[] = $config['path']['icons'];
-		$replace[] = 'mortar/icons/';
+		foreach($config['path'] as $name => $path)
+		{
+			$search[] = $path;
+			$replace[] = 'mortar/' . $name . '/';
+		}
 
 		$bigFile = '';
 		foreach($this->paths as $path)
