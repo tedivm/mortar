@@ -135,47 +135,51 @@ class Url
 	 */
 	public function checkPermission($userId)
 	{
-		if(isset($this->attributes['locationId']))
+		try
 		{
-			if(isset($this->attributes['action'])
-				&& $this->attributes['action'] == 'Add'
-				&& isset($this->attributes['type']))
+			if(isset($this->attributes['locationId']))
 			{
-				$resource = ModelRegistry::loadModel($this->attributes['type']);
-				$actionInfo = $resource->getAction('Add');
-			}else{
-				$action = (isset($this->attributes['action'])) ? $this->attributes['action'] : 'Read';
-				$location = new Location($this->attributes['locationId']);
-				$resource = $location->getResource();
-				$actionInfo = $resource->getAction($action);
+				if(isset($this->attributes['action'])
+					&& $this->attributes['action'] == 'Add'
+					&& isset($this->attributes['type']))
+				{
+					$resource = ModelRegistry::loadModel($this->attributes['type']);
+					$actionInfo = $resource->getAction('Add');
+				}else{
+					$action = (isset($this->attributes['action'])) ? $this->attributes['action'] : 'Read';
+					$location = new Location($this->attributes['locationId']);
+					$resource = $location->getResource();
+					$actionInfo = $resource->getAction($action);
+				}
+
+				$actionName = $actionInfo['className'];
+				$requiredPermission = staticHack($actionName, 'requiredPermission');
+				$permissions = new Permissions($this->attributes['locationId'], $userId);
+				return $permissions->isAllowed($requiredPermission);
+
+			}elseif(isset($this->attributes['module'])){
+
+				$permissionsList = new PermissionLists($userId);
+				$actionName = importFromModule($this->attributes['action'], $this->attributes['module'], 'action');
+				$permission = staticHack($actionName, 'requiredPermission');
+				$permissionType = staticHack($actionName, 'requiredPermissionType');
+
+				if(!$permission)
+					$permission = 'execute';
+
+				if(!$permissionType)
+					$permissionType = 'base';
+
+				if(!$permissionsList->checkAction($permissionType, $permission))
+				{
+					return false;
+				}
 			}
-
-			$actionName = $actionInfo['className'];
-			$requiredPermission = staticHack($actionName, 'requiredPermission');
-			$permissions = new Permissions($this->attributes['locationId'], $userId);
-			return $permissions->isAllowed($requiredPermission);
-
-		}elseif(isset($this->attributes['module'])){
-
-			$permissionsList = new PermissionLists($userId);
-			$actionName = importFromModule($this->attributes['action'], $this->attributes['module'], 'action');
-			$permission = staticHack($actionName, 'requiredPermission');
-			$permissionType = staticHack($actionName, 'requiredPermissionType');
-
-			if(!$permission)
-				$permission = 'execute';
-
-			if(!$permissionType)
-				$permissionType = 'base';
-
-			if(!$permissionsList->checkAction($permissionType, $permission))
-			{
-				return false;
-			}
+			return true;
+		}catch(Exception $e){
+			return false;
 		}
-		return true;
 	}
-
 
 }
 
