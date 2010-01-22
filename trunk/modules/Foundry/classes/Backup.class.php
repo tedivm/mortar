@@ -121,7 +121,7 @@ class FoundryBackup
 		if(strlen($path) < 9)
 			throw new CoreError('Unable to find mysqldump binary.');
 
-	   $shellStart = shell_exec('/opt/local/bin/mysqldump5 --version');
+	   $shellStart = shell_exec($path . ' --version');
 
 	   if(strpos($shellStart, 'mysqldump') !== 0)
 			throw new CoreError('Supplied invalid path for mysqldump binary.');
