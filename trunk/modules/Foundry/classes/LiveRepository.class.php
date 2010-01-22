@@ -16,24 +16,32 @@ class LiveRepository
 		// http/s/://path.to.site/install/resources/repositories/name
 		$url = $this->repoModel['url'];
 
-		// add last modified
-
 		if(isset($This->repoModel['lastupdate']))
 			$url .= '?lastUpdate=' . $this->repoModel['lastupdate'];
 
-		$serverData = file_get_contents($url);
+		libxml_use_internal_errors(true);
+		if(!($xml = simplexml_load_file($url)))
+		{
 
-		$xml = new SimpleXMLElement($serverData);
 
-		$channel['title'] = $xml->channel->title;
-		$channel['link'] = $xml->channel->link;
-		$channel['description'] = $xml->channel->description;
-		$channel['pubDate'] = strtotime($xml->channel->pubDate);
-		$channel['generator'] = $xml->channel->generator;
+			// zomg error!
+
+			// at some point we should do something useful here.
+			libxml_clear_errors();
+			throw new CoreInfo('Received invalid XML from the server while updating repository');
+		}
+
+
+		$this->repoModel['name'] = $xml->channel->title;
+		$this->repoModel['website'] = $xml->channel->link;
+		$this->repoModel['description'] = $xml->channel->description;
+		$this->repoModel['lastupdated'] = strtotime($xml->channel->pubDate);
+
+		if(isset($xml->channel->generator))
+			$this->repoModel['serverSoftware'] = $xml->channel->generator;
 
 		foreach($xml->channel->item as $item)
 		{
-
 			if(!$packageDetails = $this->processItem($item))
 			{
 				CoreInfo('Unable to process repository item.');
@@ -67,9 +75,14 @@ class LiveRepository
 	protected function validatePackageOwner($package)
 	{
 		$stmt = DatabaseConnection::getStatement('default_read_only');
+		$stmt->prepare('SELECT * FROM foundryRepositories, foundryRepoHasPackages, foundryPackages
+						WHERE foundryRepositories.id = foundryRepoHasPackages.repoId
+							AND foundryRepoHasPackages.packageId = foundryPackages.id
+							AND foundryPackage.name = ?
+							AND foundryRepositories.priority < ?');
+		$stmt->bindAndExecute('??', $package, $this->repoModel['priority']);
 
-		$stmt->prepare('SELECT * FROM ');
-
+		return !((bool) $stmt->num_rows);
 	}
 
 	protected function clearPackage($packageName)
@@ -79,7 +92,10 @@ class LiveRepository
 
 	protected function addPackage($packageDetails)
 	{
-
+		// add package
+		// add dependencies
+		// add conflicts
+		// add link to repo
 	}
 
 }
