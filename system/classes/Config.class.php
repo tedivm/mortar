@@ -105,8 +105,6 @@ class Config implements ArrayAccess
 	/**
 	 * Returns the stored instance of the Config object. If no object is stored, it will create it
 	 *
-	 * @access public
-	 * @static
 	 * @return Config
 	 */
 	public static function getInstance()
@@ -116,6 +114,43 @@ class Config implements ArrayAccess
 			self::$instance = new $object;
 		}
 		return self::$instance;
+	}
+
+	/**
+	 * Returns the path to the requested binary, or false if it exists.
+	 *
+	 * @param string $binary
+	 * @return string|bool
+	 */
+	static public function getBinaryPath($binary)
+	{
+		$config = Config::getInstance();
+
+		if(defined('PATH_EXEC_' . $binary))
+		{
+			$tmppath = constant('PATH_EXEC_' . $binary);
+
+			if(file_exists($tmppath) && is_executable($tmppath))
+				$path = $tmppath;
+		}
+
+		if(!isset($path) && isset($config['binaries'][$binary]))
+		{
+			$tmppath = $config['binaries'][$binary];
+
+			if(file_exists($tmppath) && is_executable($tmppath))
+				$path = $tmppath;
+		}
+
+		if(!isset($path)){
+			$path = shell_exec('which ' . $binary);
+			$path = trim($path);
+		}
+
+		if(!is_executable($path))
+			return false;
+
+		return $path;
 	}
 
 	/**
