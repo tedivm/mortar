@@ -45,7 +45,7 @@ CREATE TABLE foundryPackages
 /* Build Table Structure */
 CREATE TABLE foundryPackageInformation
 (
-	id INTEGER UNSIGNED NOT NULL PRIMARY KEY,
+	id INTEGER UNSIGNED NOT NULL PRIMARY KEY
 
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
@@ -66,17 +66,17 @@ CREATE TABLE foundryPackageConflicts
 /* Build Table Structure */
 CREATE TABLE foundryPackageDependencies
 (
-	id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY
+	id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	package VARCHAR(65) NOT NULL,
-	majorVersion INTEGER UNSIGNED NULL,
-	minorVersion INTEGER UNSIGNED NULL,
-	microVersion INTEGER UNSIGNED NULL,
-	type VARCHAR(20) NOT NULL
+	majorVersion INTEGER UNSIGNED,
+	minorVersion INTEGER UNSIGNED,
+	microVersion INTEGER UNSIGNED,
+	dependencyType VARCHAR(20) NOT NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 
 /* Add Indexes for: repositories */
-CREATE INDEX foundryPackageDependencies_priority_activeForInstalls_id_Idx ON foundryPackageDependencies (id, type, package);
+CREATE INDEX foundryPackageDependencies_priority_activeForInstalls_id_Idx ON foundryPackageDependencies (id, dependencyType, package);
 
 
 
@@ -86,7 +86,7 @@ CREATE INDEX foundryPackageDependencies_priority_activeForInstalls_id_Idx ON fou
 CREATE TABLE foundryRepoHasPackages
 (
 	repoId INTEGER UNSIGNED NOT NULL,
-	packageId INTEGER UNSIGNED NOT NULL,
+	packageId INTEGER UNSIGNED NOT NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 ALTER TABLE foundryRepoHasPackages ADD CONSTRAINT pkrepoHasPackages
