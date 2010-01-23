@@ -109,12 +109,12 @@ class FoundryBackup
 			return false;
 
 		$mysqldump->addOption('opt');
+		$mysqldump->addOption('single-transaction');
+		$mysqldump->addFlag('f');
 
 		$connectionSettings = DatabaseConnection::getDatabaseSettings('default');
 		$mysqldump->addFlag('h', $connectionSettings['host']);
 		$mysqldump->addFlag('u', $connectionSettings['username']);
-		$mysqldump->addFlag('f');
-		$mysqldump->addFlag('l');
 		$mysqldump->addOption('password', $connectionSettings['password']);
 		$mysqldump->addArgument($connectionSettings['dbname']);
 
@@ -170,7 +170,7 @@ class FoundryBackup
 				$tar = new ShellExec();
 				$tar->setBinary($tarPath);
 				$tar->addFlag('czvf');
-				$tar->addArgument(gmdate('Ymd-Hi') . '.tar.gz');
+				$tar->addArgument('mortar-' . gmdate('Y.m.d.Hi') . '.tar.gz');
 				$tar->addArgument('./' . $this->backupTime);
 				$tar->run();
 
