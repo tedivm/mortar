@@ -137,5 +137,5 @@ class FileSystem
 
 
 class FileSystemError extends CoreError {}
-class FileSystemWarning extends FileSystemWarning {}
+class FileSystemWarning extends CoreWarning {}
 ?>
