@@ -20,6 +20,8 @@ class FoundryBackup
 			'thirdparty' => 'system/thirdparty' );
 
 	protected $backupPath;
+	protected $backupTime;
+	protected $errors = array();
 
 	public function setPath($path)
 	{
@@ -32,14 +34,16 @@ class FoundryBackup
 		if($path[strlen($path)-1] != '/')
 			$path .= '/';
 
-		$path = $path . gmdate('Ymd-Hi');
+		$backupTime = gmdate('Ymd-Hi');
 
-		if(is_dir($path))
-			throw new CoreError('Can not backup over existing backing ' . $path);
+		if(is_dir($path . $backupTime))
+			throw new CoreError('Can not save backup over existing backup ' . $path . $backupTime);
 
-		mkdir($path, octdec('0755'));
+		mkdir($path . $backupTime, octdec('0755'));
 
-		$this->backupPath = $path . '/';
+		$this->backupPath = $path;
+		$this->backupTime = $backupTime;
+
 	}
 
 	public function backup()
@@ -47,31 +51,57 @@ class FoundryBackup
 		if(!isset($this->backupPath))
 			throw new CoreError('Path required for creating backups.');
 
-		$this->moveFiles();
+		if(!$this->moveFiles())
+			return false;
+
+		if(!$this->saveDatabase())
+			return false;
+
+		if(!$this->packageBackup())
+			return false;
+
+		return true;
+	}
+
+	public function getErrors()
+	{
+		if(count($this->errors) < 1)
+			return false;
+		return $this->errors;
 	}
 
 	protected function moveFiles()
 	{
 		$config = Config::getInstance();
 		$perms = octdec('0755');
-
 		foreach($this->paths as $name => $pathPiece)
 		{
-			if(isset($config['path'][$name]))
+			try
 			{
-				$backupPath = $this->backupPath . $pathPiece;
+				if(isset($config['path'][$name]))
+				{
+					$backupPath = $this->backupPath . $this->backupTime . '/' . $pathPiece;
 
-				if(!is_dir($backupPath))
-					mkdir($backupPath, $perms, true);
+					if(!is_dir($backupPath))
+						mkdir($backupPath, $perms, true);
 
-				FileSystem::copyRecursive($config['path'][$name], $backupPath, null, null, true);
+					if(!FileSystem::copyRecursive($config['path'][$name], $backupPath, null, null, true))
+						throw new FoundryBackupError('Unable to copy ' . $name . ' from ' . $config['path'][$name]);
+				}
+
+			}catch(Exception $e){
+				$this->errors[] = 'Unable to copy ' . $name . ' at path ' . $config['path'][$name];
 			}
 		}
+
+		return true;
 	}
 
 	protected function saveDatabase()
 	{
-		$mysqldumppath = self::getPathToMysqlDump();
+		$mysqldumppath = Config::getBinaryPath('mysqldump');
+		if(!$mysqldumppath)
+			throw new FoundryBackupError('Unable to find path for executable "mysqldump"');
 
 		$mysqldump = new ShellExec();
 
@@ -83,56 +113,83 @@ class FoundryBackup
 		$connectionSettings = DatabaseConnection::getDatabaseSettings('default');
 		$mysqldump->addFlag('h', $connectionSettings['host']);
 		$mysqldump->addFlag('u', $connectionSettings['username']);
-		$mysqldump->addFlag('p', $connectionSettings['password']);
+		$mysqldump->addFlag('f');
+		$mysqldump->addFlag('l');
+		$mysqldump->addOption('password', $connectionSettings['password']);
 		$mysqldump->addArgument($connectionSettings['dbname']);
 
-		$backupFile = $this->backupPath . 'full.' . gmdate("Y-m-d-H:i:s") . '.sql';
+		$sqlBackupPath = $this->backupPath . $this->backupTime . '/sql/';
+
+		mkdir($sqlBackupPath, octdec('0755'));
+
+		$backupFile = $sqlBackupPath . 'full.sql';
 		$mysqldump->setOutputFile($backupFile);
 
-		$results = $mysqldump->run();
-
+		$mysqldump->run(array('optionDelimiter' => '='));
 		// the only way to check the results are to review the last line of the file
 
+		$tailPath = Config::getBinaryPath('tail');
+		if(!$tailPath)
+			throw new FoundryBackupError('Unable to find path for executable "tail"');
 
 		$tail = new ShellExec();
-		$tail->setBinary('tail');
-		$tail->addFlag('n', 1);
-		$tail->addOption($backupFile);
+		$tail->setBinary($tailPath);
+		$tail->addFlag('1');
+		$tail->addArgument($backupFile);
 		$lastLine = $tail->run();
 
-		if(strpos($lastLine, 'error:') === false)
-			return true;
+		if(strpos($lastLine, 'Dump completed on') === false)
+		{
+			$error = 'Database Backup Failed';
 
-		// handle error
+			if(strpos($lastLine, 'error:') !== false)
+				$error .= ': ' . $lastLine;
+
+			$this->errors[] = $error;
+			return false;
+		}
+
+		return true;
 	}
 
-	static function getPathToMysqlDump()
+	protected function packageBackup()
 	{
 		$config = Config::getInstance();
 
-		if(isset($config['binaries']['mysqldump']))
-	   {
-			$path = $config['binaries']['mysqldump'];
-	   }else{
-			$path = shell_exec('which mysqldump');
-			$path = trim($path);
+		if(isset($config['backups']['compress']) && $config['backups']['compress'])
+		{
+			$destinationPath = $config['path']['temp'] . 'backups/'; // . gmdate('Ymd-Hi') . '.tar.gz';
+
+			if($tarPath = Config::getBinaryPath('tar'))
+			{
+
+				$currentDir = getcwd();
+				chdir($destinationPath);
+
+
+				$tar = new ShellExec();
+				$tar->setBinary($tarPath);
+				$tar->addFlag('czvf');
+				$tar->addArgument(gmdate('Ymd-Hi') . '.tar.gz');
+				$tar->addArgument('./' . $this->backupTime);
+				$tar->run();
+
+				chdir($currentDir);
+
+				if(file_exists($destinationPath))
+				{
+					FileSystem::deleteRecursive($this->backupPath . $this->backupTime);
+					return true;
+				}
+			}
+			return false;
 		}
 
-		if(strlen($path) < 9)
-			throw new CoreError('Unable to find mysqldump binary.');
-
-	   $shellStart = shell_exec($path . ' --version');
-
-	   if(strpos($shellStart, 'mysqldump') !== 0)
-			throw new CoreError('Supplied invalid path for mysqldump binary.');
-
-		return $path;
+		return true;
 	}
-
-
 
 }
 
-
+class FoundryBackupError extends CoreError {}
 
 ?>
