@@ -51,7 +51,6 @@ class MortarActionModulePermissions extends ActionBase
 		$actionList = PermissionActionList::getActionList();
 
 		$memberGroupRecords = new ObjectRelationshipMapper('memberGroup');
-		$memberGroupRecords->is_system = 0;
 		$memberGroupRecords->select();
 		$memgroups = $memberGroupRecords->resultsToArray();
 		$membergroups = array();
@@ -59,10 +58,12 @@ class MortarActionModulePermissions extends ActionBase
 		foreach($memgroups as $group) {
 			if($group['memgroup_name'] === 'Guest')
 				$guestGroup = $group;
-			else
+			elseif($group['is_system'] == 0)
 				$membergroups[] = $group;
 		}
-		$membergroups[] = $guestGroup;
+
+		if(isset($guestGroup))
+			$membergroups[] = $guestGroup;
 
 		foreach($this->models as $model) {
 			$form->changeSection('model_' . $model['name'])->
