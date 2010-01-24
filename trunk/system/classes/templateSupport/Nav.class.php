@@ -128,10 +128,6 @@ class TagBoxNav
 
 	public function __get($tagname)
 	{
-
-		if(defined('INSTALLMODE') && INSTALLMODE === true)
-			return true;
-
 		switch ($tagname) {
 			case "siblingList":
 				return $this->siblingNav();
