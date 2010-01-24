@@ -196,25 +196,40 @@ class Page implements ArrayAccess
 	 */
 	protected function addTemplateContent($template)
 	{
+		// if we're installing, do the bare minimum and get the heck outta here
+		if(defined('INSTALLMODE') && INSTALLMODE) {
+			$menuSys = new MenuSystem();
+			$menuSys->installMode();
+			$theme = $this->getTheme();
+
+			$menuBox = new TagBoxMenu($menuSys, $theme);
+			$content['menu'] = $menuBox;
+
+			$content['pagetitle'] = "Install Mortar";
+
+			$template->addContent($content);
+			return $template;
+		}
+
 		$query = Query::getQuery();
 		$content = array();
 
+		// set location and model variables *if* they currently apply
 		if(isset($query['location']) && is_numeric($query['location'])) {
 			$location = new Location($query['location']);
 			$model = $location->getResource();
 		} elseif ($query['type'] && $query['id']) {
 			$model = ModelRegistry::loadModel($query['type'], $query['id']);
-		} else {
-			$model = null;
 		}
 
+		// all tagboxes that require a location go here. if there's a location there's always a model
 		if(isset($location)) {
 			$navBox = new TagBoxNav($location);
 			$content['nav'] = $navBox;
 
 			$breadBox = new TagBoxBreadcrumbs($location);
 			$content['breadcrumbs'] = $breadBox;
-		} elseif(!(defined('INSTALLMODE') && INSTALLMODE)) {
+		} else {
 			$site = ActiveSite::getSite();
 			$location = $site->getLocation();
 
@@ -222,11 +237,13 @@ class Page implements ArrayAccess
 			$content['breadcrumbs'] = $breadBox;
 		}
 
+		// all tagboxes that require a model but not a location go here
 		if(isset($model)) {
 			$modelBox = new TagBoxModel($model);
 			$content['model'] = $modelBox;
 		}
 
+		// all other tagboxes that are not location- or model-dependent go here
 		$theme = $this->getTheme();
 		$themeBox = new TagBoxTheme($theme);
 		$content['theme'] = $themeBox;
@@ -235,15 +252,13 @@ class Page implements ArrayAccess
 		$content['env'] = $envBox;
 
 		$menuSys = new MenuSystem();
-		if(defined('INSTALLMODE') && INSTALLMODE) {
-			$menuSys->installMode();
-		} else {
-			$menuSys->initMenus($model);
-		}
+		$menuSys->initMenus($model);
 		$menuBox = new TagBoxMenu($menuSys, $theme);
 		$content['menu'] = $menuBox;
 
+		// finally, any non-box standalone tags go here
 		$content['pagetitle'] = $this->title;
+		$content['format'] = $query['format'];
 
 		$template->addContent($content);
 
