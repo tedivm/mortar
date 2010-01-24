@@ -315,6 +315,10 @@ width: 100%;
 position: relative;
 }
 
+.meta {
+margin-bottom: 2em;
+}
+
 .meta_item {
 margin-bottom: 3px;
 }
