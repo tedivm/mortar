@@ -252,7 +252,7 @@ class Page implements ArrayAccess
 		$content['env'] = $envBox;
 
 		$menuSys = new MenuSystem();
-		$menuSys->initMenus($model);
+		isset($model) ? $menuSys->initMenus($model) : $menuSys->initMenus();
 		$menuBox = new TagBoxMenu($menuSys, $theme);
 		$content['menu'] = $menuBox;
 

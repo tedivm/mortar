@@ -1,5 +1,16 @@
-<h1><a href="{{ model.permalink }}">{{ model.name }}</a></h1>
-<div class="content">
-<strong>Email:</strong> <span class="user_email">{{ model.email }}</span><br />
-<strong>Groups:</strong> <span class="user_groups">{{ model.membergroups }}</span><br />
-</div>
+{% extends "models/base/Display.html" %}
+
+{% block extraadmincontent %}
+{% if model.email %}
+	<div class="meta_item">
+	<span class="meta_label"><strong>Email:</strong></span>
+	<span class="meta_content">{{ model.email }}</span>
+	</div> 
+{% endif %}
+{% if model.membergroups %}
+	<div class="meta_item">
+	<span class="meta_label"><strong>Membergroups:</strong></span>
+	<span class="meta_content">{{ model.membergroups }}</span>
+	</div> 
+{% endif %}
+{% endblock %}
