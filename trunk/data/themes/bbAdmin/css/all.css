@@ -306,3 +306,25 @@ color: #719EC5;
 #BB_main a:hover {
 color: #91BEE5;
 }
+
+/* model info */
+
+.meta, .meta_item {
+display: block;
+width: 100%;
+position: relative;
+}
+
+.meta_item {
+margin-bottom: 3px;
+}
+
+.meta_label {
+max-width: 200px;
+overflow: hidden;
+}
+
+.meta_content {
+position: absolute;
+left: 200px;
+}
