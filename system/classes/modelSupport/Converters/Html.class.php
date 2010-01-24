@@ -67,6 +67,7 @@ class ModelToHtml
 	 */
 	public function getOutput()
 	{
+		$query = Query::getQuery();
 		$content = array();
 
 		$modelBox = new TagBoxModel($this->model);
@@ -84,6 +85,8 @@ class ModelToHtml
 			$themeBox = new TagBoxTheme($this->theme);
 			$content['theme'] = $themeBox;
 		}
+
+		$content['format'] = $query['format'];
 
 		$this->modelDisplay->addContent($content);
 
