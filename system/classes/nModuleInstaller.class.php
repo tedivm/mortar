@@ -17,6 +17,7 @@ class nModuleInstaller
 				$db->autocommit(false);
 
 				try{
+					$alreadyPresent = false;
 
 					$stmt = DatabaseConnection::getStatement('default');
 					$stmt->prepare('SELECT * FROM modules WHERE package = ?');
@@ -26,7 +27,7 @@ class nModuleInstaller
 					{
 						$versionString = $this->versionToString($row);
 						$version = $this->versionToInt($row);
-						$status = $row['status'];
+						$moduleStatus = $row['status'];
 						$id = $row['mod_id'];
 
 						$alreadyPresent = true;
@@ -34,6 +35,7 @@ class nModuleInstaller
 					}else{
 						$verson = 0;
 						$versionString = '0.0.0';
+						$moduleStatus = false;
 					}
 
 					$stmt = DatabaseConnection::getStatement('default');
@@ -44,9 +46,11 @@ class nModuleInstaller
 					{
 						$dbVersionString = $this->versionToString($row);
 						$dbVersion = $this->versionToInt($row);
+						$schemaStatus = $row['status'];
 						$alreadyPresent = true;
 					}else{
 						$dbVersion = 0;
+						$schemaStatus = false;
 					}
 
 
@@ -58,35 +62,36 @@ class nModuleInstaller
 
 						foreach($updates as $updateVersion => $updateInfo)
 						{
+							$sanatizedVersionString = str_replace(array('.', '-'), '_', $updateInfo['folder']);
 
-							$sanatizedVersionString = str_replace(array(',', '-'), '_', $updateInfo['folder']);
-
-							if($version < $updateVersion)
+							if(($version < $updateVersion) && ($updateInfo['prescript'] && $moduleStatus !== false))
 							{
-								if($updateInfo['prescript'])
-								{
-									$path = $updateInfo['path'] . 'pre.php';
-									$classname = $this->package . 'UpdatePreScript' . $sanatizedVersionString;
+								$path = $updateInfo['path'] . 'pre.php';
+								$classname = $this->package . 'UpdatePreScript' . $sanatizedVersionString;
 
-									if(file_exists($path))
+								if(file_exists($path))
+								{
+									inculde($path);
+									if(class_exists($classname, false))
 									{
-										inculde($path);
-										if(class_exists($classname, false))
-										{
-											$UpdatePreScript = new $classname();
-											$UpdatePreScript->run();
-										}
+										$UpdatePreScript = new $classname();
+										$UpdatePreScript->run();
 									}
 								}
 							}
 
-							if($dbVersion < $updateVersion)
+
+							$this->setModuleVersion($updateInfo['version'], 'prescript');
+
+							if($dbVersion < $updateVersion && $schemaStatus != 'full')
 							{
-								if($updateInfo['sqlstructure'])
+								if($updateInfo['sqlstructure'] && $schemaStatus != 'structure')
 								{
 									$path = $updateInfo['path'] . 'structure.sql';
 									$db->runFile($path);
 								}
+
+								$this->setDatabaseVersion($updateInfo['version'], 'structure');
 
 								if($updateInfo['sqldata'])
 								{
@@ -94,33 +99,30 @@ class nModuleInstaller
 									$db->runFile($path);
 								}
 
-								/**
-								 * @todo update database version
-								 */
+								$this->setDatabaseVersion($updateInfo['version'], 'full');
 							}
+							$schemaStatus = false;
 
-							if($version < $updateVersion)
+							if(($version < $updateVersion)
+							   && ($updateInfo['postscript']
+								   && $moduleStatus != 'postscript' && $moduleStatus != 'installed'))
 							{
-								if($updateInfo['postscript'])
-								{
-									$path = $updateInfo['path'] . 'post.php';
-									$classname = $this->package . 'UpdatePostScript' . $sanatizedVersionString;
+								$path = $updateInfo['path'] . 'post.php';
+								$classname = $this->package . 'UpdatePostScript' . $sanatizedVersionString;
 
-									if(file_exists($path))
+								if(file_exists($path))
+								{
+									inculde($path);
+									if(class_exists($classname, false))
 									{
-										inculde($path);
-										if(class_exists($classname, false))
-										{
-											$UpdatePreScript = new $classname();
-											$UpdatePreScript->run();
-										}
+										$UpdatePreScript = new $classname();
+										$UpdatePreScript->run();
 									}
 								}
 							}
 
-							/**
-							 * @todo update module version
-							 */
+							$moduleStatus = false;
+							$this->setModuleVersion($updateInfo['version'], 'postscript');
 						}
 
 					}else{
@@ -132,9 +134,7 @@ class nModuleInstaller
 					$this->addPermissions();
 					$this->installModels();
 
-					/**
-					* @todo update module version to current
-					*/
+					$this->setModuleVersion($updateInfo['version'], 'installed');
 
 					$db->commit();
 					$db->autocommit(true);
@@ -172,7 +172,8 @@ class nModuleInstaller
 			$version = $this->versionToInt($versionArray());
 
 			// skip updates we aren't going to use
-			if($version <= $currentVersion)
+			// we grab the current version in case we're continuing a partial update
+			if($version < $currentVersion)
 				continue;
 
 			$updatePackages[$version]['path'] = $folder;
@@ -194,6 +195,63 @@ class nModuleInstaller
 		return $updatePackages;
 
 	}
+
+	protected function setDatabaseVersion(array $version, $status)
+	{
+		// if we've just updated the structure we want to make sure we record that change no matter what, since
+		// rolling back the transaction will not roll back the table changes. Thus we need a brand new connection
+		// that has autocommit on.
+		if($status == 'structure')
+		{
+			$db = DatabaseConnection::getConnection('default', false);
+		}else{
+			$db = DatabaseConnection::getConnection('default');
+		}
+
+		$stmt = $db->stmt_init();
+		$stmt->prepare('REPLACE INTO schemeVersion
+							(package, lastUpdated, majorVersion, minorVersion, microVersion, status)
+							VALUES (?, NOW(), ?, ?, ?, ?)');
+		$stmt->bindAndExecute('siiis', $this->package,
+								$version['major'], $version['minor'], $version['micro'], $status);
+
+		if($status == 'structure')
+			$db->close();
+
+		return true;
+	}
+
+	protected function setModuleVersion(array $version, $status)
+	{
+		$moduleRecord = new ObjectRelationshipMapper('modules');
+		$moduleRecord->package = $this->package;
+		$moduleRecord->select();
+		$moduleRecord->status = $status;
+
+
+		if(is_numeric($version['major']))
+			$moduleRecord->majorVersion = $version['major'];
+		if(is_numeric($version['minor']))
+			$moduleRecord->minorVersion = $version['minor'];
+		if(is_numeric($version['micro']))
+			$moduleRecord->microVersion = $version['micro'];
+
+		if(isset($version['type']))
+			$moduleRecord->releaseType = $version['type'];
+
+		if(isset($version['tVersion']))
+			$moduleRecord->releaseVersion = $version['tVersion'];
+
+		$moduleRecord->querySet('lastupdated', 'NOW()');
+
+		if(!$moduleRecord->save())
+		{
+			throw new ModuleInstallerError('Unable to update package database with version information.');
+		}else{
+			return true;
+		}
+	}
+
 
 	protected function versionToInt(array $versionPieces)
 	{
@@ -232,5 +290,5 @@ class nModuleInstaller
 }
 
 
-
+class ModuleInstallerError extends CoreError {}
 ?>
