@@ -8,9 +8,6 @@ class TagBoxModel
 
 	public function __construct(Model $model)
 	{
-		if(defined('INSTALLMODE') && INSTALLMODE === true)
-			return true;
-
 		$this->model = $model;
 		$modelArray = $model->__toArray();
 
@@ -94,9 +91,6 @@ class TagBoxModel
 	
 	public function __get($key)
 	{
-		if(defined('INSTALLMODE') && INSTALLMODE === true)
-			return true;
-
 		switch($key) {
 			case 'permalink':
 				return $this->getPermalink();
