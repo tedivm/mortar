@@ -17,7 +17,7 @@ class MortarPluginMenusAdminModels
 		$basicActions = staticHack(get_class($model), 'fallbackModelActions');
 		$basicActionNames = staticHack(get_class($model), 'fallbackModelActionNames');
 		$allowedActions = $model->getActions();
-		$disallowedActions = array('Read', 'Add', 'EditGroupPermissions', 'EditUserPermissions');
+		$disallowedActions = array('Read', 'Add', 'EditGroupPermissions', 'EditUserPermissions', 'ThemePreview');
 		$modelActions = array();
 
 		foreach($basicActions as $action) {

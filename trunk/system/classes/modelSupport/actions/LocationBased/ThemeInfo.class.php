@@ -12,15 +12,33 @@ class ModelActionLocationBasedThemeInfo extends ModelActionLocationBasedAdd
 		$locTheme = $this->model->getLocation()->getMeta('htmlTheme', true);
 		$locTemp = $this->model->getLocation()->getMeta('pageTemplate', true);
 
+		$config = Config::getInstance();
+		$themePath = $config['path']['theme'];
+
+		$themes = array('');
+		$installedThemes = glob($themePath . "*", GLOB_ONLYDIR);
+		foreach($installedThemes as $themePath) {
+			$themeName = array_reverse(explode('/', $themePath));
+			$themes[] = $themeName[0];
+		}
+
 		$form = new Form('theme_info');
 
                 $form->changeSection('theme')->setLegend('Theme Settings');
 
-		$form->createInput('theme')->
+		$input = $form->createInput('theme')->
 			setLabel('Theme')->
-			addRule('alphanumeric')->
-			setValue($locTheme);
-		
+			setType('select');
+
+		foreach($themes as $theme) {
+			if($locTheme === $theme)
+				$selected = array('selected' => 'yes');
+			else
+				$selected = array();
+
+			$input->setOptions($theme, $theme, $selected);
+		}
+
 		$form->createInput('template')->
 			setLabel('Template')->
 			addRule('alphanumeric')->
