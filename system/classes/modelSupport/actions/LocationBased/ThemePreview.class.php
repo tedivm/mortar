@@ -10,9 +10,10 @@ class ModelActionLocationBasedThemePreview extends ModelActionLocationBasedRead
 	{
 		$query = Query::getQuery();
 		$location = new Location($query['location']);
+		$parent = $location->getParent();
 
-		$defaultTemplate = $location->getMeta('pageTemplate')
-			? $location->getMeta('pageTemplate') . '.html'
+		$defaultTemplate = $parent->getMeta('pageTemplate')
+			? $parent->getMeta('pageTemplate') . '.html'
 			: 'index.html';
 
 		$defaultTheme = $location->getMeta('htmlTheme');
