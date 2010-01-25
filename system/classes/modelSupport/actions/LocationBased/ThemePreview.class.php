@@ -21,6 +21,7 @@ class ModelActionLocationBasedThemePreview extends ModelActionLocationBasedRead
 		$theme = isset($query['theme']) ? $query['theme'] : $defaultTheme;
 
 		$page->setTemplate($template, $theme);
+		$this->setTitle($this->htmlSettings['headerTitle'] . " ($theme : $template)");
 
 		return parent::viewHtml($page);
 	}
