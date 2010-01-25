@@ -50,7 +50,8 @@ abstract class LocationModel extends ModelBase
 	 * @var array
 	 */
 	static public $fallbackModelActions = array('Read', 'Add', 'Edit', 'Delete', 'Ownership', 'GroupPermissions',
-		'EditGroupPermissions', 'UserPermissions', 'EditUserPermissions', 'ThemeInfo', 'Index');
+		'EditGroupPermissions', 'UserPermissions', 'EditUserPermissions', 'ThemeInfo', 'ThemePreview',
+		'Index');
 
 	static public $fallbackModelActionNames = array('Index' => 'Browse', 'GroupPermissions' => 'Group Permissions',
 		'UserPermissions' => 'User Permissions', 'ThemeInfo' => 'Theme Settings');
