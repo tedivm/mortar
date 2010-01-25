@@ -224,6 +224,11 @@ class Page implements ArrayAccess
 
 		// all tagboxes that require a location go here. if there's a location there's always a model
 		if(isset($location)) {
+			$locHook = new Hook();
+			$locHook->loadPlugins('Page', 'Template', 'Location');
+			$addContent = Hook::mergeResults($locHook->getBoxes($location));
+			$content = array_merge($content, $addContent);
+
 			$navBox = new TagBoxNav($location);
 			$content['nav'] = $navBox;
 
@@ -239,11 +244,21 @@ class Page implements ArrayAccess
 
 		// all tagboxes that require a model but not a location go here
 		if(isset($model)) {
+			$modHook = new Hook();
+			$modHook->loadPlugins('Page', 'Template', 'Model');
+			$addContent = Hook::mergeResults($modHook->getBoxes($model));
+			$content = array_merge($content, $addContent);
+
 			$modelBox = new TagBoxModel($model);
 			$content['model'] = $modelBox;
 		}
 
 		// all other tagboxes that are not location- or model-dependent go here
+		$tagHook = new Hook();
+		$tagHook->loadPlugins('Page', 'Template', 'None');
+		$addContent = Hook::mergeResults($tagHook->getBoxes());
+		$content = array_merge($content, $addContent);
+
 		$theme = $this->getTheme();
 		$themeBox = new TagBoxTheme($theme);
 		$content['theme'] = $themeBox;
