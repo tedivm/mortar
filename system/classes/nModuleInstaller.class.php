@@ -4,154 +4,85 @@ class nModuleInstaller
 {
 	protected $package;
 	protected $path;
+	protected $installVersion;
 
 	public function fullInstall()
 	{
 		try{
-			if($this->checkRequirements())
+			// Because the dbConnect function pools connections, changing this 'default' connections settings
+			// changes it for everything else that gets called, allowing us to easily roll back everything but
+			// additions to the database structure (new tables, indexes, foreign keys).
+			$db = DatabaseConnection::getConnection('default');
+			$db->autocommit(false);
+
+			$alreadyPresent = false;
+
+			$stmt = DatabaseConnection::getStatement('default');
+			$stmt->prepare('SELECT * FROM modules WHERE package = ?');
+			$stmt->bindAndExecute('s', $this->package);
+
+			if($stmt->num_rows > 0 && $row = $stmt->fetch_array())
 			{
-				// Because the dbConnect function pools connections, changing this 'default' connections settings
-				// changes it for everything else that gets called, allowing us to easily roll back everything but
-				// additions to the database structure (new tables, indexes, foreign keys).
-				$db = DatabaseConnection::getConnection('default');
-				$db->autocommit(false);
+				$versionString = $this->versionToString($row);
+				$version = $this->versionToInt($row);
+				$moduleStatus = $row['status'];
+				$id = $row['mod_id'];
 
-				try{
-					$alreadyPresent = false;
-
-					$stmt = DatabaseConnection::getStatement('default');
-					$stmt->prepare('SELECT * FROM modules WHERE package = ?');
-					$stmt->bindAndExecute('s', $this->package);
-
-					if($stmt->num_rows > 0 && $row = $stmt->fetch_array())
-					{
-						$versionString = $this->versionToString($row);
-						$version = $this->versionToInt($row);
-						$moduleStatus = $row['status'];
-						$id = $row['mod_id'];
-
-						$alreadyPresent = true;
-
-					}else{
-						$verson = 0;
-						$versionString = '0.0.0';
-						$moduleStatus = false;
-					}
-
-					$stmt = DatabaseConnection::getStatement('default');
-					$stmt->prepare('SELECT * FROM schemaVersion WHERE package = ?');
-					$stmt->bindAndExecute('s', $this->package);
-
-					if($stmt->num_rows > 0 && $row = $stmt->fetch_array())
-					{
-						$dbVersionString = $this->versionToString($row);
-						$dbVersion = $this->versionToInt($row);
-						$schemaStatus = $row['status'];
-						$alreadyPresent = true;
-					}else{
-						$dbVersion = 0;
-						$schemaStatus = false;
-					}
-
-
-					if($alreadyPresent)
-					{
-
-						$lowestVersion = ($dbVersion <= $version) ? $dbVersion : $version;
-						$updates = $this->getUpdateList($lowestVersion);
-
-						foreach($updates as $updateVersion => $updateInfo)
-						{
-							$sanatizedVersionString = str_replace(array('.', '-'), '_', $updateInfo['folder']);
-
-							if(($version < $updateVersion) && ($updateInfo['prescript'] && $moduleStatus !== false))
-							{
-								$path = $updateInfo['path'] . 'pre.php';
-								$classname = $this->package . 'UpdatePreScript' . $sanatizedVersionString;
-
-								if(file_exists($path))
-								{
-									inculde($path);
-									if(class_exists($classname, false))
-									{
-										$UpdatePreScript = new $classname();
-										$UpdatePreScript->run();
-									}
-								}
-							}
-
-
-							$this->setModuleVersion($updateInfo['version'], 'prescript');
-
-							if($dbVersion < $updateVersion && $schemaStatus != 'full')
-							{
-								if($updateInfo['sqlstructure'] && $schemaStatus != 'structure')
-								{
-									$path = $updateInfo['path'] . 'structure.sql';
-									$db->runFile($path);
-								}
-
-								$this->setDatabaseVersion($updateInfo['version'], 'structure');
-
-								if($updateInfo['sqldata'])
-								{
-									$path = $updateInfo['path'] . 'data.sql';
-									$db->runFile($path);
-								}
-
-								$this->setDatabaseVersion($updateInfo['version'], 'full');
-							}
-							$schemaStatus = false;
-
-							if(($version < $updateVersion)
-							   && ($updateInfo['postscript']
-								   && $moduleStatus != 'postscript' && $moduleStatus != 'installed'))
-							{
-								$path = $updateInfo['path'] . 'post.php';
-								$classname = $this->package . 'UpdatePostScript' . $sanatizedVersionString;
-
-								if(file_exists($path))
-								{
-									inculde($path);
-									if(class_exists($classname, false))
-									{
-										$UpdatePreScript = new $classname();
-										$UpdatePreScript->run();
-									}
-								}
-							}
-
-							$moduleStatus = false;
-							$this->setModuleVersion($updateInfo['version'], 'postscript');
-						}
-
-					}else{
-
-						// install database
-						// run script
-					}
-
-					$this->addPermissions();
-					$this->installModels();
-
-					$this->setModuleVersion($updateInfo['version'], 'installed');
-
-					$db->commit();
-					$db->autocommit(true);
-					return true;
-				}catch(Exception $e){
-					$db->rollback();	// problem, this could erase the status, which means the database structure
-										// would be set up but the system wouldn't know
-					$db->autocommit(true);
-					throw new ModuleInstallerError('Unable to install module ' . $this->package . ', rolling back database changes.');
-				}
+				$alreadyPresent = true;
 
 			}else{
-				// some sort of way to show the error
+				$verson = 0;
+				$versionString = '0.0.0';
+				$moduleStatus = false;
 			}
+
+			$stmt = DatabaseConnection::getStatement('default');
+			$stmt->prepare('SELECT * FROM schemaVersion WHERE package = ?');
+			$stmt->bindAndExecute('s', $this->package);
+
+			if($stmt->num_rows > 0 && $row = $stmt->fetch_array())
+			{
+				$dbVersionString = $this->versionToString($row);
+				$dbVersion = $this->versionToInt($row);
+				$schemaStatus = $row['status'];
+				$alreadyPresent = true;
+			}else{
+				$dbVersion = 0;
+				$schemaStatus = false;
+			}
+
+
+			if($this->installVersion == $versionString && $moduleStatus != 'installed')
+			{
+				// resume installation
+				$this->fullInstall($schemaStatus, $moduleStatus);
+			}elseif($alreadyPresent){
+				// update
+				$this->runUpdates($version, $dbVersion, $schemaStatus, $moduleStatus);
+			}else{
+				// fresh install
+				$this->fullInstall(false, false);
+			}
+
+
+			$this->addPermissions();
+			$this->installModels();
+
+			$this->setModuleVersion($updateInfo['version'], 'installed');
+
+			$db->commit();
+			$db->autocommit(true);
+			return true;
+
 		}catch(Exception $e){
+			$db->rollback();	// problem, this could erase the status, which means the database structure
+								// would be set up but the system wouldn't know
+			$db->autocommit(true);
+
+			new ModuleInstallerInfo('Unable to install module ' . $this->package . ', rolling back database changes.');
 			return false;
 		}
+
 		return true;
 	}
 
@@ -221,6 +152,130 @@ class nModuleInstaller
 		return true;
 	}
 
+
+	protected function newInstall($schemaStatus = false, $moduleStatus = false)
+	{
+		$path = $this->path . 'install/';
+
+		$pathPre = $path . 'pre.php';
+		if(file_exists($pathPre) && ($moduleStatus === false || !in_array($moduleStatus, array('prescript', 'postscript'))))
+		{
+			$classname = $this->package . 'InstallerPrescript';
+			inculde($pathPre);
+			if(class_exists($classname, false))
+			{
+				$installPreScript = new $classname();
+				$installPreScript->run();
+			}
+			$this->setModuleVersion($this->installVersion, 'prescript');
+		}
+
+		$pathSqlStructure = $path . 'structure.php';
+		if(file_exists($pathSqlStructure) && ($schemaStatus === false || !in_array($schemaStatus, array('structure', 'full'))))
+		{
+			$db->runFile($pathSqlStructure);
+			$this->setDatabaseVersion($this->installVersion, 'structure');
+		}
+
+		$pathSqlData = $path . 'data.php';
+		if(file_exists($pathSqlData) && ($schemaStatus === false || $schemaStatus !== 'full'))
+		{
+			$db->runFile($pathSqlData);
+			$this->setDatabaseVersion($this->installVersion, 'full');
+		}
+
+		$pathPost = $path . 'post.php';
+		if(file_exists($pathPost) && ($moduleStatus === false || $moduleStatus != 'postscript'))
+		{
+			$classname = $this->package . 'InstallerPostscript';
+			inculde($pathPost);
+			if(class_exists($classname, false))
+			{
+				$installPreScript = new $classname();
+				$installPreScript->run();
+			}
+			$this->setModuleVersion($this->installVersion, 'postscript');
+		}
+
+		return true;
+	}
+
+	protected function runUpdates($version = 0, $dbVersion = 0, $schemaStatus, $moduleStatus = false)
+	{
+		$lowestVersion = ($dbVersion <= $version) ? $dbVersion : $version;
+		$updates = $this->getUpdateList($lowestVersion);
+
+		foreach($updates as $updateVersion => $updateInfo)
+		{
+			$sanatizedVersionString = str_replace(array('.', '-'), '_', $updateInfo['folder']);
+
+			if($updateInfo['prescript']
+				&& ($version < $updateVersion
+					|| ($version == $updateVersion
+						&& $moduleStatus !== false
+						&& in_array($moduleStatus, array('prescript', 'postscript', 'installed')) )))
+			{
+				$path = $updateInfo['path'] . 'pre.php';
+				$classname = $this->package . 'UpdatePreScript' . $sanatizedVersionString;
+
+				if(file_exists($path))
+				{
+					inculde($path);
+					if(class_exists($classname, false))
+					{
+						$UpdatePreScript = new $classname();
+						$UpdatePreScript->run();
+					}
+				}
+			}
+			$this->setModuleVersion($updateInfo['version'], 'prescript');
+
+			if($dbVersion < $updateVersion && $schemaStatus != 'full')
+			{
+				if($updateInfo['sqlstructure'] && $schemaStatus != 'structure')
+				{
+					$path = $updateInfo['path'] . 'structure.sql';
+					$db->runFile($path);
+				}
+
+				$this->setDatabaseVersion($updateInfo['version'], 'structure');
+
+				if($updateInfo['sqldata'])
+				{
+					$path = $updateInfo['path'] . 'data.sql';
+					$db->runFile($path);
+				}
+
+				$this->setDatabaseVersion($updateInfo['version'], 'full');
+				$db->commit();
+			}
+			$schemaStatus = false;
+
+			if($updateInfo['postscript']
+				&& ($version < $updateVersion
+					|| ($version == $updateVersion
+						&& $moduleStatus !== false
+						&& in_array($moduleStatus, array('postscript', 'installed')) )))
+			{
+				$path = $updateInfo['path'] . 'post.php';
+				$classname = $this->package . 'UpdatePostScript' . $sanatizedVersionString;
+
+				if(file_exists($path))
+				{
+					inculde($path);
+					if(class_exists($classname, false))
+					{
+						$UpdatePreScript = new $classname();
+						$UpdatePreScript->run();
+					}
+				}
+			}
+
+			$moduleStatus = false;
+			$this->setModuleVersion($updateInfo['version'], 'postscript');
+		}
+	}
+
 	protected function setModuleVersion(array $version, $status)
 	{
 		$moduleRecord = new ObjectRelationshipMapper('modules');
@@ -249,6 +304,49 @@ class nModuleInstaller
 			throw new ModuleInstallerError('Unable to update package database with version information.');
 		}else{
 			return true;
+		}
+	}
+
+	protected function addPermissions()
+	{
+		$packageInfo = new PackageInfo($this->package);
+		$actions = $packageInfo->getActions();
+		$permissions = array();
+		foreach($actions as $action)
+		{
+			if(strlen($action['permissions']) > 2 )
+				$permissions[] = $action['permissions'];
+		}
+
+		$permissions = array_unique($permissions);
+		foreach($permissions as $permission)
+		{
+			PermissionActionList::addAction($permission);
+		}
+		return true;
+	}
+
+	protected function installModels()
+	{
+		$packageInfo = new PackageInfo($this->package);
+		$models = $packageInfo->getModels();
+		foreach($models as $model)
+		{
+			// skip already registered models,
+			if(ModelRegistry::getHandler($model['type']) !== false)
+				continue;
+
+
+			if(!class_exists($model['className']))
+				throw new ModuleInstallerError('Unable to register model '
+											   . $model['name'] . ' because class '
+											   . $model['className'] . ' does not exist.');
+
+			$class = new ReflectionClass($model['className']);
+			if(($class->isAbstract() && !isset($model['type'])) || !isset($model['type']))
+				continue;
+
+			ModelRegistry::setHandler($model['type'], $this->package, $model['name']);
 		}
 	}
 
@@ -283,12 +381,9 @@ class nModuleInstaller
 
 		return $dbVersionString;
 	}
-
-
-
-
 }
 
 
 class ModuleInstallerError extends CoreError {}
+class ModuleInstallerInfo extends CoreInfo {}
 ?>
