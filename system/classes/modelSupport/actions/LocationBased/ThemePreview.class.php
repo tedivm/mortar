@@ -9,7 +9,9 @@ class ModelActionLocationBasedThemePreview extends ModelActionLocationBasedRead
 	public function viewHtml($page)
 	{
 		$query = Query::getQuery();
-		$location = new Location($query['location']);
+		$location = isset($query['location'])
+			? $query['location']
+			: ActiveSite::getSite()->getLocation();
 		$parent = $location->getParent();
 
 		$defaultTemplate = $parent->getMeta('pageTemplate')
