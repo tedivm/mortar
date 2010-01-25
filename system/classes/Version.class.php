@@ -21,21 +21,21 @@ class Version
 	 *
 	 * @var int
 	 */
-	public $major;
+	public $major = 0;
 
 	/**
 	 * Minor version number
 	 *
 	 * @var int
 	 */
-	public $minor;
+	public $minor = 0;
 
 	/**
 	 * Micro version number
 	 *
 	 * @var int
 	 */
-	public $micro;
+	public $micro = 0;
 
 	/**
 	 * Release type (alpha, beta, release candidate, release)
@@ -227,6 +227,14 @@ class Version
 			return false;
 
 		return true;
+	}
+
+	protected function toInt()
+	{
+		$version = sprintf('%04s', $this->major);
+		$version .= sprintf('%04s', $this->minor);
+		$version .= sprintf('%04s', $this->micro);
+		return (int) $version;
 	}
 
 }
