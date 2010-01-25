@@ -198,7 +198,9 @@ CREATE TABLE modules
 /* Table Items: modules */
 
 /* Add Indexes for: modules */
-CREATE INDEX modules_package_Idx ON modules (package, mod_id, status);
+CREATE INDEX modules_package_Idx ON modules (package, mod_id);
+CREATE UNIQUE INDEX package_Idx ON modules (package);
+CREATE INDEX majorVersion_minorVersion_microVersion_Idx ON modules (majorVersion, minorVersion, microVersion);
 
 /******************** Add Table: modelsRegistered ************************/
 
@@ -269,7 +271,10 @@ CREATE TABLE schemaVersion
 	lastupdated TIMESTAMP NULL,
 	majorVersion INTEGER UNSIGNED NULL DEFAULT 0,
 	minorVersion INTEGER UNSIGNED NULL DEFAULT 0,
-	microVersion INTEGER UNSIGNED NULL DEFAULT 0
+	microVersion INTEGER UNSIGNED NULL DEFAULT 0,
+	releaseType VARCHAR(12) NULL,
+	releaseVersion INTEGER UNSIGNED NULL,
+	status VARCHAR(12) NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Table Items: modules */
@@ -362,8 +367,8 @@ CREATE TABLE users
 /* Table Items: users */
 
 /* Add Indexes for: users */
-CREATE INDEX user_name ON users (name, password);
-CREATE UNIQUE INDEX user_name_2 ON users (name);
+CREATE INDEX user_name_password_Idx ON users (name, password);
+CREATE UNIQUE INDEX user_name_Idx ON users (name);
 
 
 
