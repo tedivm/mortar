@@ -34,7 +34,7 @@ class nModuleInstaller
 
 	}
 
-	public function fullInstall()
+	public function integrate()
 	{
 		try{
 			// Because the dbConnect function pools connections, changing this 'default' connections settings
@@ -114,7 +114,7 @@ class nModuleInstaller
 			$this->addPermissions();
 			$this->installModels();
 
-			$this->setModuleVersion($updateInfo['version'], 'installed');
+			$this->setVersion($updateInfo['version'], 'installed');
 
 			$db->commit();
 			$db->autocommit(true);
@@ -167,32 +167,6 @@ class nModuleInstaller
 
 	}
 
-	protected function setDatabaseVersion(Version $version, $status)
-	{
-		// if we've just updated the structure we want to make sure we record that change no matter what, since
-		// rolling back the transaction will not roll back the table changes. Thus we need a brand new connection
-		// that has autocommit on.
-		if($status == 'structure')
-		{
-			$db = DatabaseConnection::getConnection('default', false);
-		}else{
-			$db = DatabaseConnection::getConnection('default');
-		}
-
-		$stmt = $db->stmt_init();
-		$stmt->prepare('REPLACE INTO schemeVersion
-							(package, lastUpdated, majorVersion, minorVersion, microVersion, status)
-							VALUES (?, NOW(), ?, ?, ?, ?)');
-		$stmt->bindAndExecute('siiis', $this->package,
-								$version->major, $version->minor, $version->micro, $status);
-
-		if($status == 'structure')
-			$db->close();
-
-		return true;
-	}
-
-
 	protected function newInstall($schemaStatus = false, $moduleStatus = false)
 	{
 		$path = $this->path . 'install/';
@@ -207,21 +181,23 @@ class nModuleInstaller
 				$installPreScript = new $classname();
 				$installPreScript->run();
 			}
-			$this->setModuleVersion($this->installVersion, 'prescript');
+			$this->setVersion($this->installVersion, 'prescript');
 		}
 
 		$pathSqlStructure = $path . 'structure.php';
 		if(file_exists($pathSqlStructure) && ($schemaStatus === false || !in_array($schemaStatus, array('structure', 'full'))))
 		{
 			$db->runFile($pathSqlStructure);
-			$this->setDatabaseVersion($this->installVersion, 'structure');
+			$this->setVersion($this->installVersion, 'structure', false);
+			$db->commit();
 		}
 
 		$pathSqlData = $path . 'data.php';
 		if(file_exists($pathSqlData) && ($schemaStatus === false || $schemaStatus !== 'full'))
 		{
 			$db->runFile($pathSqlData);
-			$this->setDatabaseVersion($this->installVersion, 'full');
+			$this->setVersion($this->installVersion, 'full', false);
+			$db->commit();
 		}
 
 		$pathPost = $path . 'post.php';
@@ -234,7 +210,7 @@ class nModuleInstaller
 				$installPreScript = new $classname();
 				$installPreScript->run();
 			}
-			$this->setModuleVersion($this->installVersion, 'postscript');
+			$this->setVersion($this->installVersion, 'postscript');
 		}
 
 		return true;
@@ -267,7 +243,7 @@ class nModuleInstaller
 					}
 				}
 			}
-			$this->setModuleVersion($updateInfo['version'], 'prescript');
+			$this->setVersion($updateInfo['version'], 'prescript');
 
 			if($dbVersion < $updateVersion && $schemaStatus != 'full')
 			{
@@ -277,7 +253,8 @@ class nModuleInstaller
 					$db->runFile($path);
 				}
 
-				$this->setDatabaseVersion($updateInfo['version'], 'structure');
+				$this->setVersion($updateInfo['version'], 'structure', false);
+				$db->commit();
 
 				if($updateInfo['sqldata'])
 				{
@@ -285,7 +262,7 @@ class nModuleInstaller
 					$db->runFile($path);
 				}
 
-				$this->setDatabaseVersion($updateInfo['version'], 'full');
+				$this->setVersion($updateInfo['version'], 'full', false);
 				$db->commit();
 			}
 			$schemaStatus = false;
@@ -311,13 +288,14 @@ class nModuleInstaller
 			}
 
 			$moduleStatus = false;
-			$this->setModuleVersion($updateInfo['version'], 'postscript');
+			$this->setVersion($updateInfo['version'], 'postscript');
 		}
 	}
 
-	protected function setModuleVersion(Version $version, $status)
+	protected function setVersion(Version $version, $status, $module = true)
 	{
-		$moduleRecord = new ObjectRelationshipMapper('modules');
+		$table = $module ? 'modules' : 'schemaVersion';
+		$moduleRecord = new ObjectRelationshipMapper($table);
 		$moduleRecord->package = $this->package;
 		$moduleRecord->select();
 		$moduleRecord->status = $status;
