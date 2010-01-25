@@ -74,6 +74,8 @@ class ModelActionLocationBasedThemeInfo extends ModelActionLocationBasedAdd
 				$url->template = $input['template'];
 
 			return $url;
+		} else {
+			return parent::getRedirectUrl();
 		}
 	}
 
@@ -81,6 +83,8 @@ class ModelActionLocationBasedThemeInfo extends ModelActionLocationBasedAdd
 	{
 		if( isset($input['preview']) && ($input['preview'] === 'Preview') )
 			return true;
+
+		$location = $this->model->getLocation();
 
 		if(isset($input['theme']))
 		{
