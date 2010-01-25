@@ -2,6 +2,7 @@
 
 class ModelActionLocationBasedThemePreview extends ModelActionLocationBasedRead
 {
+	public $htmlSettings = array( 'headerTitle' => 'Theme Preview' );
 
 	public static $requiredPermission = 'Admin';
 

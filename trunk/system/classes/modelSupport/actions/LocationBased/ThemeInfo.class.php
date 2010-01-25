@@ -2,7 +2,6 @@
 
 class ModelActionLocationBasedThemeInfo extends ModelActionLocationBasedAdd
 {
-
 	public $adminSettings = array( 'headerTitle' => 'Theme Settings' );
 
 	public static $requiredPermission = 'Admin';
@@ -44,13 +43,45 @@ class ModelActionLocationBasedThemeInfo extends ModelActionLocationBasedAdd
 			addRule('alphanumeric')->
 			setValue($locTemp);
 
+		$form->createInput('preview')->
+			setType('submit')->
+			property('value', 'Preview');
+
+		$form->createInput('save')->
+			setType('submit')->
+			property('value', 'Save');
+
 		return $form;
+	}
+
+	protected function getRedirectUrl()
+	{
+		$query = Query::getQuery();
+		$input = $this->form->checkSubmit();
+
+		if( isset($input['preview']) && ($input['preview'] === 'Preview') ) {
+			$location = $this->model->getLocation();
+
+			$url = new Url();
+			$url->location = $location->getId();
+			$url->format = 'html';
+			$url->action = 'ThemePreview';
+
+			if(isset($input['theme']) && $input['theme'] !== '')
+				$url->theme = $input['theme'];
+
+			if(isset($input['template']) && $input['template'] !== '')
+				$url->template = $input['template'];
+
+			return $url;
+		}
 	}
 
 	protected function processInput($input)
 	{
-		$location = $this->model->getLocation();
-	
+		if( isset($input['preview']) && ($input['preview'] === 'Preview') )
+			return true;
+
 		if(isset($input['theme']))
 		{
 			if($input['theme'] === '')
