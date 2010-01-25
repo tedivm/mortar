@@ -5,6 +5,34 @@ class nModuleInstaller
 	protected $package;
 	protected $path;
 	protected $installVersion;
+	protected $startVersion;
+
+	public function __construct($package)
+	{
+		$config = Config::getInstance();
+		$path = $config['path']['modules'] . $package;
+
+		if(!is_dir($path))
+			throw new ModuleInstallerError('Unable to find package at ' . $path);
+
+		$this->package = $package;
+		$this->path = $path;
+
+		$iniPath = $path . 'package.ini';
+
+		if(file_exists($iniPath) && is_readable($iniPath))
+		{
+			$config = new IniFile($iniPath);
+			$version = $config->get('General', 'version');
+
+			$version = new Version($version);
+			$this->installVersion = $version;
+		}
+
+
+		$config = new IniFile();
+
+	}
 
 	public function fullInstall()
 	{
@@ -21,49 +49,67 @@ class nModuleInstaller
 			$stmt->prepare('SELECT * FROM modules WHERE package = ?');
 			$stmt->bindAndExecute('s', $this->package);
 
+			$version = new Version();
+			$moduleStatus = false;
 			if($stmt->num_rows > 0 && $row = $stmt->fetch_array())
 			{
-				$versionString = $this->versionToString($row);
-				$version = $this->versionToInt($row);
+				$version->major = $row['versionMajor'];
+				$version->minor = $row['versionMinor'];
+				$version->micro = $row['versionMicro'];
+
+				if(isset($row['releaseType']))
+					$version->releaseType = $row['releaseType'];
+
+				if(isset($row['releaseVersion']))
+					$version->releaseVersion = $row['releaseVersion'];
+
+				$versionInt = $version->toInt();
 				$moduleStatus = $row['status'];
 				$id = $row['mod_id'];
 
 				$alreadyPresent = true;
 
-			}else{
-				$verson = 0;
-				$versionString = '0.0.0';
-				$moduleStatus = false;
 			}
 
 			$stmt = DatabaseConnection::getStatement('default');
 			$stmt->prepare('SELECT * FROM schemaVersion WHERE package = ?');
 			$stmt->bindAndExecute('s', $this->package);
 
+			$dbVersion = new Version();
+			$schemaStatus = false;
+
 			if($stmt->num_rows > 0 && $row = $stmt->fetch_array())
 			{
-				$dbVersionString = $this->versionToString($row);
-				$dbVersion = $this->versionToInt($row);
+				$dbVersion->major = $row['versionMajor'];
+				$dbVersion->minor = $row['versionMinor'];
+				$dbVersion->micro = $row['versionMicro'];
+
+				if(isset($row['releaseType']))
+					$version->releaseType = $row['releaseType'];
+
+				if(isset($row['releaseVersion']))
+					$version->releaseVersion = $row['releaseVersion'];
+
+				$dbVersionInt = $dbVersion->toInt();
 				$schemaStatus = $row['status'];
 				$alreadyPresent = true;
-			}else{
-				$dbVersion = 0;
-				$schemaStatus = false;
 			}
 
 
-			if($this->installVersion == $versionString && $moduleStatus != 'installed')
+			$lowestVersion = $dbVersion->compare($version) < 0 ? $dbVersion : $version;
+			$this->startVersion = $lowestVersion;
+
+			if($this->installVersion->compare($lowestVersion) === 0 && $moduleStatus != 'installed')
 			{
 				// resume installation
 				$this->fullInstall($schemaStatus, $moduleStatus);
 			}elseif($alreadyPresent){
 				// update
-				$this->runUpdates($version, $dbVersion, $schemaStatus, $moduleStatus);
+				$this->runUpdates($versionInt, $dbVersionInt, $schemaStatus, $moduleStatus);
 			}else{
 				// fresh install
 				$this->fullInstall(false, false);
 			}
-
 
 			$this->addPermissions();
 			$this->installModels();
@@ -86,7 +132,7 @@ class nModuleInstaller
 		return true;
 	}
 
-	protected function getUpdateList($currentVersion)
+	protected function getUpdateList()
 	{
 		$path = $this->path . 'updates/';;
 		$updatePaths = glob($path . '*', GLOB_ONLYDIR);
@@ -95,16 +141,13 @@ class nModuleInstaller
 		{
 			$realFolder = substr($folder, strrpos($folder, '/'));
 			$realFolder = trim($realFolder, '/');
-			$versionChunks = explode('.', $realFolder);
-			$versionArray = array();
-			$versionArray['versionMajor'] = isset($versionChunks[0]) ? $versionChunks[0] : 0;
-			$versionArray['versionMinor'] = isset($versionChunks[1]) ? $versionChunks[1] : 0;
-			$versionArray['versionMicro'] = isset($versionChunks[2]) ? $versionChunks[2] : 0;
-			$version = $this->versionToInt($versionArray());
+
+			$updateVersion = new Version(str_replace('_', ' ', $realFolder));
+			$version = $updateVersion->toInt();
 
 			// skip updates we aren't going to use
 			// we grab the current version in case we're continuing a partial update
-			if($version < $currentVersion)
+			if($this->startVersion->compare($updateVersion) == 1)
 				continue;
 
 			$updatePackages[$version]['path'] = $folder;
@@ -113,21 +156,18 @@ class nModuleInstaller
 			$updatePackages[$version]['sqldata'] = (bool) file_exists($folder . 'data.sql');
 			$updatePackages[$version]['prescript'] = (bool) file_exists($folder . 'pre.php');
 			$updatePackages[$version]['postscript'] = (bool) file_exists($folder . 'post.php');
+
 			$updatePackages[$version]['folder'] = $realFolder;
 			$updatePackages[$version]['path'] = $folder;
-
-			$updatePackages[$version]['version']['major'] = $versionArray['versionMajor'];
-			$updatePackages[$version]['version']['minor'] = $versionArray['versionMinor'];
-			$updatePackages[$version]['version']['micro'] = $versionArray['versionMicro'];
+			$updatePackages[$version]['versionString'] = str_replace('_', ' ', $realFolder);
+			$updatePackages[$version]['version'] = $updateVersion;
 		}
-
-
 
 		return $updatePackages;
 
 	}
 
-	protected function setDatabaseVersion(array $version, $status)
+	protected function setDatabaseVersion(Version $version, $status)
 	{
 		// if we've just updated the structure we want to make sure we record that change no matter what, since
 		// rolling back the transaction will not roll back the table changes. Thus we need a brand new connection
@@ -144,7 +184,7 @@ class nModuleInstaller
 							(package, lastUpdated, majorVersion, minorVersion, microVersion, status)
 							VALUES (?, NOW(), ?, ?, ?, ?)');
 		$stmt->bindAndExecute('siiis', $this->package,
-								$version['major'], $version['minor'], $version['micro'], $status);
+								$version->major, $version->minor, $version->micro, $status);
 
 		if($status == 'structure')
 			$db->close();
@@ -202,12 +242,11 @@ class nModuleInstaller
 
 	protected function runUpdates($version = 0, $dbVersion = 0, $schemaStatus, $moduleStatus = false)
 	{
-		$lowestVersion = ($dbVersion <= $version) ? $dbVersion : $version;
-		$updates = $this->getUpdateList($lowestVersion);
+		$updates = $this->getUpdateList();
 
 		foreach($updates as $updateVersion => $updateInfo)
 		{
-			$sanatizedVersionString = str_replace(array('.', '-'), '_', $updateInfo['folder']);
+			$sanatizedVersionString = str_replace(array('.', '-', ' '), '_', $updateInfo['folder']);
 
 			if($updateInfo['prescript']
 				&& ($version < $updateVersion
@@ -276,7 +315,7 @@ class nModuleInstaller
 		}
 	}
 
-	protected function setModuleVersion(array $version, $status)
+	protected function setModuleVersion(Version $version, $status)
 	{
 		$moduleRecord = new ObjectRelationshipMapper('modules');
 		$moduleRecord->package = $this->package;
@@ -285,17 +324,17 @@ class nModuleInstaller
 
 
 		if(is_numeric($version['major']))
-			$moduleRecord->majorVersion = $version['major'];
+			$moduleRecord->majorVersion = $version->major;
 		if(is_numeric($version['minor']))
-			$moduleRecord->minorVersion = $version['minor'];
+			$moduleRecord->minorVersion = $version->minor;
 		if(is_numeric($version['micro']))
-			$moduleRecord->microVersion = $version['micro'];
+			$moduleRecord->microVersion = $version->micro;
 
-		if(isset($version['type']))
-			$moduleRecord->releaseType = $version['type'];
+		if(isset($version->releaseType))
+			$moduleRecord->releaseType = $version->releaseType;
 
-		if(isset($version['tVersion']))
-			$moduleRecord->releaseVersion = $version['tVersion'];
+		if(isset($version->releaseVersion))
+			$moduleRecord->releaseVersion = $version->releaseVersion;
 
 		$moduleRecord->querySet('lastupdated', 'NOW()');
 
@@ -348,38 +387,6 @@ class nModuleInstaller
 
 			ModelRegistry::setHandler($model['type'], $this->package, $model['name']);
 		}
-	}
-
-
-	protected function versionToInt(array $versionPieces)
-	{
-		if(!isset($row['majorVersion']))
-			$row['majorVersion'] = 0;
-
-		$dbVersion = sprintf('%04s', $row['majorVersion']);
-
-		if(!isset($row['minorVersion']))
-			$row['minorVersion'] = 0;
-
-		$dbVersion .= sprintf('%04s', $row['minorVersion']);
-
-		if(!isset($row['microVersion']))
-			$row['microVersion'] = 0;
-
-		$dbVersion .= sprintf('%04s', $row['microVersion']);
-
-		return (int) $version;
-	}
-
-	protected function versionToString(array $versionPieces)
-	{
-		$dbVersionString = isset($row['majorVersion']) ? $row['majorVersion'] : '0';
-		$dbVersionString .= '.';
-		$dbVersionString .= isset($row['minorVersion']) ? $row['minorVersion'] : '0';
-		$dbVersionString .= '.';
-		$dbVersionString .= isset($row['microVersion']) ? $row['microVersion'] : '0';
-
-		return $dbVersionString;
 	}
 }
 
