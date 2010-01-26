@@ -10,7 +10,7 @@ class nModuleInstaller
 	public function __construct($package)
 	{
 		$config = Config::getInstance();
-		$path = $config['path']['modules'] . $package;
+		$path = $config['path']['modules'] . $package . '/';
 
 		if(!is_dir($path))
 			throw new ModuleInstallerError('Unable to find package at ' . $path);
@@ -23,14 +23,13 @@ class nModuleInstaller
 		if(file_exists($iniPath) && is_readable($iniPath))
 		{
 			$config = new IniFile($iniPath);
-			$version = $config->get('General', 'version');
-
-			$version = new Version($version);
+			$versionString = $config->get('General', 'version');
+			$version = new Version();
+			$version->fromString($versionString);
 			$this->installVersion = $version;
+		}else{
+			throw new ModuleInstallerError('Unable to load package.ini for module ' . $package);
 		}
-
-
-		$config = new IniFile();
 
 	}
 
@@ -51,11 +50,18 @@ class nModuleInstaller
 
 			$version = new Version();
 			$moduleStatus = false;
+			$versionInt = 0;
+
 			if($stmt->num_rows > 0 && $row = $stmt->fetch_array())
 			{
-				$version->major = $row['versionMajor'];
-				$version->minor = $row['versionMinor'];
-				$version->micro = $row['versionMicro'];
+				if(isset($row['versionMajor']))
+					$dbVersion->major = $row['versionMajor'];
+
+				if(isset($row['versionMinor']))
+					$dbVersion->minor = $row['versionMinor'];
+
+				if(isset($row['versionMicro']))
+					$dbVersion->micro = $row['versionMicro'];
 
 				if(isset($row['releaseType']))
 					$version->releaseType = $row['releaseType'];
@@ -64,7 +70,7 @@ class nModuleInstaller
 					$version->releaseVersion = $row['releaseVersion'];
 
 				$versionInt = $version->toInt();
-				$moduleStatus = $row['status'];
+				$moduleStatus = isset($row['status']) ? $row['status'] : false;
 				$id = $row['mod_id'];
 
 				$alreadyPresent = true;
@@ -77,12 +83,17 @@ class nModuleInstaller
 
 			$dbVersion = new Version();
 			$schemaStatus = false;
-
+			$dbVersionInt = 0;
 			if($stmt->num_rows > 0 && $row = $stmt->fetch_array())
 			{
-				$dbVersion->major = $row['versionMajor'];
-				$dbVersion->minor = $row['versionMinor'];
-				$dbVersion->micro = $row['versionMicro'];
+				if(isset($row['versionMajor']))
+					$dbVersion->major = $row['versionMajor'];
+
+				if(isset($row['versionMinor']))
+					$dbVersion->minor = $row['versionMinor'];
+
+				if(isset($row['versionMicro']))
+					$dbVersion->micro = $row['versionMicro'];
 
 				if(isset($row['releaseType']))
 					$version->releaseType = $row['releaseType'];
@@ -91,7 +102,7 @@ class nModuleInstaller
 					$version->releaseVersion = $row['releaseVersion'];
 
 				$dbVersionInt = $dbVersion->toInt();
-				$schemaStatus = $row['status'];
+				$schemaStatus = isset($row['status']) ? $row['status'] : false;
 				$alreadyPresent = true;
 			}
 
@@ -102,27 +113,26 @@ class nModuleInstaller
 			if($this->installVersion->compare($lowestVersion) === 0 && $moduleStatus != 'installed')
 			{
 				// resume installation
-				$this->fullInstall($schemaStatus, $moduleStatus);
+				$this->newInstall($schemaStatus, $moduleStatus);
 			}elseif($alreadyPresent){
 				// update
 				$this->runUpdates($versionInt, $dbVersionInt, $schemaStatus, $moduleStatus);
 			}else{
 				// fresh install
-				$this->fullInstall(false, false);
+				$this->newInstall(false, false);
 			}
 
 			$this->addPermissions();
 			$this->installModels();
 
-			$this->setVersion($updateInfo['version'], 'installed');
+			$this->setVersion($this->installVersion, 'installed');
 
 			$db->commit();
 			$db->autocommit(true);
 			return true;
 
 		}catch(Exception $e){
-			$db->rollback();	// problem, this could erase the status, which means the database structure
-								// would be set up but the system wouldn't know
+			$db->rollback();
 			$db->autocommit(true);
 
 			new ModuleInstallerInfo('Unable to install module ' . $this->package . ', rolling back database changes.');
@@ -143,6 +153,8 @@ class nModuleInstaller
 			$realFolder = trim($realFolder, '/');
 
 			$updateVersion = new Version(str_replace('_', ' ', $realFolder));
+
+
 			$version = $updateVersion->toInt();
 
 			// skip updates we aren't going to use
@@ -170,12 +182,13 @@ class nModuleInstaller
 	protected function newInstall($schemaStatus = false, $moduleStatus = false)
 	{
 		$path = $this->path . 'install/';
+		$db = DatabaseConnection::getConnection('default');
 
 		$pathPre = $path . 'pre.php';
 		if(file_exists($pathPre) && ($moduleStatus === false || !in_array($moduleStatus, array('prescript', 'postscript'))))
 		{
 			$classname = $this->package . 'InstallerPrescript';
-			inculde($pathPre);
+			include($pathPre);
 			if(class_exists($classname, false))
 			{
 				$installPreScript = new $classname();
@@ -184,7 +197,7 @@ class nModuleInstaller
 			$this->setVersion($this->installVersion, 'prescript');
 		}
 
-		$pathSqlStructure = $path . 'structure.php';
+		$pathSqlStructure = $path . 'structure.sql';
 		if(file_exists($pathSqlStructure) && ($schemaStatus === false || !in_array($schemaStatus, array('structure', 'full'))))
 		{
 			$db->runFile($pathSqlStructure);
@@ -192,7 +205,7 @@ class nModuleInstaller
 			$db->commit();
 		}
 
-		$pathSqlData = $path . 'data.php';
+		$pathSqlData = $path . 'data.sql';
 		if(file_exists($pathSqlData) && ($schemaStatus === false || $schemaStatus !== 'full'))
 		{
 			$db->runFile($pathSqlData);
@@ -204,7 +217,7 @@ class nModuleInstaller
 		if(file_exists($pathPost) && ($moduleStatus === false || $moduleStatus != 'postscript'))
 		{
 			$classname = $this->package . 'InstallerPostscript';
-			inculde($pathPost);
+			include($pathPost);
 			if(class_exists($classname, false))
 			{
 				$installPreScript = new $classname();
@@ -300,12 +313,13 @@ class nModuleInstaller
 		$moduleRecord->select();
 		$moduleRecord->status = $status;
 
-
-		if(is_numeric($version['major']))
+		if(is_numeric($version->major))
 			$moduleRecord->majorVersion = $version->major;
-		if(is_numeric($version['minor']))
+
+		if(is_numeric($version->minor))
 			$moduleRecord->minorVersion = $version->minor;
-		if(is_numeric($version['micro']))
+
+		if(is_numeric($version->micro))
 			$moduleRecord->microVersion = $version->micro;
 
 		if(isset($version->releaseType))
