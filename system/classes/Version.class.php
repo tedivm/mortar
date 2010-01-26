@@ -165,6 +165,8 @@ class Version
 	 */
 	public function __toString()
 	{
+		$output = '';
+
 		if($this->micro > 0)
 		{
 			$output .= '.' . $this->micro;
@@ -229,7 +231,7 @@ class Version
 		return true;
 	}
 
-	protected function toInt()
+	public function toInt()
 	{
 		$version = sprintf('%04s', $this->major);
 		$version .= sprintf('%04s', $this->minor);
