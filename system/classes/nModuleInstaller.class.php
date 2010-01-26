@@ -55,13 +55,13 @@ class nModuleInstaller
 			if($stmt->num_rows > 0 && $row = $stmt->fetch_array())
 			{
 				if(isset($row['versionMajor']))
-					$dbVersion->major = $row['versionMajor'];
+					$version->major = $row['majorVersion'];
 
-				if(isset($row['versionMinor']))
-					$dbVersion->minor = $row['versionMinor'];
+				if(isset($row['minorVersion']))
+					$version->minor = $row['minorVersion'];
 
-				if(isset($row['versionMicro']))
-					$dbVersion->micro = $row['versionMicro'];
+				if(isset($row['microVersion']))
+					$version->micro = $row['microVersion'];
 
 				if(isset($row['releaseType']))
 					$version->releaseType = $row['releaseType'];
@@ -86,20 +86,21 @@ class nModuleInstaller
 			$dbVersionInt = 0;
 			if($stmt->num_rows > 0 && $row = $stmt->fetch_array())
 			{
-				if(isset($row['versionMajor']))
-					$dbVersion->major = $row['versionMajor'];
+				if(isset($row['majorVersion']))
+					$dbVersion->major = $row['majorVersion'];
 
-				if(isset($row['versionMinor']))
-					$dbVersion->minor = $row['versionMinor'];
+				if(isset($row['minorVersion']))
+					$dbVersion->minor = $row['minorVersion'];
 
-				if(isset($row['versionMicro']))
-					$dbVersion->micro = $row['versionMicro'];
+				if(isset($row['microVersion']))
+					$dbVersion->micro = $row['microVersion'];
 
 				if(isset($row['releaseType']))
-					$version->releaseType = $row['releaseType'];
+					$dbVersion->releaseType = $row['releaseType'];
 
 				if(isset($row['releaseVersion']))
-					$version->releaseVersion = $row['releaseVersion'];
+					$dbVersion->releaseVersion = $row['releaseVersion'];
+
 
 				$dbVersionInt = $dbVersion->toInt();
 				$schemaStatus = isset($row['status']) ? $row['status'] : false;
@@ -144,15 +145,19 @@ class nModuleInstaller
 
 	protected function getUpdateList()
 	{
-		$path = $this->path . 'updates/';;
+		$path = $this->path . 'updates/';
+
 		$updatePaths = glob($path . '*', GLOB_ONLYDIR);
 		$updatePackages = array();
+
 		foreach($updatePaths as $folder)
 		{
 			$realFolder = substr($folder, strrpos($folder, '/'));
 			$realFolder = trim($realFolder, '/');
+			$folder = $folder . '/';
 
-			$updateVersion = new Version(str_replace('_', ' ', $realFolder));
+			$updateVersion = new Version();
+			$updateVersion->fromString(str_replace('_', ' ', $realFolder));
 
 
 			$version = $updateVersion->toInt();
@@ -232,6 +237,7 @@ class nModuleInstaller
 	protected function runUpdates($version = 0, $dbVersion = 0, $schemaStatus, $moduleStatus = false)
 	{
 		$updates = $this->getUpdateList();
+		$db = DatabaseConnection::getConnection('default');
 
 		foreach($updates as $updateVersion => $updateInfo)
 		{
@@ -244,11 +250,11 @@ class nModuleInstaller
 						&& in_array($moduleStatus, array('prescript', 'postscript', 'installed')) )))
 			{
 				$path = $updateInfo['path'] . 'pre.php';
-				$classname = $this->package . 'UpdatePreScript' . $sanatizedVersionString;
+				$classname = $this->package . 'UpdatePrescript_' . $sanatizedVersionString;
 
 				if(file_exists($path))
 				{
-					inculde($path);
+					include($path);
 					if(class_exists($classname, false))
 					{
 						$UpdatePreScript = new $classname();
@@ -256,6 +262,7 @@ class nModuleInstaller
 					}
 				}
 			}
+
 			$this->setVersion($updateInfo['version'], 'prescript');
 
 			if($dbVersion < $updateVersion && $schemaStatus != 'full')
@@ -287,11 +294,11 @@ class nModuleInstaller
 						&& in_array($moduleStatus, array('postscript', 'installed')) )))
 			{
 				$path = $updateInfo['path'] . 'post.php';
-				$classname = $this->package . 'UpdatePostScript' . $sanatizedVersionString;
+				$classname = $this->package . 'UpdatePostscript_' . $sanatizedVersionString;
 
 				if(file_exists($path))
 				{
-					inculde($path);
+					include($path);
 					if(class_exists($classname, false))
 					{
 						$UpdatePreScript = new $classname();
