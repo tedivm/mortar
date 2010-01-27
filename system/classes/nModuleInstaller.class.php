@@ -1,16 +1,16 @@
 <?php
 
-class nModuleInstaller
+class ModuleInstaller
 {
 	protected $package;
 	protected $path;
 	protected $installVersion;
 	protected $startVersion;
 
-	public function __construct($package)
+	public function __construct($package, $path = null)
 	{
 		$config = Config::getInstance();
-		$path = $config['path']['modules'] . $package . '/';
+		$path = isset($path) ? $path : $config['path']['modules'] . $package . '/';
 
 		if(!is_dir($path))
 			throw new ModuleInstallerError('Unable to find package at ' . $path);
@@ -40,7 +40,7 @@ class nModuleInstaller
 			// changes it for everything else that gets called, allowing us to easily roll back everything but
 			// additions to the database structure (new tables, indexes, foreign keys).
 			$db = DatabaseConnection::getConnection('default');
-			$db->autocommit(false);
+//			$db->autocommit(false);
 
 			$alreadyPresent = false;
 
@@ -189,6 +189,8 @@ class nModuleInstaller
 		$path = $this->path . 'install/';
 		$db = DatabaseConnection::getConnection('default');
 
+		$this->setVersion($this->installVersion, 'prepped');
+
 		$pathPre = $path . 'pre.php';
 		if(file_exists($pathPre) && ($moduleStatus === false || !in_array($moduleStatus, array('prescript', 'postscript'))))
 		{
@@ -228,9 +230,10 @@ class nModuleInstaller
 				$installPreScript = new $classname();
 				$installPreScript->run();
 			}
-			$this->setVersion($this->installVersion, 'postscript');
+
 		}
 
+		$this->setVersion($this->installVersion, 'postscript');
 		return true;
 	}
 
