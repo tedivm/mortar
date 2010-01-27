@@ -1,7 +1,15 @@
 <?php
 
-class GraffitiPluginCustomInstall extends MortarPluginCustomInstall
+class GraffitiInstallerPostscript extends MortarInstallerPostscript
 {
+	public $packageId;
+	public $package = 'Graffiti';
+	
+	public function __construct()
+	{
+		$packageInfo = new PackageInfo($this->package);
+		$this->packageId = $packageInfo->getId();
+	}
 
 	public function run()
 	{

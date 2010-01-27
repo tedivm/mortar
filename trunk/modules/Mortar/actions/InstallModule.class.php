@@ -38,7 +38,7 @@ class MortarActionInstallModule extends ActionBase
 				{
 					Cache::$runtimeDisable = true;
 					$moduleInstaller = new ModuleInstaller($installPackage);
-					$this->success = $moduleInstaller->fullInstall();
+					$this->success = $moduleInstaller->integrate();
 					Cache::$runtimeDisable = false;
 					Cache::clear();
 				}
@@ -83,11 +83,11 @@ class MortarActionInstallModule extends ActionBase
 						$url = Query::getUrl();
 						$url->id = $packageInfo->getId();
 						$url->action = 'ModulePermissions';
-						$this->ioHandler->addHeader('Location', (string) $url);
+		//				$this->ioHandler->addHeader('Location', (string) $url);
 						return true;
 					}
 				}
-				
+
 				$output = 'Module successfully installed';
 			}else{
 				$output = $this->form->getFormAs('Html');

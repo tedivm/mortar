@@ -1,14 +1,13 @@
 <?php
 
-class MortarPluginCustomInstall
+class MortarInstallerPostscript
 {
-	protected $package;
+	protected $package = 'Mortar';
 	protected $packageId;
 
-	public function __construct($package)
+	public function __construct()
 	{
-		$this->package = $package;
-		$packageInfo = new PackageInfo($package);
+		$packageInfo = new PackageInfo($this->package);
 		$this->packageId = $packageInfo->getId();
 	}
 
@@ -27,9 +26,9 @@ class MortarPluginCustomInstall
 		Hook::registerPlugin('Forms', 'checkSubmit', 'membergroup',
 								$this->packageId, 'FormInputMembergroupCheckSubmit');
 
-		Hook::registerPlugin('Forms', 'HtmlConvert', 'datetime', 
+		Hook::registerPlugin('Forms', 'HtmlConvert', 'datetime',
 								$this->packageId, 'FormInputDatetimeToHtml');
-		Hook::registerPlugin('Forms', 'checkSubmit', 'datetime', 
+		Hook::registerPlugin('Forms', 'checkSubmit', 'datetime',
 								$this->packageId, 'FormInputDatetimeCheckSubmit');
 		Hook::registerPlugin('Forms', 'Metadata', 'Base', $this->packageId, 'FormInputDatetimeMetadata');
 
