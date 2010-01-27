@@ -1,14 +1,13 @@
 <?php
 
-class TesseraPluginCustomInstall
+class TesseraInstallerPostscript
 {
-	protected $package;
+	protected $package = 'Tessera';
 	protected $packageId;
 
-	public function __construct($package)
+	public function __construct()
 	{
-		$this->package = $package;
-		$packageInfo = new PackageInfo($package);
+		$packageInfo = new PackageInfo($this->package);
 		$this->packageId = $packageInfo->getId();
 	}
 
