@@ -83,7 +83,7 @@ class MortarActionInstallModule extends ActionBase
 						$url = Query::getUrl();
 						$url->id = $packageInfo->getId();
 						$url->action = 'ModulePermissions';
-		//				$this->ioHandler->addHeader('Location', (string) $url);
+						$this->ioHandler->addHeader('Location', (string) $url);
 						return true;
 					}
 				}
