@@ -126,10 +126,12 @@ class Menu
 	 */
 	public function removeItemFromSubmenu($submenu, $name)
 	{
-		if ( (!isset($this->menuItems[$submenu])) || (!$this->menuItems[$submenu]['isMenu']) )
+		if ( !isset($this->menuItems[$submenu]) )
+			return false;
+		if (!($this->menuItems[$submenu]['item'] instanceof Menu))
 			return false;
 
-		$menu = $this->menuItems[$submenu];
+		$menu = $this->menuItems[$submenu]['item'];
 		$menu->removeItem($name);
 	}
 
