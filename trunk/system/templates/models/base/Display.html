@@ -44,13 +44,13 @@
 	<span class="meta_content">{{ model.createdOn|date('h:i:s a m/d/y') }}</span>
 	</div> 
 {% endif %}
-{% if model.lastModified %}
+{% if model.lastModified and model.lastModified != model.createdOn %}
 	<div class="meta_item">
 	<span class="meta_label"><strong>Last Modified:</strong></span>
 	<span class="meta_content">{{ model.lastModified|date('h:i:s a m/d/y') }}</span>
 	</div> 
 {% endif %}
-{% if model.publishDate %}
+{% if model.publishDate and model.publishDate != model.createdOn %}
 	<div class="meta_item">
 	<span class="meta_label"><strong>Publish Date:</strong></span>
 	<span class="meta_content">{{ model.publishDate|date('h:i:s a m/d/y') }}</span>
