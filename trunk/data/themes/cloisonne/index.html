@@ -10,6 +10,8 @@
 
 <div id="container">
 
+  <div class="main">
+
     <div id="header">
 	<img src="{{ theme.images['mortar-logo.png'] }}" alt="Mortar" />
         <h1>{{ sitename }}</h1>
@@ -19,17 +21,25 @@
 
 	<div id="subnav">
 		<ul>
-
+{% block topnav %}{% endblock %}
 		</ul>
 	</div> <!-- subnav -->
 
+{% block content %}
 	{{ content }}
+{% endblock %}
+
     </div> <!-- content -->
 
-    <div id="footer">
-    This site is Held Together By <a href="http://code.google.com/p/mortar/">Mortar</a>.
-    </div> <!-- footer -->
+  </div>
 
 </div>
+
+<div id="footer">
+	<div id="inside-footer">
+		<span>This site is Held Together By <a href="http://code.google.com/p/mortar/">Mortar</a>.</span>
+	</div>
+</div> <!-- footer -->
+
 </body>
 </html>
