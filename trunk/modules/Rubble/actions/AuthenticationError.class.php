@@ -48,6 +48,9 @@ class RubbleActionAuthenticationError extends ActionBase
 			$redirectUrl = $this->redirectUrl('Admin');
 			$this->ioHandler->addHeader('Location', (string) $redirectUrl);
 		}
+		$page = ActivePage::getInstance();
+		$page->showMenus(false);
+
 		return $this->errorMessage;
 	}
 
