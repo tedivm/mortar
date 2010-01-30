@@ -3,17 +3,17 @@
 <head>
 <title>{{ breadcrumbs.titlecrumbs }}</title>
 {{ head }}
-<link rel="icon" type="image/png" href="{{ env.siteLink }}system/assets/images/favicon.png" />
+<link rel="icon" type="image/png" href="{{ theme.images['favicon.png'] }}" />
 
 </head>
 <body>
 
-<div id="container">
+<div id="container" {% block containerclass %}{% endblock %}>
 
   <div class="main">
 
     <div id="header">
-	<img src="{{ theme.images['mortar-logo.png'] }}" alt="Mortar" />
+	<a href="{{ env.siteLink }}"><img src="{{ theme.images['mortar-logo.png'] }}" alt="Mortar" /></a>
         <h1>{{ sitename }}</h1>
     </div> <!-- header -->
 
