@@ -119,6 +119,13 @@ class Page implements ArrayAccess
 	protected $templateFile = 'index.html';
 
 	/**
+	 * Whether to display menus when rendering this page.
+	 *
+	 * @var bool
+	 */
+	protected $showMenus = true;
+
+	/**
 	 * This is a subtemplate containing technical headers for the html
 	 *
 	 * @access protected
@@ -161,6 +168,16 @@ class Page implements ArrayAccess
 	public function getTitle()
 	{
 		return $this->title;
+	}
+
+	/**
+	 * Sets the showMenus setting
+	 *
+	 * @param $b bool
+	 */
+	public function showMenus($b)
+	{
+		$this->showMenus = $b ? true : false;
 	}
 
 	/**
@@ -266,10 +283,14 @@ class Page implements ArrayAccess
 		$envBox = new TagBoxEnv();
 		$content['env'] = $envBox;
 
-		$menuSys = new MenuSystem();
-		isset($model) ? $menuSys->initMenus($model) : $menuSys->initMenus();
-		$menuBox = new TagBoxMenu($menuSys, $theme);
-		$content['menu'] = $menuBox;
+		// the menu system, which is unique and has its own special concerns
+
+		if($this->showMenus) {
+			$menuSys = new MenuSystem();
+			isset($model) ? $menuSys->initMenus($model) : $menuSys->initMenus();
+			$menuBox = new TagBoxMenu($menuSys, $theme);
+			$content['menu'] = $menuBox;
+		}
 
 		// finally, any non-box standalone tags go here
 		$content['pagetitle'] = $this->title;
