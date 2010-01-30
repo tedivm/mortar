@@ -2,6 +2,8 @@
 
 class MortarActionFontLookUp extends ActionBase
 {
+	public static $requiredPermission = 'Read';
+
 	protected $fontList = array();
 
 	public function logic()
