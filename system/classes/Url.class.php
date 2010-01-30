@@ -157,6 +157,15 @@ class Url
 				$permissions = new Permissions($this->attributes['locationId'], $userId);
 				return $permissions->isAllowed($requiredPermission);
 
+
+			}elseif(isset($this->attributes['type'])){
+
+				$action = (isset($this->attributes['action'])) ? $this->attributes['action'] : 'Read';
+				$resource = ModelRegistry::loadModel($this->attributes['type']);
+				$actionInfo = $resource->getAction($action);
+				$requiredPermission = staticHack($actionInfo['className'], 'requiredPermission');
+				return $resource->checkAuth($requiredPermission);
+
 			}elseif(isset($this->attributes['module'])){
 
 				$permissionsList = new PermissionLists($userId);
