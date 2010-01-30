@@ -25,7 +25,8 @@ class RubbleActionResourceNotFound extends RubbleActionAuthenticationError
 
 	public function viewAdmin()
 	{
-
+		$page = ActivePage::getInstance();
+		$page->showMenus(false);
 		$output = 'The page or resource you are looking for cannot be found.';
 		return $output;
 	}
