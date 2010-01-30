@@ -184,8 +184,26 @@ class InstallerProfileReader
 
 			$locations[$locationName]['name'] = $locationName;
 			$locations[$locationName]['longname'] = $parentName . $locationName;
+			$locations[$locationName]['type'] = (string) $location['type'];
 
-			$locations[$locationName]['inherits'] = (!isset($location['inherits']) || $location['inherits'] == 'true');
+			if(isset($location['inherit']))
+			{
+				$inheritsValue = (string) $location['inherit'];
+				$inheritsValue = $inheritsValue != 'false';
+			}else{
+				$inheritsValue = true;
+			}
+			$locations[$locationName]['inherits'] = $inheritsValue;
+
+			if(isset($location['form']))
+			{
+				$formValue = (string) $location['form'];
+				$formValue = $formValue == 'true';
+			}else{
+				$formValue = false;
+			}
+			$locations[$locationName]['form'] = $formValue;
+
 
 			if(isset($location->option))
 			{
@@ -201,9 +219,6 @@ class InstallerProfileReader
 			if(isset($location->user))
 					$locations[$locationName]['user'] = (string) $location->user;
 
-
-			$locations[$locationName]['type'] = (string) $location['type'];
-			$locations[$locationName]['form'] = (isset($location['form']) && $location['form'] == 'true');
 
 			if(isset($location['id']))
 				$locations[$locationName]['id'] = (string) $location['id'];
