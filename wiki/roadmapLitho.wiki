@@ -1,4 +1,4 @@
-#summary roadmap for Litho, th CMS
+#summary roadmap for Litho, the CMS
 
 = Introduction =
 
@@ -12,3 +12,6 @@ Litho is a basic CMS.
   * Compare Versions
   * Highlight changes
   * View "blame"
+  * Save drafts
+  * Autosave
+  * "Quick save"
