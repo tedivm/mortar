@@ -49,12 +49,12 @@ text-align: center;
 }
 
 #inside-footer {
-padding-top: 15px;
+padding-top: 1em;
 margin-left: auto;
 margin-right: auto;
 border-top: 3px solid #46484A;
 width: 960px;
-height: 100%;
+height: 1.8em;
 }
 
 #header, #subnav, #inside-footer {
