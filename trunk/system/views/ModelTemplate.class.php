@@ -27,6 +27,14 @@ class ViewModelTemplate extends ViewThemeTemplate
 		$parentPaths['module'] = $packagePath;
 		return $parentPaths;
 	}
+
+	protected function getTwigLoader($basePath)
+	{
+		$loader = parent::getTwigLoader($basePath);
+		$loader->useModel($this->model);
+		return $loader;
+	}
+
 }
 
 ?>

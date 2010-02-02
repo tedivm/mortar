@@ -11,7 +11,7 @@ class ViewStringTemplate extends ViewThemeTemplate
 		$this->name = $template;
 	}
 
-	protected function getTwigLoader()
+	protected function getTwigEnvironment()
 	{
 		$config = Config::getInstance();
 
