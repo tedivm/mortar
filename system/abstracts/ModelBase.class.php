@@ -407,18 +407,17 @@ abstract class ModelBase implements Model
 
 	public function getDescent()
 	{
-		return self::loadDescent($this->getType());
-		
+		return self::loadDescent($this->getType());	
 	}
 	
 	static function loadDescent($resourceType)
 	{
 		$type = self::loadParentType($resourceType);
 		if(isset($type)) {
-			$back = self::loadDescent($type);
+			$descent = self::loadDescent($type);
 
-			if(isset($back))
-				$descent = array_unshift($back, $type);
+			if(isset($descent))
+				array_unshift($descent, $type);
 			else
 				$descent = array($type);
 
