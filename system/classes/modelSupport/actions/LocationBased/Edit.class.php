@@ -18,7 +18,7 @@
 class ModelActionLocationBasedEdit extends ModelActionLocationBasedAdd
 {
 
-        public $adminSettings = array( 'headerTitle' => 'Edit' );
+	public $adminSettings = array( 'headerTitle' => 'Edit' );
 
 	/**
 	 * This defines the permission action that the user needs to run this. Permissions are based off of an action and
@@ -26,7 +26,7 @@ class ModelActionLocationBasedEdit extends ModelActionLocationBasedAdd
 	 *
 	 * @access public
 	 * @var string
-	 */
+	*/
 	public static $requiredPermission = 'Edit';
 
 	/**
@@ -45,7 +45,7 @@ class ModelActionLocationBasedEdit extends ModelActionLocationBasedAdd
 			foreach($inputGroups['model'] as $name) {
 				$input = $form->getInput('model_' . $name);
 				$input->setValue($this->model[$name]);
-				
+
 				if($name === 'title')
 					$input->setType('input');
 			}
@@ -70,23 +70,12 @@ class ModelActionLocationBasedEdit extends ModelActionLocationBasedAdd
 				$input = $form->getInput('location_groupOwner');
 				$input->setValue($this->model->getLocation()->getOwnerGroup());
 			}
+
 			if(in_array('publishDate', $inputGroups['location']))
 			{
 				$input = $form->getInput('location_publishDate');
-				$pubdate = date( 'm/d/y h:i a' , $this->model->getLocation()->getPublishDate()); 
+				$pubdate = date( 'm/d/y h:i a' , $this->model->getLocation()->getPublishDate());
 				$input->setValue($pubdate);
-			}
-			if(in_array('theme', $inputGroups['location']))
-			{
-				$input = $form->getInput('location_theme');
-				$locTheme = $this->model->getLocation()->getMeta('htmlTheme', true);
-				$input->setValue($locTheme);
-			}
-			if(in_array('template', $inputGroups['location']))
-			{
-				$input = $form->getInput('location_template');
-				$locTemp = $this->model->getLocation()->getMeta('pageTemplate', true);
-				$input->setValue($locTemp);
 			}
 		}
 
