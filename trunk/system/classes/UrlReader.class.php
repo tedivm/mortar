@@ -3,17 +3,15 @@
 class UrlReader
 {
 	protected $trailingSlash = false;
-
 	protected $attributes = array();
 
-	static $resourceMaps = array('users' => 'User', 'groups' => 'MemberGroup');
 	static $endingAttributes = array('module', 'type', 'id', 'action');
 
 	public function readUrl($getValues, $domain = null)
 	{
 		if(isset($getValues['XDEBUG_PROFILE']))
 			unset($getValues['XDEBUG_PROFILE']);
-			
+
 		if(isset($getValues['p']))
 		{
 			$this->readPath($getValues['p']);
@@ -130,9 +128,9 @@ class UrlReader
 				}
 		}
 
-		if(isset(self::$resourceMaps[$rootPiece]))
+		if($modelType = Url::getModelFromShortcut($rootPiece))
 		{
-			$this->setAttribute('type', self::$resourceMaps[$rootPiece]);
+			$this->setAttribute('type', $modelType);
 			if(isset($pathPieces[1]))
 			{
 				$this->setAttribute('id', $pathPieces[1]);
