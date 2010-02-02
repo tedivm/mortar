@@ -23,6 +23,24 @@ class Url
 	 */
 	protected $attributes = array();
 
+	static $resourceMaps = array('users' => 'User', 'groups' => 'MemberGroup');
+
+	static public function getSpecialPaths($full = false)
+	{
+		return $full ? self::$resourceMaps : array_keys(self::$resourceMaps);
+	}
+
+	static public function getModelFromShortcut($shortcut)
+	{
+		return isset(self::$resourceMaps[$shortcut]) ? self::$resourceMaps[$shortcut] : false;
+	}
+
+	static public function getShortcutFromModel($shortcut)
+	{
+		$searchArray = array_flip(self::$resourceMaps);
+		return isset($searchArray[$shortcut]) ? $searchArray[$shortcut] : false;
+	}
+
 	/**
 	 * This function returns a string, the Url
 	 *

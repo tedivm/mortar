@@ -154,13 +154,11 @@ class UrlWriter
 		return $path;
 	}
 
-
-
 	static function buildResourcePath($path, &$attributes)
 	{
-		if(in_array($attributes['type'], UrlReader::$resourceMaps))
+		if($shortCut = Url::getShortcutFromModel($attributes['type']))
 		{
-			$path .= array_search($attributes['type'], UrlReader::$resourceMaps) . '/';
+			$path .= $shortCut . '/';
 		}else{
 			$path .= 'resources/' . $attributes['type'] . '/';
 		}
