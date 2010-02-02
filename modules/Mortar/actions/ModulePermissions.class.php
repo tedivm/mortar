@@ -109,7 +109,7 @@ class MortarActionModulePermissions extends ActionBase
 			} // foreach($membergroups as $group)
 		} // foreach($this->models as $model)
 
-        return $form;
+		return $form;
 	}
 
 	protected function processInput($input)
@@ -120,7 +120,6 @@ class MortarActionModulePermissions extends ActionBase
 		$actionList = PermissionActionList::getActionList();
 
 		$memberGroupRecords = new ObjectRelationshipMapper('memberGroup');
-		$memberGroupRecords->is_system = 0;
 		$memberGroupRecords->select();
 		$membergroups = $memberGroupRecords->resultsToArray();
 
