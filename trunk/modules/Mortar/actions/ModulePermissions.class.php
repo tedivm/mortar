@@ -4,9 +4,9 @@ class MortarActionModulePermissions extends ActionBase
 {
 
 	public static $requiredPermission = 'Admin';
-	
+
 	public $adminSettings = array( 'headerTitle' => 'Module Permissions', 'useRider' => true );
-	
+
 	protected $formName = 'ModulePermissions';
 
 	protected $module;
@@ -17,7 +17,8 @@ class MortarActionModulePermissions extends ActionBase
 	{
 		$query = Query::getQuery();
 
-		if ( (!isset($query['id'])) || (!is_numeric($query['id'])) ) {
+		if(!isset($query['id']) || !is_numeric($query['id']))
+		{
 			$this->redirectAway();
 			return false;
 		}
@@ -31,21 +32,22 @@ class MortarActionModulePermissions extends ActionBase
 
 		$this->adminSettings['titleRider'] = ' for ' . $this->moduleName;
 
-		if( count($this->models) === 0 ) {
+		if(count($this->models) === 0 )
+		{
 			$this->redirectAway();
 			return false;
 		}
 
 		$this->form = $this->getForm();
 
-                if($this->form->checkSubmit())
-                {
-                        $this->formStatus = ($this->processInput($this->form->getInputHandler()));
-                }
+		if($this->form->checkSubmit())
+		{
+			$this->formStatus = ($this->processInput($this->form->getInputHandler()));
+		}
 	}
 
-        protected function getForm()
-        {
+	protected function getForm()
+	{
 		$form = new Form($this->formName . '_' . $this->moduleName);
 
 		$actionList = PermissionActionList::getActionList();
@@ -55,30 +57,36 @@ class MortarActionModulePermissions extends ActionBase
 		$memgroups = $memberGroupRecords->resultsToArray();
 		$membergroups = array();
 
-		foreach($memgroups as $group) {
+		foreach($memgroups as $group)
+		{
 			if($group['memgroup_name'] === 'Guest')
+			{
 				$guestGroup = $group;
-			elseif($group['is_system'] == 0)
+			}elseif($group['is_system'] == 0){
 				$membergroups[] = $group;
+			}
 		}
 
 		if(isset($guestGroup))
 			$membergroups[] = $guestGroup;
 
-		foreach($this->models as $model) {
-			$form->changeSection('model_' . $model['name'])->
-				setLegend($model['name']);
+		foreach($this->models as $model)
+		{
+			$form->changeSection('model_' . $model['name'])
+				->setLegend($model['name']);
 
-			foreach($membergroups as $group) {
+			foreach($membergroups as $group)
+			{
 				$x = 0;
 				$first = true;
 				$last = false;
 
-				foreach($actionList as $action) {
+				foreach($actionList as $action)
+				{
 					if(++$x === count($actionList))
 						$last = true;
 
-					$input = $form->createInput($model['name'] . '_' . $group['memgroup_name'] . 
+					$input = $form->createInput($model['name'] . '_' . $group['memgroup_name'] .
 						'_' . $action)->
 						setType('checkbox')->
 						setLabel($action);
@@ -86,21 +94,22 @@ class MortarActionModulePermissions extends ActionBase
 					if( ($group['memgroup_name'] === 'Administrator') || ($action === 'Read') )
 						$input->check(1);
 
-					if($first) {
-						$input->setPretext("<fieldset><legend>".
-							$group['memgroup_name']."</legend>");
+					if($first)
+					{
+						$input->setPretext('<fieldset><legend>' . $group['memgroup_name']."</legend>");
 						$first = false;
 					}
 
-					if($last) {
-						$input->setPosttext("</fieldset>");
+					if($last)
+					{
+						$input->setPosttext('</fieldset>');
 						$input->noBreak(true);
 					}
-				}
-			}
-		}
+				} //foreach($actionList as $action)
+			} // foreach($membergroups as $group)
+		} // foreach($this->models as $model)
 
-                return $form;
+        return $form;
 	}
 
 	protected function processInput($input)
@@ -121,9 +130,13 @@ class MortarActionModulePermissions extends ActionBase
 		foreach($this->models as $model)
 			foreach($membergroups as $group)
 				foreach($actionList as $action)
-					if(isset($input[$model['name'].'_'.$group['memgroup_name'].'_'.$action]))
-						$permissions[$group['memgroup_name']]->
-							setPermission($model['name'], $action, true);
+		{
+			if(isset($input[$model['name'].'_'.$group['memgroup_name'].'_'.$action]))
+			{
+				$permissions[$group['memgroup_name']]->
+					setPermission($model['name'], $action, true);
+			}
+		}
 
 		foreach($permissions as $perm)
 			$perm->save();
@@ -146,7 +159,6 @@ class MortarActionModulePermissions extends ActionBase
 	public function viewAdmin()
 	{
 		$this->setTitle($this->adminSettings['headerTitle'] . $this->adminSettings['titleRider']);
-
 		return $this->form->getFormAs('Html');
 	}
 
