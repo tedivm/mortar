@@ -4,7 +4,7 @@ class ModelActionLocationBasedThemeInfo extends ModelActionLocationBasedAdd
 {
 	public $adminSettings = array( 'headerTitle' => 'Theme Settings' );
 
-	public static $requiredPermission = 'Admin';
+	public static $requiredPermission = 'Theme';
 
 	protected function getForm()
 	{
