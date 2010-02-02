@@ -405,6 +405,47 @@ abstract class ModelBase implements Model
 		return $actions;
 	}
 
+	public function getDescent()
+	{
+		return self::loadDescent($this->getType());
+		
+	}
+	
+	static function loadDescent($resourceType)
+	{
+		$type = self::loadParentType($resourceType);
+		if(isset($type)) {
+			$back = self::loadDescent($type);
+
+			if(isset($back))
+				$descent = array_unshift($back, $type);
+			else
+				$descent = array($type);
+
+			return $descent;
+		} else {
+			return null;
+		}
+	}
+
+	public function getParentType()
+	{
+		$type = $this->getType();
+		$parentType = self::loadParentType($type);
+		return $parentType;
+	}
+
+	static function loadParentType($resourceType)
+	{
+		$moduleInfo = ModelRegistry::getHandler($resourceType);	
+		$reflection = new ReflectionClass($moduleInfo['class']);
+		$parentClass = $reflection->getParentClass();
+		if($parentType = $parentClass->getStaticPropertyValue('type'))
+			return $parentType;
+		else
+			return null;
+	}
+
 	/**
 	 * This function is used by the getAction function when no action is available in the module.
 	 *
