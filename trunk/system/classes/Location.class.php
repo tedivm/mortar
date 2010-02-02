@@ -384,7 +384,7 @@ class Location
 	 */
 	public function inheritsPermission()
 	{
-		return ($this->inherits == 1);
+		return ($this->inherit == 1);
 	}
 
 	/**
@@ -394,7 +394,8 @@ class Location
 	 */
 	public function setInherit($on = true)
 	{
-		$this->inherits = $on ? 1 : 0;
+		$this->inherit = $on ? 1 : 0;
+		return (bool) $this->inherit;
 	}
 
 	/**
@@ -455,7 +456,7 @@ class Location
 					$locationInfo['publishDate'] = strtotime($dbLocation->publishDate . 'UTC');
 					$locationInfo['owner'] = $dbLocation->owner;
 					$locationInfo['group'] = $dbLocation->groupOwner;
-					$locationInfo['inherits'] = ($dbLocation->inherits == 1);
+					$locationInfo['inherit'] = ($dbLocation->inherits == 1);
 					$locationInfo['status'] = $dbLocation->resourceStatus;
 
 					$db_meta = new ObjectRelationshipMapper('locationMeta');
