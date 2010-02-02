@@ -63,6 +63,13 @@ class Location
 	 * @var int
 	 */
 	protected $createdOn;
+
+	/**
+	 * This is a timestamp representing the date the location was published on
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $publishDate;
 
 	/**
@@ -405,9 +412,13 @@ class Location
 	 */
 	public function setName($name)
 	{
-		if(in_array(strtolower($name), $this->reservedNames))
+		$specialPaths = Url::getSpecialPaths();
+		$reservedNames = array_merge($this->reservedNames, $specialPaths);
+
+		if(in_array(strtolower($name), $specialPaths))
 			throw new LocationError('Attempted to name location a reserved name: ' . $name);
 
+		//$reservedUrls = UrlReader::getSpecialPaths();
 
 		$this->name = str_replace(' ', '_', $name);
 	}
