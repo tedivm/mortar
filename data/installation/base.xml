@@ -73,7 +73,7 @@
 
 
 				<children>
-					<location name="Trash" type="TrashCan" id="0" />
+					<location name="Trash" type="TrashCan" id="0" inherit="false"/>
 
 					<location name="Site" form="true" type="Site">
 
