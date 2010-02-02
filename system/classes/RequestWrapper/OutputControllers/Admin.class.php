@@ -16,6 +16,8 @@
  */
 class AdminOutputController extends AbstractOutputController
 {
+	protected $permission = 'Admin';
+
 	/**
 	 * On start set the active resource to the ActivePage, set the theme, and add the navigation filters.
 	 *
@@ -95,7 +97,7 @@ class AdminControllerContentFilter
 		$processedOutput = new ViewThemeTemplate($theme, 'adminContent.html');
 
 		$title = (isset($action->adminSettings['headerTitle'])) ? $action->adminSettings['headerTitle'] : '';
-		$title .= (isset($action->adminSettings['useRider']) && $action->adminSettings['useRider'] 
+		$title .= (isset($action->adminSettings['useRider']) && $action->adminSettings['useRider']
 			&& isset($action->adminSettings['titleRider'])) ? $action->adminSettings['titleRider'] : '';
 
 		$processedOutput->addContent(array('content' => $output, 'title' => $title));

@@ -257,7 +257,7 @@ abstract class AbstractOutputController
 			if(isset($this->permission)
 				&& !isset($action->{$settingsArrayName}['EnginePermissionOverride']))
 			{
-				if(!$action->checkAuth(staticHack($formatFilter, 'permission')))
+				if(!$action->checkAuth($this->permission))
 					throw new AuthenticationError('Not allowed to access this engine at this location.');
 			}
 
@@ -267,6 +267,7 @@ abstract class AbstractOutputController
 
 		return true;
 	}
+
 }
 
 
