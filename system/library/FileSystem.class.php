@@ -131,6 +131,11 @@ class FileSystem
 				}
 			}
 			rmdir($file);
+		}elseif(is_file($file)){
+			unlink($file);
+		}else{
+			$errorLabel = is_scalar($file) ? $file : gettype($file);
+			throw new FileSystemError('Passed Invalid Path (it\'s not a file or directory) ' . $errorLabel);
 		}
 	}
 }
