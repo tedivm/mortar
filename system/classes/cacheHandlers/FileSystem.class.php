@@ -250,7 +250,7 @@ class cacheHandlerFileSystem implements cacheHandler
 			}
 
 			if($dir)
-				deltree($path);
+				FileSystem::deleteRecursive($path);
 
 		}else{
 			return false;
