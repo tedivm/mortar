@@ -24,7 +24,7 @@ class Cache
 	 *
 	 * @var int seconds
 	 */
-	public $cacheTime = 1800;
+	public $cacheTime = 432000; // five days
 
 	/**
 	 * This is a flag to see if a valid response is returned.
