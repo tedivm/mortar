@@ -212,6 +212,8 @@ class Location
 
 	public function setPublishDate($date)
 	{
+		if(is_numeric($date))
+			throw new LocationError('Unable to set publish date without valud timestamp');
 		$this->publishDate = $date;
 	}
 
