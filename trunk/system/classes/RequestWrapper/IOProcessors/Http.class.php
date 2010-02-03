@@ -68,10 +68,16 @@ class IOProcessorHttp extends IOProcessorCli
 	/**
 	 * Session cookie expiration time (0 makes it a session only cookie)
 	 *
-	 * @static
 	 * @var int
 	 */
-	static $cookieTimeLimit = 0;
+	static $cookieTimeLimit = 432000; // 432000 == five days
+
+	/**
+	 * Enables or disabled sessions for the handler.
+	 *
+	 * @var bool
+	 */
+	static $sessionsEnabled = true;
 
 	/**
 	 * Length of each "chunk" to be echo'd, since massive blocks tend to slow the php echo function down
@@ -116,9 +122,9 @@ class IOProcessorHttp extends IOProcessorCli
 	}
 
 	/**
-	 * This function is called by the initialization function on load
+	 * This function is called by the initialization function on load. It tells the system not to stop if the user
+	 * breaks the connection and deals with enabling the session.
 	 *
-	 * @access protected
 	 */
 	protected function start()
 	{
@@ -127,7 +133,7 @@ class IOProcessorHttp extends IOProcessorCli
 		if(INSTALLMODE === true)
 			return false;
 
-		if(session_id() == '')
+		if(self::$sessionsEnabled && session_id() == '')
 		{
 			$site = ActiveSite::getSite();
 			$siteLocation = $site->getLocation();
@@ -309,7 +315,6 @@ class IOProcessorHttp extends IOProcessorCli
 	/**
 	 * Outputs the stored http headers, as well as some extra caching related headers
 	 *
-	 * @access protected
 	 */
 	protected function sendHeaders()
 	{
@@ -448,7 +453,6 @@ class SessionObserver
 	 * This is the delay between marking a session as expired and actually killing it this is needed because quick
 	 * concurrent connections (ajax) doesn't handle immediate session changes well
 	 *
-	 * @access protected
 	 * @var int
 	 */
 	protected $obsoleteTime = 2;
@@ -476,7 +480,6 @@ class SessionObserver
 	 * This function stores certain data in the session for security purposes and handles regenerating the session id
 	 * in a secure manner.
 	 *
-	 * @access protected
 	 */
 	protected function regenerateSession()
 	{
@@ -583,7 +586,6 @@ class ResponseCodeLookup
 	/**
 	 * This is an array with the http code as the index and its detailed string as the value
 	 *
-	 * @static
 	 * @var array
 	 */
 	static $lookupArray = array(
@@ -636,7 +638,6 @@ class ResponseCodeLookup
 	/**
 	 * Returns the full status string from a status code
 	 *
-	 * @static
 	 * @param int $code
 	 * @return string
 	 */
