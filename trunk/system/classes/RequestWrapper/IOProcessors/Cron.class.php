@@ -33,9 +33,8 @@ class IOProcessorCron extends IOProcessorCli
 		$pidDir = dirname($pidPath);
 
 		// delete and remake cron folder so the only pid is this one
-
 		if(is_dir($pidDir))
-			deltree($pidDir);
+			FileSystem::deleteRecursive($pidDir);;
 
 		mkdir($pidDir, 0700);
 
