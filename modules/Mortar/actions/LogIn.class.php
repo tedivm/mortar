@@ -95,6 +95,8 @@ class MortarActionLogIn extends ActionBase
 
 	public function viewAdmin()
 	{
+		$page = ActivePage::getInstance();
+		$page->showMenus(false);
 		$output = $this->viewHtml();
 		$this->setTitle($this->adminSettings['headerTitle']);
 		return $output;
