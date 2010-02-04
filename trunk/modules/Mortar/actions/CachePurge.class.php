@@ -19,7 +19,10 @@ class MortarActionCachePurge extends ActionBase
 		$clearPath[] = $config['path']['temp'] . 'loginTracker.sqlite';
 
 		foreach($clearPath as $path)
-			FileSystem::deleteRecursive($path);
+		{
+			if(is_dir($path))
+				FileSystem::deleteRecursive($path);
+		}
 
 		return true;
 	}
