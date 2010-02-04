@@ -68,52 +68,113 @@ class phpInfo
 			$phpInfoString = ob_get_clean();
 
 			$loadedExtensions = get_loaded_extensions();
-			$excludedExtentions = $loadedExtensions;
-
-			$phpinfo = array();
-			$currentKey = 'phpinfo';
-			if(preg_match_all(self::$infoRegex, $phpInfoString, $matches, PREG_SET_ORDER))
+			if(substr($phpInfoString, 0, 9) === 'phpinfo()')
 			{
-				foreach($matches as $match)
-				{
-					if(strlen($match[1]))
-					{
-						$phpinfo[$match[1]] = array();
-						$currentKey = $match[1];
-
-						if($key = array_search($currentKey, $excludedExtentions))
-							unset($excludedExtentions[$key]);
-					}else{
-
-						if($match[2] == 'Directive')
-							continue;
-
-						if(!isset($match[3]))
-							continue;
-
-						$value = (isset($match[4])) ? $match[4] : $match[3];
-
-						if($value == '<i>no value</i>')
-							continue;
-
-						$phpinfo[$currentKey][$match[2]] = $value;
-					}
-				}
-
-				unset($phpinfo['PHP License']);
-				unset($phpinfo['PHP Variables']);
-				unset($phpinfo['Environment']);
-				unset($phpinfo['Additional Modules']);
-				unset($phpinfo['HTTP Headers Information']);
-				unset($phpinfo['Apache Environment']);
+				$phpinfo = self::loadFromCli($phpInfoString);
+			}else{
+				$phpinfo = self::loadFromWeb($phpInfoString);
 			}
+
+			unset($phpinfo['Environment']);
+
 			$phpinfo['loadedExtension'] = $loadedExtensions;
 			$cache->storeData($phpinfo);
 		}
 
+
 		self::$allModules = $phpinfo['loadedExtension'];
 		unset($phpinfo['loadedExtension']);
 		self::$moduleInfo = $phpinfo;
+	}
+
+	static protected function loadFromWeb($phpinfo)
+	{
+		$infoArray = array();
+		$currentKey = 'phpinfo';
+		if(preg_match_all(self::$infoRegex, $phpinfo, $matches, PREG_SET_ORDER))
+		{
+			foreach($matches as $match)
+			{
+				if(strlen($match[1]))
+				{
+					$infoArray[$match[1]] = array();
+					$currentKey = $match[1];
+				}else{
+
+					if($match[2] == 'Directive')
+						continue;
+
+					if(!isset($match[3]))
+						continue;
+
+					$value = $match[3];
+
+					if($value == '<i>no value</i>')
+						continue;
+
+					$infoArray[$currentKey][$match[2]] = $value;
+				}
+			}
+
+			unset($infoArray['PHP License']);
+			unset($infoArray['PHP Variables']);
+			unset($infoArray['Additional Modules']);
+			unset($infoArray['HTTP Headers Information']);
+			unset($infoArray['Apache Environment']);
+		}
+
+		return $infoArray;
+	}
+
+	static protected function loadFromCli($phpinfo)
+	{
+		$infoArray = array();
+		$currentSection = 'phpinfo';
+
+		$index = 0;
+		$strlen = strlen($phpinfo);
+		$lastLine = '';
+		while($index < $strlen)
+		{
+			$nextNewLine = strpos($phpinfo, "\n", $index);
+			if($nextNewLine !== false)
+			{
+				$currentLine = trim(substr($phpinfo, $index, $nextNewLine - $index));
+				$index = $nextNewLine + 1;
+			}else{
+				$currentLine = trim(substr($phpinfo, $index));
+				$index = $strlen;
+			}
+
+			switch(true)
+			{
+				case (strpos($currentLine, '=>') !== false):
+
+
+					$pieces = explode('=>', $currentLine);
+					$name = trim($pieces[0]);
+					$value = trim($pieces[1]);
+
+					if($name == 'Directive' || $value == 'no value')
+						break;
+
+					$infoArray[$currentSection][$name] = $value;
+					break;
+
+				// lines to skip
+				case $currentLine == '':
+				case (strpos($currentLine, 'Warning: phpinfo():') !== false):
+				case (strpos($currentLine, 'Call Stack:') !== false):
+					break;
+
+
+				case ctype_alnum($currentLine):
+					$currentSection = $currentLine;
+					break;
+			}
+		}
+
+		return $infoArray;
 	}
 }
 
