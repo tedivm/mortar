@@ -261,6 +261,8 @@ abstract class AbstractOutputController
 					throw new AuthenticationError('Not allowed to access this engine at this location.');
 			}
 
+		}catch(AuthenticationError $e){
+			throw $e;
 		}catch(Exception $e){
 			return false;
 		}
