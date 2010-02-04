@@ -12,6 +12,7 @@ class RubbleActionAuthenticationError extends ActionBase
 	protected $unauthenticatedErrorCode = 401;
 
 	protected $errorMessage = 'You do not have the appropriate permissions to access this resource.';
+
 	public function logic()
 	{
 		if(isset($this->argument) && is_numeric($this->argument))
