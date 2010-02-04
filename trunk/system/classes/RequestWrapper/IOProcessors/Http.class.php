@@ -291,8 +291,12 @@ class IOProcessorHttp extends IOProcessorCli
 		{
 			$bufferSize = self::$echoBufferSize * 1024;
 
+			$throttle = false;
 			if(self::$maxTransferSpeed)
+			{
+				$throttle = true;
 				$breakAt = floor((self::$maxTransferSpeed * 1024) / self::$echoBufferSize);
+			}
 
 			$x = 1;
 
@@ -300,7 +304,7 @@ class IOProcessorHttp extends IOProcessorCli
 			{
 				echo substr($output, $start, $bufferSize);
 
-				if(isset($breakAt) && ($breakAt % $x) === 0)
+				if($throttle && ($breakAt % $x) === 0)
 				{
 					$x = 1;
 					sleep(1);
