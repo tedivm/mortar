@@ -64,6 +64,12 @@ RewriteRule ^(.*) index.php?p=$1 [QSA]
     Order allow,deny
     Deny from all
 </Files>
+
+<Files ~ "\.ini$">
+    Order allow,deny
+    Deny from all
+</Files>
+
 ';
 
 		$escapedHtaccess = htmlentities($htaccessContent);
