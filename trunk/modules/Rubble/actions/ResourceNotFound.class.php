@@ -2,8 +2,8 @@
 
 class RubbleActionResourceNotFound extends RubbleActionAuthenticationError
 {
-	public $AdminSettings = array(	'linkTab' => 'Universal',
-									'headerTitle' => '404 Error');
+	public $adminSettings = array('headerTitle' => '404 Error');
+	public $htmlSettings = array('headerTitle' => '404 Error');
 	static $requiredPermission = 'Read';
 
 	protected $authenticatedErrorCode = 404;
@@ -13,13 +13,14 @@ class RubbleActionResourceNotFound extends RubbleActionAuthenticationError
 
 	public function viewHtml($page)
 	{
+		$page->setTitle($this->htmlSettings['headerTitle']);
 		return $this->errorMessage;
 	}
 
 	public function viewAdmin($page)
 	{
-		$page = ActivePage::getInstance();
 		$page->showMenus(false);
+		$page->setTitle($this->adminSettings['headerTitle']);
 
 		return $this->errorMessage;
 	}

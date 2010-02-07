@@ -2,9 +2,10 @@
 
 class RubbleActionAuthenticationError extends ActionBase
 {
-	public $AdminSettings = array(	'linkTab' => 'Universal',
-									'headerTitle' => 'Forbidden',
-									'EnginePermissionOverride' => true);
+	public $adminSettings = array(	'headerTitle' => 'Forbidden',
+					'EnginePermissionOverride' => true);
+	public $htmlSettings = array(	'headerTitle' => 'Forbidden');
+
 
 	static $requiredPermission = 'Read';
 
@@ -37,6 +38,7 @@ class RubbleActionAuthenticationError extends ActionBase
 			$redirectUrl = $this->redirectUrl('Html');
 			$this->ioHandler->addHeader('Location', (string) $redirectUrl);
 		}
+		$page->setTitle($this->htmlSettings['headerTitle']);
 
 		return $this->errorMessage;
 	}
@@ -50,6 +52,7 @@ class RubbleActionAuthenticationError extends ActionBase
 			$this->ioHandler->addHeader('Location', (string) $redirectUrl);
 		}
 		$page->showMenus(false);
+		$page->setTitle($this->adminSettings['headerTitle']);
 
 		return $this->errorMessage;
 	}

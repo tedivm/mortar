@@ -2,9 +2,9 @@
 
 class RubbleActionMaintenanceMode extends RubbleActionAuthenticationError
 {
-	public $AdminSettings = array(	'linkTab' => 'Universal',
-									'headerTitle' => 'Forbidden',
-									'EnginePermissionOverride' => true);
+	public $adminSettings = array(	'headerTitle' => 'Maintenance',
+					'EnginePermissionOverride' => true);
+	public $htmlSettings = array(	'headerTitle' => 'Maintenance');
 
 	static $requiredPermission = 'Read';
 
@@ -24,6 +24,7 @@ class RubbleActionMaintenanceMode extends RubbleActionAuthenticationError
 
 	public function viewHtml($page)
 	{
+		$page->setTitle($this->htmlSettings['headerTitle']);
 		return $this->errorMessage;
 	}
 
