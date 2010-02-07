@@ -169,6 +169,20 @@ abstract class ModelActionBase implements ActionInterface
 	}
 
 	/**
+	 * Returns the name of the action.
+	 *
+	 * @return string
+	 */
+	public function getName()
+	{
+		if (strpos($this->actionName, $this->type) === false) {
+			return $this->actionName;
+		} else {
+			return substr($this->actionName, strlen($this->type));
+		}
+	}
+
+	/**
 	 * This creates the permission object and saves it. This function can be overwritten for special purposes, such as
 	 * with the Add class which needs to check the parent models permission, not the current model.
 	 *
