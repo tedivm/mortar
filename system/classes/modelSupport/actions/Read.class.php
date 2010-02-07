@@ -34,7 +34,7 @@ class ModelActionRead extends ModelActionBase
 	 *
 	 * @return string
 	 */
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
 		$page = ActivePage::getInstance();
 
@@ -52,7 +52,7 @@ class ModelActionRead extends ModelActionBase
 	 *
 	 * @return string This is the html that will get injected into the template.
 	 */
-	public function viewHtml()
+	public function viewHtml($page)
 	{
 		$page = ActivePage::getInstance();
 

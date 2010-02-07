@@ -104,9 +104,9 @@ class ModelActionLocationBasedThemeInfo extends ModelActionLocationBasedAdd
 		return $this->model->save();
 	}
 
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
-		$output = parent::viewAdmin();
+		$output = parent::viewAdmin($page);
 		$this->setTitle($this->adminSettings['headerTitle']);
 		return $output;
 	}

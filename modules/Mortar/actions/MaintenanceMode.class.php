@@ -31,7 +31,7 @@ class MortarActionMaintenanceMode extends FormAction
 		return true;
 	}
 
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
 		$this->setTitle($this->adminSettings['headerTitle']);
 

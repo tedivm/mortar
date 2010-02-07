@@ -25,16 +25,16 @@ class RubbleActionResourceMoved extends ActionBase
 		$this->ioHandler->addHeader('Location', (string) $redirectUrl);
 	}
 
-	public function viewHtml()
+	public function viewHtml($page)
 	{
 		$link = $this->redirectUrl->getLink('new location');
 		return '<p>This page has been moved to a ' . trim($link, PHP_EOL) .
 				', please wait a moment while we redirect you.</p>';
 	}
 
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
-		return $this->viewHtml();
+		return $this->viewHtml($page);
 	}
 
 
