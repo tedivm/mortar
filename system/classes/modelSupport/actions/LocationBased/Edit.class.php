@@ -18,7 +18,8 @@
 class ModelActionLocationBasedEdit extends ModelActionLocationBasedAdd
 {
 
-	public $adminSettings = array( 'headerTitle' => 'Edit' );
+	public $adminSettings = array( 'headerTitle' => 'Edit', 'useRider' => true );
+	public $htmlSettings = array( 'headerTitle' => 'Edit', 'useRider' => true );
 
 	/**
 	 * This defines the permission action that the user needs to run this. Permissions are based off of an action and

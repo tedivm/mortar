@@ -240,9 +240,10 @@ class ModelActionAdd extends ModelActionBase
 	public function viewHtml()
 	{
 		$form = $this->viewAdmin();
+		$this->htmlSettings['titleRider'] = " New " . $this->model->getType();
 		$title = $this->htmlSettings['headerTitle'];
-		$title .= (isset($htmlSettings['useRider']) && $htmlSettings['useRider'])
-			? $htmlSettings['titleRider']
+		$title .= (isset($this->htmlSettings['useRider']) && $this->htmlSettings['useRider'])
+			? $this->htmlSettings['titleRider']
 			: '';
 		$this->setTitle($title);
 		return $form;
