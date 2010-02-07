@@ -60,6 +60,11 @@ abstract class ActionBase implements ActionInterface
 		return $this->permissionObject->isAllowed($action, $type);
 	}
 
+	public function getName()
+	{
+		return $this->actionName;
+	}
+
 	protected function setTitle($title)
 	{
 		$page = ActivePage::getInstance();

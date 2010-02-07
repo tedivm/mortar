@@ -91,6 +91,8 @@ class AdminControllerContentFilter
 		$action = $adminController->getAction();
 		$page = $adminController->getResource();
 
+		$page->addRegion('action', $action->getName());
+
 		$themePath = $page->getThemePath();
 		$theme = $page->getTheme();
 

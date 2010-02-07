@@ -30,7 +30,6 @@ class HtmlOutputController extends AbstractOutputController
 	protected function start()
 	{
 		$page = ActivePage::getInstance();
-		$page->addRegion('pagetitle', 'Mortar');
 
 		$query = Query::getQuery();
 		if(isset($query['location'])) {
@@ -86,6 +85,8 @@ class HtmlControllerContentFilter
 	{
 		$action = $htmlController->getAction();
 		$page = $htmlController->getResource();
+
+		$page->addRegion('action', $action->getName());
 
 		return $output;
 	}
