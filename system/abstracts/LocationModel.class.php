@@ -403,6 +403,7 @@ abstract class LocationModel extends ModelBase
 		$locationInfo['owner'] = $location->getOwner();
 		$locationInfo['group'] = $location->getOwnerGroup();
 		$locationInfo['name'] = $location->getName();
+		$locationInfo['status'] = $location->getStatus();
 		$array = array_merge($array, $locationInfo);
 		return $array;
 	}
