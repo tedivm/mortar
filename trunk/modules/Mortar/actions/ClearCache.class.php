@@ -12,7 +12,7 @@ class MortarActionClearCache extends ActionBase
 	}
 
 
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
 		$this->setTitle($this->adminSettings['headerTitle']);
 

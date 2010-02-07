@@ -155,7 +155,7 @@ class MortarActionModulePermissions extends ActionBase
 		$this->ioHandler->addHeader('Location', (string) $url);
 	}
 
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
 		$this->setTitle($this->adminSettings['headerTitle'] . $this->adminSettings['titleRider']);
 		return $this->form->getFormAs('Html');

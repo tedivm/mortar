@@ -40,7 +40,7 @@ class GraffitiActionSetTaggedModels extends ActionBase
 		}
 	}
 
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
 
 	}

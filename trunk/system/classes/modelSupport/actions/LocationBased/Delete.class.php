@@ -75,7 +75,7 @@ class ModelActionLocationBasedDelete extends ModelActionLocationBasedEdit
 	}
 
 
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
 	        $this->setTitle($this->adminSettings['headerTitle']);
 
@@ -96,7 +96,7 @@ class ModelActionLocationBasedDelete extends ModelActionLocationBasedEdit
 		}
 	}
 
-	public function viewHtml()
+	public function viewHtml($page)
 	{
 		return '';
 	}

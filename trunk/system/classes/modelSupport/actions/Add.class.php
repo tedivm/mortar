@@ -197,7 +197,7 @@ class ModelActionAdd extends ModelActionBase
 	 *
 	 * @return string
 	 */
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
 		$this->adminSettings['titleRider'] = " New " . $this->model->getType();
 		$title = $this->adminSettings['headerTitle'];
@@ -237,9 +237,9 @@ class ModelActionAdd extends ModelActionBase
 		}
 	}
 
-	public function viewHtml()
+	public function viewHtml($page)
 	{
-		$form = $this->viewAdmin();
+		$form = $this->viewAdmin($page);
 		$this->htmlSettings['titleRider'] = " New " . $this->model->getType();
 		$title = $this->htmlSettings['headerTitle'];
 		$title .= (isset($this->htmlSettings['useRider']) && $this->htmlSettings['useRider'])

@@ -18,13 +18,13 @@ class RubbleActionTechnicalError extends RubbleActionAuthenticationError
 		}
 	}
 
-	public function viewHtml()
+	public function viewHtml($page)
 	{
 		$output = 'An unknown error has occured.';
 		return $output;
 	}
 
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
 		$output = 'An unknown error has occured.';
 		return $output;

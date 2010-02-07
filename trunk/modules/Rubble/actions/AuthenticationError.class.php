@@ -29,7 +29,7 @@ class RubbleActionAuthenticationError extends ActionBase
 		}
 	}
 
-	public function viewHtml()
+	public function viewHtml($page)
 	{
 		if(!ActiveUser::isLoggedIn())
 		{
@@ -41,7 +41,7 @@ class RubbleActionAuthenticationError extends ActionBase
 		return $this->errorMessage;
 	}
 
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
 		if(!ActiveUser::isLoggedIn())
 		{
@@ -49,7 +49,6 @@ class RubbleActionAuthenticationError extends ActionBase
 			$redirectUrl = $this->redirectUrl('Admin');
 			$this->ioHandler->addHeader('Location', (string) $redirectUrl);
 		}
-		$page = ActivePage::getInstance();
 		$page->showMenus(false);
 
 		return $this->errorMessage;

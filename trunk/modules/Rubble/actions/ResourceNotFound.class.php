@@ -11,12 +11,12 @@ class RubbleActionResourceNotFound extends RubbleActionAuthenticationError
 
 	protected $errorMessage = 'The page or resource you are looking for cannot be found.';
 
-	public function viewHtml()
+	public function viewHtml($page)
 	{
 		return $this->errorMessage;
 	}
 
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
 		$page = ActivePage::getInstance();
 		$page->showMenus(false);

@@ -70,7 +70,7 @@ class MortarActionLogIn extends ActionBase
 		$this->ioHandler->setStatusCode(200);
 	}
 
-	public function viewHtml()
+	public function viewHtml($page)
 	{
 		$this->setTitle($this->htmlSettings['headerTitle']);
 
@@ -93,11 +93,11 @@ class MortarActionLogIn extends ActionBase
 		return $output;
 	}
 
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
 		$page = ActivePage::getInstance();
 		$page->showMenus(false);
-		$output = $this->viewHtml();
+		$output = $this->viewHtml($page);
 		$this->setTitle($this->adminSettings['headerTitle']);
 		return $output;
 	}

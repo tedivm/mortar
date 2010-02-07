@@ -19,14 +19,14 @@ class MortarActionSiteDelete extends ModelActionLocationBasedDelete
 		}
 	}
 
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
 		if(isset($this->error))
 		{
 			return $this->error;
 		}else{
 
-			return parent::viewAdmin();
+			return parent::viewAdmin($page);
 		}
 	}
 

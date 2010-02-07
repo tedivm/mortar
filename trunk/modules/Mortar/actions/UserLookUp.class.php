@@ -72,7 +72,7 @@ class MortarActionUserLookUp extends ActionBase
 		}
 	}
 
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
 		$output = '';
 		foreach($this->list as $user)
@@ -80,7 +80,7 @@ class MortarActionUserLookUp extends ActionBase
 		return $output;
 	}
 
-	public function viewHtml()
+	public function viewHtml($page)
 	{
 		return $html;
 	}

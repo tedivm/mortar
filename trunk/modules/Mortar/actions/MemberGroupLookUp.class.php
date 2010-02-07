@@ -48,7 +48,7 @@ class MortarActionMemberGroupLookUp extends ActionBase
 		}
 	}
 
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
 		$output = '';
 		foreach($this->list as $memberGroup)
@@ -56,7 +56,7 @@ class MortarActionMemberGroupLookUp extends ActionBase
 		return $output;
 	}
 
-	public function viewHtml()
+	public function viewHtml($page)
 	{
 		return $html;
 	}

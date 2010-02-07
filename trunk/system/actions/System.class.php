@@ -32,7 +32,7 @@ abstract class ActionSystem extends ActionBase
 		return ($this->actionStatus) ? $this->successMessage : $this->errorMessage;
 	}
 
-	public function viewAdmin()
+	public function viewAdmin($page)
 	{
 		if(!$this->actionStatus)
 		{
