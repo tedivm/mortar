@@ -2,9 +2,9 @@
 
 class RubbleActionTechnicalError extends RubbleActionAuthenticationError
 {
-	public $AdminSettings = array(	'linkTab' => 'Universal',
-									'headerTitle' => 'Unknown Error',
-									'EnginePermissionOverride' => true);
+	public $adminSettings = array(	'headerTitle' => 'Unknown Error',
+					'EnginePermissionOverride' => true);
+	public $htmlSettings = array(	'headerTitle' => 'Unknown Error');
 
 	static $requiredPermission = 'Read';
 
@@ -20,12 +20,14 @@ class RubbleActionTechnicalError extends RubbleActionAuthenticationError
 
 	public function viewHtml($page)
 	{
+		$page->setTitle($this->htmlSettings['headerTitle']);
 		$output = 'An unknown error has occured.';
 		return $output;
 	}
 
 	public function viewAdmin($page)
 	{
+		$page->setTitle($this->adminSettings['headerTitle']);
 		$output = 'An unknown error has occured.';
 		return $output;
 	}
