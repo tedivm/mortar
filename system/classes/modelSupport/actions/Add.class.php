@@ -240,11 +240,12 @@ class ModelActionAdd extends ModelActionBase
 	public function viewHtml()
 	{
 		$form = $this->viewAdmin();
-		$title = $htmlSettings['headerTitle'];
+		$title = $this->htmlSettings['headerTitle'];
 		$title .= (isset($htmlSettings['useRider']) && $htmlSettings['useRider'])
 			? $htmlSettings['titleRider']
 			: '';
 		$this->setTitle($title);
+		return $form;
 	}
 
 	protected function getRedirectUrl()
