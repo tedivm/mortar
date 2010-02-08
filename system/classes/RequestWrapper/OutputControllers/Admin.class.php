@@ -99,8 +99,9 @@ class AdminControllerContentFilter
 		$title = (isset($action->adminSettings['headerTitle'])) ? $action->adminSettings['headerTitle'] : '';
 		$title .= (isset($action->adminSettings['useRider']) && $action->adminSettings['useRider']
 			&& isset($action->adminSettings['titleRider'])) ? $action->adminSettings['titleRider'] : '';
+		$subtitle = $action->adminSettings['headerSubTitle'];
 
-		$processedOutput->addContent(array('content' => $output, 'title' => $title));
+		$processedOutput->addContent(array('content' => $output, 'title' => $title, 'subtitle' => $subtitle));
 
 		$oldtitle = $page->getTitle();
 		if(!isset($oldtitle)) 
