@@ -244,7 +244,7 @@ class Hook
 			return array();
 
 		if($count == 1)
-			return $results[0];
+			return $results;
 
 		return call_user_func_array('array_merge', $results);
 	}
