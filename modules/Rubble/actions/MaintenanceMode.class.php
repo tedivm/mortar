@@ -24,7 +24,6 @@ class RubbleActionMaintenanceMode extends RubbleActionAuthenticationError
 
 	public function viewHtml($page)
 	{
-		$page->setTitle($this->htmlSettings['headerTitle']);
 		return $this->errorMessage;
 	}
 

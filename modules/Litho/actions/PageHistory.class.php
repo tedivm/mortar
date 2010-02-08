@@ -65,15 +65,12 @@ class LithoActionPageHistory extends ModelActionLocationBasedRead
 
 	public function viewAdmin($page)
 	{
-		$this->setTitle($this->adminSettings['headerTitle']);
-		parent::viewAdmin($page);
 		$table = $this->revisionsToTable('Admin');
 		return $table;
 	}
 
 	public function viewHtml($page)
 	{
-		$this->setTitle($this->htmlSettings['headerTitle']);
 		$table = $this->revisionsToTable('Html');
 		return $table;
 	}

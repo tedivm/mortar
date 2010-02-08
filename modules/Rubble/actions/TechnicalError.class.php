@@ -20,14 +20,12 @@ class RubbleActionTechnicalError extends RubbleActionAuthenticationError
 
 	public function viewHtml($page)
 	{
-		$page->setTitle($this->htmlSettings['headerTitle']);
 		$output = 'An unknown error has occured.';
 		return $output;
 	}
 
 	public function viewAdmin($page)
 	{
-		$page->setTitle($this->adminSettings['headerTitle']);
 		$output = 'An unknown error has occured.';
 		return $output;
 	}

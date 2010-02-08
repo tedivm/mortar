@@ -36,12 +36,11 @@ class ModelActionRead extends ModelActionBase
 	 */
 	public function viewAdmin($page)
 	{
-		$page = ActivePage::getInstance();
-
-		if(isset($this->model['title']))
-			$this->setTitle($this->model['title']);
-		elseif(isset($this->model['name']))
-			$this->setTitle($this->model['name']);
+		if(isset($this->model['title'])) {
+			$page->setTitle($this->model['title']);
+		} elseif(isset($this->model['name'])) {
+			$page->setTitle($this->model['name']);
+		}
 
 		return $this->modelToHtml($page, $this->model, 'Display.html');
 	}
@@ -57,9 +56,9 @@ class ModelActionRead extends ModelActionBase
 		$page = ActivePage::getInstance();
 
 		if(isset($this->model['title']))
-			$this->setTitle($this->model['title']);
+			$page->setTitle($this->model['title']);
 		elseif(isset($this->model['name']))
-			$this->setTitle($this->model['name']);
+			$page->setTitle($this->model['name']);
 
 		if(isset($this->model->keywords))
 			$page->addMeta('keywords', $this->model->keywords);

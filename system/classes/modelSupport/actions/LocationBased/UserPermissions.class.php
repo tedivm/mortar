@@ -19,7 +19,7 @@
 class ModelActionLocationBasedUserPermissions extends ModelActionLocationBasedGroupPermissions
 {
 
-        public $adminSettings = array( 'headerTitle' => 'Select a User' );
+        public $adminSettings = array( 'headerTitle' => 'User Permissions' );
 
 	/**
 	 * This defines the permission action that the user needs to run this. Permissions are based off of an action and
@@ -74,7 +74,6 @@ class ModelActionLocationBasedUserPermissions extends ModelActionLocationBasedGr
 	public function viewAdmin($page)
 	{
 		$output = parent::viewAdmin($page);
-		$this->setTitle('User Permissions');
 		return $output;
 	}
 

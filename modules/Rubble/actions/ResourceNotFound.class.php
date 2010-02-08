@@ -13,14 +13,12 @@ class RubbleActionResourceNotFound extends RubbleActionAuthenticationError
 
 	public function viewHtml($page)
 	{
-		$page->setTitle($this->htmlSettings['headerTitle']);
 		return $this->errorMessage;
 	}
 
 	public function viewAdmin($page)
 	{
 		$page->showMenus(false);
-		$page->setTitle($this->adminSettings['headerTitle']);
 
 		return $this->errorMessage;
 	}

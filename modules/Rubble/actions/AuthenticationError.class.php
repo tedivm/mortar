@@ -38,7 +38,6 @@ class RubbleActionAuthenticationError extends ActionBase
 			$redirectUrl = $this->redirectUrl('Html');
 			$this->ioHandler->addHeader('Location', (string) $redirectUrl);
 		}
-		$page->setTitle($this->htmlSettings['headerTitle']);
 
 		return $this->errorMessage;
 	}
@@ -52,7 +51,6 @@ class RubbleActionAuthenticationError extends ActionBase
 			$this->ioHandler->addHeader('Location', (string) $redirectUrl);
 		}
 		$page->showMenus(false);
-		$page->setTitle($this->adminSettings['headerTitle']);
 
 		return $this->errorMessage;
 	}
