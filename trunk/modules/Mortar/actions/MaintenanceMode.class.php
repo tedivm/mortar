@@ -33,8 +33,6 @@ class MortarActionMaintenanceMode extends FormAction
 
 	public function viewAdmin($page)
 	{
-		$this->setTitle($this->adminSettings['headerTitle']);
-
 		$output = '';
 		if($this->formStatus)
 		{

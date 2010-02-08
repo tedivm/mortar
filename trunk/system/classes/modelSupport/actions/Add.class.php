@@ -200,11 +200,6 @@ class ModelActionAdd extends ModelActionBase
 	public function viewAdmin($page)
 	{
 		$this->adminSettings['titleRider'] = " New " . $this->model->getType();
-		$title = $this->adminSettings['headerTitle'];
-		$title .= (isset($this->adminSettings['useRider']) && $this->adminSettings['useRider'])
-			? $this->adminSettings['titleRider']
-			: '';
-		$this->setTitle($title);
 
 		if($this->form->wasSubmitted())
 		{
@@ -241,11 +236,6 @@ class ModelActionAdd extends ModelActionBase
 	{
 		$form = $this->viewAdmin($page);
 		$this->htmlSettings['titleRider'] = " New " . $this->model->getType();
-		$title = $this->htmlSettings['headerTitle'];
-		$title .= (isset($this->htmlSettings['useRider']) && $this->htmlSettings['useRider'])
-			? $this->htmlSettings['titleRider']
-			: '';
-		$this->setTitle($title);
 		return $form;
 	}
 

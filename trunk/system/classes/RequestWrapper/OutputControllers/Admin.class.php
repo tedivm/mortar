@@ -91,8 +91,6 @@ class AdminControllerContentFilter
 		$action = $adminController->getAction();
 		$page = $adminController->getResource();
 
-		$page->addRegion('action', $action->getName());
-
 		$themePath = $page->getThemePath();
 		$theme = $page->getTheme();
 
@@ -103,6 +101,13 @@ class AdminControllerContentFilter
 			&& isset($action->adminSettings['titleRider'])) ? $action->adminSettings['titleRider'] : '';
 
 		$processedOutput->addContent(array('content' => $output, 'title' => $title));
+
+		$oldtitle = $page->getTitle();
+		if(!isset($oldtitle)) 
+			$page->setTitle($title);
+
+		$page->addRegion('action', $action->getName());
+
 		$output = $processedOutput->getDisplay();
 
 		return $output;

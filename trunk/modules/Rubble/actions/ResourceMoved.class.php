@@ -31,7 +31,6 @@ class RubbleActionResourceMoved extends ActionBase
 
 	public function viewHtml($page)
 	{
-		$page->setTitle($this->htmlSettings['headerTitle']);
 		$link = $this->redirectUrl->getLink('new location');
 		return '<p>This page has been moved to a ' . trim($link, PHP_EOL) .
 				', please wait a moment while we redirect you.</p>';
@@ -39,7 +38,6 @@ class RubbleActionResourceMoved extends ActionBase
 
 	public function viewAdmin($page)
 	{
-		$page->setTitle($this->adminSettings['headerTitle']);
 		return $this->viewHtml($page);
 	}
 

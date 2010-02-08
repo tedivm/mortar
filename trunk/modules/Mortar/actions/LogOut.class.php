@@ -16,14 +16,12 @@ class MortarActionLogOut extends ActionBase
 
 	public function viewAdmin($page)
 	{
-		$this->setTitle($this->adminSettings['headerTitle']);
 		return 'You have been logged out.';
 	}
 
 
 	public function viewHtml($page)
 	{
-		$this->setTitle($this->htmlSettings['headerTitle']);
 		return 'You have been logged out.';
 	}
 

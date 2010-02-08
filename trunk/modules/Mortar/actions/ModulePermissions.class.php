@@ -157,7 +157,6 @@ class MortarActionModulePermissions extends ActionBase
 
 	public function viewAdmin($page)
 	{
-		$this->setTitle($this->adminSettings['headerTitle'] . $this->adminSettings['titleRider']);
 		return $this->form->getFormAs('Html');
 	}
 

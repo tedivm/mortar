@@ -65,12 +65,6 @@ abstract class ActionBase implements ActionInterface
 		return $this->actionName;
 	}
 
-	protected function setTitle($title)
-	{
-		$page = ActivePage::getInstance();
-		$page->setTitle($title);
-	}
-
 	/*
 	public function viewAdmin()
 	{

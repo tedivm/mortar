@@ -77,8 +77,6 @@ class ModelActionLocationBasedDelete extends ModelActionLocationBasedEdit
 
 	public function viewAdmin($page)
 	{
-	        $this->setTitle($this->adminSettings['headerTitle']);
-
 		if($this->formStatus)
 		{
 			if(isset($this->originalParent) && is_numeric($this->originalParent))

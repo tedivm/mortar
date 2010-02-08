@@ -205,12 +205,6 @@ abstract class ModelActionBase implements ActionInterface
 		return $htmlConverter->getOutput();
 	}
 
-	protected function setTitle($title)
-	{
-		$page = ActivePage::getInstance();
-		$page->setTitle($title);
-	}
-
 	/*
 	public function viewAdmin()
 	{

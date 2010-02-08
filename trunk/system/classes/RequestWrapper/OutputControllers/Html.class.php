@@ -86,6 +86,14 @@ class HtmlControllerContentFilter
 		$action = $htmlController->getAction();
 		$page = $htmlController->getResource();
 
+		$title = (isset($action->htmlSettings['headerTitle'])) ? $action->htmlSettings['headerTitle'] : '';
+		$title .= (isset($action->htmlSettings['useRider']) && $action->htmlSettings['useRider']
+			&& isset($action->htmlSettings['titleRider'])) ? $action->htmlSettings['titleRider'] : '';
+
+		$oldtitle = $page->getTitle();
+		if(!isset($oldtitle))
+			$page->setTitle($title);
+
 		$page->addRegion('action', $action->getName());
 
 		return $output;

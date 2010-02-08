@@ -72,8 +72,6 @@ class MortarActionLogIn extends ActionBase
 
 	public function viewHtml($page)
 	{
-		$this->setTitle($this->htmlSettings['headerTitle']);
-
 		$output = '';
 		if($this->loginSuccessful)
 		{
@@ -85,7 +83,7 @@ class MortarActionLogIn extends ActionBase
 			return 'You have successfully logged in.';
 		}else{
 			if($this->form->wasSubmitted())
-				$this->AdminSettings['headerSubTitle'] = 'Invalid login';
+				$this->adminSettings['headerSubTitle'] = 'Invalid login';
 
 			$output .= $this->form->getFormAs('Html');
 		}
@@ -95,10 +93,8 @@ class MortarActionLogIn extends ActionBase
 
 	public function viewAdmin($page)
 	{
-		$page = ActivePage::getInstance();
 		$page->showMenus(false);
 		$output = $this->viewHtml($page);
-		$this->setTitle($this->adminSettings['headerTitle']);
 		return $output;
 	}
 
