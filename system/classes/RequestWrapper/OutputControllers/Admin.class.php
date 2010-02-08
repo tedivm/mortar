@@ -36,12 +36,15 @@ class AdminOutputController extends AbstractOutputController
 		{
 			$page->setTemplate('index.html', 'bbAdmin');
 		}else{
+			$query = Query::getQuery();
+			if(isset($query['location'])) {
+				$location = new Location($query['location']);
+			} else {
+				$site = ActiveSite::getSite();
+				$location = $site->getLocation();
+			}
 
-
-			$site = ActiveSite::getSite();
-			$siteLocation = $site->getLocation();
-			$page->setTemplate('index.html', $siteLocation->getMeta('adminTheme'));
-
+			$page->setTemplate('index.html', $location->getMeta('adminTheme'));
 		}
 	}
 
