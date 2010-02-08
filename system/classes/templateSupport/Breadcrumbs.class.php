@@ -21,24 +21,32 @@ class TagBoxBreadcrumbs
 		$urlList = array();
 		$x = 1;
 
-		if(isset($this->query['action']) && $this->query['action'] !== 'Read') {
-			$page = ActivePage::getInstance();
-			$title = $page->getTitle();
+		$page = ActivePage::getInstance();
+		$pagetitle = $page->getTitle();
 
+		// First, check whether a non-read action is being performed. If so, add that action to the front of the list.
+
+		if(isset($this->query['action']) && $this->query['action'] !== 'Read') {
 			if($html) {
 				$url = Query::getUrl();
-				$nameList[] = $url->getLink($title);
+				$nameList[] = $url->getLink($pagetitle);
 			} else {
-				$nameList[] = $title;
+				$nameList[] = $pagetitle;
 			}
 		}
 
+		// Then, check whether a location is set.
+
 		if( !isset($this->query['location']) ) {
+
+			// If one isn't, check whether a type and id are set. 
+			// If so, we're looking at a non-LB model; add it to the front of the list.
+			// If not, that action we just added is superfluous and we empty the list again.
 
 			if( isset($this->query['id']) && isset($this->query['type']) ) {
 				$model = ModelRegistry::loadModel($this->query['type'], $this->query['id']);
 				$title = isset($model['title']) ? $model['title'] :
-					isset($model['name']) ? $model['name'] : 'Model';
+					isset($model['name']) ? $model['name'] : $pagetitle;
 
 				if($html) {
 					$url = Query::getUrl();
@@ -47,16 +55,51 @@ class TagBoxBreadcrumbs
 				} else {
 					$nameList[] = $title;
 				}
+			} else {
+				$nameList = null;
 			}
 
-			if($html) {
-				$url = new Url();
-				$url->type = $this->query['type'];
-				$nameList[] = $url->getLink($this->query['type']);
+			// Then, check whether a type is set. 
+			// If so, we're looking at non-LB models and the link to the index of 
+			// the type should be added to the list. 
+			// If not, we're in an error state and the error message title should
+			// go on the list.
+
+			if(isset($this->query['type'])) {
+				if($html) {
+					$url = Query::getUrl();
+					$url->type = $this->query['type'];
+					unset($url->id);
+					$nameList[] = $url->getLink($this->query['type']);
+				} else {
+					$nameList[] = $this->query['type'];
+				}
 			} else {
-				$nameList[] = $this->query['type'];
+				if($html) {
+					$url = Query::getUrl();
+					$nameList[] = $url->getLink($pagetitle);
+				} else {
+					$nameList[] = $pagetitle;
+				}
 			}
 		}
+
+		// If nothing is on the list yet, we are viewing a location. We check to see if the page title 
+		// matches the title of the first location on the list; if not, we override the title of
+		// that location to match it, in case we're in an error state.
+
+		if(!isset($nameList) || count($nameList) === 0) {
+			$model = $location->getResource();
+			$name = isset($model['title']) ? $model['title'] : str_replace('_', ' ', $location->getName());
+			if(str_replace('_', ' ', $pagetitle) !== $name) {
+				$firstname = $pagetitle;
+			}
+		}
+
+		// Finally, we loop through the list of locations. If we have a non-location-based
+		// resource, this list will only contain the active site; otherwise, we start at the
+		// current location and go back through its parents until we reach the root, adding
+		// each to the list.
 
 		do {
 			if($location->getType() == 'Root')
@@ -70,16 +113,27 @@ class TagBoxBreadcrumbs
 				$model = $location->getResource();
 				$name = isset($model['title']) ? $model['title'] : str_replace('_', ' ', $location->getName());
 
-				if($html)
+				if(isset($firstname)) {
+					$name = $firstname;
+					unset($firstname);
+				}
+
+				if($html) {
 					$nameList[] = $url->getLink($name);
-				else
+				} else {
 					$nameList[] = $name;
+				}
 			}
 		} while($location = $location->getParent());
+
+		// if $rev is set we flip the array into reverse order
 
 		if(!$rev) {
 			$nameList = array_reverse($nameList);
 		}
+
+		// if $html is set we transform the list into an HTML-wrapped affair, otherwise we
+		// intersperse dividers between the text entries
 
 		if($html) {
 			$breadCrumb = new HtmlObject('div');
@@ -92,8 +146,8 @@ class TagBoxBreadcrumbs
 
 			$first = true;
 
-			foreach($nameList as $url)
-			{
+			foreach($nameList as $url) {
+
 				if($first) {
 					$first = false;
 				} elseif ($sep !== '') {

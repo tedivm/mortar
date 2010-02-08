@@ -36,6 +36,12 @@ class ModelActionLocationBasedRead extends ModelActionLocationBasedBase
 	 */
 	public function viewAdmin($page)
 	{
+		if(isset($this->model['title'])) {
+			$page->setTitle($this->model['title']);
+		} elseif(isset($this->model->name)) {
+			$page->setTitle($this->model->name);
+		}
+
 		return $this->modelToHtml($page, $this->model, 'Display.html');
 	}
 
@@ -66,8 +72,8 @@ class ModelActionLocationBasedRead extends ModelActionLocationBasedBase
 
 		if(isset($this->model['title'])) {
 			$page->setTitle($titlePrefix . $this->model['title']);
-		} elseif(isset($this->model['name'])) {
-			$page->setTitle($titlePrefix . $this->model['name']);
+		} elseif(isset($this->model->name)) {
+			$page->setTitle($titlePrefix . $this->model->name);
 		}
 
 		if(isset($this->model->keywords))

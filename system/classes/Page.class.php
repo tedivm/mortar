@@ -237,6 +237,8 @@ class Page implements ArrayAccess
 			$model = $location->getResource();
 		} elseif ($query['type'] && $query['id']) {
 			$model = ModelRegistry::loadModel($query['type'], $query['id']);
+			if ($model === false)
+				unset($model);
 		}
 
 		// all tagboxes that require a location go here. if there's a location there's always a model
