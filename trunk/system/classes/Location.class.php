@@ -743,6 +743,27 @@ class Location
 	}
 
 	/**
+	 * This function checks whether the current location is published by recursively checking that it
+	 * and all its ancestors have publishDates that are before the current time.
+	 *
+	 * @return bool
+	 */
+	public function checkPublished()
+	{
+		if($this->publishDate > time()) {
+			return false;
+		}
+
+		if($parent = $this->getParent()) {
+			return $parent->checkPublished();
+		} else {
+			return true;
+		}
+		
+		
+	}
+
+	/**
 	 * Returns a multidemensional tree of locations
 	 *
 	 * @param string $types

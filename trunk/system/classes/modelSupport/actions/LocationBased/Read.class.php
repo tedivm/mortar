@@ -53,15 +53,11 @@ class ModelActionLocationBasedRead extends ModelActionLocationBasedBase
 	 */
 	public function viewHtml($page)
 	{
-		if ($this->model->publishDate > time()) {
-			$unpub = true;
-			$auth = $this->checkAuth('Admin');
-		} else {
-			$unpub = false;
-		}
+		$location = $this->model->getLocation();
+		$unpub = !($location->checkPublished()); 
 
 		if ($unpub === true) {
-			if($auth === true) {
+			if($this->checkAuth('Admin') === true) {
 				$titlePrefix = 'Preview -- ';
 			} else {
 				throw new ResourceNotFoundError();

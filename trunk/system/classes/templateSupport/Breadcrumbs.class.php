@@ -85,14 +85,18 @@ class TagBoxBreadcrumbs
 		}
 
 		// If nothing is on the list yet, we are viewing a location. We check to see if the page title 
-		// matches the title of the first location on the list; if not, we override the title of
-		// that location to match it, in case we're in an error state.
+		// matches the title of the first location on the list; if not, we add the page title to the list.
 
 		if(!isset($nameList) || count($nameList) === 0) {
 			$model = $location->getResource();
 			$name = isset($model['title']) ? $model['title'] : str_replace('_', ' ', $location->getName());
 			if(str_replace('_', ' ', $pagetitle) !== $name) {
-				$firstname = $pagetitle;
+				if($html) {
+					$url = Query::getUrl();
+					$nameList[] = $url->getLink($pagetitle);
+				} else {
+					$nameList[] = $pagetitle;
+				}
 			}
 		}
 
@@ -109,7 +113,7 @@ class TagBoxBreadcrumbs
 			$url->location = $location->getId();
 			$url->format = $this->query['format'];
 
-			if($url->checkPermission($userId)) {
+			if($url->checkPermission($userId) && $location->checkPublished()) {
 				$model = $location->getResource();
 				$name = isset($model['title']) ? $model['title'] : str_replace('_', ' ', $location->getName());
 
