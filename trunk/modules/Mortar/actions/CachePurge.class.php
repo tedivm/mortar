@@ -13,10 +13,11 @@ class MortarActionCachePurge extends ActionBase
 		if(!isset($config['path']['temp']))
 			return true;
 
+		MortarLoginTracker::purge();
+
 		$clearPath = array();
 		$clearPath[] = $config['path']['temp'] . 'outputCompression/';
 		$clearPath[] = $config['path']['temp'] . 'twigCache/strings/';
-		$clearPath[] = $config['path']['temp'] . 'loginTracker.sqlite';
 
 		foreach($clearPath as $path)
 		{
