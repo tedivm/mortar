@@ -47,8 +47,28 @@ class ModelActionLocationBasedRead extends ModelActionLocationBasedBase
 	 */
 	public function viewHtml($page)
 	{
-		if(isset($this->model['title']))
-			$page->addRegion('pagetitle', htmlentities($this->model['title']));
+		if ($this->model->publishDate > time()) {
+			$unpub = true;
+			$auth = $this->checkAuth('Admin');
+		} else {
+			$unpub = false;
+		}
+
+		if ($unpub === true) {
+			if($auth === true) {
+				$titlePrefix = 'Preview -- ';
+			} else {
+				throw new ResourceNotFoundError();
+			}
+		} else {
+			$titlePrefix = '';
+		}
+
+		if(isset($this->model['title'])) {
+			$page->setTitle($titlePrefix . $this->model['title']);
+		} elseif(isset($this->model['name'])) {
+			$page->setTitle($titlePrefix . $this->model['name']);
+		}
 
 		if(isset($this->model->keywords))
 			$page->addMeta('keywords', $this->model->keywords);
