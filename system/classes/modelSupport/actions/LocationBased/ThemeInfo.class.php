@@ -18,7 +18,11 @@ class ModelActionLocationBasedThemeInfo extends ModelActionLocationBasedAdd
 		$installedThemes = glob($themePath . "*", GLOB_ONLYDIR);
 		foreach($installedThemes as $themePath) {
 			$themeName = array_reverse(explode('/', $themePath));
-			$themes[] = $themeName[0];
+			$theme = new Theme($themeName[0]);
+			$settings = $theme->getSettings();
+			if(strtolower($settings['meta']['format']) === 'html') {
+				$themes[] = $themeName[0];
+			}
 		}
 
 		$form = new Form('theme_info');
