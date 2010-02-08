@@ -297,6 +297,7 @@ abstract class ModelBase implements Model
 	 * be used, and if not it checks through the fallback action list. If nothing is found there it ultimately
 	 * returns false.
 	 *
+	 * @hook model *resourceType actionLookup
 	 * @param string $actionName
 	 * @param null|User $user
 	 * @return string|bool
@@ -317,12 +318,21 @@ abstract class ModelBase implements Model
 	 */
 	public function getActions($user = null)
 	{
-		$actionListCache = new Cache('models', $this->getType(), 'actionList');
+		$type = $this->getType();
+		$actionListCache = new Cache('models', $type, 'actionList');
 		$actionList = $actionListCache->getData();
 
 		if($actionListCache->isStale())
 		{
-			$actionList = self::loadActions($this->getType());
+			$hook = new Hook();
+			// because we look up each model explicitly we need to add the "all" plugins right at the start.
+			$hook->loadPlugins('model', 'all', 'actionLookup');
+			$pluginActionList = Hook::mergeResults($hook->getActions());
+
+			$actionList = self::loadActions($type);
+			$actionList = array_merge($pluginActionList, $actionList);
+
+
 			foreach(staticHack(get_class($this), 'fallbackModelActions') as $fallbackAction)
 				if ((!isset($actionList[$fallbackAction])) && !(in_array($fallbackAction, $this->excludeFallbackActions)))
 					$actionList[$fallbackAction] = $this->loadFallbackAction($fallbackAction);
@@ -330,9 +340,9 @@ abstract class ModelBase implements Model
 			$actionListCache->storeData($actionList);
 		}
 
-		if (isset($user)) {
-
-			$permittedActionListCache = new Cache('user', $user->getId(), 'models', $this->getType(), 'actionList');
+		if (isset($user))
+		{
+			$permittedActionListCache = new Cache('user', $user->getId(), 'models', $type, 'actionList');
 			$permittedActions = $permittedActionListCache->getData();
 
 			if($permittedActionListCache->isStale())
@@ -378,6 +388,10 @@ abstract class ModelBase implements Model
 
 	}
 
+	/**
+	 *
+	 * @hook model *resourceType actionLookup
+	 */
 	static function loadActions($resourceType)
 	{
 		$actions = array();
@@ -386,6 +400,15 @@ abstract class ModelBase implements Model
 		$packageInfo = new PackageInfo($moduleInfo['module']);
 
 		$actionList = $packageInfo->getActions();
+
+
+		$hook = new Hook();
+		// Allow plugins for this specific model only, so we use loadPlugins instead of loadModelPlugins
+		$hook->loadPlugins('model', $resourceType, 'actionLookup');
+		$pluginActionList = Hook::mergeResults($hook->getActions());
+
+		$actionList = array_merge($actionList, $pluginActionList);
+
 
 		$reflection = new ReflectionClass($moduleInfo['class']);
 		$parentClass = $reflection->getParentClass();
@@ -407,9 +430,9 @@ abstract class ModelBase implements Model
 
 	public function getDescent()
 	{
-		return self::loadDescent($this->getType());	
+		return self::loadDescent($this->getType());
 	}
-	
+
 	static function loadDescent($resourceType)
 	{
 		$type = self::loadParentType($resourceType);
@@ -436,7 +459,7 @@ abstract class ModelBase implements Model
 
 	static function loadParentType($resourceType)
 	{
-		$moduleInfo = ModelRegistry::getHandler($resourceType);	
+		$moduleInfo = ModelRegistry::getHandler($resourceType);
 		$reflection = new ReflectionClass($moduleInfo['class']);
 		$parentClass = $reflection->getParentClass();
 		if($parentType = $parentClass->getStaticPropertyValue('type'))
