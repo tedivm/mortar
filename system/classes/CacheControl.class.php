@@ -2,9 +2,17 @@
 
 class CacheControl
 {
+
+	static function disableCache($flag = true)
+	{
+		Cache::$runtimeDisable = (bool) $flag;
+	}
+
 	static function getCache()
 	{
 		$args = func_get_args();
+		if(count($args) == 1 && is_array($args[0]))
+			$args = $args[0];
 		$cache = new Cache($args);
 		return $cache;
 	}
@@ -12,6 +20,14 @@ class CacheControl
 	static function clearCache()
 	{
 		$args = func_get_args();
+		$numArgs = count($args);
+
+		if($numArgs === 0)
+			return Cache::clear();
+
+		if($numArgs == 1 && is_array($args[0]))
+			$args = $args[0];
+
 		Cache::clear($args);
 	}
 
