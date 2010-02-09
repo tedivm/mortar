@@ -57,7 +57,7 @@ class GraffitiTagger
 			$deleteStatement->bindAndExecute('i', $locationId);
 		}
 
-		Cache::clear('locations', $locationId, 'tags');
+		CacheControl::clearCache('locations', $locationId, 'tags');
 	}
 
 	static function canTagModelType($resource)
@@ -65,7 +65,7 @@ class GraffitiTagger
 		if(!is_numeric($resource))
 			$resource = ModelRegistry::getIdFromType($resource);
 
-		$cache = new Cache('models', $resource, 'settings', 'tagging');
+		$cache = CacheControl::getCache('models', $resource, 'settings', 'tagging');
 		$data = $cache->getData();
 
 		if($cache->isStale())

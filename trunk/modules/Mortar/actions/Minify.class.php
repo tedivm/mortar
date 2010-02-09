@@ -41,7 +41,7 @@ class MortarActionMinify extends ActionBase
 			$url = $theme->getUrl($type);
 			if(isset($query['id']) && $url->id == $query['id'])
 			{
-				Cache::clear('themes', $themeName, 'minification', $type);
+				CacheControl::clearCache('themes', $themeName, 'minification', $type);
 				$url = $theme->getUrl($type);
 			}
 
@@ -70,7 +70,7 @@ class MortarActionMinify extends ActionBase
 			return;
 		}
 
-		$cache = new Cache('themes', $themeName, 'minification', $type, 'minified');
+		$cache = CacheControl::getCache('themes', $themeName, 'minification', $type, 'minified');
 		// might as well make this huge because the checksum comparison will invalidate it the moment anything changes
 		$cache->cacheTime = 31449600;
 		$minifiedData = $cache->getData();
@@ -82,7 +82,7 @@ class MortarActionMinify extends ActionBase
 			if(!ProcessPool::getProcesses('minification-' . $type, true))
 			{
 				$pid = ProcessPool::addProcess('minification-' . $type);
-				Cache::clear('themes', $themeName, 'minification', $type, 'url');
+				CacheControl::clearCache('themes', $themeName, 'minification', $type, 'url');
 				$minifiedData['checksum'] = $actualCheckSum;
 				$minifiedData['data'] = $minifier->minifyFiles();
 				$cache->storeData($minifiedData);

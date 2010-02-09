@@ -102,7 +102,7 @@ class IOProcessorCli
 		Form::disableXsfrProtection();
 
 		if($query['disableCache'])
-			Cache::$runtimeDisable = true;
+			CacheControl::disableCache();
 
 		// poor windows people don't get this right now.
 		$isRoot = (function_exists('posix_getuid') && posix_getuid() === 0);

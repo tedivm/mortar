@@ -36,11 +36,11 @@ class MortarActionInstallModule extends ActionBase
 
 				if($this->form->checkSubmit())
 				{
-					Cache::$runtimeDisable = true;
+					CacheControl::disableCache();
 					$moduleInstaller = new ModuleInstaller($installPackage);
 					$this->success = $moduleInstaller->integrate();
-					Cache::$runtimeDisable = false;
-					Cache::clear();
+					CacheControl::disableCache(false);
+					CacheControl::clearCache();
 				}
 			}else{
 				//redirect to listing

@@ -83,7 +83,7 @@ class OrmTableStructure
 	 */
 	protected function loadSchema()
 	{
-		$cache = new Cache('orm', 'schema', $this->table);
+		$cache = CacheControl::getCache('orm', 'schema', $this->table);
 		$cache->cacheTime = self::$cacheTime;
 
 		if(!($schema = $cache->getData()) || $cache->isStale())

@@ -64,7 +64,7 @@ class ModelActionAdd extends ModelActionBase
 			$inputs = $this->form->checkSubmit();
 			if($inputs && $this->formStatus = $this->processInput($inputs))
 			{
-				Cache::clear('models', $this->model->getType(), 'browseModelBy');
+				CacheControl::clearCache('models', $this->model->getType(), 'browseModelBy');
 				$this->formStatus = true;
 				$this->onSuccess();
 			}else{

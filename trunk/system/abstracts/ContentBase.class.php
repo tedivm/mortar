@@ -95,7 +95,7 @@ abstract class ContentBase
 	 */
 	public function getImageUrl($imageName)
 	{
-		$cache = new Cache($this->contentType, $this->name, 'imagepath', $imageName);
+		$cache = CacheControl::getCache($this->contentType, $this->name, 'imagepath', $imageName);
 		$url = $cache->getData();
 
 		if($cache->isStale())

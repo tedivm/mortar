@@ -67,7 +67,7 @@ class MortarModelSite extends LocationModel
 
 	public function getDomainUrl($ssl = false)
 	{
-		$cache = new Cache('models', 'site', $this->id, 'url', ($ssl) ? 1:0);
+		$cache = CacheControl::getCache('models', 'site', $this->id, 'url', ($ssl) ? 1:0);
 		$url = $cache->getData();
 
 		if($cache->isStale())

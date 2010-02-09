@@ -7,7 +7,7 @@ class FoundryActionRepositoryUpdate extends ModelActionBase
 	protected function logic()
 	{
 		// ignore the cache for this
-		Cache::$runtimeDisable = true;
+		CacheControl::disableCache();
 
 
 		// check some flag to see if its a full wipe
@@ -32,11 +32,11 @@ class FoundryActionRepositoryUpdate extends ModelActionBase
 		}
 
 		// Renable Caching
-		Cache::$runtimeDisable = false;
+		CacheControl::disableCache(false);
 
 		// Clear system cache
-		Cache::clear('system');
-		Cache::clear('modules');
+		CacheControl::clearCache('system');
+		CacheControl::clearCache('modules');
 
 	}
 

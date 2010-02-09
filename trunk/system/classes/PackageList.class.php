@@ -72,7 +72,7 @@ class PackageList
 		if(defined('INSTALLMODE') && INSTALLMODE)
 			return array();
 
-		$cache = new Cache('system', 'modules', 'installed');
+		$cache = CacheControl::getCache('system', 'modules', 'installed');
 		$packageList = $cache->getData();
 
 		if($cache->isStale())

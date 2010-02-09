@@ -8,7 +8,7 @@ class MortarActionClearCache extends ActionBase
 
 	public function logic()
 	{
-		Cache::clear();
+		CacheControl::clearCache();
 	}
 
 

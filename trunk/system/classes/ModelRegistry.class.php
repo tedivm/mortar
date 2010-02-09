@@ -109,7 +109,7 @@ class ModelRegistry
 											'module' => $moduleId,
 											'resource' => $resource,
 											'class' => $className);
-		Cache::clear('system', 'models', 'handlers');
+		CacheControl::clearCache('system', 'models', 'handlers');
 	}
 
 	/**
@@ -170,7 +170,7 @@ class ModelRegistry
 	 */
 	static protected function loadHandlers()
 	{
-		$cache = new Cache('system', 'models', 'handlers');
+		$cache = CacheControl::getCache('system', 'models', 'handlers');
 		$data = $cache->getData();
 
 		if($cache->isStale())

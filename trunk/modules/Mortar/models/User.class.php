@@ -56,7 +56,7 @@ class MortarModelUser extends ModelBase
 	{
 		if(parent::load($id))
 		{
-			$cache = new Cache('models', 'User', $id, 'membergroups');
+			$cache = CacheControl::getCache('models', 'User', $id, 'membergroups');
 			$memberGroups = $cache->getData();
 			if($cache->isStale())
 			{
@@ -103,7 +103,7 @@ class MortarModelUser extends ModelBase
 		if(!filter_var($address, FILTER_VALIDATE_EMAIL))
 			throw new CoreError('You must pass an email address to the loadByEmail function.');
 
-		$cache = new Cache('models', $this->getType(), 'loadByEmail', $address);
+		$cache = CacheControl::getCache('models', $this->getType(), 'loadByEmail', $address);
 		$userId = $cache->getData();
 
 		if($cache->isStale())

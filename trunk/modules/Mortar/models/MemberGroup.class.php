@@ -29,7 +29,7 @@ class MortarModelMemberGroup extends ModelBase
 	public function containsUser($userId)
 	{
 		//'models', 'Users', $userId, 'membergroups', $this->id
-		$cache = new Cache('models', 'Users', $userId, 'membergroups', $this->id);
+		$cache = CacheControl::getCache('models', 'Users', $userId, 'membergroups', $this->id);
 		$inGroup = $cache->getData();
 
 		if($cache->isStale())
@@ -56,7 +56,7 @@ class MortarModelMemberGroup extends ModelBase
 	 */
 	public function getUsers($limit = 0, $offset = 0)
 	{
-		$cache = new Cache('membergroups', $this->getId(), 'userList', $limit, $offset);
+		$cache = CacheControl::getCache('membergroups', $this->getId(), 'userList', $limit, $offset);
 		$results = $cache->getData();
 
 		if($cache->isStale())
@@ -101,7 +101,7 @@ class MortarModelMemberGroup extends ModelBase
 		$insertStmt = $dbWrite->stmt_init();
 		$insertStmt->prepare('INSERT INTO userInMemberGroup (user_id, memgroup_id) VALUES (?, ?)');
 		$result = $insertStmt->bindAndExecute('ii', $userId, $this->id);
-		Cache::clear('models', 'User', $userId, 'membergroups');
+		CacheControl::clearCache('models', 'User', $userId, 'membergroups');
 		return $result;
 	}
 
@@ -135,7 +135,7 @@ class MortarModelMemberGroup extends ModelBase
 	 */
 	public function loadbyName($name)
 	{
-		$cache = new Cache('membergroups', 'lookup', 'name', $name, 'id');
+		$cache = CacheControl::getCache('membergroups', 'lookup', 'name', $name, 'id');
 
 		$id = $cache->getData();
 
@@ -162,7 +162,7 @@ class MortarModelMemberGroup extends ModelBase
 	{
 		if($offset === 'name')
 			return $this->content['memgroup_name'];
-		
+
 		return parent::offsetGet($offset);
 	}
 
@@ -178,7 +178,7 @@ class MortarModelMemberGroup extends ModelBase
 	{
 		if($offset === 'name')
 			$offset = 'memgroup_name';
-		
+
 		return parent::offsetExists($offset);
 	}
 

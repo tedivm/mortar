@@ -20,7 +20,7 @@ class MortarActionMemberGroupLookUp extends ActionBase
 			if($limit > $this->maxLimit)
 				$limit = $this->maxLimit;
 
-			$cache = new Cache('MemberGroupLookUp', 'bystring', $query['q'], $limit);
+			$cache = CacheControl::getCache('MemberGroupLookUp', 'bystring', $query['q'], $limit);
 			$memberGroupList = $cache->getData();
 
 			if($cache->isStale())

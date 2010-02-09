@@ -11,7 +11,7 @@ class GraffitiTagLookUp
 		if(self::isStopWord($tag))
 			return false;
 
-		$cache = new Cache('tags', 'tagid', $tag);
+		$cache = CacheControl::getCache('tags', 'tagid', $tag);
 		$tagId = $cache->getData();
 
 		if($cache->isStale())
@@ -32,7 +32,7 @@ class GraffitiTagLookUp
 				if(isset($insertStmt->insert_id) && $insertStmt->insert_id > 0)
 				{
 					$tagId = $insertStmt->insert_id;
-					Cache::clear('tags', 'fromStem', $stem);
+					CacheControl::clearCache('tags', 'fromStem', $stem);
 				}else{
 					$tagId = false;
 				}
@@ -44,7 +44,7 @@ class GraffitiTagLookUp
 
 	static function getTagFromId($id)
 	{
-		$cache = new Cache('tags', 'idtag', $id);
+		$cache = CacheControl::getCache('tags', 'idtag', $id);
 		$tag = $cache->getData();
 
 		if($cache->isStale())
@@ -66,7 +66,7 @@ class GraffitiTagLookUp
 
 	static function getTagsFromStem($stem)
 	{
-		$cache = new Cache('tags', 'fromStem', $stem);
+		$cache = CacheControl::getCache('tags', 'fromStem', $stem);
 		$tags = $cache->getData();
 
 		if($cache->isStale())
@@ -91,7 +91,7 @@ class GraffitiTagLookUp
 	static function getTagsFromLocation(Location $location)
 	{
 		$locationId = $location->getId();
-		$cache = new Cache('locations', $locationId, 'tags');
+		$cache = CacheControl::getCache('locations', $locationId, 'tags');
 		$tags = $cache->getData();
 
 		if($cache->isStale())

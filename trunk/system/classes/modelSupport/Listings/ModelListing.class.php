@@ -220,7 +220,7 @@ class ModelListing
 		$cacheKey[] = $browseBy . '_' . $order;
 		$cacheKey[] = $offset . '_' . $number;
 
-		$cache = new Cache($cacheKey);
+		$cache = CacheControl::getCache($cacheKey);
 		$modelList = $cache->getData();
 
 		if($cache->isStale())

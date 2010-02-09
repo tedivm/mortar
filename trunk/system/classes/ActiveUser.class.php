@@ -122,7 +122,7 @@ class ActiveUser
 	 */
 	static function getIdFromName($name)
 	{
-		$cache = new Cache('userLookup', 'byname', $name);
+		$cache = CacheControl::getCache('userLookup', 'byname', $name);
 		$userId = $cache->getData();
 
 		if($cache->isStale())

@@ -15,7 +15,7 @@ class TwigIntegrationThemeLoader implements Twig_LoaderInterface
 
 		$availableThemes = array_keys($this->paths);
 
-		$cache = new Cache('themes', $availableThemes[0], 'templates', $name);
+		$cache = CacheControl::getCache('themes', $availableThemes[0], 'templates', $name);
 		$templateSet = $cache->getData();
 
 		if($cache->isStale())

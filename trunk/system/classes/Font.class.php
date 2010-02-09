@@ -13,7 +13,7 @@ class Font extends ContentBase
 		$fontPath = $config['path']['fonts'] . $name . '/';
 		$this->contentPath = $fontPath;
 
-		$cache = new Cache('fonts', 'typefaces', $this->name);
+		$cache = CacheControl::getCache('fonts', 'typefaces', $this->name);
 		$data = $cache->getData();
 
 		if($cache->isStale())
@@ -27,7 +27,7 @@ class Font extends ContentBase
 				$data['settings'] = $iniFile->getArray();
 			} else {
 				$stylesheetPath = $this->contentPath . 'stylesheet.css';
-				
+
 				if(is_readable($stylesheetPath))
 					$data['settings'] = $this->processStylesheet($stylesheetPath);
 			}
@@ -67,7 +67,7 @@ class Font extends ContentBase
 
 		while(isset($stylesheetRaw[$x]) && strpos($stylesheetRaw[$x], '@font-face') !== false) {
 			$x++;
-			
+
 			$eotPos = strpos($stylesheetRaw[++$x], "url('") + 5;
 			$eotEndPos = strpos($stylesheetRaw[$x], "');");
 			$eot = substr($stylesheetRaw[$x], $eotPos, $eotEndPos - $eotPos);
@@ -120,7 +120,7 @@ class Font extends ContentBase
 			$fontCss .= "url('$url{$fontData['svg']}') format('svg');\n";
 			$fontCss .= "}\n\n\n";
 		}
-		
+
 		return $fontCss;
 	}
 

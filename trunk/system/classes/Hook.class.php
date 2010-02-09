@@ -84,7 +84,7 @@ class Hook
 
 		$realm = ($realm instanceof Location) ? 'Resource' . $this->realm->getType() : $realm;
 
-		$cache = new Cache('plugins', $realm, $category, $name, 'list');
+		$cache = CacheControl::getCache('plugins', $realm, $category, $name, 'list');
 		$pluginList = $cache->getData();
 
 		if($cache->isStale())
@@ -229,7 +229,7 @@ class Hook
 							INTO plugins (realm, category, hook, modId, plugin, isRecursive)
 							VALUES (?, ?, ?, ?, ?, ?)');
 		$stmt->bindAndExecute('sssisi', $realm, $category, $name, $module, $plugin, $isRecursive);
-		Cache::clear('plugins', $realm, $category, $name);
+		CacheControl::clearCache('plugins', $realm, $category, $name);
 	}
 
 	static public function registerModelPlugin($type, $name, $module, $plugin, $isRecursive = false)
