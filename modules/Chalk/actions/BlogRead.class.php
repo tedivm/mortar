@@ -7,7 +7,9 @@ class ChalkActionBlogRead extends ModelActionLocationBasedIndex
 	public function viewAdmin($page)
 	{
 		if(isset($this->model['title']))
-			$page->addRegion('pagetitle', htmlentities($this->model['title']));
+			$page->setTitle($this->model['title']);
+		elseif(isset($this->model['name']))
+			$page->setTitle($this->model['name']);
 
 		return parent::viewHtml($page);
 	}
