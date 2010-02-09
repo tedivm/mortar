@@ -3,6 +3,7 @@
 class LithoModelPage extends LocationModel
 {
 	static public $type = 'Page';
+	static public $usePublishDate = true;
 	protected $table = 'lithoPages';
 	public $allowedChildrenTypes = array();
 	protected $excludeFallbackActions = array('Index');

@@ -27,6 +27,14 @@ abstract class LocationModel extends ModelBase
 	static public $autoName = false;
 
 	/**
+	 * This attributes defines whether this model requires a separate publish date field. When false, add/edit forms
+	 * will not include a field for publishDate.
+	 *
+	 * @var bool
+	 */
+	static public $usePublishDate = false;
+
+	/**
 	 * This specificies what folder inside the modelSupport folder contains the model's fallback actions. Each array
 	 * element is an additional directory level and name.
 	 *
