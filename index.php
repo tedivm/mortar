@@ -133,6 +133,7 @@ class BootStrapper
 		require('system/functions/general.functions.php');
 		require('system/classes/Permissions.class.php');
 		require('system/classes/Cache.class.php');
+		require('system/classes/CacheControl.class.php');
 		require('system/classes/PackageList.class.php');
 		require('system/classes/PackageInfo.class.php');
 		require('system/classes/Version.class.php');
@@ -151,7 +152,7 @@ class BootStrapper
 			if($config->error)
 			{
 				// disable cache, since we can't load the settings for it anyways
-				Cache::$runtimeDisable = true;
+				CacheControl::disableCache();
 
 				// If the install class file is not, we shouldn't attempt an install
 				if(!file_exists($config['path']['modules'] . 'Installer/actions/Install.class.php'))
