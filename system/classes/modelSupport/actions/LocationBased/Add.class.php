@@ -89,9 +89,11 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 				$selectInput->setValue($this->model->status);
 		}
 
-		$form->createInput('location_publishDate')->
-			setType('datetime')->
-			setLabel('Publish Date');
+		if(staticHack($this->model, 'usePublishDate')) {
+			$form->createInput('location_publishDate')->
+				setType('datetime')->
+				setLabel('Publish Date');
+		}
 
 		$locationFormName = importClass('LocationForm', 'modelSupport/Forms/LocationForm.class.php', 'mainclasses');
 		if(!isset($locationFormName))
