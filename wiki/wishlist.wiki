@@ -102,4 +102,4 @@ One thing we'll eventually need is the ability to "embed" a lot of content insid
 
 == Port SmartyPants ==
 
-SmartyPants http://daringfireball.net/projects/smartypants/ provides "smart" punctuation that is HTML-aware (it doesn't get replaced inside <pre> tags, for example.) It's written in PERL but it's 3-clause BSD and would be an awesome feature to include.
+SmartyPants http://daringfireball.net/projects/smartypants/ provides "smart" punctuation that is HTML-aware (it doesn't get replaced inside pre tags, for example.) It's written in PERL but it's 3-clause BSD and would be an awesome feature to include.
