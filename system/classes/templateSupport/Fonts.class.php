@@ -19,7 +19,7 @@ class TagBoxFonts
 
 	protected function getAtDeclarations()
 	{
-		$cache = new Cache('fonts', 'tagbox', 'all');
+		$cache = CacheControl::getCache('fonts', 'tagbox', 'all');
 		$data = $cache->getData();
 
 		if($cache->isStale())
@@ -34,12 +34,12 @@ class TagBoxFonts
 		}
 
 		$decs = '';
-		
+
 		foreach ($data as $css)
 			$decs .= $css;
 
 		return $decs;
-		
+
 	}
 
 	public function __get($tagname)

@@ -158,7 +158,7 @@ class Permissions
 						$current[$typeIndex][$actionIndex] = false;
 						break;
 
-					case (isset($current[$typeIndex][$actionIndex]) 
+					case (isset($current[$typeIndex][$actionIndex])
 						&& ($current[$typeIndex][$actionIndex] == 'inherit')):
 					case ($actionValue == 'inherit'):
 					default:
@@ -366,7 +366,7 @@ class UserPermission
 		$typeId = $this->typeId;
 		$id = $this->id;
 
-		$cache = new Cache('permissions', $type, $id, $this->location);
+		$cache = CacheControl::getCache('permissions', $type, $id, $this->location);
 		$permissions = $cache->getData();
 		if($cache->isStale())
 		{
@@ -447,7 +447,7 @@ class UserPermission
 															$typeIndex, $saveValue, $this->id);
 				}
 
-				Cache::clear('permissions', $typeIndex, $this->id, $this->location);
+				CacheControl::clearCache('permissions', $typeIndex, $this->id, $this->location);
 			}
 
 		}catch(Exception $e){
@@ -574,7 +574,7 @@ class PermissionLists
 	 */
 	protected function loadUserPermissions($userId)
 	{
-		$cache = new Cache('permissions', 'user', $userId, 'allowedActions');
+		$cache = CacheControl::getCache('permissions', 'user', $userId, 'allowedActions');
 		$allowedPermissions = $cache->getData();
 
 		if($cache->isStale())
@@ -611,7 +611,7 @@ class PermissionLists
 	 */
 	protected function loadGroupPermissions($groupId)
 	{
-		$cache = new Cache('permissions', 'group', $groupId, 'allowedActions');
+		$cache = CacheControl::getCache('permissions', 'group', $groupId, 'allowedActions');
 		$allowedPermissions = $cache->getData();
 
 		if($cache->isStale())
@@ -748,7 +748,7 @@ class PermissionActionList
 	static protected function loadActionList()
 	{
 
-		$cache = new Cache('permissions', 'actionLookup');
+		$cache = CacheControl::getCache('permissions', 'actionLookup');
 		$actions = $cache->getData();
 
 		if($cache->isStale())

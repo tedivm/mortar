@@ -105,7 +105,7 @@ class PackageInfo
 	 */
 	protected function loadById($id)
 	{
-		$cache = new Cache('packages', 'moduleLookup', $id);
+		$cache = CacheControl::getCache('packages', 'moduleLookup', $id);
 		$package = $cache->getData();
 
 		if($cache->isStale())
@@ -151,7 +151,7 @@ class PackageInfo
 			throw new PackageInfoError('Unable to locate package ' . $this->name);
 		}
 
-		$cache = new Cache('packages', $packageName, 'info');
+		$cache = CacheControl::getCache('packages', $packageName, 'info');
 		$info = $cache->getData();
 		if($cache->isStale())
 		{
@@ -357,7 +357,7 @@ class PackageInfo
 
 	static function getMetaInfo($package)
 	{
-		$cache = new Cache('packages', $package, 'meta');
+		$cache = CacheControl::getCache('packages', $package, 'meta');
 		$cache->setMemOnly(); // storing this would be ridiculous but memory saves us some includes
 		$meta = $cache->getData();
 
@@ -416,7 +416,7 @@ class PackageInfo
 	 */
 	protected function loadActions()
 	{
-		$cache = new Cache('packages', $this->name, 'actions');
+		$cache = CacheControl::getCache('packages', $this->name, 'actions');
 		$actions = $cache->getData();
 		if($cache->isStale())
 		{
@@ -482,7 +482,7 @@ class PackageInfo
 	 */
 	protected function loadPlugins()
 	{
-		$cache = new Cache('packages', $this->packageName, 'plugins');
+		$cache = CacheControl::getCache('packages', $this->packageName, 'plugins');
 		$plugins = $cache->getData();
 
 		if($cache->isStale())
@@ -509,7 +509,7 @@ class PackageInfo
 	 */
 	protected function loadModels()
 	{
-		$cache = new Cache('packages', $this->name, 'models');
+		$cache = CacheControl::getCache('packages', $this->name, 'models');
 		$models = $cache->getData();
 
 		if($cache->isStale())

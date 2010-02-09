@@ -93,7 +93,7 @@ class AutoLoader
 			if(self::loadExternal($classname))
 				return true;
 
-			Cache::clear('system', 'autoloader');
+			CacheControl::clearCache('system', 'autoloader');
 			self::$classIndex = null;
 			self::createClassIndex();
 		}
@@ -156,7 +156,7 @@ class AutoLoader
 	 */
 	static protected function createClassIndex()
 	{
-		$cache = new Cache('system', 'autoloader', 'classindex');
+		$cache = CacheControl::getCache('system', 'autoloader', 'classindex');
 		$cacheData = $cache->getData();
 
 		if($cache->isStale())

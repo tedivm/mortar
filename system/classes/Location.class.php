@@ -450,7 +450,7 @@ class Location
 			if(!is_numeric($id))
 				throw new TypeMismatch(array('integer', $id));
 
-			$cache = new Cache('locations', $id, 'info');
+			$cache = CacheControl::getCache('locations', $id, 'info');
 			$locationInfo = $cache->getData();
 
 			if($cache->isStale())
@@ -580,7 +580,7 @@ class Location
 			$metaAdd->save();
 		}
 
-		Cache::clear('locations', $this->id);
+		CacheControl::clearCache('locations', $this->id);
 		return true;
 	}
 
@@ -593,7 +593,7 @@ class Location
 	 */
 	public function getChildByName($name)
 	{
-		$cache = new Cache('locations', $this->id, 'children', $name);
+		$cache = CacheControl::getCache('locations', $this->id, 'children', $name);
 		$childId = $cache->getData();
 		if($cache->isStale())
 		{
@@ -624,7 +624,7 @@ class Location
 	 */
 	public function getChildren($type = 'all')
 	{
-		$cache = new Cache('locations', $this->id, 'children', $type);
+		$cache = CacheControl::getCache('locations', $this->id, 'children', $type);
 
 		if(!$childrenIds = $cache->getData())
 		{
@@ -668,7 +668,7 @@ class Location
 		if(!is_numeric($id))
 			return false;
 
-		$cache = new Cache('locations', $id, 'hasChildren');
+		$cache = CacheControl::getCache('locations', $id, 'hasChildren');
 		$hasChildren = $cache->getData();
 
 		if($cache->isStale())
@@ -759,8 +759,8 @@ class Location
 		} else {
 			return true;
 		}
-		
-		
+
+
 	}
 
 	/**

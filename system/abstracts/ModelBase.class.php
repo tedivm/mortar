@@ -237,7 +237,7 @@ abstract class ModelBase implements Model
 
 			}
 
-			Cache::clear('models', $this->getType(), $this->id);
+			CacheControl::clearCache('models', $this->getType(), $this->id);
 
 		}catch(Exception $e){
 			$db->rollback();
@@ -319,7 +319,7 @@ abstract class ModelBase implements Model
 	public function getActions($user = null)
 	{
 		$type = $this->getType();
-		$actionListCache = new Cache('models', $type, 'actionList');
+		$actionListCache = CacheControl::getCache('models', $type, 'actionList');
 		$actionList = $actionListCache->getData();
 
 		if($actionListCache->isStale())
@@ -342,7 +342,7 @@ abstract class ModelBase implements Model
 
 		if (isset($user))
 		{
-			$permittedActionListCache = new Cache('user', $user->getId(), 'models', $type, 'actionList');
+			$permittedActionListCache = CacheControl::getCache('user', $user->getId(), 'models', $type, 'actionList');
 			$permittedActions = $permittedActionListCache->getData();
 
 			if($permittedActionListCache->isStale())
@@ -615,7 +615,7 @@ abstract class ModelBase implements Model
 
 	public function getTables()
 	{
-		$cache = new Cache('models', $this->getType(), 'tables');
+		$cache = CacheControl::getCache('models', $this->getType(), 'tables');
 		$cache->setMemOnly();
 
 		$tables = $cache->getData();
@@ -712,7 +712,7 @@ abstract class ModelBase implements Model
 	 */
 	protected function load($id)
 	{
-		$cache = new Cache('models', $this->getType(), $id, 'info');
+		$cache = CacheControl::getCache('models', $this->getType(), $id, 'info');
 		$info = $cache->getData();
 
 		if($cache->isStale())

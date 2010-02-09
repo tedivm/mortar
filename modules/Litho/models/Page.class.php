@@ -118,7 +118,7 @@ class LithoModelPage extends LocationModel
 		if(!is_numeric($quantity) || !is_numeric($offset))
 			throw new TypeMismatch(array('Integer'));
 
-		$cache = new Cache('models', 'Page', $this->getId(), 'content', 'browseRevisions', $quantity, $offset);
+		$cache = CacheControl::getCache('models', 'Page', $this->getId(), 'content', 'browseRevisions', $quantity, $offset);
 		$revisionList = $cache->getData();
 		if($cache->isStale())
 		{
@@ -224,7 +224,7 @@ class PageRevision
 	{
 		if(is_numeric($this->pageId) && is_numeric($revisionId))
 		{
-			$cache = new Cache('models', 'Page', $this->pageId, 'content', $revisionId);
+			$cache = CacheControl::getCache('models', 'Page', $this->pageId, 'content', $revisionId);
 			$contentData = $cache->getData();
 
 			if($cache->isStale())

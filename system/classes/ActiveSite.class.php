@@ -54,7 +54,7 @@ class ActiveSite
 
 			$url = rtrim($url, '/');
 
-			$cache = new Cache('urlLookup', $url);
+			$cache = CacheControl::getCache('urlLookup', $url);
 			$siteId = $cache->getData();
 
 			if($cache->isStale() || !is_numeric($siteId))

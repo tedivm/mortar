@@ -75,7 +75,7 @@ class Theme extends ContentBase
 		$this->contentPath = $themePath;
 		$themeUrl = $this->url;
 
-		$cache = new Cache('theme', $this->name, ActiveSite::getLink('theme'));
+		$cache = CacheControl::getCache('theme', $this->name, ActiveSite::getLink('theme'));
 		$data = $cache->getData();
 
 		if($cache->isStale())
@@ -273,7 +273,7 @@ class Theme extends ContentBase
 
 		if($type == 'js' || $type == 'css')
 		{
-			$cache = new Cache($this->contentType, $this->name, 'minification', $type, 'url');
+			$cache = CacheControl::getCache($this->contentType, $this->name, 'minification', $type, 'url');
 			$url = $cache->getData();
 
 			if($cache->isStale())

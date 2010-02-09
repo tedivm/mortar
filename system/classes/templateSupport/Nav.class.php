@@ -21,7 +21,7 @@ class TagBoxNav
 		foreach($children as $child)
 			$cacheKey .= $child->getId() . "_";
 
-		$cache = new Cache('tagboxes', $this->location->getId(), 'nav', 'navList', $cacheKey);
+		$cache = CacheControl::getCache('tagboxes', $this->location->getId(), 'nav', 'navList', $cacheKey);
 
 		$navList = $cache->getData();
 
@@ -37,12 +37,12 @@ class TagBoxNav
 				$childLink = new HtmlObject('a');
 				$childLink->property('href', (string) $url)->
 					addClass('navLink');
-			
+
 				$childItem = new HtmlObject('li');
 				$childItem->addClass('navItem');
-			
+
 				$childName = $model['title'];
-			
+
 				if(($marker) && ($child->getId() === $this->location->getId()))
 					$childItem->wrapAround($childName)->
 						addClass('navItemSelect');
@@ -62,29 +62,29 @@ class TagBoxNav
 	protected function siblingNav($marker = true)
 	{
 		$children = $this->location->getParent()->getChildren();
-		
+
 		$navList = $this->navList($children, $marker);
-		
+
 		return (string) $navList;
 	}
 
 	protected function childrenNav()
 	{
-		$children = $this->location->getChildren();	
+		$children = $this->location->getChildren();
 
 		$navList = $this->navList($children);
-		
+
 		return (string) $navList;
 	}
-	
+
 	protected function navByMonth()
 	{
-		$cache = new Cache('tagboxes', $this->location->getId(), 'nav', 'navByMonth');
+		$cache = CacheControl::getCache('tagboxes', $this->location->getId(), 'nav', 'navByMonth');
 
 		$dateList = $cache->getData();
 
 		if($cache->isStale())
-		{ 
+		{
 			$db = db_connect('default_read_only');
 			$stmt = $db->stmt_init();
 
@@ -93,7 +93,7 @@ class TagBoxNav
 
 			$stmt->prepare($sql);
 			$stmt->bindAndExecute('i', $this->location->getId());
-			
+
 			$dateList = new HtmlObject('ul');
 			$dateList->addClass('dateList');
 
@@ -112,17 +112,17 @@ class TagBoxNav
 				$dateLink = new HtmlObject('a');
 				$dateLink->property('href', (string) $url)->
 					wrapAround($formattedDate);
-				
+
 				$dateItem = new HtmlObject('li');
 				$dateItem->addClass('dateItem')->
 					wrapAround($dateLink);
-				
+
 				$dateList->wrapAround($dateItem);
 			}
-			
+
 			$cache->storeData($dateList);
 		}
-		
+
 		return (string) $dateList;
 	}
 

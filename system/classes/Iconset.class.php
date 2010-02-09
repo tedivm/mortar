@@ -22,7 +22,7 @@ class Iconset extends ContentBase
 		$this->contentPath = $iconsPath;
 		$iconsUrl = $this->url;
 
-		$cache = new Cache('iconset', $this->name, ActiveSite::getLink('icons'));
+		$cache = CacheControl::getCache('iconset', $this->name, ActiveSite::getLink('icons'));
 		$data = $cache->getData();
 
 		if($cache->isStale())

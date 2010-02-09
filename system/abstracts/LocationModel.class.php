@@ -91,7 +91,7 @@ abstract class LocationModel extends ModelBase
 
 		if(isset($this->id))
 		{
-			$cache = new Cache('models', $this->getType(), $id, 'location');
+			$cache = CacheControl::getCache('models', $this->getType(), $id, 'location');
 			$locationId = $cache->getData();
 
 			if($cache->isStale())
@@ -182,7 +182,7 @@ abstract class LocationModel extends ModelBase
 				throw new LocationModelError('Unable to save model location');
 
 			if($parentLocation = $location->getParent())
-				Cache::clear('locations', $parentLocation->getId(), 'children');
+				CacheControl::clearCache('locations', $parentLocation->getId(), 'children');
 
 		}catch(Exception $e){
 			$db->rollback();
@@ -252,8 +252,8 @@ abstract class LocationModel extends ModelBase
 			// delete location!
 			$location = $this->getLocation();
 
-			Cache::clear('locations', $location->getId());
-			Cache::clear('models', $this->getType(), $this->getId());
+			CacheControl::clearCache('locations', $location->getId());
+			CacheControl::clearCache('models', $this->getType(), $this->getId());
 			$location = new Location();
 
 			if($children = $location->getChildren())
@@ -273,8 +273,8 @@ abstract class LocationModel extends ModelBase
 				throw new LocationModelError('Unable to delete child location ' . (string) $child);
 
 			$db->autocommit(true);
-			Cache::clear('locations', $location->getId());
-			Cache::clear('models', $this->getType(), $this->getId());
+			CacheControl::clearCache('locations', $location->getId());
+			CacheControl::clearCache('models', $this->getType(), $this->getId());
 			unset($this->location);
 			unset($this->id);
 

@@ -18,7 +18,7 @@ class GraffitiActionTagList extends ActionBase
 			$limit = $this->maxLimit;
 
 		$type = (isset($query['type'])) ? $query['type'] : 'all';
-		$cache = new Cache('tags', 'lookup', $type, $searchString, $limit);
+		$cache = CacheControl::getCache('tags', 'lookup', $type, $searchString, $limit);
 
 		$tagList = $cache->getData();
 

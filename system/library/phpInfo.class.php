@@ -57,7 +57,7 @@ class phpInfo
 	 */
 	static protected function loadEnvironmentInfo()
 	{
-		$cache = new Cache('system', 'phpinfo');
+		$cache = CacheControl::getCache('system', 'phpinfo');
 		$phpinfo = $cache->getData();
 
 		if($cache->isStale())

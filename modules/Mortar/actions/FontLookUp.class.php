@@ -17,7 +17,7 @@ class MortarActionFontLookUp extends ActionBase
 			$fonts[] = $fontFamily[0];
 		}
 
-		$cache = new Cache('fonts', 'names', 'all');
+		$cache = CacheControl::getCache('fonts', 'names', 'all');
 		$data = $cache->getData();
 
 		if($cache->isStale())
@@ -49,7 +49,7 @@ class MortarActionFontLookUp extends ActionBase
 		$this->ioHandler->addHeader('Content-Type', 'application/x-javascript; charset=utf-8');
 		$results  = "CKEDITOR.editorConfig = function( config )\n{\n";
 		$results .= "config.font_names='";
-		foreach($this->fontList as $font) 
+		foreach($this->fontList as $font)
 			$results .= $font . "; ";
 		$results .= "'+ config.font_names; \n};";
 
