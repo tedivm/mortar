@@ -52,7 +52,7 @@
 				}
 			});
 
-			$(this).("input").live('click', function() {
+			$("input").click(function() {
 				$.ckeditor.update();
 			});
 
