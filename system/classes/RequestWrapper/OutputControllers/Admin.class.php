@@ -109,10 +109,11 @@ class AdminControllerContentFilter
 		$processedOutput->addContent(array('content' => $output, 'title' => $title, 'subtitle' => $subtitle));
 
 		$oldtitle = $page->getTitle();
-		if(!isset($oldtitle)) 
+		if(!isset($oldtitle))
 			$page->setTitle($title);
 
-		$page->addRegion('action', $action->getName());
+		if(method_exists($action, 'getName'))
+			$page->addRegion('action', $action->getName());
 
 		$output = $processedOutput->getDisplay();
 
