@@ -1,5 +1,5 @@
 /*
- ### jQuery CKEditor Plugin v0.1 - 2009-11-24 ###
+ ### jQuery CKEditor Plugin v0.31 - 2010-01-21 ###
  * http://www.fyneworks.com/ - diego@fyneworks.com
  * Dual licensed under the MIT and GPL licenses:
  *   http://www.opensource.org/licenses/mit-license.php
@@ -30,36 +30,36 @@ $.extend($, {
   // utility method to load instance of CKEditor
   instance: function(i){
 			var x = CKEDITOR.instances[i];
-			//LOG(['ckeditor.instance','x',x]);
+			//console.log(['ckeditor.instance','x',x]);
 			// Look for textare with matching name for backward compatibility
 			if(!x){
 				x = $('#'+i.replace(/\./gi,'\\\.')+'')[0];
-				//LOG(['ckeditor.instance','ele',x]);
+				//console.log(['ckeditor.instance','ele',x]);
 				if(x) x = CKEDITOR.instances[x.id];
 			};
-			//LOG(['ckeditor.instance',i,x]);
+			//console.log(['ckeditor.instance',i,x]);
 			return x;
 		},
 		
   // utility method to read contents of CKEditor
   content: function(i, v){
-			//LOG(['ckeditor.content',arguments]);
+			//console.log(['ckeditor.content',arguments]);
 			var x = this.instance(i);
 			if(!x){
 				alert('CKEditor instance "'+i+'" could not be found!');
 				return '';
 			};
 			if(v!=undefined){
- 			//LOG(['ckeditor.content',x,'x.setData',v]);
+ 			//console.log(['ckeditor.content',x,'x.setData',v]);
 				x.setData(v);
 			};
-			//LOG(['ckeditor.content','getData',x.getData(true)]);
+			//console.log(['ckeditor.content','getData',x.getData(true)]);
    return x.getData(true);
   }, // ckeditor.content function
   
   // inspired by Sebastián Barrozo <sbarrozo@b-soft.com.ar>
   setHTML: function(i, v){
-			//LOG(['ckeditor.setHTML',arguments]);
+			//console.log(['ckeditor.setHTML',arguments]);
    if(typeof i=='object'){
     v = i.html;
     i = i.name || i.instance;
@@ -72,25 +72,48 @@ $.extend($, {
 			// Remove old non-existing editors from memory
 			$.ckeditor.clean();
 			// loop through editors
-			for(var name in CKEDITOR.instances){
- 			//LOG(['ckeditor.update',name,CKEDITOR.instances[name]]);
-				var data = this.content(name);
-				var area = $('#'+name);
- 			//LOG(['ckeditor.update','-->',area,data]);
-				area.text( data );
+			//console.log(['ckeditor.update','before',$.ckeditor.editors/*,CKEDITOR.instances*/]);
+			//$.each($.ckeditor.editors,function(i,name){
+			for(var i=0;i<$.ckeditor.editors.length;i++){
+				var name = $.ckeditor.editors[i];
+				//console.log(['ckeditor.update',name,CKEDITOR.instances[name]]);
+				var area = $('#'+name.replace(/\./g,'\\.'));
+				if(area.length>0){
+ 				var data = this.content(name);
+  			//console.log(['ckeditor.update','-->',area,data.length]);
+	 			area.val( data ).text( data );
+				};
+   //});
 			};
-   //LOG(['ckeditor.update','done']);
+			//console.log(['ckeditor.update','done',$.ckeditor.editors/*,CKEDITOR.instances*/]);
   }, // ckeditor.update
   
-  // utility method to non-existing instances from memory
+  // utility method to clear orphan instances from memory
   clean: function(){
-			//LOG(['ckeditor.clean','before',CKEDITOR.instances]);
-			for(var name in CKEDITOR.instances){
- 			//LOG(['ckeditor.update',name,CKEDITOR.instances[name]]);
-				if($('#'+name).length==0)
+			if(!window.CKEDITOR) return;
+			//console.log(['ckeditor.clean','before',$.ckeditor.editors]);
+			//console.log(['ckeditor.clean','before(B)',CKEDITOR.instances]);
+			for(var i=0;i<$.ckeditor.editors.length;i++){
+				var name = $.ckeditor.editors[i];
+ 			//console.log(['ckeditor.clean',name,CKEDITOR.instances[name]]);
+				var area = $('#'+name.replace(/\./g,'\\.'));
+ 			//console.log(['ckeditor.clean',name,'textarea:',area]);
+ 			//console.log(['ckeditor.clean',name,'CKEDITOR:',CKEDITOR.instances[name]]);
+ 			//console.log(['ckeditor.clean',name,'CKEDITOR.textarea:',CKEDITOR.instances[name]?CKEDITOR.instances[name].textarea:null]);
+				var inst = CKEDITOR.instances[name];
+				if(area.length==0 || !inst || inst.textarea!=area[0]){
+					//console.log(['ckeditor.clean',name,'DOES NOT EXIST']);
+					//console.log(['ckeditor.clean',name,'editors.splice('+i+')']);
+				 $.ckeditor.editors.splice(i);
+					////console.log(['ckeditor.clean',name,'delete CKEDITOR.instances['+name+']']);
 				 delete CKEDITOR.instances[name];
+					////console.log(['ckeditor.clean',name,'CKEDITOR.instances['+name+'].destroy()']);
+					//inst.destroy();
+				};
+   //});
 			};
-			//LOG(['ckeditor.clean','after',CKEDITOR.instances]);
+			//console.log(['ckeditor.clean','after',$.ckeditor.editors]);
+			//console.log(['ckeditor.clean','after(B)',CKEDITOR.instances]);
   }, // ckeditor.clean
   
   // utility method to create instances of CKEditor (if any)
@@ -102,12 +125,17 @@ $.extend($, {
     selector: o.selector || $.ckeditor.selector,
     basePath: o.path || o.basePath || (window.CKEDITOR_BASEPATH ? CKEDITOR_BASEPATH : $.ckeditor.path)
    });
+			//console.log(['ckeditor.create','o',o]);
    // Find ckeditor.editor-instance 'wannabes'
    var e = o.e ? $(o.e) : undefined;
    if(!e || !e.length>0) e = $(o.selector);
+			//console.log(['ckeditor.create','e',e]);
    if(!e || !e.length>0) return;
+			//console.log(['ckeditor.create','loaded?',$.ckeditor.loaded]);
+			//console.log(['ckeditor.create','loading?',$.ckeditor.loading]);
    // Load script and create instances
    if(!$.ckeditor.loading && !$.ckeditor.loaded){
+ 			//console.log(['ckeditor.create','load script']);
     $.ckeditor.loading = true;
     $.getScript(
      o.basePath+'ckeditor.js',
@@ -116,12 +144,13 @@ $.extend($, {
    };
    // Start editor
    var start = function(){//e){
+				//console.log(['ckeditor.create','start','loaded?',$.ckeditor.loaded]);
     if($.ckeditor.loaded){
-     //LOG(['ckeditor.create','start',e,o]);
+     //console.log(['ckeditor.create','start','loaded!',e,o]);
      $.ckeditor.editor(e,o);
     }
     else{
-     //LOG(['ckeditor.create','waiting for script...',e,o]);
+     //console.log(['ckeditor.create','start','waiting:',e,o]);
      if($.ckeditor.waited<=0){
       alert('jQuery.CKEditor plugin error: The CKEditor script did not load.');
      }
@@ -145,7 +174,7 @@ $.extend($, {
     ajaxSubmit: $.fn.ajaxSubmit || function(){}
    };
    $.fn.ajaxSubmit = function(){
-				//LOG(['ckeditor.intercepted','$.fn.ajaxSubmit',CKEDITOR.instances]);
+				//console.log(['ckeditor.intercepted','$.fn.ajaxSubmit',CKEDITOR.instances]);
     $.ckeditor.update(); // update html
     return $.ckeditor.intercepted.ajaxSubmit.apply( this, arguments );
    };
@@ -161,14 +190,16 @@ $.extend($, {
 			o = $.extend({}, $.ckeditor.config || {}, o || {});
    // Make sure we have a jQuery object
    e = $(e);
-   //LOG(['ckeditor.editor','E',e,o]);
+   //console.log(['ckeditor.editor','E',e,'o',o]);
    if(e.size()>0){
     // Go through objects and initialize ckeditor.editor
     e.each(
      function(i,t){
+      //console.log(['ckeditor.editor','each','t',i,t]);
 						if((t.tagName||'').toLowerCase()!='textarea')
 							return alert(['An invalid parameter has been passed to the $.CKEditor.editor function','tagName:'+t.tagName,'name:'+t.name,'id:'+t.id].join('\n'));
       
+      //console.log(['ckeditor.editor','each','t.ckeditor',t.ckeditor]);
       var T = $(t);// t = element, T = jQuery
       if(!t.ckeditor/* not already installed */){
 							// make sure the element has an id
@@ -176,7 +207,7 @@ $.extend($, {
 							$.ckeditor.editors[$.ckeditor.editors.length] = t.id;
 							// make sure the element has a name
 							t.name = t.name || t.id;
-       //LOG(['ckeditor.editor','metadata',T.metadata()]);
+       //console.log(['ckeditor.editor','metadata',T.metadata()]);
 							// Accept settings from metadata plugin
 							var config = $.extend({}, o,
 								($.meta ? T.data()/*NEW metadata plugin*/ :
@@ -190,15 +221,18 @@ $.extend($, {
 								basePath: (o.path || o.basePath),
 								toolbar: (o.toolbar || o.ToolbarSet || undefined)// 'Default')
 							});
-       //LOG(['ckeditor.editor','make','t',t]);
-       //LOG(['ckeditor.editor','make','t.id',t.id]);
-       //LOG(['ckeditor.editor','make','config',config]);
+       //console.log(['ckeditor.editor','make','t',t]);
+       //console.log(['ckeditor.editor','make','t.id',t.id]);
+       //console.log(['ckeditor.editor','make','config',config]);
 							// create CKEditor instance
        var editor = CKEDITOR.replace(t.id, config);
 							// Store reference to element in CKEditor object
-       editor.textarea = T;
+       editor.textarea = t;
 							// Store reference to CKEditor object in element
        t.ckeditor = editor;
+							// Mark this editor so we know if a new editor
+							// with the same id has taken its place
+       T.addClass('is-ckeditor');
       };
      }
     );
@@ -211,7 +245,11 @@ $.extend($, {
   
   // start-up method
   start: function(o/* options */){
+			// Drop dead instances
+			//console.log(['ckeditor.start','clean']);
+			$.ckeditor.clean();
    // Attach itself to known plugins...
+			//console.log(['ckeditor.start','intercept']);
 			$.ckeditor.intercept();
 			// Create CKEDITOR
    return $.ckeditor.create(o);
@@ -227,11 +265,26 @@ $.extend($, {
 
 $.extend($.fn, {
  ckeditor: function(o){
-  
-		if(this.length==1 && this[0].id && window.CKEDITOR && CKEDITOR.instances[this[0].id]!=undefined)
-			return CKEDITOR.instances[this[0].id];
+		//console.log(['ckeditor',this]);
 		
+		// Provide quick access to CKEditor Instance Object
+		if(this.length==1 && this[0].id && window.CKEDITOR){
+   var e = CKEDITOR.instances[this[0].id];
+			if(e==this[0]){
+ 		 //console.log(['ckeditor','already exists:',CKEDITOR.instances[this[0].id]]);
+ 			return CKEDITOR.instances[this[0].id];
+			}
+			else{
+ 		 //console.log(['ckeditor','edit not created for:',this[0]]);
+			 $.ckeditor.clean();
+			};
+		};
+		
+		//console.log(['ckeditor','make editors for:',this]);
+		
+		// Let's make some editors! :-)
 		return $(this).each(function(){
+			//console.log(['ckeditor','each','t',this]);
    $.ckeditor.start(
 				$.extend(
 					{}, // create a new options object
@@ -240,6 +293,8 @@ $.extend($.fn, {
 				) // $.extend
 			); // $.ckeditor.start
   }); // each element
+		
+		//console.log(['ckeditor','done','editors:',$.editor.editors]);
 		
  } //$.fn.ckeditor
 });
