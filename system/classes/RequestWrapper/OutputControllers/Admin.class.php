@@ -97,7 +97,7 @@ class AdminControllerContentFilter
 		$themePath = $page->getThemePath();
 		$theme = $page->getTheme();
 
-		$processedOutput = new ViewThemeTemplate($theme, 'adminContent.html');
+		$processedOutput = new ViewThemeTemplate($theme, 'support/adminContent.html');
 
 		$title = (isset($action->adminSettings['headerTitle'])) ? $action->adminSettings['headerTitle'] : '';
 		$title .= (isset($action->adminSettings['useRider']) && $action->adminSettings['useRider']
