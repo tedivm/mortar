@@ -17,7 +17,7 @@ if(!class_exists('cacheHandlerSqlite', false))
  * @package System
  * @subpackage Caching
  */
-class cacheHandlerSqliteOneFile extends cacheHandlerSqlite
+class StashSqliteOneFile extends StashSqlite
 {
 
 

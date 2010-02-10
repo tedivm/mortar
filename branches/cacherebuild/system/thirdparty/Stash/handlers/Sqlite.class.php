@@ -14,7 +14,7 @@
  * @package System
  * @subpackage Caching
  */
-class cacheHandlerSqlite implements cacheHandler
+class StashSqlite implements StashHandler
 {
 	/**
 	 * This is a string that represents the item being managed.

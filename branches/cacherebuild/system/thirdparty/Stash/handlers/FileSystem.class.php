@@ -5,7 +5,7 @@
  * @package System
  * @subpackage Caching
  */
-class cacheHandlerFileSystem implements cacheHandler
+class StashFileSystem implements StashHandler
 {
 	/**
 	 * This is the path to the file which will be used to store the cached item. It is based off of the key.
