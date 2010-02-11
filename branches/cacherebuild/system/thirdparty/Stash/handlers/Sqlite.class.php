@@ -74,8 +74,6 @@ class StashSqlite implements StashHandler
 		}else{
 			$this->cachePath = Stash::getBaseDirectory($this);
 		}
-var_dump($this->cachePath);
-exit();
 	}
 
 	/**
