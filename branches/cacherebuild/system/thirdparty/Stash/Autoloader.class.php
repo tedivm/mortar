@@ -5,11 +5,12 @@ class StashAutoloader
 	static protected $classes = array(
 										'Handler' => 'Handler.class.php',
 										'StashError' => 'Error.class.php',
+										'StashWarning' => 'Warning.class.php',
 										'Stash' => 'Stash.class.php',
 
-										'StashFileSystem' => 'FileSystem.class.php',
-										'StashSqlite' => 'Sqlite.class.php',
-										'StashSqliteOneFile' => 'SqliteOneFile.class.php'
+										'StashFileSystem' => 'handlers/FileSystem.class.php',
+										'StashSqlite' => 'handlers/Sqlite.class.php',
+										'StashSqliteOneFile' => 'handlers/SqliteOneFile.class.php'
 									);
 
 
@@ -28,9 +29,9 @@ class StashAutoloader
 
 	static function loadAll()
 	{
-		$currentDir = dirname(__file__);
+		$currentDir = dirname(__file__) . '/';
 
-		foreach($classes as $classname => $path)
+		foreach(self::$classes as $classname => $path)
 		{
 			if(class_exists($classname, false) || !file_exists($currentDir . $path))
 				continue;
