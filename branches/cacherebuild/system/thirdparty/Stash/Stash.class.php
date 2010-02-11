@@ -91,9 +91,9 @@ class Stash
 	 *
 	 * @var array
 	 */
-	protected static $handlers = array('FileSystem' => 'cacheHandlerFileSystem',
-										'SQLiteMF' => 'cacheHandlerSqlite',
-										'SQLite' => 'cacheHandlerSqliteOneFile');
+	protected static $handlers = array('FileSystem' => 'StashFileSystem',
+										'SQLiteMF' => 'StashSqlite',
+										'SQLite' => 'StashSqliteOneFile');
 	/**
 	 * This variable can be used to disable the cache system wide. It is used when the storage engine fails or if the
 	 * cache is being cleared.
@@ -144,43 +144,25 @@ class Stash
 	 *
 	 * @param string $key...
 	 */
-	public function __construct()
+	public function __construct(StashHandler $handler)
 	{
-		self::$cacheCalls++;
 		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable)
-		{
 			$this->cache_enabled = false;
-			return;
-		}
 
-		try{
+		$this->handler = $handler;
+	}
 
-			if(func_num_args() == 0)
-				throw new CacheError('No key sent to the cache constructor.');
+	public function setupKey()
+	{
+		if(func_num_args() == 0)
+			throw new StashError('No key sent to the cache constructor.');
 
-			$key = func_get_args();
-			if(count($key) == 1 && is_array($key[0]))
-				$key = $key[0];
+		$key = func_get_args();
+		if(count($key) == 1 && is_array($key[0]))
+			$key = $key[0];
 
-			$this->key = array_map('strtolower', $key);
-			$this->keyString = implode(':::', $this->key);
-
-			if(BENCHMARK)
-			{
-				$keyString = implode('/', $this->key);
-
-				if(isset(self::$queryRecord[$keyString]))
-				{
-					self::$queryRecord[$keyString]++;
-				}else{
-					self::$queryRecord[$keyString] = 1;
-				}
-			}
-
-		}catch (Exception $e){
-			$this->cache_enabled = false;
-		}
-
+		$this->key = array_map('strtolower', $key);
+		$this->keyString = implode(':::', $this->key);
 	}
 
 	/**
@@ -209,17 +191,18 @@ class Stash
 	 * @param null|string $key...
 	 * @return bool
 	 */
-	static public function clear()
+	public function clear()
 	{
 		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable)
 			return true;
 
 		self::$memStore = array();
 
-		if($handlerClass = self::getHandlerClass())
+		if($handler = $this->getHandler())
 		{
 			$args = func_get_args();
-			return staticFunctionHack($handlerClass, 'clear', $args);
+			return $handler->clear($args);
+			//return Stash::staticFunctionHack($handlerClass, 'clear', $args);
 		}
 	}
 
@@ -229,34 +212,14 @@ class Stash
 	 *
 	 * @return bool
 	 */
-	static public function purge()
+	public function purge()
 	{
 		self::$memStore = array();
 
-		if($handlerClass = self::getHandlerClass())
-			return staticFunctionHack($handlerClass, 'purge');
+		if($handlerClass = $this->getHandler())
+			return Stash::staticFunctionHack($handlerClass, 'purge');
 
 		return false;
-	}
-
-	/**
-	 * This function returns the handler class that is currently active.
-	 *
-	 * @return string
-	 */
-	static public function getHandlerClass()
-	{
-		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable)
-			return false;
-
-		if(!isset(self::$handlerClass) || self::$handlerClass == '')
-		{
-			$handlers = self::getHandlers();
-			$config = Config::getInstance();
-			self::$handlerClass = (isset($handlers[$config['cacheType']])) ? $handlers[$config['cacheType']]
-																			: $handlers['FileSystem'];
-		}
-		return self::$handlerClass;
 	}
 
 	/**
@@ -268,6 +231,8 @@ class Stash
 	 */
 	public function getData()
 	{
+		self::$cacheCalls++;
+
 		if(!$this->cache_enabled)
 			return false;
 
@@ -279,7 +244,7 @@ class Stash
 			if(!$handler)
 				return false;
 
-			$record = $handler->getData();
+			$record = $handler->getData($this->key);
 			self::$memStore[$this->keyString] = ($this->storeMemory) ? $record : false;
 		}else{
 			return false;
@@ -333,7 +298,7 @@ class Stash
 			if(!$handler)
 				return false;
 
-			$handler->storeData($store, $expiration);
+			$handler->storeData($this->key, $store, $expiration);
 		}catch(Exception $e){
 
 		}
@@ -361,21 +326,10 @@ class Stash
 	{
 		foreach(self::$handlers as $name => $class)
 		{
-			if(!class_exists($class, false))
-			{
-				$config = Config::getInstance();
-				$filename = (strpos($class, 'cacheHandler') !== false) ? substr($class, '12') : $class;
+			if(!class_exists($class))
+				continue;
 
-				$path = $config['path']['mainclasses'] . 'cacheHandlers/' . $filename . '.class.php';
-				if(file_exists($path))
-				{
-					include($path);
-				}else{
-					continue;
-				}
-			}
-
-			if(staticFunctionHack($class, 'canEnable'))
+			if(Stash::staticFunctionHack($class, 'canEnable'))
 				$availableHandlers[$name] = $class;
 		}
 
@@ -395,41 +349,7 @@ class Stash
 		if(isset($this->handler))
 			return $this->handler;
 
-		if(self::$handlerClass == '')
-		{
-			$config = Config::getInstance();
-			$handlerType = (isset($config['system']['cacheHandler'])
-								&& isset(self::$handlers[$config['system']['cacheHandler']]))
-										? $config['system']['cacheHandler']
-										: 'FileSystem';
-
-			$handlerClass = self::$handlers[$handlerType];
-
-			if(!class_exists($handlerClass, false))
-			{
-				$filename = (strpos($handlerClass, 'cacheHandler') !== false) ? substr($handlerClass, '12') : $handlerClass;
-				$path = $config['path']['mainclasses'] .'cacheHandlers/' . $filename . '.class.php';
-
-				if(file_exists($path))
-				{
-					include($path);
-				}else{
-					self::$runtimeDisable = true;
-					throw new CacheError('Unable to load cache handler ' . $handlerType . ' at ' . $path);
-				}
-			}
-
-			self::$handlerClass = $handlerClass;
-		}
-
-		$this->handler = new self::$handlerClass();
-
-		if(!$this->handler->setup($this->key))
-		{
-			$this->cache_enabled = false;
-			throw new CacheError('Unable to setup cache handler.');
-		}
-		return $this->handler;
+		return false;
 	}
 
 	static function encoding($data)
@@ -472,6 +392,31 @@ class Stash
 			case 'none':
 			default:
 				return $data;
+		}
+	}
+
+	/**
+	 * This function is used to get around late static binding issues and other fun things in < php5.3
+	 *
+	 * @param string $className
+	 * @param string $functionName
+	 * @param mixed $arguments,...
+	 */
+	static function staticFunctionHack($className, $functionName)
+	{
+		$arguments = func_get_args();
+		$className = array_shift($arguments);
+		$functionName = array_shift($arguments);
+
+		if(is_object($className))
+			$className = get_class($className);
+
+		/* This dirty hack is brought to you by php failing at oop */
+		if(is_callable(array($className, $functionName)))
+		{
+			return call_user_func_array(array($className, $functionName), $arguments);
+		}else{
+			throw new StashError('static function ' . $functionName . ' not found in class ' . $className);
 		}
 	}
 }
