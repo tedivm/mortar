@@ -419,6 +419,19 @@ class Stash
 			throw new StashError('static function ' . $functionName . ' not found in class ' . $className);
 		}
 	}
+
+	/**
+	 * This is used by handlers that require a path to store files or other data in when they haven't been passed a
+	 * path. This directory is inside the systems temp folder and uses Stash's current location to keep its files
+	 * seperate from other Stash libraries on the same machine. Additionally each handler class gets its own sub folder.
+	 *
+	 * @param StashHandler $handler
+	 * @return string Path for Stash files
+	 */
+	static function getBaseDirectory(StashHandler $handler)
+	{
+		return sys_get_temp_dir() . 'stash_' . md5(dirname(__FILE__)) . '/' . get_class($handler) . '/';
+	}
 }
 
 ?>
