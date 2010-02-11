@@ -54,34 +54,21 @@ class StashSqlite implements StashHandler
 	static public $busyTimeout = 500;
 
 	/**
-	 * This takes in a key (array) and turns it into the sql key. It also sets up the SQLiteDatabase object, returning
-	 * false on failure.
-	 *
-	 * @param array $key
-	 * @return bool
-	 */
-	public function setup($key)
-	{
-		$this->section = $key[0];
-		$this->key = self::makeSqlKey($key);
-		$sqlResource = staticFunctionHack(get_class($this), 'getSqliteHandler', $this->section);
-		return (get_class($sqlResource) == 'SQLiteDatabase');
-	}
-
-	/**
 	 * This returns the data from the SQLiteDatabase
 	 *
 	 * @return array
 	 */
-	public function getData()
+	public function getData($key)
 	{
+		$sqlKey = Stash::staticFunctionHack($this, 'makeSqlKey', $key);
+
 		//$sqlResource = self::getSqliteHandler($this->section);
-		$sqlResource = staticFunctionHack(get_class($this), 'getSqliteHandler', $this->section);
-		$query = $sqlResource->query("SELECT * FROM cacheStore WHERE key LIKE '{$this->key}'");
+		$sqlResource = Stash::staticFunctionHack($this, 'getSqliteHandler', $key[0]);
+		$query = $sqlResource->query("SELECT * FROM cacheStore WHERE key LIKE '{$sqlKey}'");
 
 		if($resultArray = $query->fetch(SQLITE_ASSOC))
 		{
-			$returnData = Cache::decode($resultArray['data'], $resultArray['encoding']);
+			$returnData = Stash::decode($resultArray['data'], $resultArray['encoding']);
 			$results = array('expiration' => $resultArray['expires'], 'data' => $returnData);
 		}else{
 			$results = false;
@@ -96,12 +83,13 @@ class StashSqlite implements StashHandler
 	 * @param array $data
 	 * @param int $expiration
 	 */
-	public function storeData($data, $expiration)
+	public function storeData($key, $data, $expiration)
 	{
-		$encoding = Cache::encoding($data);
-		$data = Cache::encode($data);
+		$sqlKey = Stash::staticFunctionHack($this, 'makeSqlKey', $key);
+		$encoding = Stash::encoding($data);
+		$data = Stash::encode($data);
 		$data = sqlite_escape_string($data);
-		$sqlResource = staticFunctionHack(get_class($this), 'getSqliteHandler', $this->section);
+		$sqlResource = Stash::staticFunctionHack($this, 'getSqliteHandler', $key[0]);
 
 		$resetBusy = false;
 		$contentLength = strlen($data);
@@ -112,7 +100,7 @@ class StashSqlite implements StashHandler
 		}
 
 		$query = $sqlResource->query("INSERT INTO cacheStore (key, expires, data, encoding)
-											VALUES ('{$this->key}', '{$expiration}', '{$data}', '{$encoding}')");
+											VALUES ('{$sqlKey}', '{$expiration}', '{$data}', '{$encoding}')");
 
 		if($resetBusy)
 			$sqlResource->busyTimeout(self::$busyTimeout);
@@ -125,7 +113,7 @@ class StashSqlite implements StashHandler
 	 *
 	 * @param null|array $key
 	 */
-	static function clear($key = null)
+	public function clear($key = null)
 	{
 		if(is_null($key) || (is_array($key) && count($key) == 0))
 		{
@@ -142,9 +130,9 @@ class StashSqlite implements StashHandler
 			self::$sqlObject[$name] = null;
 			SqliteConnection::clear();
 		}else{
-			$key = self::makeSqlKey($key) . '%';
-			$sqlResource = staticFunctionHack(get_class($this), 'getSqliteHandler', $this->section);
-			$query = $sqlResource->queryExec("DELETE FROM cacheStore WHERE key LIKE '{$key}'");
+			$sqlKey = Stash::staticFunctionHack($this, 'makeSqlKey', $key);
+			$sqlResource = Stash::staticFunctionHack($this, 'getSqliteHandler', $key[0]);
+			$query = $sqlResource->queryExec("DELETE FROM cacheStore WHERE key LIKE '{$sqlKey}%'");
 		}
 	}
 
@@ -153,12 +141,13 @@ class StashSqlite implements StashHandler
 	 *
 	 * @return bool
 	 */
-	static function purge()
+	public function purge()
 	{
 		$config = Config::getInstance();
 		$filePath = $config['path']['temp'] . 'cache/';
 
 		$databases = glob($filePath . '*.sqlite');
+		$expiration = microtime(true);
 		foreach($databases as $database)
 		{
 			$tmpArray = explode('/', $filename);
@@ -167,7 +156,7 @@ class StashSqlite implements StashHandler
 			$cacheName = array_shift($tmpArray);
 
 			$handler = self::getSqliteHandler($cacheName);
-			$handler->query('DELETE FROM cacheStore WHERE expires < ' . microtime(true));
+			$handler->query('DELETE FROM cacheStore WHERE expires < ' . $expiration);
 		}
 		return true;
 	}
@@ -246,5 +235,4 @@ class StashSqlite implements StashHandler
 	}
 }
 
-class CacheSqliteWarning extends CoreWarning {}
 ?>

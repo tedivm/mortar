@@ -8,9 +8,6 @@
  * @subpackage Caching
  */
 
-if(!class_exists('cacheHandlerSqlite', false))
-	include 'Sqlite.class.php';
-
 /**
  * This class is used by the Cache class for persistent storage of cached objects using an sqlite file.
  *
@@ -36,7 +33,7 @@ class StashSqliteOneFile extends StashSqlite
 	 *
 	 * @param null|array $key
 	 */
-	static function clear($key = null)
+	public function clear($key = null)
 	{
 		if(is_null($key) || (is_array($key) && count($key) == 0))
 		{
@@ -56,7 +53,7 @@ class StashSqliteOneFile extends StashSqlite
 	 *
 	 * @return unknown
 	 */
-	static function purge()
+	public function purge()
 	{
 		$handler = self::getSqliteHandler('cache');
 		$handler->query('DELETE FROM cacheStore WHERE expires < ' . microtime(true));
@@ -72,7 +69,7 @@ class StashSqliteOneFile extends StashSqlite
 	 */
 	static function getSqliteHandler($name)
 	{
-		return cacheHandlerSqlite::getSqliteHandler('cache');
+		return StashSqlite::getSqliteHandler('cache');
 	}
 }
 

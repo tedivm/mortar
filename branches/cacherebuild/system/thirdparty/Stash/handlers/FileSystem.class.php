@@ -45,26 +45,12 @@ class StashFileSystem implements StashHandler
 	 */
 	protected static $cachePath;
 
-	protected $currentKey;
-
-
-	/**
-	 * This function takes the key and creates the path. If it is unable to create a path using that key, it returns
-	 * false.
-	 *
-	 * @param array $key
-	 * @return bool
-	 */
-	public function setup($key)
+	public function makeKeyString()
 	{
-		$memkey = '';
+		$keyString = '';
 		foreach($key as $group)
-			$memkey .= $group . '/' ;
-
-		$this->currentKey = $memkey;
-
-		$this->path = self::makePath($key);
-		return ($this->path !== false);
+			$keyString .= $group . '/' ;
+		return $keyString;
 	}
 
 	/**
@@ -74,12 +60,14 @@ class StashFileSystem implements StashHandler
 	 *
 	 * @return bool
 	 */
-	public function getData()
+	public function getData($key)
 	{
-		if(!file_exists($this->path))
+		$path = self::makePath($key);
+
+		if(!file_exists($path))
 			return false;
 
-		$data = self::getDataFromFile($this->path);
+		$data = self::getDataFromFile($path);
 
 		if($data !== false)
 			return $data;
@@ -93,8 +81,8 @@ class StashFileSystem implements StashHandler
 
 		if(!isset($data) || !isset($expiration))
 		{
-			$this->cache_enabled = false;
-			throw new CacheError('Unable to load cache from filesystem');
+			//$this->cache_enabled = false;
+			throw new StashError('Unable to load cache from filesystem');
 		}
 
 		return array('data' => $data, 'expiration' => $expiration);
@@ -109,32 +97,34 @@ class StashFileSystem implements StashHandler
 	 * @param int $expiration
 	 * @return bool
 	 */
-	public function storeData($data, $expiration)
+	public function storeData($key, $data, $expiration)
 	{
 		$success = false;
 		if(!$this->cache_enabled)
 			return false;
 
-		if(!is_dir(dirname($this->path)))
+		$path = self::makePath($key);
+
+		if(!is_dir(dirname($path)))
 		{
-			if(!mkdir(dirname($this->path), 0700, true))
+			if(!mkdir(dirname($path), 0700, true))
 				return false;
 		}
 
-		$file = fopen($this->path, 'w+');
+		$file = fopen($path, 'w+');
 		if(flock($file, LOCK_EX))
 		{
 			// by dumping this behind a php tag and comment, we make it inaccessible should it happen to become web
 			// accessible
 
-			switch(Cache::encoding($data))
+			switch(Stash::encoding($data))
 			{
 				case 'bool':
 					$dataString = (bool) $data ? 'true' : 'false';
 					break;
 
 				case 'serialize':
-					$dataString = 'unserialize(base64_decode(\'' . base64_encode(serialize($data)) . '\'))'; //sprintf('"%s"', addslashes(serialize($data))) .
+					$dataString = 'unserialize(base64_decode(\'' . base64_encode(serialize($data)) . '\'))';
 					break;
 
 				case 'none':
@@ -144,7 +134,7 @@ class StashFileSystem implements StashHandler
 			}
 
 			$storeString = '<?php ' . PHP_EOL .
-			'/* Cachekey: ' . $this->currentKey . ' */' . PHP_EOL .
+			'/* Cachekey: ' . $this->makeKeyString($key) . ' */' . PHP_EOL .
 			'/* Type: ' . gettype($data) . ' */' . PHP_EOL .
 			'$expiration = ' . $expiration . ';' . PHP_EOL .
 			'$data = ' . $dataString . ';' . PHP_EOL .
@@ -229,7 +219,7 @@ class StashFileSystem implements StashHandler
 	 * @param null|array $key
 	 * @return bool
 	 */
-	static public function clear($key = null)
+	public function clear($key = null)
 	{
 		if(is_null($key))
 			$key = '';
@@ -264,7 +254,7 @@ class StashFileSystem implements StashHandler
 	 *
 	 * @return bool
 	 */
-	static function purge()
+	public function purge()
 	{
 		$config = Config::getInstance();
 
