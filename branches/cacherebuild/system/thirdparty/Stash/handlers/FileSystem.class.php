@@ -39,11 +39,25 @@ class StashFileSystem implements StashHandler
 
 	/**
 	 * This is the base path for the cache items to be saved in. This defaults to a directory in the tmp directory (as
-	 * defined by the connfiguration) called 'cache', which it will create if needed.
+	 * defined by the configuration) called 'stash_', which it will create if needed.
 	 *
 	 * @var string
 	 */
-	protected static $cachePath;
+	protected $cachePath;
+
+	public function __construct($options = array())
+	{
+		if(isset($options['path']))
+		{
+			$this->cachePath = $options['path'];
+			$lastChar = substr($this->cachePath, -1);
+
+			if($lastChar != '/' && $lastChar != '\'')
+				$this->cachePath .= '/';
+		}else{
+			$this->cachePath = Stash::getBaseDirectory($this);
+		}
+	}
 
 	public function makeKeyString()
 	{
@@ -62,7 +76,7 @@ class StashFileSystem implements StashHandler
 	 */
 	public function getData($key)
 	{
-		$path = self::makePath($key);
+		$path = $this->makePath($key);
 
 		if(!file_exists($path))
 			return false;
@@ -103,7 +117,7 @@ class StashFileSystem implements StashHandler
 		if(!$this->cache_enabled)
 			return false;
 
-		$path = self::makePath($key);
+		$path = $this->makePath($key);
 
 		if(!is_dir(dirname($path)))
 		{
@@ -162,15 +176,12 @@ class StashFileSystem implements StashHandler
 	 * @param array $key
 	 * @return string
 	 */
-	static protected function makePath($key)
+	protected function makePath($key)
 	{
 		if(!isset(self::$cachePath))
-		{
-			$config = Config::getInstance();
-			self::$cachePath = $config['path']['temp'] . 'cache/';
-		}
+			throw new StashFileSystemError('Unable to load system without a base path.');
 
-		$path = self::$cachePath;
+		$basePath = $this->cachePath;
 
 		// When I profiled this compared to the "implode" function, this was much faster
 		// This is probably due to the small size of the arrays and the overhead from function calls
@@ -184,11 +195,10 @@ class StashFileSystem implements StashHandler
 		}else{
 
 			foreach($key as $index => $value)
-			{
 				$key[$index] = md5($value);
-			}
 
-			switch (count($key)) {
+			switch (count($key))
+			{
 				case 0:
 					return $path;
 					break;
@@ -201,15 +211,14 @@ class StashFileSystem implements StashHandler
 					$name = array_pop($key);
 
 					foreach($key as $group)
-					{
 						$path .= $group . '/';
-					}
+
 					$path .= $name . '.php';
 					break;
 			}
 			self::$memStore['keys'][$memkey] = $path;
 		}
-		return $path;
+		return $basePath . $path;
 	}
 
 	/**
@@ -224,7 +233,7 @@ class StashFileSystem implements StashHandler
 		if(is_null($key))
 			$key = '';
 
-		$path = self::makePath($key);
+		$path = $this->makePath($key);
 
 		if($path)
 		{
@@ -256,9 +265,7 @@ class StashFileSystem implements StashHandler
 	 */
 	public function purge()
 	{
-		$config = Config::getInstance();
-
-		$filePath = $config['path']['temp'] . 'cache/';
+		$filePath = $this->cachePath;
 
 		$directoryIt = new RecursiveDirectoryIterator($filePath);
 
@@ -302,4 +309,5 @@ class StashFileSystem implements StashHandler
 
 }
 
+class StashFileSystemError extends StashError {}
 ?>

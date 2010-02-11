@@ -54,6 +54,31 @@ class StashSqlite implements StashHandler
 	static public $busyTimeout = 500;
 
 	/**
+	 * This is the base path for the cache items to be saved in. This defaults to a directory in the tmp directory (as
+	 * defined by the configuration) called 'stash_', which it will create if needed.
+	 *
+	 * @var string
+	 */
+	protected $cachePath;
+
+	public function __construct($options = array())
+	{
+		if(isset($options['path']))
+		{
+			$this->cachePath = $options['path'];
+			$lastChar = substr($this->cachePath, -1);
+
+			if($lastChar != '/' && $lastChar != '\'')
+				$this->cachePath .= '/';
+
+		}else{
+			$this->cachePath = Stash::getBaseDirectory($this);
+		}
+var_dump($this->cachePath);
+exit();
+	}
+
+	/**
 	 * This returns the data from the SQLiteDatabase
 	 *
 	 * @return array
@@ -62,8 +87,7 @@ class StashSqlite implements StashHandler
 	{
 		$sqlKey = Stash::staticFunctionHack($this, 'makeSqlKey', $key);
 
-		//$sqlResource = self::getSqliteHandler($this->section);
-		$sqlResource = Stash::staticFunctionHack($this, 'getSqliteHandler', $key[0]);
+		$sqlResource = $this->getSqliteHandler($key[0]);
 		$query = $sqlResource->query("SELECT * FROM cacheStore WHERE key LIKE '{$sqlKey}'");
 
 		if($resultArray = $query->fetch(SQLITE_ASSOC))
@@ -89,7 +113,7 @@ class StashSqlite implements StashHandler
 		$encoding = Stash::encoding($data);
 		$data = Stash::encode($data);
 		$data = sqlite_escape_string($data);
-		$sqlResource = Stash::staticFunctionHack($this, 'getSqliteHandler', $key[0]);
+		$sqlResource = $this->getSqliteHandler($key[0]);
 
 		$resetBusy = false;
 		$contentLength = strlen($data);
@@ -117,21 +141,20 @@ class StashSqlite implements StashHandler
 	{
 		if(is_null($key) || (is_array($key) && count($key) == 0))
 		{
-			$config = Config::getInstance();
-			deltree($config['path']['temp'] . 'cache');
+			deltree($this->cachePath);
 			self::$sqlObject = false;
 			SqliteConnection::clear();
+			Stash::$runtimeDisable = true;
 		}elseif(is_array($key) && count($key) == 1){
 
-			$config = Config::getInstance();
 			$name = array_shift($key);
 
-			deltree($config['path']['temp'] . 'cache/' . $name . '.sqlite');
+			deltree($this->cachePath . $name . '.sqlite');
 			self::$sqlObject[$name] = null;
 			SqliteConnection::clear();
 		}else{
 			$sqlKey = Stash::staticFunctionHack($this, 'makeSqlKey', $key);
-			$sqlResource = Stash::staticFunctionHack($this, 'getSqliteHandler', $key[0]);
+			$sqlResource = $this->getSqliteHandler($key[0]);
 			$query = $sqlResource->queryExec("DELETE FROM cacheStore WHERE key LIKE '{$sqlKey}%'");
 		}
 	}
@@ -143,8 +166,7 @@ class StashSqlite implements StashHandler
 	 */
 	public function purge()
 	{
-		$config = Config::getInstance();
-		$filePath = $config['path']['temp'] . 'cache/';
+		$filePath = $this->cachePath;
 
 		$databases = glob($filePath . '*.sqlite');
 		$expiration = microtime(true);
@@ -155,7 +177,7 @@ class StashSqlite implements StashHandler
 			$tmpArray = explode('.', $tmpArray);
 			$cacheName = array_shift($tmpArray);
 
-			$handler = self::getSqliteHandler($cacheName);
+			$handler = $this->getSqliteHandler($cacheName);
 			$handler->query('DELETE FROM cacheStore WHERE expires < ' . $expiration);
 		}
 		return true;
@@ -168,14 +190,13 @@ class StashSqlite implements StashHandler
 	 * @param string
 	 * @return SQLiteDatabase
 	 */
-	static function getSqliteHandler($name)
+	public function getSqliteHandler($name)
 	{
 		try {
 			if(isset(self::$sqlObject[$name]) && get_class(self::$sqlObject[$name]) == 'SQLiteDatabase')
 				return self::$sqlObject[$name];
 
-			$config = Config::getInstance();
-			$filePath = $config['path']['temp'] . 'cache/';
+			$filePath = $this->cachePath;
 
 			if(!file_exists($filePath))
 				mkdir($filePath);

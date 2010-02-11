@@ -37,13 +37,13 @@ class StashSqliteOneFile extends StashSqlite
 	{
 		if(is_null($key) || (is_array($key) && count($key) == 0))
 		{
-			$config = Config::getInstance();
-			deltree($config['path']['temp'] . 'cache');
-			SqliteConnection::clear();
+			deltree($this->cachePath);
 			self::$sqlObject = false;
+			SqliteConnection::clear();
+			Stash::$runtimeDisable = true;
 		}else{
 			$key = self::makeSqlKey($key) . '%';
-			$sqlResource = self::getSqliteHandler($key[0]);
+			$sqlResource = $this->getSqliteHandler($key[0]);
 			$query = $sqlResource->queryExec("DELETE FROM cacheStore WHERE key LIKE '{$key}'");
 		}
 	}
@@ -67,9 +67,9 @@ class StashSqliteOneFile extends StashSqlite
 	 * @param string
 	 * @return bool
 	 */
-	static function getSqliteHandler($name)
+	public function getSqliteHandler($name)
 	{
-		return StashSqlite::getSqliteHandler('cache');
+		return parent::getSqliteHandler('cache');
 	}
 }
 
