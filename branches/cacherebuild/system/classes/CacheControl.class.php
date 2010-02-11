@@ -2,6 +2,7 @@
 
 class CacheControl
 {
+	static protected $cacheHandler;
 
 	static function disableCache($flag = true)
 	{
@@ -9,6 +10,25 @@ class CacheControl
 	}
 
 	static function getUnprimedCache()
+	{
+		if(!isset(self::$cacheHandler))
+			self::setCacheHandler();
+
+		$cache = new Stash(self::$cacheHandler);
+		return $cache;
+	}
+
+	static function getCache()
+	{
+		$args = func_get_args();
+		if(count($args) == 1 && is_array($args[0]))
+			$args = $args[0];
+		$cache = self::getUnprimedCache();
+		$cache->setupKey($args);
+		return $cache;
+	}
+	
+	static protected function setCacheHandler()
 	{
 		$handlers = Stash::getHandlers();
 
@@ -27,18 +47,7 @@ class CacheControl
 		}
 
 		$handler = new $handlerClass(array('path' => $config['path']['temp'] . 'cache'));
-		$cache = new Stash($handler);
-		return $cache;
-	}
-
-	static function getCache()
-	{
-		$args = func_get_args();
-		if(count($args) == 1 && is_array($args[0]))
-			$args = $args[0];
-		$cache = self::getUnprimedCache();
-		$cache->setupKey($args);
-		return $cache;
+		self::$cacheHandler = $handler;
 	}
 
 	static function clearCache()
