@@ -10,6 +10,13 @@
 interface StashHandler
 {
 	/**
+	 * This function should takes an array which is used to pass option values to the handler.
+	 *
+	 * @param array $options
+	 */
+	public function __construct($options = array());
+
+	/**
 	 * This function should return the data array, exactly as it was received by the storeData function, or false if it
 	 * is not present. This array should have a value for "createdOn" and for "return", which should be the data the
 	 * main script is trying to store.
