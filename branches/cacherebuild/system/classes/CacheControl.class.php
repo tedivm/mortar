@@ -26,7 +26,7 @@ class CacheControl
 			throw new CacheError('Unable to load cache handler ' . $handlerType);
 		}
 
-		$handler = new $handlerClass();
+		$handler = new $handlerClass(array('path' => $config['path']['temp'] . 'cache'));
 		$cache = new Stash($handler);
 		return $cache;
 	}
