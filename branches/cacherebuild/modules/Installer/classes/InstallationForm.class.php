@@ -87,11 +87,9 @@ class InstallerInstallationForm extends Form
 					setValue('SQLite')->
 					addRule('required');
 
-				$cacheHandlers = Cache::getHandlers();
+				$cacheHandlers = CacheControl::getCacheHandlers();
 				foreach($cacheHandlers as $cacheName => $cacheClass)
-				{
 					$cacheInput->setOptions($cacheName, $cacheName);
-				}
 
 			$this->changeSection('mainDatabase')->
 				setLegend('Main Database Connection')->
