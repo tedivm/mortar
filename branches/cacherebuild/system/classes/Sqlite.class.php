@@ -84,6 +84,10 @@ class SqliteConnection
 
 	static function clear()
 	{
+		foreach(self::$sqliteConnections as $name => $connection)
+			unset(self::$sqliteConnections[$name]);
+
+		self::$sqliteConnections = null;
 		self::$sqliteConnections = array();
 	}
 
