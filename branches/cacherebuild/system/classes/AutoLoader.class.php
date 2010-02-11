@@ -61,6 +61,10 @@ class AutoLoader
 	{
 		spl_autoload_register(array(new self, 'loadClass'));
 
+		// We need to load everything from the start because the autoloader's loadClass fucntion is dependent on the
+		// cache system to save its index.
+		StashAutoloader::loadAll();
+
 		$config = Config::getInstance();
 		self::$thirdPartyIncludes = $config['path']['thirdparty'];
 	}
