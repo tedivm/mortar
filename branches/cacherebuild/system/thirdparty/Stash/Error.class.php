@@ -1,3 +1,3 @@
 <?php
-class CacheError {}
+class StashError extends Exception {}
 ?>
