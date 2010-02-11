@@ -53,6 +53,14 @@ class StashSqlite implements StashHandler
 	 */
 	static public $busyTimeout = 500;
 
+	protected $creationSql = 'CREATE TABLE cacheStore (
+							key TEXT UNIQUE ON CONFLICT REPLACE,
+							expires FLOAT,
+							encoding TEXT,
+							data BLOB
+						);
+						CREATE INDEX keyIndex ON cacheStore (key);';
+
 	/**
 	 * This is the base path for the cache items to be saved in. This defaults to a directory in the tmp directory (as
 	 * defined by the configuration) called 'stash_', which it will create if needed.
@@ -141,7 +149,6 @@ class StashSqlite implements StashHandler
 		{
 			deltree($this->cachePath);
 			self::$sqlObject = false;
-			SqliteConnection::clear();
 			Stash::$runtimeDisable = true;
 		}elseif(is_array($key) && count($key) == 1){
 
@@ -149,7 +156,6 @@ class StashSqlite implements StashHandler
 
 			deltree($this->cachePath . $name . '.sqlite');
 			self::$sqlObject[$name] = null;
-			SqliteConnection::clear();
 		}else{
 			$sqlKey = Stash::staticFunctionHack($this, 'makeSqlKey', $key);
 			$sqlResource = $this->getSqliteHandler($key[0]);
@@ -197,20 +203,11 @@ class StashSqlite implements StashHandler
 			$filePath = $this->cachePath;
 
 			if(!file_exists($filePath))
-				mkdir($filePath);
+				mkdir($filePath, null, true);
 
-			if(!$db = SqliteConnection::getDatabase($name, $filePath))
+			if(!$db = $this->getDatabase($name))
 			{
-				$creationResults = SqliteConnection::createDatabase($name,'
-						CREATE TABLE cacheStore (
-							key TEXT UNIQUE ON CONFLICT REPLACE,
-							expires FLOAT,
-							encoding TEXT,
-							data BLOB
-						);
-						CREATE INDEX keyIndex ON cacheStore (key);', false, $filePath);
-
-				if(!($creationResults && $db = SqliteConnection::getDatabase($name, $filePath)))
+				if(!($this->createDatabase($name) && $db = $this->getDatabase($name, $filePath)))
 					return false;
 			}
 
@@ -252,6 +249,51 @@ class StashSqlite implements StashHandler
 	{
 		return class_exists('SQLiteDatabase', false);
 	}
+
+	protected function getDatabase($name)
+	{
+		$path .= $this->cachePath . $name . '.sqlite';
+
+		if(!file_exists($path))
+			return false;
+
+		if(!$db = new SQLiteDatabase($path, '0666', $errorMessage))
+			throw new StashSqliteError('Unable to open SQLite Database: '. $errorMessage);
+
+		return $db;
+	}
+
+	protected function createDatabase($name)
+	{
+		try{
+			$path = $this->cachePath;
+
+			// check directory
+			if(!file_exists($path))
+				return false;
+
+			$path .= $name . '.sqlite';
+
+			if(file_exists($path))
+				return false;
+
+			if(!$db = new SQLiteDatabase($path, '0666', $errorMessage))
+				throw new StashSqliteError('Unable to open SQLite Database: '. $errorMessage);
+
+			if(!$db->queryExec($this->creationSql, $errorMessage))
+			{
+				unlink($path);
+				throw new StashSqliteError('Unable to set SQLite: structure: '. $errorMessage);
+			}
+
+			return true;
+
+		}catch(Exception $e){
+			return false;
+		}
+	}
+
 }
 
+class StashSqliteError extends StashError {}
 ?>
