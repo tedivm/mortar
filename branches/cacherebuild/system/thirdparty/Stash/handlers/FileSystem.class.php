@@ -59,7 +59,7 @@ class StashFileSystem implements StashHandler
 		}
 	}
 
-	public function makeKeyString()
+	protected function makeKeyString($key)
 	{
 		$keyString = '';
 		foreach($key as $group)
@@ -178,7 +178,7 @@ class StashFileSystem implements StashHandler
 	 */
 	protected function makePath($key)
 	{
-		if(!isset(self::$cachePath))
+		if(!isset($this->cachePath))
 			throw new StashFileSystemError('Unable to load system without a base path.');
 
 		$basePath = $this->cachePath;
@@ -200,16 +200,16 @@ class StashFileSystem implements StashHandler
 			switch (count($key))
 			{
 				case 0:
-					return $path;
+					return $basePath;
 					break;
 
 				case 1:
-					$path .= $key[0] . '.php';
+					$path = $key[0] . '.php';
 					break;
 
 				default:
 					$name = array_pop($key);
-
+					$path = '';
 					foreach($key as $group)
 						$path .= $group . '/';
 
@@ -237,19 +237,18 @@ class StashFileSystem implements StashHandler
 
 		if($path)
 		{
-
 			if(is_file($path))
 				unlink($path);
 
 			if(strpos($path, '.php') !== false)
 			{
-				$dir = dirname($path);
+				$dir = substr($path, 0, strlen($path) - 4);
 			}elseif(is_dir($path)){
 				$dir = $path;
 			}
 
-			if($dir)
-				FileSystem::deleteRecursive($path);
+			if(isset($dir))
+				Stash::deleteRecursive($dir);
 
 		}else{
 			return false;
