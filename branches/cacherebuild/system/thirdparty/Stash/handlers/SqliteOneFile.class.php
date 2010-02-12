@@ -37,9 +37,8 @@ class StashSqliteOneFile extends StashSqlite
 	{
 		if(is_null($key) || (is_array($key) && count($key) == 0))
 		{
-			deltree($this->cachePath);
+			Stash::deleteRecursive($this->cachePath);
 			self::$sqlObject = false;
-			SqliteConnection::clear();
 			Stash::$runtimeDisable = true;
 		}else{
 			$key = self::makeSqlKey($key) . '%';
