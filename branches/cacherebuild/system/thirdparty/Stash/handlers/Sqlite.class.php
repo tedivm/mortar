@@ -37,6 +37,8 @@ class StashSqlite implements StashHandler
 	 */
 	protected $section;
 
+	protected $responseCode = SQLITE_ASSOC;
+
 	/**
 	 * This is a stored sqlObject using the cache database. This way each cache call does not need to open the handler
 	 * again, saving a bit of overhead.
@@ -85,20 +87,22 @@ class StashSqlite implements StashHandler
 	}
 
 	/**
-	 * This returns the data from the SQLiteDatabase
+	 * This returns the data from the SQLite database
 	 *
 	 * @return array
 	 */
 	public function getData($key)
 	{
-		$sqlKey = Stash::staticFunctionHack($this, 'makeSqlKey', $key);
+		$sqlKey = self::makeSqlKey($key);
 
-		$sqlResource = $this->getSqliteHandler($key[0]);
+		if(!($sqlResource = $this->getSqliteHandler($key[0])))
+			return null;
+
 		$query = $sqlResource->query("SELECT * FROM cacheStore WHERE key LIKE '{$sqlKey}'");
 
-		if($resultArray = $query->fetch(SQLITE_ASSOC))
+		if($query !== false && $resultArray = $query->fetch($this->responseCode))
 		{
-			$returnData = Stash::decode($resultArray['data'], $resultArray['encoding']);
+			$returnData = Stash::decode(base64_decode($resultArray['data']), $resultArray['encoding']);
 			$results = array('expiration' => $resultArray['expires'], 'data' => $returnData);
 		}else{
 			$results = false;
@@ -108,32 +112,45 @@ class StashSqlite implements StashHandler
 	}
 
 	/**
-	 * This stores the data array into the SQLiteDatabase.
+	 * This stores the data array into the SQLite database.
 	 *
 	 * @param array $data
 	 * @param int $expiration
 	 */
 	public function storeData($key, $data, $expiration)
 	{
-		$sqlKey = Stash::staticFunctionHack($this, 'makeSqlKey', $key);
+		$sqlKey = self::makeSqlKey($key);
 		$encoding = Stash::encoding($data);
 		$data = Stash::encode($data);
-		$data = sqlite_escape_string($data);
-		$sqlResource = $this->getSqliteHandler($key[0]);
+		$data = base64_encode($data);
+
+		if(!($sqlResource = $this->getSqliteHandler($key[0])))
+			return false;
 
 		$resetBusy = false;
 		$contentLength = strlen($data);
 		if($contentLength > 100000)
 		{
 			$resetBusy = true;
-			$sqlResource->busyTimeout(self::$busyTimeout * (ceil($contentLength/100000))); // half a second per 100k
+			self::setTimeout($sqlResource, self::$busyTimeout * (ceil($contentLength/100000))); // .5s per 100k
 		}
 
 		$query = $sqlResource->query("INSERT INTO cacheStore (key, expires, data, encoding)
 											VALUES ('{$sqlKey}', '{$expiration}', '{$data}', '{$encoding}')");
 
 		if($resetBusy)
-			$sqlResource->busyTimeout(self::$busyTimeout);
+			self::setTimeout($sqlResource, self::$busyTimeout);
+	}
+
+	static function setTimeout($sqliteHandler, $milliseconds)
+	{
+		if($sqliteHandler instanceof PDO)
+		{
+			$timeout = ceil($milliseconds/1000);
+			$sqliteHandler->setAttribute(PDO::ATTR_TIMEOUT, $timeout);
+		}else{
+			$sqliteHandler->busyTimeout($milliseconds);
+		}
 	}
 
 	/**
@@ -147,19 +164,19 @@ class StashSqlite implements StashHandler
 	{
 		if(is_null($key) || (is_array($key) && count($key) == 0))
 		{
-			deltree($this->cachePath);
+			Stash::deleteRecursive($this->cachePath);
 			self::$sqlObject = false;
 			Stash::$runtimeDisable = true;
 		}elseif(is_array($key) && count($key) == 1){
 
 			$name = array_shift($key);
 
-			deltree($this->cachePath . $name . '.sqlite');
+			unlink($this->cachePath . $name . '.sqlite');
 			self::$sqlObject[$name] = null;
 		}else{
-			$sqlKey = Stash::staticFunctionHack($this, 'makeSqlKey', $key);
+			$sqlKey = self::makeSqlKey($key);
 			$sqlResource = $this->getSqliteHandler($key[0]);
-			$query = $sqlResource->queryExec("DELETE FROM cacheStore WHERE key LIKE '{$sqlKey}%'");
+			$query = $sqlResource->query("DELETE FROM cacheStore WHERE key LIKE '{$sqlKey}%'");
 		}
 	}
 
@@ -192,27 +209,46 @@ class StashSqlite implements StashHandler
 	 * and and sets up the structure.
 	 *
 	 * @param string
-	 * @return SQLiteDatabase
+	 * @return SQLiteDatabase|SQLite3
 	 */
 	public function getSqliteHandler($name)
 	{
 		try {
-			if(isset(self::$sqlObject[$name]) && get_class(self::$sqlObject[$name]) == 'SQLiteDatabase')
-				return self::$sqlObject[$name];
 
-			$filePath = $this->cachePath;
+			if(isset(self::$sqlObject[$name]) && is_object(self::$sqlObject[$name]))
+					return self::$sqlObject[$name];
 
-			if(!file_exists($filePath))
-				mkdir($filePath, null, true);
+			if(!file_exists($this->cachePath))
+				mkdir($this->cachePath, 0770, true);
 
-			if(!$db = $this->getDatabase($name))
-			{
-				if(!($this->createDatabase($name) && $db = $this->getDatabase($name, $filePath)))
-					return false;
+			$path = $this->cachePath . $name . '.sqlite';
+
+			$runInstall = !file_exists($path);
+
+			try{
+				$db = new PDO('sqlite:' . $path);
+				$this->responseCode = PDO::FETCH_ASSOC;
+			}catch(Exception $e){
+				if(isset($db)) unset($db);
 			}
 
-			$db->busyTimeout(self::$busyTimeout);
+			if(!isset($db))
+			{
+				if(!$db = new SQLiteDatabase($path, '0666', $errorMessage))
+					throw new StashSqliteError('Unable to open SQLite Database: '. $errorMessage);
+			}
+
+			if($runInstall && !$db->query($this->creationSql))
+			{
+				unlink($path);
+				throw new StashSqliteError('Unable to set SQLite: structure');
+			}
+
+			// prevent the cache from getting hungup waiting on a return
+			self::setTimeout($db, self::$busyTimeout);
+
 			self::$sqlObject[$name] = $db;
+
 			return $db;
 
 		}catch(Exception $e){
@@ -241,56 +277,13 @@ class StashSqlite implements StashHandler
 
 	/**
 	 * This function checks to see if it is possble to enable this handler. It does so here by making sure the
-	 * SQLiteDatabase class exists.
+	 * SQLite3 or SQLiteDatabase class exists.
 	 *
 	 * @return bool
 	 */
 	static function canEnable()
 	{
-		return class_exists('SQLiteDatabase', false);
-	}
-
-	protected function getDatabase($name)
-	{
-		$path .= $this->cachePath . $name . '.sqlite';
-
-		if(!file_exists($path))
-			return false;
-
-		if(!$db = new SQLiteDatabase($path, '0666', $errorMessage))
-			throw new StashSqliteError('Unable to open SQLite Database: '. $errorMessage);
-
-		return $db;
-	}
-
-	protected function createDatabase($name)
-	{
-		try{
-			$path = $this->cachePath;
-
-			// check directory
-			if(!file_exists($path))
-				return false;
-
-			$path .= $name . '.sqlite';
-
-			if(file_exists($path))
-				return false;
-
-			if(!$db = new SQLiteDatabase($path, '0666', $errorMessage))
-				throw new StashSqliteError('Unable to open SQLite Database: '. $errorMessage);
-
-			if(!$db->queryExec($this->creationSql, $errorMessage))
-			{
-				unlink($path);
-				throw new StashSqliteError('Unable to set SQLite: structure: '. $errorMessage);
-			}
-
-			return true;
-
-		}catch(Exception $e){
-			return false;
-		}
+		return class_exists('PDO', false) || class_exists('SQLiteDatabase', false);
 	}
 
 }
