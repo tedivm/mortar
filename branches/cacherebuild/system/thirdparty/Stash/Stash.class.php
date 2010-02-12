@@ -34,10 +34,10 @@ class Stash
 	public $cacheReturned = false;
 
 	/**
-	 * If set to true, the system stores a copy of the current cache data (key, data and expiration) is stored to a
-	 * static variable. This allows future requests to that object to bypass retriving it from the cachehandler, but the
-	 * trade off is that scripts use a bit more memory. For large pieces of data not likely to be called multiple times
-	 * in a script (template data, for instance) this should be set to false.
+	 * If set to true, the system stores a copy of the current cache data (key, data and expiration) stored to a static
+	 * variable. This allows future requests to that object to bypass retriving it from the cachehandler, but the trade
+	 * off is that scripts use a bit more memory. For large pieces of data not likely to be called multiple times in a
+	 * script (template data, for instance) this should be set to false.
 	 *
 	 * @var bool
 	 */
@@ -120,7 +120,8 @@ class Stash
 	/**
 	 * This array holds a copy of all valid data (whether retrieved from or stored to the cacheHandler) in order to
 	 * avoid unnecessary calls to the storage handler. The index of this array is the string version of the key, and
-	 * the value is an exact copy of the data stored by the handlers.
+	 * the value is an exact copy of the data stored by the handlers. When items are added or removed this array gets
+	 * updated automatically.
 	 *
 	 * @var string
 	 */
@@ -135,14 +136,9 @@ class Stash
 	static $queryRecord;
 
 	/**
-	 * This constructor takes an unlimited number of arguments. These strings should be unique to the data you are
-	 * trying to store. These keys should be considered hierarchical- that is, each additional argument passed is
-	 * considered a child of the one before it by the system. This function stores that key and sets up the cacheHandler
-	 * object to work with the data, although it does not retrieve it yet.
+	 * This constructor requires a StashHandler.
 	 *
-	 * @example $cache = new Cache('permissions', 'user', '4', '2'); where 4 is the user id and 2 is the location id.
-	 *
-	 * @param string $key...
+	 * @param StashHandler $key...
 	 */
 	public function __construct(StashHandler $handler)
 	{
@@ -152,6 +148,16 @@ class Stash
 		$this->handler = $handler;
 	}
 
+	/**
+	 * This constructor takes an unlimited number of arguments. These strings should be unique to the data you are
+	 * trying to store or retrieve. These keys should be considered hierarchical- that is, each additional argument
+	 * passed is considered a child of the one before it by the system. This function stores that key and sets up the
+	 * cacheHandler object to work with the data, although it does not retrieve it yet.
+	 *
+	 * @example $cache = new Cache('permissions', 'user', '4', '2'); where 4 is the user id and 2 is the location id.
+	 *
+	 * @param string $key...
+	 */
 	public function setupKey()
 	{
 		if(func_num_args() == 0)
@@ -250,7 +256,7 @@ class Stash
 			return false;
 		}
 
-		if($record['expiration'] - START_TIME < 0)
+		if($record['expiration'] - microtime(true) < 0)
 			return false;
 
 		$this->cacheReturned = true;
@@ -282,7 +288,7 @@ class Stash
 			return;
 
 		$store['return'] = $data;
-		$store['createdOn'] = START_TIME;
+		$store['createdOn'] = microtime(true);
 
 		try{
 			$random = $this->cacheTime * .1 ;
@@ -431,6 +437,40 @@ class Stash
 	static function getBaseDirectory(StashHandler $handler)
 	{
 		return sys_get_temp_dir() . 'stash_' . md5(dirname(__FILE__)) . '/' . get_class($handler) . '/';
+	}
+
+	static function deleteRecursive($file)
+	{
+		if(substr($file, 0, 1) !== '/')
+			throw new StashError('deltree function requires an absolute path.');
+
+		$badCalls = array('/', '/*', '/.', '/..');
+		if(in_array($file, $badCalls))
+			throw new StashError('deltree function does not like that call.');
+
+		$file = rtrim($file, ' /');
+		if(is_dir($file)) {
+			$hiddenFiles = glob($file.'/.?*');
+			$files = glob($file.'/*');
+			$files = array_merge($hiddenFiles, $files);
+
+			foreach($files as $filePath)
+			{
+				if(substr($filePath, -2, 2) == '/.' || substr($filePath, -3, 3) == '/..')
+					continue;
+
+				if(is_dir($filePath) && !is_link($filePath)) {
+					Stash::deleteRecursive($filePath);
+				}else{
+					unlink($filePath);
+				}
+			}
+			rmdir($file);
+		}elseif(is_file($file)){
+			unlink($file);
+		}else{
+
+		}
 	}
 }
 
