@@ -82,7 +82,7 @@ class StashSqlite implements StashHandler
 				$this->cachePath .= '/';
 
 		}else{
-			$this->cachePath = Stash::getBaseDirectory($this);
+			$this->cachePath = StashUtilities::getBaseDirectory($this);
 		}
 	}
 
@@ -102,7 +102,7 @@ class StashSqlite implements StashHandler
 
 		if($query !== false && $resultArray = $query->fetch($this->responseCode))
 		{
-			$returnData = Stash::decode(base64_decode($resultArray['data']), $resultArray['encoding']);
+			$returnData = StashUtilities::decode(base64_decode($resultArray['data']), $resultArray['encoding']);
 			$results = array('expiration' => $resultArray['expires'], 'data' => $returnData);
 		}else{
 			$results = false;
@@ -121,7 +121,7 @@ class StashSqlite implements StashHandler
 	{
 		$sqlKey = self::makeSqlKey($key);
 		$encoding = Stash::encoding($data);
-		$data = Stash::encode($data);
+		$data = StashUtilities::encode($data);
 		$data = base64_encode($data);
 
 		if(!($sqlResource = $this->getSqliteHandler($key[0])))
@@ -164,7 +164,7 @@ class StashSqlite implements StashHandler
 	{
 		if(is_null($key) || (is_array($key) && count($key) == 0))
 		{
-			Stash::deleteRecursive($this->cachePath);
+			StashUtilities::deleteRecursive($this->cachePath);
 			self::$sqlObject = false;
 			Stash::$runtimeDisable = true;
 		}elseif(is_array($key) && count($key) == 1){

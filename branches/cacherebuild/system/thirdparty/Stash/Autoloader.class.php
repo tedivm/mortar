@@ -6,6 +6,7 @@ class StashAutoloader
 										'Handler' => 'Handler.class.php',
 										'StashError' => 'Error.class.php',
 										'StashWarning' => 'Warning.class.php',
+										'StashUtilities' => 'Utilities.class.php',
 										'Stash' => 'Stash.class.php',
 
 										'StashFileSystem' => 'handlers/FileSystem.class.php',

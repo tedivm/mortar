@@ -55,7 +55,7 @@ class StashFileSystem implements StashHandler
 			if($lastChar != '/' && $lastChar != '\'')
 				$this->cachePath .= '/';
 		}else{
-			$this->cachePath = Stash::getBaseDirectory($this);
+			$this->cachePath = StashUtilities::getBaseDirectory($this);
 		}
 	}
 
@@ -248,7 +248,7 @@ class StashFileSystem implements StashHandler
 			}
 
 			if(isset($dir))
-				Stash::deleteRecursive($dir);
+				StashUtilities::deleteRecursive($dir);
 
 		}else{
 			return false;
