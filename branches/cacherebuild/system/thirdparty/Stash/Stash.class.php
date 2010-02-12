@@ -199,16 +199,20 @@ class Stash
 	 */
 	public function clear()
 	{
-		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable)
-			return true;
+		try{
+			if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable)
+				return true;
 
-		self::$memStore = array();
+			self::$memStore = array();
 
-		if($handler = $this->getHandler())
-		{
-			$args = func_get_args();
-			return $handler->clear($args);
-			//return Stash::staticFunctionHack($handlerClass, 'clear', $args);
+			if($handler = $this->getHandler())
+			{
+				$args = func_get_args();
+				return $handler->clear($args);
+			}
+
+		}catch(Exception $e){
+			return false;
 		}
 	}
 
@@ -220,10 +224,14 @@ class Stash
 	 */
 	public function purge()
 	{
-		self::$memStore = array();
+		try{
+			self::$memStore = array();
+			if($handler = $this->getHandler())
+				return $handler->purge();
 
-		if($handlerClass = $this->getHandler())
-			return Stash::staticFunctionHack($handlerClass, 'purge');
+		}catch(Exception $e){
+
+		}
 
 		return false;
 	}
@@ -240,28 +248,38 @@ class Stash
 		self::$cacheCalls++;
 
 		if(!$this->cache_enabled)
-			return false;
+			return null;
 
-		if(isset(self::$memStore[$this->keyString]) && is_array(self::$memStore[$this->keyString]))
+		try
 		{
-			$record = self::$memStore[$this->keyString];
-		}elseif(!$this->memOnly){
-			$handler = $this->getHandler();
-			if(!$handler)
-				return false;
+			if(isset(self::$memStore[$this->keyString]) && is_array(self::$memStore[$this->keyString]))
+			{
+				$record = self::$memStore[$this->keyString];
+			}elseif(!$this->memOnly){
+				$handler = $this->getHandler();
+				if(!$handler)
+					return null;
 
-			$record = $handler->getData($this->key);
-			self::$memStore[$this->keyString] = ($this->storeMemory) ? $record : false;
-		}else{
-			return false;
+				$record = $handler->getData($this->key);
+
+				if($this->storeMemory)
+					self::$memStore[$this->keyString] = $record;
+
+			}else{
+				return null;
+			}
+
+			if(!isset($record['expiration']) || $record['expiration'] - microtime(true) < 0)
+				return null;
+
+			$this->cacheReturned = true;
+			self::$cacheReturns++;
+			return $record['data']['return'];
+
+		}catch(Exception $e){
+			$this->cache_enabled = false;
+			return null;
 		}
-
-		if($record['expiration'] - microtime(true) < 0)
-			return false;
-
-		$this->cacheReturned = true;
-		self::$cacheReturns++;
-		return $record['data']['return'];
 	}
 
 	/**
@@ -306,7 +324,7 @@ class Stash
 
 			$handler->storeData($this->key, $store, $expiration);
 		}catch(Exception $e){
-
+			return false;
 		}
 	}
 
