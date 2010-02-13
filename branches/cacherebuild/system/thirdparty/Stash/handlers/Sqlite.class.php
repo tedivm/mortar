@@ -120,7 +120,7 @@ class StashSqlite implements StashHandler
 	public function storeData($key, $data, $expiration)
 	{
 		$sqlKey = self::makeSqlKey($key);
-		$encoding = Stash::encoding($data);
+		$encoding = StashUtilities::encoding($data);
 		$data = StashUtilities::encode($data);
 		$data = base64_encode($data);
 
