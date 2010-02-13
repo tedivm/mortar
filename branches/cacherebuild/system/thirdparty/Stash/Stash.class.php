@@ -312,8 +312,7 @@ class Stash
 		$store['createdOn'] = microtime(true);
 
 		try{
-			$random = $this->cacheTime * .1 ;
-			$expiration = (microtime(true) + ($this->cacheTime + rand(-1 * $random , $random)));
+			$expiration = (microtime(true) + ($this->cacheTime - rand(0, $this->cacheTime * .15)));
 
 			if($this->storeMemory)
 				self::$memStore[$this->keyString] = array('expiration' => $expiration, 'data' => $store);
