@@ -131,7 +131,7 @@ class StashFileSystem implements StashHandler
 			// by dumping this behind a php tag and comment, we make it inaccessible should it happen to become web
 			// accessible
 
-			switch(Stash::encoding($data))
+			switch(StashUtilities::encoding($data))
 			{
 				case 'bool':
 					$dataString = (bool) $data ? 'true' : 'false';
