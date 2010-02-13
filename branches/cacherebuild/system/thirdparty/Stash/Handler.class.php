@@ -52,6 +52,14 @@ interface StashHandler
 	 * @return bool
 	 */
 	public function purge();
+
+	/**
+	 * This function checks to see if it is possible to enable this handler. This returns true no matter what, since
+	 * this is the handler of last resort.
+	 *
+	 * @return bool true
+	 */
+	static function canEnable();
 }
 
 ?>
