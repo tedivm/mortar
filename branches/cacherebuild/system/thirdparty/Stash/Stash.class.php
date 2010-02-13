@@ -262,6 +262,9 @@ class Stash
 
 				$record = $handler->getData($this->key);
 
+				if(!is_array($record))
+					return null;
+
 				if($this->storeMemory)
 					self::$memStore[$this->keyString] = $record;
 
