@@ -52,7 +52,8 @@ class StashXcache extends StashApc
 		if(!$keyString)
 			return false;
 
-		return xcache_set($keyString, serialize(array('return' => $data, 'expiration' => $expiration)), $this->cacheTime);
+		$cacheTime = self::getCacheTime();
+		return xcache_set($keyString, serialize(array('return' => $data, 'expiration' => $expiration)), $cacheTime);
 	}
 
 

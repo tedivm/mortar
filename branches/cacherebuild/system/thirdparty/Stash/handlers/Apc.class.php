@@ -13,9 +13,6 @@ class StashApc implements StashHandler
 	{
 		if(isset($options['ttl']) && is_numeric($options['ttl']))
 			$this->cacheTime = (int) $options['ttl'];
-
-		$adjust = .1 * $this->cacheTime;
-		$this->cacheTime =+ rand($adjust * -1, $adjust);
 	}
 
 	/**
@@ -54,9 +51,9 @@ class StashApc implements StashHandler
 		if(!$keyString)
 			return false;
 
-		return apc_add($keyString, serialize(array('return' => $data, 'expiration' => $expiration)), $this->cacheTime);
+		$cacheTime = self::getCacheTime();
+		return apc_add($keyString, serialize(array('return' => $data, 'expiration' => $expiration)), $cacheTime);
 	}
-
 
 	/**
 	 * This function should clear the cache tree using the key array provided. If called with no arguments the entire
@@ -102,6 +99,17 @@ class StashApc implements StashHandler
 			$key .= '::' . $piece;
 
 		return $keyString;
+	}
+
+	static protected function getCacheTime($expiration)
+	{
+		$currentTime = microtime(true);
+
+		$life = $expiration - $currentTime;
+		$adjust = .1 * $this->cacheTime;
+		$cacheTime =+ rand($adjust * -1, $adjust);
+
+		return (int) ($life < $cacheTime) ? $life : $cacheTime;
 	}
 }
 
