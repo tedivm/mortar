@@ -1,0 +1,7 @@
+<div id="BlogEntry_{{ model.id }}_{{ model.name }}_listing" class="BlogEntry_listing">
+<h2 class="BlogEntry_title"><a href="{{ model.permalink }}">{{ model.title }}</a></h2>
+<p class="BlogEntry_meta meta">Posted by <span class="BlogEntry_owner">{{ model.owner }}</span> on <span class="BlogEntry_date">
+{{ model.publishDate|date('h:i:s a m/d/y') }}</span>
+<span class="separator">|</span> <span class="BlogEntry_actions"><ul>{{ model.actionList }}</ul></span></p>
+<p class="content">{{ model.content }}</p>
+</div>
