@@ -86,11 +86,11 @@ class StashUtilities
 	static function deleteRecursive($file)
 	{
 		if(substr($file, 0, 1) !== '/')
-			throw new StashError('deltree function requires an absolute path.');
+			throw new StashError('deleteRecursive function requires an absolute path.');
 
 		$badCalls = array('/', '/*', '/.', '/..');
 		if(in_array($file, $badCalls))
-			throw new StashError('deltree function does not like that call.');
+			throw new StashError('deleteRecursive function does not like that call.');
 
 		$file = rtrim($file, ' /');
 		if(is_dir($file)) {
