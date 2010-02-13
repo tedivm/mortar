@@ -62,8 +62,9 @@ class StashMultiHandler extends StashHandler
 	 */
 	public function storeData($key, $data, $expiration)
 	{
+		$handlers = array_reverse($this->handlers);
 		$return = true;
-		foreach($this->handlers as $handler)
+		foreach($handlers as $handler)
 			$return = ($return) ? $this->storeData($key, $data, $expiration) : false;
 
 		return $return;
@@ -78,8 +79,9 @@ class StashMultiHandler extends StashHandler
 	 */
 	public function clear($key = null)
 	{
+		$handlers = array_reverse($this->handlers);
 		$return = true;
-		foreach($this->handlers as $handler)
+		foreach($handlers as $handler)
 			$return = ($return) ? $this->clear($key) : false;
 
 		return $return;
@@ -92,8 +94,9 @@ class StashMultiHandler extends StashHandler
 	 */
 	public function purge()
 	{
+		$handlers = array_reverse($this->handlers);
 		$return = true;
-		foreach($this->handlers as $handler)
+		foreach($handlers as $handler)
 			$return = ($return) ? $this->purge() : false;
 
 		return $return;
