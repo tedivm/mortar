@@ -9,9 +9,12 @@ class StashAutoloader
 										'StashUtilities' => 'Utilities.class.php',
 										'Stash' => 'Stash.class.php',
 
-										'StashFileSystem' => 'handlers/FileSystem.class.php',
+										'StashApc' => 'handlers/Apc.class.php',
+										'StashXcache' => 'handlers/Xcache.class.php',
 										'StashSqlite' => 'handlers/Sqlite.class.php',
-										'StashSqliteOneFile' => 'handlers/SqliteOneFile.class.php'
+										'StashFileSystem' => 'handlers/FileSystem.class.php',
+										'StashSqliteOneFile' => 'handlers/SqliteOneFile.class.php',
+										'StashMultiHandler' => 'handlers/MultiHandler.class.php',
 									);
 
 
