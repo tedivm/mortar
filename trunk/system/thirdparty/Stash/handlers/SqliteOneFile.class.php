@@ -8,16 +8,13 @@
  * @subpackage Caching
  */
 
-if(!class_exists('cacheHandlerSqlite', false))
-	include 'Sqlite.class.php';
-
 /**
  * This class is used by the Cache class for persistent storage of cached objects using an sqlite file.
  *
  * @package System
  * @subpackage Caching
  */
-class cacheHandlerSqliteOneFile extends cacheHandlerSqlite
+class StashSqliteOneFile extends StashSqlite
 {
 
 
@@ -36,17 +33,16 @@ class cacheHandlerSqliteOneFile extends cacheHandlerSqlite
 	 *
 	 * @param null|array $key
 	 */
-	static function clear($key = null)
+	public function clear($key = null)
 	{
 		if(is_null($key) || (is_array($key) && count($key) == 0))
 		{
-			$config = Config::getInstance();
-			deltree($config['path']['temp'] . 'cache');
-			SqliteConnection::clear();
+			StashUtilities::deleteRecursive($this->cachePath);
 			self::$sqlObject = false;
+			Stash::$runtimeDisable = true;
 		}else{
 			$key = self::makeSqlKey($key) . '%';
-			$sqlResource = self::getSqliteHandler($key[0]);
+			$sqlResource = $this->getSqliteHandler($key[0]);
 			$query = $sqlResource->queryExec("DELETE FROM cacheStore WHERE key LIKE '{$key}'");
 		}
 	}
@@ -56,7 +52,7 @@ class cacheHandlerSqliteOneFile extends cacheHandlerSqlite
 	 *
 	 * @return unknown
 	 */
-	static function purge()
+	public function purge()
 	{
 		$handler = self::getSqliteHandler('cache');
 		$handler->query('DELETE FROM cacheStore WHERE expires < ' . microtime(true));
@@ -70,9 +66,9 @@ class cacheHandlerSqliteOneFile extends cacheHandlerSqlite
 	 * @param string
 	 * @return bool
 	 */
-	static function getSqliteHandler($name)
+	public function getSqliteHandler($name)
 	{
-		return cacheHandlerSqlite::getSqliteHandler('cache');
+		return parent::getSqliteHandler('cache');
 	}
 }
 

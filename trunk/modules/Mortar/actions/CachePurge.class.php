@@ -6,7 +6,7 @@ class MortarActionCachePurge extends ActionBase
 
 	protected function logic()
 	{
-		Cache::purge();
+		CacheControl::purge();
 
 		$config = Config::getInstance();
 
