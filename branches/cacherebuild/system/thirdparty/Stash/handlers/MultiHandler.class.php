@@ -53,7 +53,7 @@ class StashMultiHandler extends StashHandler
 	/**
 	 * This function takes an array as its first argument and the expiration time as the second. This array contains two
 	 * items, "createdOn" describing the first time the item was called and "return", which is the data that needs to be
-	 * stored. This function needs to store that data in such a way that it can be retrieced exactly as it was sent. The
+	 * stored. This function needs to store that data in such a way that it can be retrieved exactly as it was sent. The
 	 * expiration time needs to be stored with this data.
 	 *
 	 * @param array $data
@@ -65,7 +65,10 @@ class StashMultiHandler extends StashHandler
 		$handlers = array_reverse($this->handlers);
 		$return = true;
 		foreach($handlers as $handler)
-			$return = ($return) ? $this->storeData($key, $data, $expiration) : false;
+		{
+			$storeResults = $this->storeData($key, $data, $expiration);
+			$return = ($return) ? $storeResults : false;
+		}
 
 		return $return;
 	}
@@ -82,7 +85,10 @@ class StashMultiHandler extends StashHandler
 		$handlers = array_reverse($this->handlers);
 		$return = true;
 		foreach($handlers as $handler)
-			$return = ($return) ? $this->clear($key) : false;
+		{
+			$clearResults = $this->clear($key);
+			$return = ($return) ? $clearResults : false;
+		}
 
 		return $return;
 	}
@@ -97,14 +103,17 @@ class StashMultiHandler extends StashHandler
 		$handlers = array_reverse($this->handlers);
 		$return = true;
 		foreach($handlers as $handler)
-			$return = ($return) ? $this->purge() : false;
+		{
+			$purgeResults = $this->purge();
+			$return = ($return) ? $purgeResults : false;
+		}
 
 		return $return;
 	}
 
 	/**
 	 * This function checks to see if it is possible to enable this handler. This returns true no matter what, since
-	 * this is the handler of last resort.
+	 * there are no dependencies for this handler
 	 *
 	 * @return bool true
 	 */
