@@ -1,6 +1,6 @@
 <?php
 
-class StashMultiHandler extends StashHandler
+class StashMultiHandler implements StashHandler
 {
 
 	protected $handlers = array();
