@@ -5,7 +5,7 @@
  * @package System
  * @subpackage Caching
  */
-class cacheHandlerFileSystem implements cacheHandler
+class StashFileSystem implements StashHandler
 {
 	/**
 	 * This is the path to the file which will be used to store the cached item. It is based off of the key.
@@ -39,32 +39,32 @@ class cacheHandlerFileSystem implements cacheHandler
 
 	/**
 	 * This is the base path for the cache items to be saved in. This defaults to a directory in the tmp directory (as
-	 * defined by the connfiguration) called 'cache', which it will create if needed.
+	 * defined by the configuration) called 'stash_', which it will create if needed.
 	 *
 	 * @var string
 	 */
-	protected static $cachePath;
+	protected $cachePath;
 
-	protected $currentKey;
-
-
-	/**
-	 * This function takes the key and creates the path. If it is unable to create a path using that key, it returns
-	 * false.
-	 *
-	 * @param array $key
-	 * @return bool
-	 */
-	public function setup($key)
+	public function __construct($options = array())
 	{
-		$memkey = '';
+		if(isset($options['path']))
+		{
+			$this->cachePath = $options['path'];
+			$lastChar = substr($this->cachePath, -1);
+
+			if($lastChar != '/' && $lastChar != '\'')
+				$this->cachePath .= '/';
+		}else{
+			$this->cachePath = StashUtilities::getBaseDirectory($this);
+		}
+	}
+
+	protected function makeKeyString($key)
+	{
+		$keyString = '';
 		foreach($key as $group)
-			$memkey .= $group . '/' ;
-
-		$this->currentKey = $memkey;
-
-		$this->path = self::makePath($key);
-		return ($this->path !== false);
+			$keyString .= $group . '/' ;
+		return $keyString;
 	}
 
 	/**
@@ -74,12 +74,14 @@ class cacheHandlerFileSystem implements cacheHandler
 	 *
 	 * @return bool
 	 */
-	public function getData()
+	public function getData($key)
 	{
-		if(!file_exists($this->path))
+		$path = $this->makePath($key);
+
+		if(!file_exists($path))
 			return false;
 
-		$data = self::getDataFromFile($this->path);
+		$data = self::getDataFromFile($path);
 
 		if($data !== false)
 			return $data;
@@ -93,8 +95,8 @@ class cacheHandlerFileSystem implements cacheHandler
 
 		if(!isset($data) || !isset($expiration))
 		{
-			$this->cache_enabled = false;
-			throw new CacheError('Unable to load cache from filesystem');
+			//$this->cache_enabled = false;
+			throw new StashError('Unable to load cache from filesystem');
 		}
 
 		return array('data' => $data, 'expiration' => $expiration);
@@ -109,32 +111,34 @@ class cacheHandlerFileSystem implements cacheHandler
 	 * @param int $expiration
 	 * @return bool
 	 */
-	public function storeData($data, $expiration)
+	public function storeData($key, $data, $expiration)
 	{
 		$success = false;
 		if(!$this->cache_enabled)
 			return false;
 
-		if(!is_dir(dirname($this->path)))
+		$path = $this->makePath($key);
+
+		if(!is_dir(dirname($path)))
 		{
-			if(!mkdir(dirname($this->path), 0700, true))
+			if(!mkdir(dirname($path), 0700, true))
 				return false;
 		}
 
-		$file = fopen($this->path, 'w+');
+		$file = fopen($path, 'w+');
 		if(flock($file, LOCK_EX))
 		{
 			// by dumping this behind a php tag and comment, we make it inaccessible should it happen to become web
 			// accessible
 
-			switch(Cache::encoding($data))
+			switch(StashUtilities::encoding($data))
 			{
 				case 'bool':
 					$dataString = (bool) $data ? 'true' : 'false';
 					break;
 
 				case 'serialize':
-					$dataString = 'unserialize(base64_decode(\'' . base64_encode(serialize($data)) . '\'))'; //sprintf('"%s"', addslashes(serialize($data))) .
+					$dataString = 'unserialize(base64_decode(\'' . base64_encode(serialize($data)) . '\'))';
 					break;
 
 				case 'none':
@@ -144,7 +148,7 @@ class cacheHandlerFileSystem implements cacheHandler
 			}
 
 			$storeString = '<?php ' . PHP_EOL .
-			'/* Cachekey: ' . $this->currentKey . ' */' . PHP_EOL .
+			'/* Cachekey: ' . $this->makeKeyString($key) . ' */' . PHP_EOL .
 			'/* Type: ' . gettype($data) . ' */' . PHP_EOL .
 			'$expiration = ' . $expiration . ';' . PHP_EOL .
 			'$data = ' . $dataString . ';' . PHP_EOL .
@@ -172,15 +176,12 @@ class cacheHandlerFileSystem implements cacheHandler
 	 * @param array $key
 	 * @return string
 	 */
-	static protected function makePath($key)
+	protected function makePath($key)
 	{
-		if(!isset(self::$cachePath))
-		{
-			$config = Config::getInstance();
-			self::$cachePath = $config['path']['temp'] . 'cache/';
-		}
+		if(!isset($this->cachePath))
+			throw new StashFileSystemError('Unable to load system without a base path.');
 
-		$path = self::$cachePath;
+		$basePath = $this->cachePath;
 
 		// When I profiled this compared to the "implode" function, this was much faster
 		// This is probably due to the small size of the arrays and the overhead from function calls
@@ -194,32 +195,30 @@ class cacheHandlerFileSystem implements cacheHandler
 		}else{
 
 			foreach($key as $index => $value)
-			{
 				$key[$index] = md5($value);
-			}
 
-			switch (count($key)) {
+			switch (count($key))
+			{
 				case 0:
-					return $path;
+					return $basePath;
 					break;
 
 				case 1:
-					$path .= $key[0] . '.php';
+					$path = $key[0] . '.php';
 					break;
 
 				default:
 					$name = array_pop($key);
-
+					$path = '';
 					foreach($key as $group)
-					{
 						$path .= $group . '/';
-					}
+
 					$path .= $name . '.php';
 					break;
 			}
 			self::$memStore['keys'][$memkey] = $path;
 		}
-		return $path;
+		return $basePath . $path;
 	}
 
 	/**
@@ -229,28 +228,27 @@ class cacheHandlerFileSystem implements cacheHandler
 	 * @param null|array $key
 	 * @return bool
 	 */
-	static public function clear($key = null)
+	public function clear($key = null)
 	{
 		if(is_null($key))
 			$key = '';
 
-		$path = self::makePath($key);
+		$path = $this->makePath($key);
 
 		if($path)
 		{
-
 			if(is_file($path))
 				unlink($path);
 
 			if(strpos($path, '.php') !== false)
 			{
-				$dir = dirname($path);
+				$dir = substr($path, 0, strlen($path) - 4);
 			}elseif(is_dir($path)){
 				$dir = $path;
 			}
 
-			if($dir)
-				FileSystem::deleteRecursive($path);
+			if(isset($dir))
+				StashUtilities::deleteRecursive($dir);
 
 		}else{
 			return false;
@@ -264,11 +262,9 @@ class cacheHandlerFileSystem implements cacheHandler
 	 *
 	 * @return bool
 	 */
-	static function purge()
+	public function purge()
 	{
-		$config = Config::getInstance();
-
-		$filePath = $config['path']['temp'] . 'cache/';
+		$filePath = $this->cachePath;
 
 		$directoryIt = new RecursiveDirectoryIterator($filePath);
 
@@ -312,4 +308,5 @@ class cacheHandlerFileSystem implements cacheHandler
 
 }
 
+class StashFileSystemError extends StashError {}
 ?>

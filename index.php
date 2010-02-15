@@ -132,7 +132,7 @@ class BootStrapper
 		require('system/classes/Sqlite.class.php');
 		require('system/functions/general.functions.php');
 		require('system/classes/Permissions.class.php');
-		require('system/classes/Cache.class.php');
+		require('system/thirdparty/Stash/Autoloader.class.php');
 		require('system/classes/CacheControl.class.php');
 		require('system/classes/PackageList.class.php');
 		require('system/classes/PackageInfo.class.php');

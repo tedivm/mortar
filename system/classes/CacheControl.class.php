@@ -2,10 +2,20 @@
 
 class CacheControl
 {
+	static protected $cacheHandler;
 
 	static function disableCache($flag = true)
 	{
-		Cache::$runtimeDisable = (bool) $flag;
+		Stash::$runtimeDisable = (bool) $flag;
+	}
+
+	static function getUnprimedCache()
+	{
+		if(!isset(self::$cacheHandler))
+			self::setCacheHandler();
+
+		$cache = new Stash(self::$cacheHandler);
+		return $cache;
 	}
 
 	static function getCache()
@@ -13,8 +23,31 @@ class CacheControl
 		$args = func_get_args();
 		if(count($args) == 1 && is_array($args[0]))
 			$args = $args[0];
-		$cache = new Cache($args);
+		$cache = self::getUnprimedCache();
+		$cache->setupKey($args);
 		return $cache;
+	}
+	
+	static protected function setCacheHandler()
+	{
+		$handlers = Stash::getHandlers();
+
+		$config = Config::getInstance();
+		$handlerType = (isset($config['system']['cacheHandler'])
+							&& isset($handlers[$config['system']['cacheHandler']]))
+									? $config['system']['cacheHandler']
+									: 'FileSystem';
+
+		$handlerClass = $handlers[$handlerType];
+
+		if(!class_exists($handlerClass))
+		{
+			Stash::$runtimeDisable = true;
+			throw new CacheError('Unable to load cache handler ' . $handlerType);
+		}
+
+		$handler = new $handlerClass(array('path' => $config['path']['temp'] . 'cache'));
+		self::$cacheHandler = $handler;
 	}
 
 	static function clearCache()
@@ -22,18 +55,26 @@ class CacheControl
 		$args = func_get_args();
 		$numArgs = count($args);
 
+		$cache = self::getUnprimedCache();
+
 		if($numArgs === 0)
-			return Cache::clear();
+			return $cache->clear();
 
 		if($numArgs == 1 && is_array($args[0]))
 			$args = $args[0];
 
-		Cache::clear($args);
+		return $cache->clear($args);
 	}
 
 	static function purgeCache()
 	{
-		Cache::purge();
+		$cache = self::getUnprimedCache();
+		return $cache->purge();
+	}
+
+	static function getCacheHandlers()
+	{
+		return Stash::getHandlers();
 	}
 
 	static function getOutputCache($md5, $encoding)
@@ -77,4 +118,5 @@ class CacheControl
 	}
 }
 
+class CacheError extends CoreError {}
 ?>
