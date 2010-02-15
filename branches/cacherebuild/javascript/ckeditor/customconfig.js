@@ -13,18 +13,19 @@ CKEDITOR.editorConfig = function( config )
 
 	config.toolbar = 
 	[
-		['Source','-','Save','NewPage','Preview','-','Templates'],
-		['Cut','Copy','Paste','PasteText','PasteFromWord','-','Print', 'SpellChecker', 'Scayt'],
-		['Undo','Redo','-','Find','Replace','-','SelectAll','RemoveFormat'],
+		['Source'],
+		['Cut','Copy','Paste','PasteText','PasteFromWord','-','SpellChecker', 'Scayt'],
+		['Undo','Redo','-','Find','Replace','-','RemoveFormat'],
+		['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
+		['Link','Unlink','Anchor'],
+		['Image','Table','HorizontalRule','SpecialChar'],
+		['Maximize', 'ShowBlocks'],
 		'/',
 		['Bold','Italic','Underline','Strike','-','Subscript','Superscript'],
 		['NumberedList','BulletedList','-','Outdent','Indent','Blockquote'],
-		['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
-		['Link','Unlink','Anchor'],
-		['Image','Table','HorizontalRule','Smiley','SpecialChar','PageBreak'],
 		['Styles','Format','Font','FontSize'],
 		['TextColor','BGColor'],
-		['Maximize', 'ShowBlocks','-','About']		
+		['About']
 	];
 
 	config.contentsCss = baseUrl + 'module/Mortar/FontLookUp.css';

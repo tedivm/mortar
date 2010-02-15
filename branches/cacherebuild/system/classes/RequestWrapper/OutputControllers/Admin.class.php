@@ -97,7 +97,7 @@ class AdminControllerContentFilter
 		$themePath = $page->getThemePath();
 		$theme = $page->getTheme();
 
-		$processedOutput = new ViewThemeTemplate($theme, 'adminContent.html');
+		$processedOutput = new ViewThemeTemplate($theme, 'support/adminContent.html');
 
 		$title = (isset($action->adminSettings['headerTitle'])) ? $action->adminSettings['headerTitle'] : '';
 		$title .= (isset($action->adminSettings['useRider']) && $action->adminSettings['useRider']
@@ -109,10 +109,11 @@ class AdminControllerContentFilter
 		$processedOutput->addContent(array('content' => $output, 'title' => $title, 'subtitle' => $subtitle));
 
 		$oldtitle = $page->getTitle();
-		if(!isset($oldtitle)) 
+		if(!isset($oldtitle))
 			$page->setTitle($title);
 
-		$page->addRegion('action', $action->getName());
+		if(method_exists($action, 'getName'))
+			$page->addRegion('action', $action->getName());
 
 		$output = $processedOutput->getDisplay();
 
