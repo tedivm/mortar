@@ -25,3 +25,17 @@ JShrink.class.php
 	BSD License
 	A Javascript Minifier written in PHP
 	http://code.google.com/p/jshrink-/
+
+DiffMatchPatch/
+	DiffMatchPatch
+	v1.5
+	LGPL
+	Robust algorithms to perform the operations required for synchronizing plain text. 
+	http://code.google.com/p/google-diff-match-patch/
+
+PHPSmartyPants/
+	PHP SmartyPants Typographer
+	1.0
+	3-Clause BSD
+	Translates plain ASCII punctuation characters into "smart" typographic punctuation HTML entities.
+	http://michelf.com/projects/php-smartypants/
