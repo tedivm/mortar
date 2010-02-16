@@ -1,0 +1,15 @@
+.dashboard {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	width: 100%;
+}
+
+.dashboard_widget {
+	width: 450px;
+	border: solid #2D5F8A 2px;
+	margin: 5px;
+	padding: 5px;
+	float: left;
+	height: 350px;
+}
