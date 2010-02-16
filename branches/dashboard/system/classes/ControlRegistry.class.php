@@ -10,7 +10,7 @@ class ControlRegistry
 		$stmt = $db->stmt_init();
 		$stmt->prepare('INSERT INTO controls (controlFormat, controlName, moduleId, controlClass)
 				VALUES (?, ?, ?, ?)');
-		$stmt->bindAndExecute('ssis', $name, $module, $class);
+		$stmt->bindAndExecute('ssis', $format, $name, $module, $class);
 	}
 
 	static public function getControl($format, $name)
@@ -35,7 +35,7 @@ class ControlRegistry
 			$db = DatabaseConnection::getConnection('default_read_only');
 			$stmt = $db->stmt_init();
 			$sql = 'SELECT controlName, moduleId, controlClass
-						FROM plugins 
+						FROM controls
 						WHERE controlFormat = ?';
 			if(isset($name)) {
 				$sql .= ' AND controlName = ?';
@@ -49,7 +49,7 @@ class ControlRegistry
 			}
 			if($success) {
 				while($row = $stmt->fetch_array()) {
-					$className = importFromModule($row['controlClass'], $row['moduleId'], 'control'));
+					$className = importFromModule($row['controlClass'], $row['moduleId'], 'control');
 					if($className !== false) {
 						$data[] = $row;
 					}
@@ -61,7 +61,8 @@ class ControlRegistry
 		if (count($data) === 0) {
 			return false;
 		} elseif(isset($name)) {
-			$class = importFromModule($data['controlClass'], $data['moduleId'], 'control');
+			$row = array_shift($data);
+			$class = importFromModule($row['controlClass'], $row['moduleId'], 'control');
 			try {
 				$control = new $class();
 			} catch (Exception $e) {}

@@ -307,10 +307,11 @@ class AutoLoader
 		$module = new PackageInfo($module);
 		$basePath = $module->getPath();
 		$moduleName = $module->getName();
-		$moduleFolders = array('actions' => 'Action',
-								'models' => 'Model',
-								'classes' => 'none',
-								'plugins' => 'Plugin');
+		$moduleFolders = array(	'actions' => 'Action',
+					'controls' => 'Control',
+					'models' => 'Model',
+					'classes' => 'none',
+					'plugins' => 'Plugin');
 		$classes = array();
 
 		$path = $basePath . 'classes/*';

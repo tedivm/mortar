@@ -37,8 +37,7 @@ CREATE TABLE controls
 	controlClass  VARCHAR(65) NOT NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
-ALTER TABLE controls ADD CONSTRAINT pkcontrols
-	PRIMARY KEY (controlFormat, controlName);
+CREATE UNIQUE INDEX controls_controlFormat_controlName_Idx ON controls (controlFormat, controlName);
 
 /******************** Add Table: cronJobs ************************/
 
@@ -74,7 +73,7 @@ CREATE TABLE dashboardControls
 	instanceId INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	userId INTEGER UNSIGNED NOT NULL,
 	sequence INTEGER UNSIGNED NOT NULL,
-	controlId INTEGER UNSIGNED NOT NULL,
+	controlId INTEGER UNSIGNED NOT NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 CREATE UNIQUE INDEX dashboardControls_userId_sequence_Idx ON dashboardControls (userId, sequence);

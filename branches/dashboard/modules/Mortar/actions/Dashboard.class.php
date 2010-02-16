@@ -10,21 +10,19 @@ class MortarActionDashboard extends ActionBase
 
 	public function viewAdmin($page) {
 
-		$location = new Location(37);
-		$model = $location->getResource();
-
-		$this->actions = array(	array('action' => 'MortarActionInstallModule', 'argument' => ''),
-						array('action' => 'MortarActionSiteRead', 'argument' => ActiveSite::getSite()),
-						array('action' => 'MortarAction', 'argument' => $model),
-						array('action' => '', 'argument' => '')	);
+		$control = ControlRegistry::getControl('admin', 'Hello, World!');
 
 		$content = new HtmlObject('ul');
 		$content->addClass('dashboard');
 
 		for ($i = 0; $i < 4; $i++) {
+			$stuff = $control->getContents();
 			$box = new HtmlObject('li');
 			$box->addClass('dashboard_widget');
 			$box->wrapAround("Box number $i");
+			if($i == 0) {
+				$box->wrapAround($stuff);
+			}
 			$content->wrapAround($box);
 		}
 
