@@ -79,16 +79,6 @@ CREATE TABLE dashboardControls
 
 CREATE UNIQUE INDEX dashboardControls_userId_sequence_Idx ON dashboardControls (userId, sequence);
 
-/******************** Add Table: dashboardSettings ***************/
-
-/* Build Table Structure */
-CREATE TABLE dashboardSettings
-(
-	instanceId INTEGER UNSIGNED NOT NULL,
-	settingName VARCHAR(45) NOT NULL,
-	settingValue VARCHAR(45) NOT NULL
-) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
-
 /******************** Add Table: directories ************************/
 
 /* Build Table Structure */
@@ -441,9 +431,9 @@ ALTER TABLE cronJobs ADD CONSTRAINT fk_cronJobs_locations
 ALTER TABLE dashboardControls ADD CONSTRAINT fk_dashboardControls_controls
 	FOREIGN KEY (controlId) REFERENCES controls (controlId) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-/************ Foreign Key: fk_dashboardSettings_dashboardControls ***************/
-ALTER TABLE dashboardSettings ADD CONSTRAINT fk_dashboardSettings_dashboardControls
-	FOREIGN KEY (instanceId) REFERENCES dashboardControls (instanceId) ON UPDATE NO ACTION ON DELETE NO ACTION;
+/************ Foreign Key: fk_dashboardControls_users ***************/
+ALTER TABLE dashboardControls ADD CONSTRAINT fk_dashboardControls_users
+	FOREIGN KEY (userId) REFERENCES users (user_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_directories_locations ***************/
 ALTER TABLE directories ADD CONSTRAINT fk_directories_locations
