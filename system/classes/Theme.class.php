@@ -310,6 +310,11 @@ class Theme extends ContentBase
 
 			$fileTemplate->addContent(array('theme' => $themeBox, 'fonts' => $fontBox));
 
+			if(INSTALLMODE !== true) {
+				$envBox = new TagBoxEnv();
+				$fileTemplate->addContent(array('env' => $envBox));
+			}
+
 			$baseString = $fileTemplate->getDisplay();
 			$minifier->setBaseString($baseString);
 		}
