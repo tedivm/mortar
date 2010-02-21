@@ -2,8 +2,6 @@
 
 class ControlRegistry
 {
-	protected $controls;
-
 	static public function registerControl($name, $format, $module, $class)
 	{
 		$db = DatabaseConnection::getConnection('default');
@@ -15,10 +13,10 @@ class ControlRegistry
 
 	static public function getControl($format, $name)
 	{
-		return self::loadControls($format, $name);
+		return self::getControls($format, $name);
 	}
 
-	static public function loadControls($format, $name = null)
+	static public function getControls($format, $name = null)
 	{
 		if(defined('INSTALLMODE') && INSTALLMODE == true)
 			return false;
