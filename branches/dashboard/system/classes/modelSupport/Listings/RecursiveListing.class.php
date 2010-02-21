@@ -11,16 +11,18 @@ class RecursiveListing extends LocationListing
 		$modelList = parent::getModels($number, $offset);
 		$sortedModels = array();
 
-		foreach($modelList as $model) {
-			$mmodel = ModelRegistry::loadModel($model['type'], $model['id']);
-			$location = $mmodel->getLocation();
-			$this->restrictions['parent'] = $location->getId();
-			$descentModels = $this->getModels($this->maxLimit, 0);
+		if ($modelList) {
+			foreach($modelList as $model) {
+				$mmodel = ModelRegistry::loadModel($model['type'], $model['id']);
+				$location = $mmodel->getLocation();
+				$this->restrictions['parent'] = $location->getId();
+				$descentModels = $this->getModels($this->maxLimit, 0);
 
-			$sortedModels[] = $model;
+				$sortedModels[] = $model;
 
-			if($descentModels !== false) {
-				$sortedModels = array_merge($sortedModels, $descentModels);
+				if($descentModels !== false) {
+					$sortedModels = array_merge($sortedModels, $descentModels);
+				}
 			}
 		}
 
