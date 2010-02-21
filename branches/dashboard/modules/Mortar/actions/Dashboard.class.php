@@ -9,20 +9,13 @@ class MortarActionDashboard extends ActionBase
 	protected $actions;
 
 	public function viewAdmin($page) {
-
-		$control = ControlRegistry::getControl('admin', 'Hello, World!');
-
 		$content = new HtmlObject('ul');
 		$content->addClass('dashboard');
 
 		for ($i = 0; $i < 4; $i++) {
-			$stuff = $control->getContents();
 			$box = new HtmlObject('li');
 			$box->addClass('dashboard_widget');
 			$box->wrapAround("Box number $i");
-			if($i == 0) {
-				$box->wrapAround($stuff);
-			}
 			$content->wrapAround($box);
 		}
 
@@ -31,7 +24,6 @@ class MortarActionDashboard extends ActionBase
 		$content->wrapAround($clean);
 
 		return (string) $content;
-
 	}
 }
 

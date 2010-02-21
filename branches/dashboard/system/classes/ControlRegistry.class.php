@@ -13,10 +13,23 @@ class ControlRegistry
 
 	static public function getControl($format, $name)
 	{
-		return self::getControls($format, $name);
+		$data = self::loadControls($format, $name);
+		$row = array_shift($data);
+		$class = importFromModule($row['controlClass'], $row['moduleId'], 'control');
+		try {
+			$control = new $class();
+		} catch (Exception $e) {}
+		return $control;
 	}
 
-	static public function getControls($format, $name = null)
+	static public function getControlInfo($format, $name)
+	{
+		$rawInfo = self::loadControls($format, $name);
+		$info = array('id' => $rawInfo['moduleId'], 'name' => $rawInfo['controlName'], 'class' => $rawInfo['controlClass']);
+		return $info;
+	}
+
+	static protected function loadControls($format, $name = null)
 	{
 		if(defined('INSTALLMODE') && INSTALLMODE == true)
 			return false;
@@ -58,13 +71,6 @@ class ControlRegistry
 
 		if (count($data) === 0) {
 			return false;
-		} elseif(isset($name)) {
-			$row = array_shift($data);
-			$class = importFromModule($row['controlClass'], $row['moduleId'], 'control');
-			try {
-				$control = new $class();
-			} catch (Exception $e) {}
-			return $control;
 		} else {
 			return $data;
 		}

@@ -454,7 +454,7 @@ ALTER TABLE dashboardControls ADD CONSTRAINT fk_dashboardControls_locations
 
 /************ Foreign Key: fk_dashboardControlSettings_dashboardControls ***************/
 ALTER TABLE dashboardControlSettings ADD CONSTRAINT fk_dashboardControlSettings_dashboardControls
-	FOREIGN KEY (instanceId) REFERENCES dashboardControls (instanceId) ON UPDATE NO ACTION ON DELETE NO ACTION;
+	FOREIGN KEY (instanceId) REFERENCES dashboardControls (instanceId) ON UPDATE NO ACTION ON DELETE CASCADE;
 
 /************ Foreign Key: fk_directories_locations ***************/
 ALTER TABLE directories ADD CONSTRAINT fk_directories_locations
