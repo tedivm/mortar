@@ -150,6 +150,16 @@ class ControlSet
 			}
 		}
 	}
+
+	public function getControls()
+	{
+		$controls = array();
+		foreach($this->controls as $control) {
+			$controls[] = $control['class'];
+		}
+
+		return $controls;
+	}
 }
 
 ?>

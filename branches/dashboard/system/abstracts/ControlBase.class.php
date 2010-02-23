@@ -15,6 +15,8 @@ abstract class ControlBase
 			$this->settings = $settings;
 		}
 	}
+
+	abstract public function getContent();
 }
 
 ?>
