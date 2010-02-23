@@ -24,9 +24,14 @@ class ControlRegistry
 
 	static public function getControlInfo($format, $name)
 	{
-		$rawInfo = self::loadControls($format, $name);
-		$info = array('id' => $rawInfo['moduleId'], 'name' => $rawInfo['controlName'], 'class' => $rawInfo['controlClass']);
-		return $info;
+		$result = self::loadControls($format, $name);
+		if(isset($result[0])) {
+			$rawInfo = $result[0];
+			$info = array('id' => $rawInfo['controlId'], 'name' => $rawInfo['controlName'], 'class' => $rawInfo['controlClass']);
+			return $info;
+		} else {
+			return false;
+		}
 	}
 
 	static protected function loadControls($format, $name = null)
@@ -45,9 +50,9 @@ class ControlRegistry
 			$data = array();
 			$db = DatabaseConnection::getConnection('default_read_only');
 			$stmt = $db->stmt_init();
-			$sql = 'SELECT controlName, moduleId, controlClass
-						FROM controls
-						WHERE controlFormat = ?';
+			$sql = 'SELECT controlId, controlName, moduleId, controlClass
+				FROM controls
+				WHERE controlFormat = ?';
 			if(isset($name)) {
 				$sql .= ' AND controlName = ?';
 			}

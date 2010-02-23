@@ -6,7 +6,7 @@ class ControlSet
 	protected $user;
 
 	protected $format = 'admin';
-	protected $controlsTable = 'dashoardControls';
+	protected $controlsTable = 'dashboardControls';
 	protected $settingsTable = 'dashboardControlSettings';
 
 	public function __construct($user) {
@@ -68,7 +68,12 @@ class ControlSet
 
 		$control = array('id' => 'unsaved', 'control' => $info['id'], 'settings' => $settings);
 
+		if(isset($location))
+			$control['location'] = $location;
+
 		$this->controls[] = $control;
+		
+		return count($this->controls);
 	}
 
 	public function setLocation($id, $location = null)
@@ -101,6 +106,43 @@ class ControlSet
 		$stmt->bindAndExecute('i', $this->user->getId());
 	}
 
+	public function saveControls()
+	{
+		$this->clearControls();
+
+		$db = DatabaseConnection::getConnection('default');
+
+		foreach($this->controls as $key => $control) {
+			$stmt = $db->stmt_init();
+echo "<pre>"; var_dump($control); echo "</pre>";
+			if(isset($control['location'])) {
+				$stmt->prepare('INSERT INTO ' . $this->controlsTable . '
+						(sequence, controlId, userId, locationId)
+						VALUES (?, ?, ?, ?)');
+
+				$stmt->bindAndExecute('iiii', $key, $control['control'], $this->user->getId(), 
+					$control['location']);
+			} else {
+				$stmt->prepare('INSERT INTO ' . $this->controlsTable . '
+						(sequence, controlId, userId)
+						VALUES (?, ?, ?)');
+
+				$stmt->bindAndExecute('iii', $key, $control['control'], $this->user->getId());
+			}
+
+			$control['id'] = $stmt->insert_id;
+
+			foreach($control['settings'] as $name => $val) {
+				$setting_stmt = $db->stmt_init();
+
+				$setting_stmt->prepare('INSERT INTO ' . $this->settingsTable . '
+							(instanceId, settingName, settingKey)
+							VALUES (?, ?, ?)');
+
+				$setting_stmt->bindAndExecute('iss', $stmt->insert_id, $name, $val);
+			}
+		}
+	}
 }
 
 ?>
