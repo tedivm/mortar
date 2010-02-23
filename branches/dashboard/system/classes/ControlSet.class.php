@@ -114,7 +114,7 @@ class ControlSet
 
 		foreach($this->controls as $key => $control) {
 			$stmt = $db->stmt_init();
-echo "<pre>"; var_dump($control); echo "</pre>";
+
 			if(isset($control['location'])) {
 				$stmt->prepare('INSERT INTO ' . $this->controlsTable . '
 						(sequence, controlId, userId, locationId)
