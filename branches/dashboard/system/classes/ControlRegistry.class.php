@@ -15,32 +15,53 @@ class ControlRegistry
 	{
 		$data = self::loadControls($format, $name);
 		$row = array_shift($data);
-		$class = importFromModule($row['controlClass'], $row['moduleId'], 'control');
+		$class = importFromModule($row['class'], $row['module'], 'control');
 		try {
 			$control = new $class($format, $location, $settings);
 		} catch (Exception $e) {}
 		return $control;
 	}
 
+	static public function getControlInfoById($id)
+	{
+		$data = self::loadControls(null, null, $id);
+		if(isset($data[0])) {
+			return $data[0];
+		} else {
+			return false;
+		}
+		
+	}
+
 	static public function getControlInfo($format, $name)
 	{
 		$result = self::loadControls($format, $name);
 		if(isset($result[0])) {
-			$rawInfo = $result[0];
-			$info = array('id' => $rawInfo['controlId'], 'name' => $rawInfo['controlName'], 'class' => $rawInfo['controlClass']);
-			return $info;
+			return $result[0];
 		} else {
 			return false;
 		}
 	}
 
-	static protected function loadControls($format, $name = null)
+	static protected function renameElements($list)
+	{
+		$info = array();
+		foreach($list as $control) {
+			$info[] = array('id' => $control['controlId'], 'name' => $control['controlName'], 
+				'class' => $control['controlClass'], 'module' => $control['moduleId']);
+		}
+		return $info;
+	}
+
+	static protected function loadControls($format = 'admin', $name = null, $id = null)
 	{
 		if(defined('INSTALLMODE') && INSTALLMODE == true)
 			return false;
 
 		if(isset($name)) {
-			$cache = CacheControl::getCache('controls', $format, 'single', $name);
+			$cache = CacheControl::getCache('controls', $format, 'single', 'name', $name);
+		} elseif(isset($id)) {
+			$cache = CacheControl::getCache('controls', $format, 'single', 'id', $id);
 		} else {
 			$cache = CacheControl::getCache('controls', $format, 'list');
 		}
@@ -51,15 +72,21 @@ class ControlRegistry
 			$db = DatabaseConnection::getConnection('default_read_only');
 			$stmt = $db->stmt_init();
 			$sql = 'SELECT controlId, controlName, moduleId, controlClass
-				FROM controls
-				WHERE controlFormat = ?';
+				FROM controls ';
 			if(isset($name)) {
-				$sql .= ' AND controlName = ?';
+				$sql .= 'WHERE controlFormat = ? AND controlName = ?';
+			} elseif(isset($id)) {
+				$sql .= 'WHERE controlId = ?';
+			} else {
+				$sql .= 'WHERE controlFormat = ?';
 			}
+
 			$stmt->prepare($sql);
 
 			if(isset($name)) {
 				$success = $stmt->bindAndExecute('ss', $format, $name);
+			} elseif(isset($id)) {
+				$success = $stmt->bindAndExecute('i', $id);
 			} else {
 				$success = $stmt->bindAndExecute('s', $format);
 			}
@@ -70,6 +97,7 @@ class ControlRegistry
 						$data[] = $row;
 					}
 				}
+				$data = self::renameElements($data);
 			}
 			$cache->storeData($data);
 		}

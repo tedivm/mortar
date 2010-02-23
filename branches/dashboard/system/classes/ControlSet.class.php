@@ -37,6 +37,9 @@ class ControlSet
 				$control = array('id' => $row['instanceId'], 'control' => $row['controlId'],
 						 'location' => $row['locationId']);
 
+				$byId = ControlRegistry::getControlInfoById($row['instanceId']);
+				$control['name'] = $byId['name'];
+
 				$set_stmt = $db->stmt_init();
 
 				$set_stmt->prepare('SELECT settingName, settingKey
@@ -50,17 +53,15 @@ class ControlSet
 				}
 				$control['settings'] = $settings;
 
+				$control['class'] = ControlRegistry::getControl($this->format, 
+					$control['name'], $control['location'], $control['settings']);
+
 				$data[$row['sequence']] = $control;
 			}
 
 			$cache->storeData($data);
 		}
 		$this->controls = $data;
-
-		foreach($controls as $control) {
-			$control['class'] = ControlRegistry::getControl($this->format, $control['name'],
-				$control['location'], $control['settings']);
-		}
 	}
 
 	public function addControl($name, $location = null, $settings = array())

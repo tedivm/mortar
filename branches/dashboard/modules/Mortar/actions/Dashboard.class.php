@@ -9,15 +9,18 @@ class MortarActionDashboard extends ActionBase
 	protected $actions;
 
 	public function viewAdmin($page) {
+		$user = ActiveUser::getUser();
+		$theme = $page->getTheme();
+
+		$cs = new ControlSet($user->getId());
+		$cs->loadControls();
+		$cd = new ViewControlDisplay($cs, $theme);
+		$dash = $cd->getDisplay();
+
 		$content = new HtmlObject('ul');
 		$content->addClass('dashboard');
 
-		for ($i = 0; $i < 4; $i++) {
-			$box = new HtmlObject('li');
-			$box->addClass('dashboard_widget');
-			$box->wrapAround("Box number $i");
-			$content->wrapAround($box);
-		}
+		$content->wrapAround($dash);
 
 		$clean = new HtmlObject('div');
 		$clean->addClass('clean');
