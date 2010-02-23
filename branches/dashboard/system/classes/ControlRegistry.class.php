@@ -11,13 +11,13 @@ class ControlRegistry
 		$stmt->bindAndExecute('ssis', $format, $name, $module, $class);
 	}
 
-	static public function getControl($format, $name)
+	static public function getControl($format, $name, $location = null, $settings = array())
 	{
 		$data = self::loadControls($format, $name);
 		$row = array_shift($data);
 		$class = importFromModule($row['controlClass'], $row['moduleId'], 'control');
 		try {
-			$control = new $class();
+			$control = new $class($format, $location, $settings);
 		} catch (Exception $e) {}
 		return $control;
 	}

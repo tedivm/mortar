@@ -56,6 +56,11 @@ class ControlSet
 			$cache->storeData($data);
 		}
 		$this->controls = $data;
+
+		foreach($controls as $control) {
+			$control['class'] = ControlRegistry::getControl($this->format, $control['name'],
+				$control['location'], $control['settings']);
+		}
 	}
 
 	public function addControl($name, $location = null, $settings = array())
@@ -70,6 +75,8 @@ class ControlSet
 
 		if(isset($location))
 			$control['location'] = $location;
+
+		$control['class'] = ControlRegistry::getControl($this->format, $name, $location, $settings);
 
 		$this->controls[] = $control;
 		
