@@ -112,3 +112,9 @@ Action settings are very useful for providing semi-dynamic titles for actions an
   * actionSettings is an array, with potential subarrays for each format and also a 'default' subarray.
   * getSettings($format, $setting) checks if a format-specific setting is set, returns that if so, then checks if a default setting is set, and returns _that_ if so.
   * setSettings($format, $setting) just sets the specific setting for the specific format and doesn't worry about the default.
+
+ADDENDUM:
+
+== Form Actions ==
+
+Right now, functionality for actions that use forms is defined in a FormAction abstract, but because most form-based actions are Model Actions, this abstract is literally only extended for one single action in the system: MaintenanceMode. I suggest somehow rolling this functionality into the Action core so that it can be used and extended in a single place for both model and non-model actions.
