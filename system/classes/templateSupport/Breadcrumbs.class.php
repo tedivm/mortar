@@ -115,7 +115,9 @@ class TagBoxBreadcrumbs
 
 			if($url->checkPermission($userId) && $location->checkPublished()) {
 				$model = $location->getResource();
-				$name = isset($model['title']) ? $model['title'] : str_replace('_', ' ', $location->getName());
+				$name = isset($model['title'])
+					? $model['title']
+					: ucwords(str_replace('_', ' ', $location->getName()));
 
 				if(isset($firstname)) {
 					$name = $firstname;
