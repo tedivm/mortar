@@ -125,7 +125,7 @@ class FileSystem
 					continue;
 
 				if(is_dir($filePath) && !is_link($filePath)) {
-					deltree($filePath);
+					self::deleteRecursive($filePath);
 				}else{
 					unlink($filePath);
 				}
