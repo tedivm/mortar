@@ -208,6 +208,11 @@ class ControlSet
 
 		return $info;
 	}
+
+	public function getUserId()
+	{
+		return $this->user->getId();
+	}
 }
 
 ?>

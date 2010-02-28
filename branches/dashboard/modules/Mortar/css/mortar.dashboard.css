@@ -24,8 +24,22 @@
 }
 
 .dashboard_links {
-	font-size: .6em;
 	position: absolute;
 	bottom: 2px;
 	right: 2px;
+}
+
+.dashboard_links form {
+	display: inline;
+}
+
+.dashboard_links button {
+	border: 0;
+	margin: 0;
+	padding: 0;
+	background: none;
+	display: inline;
+	font-size: 8pt;
+	color: #ccc;
+	background-color: transparent;
 }
