@@ -2,13 +2,28 @@
 
 class ControlRegistry
 {
-	static public function registerControl($name, $format, $module, $class)
+	static public function registerControl($format, $module, $class)
 	{
+		$className = importFromModule($class, $row['moduleId'], 'control');
+		if($className === false)
+			return false;
+
+		try {
+			$class = new $className($format, null, null);
+			$name = $class->getName();
+		} catch (Exception $e) {
+			return false;
+		}
+
 		$db = DatabaseConnection::getConnection('default');
 		$stmt = $db->stmt_init();
 		$stmt->prepare('INSERT INTO controls (controlFormat, controlName, moduleId, controlClass)
 				VALUES (?, ?, ?, ?)');
-		$stmt->bindAndExecute('ssis', $format, $name, $module, $class);
+		if($stmt->bindAndExecute('ssis', $format, $name, $module, $class)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	static public function getControl($format, $name, $location = null, $settings = array())

@@ -6,6 +6,7 @@ class MortarActionControlSettings extends FormAction
 
 	public $adminSettings = array( 'headerTitle' => 'Control Settings', 'useRider' => true);
 
+	protected $cs;
 	protected $control;
 
 	public function logic()
@@ -13,9 +14,9 @@ class MortarActionControlSettings extends FormAction
 		$query = Query::getQuery();
 
 		$user = ActiveUser::getUser();
-		$cs = new ControlSet($user->getId());
-		$cs->loadControls();
-		$info = $cs->getInfo();
+		$this->cs = new ControlSet($user->getId());
+		$this->cs->loadControls();
+		$info = $this->cs->getInfo();
 
 		$url = new Url();
 		$url->module = 'Mortar';
@@ -23,7 +24,7 @@ class MortarActionControlSettings extends FormAction
 		$url->format = 'admin';
 
 		if(isset($query['id']) && isset($info[$query['id']])) {
-			$this->control = $cs->getControl($query['id']);
+			$this->control = $this->cs->getControl($query['id']);
 		} else {
 			$url = new Url();
 			$url->module = 'Mortar';
@@ -32,28 +33,41 @@ class MortarActionControlSettings extends FormAction
 			$this->ioHandler->addHeader('Location', (string) $url);
 		}
 
-/*		$this->form = $this->getForm();
+		$this->form = $this->getForm();
 
-		if($this->form->checkSubmit())
+		if($this->form !== false && $this->form->checkSubmit())
 		{
 			$this->processInput($this->form->getInputHandler());
 			$this->ioHandler->addHeader('Location', (string) $url);
-		}*/
+		}
 	}
 
 	public function viewAdmin($page)
 	{
+		$this->adminSettings['titleRider'] = ' For ' . $this->control->getName();
 
+		if($this->form === false) {
+			$output = 'This control has no manual settings.';
+		} elseif ($this->form->wasSubmitted()) {
+                	$output = '';
+		} else {
+	                $output = $this->form->getFormAs('Html');
+	        }
+                return $output;
 	}
 
 	protected function processInput($input)
 	{
-		return true;
+		return $this->control->processSettingsInput($input);
 	}
 
 	protected function getForm()
 	{
-		return true;
+		$form = new Form('control_settings');
+		$form->setLegend('Control Settings For ' . $this->control->getName());
+
+		$form = $this->control->settingsForm($form);
+		return $form;
 	}
 }
 

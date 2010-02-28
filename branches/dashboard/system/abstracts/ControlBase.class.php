@@ -43,6 +43,11 @@ abstract class ControlBase
 
 		return $content;
 	}
+
+	public function getName()
+	{
+		return $this->name;
+	}
 }
 
 ?>
