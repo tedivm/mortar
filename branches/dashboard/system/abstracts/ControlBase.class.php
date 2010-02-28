@@ -9,6 +9,7 @@ abstract class ControlBase
 
 	protected $useLocation = false;
 	protected $settings = array();
+	protected $autoSettings = array();
 
 	public function __construct($format, $location = null, $settings = array())
 	{
@@ -17,11 +18,6 @@ abstract class ControlBase
 		if(is_array($settings)) {
 			$this->settings = $settings;
 		}
-	}
-
-	public function getSettingsForm()
-	{
-		return false;
 	}
 
 	public function getClasses()
@@ -108,11 +104,42 @@ abstract class ControlBase
 		return $this->processLocalSettings($input);
 	}
 
+	public function modifyForm($form)
+	{
+		$form->changeSection('settings')->
+			setLegend('Settings');
+
+		foreach($this->autoSettings as $label => $name) {
+			$input = $form->createInput($name)->
+				setLabel($label);
+
+			if(isset($this->settings[$name])) {
+				$input->setValue($this->settings[$name]);
+			}
+		}
+
+		if(count($this->autoSettings) > 0) {
+			return $form;
+		} else {
+			return false;
+		}
+	}
+
+	public function processLocalSettings($input)
+	{
+		$input = Input::getInput();
+
+		foreach($this->autoSettings as $name) {
+			if(isset($input[$name])) {
+				$this->settings[$name] = $input[$name];
+			}
+		}
+
+		return true;
+	}
+
 	abstract public function getContent();
 
-	abstract public function modifyForm($form);
-
-	abstract public function processLocalSettings($input);
 }
 
 ?>
