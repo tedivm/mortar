@@ -27,10 +27,11 @@ class ViewControlDisplay
 		foreach($controls as $key => $control) {
 			$classes = $control->getClasses();
 			$content = $control->getContent();
+			$links = $this->getLinks($key);
 
 			$controlView = new ViewThemeTemplate($this->theme, $this->template);
 			$controlView->addContent(array('content' => $content, 'classes' => $classes,
-				'links' => $this->getLinks($key)));
+				'links' => $links));
 			$controlContent .= $controlView->getDisplay();
 		}
 

@@ -128,7 +128,7 @@ class ControlSet
 
 	public function removeControl($pos)
 	{
-		unset($this->controls[$pos]);
+		array_splice($this->controls, $pos, 1);
 		return true;
 	}
 
