@@ -37,7 +37,7 @@ class ControlSet
 				$control = array('id' => $row['instanceId'], 'control' => $row['controlId'],
 						 'location' => $row['locationId']);
 
-				$byId = ControlRegistry::getControlInfoById($row['instanceId']);
+				$byId = ControlRegistry::getControlInfoById($row['controlId']);
 				$control['name'] = $byId['name'];
 
 				$set_stmt = $db->stmt_init();
@@ -64,40 +64,41 @@ class ControlSet
 		$this->controls = $data;
 	}
 
-	public function addControl($name, $location = null, $settings = array())
+	public function addControl($id, $location = null, $settings = array())
 	{
-		if(!($info = ControlRegistry::getControlInfo($this->format, $name)))
+		if(!($info = ControlRegistry::getControlInfoById($id)))
 			return false;
 
 		if(!is_array($settings))
 			$settings = array();
 
-		$control = array('id' => 'unsaved', 'control' => $info['id'], 'settings' => $settings);
+		$control = array('id' => 'unsaved', 'control' => $info['id'], 'settings' => $settings, 
+			'name' => $info['name']);
 
 		if(isset($location))
 			$control['location'] = $location;
 
-		$control['class'] = ControlRegistry::getControl($this->format, $name, $location, $settings);
+		$control['class'] = ControlRegistry::getControl($this->format, $info['name'], $location, $settings);
 
 		$this->controls[] = $control;
 		
 		return count($this->controls);
 	}
 
-	public function setLocation($id, $location = null)
+	public function setLocation($pos, $location = null)
 	{
-		if(isset($this->controls[$id])) {
-			$this->controls[$id]['location'] = $location;
+		if(isset($this->controls[$pos])) {
+			$this->controls[$pos]['location'] = $location;
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public function setSettings($id, $settings = array())
+	public function setSettings($pos, $settings = array())
 	{
-		if(isset($this->controls[$id]) && is_array($settings)) {
-			$this->controls[$id]['settings'] = $settings;
+		if(isset($this->controls[$pos]) && is_array($settings)) {
+			$this->controls[$pos]['settings'] = $settings;
 			return true;
 		} else {
 			return false;
