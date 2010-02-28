@@ -25,7 +25,7 @@ class MortarActionDashboardSettings extends FormAction
 
 		for($i = 0; $i < $this->dashboardSlots; $i++) {
 			$input = $form->createInput('dashboard_slot_' . $i)->
-				setLabel('Control #' . $i)->
+				setLabel('Control #' . ($i+1))->
 				setType('select')->
 				setOptions('', null, null);
 
@@ -33,7 +33,7 @@ class MortarActionDashboardSettings extends FormAction
 				$select = (isset($cInfo[$i]) && $cInfo[$i]['name'] === $control['name'])
 					? array('selected' => 'yes')
 					: null;
-				$input->setOptions($control['name'], $control['name'], $select);
+				$input->setOptions($control['id'], $control['name'], $select);
 			}
 		}
 
@@ -41,17 +41,27 @@ class MortarActionDashboardSettings extends FormAction
 	}
 
 	public function processInput($inputHandler) {
-	
+		$user = ActiveUser::getUser();
+		$cs = new ControlSet($user->getId());
+
+		for($i = 0; isset($inputHandler['dashboard_slot_' . $i]); $i++) {
+			$cs->addControl($inputHandler['dashboard_slot_' . $i], null, null);
+		}
+
+		$cs->saveControls();
+
+		return true;		
 	}
 
 	public function viewAdmin($page)
 	{
-		if($this->formStatus) {
-			$output = "Successfully submitted.";
-		} else {
-			$output = $this->form->getFormAs();
-		}
-		return $output;
+                $output = '';
+                if($this->form->wasSubmitted()) {
+                	$output .= '<h3>Settings Saved</h3>';
+                }
+
+                $output .= $this->form->getFormAs('Html');
+                return $output;
 	}
 }
 
