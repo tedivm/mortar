@@ -6,6 +6,7 @@
 }
 
 .dashboard_widget {
+	position: relative;
 	width: 450px;
 	border: solid #2D5F8A 2px;
 	margin: 5px;
@@ -20,4 +21,11 @@
 
 .dashboard_widget.two_tall {
 	height: 723px;
+}
+
+.dashboard_settings_link {
+	font-size: .6em;
+	position: absolute;
+	bottom: 2px;
+	right: 2px;
 }

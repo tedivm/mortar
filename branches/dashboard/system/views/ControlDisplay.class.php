@@ -27,8 +27,16 @@ class ViewControlDisplay
 		foreach($controls as $key => $control) {
 			$classes = $control->getClasses();
 			$content = $control->getContent();
+
+			$link = new Url();
+			$link->module = 'Mortar';
+			$link->format = 'admin';
+			$link->action = 'ControlSettings';
+			$link->id = $key;
+
 			$controlView = new ViewThemeTemplate($this->theme, $this->template);
-			$controlView->addContent(array('content' => $content, 'classes' => $classes));
+			$controlView->addContent(array('content' => $content, 'classes' => $classes,
+				'settingslink' => (string) $link));
 			$controlContent .= $controlView->getDisplay();
 		}
 
