@@ -43,6 +43,11 @@ class ControlRegistry
 		}
 	}
 
+	static public function getControls($format)
+	{
+		return self::loadControls($format);
+	}
+
 	static protected function renameElements($list)
 	{
 		$info = array();

@@ -161,6 +161,16 @@ class ControlSet
 
 		return $controls;
 	}
+
+	public function getInfo()
+	{
+		$info = $this->controls;
+		foreach($info as $key => $item) {
+			unset($info[$key]['class']);
+		}
+
+		return $info;
+	}
 }
 
 ?>
