@@ -823,6 +823,28 @@ class Location
 		return $outputArray;
 
 	}
+
+	/**
+	 * Parses a '/'-delimited path of location names and returns the ID for the final item in the chain,
+	 * or false if the path does not resolve to a location.
+	 *
+	 * @param string $path
+	 * @return int|false
+	 */
+	static public function getIdByPath($path)
+	{
+		$locs = explode('/', $path);
+
+		$locpointer = new Location(1);
+
+		foreach($locs as $loc) {
+			$locpointer = $locpointer->getChildByName($loc);
+			if($locpointer === false)
+				return false;
+		}
+
+		return $locpointer->getId();
+	}
 }
 
 class LocationError extends CoreError {}

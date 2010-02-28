@@ -19,8 +19,6 @@ abstract class ControlBase
 		}
 	}
 
-	abstract public function getContent();
-
 	public function getSettingsForm()
 	{
 		return false;
@@ -48,6 +46,39 @@ abstract class ControlBase
 	{
 		return $this->name;
 	}
+
+	public function settingsForm($form)
+	{
+		if($this->useLocation) {
+			$form->changeSection('location')->
+				setLegend('Location');
+
+			$form->createInput('location')->
+				setLabel('Location');
+		}
+
+		$results =  $this->modifyForm($form);
+		if ($this->useLocation && !$results) {
+			return $form;
+		} else {
+			return $results;
+		}
+	}
+
+	public function processSettingsInput($input)
+	{
+		if($this->useLocation) {
+			$loc = Location::getIdByPath($input['location']);
+		}
+
+		return $this->processLocalSettings($input);
+	}
+
+	abstract public function getContent();
+
+	abstract public function modifyForm($form);
+
+	abstract public function processLocalSettings($input);
 }
 
 ?>
