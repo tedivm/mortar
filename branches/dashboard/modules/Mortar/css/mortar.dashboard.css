@@ -13,6 +13,7 @@
 	padding: 5px;
 	float: left;
 	height: 350px;
+	overflow: hidden;
 }
 
 .dashboard_widget.two_wide {
