@@ -47,28 +47,15 @@ class ViewControlDisplay
 		$link = new Url();
 		$link->module = 'Mortar';
 		$link->format = 'admin';
-		$link->action = 'ControlSettings';
+		$link->action = 'ControlModify';
 		$link->id = $pos;
-
-		$settings = new HtmlObject('form');
-		$settings->property('action', (string) $link);
-		$settings->property('method', 'post');
 
 		$basebutton = new HtmlObject('button');
 		$basebutton->property('name', 'modify');
 		$basebutton->property('type', 'Submit');
 
-		$button = clone($basebutton);
-		$button->property('name', 'settings');
-		$button->property('value', 'submit');
-		$button->wrapAround('Settings');
-		$settings->wrapAround($button);		
-
-		$formlink = clone($link);
-		$formlink->action = 'ControlModify';
-
 		$form = new HtmlObject('form');
-		$form->property('action', (string) $formlink);
+		$form->property('action', (string) $link);
 		$form->property('method', 'post');
 
 		$item = new HtmlObject('input');
@@ -82,6 +69,11 @@ class ViewControlDisplay
 		$item->property('name', 'id');
 		$item->property('value', $info[$pos]['id']);
 		$form->wrapAround($item);
+
+		$button = clone($basebutton);
+		$button->property('value', 'Settings');
+		$button->wrapAround('Settings');
+		$form->wrapAround($button);
 
 		if($pos != 0) {
 			$button = clone($basebutton);
@@ -102,7 +94,6 @@ class ViewControlDisplay
 		$button->wrapAround('Remove');
 		$form->wrapAround($button);	
 
-		$links->wrapAround($settings);
 		$links->wrapAround($form);
 		return (string) $links;
 	}

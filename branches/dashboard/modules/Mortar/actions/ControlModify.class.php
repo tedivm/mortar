@@ -11,8 +11,15 @@ class MortarActionControlModify extends ActionBase
 
 		$url = new Url();
 		$url->module = 'Mortar';
-		$url->action = 'Dashboard';
 		$url->format = 'admin';
+
+		if(isset($input['modify']) && isset($query['id']) && $input['modify'] === 'Settings') {
+			$url->action = 'ControlSettings';
+			$url->id = $query['id'];
+		} else {
+			$url->action = 'Dashboard';
+		}
+
 		$this->ioHandler->addHeader('Location', (string) $url);
 
 		if(!isset($input['user'])) {
