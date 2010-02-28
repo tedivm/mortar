@@ -28,13 +28,13 @@ class ControlSet
 			$db = DatabaseConnection::getConnection('default_read_only');
 			$stmt = $db->stmt_init();
 
-			$stmt->prepare('SELECT instanceId, sequence, controlId, locationId
+			$stmt->prepare('SELECT sequence, controlId, locationId
 					FROM ' . $this->controlsTable . '
 					WHERE userId = ?');
 			$stmt->bindAndExecute('i', $this->user->getId());
 
 			while($row = $stmt->fetch_array()) {
-				$control = array('id' => $row['instanceId'], 'control' => $row['controlId'],
+				$control = array('id' => $row['controlId'],
 						 'location' => $row['locationId']);
 
 				$byId = ControlRegistry::getControlInfoById($row['controlId']);
@@ -44,8 +44,8 @@ class ControlSet
 
 				$set_stmt->prepare('SELECT settingName, settingKey
 						    FROM ' . $this->settingsTable . '
-						    WHERE instanceId = ?');
-				$set_stmt->bindAndExecute('i', $row['instanceId']);
+						    WHERE userId = ? AND sequence = ?');
+				$set_stmt->bindAndExecute('ii', $this->user->getId(), $row['sequence']);
 
 				$settings = array();
 				while($set_row = $set_stmt->fetch_array()) {
@@ -72,8 +72,7 @@ class ControlSet
 		if(!is_array($settings))
 			$settings = array();
 
-		$control = array('id' => 'unsaved', 'control' => $info['id'], 'settings' => $settings, 
-			'name' => $info['name']);
+		$control = array('id' => $info['id'], 'settings' => $settings, 'name' => $info['name']);
 
 		if(isset($location))
 			$control['location'] = $location;
@@ -105,6 +104,34 @@ class ControlSet
 		}
 	}
 
+	public function swapControls($pos, $up = true)
+	{
+		if(!isset($this->controls[$pos]))
+			return false;
+
+		if($up && !isset($this->controls[$pos - 1]))
+			return false;
+
+		if(!$up && !isset($this->controls[$pos + 1]))
+			return false;
+
+		$swappee = $up ? $this->controls[$pos - 1] : $this->controls[$pos + 1];
+		if($up) {
+			$this->controls[$pos - 1] = $this->controls[$pos];
+		} else {
+			$this->controls[$pos + 1] = $this->controls[$pos];
+		}
+		$this->controls[$pos] = $swappee;
+
+		return true;
+	}
+
+	public function removeControl($pos)
+	{
+		unset($this->controls[$pos]);
+		return true;
+	}
+
 	public function clearControls()
 	{
 		$db = DatabaseConnection::getConnection('default');
@@ -129,14 +156,14 @@ class ControlSet
 						(sequence, controlId, userId, locationId)
 						VALUES (?, ?, ?, ?)');
 
-				$stmt->bindAndExecute('iiii', $key, $control['control'], $this->user->getId(), 
+				$stmt->bindAndExecute('iiii', $key, $control['id'], $this->user->getId(), 
 					$control['location']);
 			} else {
 				$stmt->prepare('INSERT INTO ' . $this->controlsTable . '
 						(sequence, controlId, userId)
 						VALUES (?, ?, ?)');
 
-				$stmt->bindAndExecute('iii', $key, $control['control'], $this->user->getId());
+				$stmt->bindAndExecute('iii', $key, $control['id'], $this->user->getId());
 			}
 
 			$control['id'] = $stmt->insert_id;
@@ -145,10 +172,10 @@ class ControlSet
 				$setting_stmt = $db->stmt_init();
 
 				$setting_stmt->prepare('INSERT INTO ' . $this->settingsTable . '
-							(instanceId, settingName, settingKey)
-							VALUES (?, ?, ?)');
+							(userId, sequence, settingName, settingKey)
+							VALUES (?, ?, ?, ?)');
 
-				$setting_stmt->bindAndExecute('iss', $stmt->insert_id, $name, $val);
+				$setting_stmt->bindAndExecute('iiss', $this->user->getId(), $key, $name, $val);
 			}
 		}
 	}

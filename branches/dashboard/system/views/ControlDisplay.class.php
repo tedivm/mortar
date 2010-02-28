@@ -28,19 +28,37 @@ class ViewControlDisplay
 			$classes = $control->getClasses();
 			$content = $control->getContent();
 
-			$link = new Url();
-			$link->module = 'Mortar';
-			$link->format = 'admin';
-			$link->action = 'ControlSettings';
-			$link->id = $key;
-
 			$controlView = new ViewThemeTemplate($this->theme, $this->template);
 			$controlView->addContent(array('content' => $content, 'classes' => $classes,
-				'settingslink' => (string) $link));
+				'links' => $this->getLinks($key)));
 			$controlContent .= $controlView->getDisplay();
 		}
 
 		return $controlContent;
+	}
+
+	protected function getLinks($pos)
+	{
+		$links = new HtmlObject('div');
+		$links->addClass('dashboard_links');
+
+		$info = $this->controlset->getInfo();
+		$link = new Url();
+		$link->module = 'Mortar';
+		$link->format = 'admin';
+		$link->action = 'ControlSettings';
+		$link->id = $pos;
+
+//		if($pos != 0) {
+			
+//		}
+
+//		if($pos != (count($info) - 1)) {
+		
+//		}
+
+		$links->wrapAround($link->getLink('Settings'));
+		return (string) $links;
 	}
 }
 
