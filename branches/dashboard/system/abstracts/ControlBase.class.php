@@ -47,6 +47,29 @@ abstract class ControlBase
 		return $this->name;
 	}
 
+	public function getLocation()
+	{
+		return $this->location;
+	}
+
+	public function getSettings()
+	{
+		return $this->settings;
+	}
+
+	public function setLocation($loc)
+	{
+		$this->location = $loc;
+	}
+
+	public function setSettings($settings)
+	{
+		if(!is_array($settings))
+			return false;
+
+		$this->settings = $settings;
+	}
+
 	public function settingsForm($form)
 	{
 		if($this->useLocation) {
@@ -69,6 +92,9 @@ abstract class ControlBase
 	{
 		if($this->useLocation) {
 			$loc = Location::getIdByPath($input['location']);
+			if($loc !== false) {
+				$this->location = $loc;
+			}
 		}
 
 		return $this->processLocalSettings($input);

@@ -88,6 +88,8 @@ class ControlSet
 	{
 		if(isset($this->controls[$pos])) {
 			$this->controls[$pos]['location'] = $location;
+			$class = $this->controls[$pos]['class'];
+			$class->setLocation($location);
 			return true;
 		} else {
 			return false;
@@ -98,6 +100,8 @@ class ControlSet
 	{
 		if(isset($this->controls[$pos]) && is_array($settings)) {
 			$this->controls[$pos]['settings'] = $settings;
+			$class = $this->controls[$pos]['class'];
+			$class->setSettings($settings);
 			return true;
 		} else {
 			return false;
@@ -142,9 +146,19 @@ class ControlSet
 		$stmt->bindAndExecute('i', $this->user->getId());
 	}
 
+	public function refreshControls()
+	{
+		foreach($this->controls as $key => $control) {
+			$c = $control['class'];
+			$this->controls[$key]['location'] = $c->getLocation();
+			$this->controls[$key]['settings'] = $c->getSettings();
+		}
+	}
+
 	public function saveControls()
 	{
 		$this->clearControls();
+		$this->refreshControls();
 
 		$db = DatabaseConnection::getConnection('default');
 

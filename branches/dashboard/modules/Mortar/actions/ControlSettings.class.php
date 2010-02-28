@@ -38,6 +38,7 @@ class MortarActionControlSettings extends FormAction
 		if($this->form !== false && $this->form->checkSubmit())
 		{
 			$this->processInput($this->form->getInputHandler());
+			$this->cs->saveControls();
 			$this->ioHandler->addHeader('Location', (string) $url);
 		}
 	}
