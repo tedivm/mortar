@@ -163,6 +163,15 @@ class ControlSet
 		return $controls;
 	}
 
+	public function getControl($pos)
+	{
+		if(isset($this->controls[$pos])) {
+			return $this->controls[$pos]['class'];
+		} else {
+			return false;
+		}
+	}
+
 	public function getInfo()
 	{
 		$info = $this->controls;

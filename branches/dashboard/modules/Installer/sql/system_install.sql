@@ -70,27 +70,28 @@ CREATE INDEX cronJobs_jobPid_lastRun_Idx ON cronJobs (jobPid, lastRun);
 /* Build Table Structure */
 CREATE TABLE dashboardControls
 (
-	instanceId INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	userId INTEGER UNSIGNED NOT NULL,
 	sequence INTEGER UNSIGNED NOT NULL,
 	controlId INTEGER UNSIGNED NOT NULL,
 	locationId INTEGER UNSIGNED
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
-CREATE UNIQUE INDEX dashboardControls_userId_sequence_Idx ON dashboardControls (userId, sequence);
+ALTER TABLE dashboardControls ADD CONSTRAINT pkdashboardControls
+	PRIMARY KEY (userId, sequence);
 
 /******************** Add Table: dashboardControlSettings ***********/
 
 /* Build Table Structure */
 CREATE TABLE dashboardControlSettings
 (
-	instanceId INTEGER UNSIGNED NOT NULL,
+	userId INTEGER UNSIGNED NOT NULL,
+	sequence INTEGER UNSIGNED NOT NULL,
 	settingName VARCHAR(45) NOT NULL,
 	settingKey VARCHAR(45) NOT NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 ALTER TABLE dashboardControlSettings ADD CONSTRAINT pkdashboardControlSettings
-	PRIMARY KEY (instanceId, settingName);
+	PRIMARY KEY (userId, sequence, settingName);
 
 /******************** Add Table: directories ************************/
 
@@ -454,7 +455,7 @@ ALTER TABLE dashboardControls ADD CONSTRAINT fk_dashboardControls_locations
 
 /************ Foreign Key: fk_dashboardControlSettings_dashboardControls ***************/
 ALTER TABLE dashboardControlSettings ADD CONSTRAINT fk_dashboardControlSettings_dashboardControls
-	FOREIGN KEY (instanceId) REFERENCES dashboardControls (instanceId) ON UPDATE NO ACTION ON DELETE CASCADE;
+	FOREIGN KEY (userId, sequence) REFERENCES dashboardControls (userId, sequence) ON UPDATE NO ACTION ON DELETE CASCADE;
 
 /************ Foreign Key: fk_directories_locations ***************/
 ALTER TABLE directories ADD CONSTRAINT fk_directories_locations
