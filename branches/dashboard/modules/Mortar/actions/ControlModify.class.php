@@ -15,14 +15,23 @@ class MortarActionControlModify extends ActionBase
 		$url->format = 'admin';
 		$this->ioHandler->addHeader('Location', (string) $url);
 
-		if(!isset($input['user']) || !isset($input['id']) || !isset($input['modify']) || 
-			!isset($query['id'])) {
+		if(!isset($input['user'])) {
 			return false;
 		}
 
 		$cs = new ControlSet($input['user']);
 		$cs->loadControls();
 		$info = $cs->getInfo();
+
+		if(isset($input['modify']) && isset($input['id']) && $input['modify'] === 'Add') {
+			$cs->addControl($input['id']);
+			$cs->saveControls();
+			return true;
+		}
+
+		if(!isset($input['id']) || !isset($input['modify']) || !isset($query['id'])) {
+			return false;
+		}
 
 		if((int) $info[$query['id']]['id'] !== (int) $input['id']) {
 			return false;

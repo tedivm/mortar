@@ -24,6 +24,7 @@
 }
 
 .dashboard_links {
+	display: none;
 	position: absolute;
 	bottom: 2px;
 	right: 2px;
@@ -40,6 +41,10 @@
 	background: none;
 	display: inline;
 	font-size: 8pt;
-	color: #ccc;
+	color: #aaa;
 	background-color: transparent;
+}
+
+.dashboard_widget:hover .dashboard_links {
+	display: block;
 }
