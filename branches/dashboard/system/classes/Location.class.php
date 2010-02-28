@@ -831,11 +831,11 @@ class Location
 	 * @param string $path
 	 * @return int|false
 	 */
-	static public function getIdByPath($path)
+	static public function getIdByPath($path, $start = 1)
 	{
 		$locs = explode('/', $path);
 
-		$locpointer = new Location(1);
+		$locpointer = new Location($start);
 
 		foreach($locs as $loc) {
 			$locpointer = $locpointer->getChildByName($loc);
@@ -844,6 +844,37 @@ class Location
 		}
 
 		return $locpointer->getId();
+	}
+
+	/**
+	 * Returns a human-readable mortar path to the location 
+	 *
+	 * @param string $path
+	 * @return int|false
+	 */
+	static public function getPathById($id, $start = 1)
+	{
+		$end = new Location($id);
+		$path = '';
+		$first = true;
+
+		$rootpath = array_reverse($end->getPathToRoot());
+
+		foreach($rootpath as $id) {
+			if($id === $start)
+				break;
+
+			$loc = new Location($id);
+			if($first) {
+				$first = false;
+				$path = $loc->getName();
+			} else {
+				$path = $loc->getName() . '/' . $path;
+			}
+		}
+
+		return $path;
+
 	}
 }
 

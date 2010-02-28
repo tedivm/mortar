@@ -76,8 +76,16 @@ abstract class ControlBase
 			$form->changeSection('location')->
 				setLegend('Location');
 
-			$form->createInput('location')->
+			$input = $form->createInput('location')->
 				setLabel('Location');
+
+			if(isset($this->location)) {
+				$path = Location::getPathById($this->location);
+				if($path) {
+					$input->setValue($path);
+				}
+			}
+
 		}
 
 		$results =  $this->modifyForm($form);
