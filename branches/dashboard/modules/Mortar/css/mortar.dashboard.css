@@ -13,3 +13,11 @@
 	float: left;
 	height: 350px;
 }
+
+.dashboard_widget.two_wide {
+	width: 923px;
+}
+
+.dashboard_widget.two_tall {
+	height: 723px;
+}

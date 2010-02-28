@@ -25,9 +25,10 @@ class ViewControlDisplay
 		$controlContent = '';
 
 		foreach($controls as $key => $control) {
+			$classes = $control->getClasses();
 			$content = $control->getContent();
 			$controlView = new ViewThemeTemplate($this->theme, $this->template);
-			$controlView->addContent(array('content' => $content));
+			$controlView->addContent(array('content' => $content, 'classes' => $classes));
 			$controlContent .= $controlView->getDisplay();
 		}
 
