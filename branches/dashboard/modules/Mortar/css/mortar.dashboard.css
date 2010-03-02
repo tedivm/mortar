@@ -24,6 +24,11 @@
 	height: 723px;
 }
 
+.dashboard_widget h1, .dashboard_widget h2, .dashboard_widget h3 {
+	margin-top: 0;
+	font-weight: bold;
+}
+
 .dashboard_links {
 	display: none;
 	position: absolute;

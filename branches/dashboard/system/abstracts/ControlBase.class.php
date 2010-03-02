@@ -138,6 +138,12 @@ abstract class ControlBase
 		return true;
 	}
 
+	public function display()
+	{
+		$content = '<h3>' . $this->name . '</h3>';
+		return $content . $this->getContent();
+	}
+
 	abstract public function getContent();
 
 }

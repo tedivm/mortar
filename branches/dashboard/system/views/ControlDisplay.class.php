@@ -26,7 +26,7 @@ class ViewControlDisplay
 
 		foreach($controls as $key => $control) {
 			$classes = $control->getClasses();
-			$content = $control->getContent();
+			$content = $control->display();
 			$links = $this->getLinks($key);
 
 			$controlView = new ViewThemeTemplate($this->theme, $this->template);
