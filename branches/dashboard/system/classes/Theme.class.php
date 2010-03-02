@@ -53,6 +53,14 @@ class Theme extends ContentBase
 	 */
 	protected $iconset;
 
+	/**
+	 * The template into which header content is inserted for any minified css
+	 *
+	 * @access protected
+	 * @var string
+	 */
+	protected $cssTemplate = "@charset 'UTF-8';\n\n{{ fonts.theme }}\n";
+
 	protected $contentType = 'theme';
 	protected $imagePath = 'images/';
 
@@ -296,13 +304,13 @@ class Theme extends ContentBase
 		$minifier = new Minifier($type);
 		$minifier->addFiles($this->getPaths($type));
 
-		if($type !== 'js')
+		if($type === 'css')
 		{
-			$baseString = "{{ fonts.all }}\n" . $minifier->getBaseString();
+			$baseString = $this->cssTemplate . $minifier->getBaseString();
 			$fileTemplate = new ViewStringTemplate($baseString);
 
 			$themeBox = new TagBoxTheme($this);
-			$fontBox = new TagBoxFonts();
+			$fontBox = new TagBoxFonts($this);
 
 			$fileTemplate->addContent(array('theme' => $themeBox, 'fonts' => $fontBox));
 
