@@ -138,8 +138,7 @@ class Page implements ArrayAccess
 	</script>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	{{ meta }}
-	{{ headerContent }}
-';
+	{{ headerContent }}';
 
 	protected $footerTemplate = '
 	{{ jsIncludes }}
@@ -472,11 +471,12 @@ class Page implements ArrayAccess
 
 		$jsInclude = ActiveSite::getLink() . 'javascript/';
 		$headerFinal = $headerTemplate->getDisplay();
+		$footerFinal = $footerTemplate->getDisplay();
 
-		$display->addContent(array('js_path' => $jsInclude, 'head' => $headerFinal));
+		$display->addContent(array('js_path' => $jsInclude, 'head' => $headerFinal, 'foot' => $footerFinal));
 		$this->addTemplateContent($display);
 
-		return $display->getDisplay() . PHP_EOL . $footerTemplate->getDisplay();
+		return $display->getDisplay();
 	}
 
 	/**
