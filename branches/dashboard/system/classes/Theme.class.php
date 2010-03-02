@@ -62,7 +62,7 @@ class Theme extends ContentBase
 	 * @cache theme *name *link
 	 * @param string $name
 	 */
-	public function __construct($name)
+	public function __construct($name, $depth = 0)
 	{
 		$config = Config::getInstance();
 
@@ -90,7 +90,7 @@ class Theme extends ContentBase
 
 			if(isset($data['settings']['meta']['extends']))
 			{
-				$parentTheme = new Theme($data['settings']['meta']['extends']);
+				$parentTheme = new Theme($data['settings']['meta']['extends'], ($depth + 1));
 				$cssLinks = $parentTheme->getCssFiles();
 				$javascriptLinks = $parentTheme->getJsFiles();
 
@@ -107,10 +107,6 @@ class Theme extends ContentBase
 
 			$baseModulePath = $config['path']['modules'];
 			$baseModuleUrl = $config['url']['modules'];
-
-			$baseModulePath = $config['path']['modules'];
-			$baseModuleUrl = $config['url']['modules'];
-
 
 			$packageList = new PackageList();
 			$packages = $packageList->getInstalledPackages();
@@ -138,7 +134,7 @@ class Theme extends ContentBase
 				$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
 
 			// css
-			$cssResult = $this->getFiles($themePath . 'css/', $themeUrl . 'css/', 'css');
+			$cssResult = $this->getFiles($themePath . 'css/', $themeUrl . 'css/', 'css', (100 - $depth));
 			if($cssResult)
 				$cssLinks = array_merge_recursive($cssLinks, $cssResult);
 
