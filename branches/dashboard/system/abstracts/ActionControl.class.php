@@ -12,8 +12,9 @@ abstract class ActionControl extends ControlBase
 		$iop = new IOProcessorHttp();
 		$argument = '';
 
-		$oldquery = Query::getQuery();
 		$query = Query::getQuery();
+		$oldquery = clone($query);
+
 		foreach(array('module', 'action', 'location') as $key) {
 			if(isset($query[$key])) {
 				unset($query[$key]);
@@ -34,7 +35,7 @@ abstract class ActionControl extends ControlBase
 		if ($this->useLocation === false || ($this->useLocation && $this->location)) {
 			$actionInfo = $this->getActionClass();
 			if($actionInfo === false) {
-				Query::setQuery($oldquery);
+				Query::setQuery((array) $oldquery);
 				return "There was an error loading the action for this control.";
 			}
 
@@ -44,13 +45,17 @@ abstract class ActionControl extends ControlBase
 
 			try {
 				$action->start();
-				$result = $action->viewAdmin($page);
+				if(method_exists($action, 'viewControl')) {
+					$result = $action->viewControl($page);
+				} else {
+					$result = $action->viewAdmin($page);
+				}
 			} catch (Exception $e) {
-				Query::setQuery($oldquery);
+				Query::setQuery((array) $oldquery);
 				return "You do not have permission to use this control.";
 			}
 
-			Query::setQuery($oldquery);
+			Query::setQuery((array) $oldquery);
 
 			return $result;
 		} else {
