@@ -81,7 +81,6 @@ abstract class ControlBase
 					$input->setValue($path);
 				}
 			}
-
 		}
 
 		$results =  $this->modifyForm($form);
@@ -140,8 +139,14 @@ abstract class ControlBase
 
 	public function display()
 	{
+		$this->setName();
 		$content = '<h3>' . $this->name . '</h3>';
 		return $content . $this->getContent();
+	}
+
+	protected function setName()
+	{
+	
 	}
 
 	abstract public function getContent();

@@ -4,13 +4,13 @@ class ControlRegistry
 {
 	static public function registerControl($format, $module, $class)
 	{
-		$className = importFromModule($class, $row['moduleId'], 'control');
+		$className = importFromModule($class, $module, 'control');
 		if($className === false)
 			return false;
 
 		try {
-			$class = new $className($format, null, null);
-			$name = $class->getName();
+			$classI = new $className($format, null, null);
+			$name = $classI->getName();
 		} catch (Exception $e) {
 			return false;
 		}
