@@ -61,7 +61,11 @@ class ControlSet
 
 			$cache->storeData($data);
 		}
-		$this->controls = $data;
+		if ($data === false) {
+			$this->controls = array();
+		} else {
+			$this->controls = $data;
+		}
 	}
 
 	public function addControl($id, $location = null, $settings = array())
