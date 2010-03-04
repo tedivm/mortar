@@ -55,6 +55,8 @@ class MortarActionDashboard extends ActionBase
 			setValue($user->getId());
 
 		$content .= $form->getFormAs();
+
+		$page->setTitle('Dashboard');
 		return (string) $content;
 	}
 }

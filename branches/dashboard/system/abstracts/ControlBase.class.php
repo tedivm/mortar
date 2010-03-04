@@ -141,7 +141,11 @@ abstract class ControlBase
 	{
 		$this->setName();
 		$content = '<h3>' . $this->name . '</h3>';
-		return $content . $this->getContent();
+		if ($this->useLocation === false || ($this->useLocation && $this->location)) {
+			return $content . $this->getContent();
+		} else {
+			return $content . "This control requires a location to be set.";
+		}
 	}
 
 	protected function setName()
