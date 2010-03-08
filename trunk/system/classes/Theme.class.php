@@ -127,12 +127,12 @@ class Theme extends ContentBase
 				// javascript
 				$javascriptResult = $this->getFiles($packagePath . 'javascript/', $packageUrl . 'javascript/', 'js', 25);
 				if($javascriptResult)
-					$javascriptLinks = array_merge($javascriptLinks, $javascriptResult);
+					$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
 
 				// css
 				$cssResult = $this->getFiles($packagePath . 'css/', $packageUrl . 'css/', 'css');
 				if($cssResult)
-					$cssLinks = array_merge($cssLinks, $cssResult);
+					$cssLinks = array_merge_recursive($cssLinks, $cssResult);
 
 			}
 
@@ -213,17 +213,45 @@ class Theme extends ContentBase
 		}
 
 		$paths = array();
-		foreach($urlArray as $section)
+		foreach($urlArray as $domain => $section) 
 		{
-			foreach($section as $url)
-			{
-				$priority = isset($url['priority']) ? (int) $url['priority'] : 30;
-
-				if($priority == 0)
+			if($type === 'css' && isset($this->settings['css']['exclude'])) {
+				$exc = $this->settings['css']['exclude'];
+				if(is_array($exc) && in_array($domain, $exc)) {
 					continue;
+				}
+			}
+			
+			foreach($section as $name => $url)
+			{
+				if($type === 'css' && isset($this->settings['css']['exclude'])) {
+					$designation = $domain . "." . $name;
+					$exc = $this->settings['css']['exclude'];
+					if(is_array($exc) && in_array($designation, $exc)) {
+						continue;
+					}
+				}
 
-				if(isset($url['path']))
-					$paths[$priority][] = $url['path'];
+				if(is_array($url['path'])) {
+					$sets = array();
+					for($i = 0; $i < count($url['path']); $i++) {
+						$sets[] = array('mainLink' => $url['mainLink'][$i],
+							'path' => $url['path'][$i],
+							'priority' => $url['priority'][$i]);
+					}
+				} else {
+					$sets = array($url);
+				}
+
+				foreach($sets as $set) {
+					$priority = isset($set['priority']) ? (int) $set['priority'] : 30;
+
+					if($priority == 0)
+						continue;
+
+					if(isset($set['path']))
+						$paths[$priority][] = $set['path'];
+				}
 			}
 		}
 		ksort($paths);
