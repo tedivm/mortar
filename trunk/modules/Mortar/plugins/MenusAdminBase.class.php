@@ -18,6 +18,10 @@ class MortarPluginMenusAdminBase
 		$url->format = 'Admin';
 		$url->module = 'Mortar';
 
+		$url->action = 'Dashboard';
+		$link = $url->getLink("Dashboard");
+		$menuSys->addItemToSubmenu('primary', 'Meta', $link, 'Dashboard', 'auto', $url);
+
 		if(!ActiveUser::isLoggedIn())
 		{
 			$url->action = 'LogIn';

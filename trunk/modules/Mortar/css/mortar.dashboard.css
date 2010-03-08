@@ -1,0 +1,71 @@
+.dashboard {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	width: 100%;
+}
+
+.dashboard_widget {
+	position: relative;
+	width: 450px;
+	border: solid #2D5F8A 2px;
+	margin: 5px;
+	padding: 5px;
+	float: left;
+	height: 350px;
+	max-width: 98%;
+}
+
+.dashboard_widget.two_wide {
+	width: 923px;
+}
+
+.dashboard_widget.two_tall {
+	height: 723px;
+}
+
+.dashboard_content {
+	width: 100%;
+	height: 335px;
+	overflow: auto;
+}
+
+.two_tall .dashboard_content {
+	height: 708px;
+}
+
+.dashboard_widget h1, .dashboard_widget h2, .dashboard_widget h3 {
+	margin-top: 0;
+	font-weight: bold;
+}
+
+.dashboard_links {
+	display: none;
+	position: absolute;
+	bottom: 2px;
+	right: 2px;
+}
+
+.dashboard_links form {
+	display: inline;
+}
+
+.dashboard_links button {
+	border: 0;
+	margin: 0;
+	padding: 0;
+	background: none;
+	display: inline;
+	font-size: 8pt;
+	color: #aaa;
+	background-color: transparent;
+}
+
+.dashboard_widget:hover .dashboard_links {
+	display: block;
+}
+
+.dashboard_widget .index-listing {
+	width: 99%;
+	font-size: .8em;
+}

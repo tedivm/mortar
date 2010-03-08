@@ -228,7 +228,7 @@ font-weight: bold;
 
 /* FONT SUPPORT */
 
-#BB_main strong, #BB_main b {
+#BB_main strong, #BB_main b, .dashboard_widget h3{
 font-family: "VegurBold";
 }
 
