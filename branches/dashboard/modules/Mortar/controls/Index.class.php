@@ -1,5 +1,19 @@
 <?php
+/**
+ * Mortar
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage Dashboard
+ */
 
+/**
+ * The Index Control enables the output of the Index action to be registered as a control. 
+ *
+ * @package Mortar
+ * @subpackage Dashboard
+ */
 class MortarControlIndex extends ActionControl
 {
 	protected $useLocation = true;

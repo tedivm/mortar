@@ -1,18 +1,78 @@
 <?php
+/**
+ * Mortar
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage Dashboard
+ */
 
+/**
+ * A ControlSet encapsulates the full set of Controls which are registered for display to a specific user. Using this
+ * class, various parts of the system can extract the content of these controls, change their order and settings,
+ * add and remove Controls altogether, and save changes directly to the database.
+ *
+ * @package System
+ * @subpackage Dashboard
+ */
 class ControlSet
 {
+	/**
+	 * Array of the Controls assigned to this user
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $controls = array();
+
+	/**
+	 * Model instance of the User that this ControlSet is assigned to
+	 *
+	 * @access protected
+	 * @var MortarModelUser
+	 */
 	protected $user;
 
+	/**
+	 * Id of the User that this ControlSet is assigned to
+	 *
+	 * @access protected
+	 * @var int
+	 */
 	protected $format = 'admin';
+
+	/**
+	 * Name of the table in which user controls are saved.
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $controlsTable = 'dashboardControls';
+
+	/**
+	 * Name of the table in which settings for user controls are saved.
+	 *
+	 * @access protected
+	 * @var string
+	 */
 	protected $settingsTable = 'dashboardControlSettings';
 
+	/**
+	 * Constructor takes the id of a user and loads the model associated with it
+	 *
+	 * @param string $name
+	 */
 	public function __construct($user) {
 		$this->user = ModelRegistry::loadModel('User', $user);
 	}
 
+	/**
+	 * Loads from the database the current list of controls registered to this user, along with their settings
+	 * and order. This should always be called before modifying any settings intended to be saved since
+	 * otherwise existing settings will be wiped out. 
+	 *
+	 */
 	public function loadControls()
 	{
 		if(defined('INSTALLMODE') && INSTALLMODE == true)
@@ -68,6 +128,16 @@ class ControlSet
 		}
 	}
 
+	/**
+	 * Adds a new control to the end of the current user's list based on its Id in the ControlRegistry.
+	 * Optionally takes a location and any number of settings (in an array) to pre-initialize the new
+	 * control with specific settings.
+	 *
+	 * @param int $id
+	 * @param int $location = null
+	 * @param array $settings = array()
+	 * @return int
+	 */
 	public function addControl($id, $location = null, $settings = array())
 	{
 		if(!($info = ControlRegistry::getControlInfoById($id)))
@@ -88,6 +158,14 @@ class ControlSet
 		return count($this->controls);
 	}
 
+	/**
+	 * Sets the value of the location field for the control currently in the provided position. Returns
+	 * true if there's a control present in that position.
+	 *
+	 * @param int $pos
+	 * @param int $location = null
+	 * @return bool
+	 */
 	public function setLocation($pos, $location = null)
 	{
 		if(isset($this->controls[$pos])) {
@@ -100,6 +178,14 @@ class ControlSet
 		}
 	}
 
+	/**
+	 * Sets the value of the settings array for the control currently in the provided position. Returns
+	 * true if there's a control present in that position.
+	 *
+	 * @param int $pos
+	 * @param int $settings = array()
+	 * @return bool
+	 */
 	public function setSettings($pos, $settings = array())
 	{
 		if(isset($this->controls[$pos]) && is_array($settings)) {
@@ -112,6 +198,15 @@ class ControlSet
 		}
 	}
 
+	/**
+	 * Takes the control in the listed position and moves it either up or down depending on the provided parameter.
+	 * Returns true if the control in question could effectively be swapped in the listed direction, false if
+	 * it could not.
+	 *
+	 * @param int $pos
+	 * @param bool $up = true
+	 * @return bool
+	 */
 	public function swapControls($pos, $up = true)
 	{
 		if(!isset($this->controls[$pos]))
@@ -134,12 +229,23 @@ class ControlSet
 		return true;
 	}
 
+	/**
+	 * Removes the control currently occupying the specified position from the list of controls.
+	 *
+	 * @param int $pos
+	 * @return true
+	 */
 	public function removeControl($pos)
 	{
 		array_splice($this->controls, $pos, 1);
 		return true;
 	}
 
+	/**
+	 * Removes all controls saved for the current user from the database. Is a prerequisite for saving the state of
+	 * this ControlSet and is called by saveControls()
+	 *
+	 */
 	public function clearControls()
 	{
 		$db = DatabaseConnection::getConnection('default');
@@ -150,6 +256,13 @@ class ControlSet
 		$stmt->bindAndExecute('i', $this->user->getId());
 	}
 
+	/**
+	 * Updates this class' array of control data by reading any changes from the Control objects themselves.
+	 * NOTE: This entire class needs to be refactored to remove the necessity of this step, probably by
+	 * having ControlBase implement the ArrayAccess interface and then using the controls themselves directly
+	 * as array members for storage in this class.
+	 *
+	 */
 	public function refreshControls()
 	{
 		foreach($this->controls as $key => $control) {
@@ -159,6 +272,10 @@ class ControlSet
 		}
 	}
 
+	/**
+	 * Saves all details of the controls currently loaded into this class to the database.
+	 *
+	 */
 	public function saveControls()
 	{
 		$this->clearControls();
@@ -198,6 +315,11 @@ class ControlSet
 		}
 	}
 
+	/**
+	 * Returns an array of the control classes currently loaded to this set.
+	 *
+	 * @return array
+	 */
 	public function getControls()
 	{
 		$controls = array();
@@ -208,6 +330,13 @@ class ControlSet
 		return $controls;
 	}
 
+	/**
+	 * Given a position number, returns the control class of the control in that position, or false
+	 * if none is present.
+	 *
+	 * @param int $pos
+	 * @return ControlBase|false
+	 */
 	public function getControl($pos)
 	{
 		if(isset($this->controls[$pos])) {
@@ -217,6 +346,12 @@ class ControlSet
 		}
 	}
 
+	/**
+	 * Returns an array of information (id, name, location, settings) about the controls in this user's
+	 * current list.
+	 *
+	 * @return array
+	 */
 	public function getInfo()
 	{
 		$info = $this->controls;
@@ -227,6 +362,11 @@ class ControlSet
 		return $info;
 	}
 
+	/**
+	 * Returns the id of the user this class is representing the controls of.
+	 *
+	 * @return int
+	 */
 	public function getUserId()
 	{
 		return $this->user->getId();

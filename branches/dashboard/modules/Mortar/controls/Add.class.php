@@ -1,5 +1,19 @@
 <?php
+/**
+ * Mortar
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage Dashboard
+ */
 
+/**
+ * The Add Control adds the ability to register a form used to create a new Model as a Control.
+ *
+ * @package Mortar
+ * @subpackage Dashboard
+ */
 class MortarControlAdd extends ActionControl
 {
 	protected $useLocation = true;

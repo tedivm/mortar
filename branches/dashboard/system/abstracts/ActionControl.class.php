@@ -1,9 +1,41 @@
 <?php
+/**
+ * Mortar
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage Dashboard
+ */
 
+/**
+ * The ActionControl extends the ControlBase in order to enable the existence of Controls which simply wrap the output
+ * of Mortar Actions. This abstract contains the code needed to load an action by name, pass a custom query to it, and
+ * then return its value in a format compatible with the Control system.
+ *
+ * @package System
+ * @subpackage Dashboard
+ */
 abstract class ActionControl extends ControlBase
 {
+	/**
+	 * A custom Query array which is passed to the action. This string should generally include the action being
+	 * performed as well as any specific parameters which this action should be passed. Generally set in advance
+	 * but can be modified at runtime.
+	 *
+	 * @access protected
+	 * @var array
+	 */
 	protected $customQuery = array();
 
+	/**
+	 * Loads and stores the current system query, constructs a new one based on the $customQuery property and
+	 * the location, and then attempts to load, start, and view the specified action. If all that works, the
+	 * resulting content is returned; otherwise, a text error message for the end user is returned instead.
+	 * The original system query is restored right before this class returns either a success or an error.
+	 *
+	 * @return string
+	 */
 	public function getContent()
 	{
 		if($this->customQuery['action'] === 'Dashboard')
@@ -63,7 +95,14 @@ abstract class ActionControl extends ControlBase
 			return "This control requires a location to be set.";
 		}
 	}
-	
+
+	/**
+	 * This method returns an array of (className, argument) containing a string and Model for use in creating
+	 * an Action object. NOTE: This is a very slightly altered port of functionality directly from the
+	 * RequestWrapper and in general should probably be refactored at some point
+	 *
+	 * @return array
+	 */
 	protected function getActionClass()
 	{
 		$query = Query::getQuery();

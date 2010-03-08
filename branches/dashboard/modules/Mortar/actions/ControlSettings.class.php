@@ -1,5 +1,19 @@
 <?php
+/**
+ * Mortar
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package Mortar
+ * @subpackage Dashboard
+ */
 
+/**
+ * The ControlSettings action generates a Form for modifying a given Control's settings.
+ *
+ * @package Mortar
+ * @subpackage Dashboard
+ */
 class MortarActionControlSettings extends FormAction
 {
 	static $requiredPermission = 'System';
@@ -9,6 +23,11 @@ class MortarActionControlSettings extends FormAction
 	protected $cs;
 	protected $control;
 
+	/**
+	 * Loads the ControlSet and specific Control for the user and id provided, then fetches the form; outputs
+	 * the form if it hasn't been submitted, or saves the changes then redirects back to the Dashboard otherwise.
+	 *
+	 */
 	public function logic()
 	{
 		$query = Query::getQuery();
@@ -26,10 +45,6 @@ class MortarActionControlSettings extends FormAction
 		if(isset($query['id']) && isset($info[$query['id']])) {
 			$this->control = $this->cs->getControl($query['id']);
 		} else {
-			$url = new Url();
-			$url->module = 'Mortar';
-			$url->action = 'Dashboard';
-			$url->format = 'admin';
 			$this->ioHandler->addHeader('Location', (string) $url);
 		}
 
@@ -43,6 +58,11 @@ class MortarActionControlSettings extends FormAction
 		}
 	}
 
+	/**
+	 * Just sends back an error message if there are no manual settings, or the form otherwise.
+	 *
+	 * @return string
+	 */
 	public function viewAdmin($page)
 	{
 		$this->adminSettings['titleRider'] = ' For ' . $this->control->getName();
@@ -57,11 +77,23 @@ class MortarActionControlSettings extends FormAction
                 return $output;
 	}
 
+	/**
+	 * Our input processing is completely passed off to the Control; we just call that class' processSettingsInput
+	 * method here.
+	 *
+	 * @return bool
+	 */
 	protected function processInput($input)
 	{
 		return $this->control->processSettingsInput($input);
 	}
 
+	/**
+	 * We generate an empty form with the correct name and legend, then pass it onto the control itself
+	 * where it is actually populated.
+	 *
+	 * @return Form
+	 */
 	protected function getForm()
 	{
 		$form = new Form('control_settings');

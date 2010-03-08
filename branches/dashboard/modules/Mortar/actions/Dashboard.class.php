@@ -1,13 +1,34 @@
 <?php
+/**
+ * Mortar
+ *
+ * @copyright Copyright (c) 2009, Robert Hafner
+ * @license http://www.mozilla.org/MPL/
+ * @package System
+ * @subpackage Dashboard
+ */
 
+/**
+ * The Dashboard action actually displays a set of registered Controls for a user. Basically all the heavy lifting
+ * is done elsewhere; this action just wraps some HTML around it.
+ *
+ * @package Mortar
+ * @subpackage Dashboard
+ */
 class MortarActionDashboard extends ActionBase
 {
 	static $requiredPermission = 'Admin';
 
 	public $adminSettings = array( 'headerTitle' => 'Mortar Dashboard' );
 
-	protected $actions;
-
+	/**
+	 * Wraps HTML around a series of Controls which are loaded via the ControlSet class and displayed using the
+	 * ViewControlDisplay. It also generates a small "Add Control" form using data from the ControlRegistry
+	 * whose results are passed along to the ControlModify action.
+	 *
+	 * @param Page $page
+	 * @return string
+	 */
 	public function viewAdmin($page) {
 		$user = ActiveUser::getUser();
 		$theme = $page->getTheme();
