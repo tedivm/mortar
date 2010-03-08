@@ -25,6 +25,20 @@ CREATE TABLE aliases
 	aliasOther VARCHAR(60) NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
+/******************** Add Table: controls ************************/
+
+/* Build Table Structure */
+CREATE TABLE controls
+(
+	controlId INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	controlFormat VARCHAR(15) NOT NULL,
+	controlName VARCHAR(65) NOT NULL,
+	moduleId INTEGER UNSIGNED NOT NULL,
+	controlClass  VARCHAR(65) NOT NULL
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+CREATE UNIQUE INDEX controls_controlFormat_controlName_Idx ON controls (controlFormat, controlName);
+
 /******************** Add Table: cronJobs ************************/
 
 /* Build Table Structure */
@@ -50,6 +64,34 @@ CREATE UNIQUE INDEX cronJobs_moduleId_locationId_actionName_Idx ON cronJobs (mod
 CREATE UNIQUE INDEX cronJobs_locationId_actionName_Idx ON cronJobs (locationId, actionName);
 CREATE UNIQUE INDEX cronJobs_moduleId_actionName_Idx ON cronJobs (moduleId, actionName);
 CREATE INDEX cronJobs_jobPid_lastRun_Idx ON cronJobs (jobPid, lastRun);
+
+/******************** Add Table: dashboardControls ***************/
+
+/* Build Table Structure */
+CREATE TABLE dashboardControls
+(
+	userId INTEGER UNSIGNED NOT NULL,
+	sequence INTEGER UNSIGNED NOT NULL,
+	controlId INTEGER UNSIGNED NOT NULL,
+	locationId INTEGER UNSIGNED
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+ALTER TABLE dashboardControls ADD CONSTRAINT pkdashboardControls
+	PRIMARY KEY (userId, sequence);
+
+/******************** Add Table: dashboardControlSettings ***********/
+
+/* Build Table Structure */
+CREATE TABLE dashboardControlSettings
+(
+	userId INTEGER UNSIGNED NOT NULL,
+	sequence INTEGER UNSIGNED NOT NULL,
+	settingName VARCHAR(45) NOT NULL,
+	settingKey VARCHAR(45) NOT NULL
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+ALTER TABLE dashboardControlSettings ADD CONSTRAINT pkdashboardControlSettings
+	PRIMARY KEY (userId, sequence, settingName);
 
 /******************** Add Table: directories ************************/
 
@@ -387,6 +429,10 @@ ALTER TABLE aliases ADD CONSTRAINT fk_aliases_locations_result
 ALTER TABLE aliases ADD CONSTRAINT fk_aliases_locations_target
 	FOREIGN KEY (aliasLocation) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
+/************ Foreign Key: fk_controls_modules ***************/
+ALTER TABLE controls ADD CONSTRAINT fk_controls_modules
+	FOREIGN KEY (moduleId) REFERENCES modules (mod_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
 /************ Foreign Key: fk_cronJobs_modules ***************/
 ALTER TABLE cronJobs ADD CONSTRAINT fk_cronJobs_modules
 	FOREIGN KEY (moduleId) REFERENCES modules (mod_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
@@ -394,6 +440,22 @@ ALTER TABLE cronJobs ADD CONSTRAINT fk_cronJobs_modules
 /************ Foreign Key: fk_cronJobs_locations ***************/
 ALTER TABLE cronJobs ADD CONSTRAINT fk_cronJobs_locations
 	FOREIGN KEY (locationId) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/************ Foreign Key: fk_dashboardControls_controls ***************/
+ALTER TABLE dashboardControls ADD CONSTRAINT fk_dashboardControls_controls
+	FOREIGN KEY (controlId) REFERENCES controls (controlId) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/************ Foreign Key: fk_dashboardControls_users ***************/
+ALTER TABLE dashboardControls ADD CONSTRAINT fk_dashboardControls_users
+	FOREIGN KEY (userId) REFERENCES users (user_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/************ Foreign Key: fk_dashboardControls_locations ***************/
+ALTER TABLE dashboardControls ADD CONSTRAINT fk_dashboardControls_locations
+	FOREIGN KEY (locationId) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/************ Foreign Key: fk_dashboardControlSettings_dashboardControls ***************/
+ALTER TABLE dashboardControlSettings ADD CONSTRAINT fk_dashboardControlSettings_dashboardControls
+	FOREIGN KEY (userId, sequence) REFERENCES dashboardControls (userId, sequence) ON UPDATE NO ACTION ON DELETE CASCADE;
 
 /************ Foreign Key: fk_directories_locations ***************/
 ALTER TABLE directories ADD CONSTRAINT fk_directories_locations

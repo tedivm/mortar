@@ -53,6 +53,14 @@ class Theme extends ContentBase
 	 */
 	protected $iconset;
 
+	/**
+	 * The template into which header content is inserted for any minified css
+	 *
+	 * @access protected
+	 * @var string
+	 */
+	protected $cssTemplate = "@charset 'UTF-8';\n\n{{ fonts.theme }}\n";
+
 	protected $contentType = 'theme';
 	protected $imagePath = 'images/';
 
@@ -62,7 +70,7 @@ class Theme extends ContentBase
 	 * @cache theme *name *link
 	 * @param string $name
 	 */
-	public function __construct($name)
+	public function __construct($name, $depth = 0)
 	{
 		$config = Config::getInstance();
 
@@ -90,7 +98,7 @@ class Theme extends ContentBase
 
 			if(isset($data['settings']['meta']['extends']))
 			{
-				$parentTheme = new Theme($data['settings']['meta']['extends']);
+				$parentTheme = new Theme($data['settings']['meta']['extends'], ($depth + 1));
 				$cssLinks = $parentTheme->getCssFiles();
 				$javascriptLinks = $parentTheme->getJsFiles();
 
@@ -107,10 +115,6 @@ class Theme extends ContentBase
 
 			$baseModulePath = $config['path']['modules'];
 			$baseModuleUrl = $config['url']['modules'];
-
-			$baseModulePath = $config['path']['modules'];
-			$baseModuleUrl = $config['url']['modules'];
-
 
 			$packageList = new PackageList();
 			$packages = $packageList->getInstalledPackages();
@@ -138,7 +142,7 @@ class Theme extends ContentBase
 				$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
 
 			// css
-			$cssResult = $this->getFiles($themePath . 'css/', $themeUrl . 'css/', 'css');
+			$cssResult = $this->getFiles($themePath . 'css/', $themeUrl . 'css/', 'css', (100 - $depth));
 			if($cssResult)
 				$cssLinks = array_merge_recursive($cssLinks, $cssResult);
 
@@ -300,13 +304,13 @@ class Theme extends ContentBase
 		$minifier = new Minifier($type);
 		$minifier->addFiles($this->getPaths($type));
 
-		if($type !== 'js')
+		if($type === 'css')
 		{
-			$baseString = "{{ fonts.all }}\n" . $minifier->getBaseString();
+			$baseString = $this->cssTemplate . $minifier->getBaseString();
 			$fileTemplate = new ViewStringTemplate($baseString);
 
 			$themeBox = new TagBoxTheme($this);
-			$fontBox = new TagBoxFonts();
+			$fontBox = new TagBoxFonts($this);
 
 			$fileTemplate->addContent(array('theme' => $themeBox, 'fonts' => $fontBox));
 

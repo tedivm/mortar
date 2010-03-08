@@ -239,6 +239,13 @@ class ModelActionAdd extends ModelActionBase
 		return $form;
 	}
 
+	public function viewControl($page)
+	{
+		$url = Query::getUrl();
+		$this->form->setAction((string) $url);
+		return $this->viewAdmin($page);
+	}
+
 	protected function getRedirectUrl()
 	{
 		$query = Query::getQuery();
