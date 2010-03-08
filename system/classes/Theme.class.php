@@ -213,7 +213,7 @@ class Theme extends ContentBase
 		}
 
 		$paths = array();
-		foreach($urlArray as $domain => $section) 
+		foreach($urlArray as $domain => $section)
 		{
 			if($type === 'css' && isset($this->settings['css']['exclude'])) {
 				$exc = $this->settings['css']['exclude'];
@@ -233,25 +233,19 @@ class Theme extends ContentBase
 				}
 
 				if(is_array($url['path'])) {
-					$sets = array();
-					for($i = 0; $i < count($url['path']); $i++) {
-						$sets[] = array('mainLink' => $url['mainLink'][$i],
-							'path' => $url['path'][$i],
-							'priority' => $url['priority'][$i]);
-					}
-				} else {
-					$sets = array($url);
+					$url = array('mainLink' => array_pop($url['mainLink']),
+							'path' => array_pop($url['path']),
+							'priority' => array_pop($url['priority']));
 				}
 
-				foreach($sets as $set) {
-					$priority = isset($set['priority']) ? (int) $set['priority'] : 30;
 
-					if($priority == 0)
-						continue;
+				$priority = isset($url['priority']) ? (int) $url['priority'] : 30;
 
-					if(isset($set['path']))
-						$paths[$priority][] = $set['path'];
-				}
+				if($priority == 0)
+					continue;
+
+				if(isset($url['path']))
+					$paths[$priority][] = $url['path'];
 			}
 		}
 		ksort($paths);
