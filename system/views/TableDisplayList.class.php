@@ -31,9 +31,13 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 					'lastModified'	=> 'Last Modified',
 					'publishDate'	=> 'Published');
 
-	public function __construct(Model $mmodel, array $modelList)
+	public function __construct(Model $mmodel, array $modelList, $columns = null)
 	{
 		parent::__construct($mmodel, $modelList);		
+
+		if(isset($columns) && is_array($columns)) {
+			$this->allowedColumns = $columns;
+		}
 
 		$this->extractTableData();
 	}
