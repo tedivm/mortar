@@ -15,6 +15,7 @@ class MortarInstallerPostscript
 	{
 		ControlRegistry::registerControl('admin', $this->packageId, 'Add');
 		ControlRegistry::registerControl('admin', $this->packageId, 'Index');
+		ControlRegistry::registerControl('admin', $this->packageId, 'RecentLocations');
 
 		Hook::registerPlugin('system', 'menus', 'admin', $this->packageId, 'MenusAdminBase');
 		Hook::registerPlugin('model', 'All', 'adminMenu', $this->packageId, 'MenusAdminModels');

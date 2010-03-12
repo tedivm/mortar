@@ -18,6 +18,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 
 	protected $tableColumns;
 	protected $modelData;
+	protected $useIndex = true;
 
 	protected $allowedColumns = array('type' 	=> 'Type',
 					'name' 		=> 'Name',
@@ -36,6 +37,24 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 		parent::__construct($mmodel, $modelList);		
 
 		if(isset($columns) && is_array($columns)) {
+			$this->allowedColumns = $columns;
+		}
+
+		$this->extractTableData();
+	}
+
+	public function useIndex($use)
+	{
+		if($use) {
+			$this->useIndex = true;
+		} else {
+			$this->useIndex = false;
+		}
+	}
+
+	public function setColumns($columns)
+	{
+		if(is_array($columns)) {
 			$this->allowedColumns = $columns;
 		}
 
@@ -93,7 +112,9 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 		$table->addClass('model-listing');
 		$table->addClass('index-listing');
 		$table->addClass($name . '-listing');
-		$table->enableIndex();
+		if($this->useIndex) {
+			$table->enableIndex();
+		}
 
 		$this->addColumnsToTable($table);
 
