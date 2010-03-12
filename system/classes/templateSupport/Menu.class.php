@@ -25,25 +25,9 @@ class TagBoxMenu
 			case 'remaining':
 				return $this->getRemaining();
 			default:
-				if(is_numeric($key)) {
-					$menu = array_slice($this->menus, 0, $key);
-					$this->menusUsed[$menu->getName()] = true;
-					break;
-				}
-
-				if(isset($this->menus[$key])) {
-					$menu = $this->menus[$key];
-					$this->menusUsed[$key] = true;
-					break;
-				}
+				return $this->show($key);
 		}
-
-		if (isset($menu)) {
-			$menuView = new ViewMenuDisplay($menu, $this->theme);
-			return $menuView->getDisplay();
-		} else {
-			return false;
-		}
+		return false;
 	}
 
 	public function __isset($key)
@@ -88,6 +72,25 @@ class TagBoxMenu
 		return ($menuContent === '') ? false : $menuContent;
 	}
 
+	public function show($key, $template = '')
+	{
+		if(is_numeric($key)) {
+			$menu = array_slice($this->menus, 0, $key);
+			$this->menusUsed[$menu->getName()] = true;
+		} elseif(isset($this->menus[$key])) {
+			$menu = $this->menus[$key];
+			$this->menusUsed[$key] = true;
+		}
+
+		if(isset($menu)) {
+			$menuView = new ViewMenuDisplay($menu, $this->theme);
+			$menuView->useItemTemplate('support/MenuItem' . $template . '.html');
+			$menuView->useMenuTemplate('support/Menu' . $template . '.html');
+			return $menuView->getDisplay();
+		} else {
+			return false;
+		}
+	}
 }
 
 ?>
