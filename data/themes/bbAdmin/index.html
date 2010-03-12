@@ -12,15 +12,15 @@
 	<div id="BB_wrapper">
 		<div id="BB_header">
 			<h1>Mortar</h1>
+			{{ menu.show('primary', 'Top') }}
 		</div> <!-- BB_header -->
 		<div id="BB_body">
-				{{ menu.next }}
-				{{ menu.remaining }}
 			<div id="BB_main">
+				{{ menu.remaining }}
 				{{ breadcrumbs }}
 				{{ content }}
+				<div class="clean">&nbsp;</div>
 			</div>
-			<div class="clean">&nbsp;</div>
 		</div> <!-- BB_body -->
 		<div class="clean">&nbsp;</div>
 		<div id="BB_footer">

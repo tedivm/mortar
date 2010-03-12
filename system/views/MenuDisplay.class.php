@@ -37,11 +37,13 @@ class ViewMenuDisplay
 		foreach($menuItems as $item) {
 			if ($item['item'] instanceof Menu) {
 				$itemView = new ViewMenuDisplay($item['item'], $this->theme, $this->level + 1);
+				$itemView->useItemTemplate($this->itemTemplate);
+				$itemView->useMenuTemplate($this->menuTemplate);
 			} else {
 				$itemView = new ViewThemeTemplate($this->theme, $this->itemTemplate);
 				$itemView->addContent(array('name' => $item['name'], 'item' => $item['item']));
 			}
-			
+
 			$menuContent .= $itemView->getDisplay();
 		}
 
