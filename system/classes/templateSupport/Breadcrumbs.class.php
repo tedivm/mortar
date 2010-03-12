@@ -15,6 +15,8 @@ class TagBoxBreadcrumbs
 
 	public function getCrumbs($sep = '', $html = true, $rev = false)
 	{
+		$nameList = array();
+
 		$userId = $this->user->getId();
 
 		$location = $this->location;
@@ -41,7 +43,6 @@ class TagBoxBreadcrumbs
 
 			// If one isn't, check whether a type and id are set. 
 			// If so, we're looking at a non-LB model; add it to the front of the list.
-			// If not, that action we just added is superfluous and we empty the list again.
 
 			if( isset($this->query['id']) && isset($this->query['type']) ) {
 				$model = ModelRegistry::loadModel($this->query['type'], $this->query['id']);
@@ -55,8 +56,6 @@ class TagBoxBreadcrumbs
 				} else {
 					$nameList[] = $title;
 				}
-			} else {
-				$nameList = null;
 			}
 
 			// Then, check whether a type is set. 
