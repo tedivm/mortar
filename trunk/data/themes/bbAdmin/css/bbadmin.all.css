@@ -32,15 +32,16 @@ clear: both;
 
 #BB_header {
 display: block;
-height: 80px;
+height: 85px;
+overflow: hidden;
 position: relative;
 }
 
 #BB_header h1 {
-font-family: 'VegurBold', sans-serif;
 position: absolute;
-top: -40px;
-font-size: 100pt;
+font-family: 'VegurBold', sans-serif;
+font-size: 135px;
+top: -28px;
 color: #91BEE5;
 margin: 0;
 padding: 0;
@@ -75,7 +76,7 @@ height:100%;
 }
 
 #BB_body {
-padding: 20px 0;
+padding: 0;
 }
 
 .sidebar {
