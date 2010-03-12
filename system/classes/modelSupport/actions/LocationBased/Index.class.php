@@ -201,6 +201,16 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 	}
 
 
+	public function viewControl($page)
+	{
+		$indexList = $this->getTableDisplayList();
+		$indexList->setColumns(array('type' => 'Type', 'name' => 'Name', 'title' => 'Title'));
+
+		$indexList->addPage($page);
+
+		return $indexList->getListing();
+	}
+
 	/**
 	 * This will convert the model into RSS for outputting.
 	 *

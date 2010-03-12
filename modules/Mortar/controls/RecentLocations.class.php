@@ -2,10 +2,11 @@
 
 class MortarControlRecentLocations extends ControlBase
 {
-
 	protected $name = "Recent Additions";
 
 	protected $useLocation = true;
+
+	protected $classes = array('two_wide');
 
 	public function getContent()
 	{
@@ -21,30 +22,47 @@ class MortarControlRecentLocations extends ControlBase
 		$success = $stmt->bindAndExecute('i', $this->location);
 
 		if($success) {
+			$loc = new Location($this->location);
+			$mmodel = $loc->getResource();
+
+			$models = array();
 			while($row = $stmt->fetch_array()) {
 				$loc = new Location($row['location_id']);
 				$model = $loc->getResource();
 
-				if(isset($model['title'])) {
-					$name = $model['title'];
-				} else {
-					$name = str_replace('_', ' ', $loc->getName());
-				}
-
-				$url = new Url();
-				$url->location = $loc->getId();
-				$url->action = 'Read';
-				$url->format = 'admin';
-
-				$content .= '<b><a href="' . (string) $url . '">' . $name . '</a></b> ';
-				$content .= '-- created on ' . date('d:m:y h:i a', strtotime($row['creationDate'])) . '<br />';
+				$models[] = $model;
 			}
+
+			$indexListing = new ViewTableDisplayList($mmodel, $models, array('name' => 'Name', 
+				'title' => 'Title', 'createdOn' => 'Created On'));
+
+			$indexListing->useIndex(false);
+			$indexListing->addPage(ActivePage::getInstance());
+
+			return $indexListing->getListing();
 		} else {
-			$content = 'There are no additions at the specified location.';
+			$content = 'There are no recent additions at the specified location.';
 		}
 
 		return $content;
 	}
+
+	protected function setName()
+	{
+		if(isset($this->location)) {
+			$loc = new Location($this->location);
+			$model = $loc->getResource();
+
+			if(isset($model['title'])) {
+				$name = $model['title'];
+			} else {
+				$name = str_replace('_', ' ', $model->name);
+			}
+
+			$this->name .= ' at ' . $name;
+		}
+	}
+
 }
 
 ?>
