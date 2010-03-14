@@ -195,6 +195,10 @@ width: 100%;
 float: left;
 }
 
+.BB_inside {
+margin-right: 160px;
+}
+
 #BB_main_left {
 width: 565px;
 float: left;
