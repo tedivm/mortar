@@ -12,7 +12,7 @@ class MortarPluginMenusAdminBase
 		$loc = $site->getLocation();
 		$url->location = $loc;		
 		$link = $url->getLink('Home');
-		$menuSys->addItemToSubmenu('primary', 'Meta', $link, 'Home', 'auto', $url);
+		$menuSys->addItemToSubmenu('primary', 'Home', $link, 'Home', 'auto', $url);
 
 		$url = new Url();
 		$url->format = 'Admin';
@@ -20,59 +20,61 @@ class MortarPluginMenusAdminBase
 
 		$url->action = 'Dashboard';
 		$link = $url->getLink("Dashboard");
-		$menuSys->addItemToSubmenu('primary', 'Meta', $link, 'Dashboard', 'auto', $url);
+		$menuSys->addItemToSubmenu('primary', 'Dashboard', $link, 'Dashboard', 'auto', $url);
 
 		if(!ActiveUser::isLoggedIn())
 		{
 			$url->action = 'LogIn';
 			$link = $url->getLink("Log In");
-			$menuSys->addItemToSubmenu('primary', 'Meta', $link, 'Log In', 'auto', $url);
+			$menuSys->addItemToSubmenu('primary', 'Log In', $link, 'Log In', 'auto', $url);
 		}else{
 			$url->action = 'LogOut';
 			$link = $url->getLink("Log Out");
-			$menuSys->addItemToSubmenu('primary', 'Meta', $link, 'Log Out', 'auto', $url);
+			$menuSys->addItemToSubmenu('primary', 'Log In', $link, 'Log Out', 'auto', $url);
 		}
+
+		$menuSys->addItemToSubmenu('primary', 'Settings', '<a href="#">Settings</a>', 'Settings', 'auto');
 
 		$url = clone $url;
 		$url->action = 'ClearCache';
 		$link = $url->getLink("Clear Cache");
-		$menuSys->addItemToSubmenu('primary', 'Environment', $link, 'Clear Cache', 'auto', $url);
+		$menuSys->addItemToSubmenu('primary', 'Settings', $link, 'Clear Cache', 'auto', $url);
 
 		$url = clone $url;
 		$url->action = 'MaintenanceMode';
 		$link = $url->getLink("Maintenance Mode");
-		$menuSys->addItemToSubmenu('primary', 'Environment', $link, 'Maintenance Mode', 'auto', $url);
+		$menuSys->addItemToSubmenu('primary', 'Settings', $link, 'Maintenance Mode', 'auto', $url);
 
 		$url = clone $url;
 		$url->action = 'InstallModule';
 		$link = $url->getLink("Install Module");
-		$menuSys->addItemToSubmenu('primary', 'Modules', $link, 'Install Modules', 'auto', $url);
+		$menuSys->addItemToSubmenu('primary', 'Settings', $link, 'Install Modules', 'auto', $url);
 
 
 
 		$url = new Url();
 		$url->type = 'User';
-		$url->action = 'Add';
+		$url->action = 'Index';
 		$url->format = 'Admin';
-		$link = $url->getLink("Add User");
-		$menuSys->addItemToSubmenu('primary', 'Manage Users', $link, 'Add User', 'auto', $url);
+		$link = $url->getLink("Users");
+		$menuSys->addItemToSubmenu('primary', 'Manage Users', $link, 'Users', 'auto', $url);
 
 		$url = clone $url;
-		$url->action = 'Index';
-		$link = $url->getLink("List Users");
+		$url->action = 'Add';
+		$link = $url->getLink("Add User");
 		$menuSys->addItemToSubmenu('primary', 'Manage Users', $link, 'List Users', 'auto', $url);
 
 		$url = new Url();
 		$url->type = 'MemberGroup';
-		$url->action = 'Add';
+		$url->action = 'Index';
 		$url->format = 'Admin';
-		$link = $url->getLink("Add Group");
-		$menuSys->addItemToSubmenu('primary', 'Manage Groups', $link, 'Add Groups', 'auto', $url);
+		$link = $url->getLink("Groups");
+		$menuSys->addItemToSubmenu('primary', 'Manage Groups', $link, 'Groups', 'auto', $url);
 
 		$url = clone $url;
-		$url->action = 'Index';
-		$link = $url->getLink("List Groups");
-		$menuSys->addItemToSubmenu('primary', 'Manage Groups', $link, 'List Groups', 'auto', $url);
+		$url->action = 'Add';
+		$link = $url->getLink("Add Group");
+		$menuSys->addItemToSubmenu('primary', 'Manage Groups', $link, 'Add New Group', 'auto', $url);
 	}
 }
 

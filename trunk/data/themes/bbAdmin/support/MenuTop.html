@@ -1,13 +1,11 @@
 {% if level == 1 %}
 <div id="BB_topbar" class="topbar_menu_{{ name }}">
-{% else %}
 	<div id="topbar_menu_{{ name }}" class="topbar_menu">
 		<ul id="topbar_menu_{{ name }}_list">
 {% endif %}
 			{{ content }}
-{% if level != 1 %}
+{% if level == 1 %}
 		</ul>
 	</div>
-{% else %}
 </div>
 {% endif %}
