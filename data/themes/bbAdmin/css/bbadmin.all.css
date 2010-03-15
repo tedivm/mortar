@@ -38,7 +38,6 @@ clear: both;
 #BB_header {
 display: block;
 height: 125px;
-overflow: hidden;
 position: relative;
 }
 
@@ -53,38 +52,6 @@ bottom: 0;
 width: 100%;
 background: #fff;
 }
-
-.topbar_menu {
-height: 100%;
-float: left;
-}
-
-.topbar_menu * {
-margin: 0;
-display: block;
-float: left;
-height: 100%;
-}
-
-.topbar_menu ul {
-padding: 0;
-}
-
-.topbar_menu ul li {
-height: 100%;
-border-right: 3px solid #2D5F8A;
-}
-
-.topbar_menu a {
-padding: 3px 10px 0;
-color: #2D5F8A;
-}
-
-.topbar_menu a:hover {
-background: #2D5F8A;
-color: #fff;
-}
-
 #BB_header h1 {
 position: absolute;
 font-family: 'VegurBold', sans-serif;
@@ -250,6 +217,76 @@ color: #2D5F8A;
 background: #fff;
 }
 
+.topbar_menu {
+height: 100%;
+float: left;
+}
+
+.topbar_menu * {
+margin: 0;
+display: block;
+float: left;
+height: 100%;
+}
+
+.topbar_menu ul {
+padding: 0;
+}
+
+.topbar_menu ul li {
+height: 100%;
+border-right: 3px solid #2D5F8A;
+}
+
+.topbar_menu a {
+padding: 3px 10px 0;
+color: #2D5F8A;
+}
+
+.topbar_menu a:hover {
+background: #2D5F8A;
+color: #fff;
+}
+
+.topbar_menu ul li {
+position: relative;
+}
+
+.topbar_menu .topbar_dropdown_menu {
+display: block;
+border: 3px solid #2D5F8A;
+background: #fff;
+position: absolute;
+top: 24px;
+left: -9999px;
+min-width: 150px;
+height: auto;
+}
+
+.topbar_menu .topbar_dropdown_menu li {
+display: block;
+clear: left;
+background: #fff;
+width: 100%;
+min-height: 24px;
+border: 0;
+}
+
+.topbar_menu .topbar_dropdown_menu li a {
+display: block;
+float: left;
+min-height: 21px;
+width: auto;
+padding: 3px 5px 0;
+}
+
+.topbar_menu li:hover .topbar_dropdown_menu, .topbar_menu .topbar_dropdown_menu:hover {
+left: -3px;
+}
+
+.topbar_menu .topbar_dropdown_menu li:hover {
+background: #2D5F8A;
+}
 
 /* LISTING TABLES */
 
