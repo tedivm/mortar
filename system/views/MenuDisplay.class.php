@@ -7,6 +7,7 @@ class ViewMenuDisplay
 	protected $level;
 	protected $itemTemplate = 'support/MenuItem.html';
 	protected $menuTemplate = 'support/Menu.html';
+	protected $content = array();
 
 	public function __construct(Menu $menu, Theme $theme, $level = 1)
 	{
@@ -25,6 +26,12 @@ class ViewMenuDisplay
 		$this->menuTemplate = $template;
 	}
 
+	public function addContent($content)
+	{
+		if(is_array($content))
+			$this->content = $content;
+	}
+
 	public function getDisplay()
 	{
 		$menuItems = $this->menu->getItems();
@@ -33,6 +40,8 @@ class ViewMenuDisplay
 			return '';
 
 		$menuContent = '';
+
+		$x = 1;
 
 		foreach($menuItems as $item) {
 			if ($item['item'] instanceof Menu) {
@@ -44,6 +53,15 @@ class ViewMenuDisplay
 				$itemView->addContent(array('name' => $item['name'], 'item' => $item['item']));
 			}
 
+			$content = array();
+			if($x === 1)
+				$content['first'] = 'first';
+			if($x === count($menuItems))
+				$content['last'] = 'last';
+			$content['number'] = $x++;
+
+			$itemView->addContent($content);
+			$itemView->addContent($this->content);
 			$menuContent .= $itemView->getDisplay();
 		}
 
