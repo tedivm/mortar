@@ -7,9 +7,9 @@
 
 .dashboard_widget {
 	position: relative;
-	width: 350px;
+	width: 31%;
 	border: solid #2D5F8A 2px;
-	margin: 5px;
+	margin: 5px 0.25%;
 	padding: 5px;
 	float: left;
 	height: 350px;
@@ -17,11 +17,15 @@
 }
 
 .dashboard_widget.two_wide {
-	width: 723px;
+	width: 64.25%;
 }
 
 .dashboard_widget.two_tall {
 	height: 723px;
+}
+
+.dashboard_widget.three_wide {
+	width: 96.5%;
 }
 
 .dashboard_content {
