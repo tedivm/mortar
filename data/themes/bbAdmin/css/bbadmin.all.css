@@ -217,6 +217,15 @@ color: #2D5F8A;
 background: #fff;
 }
 
+.user_meta {
+border: 3px solid #2D5F8A;
+height: 40px;
+min-width: 120px;
+float: right;
+padding: 10px;
+margin: 10px 5px;
+}
+
 .topbar_menu {
 height: 100%;
 float: left;
@@ -287,6 +296,7 @@ left: -3px;
 .topbar_menu .topbar_dropdown_menu li:hover {
 background: #2D5F8A;
 }
+
 
 /* LISTING TABLES */
 
