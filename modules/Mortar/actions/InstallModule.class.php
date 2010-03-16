@@ -61,12 +61,13 @@ class MortarActionInstallModule extends ActionBase
 
 			foreach($this->installablePackages as $package)
 			{
+				$packageInfo = new PackageInfo($package);
+				$meta = $packageInfo->getMeta();
+
 				$linkToPackage = clone $linkToSelf;
 				$linkToPackage->id = $package;
 
-				$output .= $linkToPackage->getLink($package) . '<br>';
-
-			//	$packageInfo = new PackageInfo($package);
+				$output .= $linkToPackage->getLink($package) . ' - ' . $meta['description'] . '<br>';
 			}
 		}elseif($this->form){
 			if($this->success)
