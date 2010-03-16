@@ -36,6 +36,14 @@ class TagBoxEnv
 					return 'Installer';
 
 				return $this->user['name'];
+			case "userlink":
+
+				if(!isset($this->user))
+					return 'Installer';
+
+				$url = $this->user->getUrl();
+				return $url->getLink($this->user['name']);
+
 			default:
 				return false;
 		}
@@ -47,6 +55,7 @@ class TagBoxEnv
 			case "siteLink":
 			case "siteName":
 			case "user":
+			case "userlink": 
 				return true;
 			default:
 				return false;
