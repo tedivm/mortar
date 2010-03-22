@@ -5,7 +5,7 @@ class MortarActionUserLookUp extends ActionBase
 	protected $list;
 
 	protected $maxLimit = 25;
-	protected $Limit = 10;
+	protected $limit = 10;
 
 	public function logic()
 	{
