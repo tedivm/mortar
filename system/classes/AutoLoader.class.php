@@ -48,7 +48,8 @@ class AutoLoader
 										'InputHandlers' => 'none',
 										'cacheHandlers' => 'cacheHandler',
 										'RequestWrapper/IOProcessors' => 'IOProcessor',
-										'templateSupport' => 'TagBox');
+										'templateSupport' => 'TagBox',
+										'DbDrivers' => 'DbDriver');
 
 	protected static $extraLibraryDirectories = array('Form/Converters' => 'FormTo',
 										'Form/ValidationRules' => 'FormValidation',
