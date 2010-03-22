@@ -11,7 +11,7 @@
 
 class Twig_Environment
 {
-  const VERSION = '0.9.5-DEV';
+  const VERSION = '0.9.6-DEV';
 
   protected $charset;
   protected $loader;
@@ -25,7 +25,7 @@ class Twig_Environment
   protected $baseTemplateClass;
   protected $extensions;
   protected $parsers;
-  protected $transformers;
+  protected $visitors;
   protected $filters;
   protected $runtimeInitialized;
   protected $loadedTemplates;
@@ -69,7 +69,7 @@ class Twig_Environment
     $this->charset            = isset($options['charset']) ? $options['charset'] : 'UTF-8';
     $this->baseTemplateClass  = isset($options['base_template_class']) ? $options['base_template_class'] : 'Twig_Template';
     $this->autoReload         = isset($options['auto_reload']) ? (bool) $options['auto_reload'] : $this->debug;
-    $this->extensions         = array(new Twig_Extension_Core());
+    $this->extensions         = array('core' => new Twig_Extension_Core());
     $this->runtimeInitialized = false;
     $this->setCache(isset($options['cache']) ? $options['cache'] : null);
   }
@@ -353,18 +353,18 @@ class Twig_Environment
     return $this->parsers;
   }
 
-  public function getNodeTransformers()
+  public function getNodeVisitors()
   {
-    if (null === $this->transformers)
+    if (null === $this->visitors)
     {
-      $this->transformers = array();
+      $this->visitors = array();
       foreach ($this->getExtensions() as $extension)
       {
-        $this->transformers = array_merge($this->transformers, $extension->getNodeTransformers());
+        $this->visitors = array_merge($this->visitors, $extension->getNodeVisitors());
       }
     }
 
-    return $this->transformers;
+    return $this->visitors;
   }
 
   public function getFilters()
