@@ -2,7 +2,7 @@
 
 class MortarActionLocationLookUp extends ActionBase
 {
-	protected $list;
+	protected $list = array();
 
 	protected $maxLimit = 25;
 	protected $limit = 10;

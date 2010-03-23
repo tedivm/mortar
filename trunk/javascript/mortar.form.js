@@ -69,6 +69,7 @@
 	$.fn.MorterForm.defaults.autocomplete = {
 					dataType:"json",
 					cacheLength:10,
+					minChars:0,
 					formatItem:function(data,i,max,value,term){ return value; },
 					parse: function parse(data) {
 									var parsed = [];
