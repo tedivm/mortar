@@ -25,13 +25,22 @@ class MortarActionLocationLookUp extends ActionBase
 
 			if($cache->isStale())
 			{
+				if(isset($query['s']) && is_numeric($query['s'])) {
+					$prefix = Location::getPathById($query['s']);
+				}
+
 				$path = explode('/', $query['q']);
 
 				if(count($path) === 1) {
 					$parent = 1;
 					$q = $query['q'];
 				} else {
-					$parentPath = '';
+					if(isset($prefix)) {
+						$parentPath = $prefix . '/';
+					} else {
+						$parentPath = '';
+					}
+
 					foreach($path as $num => $loc) {
 						if(($num + 1) < count($path)) {
 							$parentPath .= $loc . '/';
