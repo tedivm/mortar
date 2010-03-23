@@ -252,19 +252,19 @@ class FormToHtml
 
 				foreach($input->options as $option)
 				{
-					$properties = array();
+					$optionProperties = array();
 
 					if($option['value'] == $value)
-						$properties['selected'] = 'selected';
+						$optionProperties['selected'] = 'selected';
 
 					$optionHtml = $inputHtml->insertNewHtmlObject('option')->
 						property('value', $option['value'])->
 						wrapAround($option['label']);
 
-						if(isset($properties) && is_array($option['properties']))
-							$properties = array_merge($properties, $option['properties']);
+						if(isset($optionProperties) && is_array($option['properties']))
+							$optionProperties = array_merge($optionProperties, $option['properties']);
 
-						$optionHtml->property($properties);
+						$optionHtml->property($optionProperties);
 				}
 				break;
 
