@@ -838,9 +838,11 @@ class Location
 		$locpointer = new Location($start);
 
 		foreach($locs as $loc) {
-			$locpointer = $locpointer->getChildByName($loc);
-			if($locpointer === false)
-				return false;
+			if($loc !== '') {
+				$locpointer = $locpointer->getChildByName($loc);
+				if($locpointer === false)
+					return false;
+			}
 		}
 
 		return $locpointer->getId();
