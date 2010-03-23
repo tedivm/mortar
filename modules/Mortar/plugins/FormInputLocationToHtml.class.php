@@ -11,7 +11,13 @@ class MortarPluginFormInputLocationToHtml implements FormToHtmlHook
 
 		if(isset($input->properties['value']))
 		{
-			$valueString = Location::getPathById($input->properties['value']);
+			if(isset($input->properties['startid']) && is_numeric($input->properties['startid'])) {
+				$id = $input->properties['startid'];
+			} else {
+				$id = 1;
+			}
+
+			$valueString = Location::getPathById($input->properties['value'], $id);
 			$input->property('value', $valueString);
 		}
 
