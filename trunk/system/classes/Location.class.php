@@ -863,7 +863,7 @@ class Location
 		$rootpath = array_reverse($end->getPathToRoot());
 
 		foreach($rootpath as $id) {
-			if($id === $start)
+			if($id === (int) $start)
 				break;
 
 			$loc = new Location($id);
