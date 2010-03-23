@@ -188,13 +188,11 @@ abstract class ControlBase
 				setLegend('Location');
 
 			$input = $form->createInput('location')->
+				setType('location')->
 				setLabel('Location');
 
 			if(isset($this->location)) {
-				$path = Location::getPathById($this->location);
-				if($path) {
-					$input->setValue($path);
-				}
+				$input->setValue($this->location);
 			}
 		}
 
@@ -217,10 +215,8 @@ abstract class ControlBase
 	public function processSettingsInput($input)
 	{
 		if($this->useLocation) {
-			$loc = Location::getIdByPath($input['location']);
-			if($loc !== false) {
-				$this->location = $loc;
-			}
+			if(isset($input['location']) && is_numeric($input['location']))
+				$this->location = $input['location'];
 		}
 
 		return $this->processLocalSettings($input);
