@@ -20,6 +20,8 @@ class MortarInstallerPostscript
 		Hook::registerPlugin('system', 'menus', 'admin', $this->packageId, 'MenusAdminBase');
 		Hook::registerPlugin('model', 'All', 'adminMenu', $this->packageId, 'MenusAdminModels');
 
+		Hook::registerPlugin('Forms', 'HtmlConvert', 'template', $this->packageId, 'FormInputTemplateToHtml');
+
 		Hook::registerPlugin('Forms', 'HtmlConvert', 'location', $this->packageId, 'FormInputLocationToHtml');
 		Hook::registerPlugin('Forms', 'checkSubmit', 'location', $this->packageId, 'FormInputLocationCheckSubmit');
 
