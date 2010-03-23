@@ -6,26 +6,44 @@ class MortarPluginFormInputLocationToHtml implements FormToHtmlHook
 
 	public function setInput(FormInput $input)
 	{
-		if($input->type != 'location')
+		if(!$this->runCheck($input))
 			return;
 
-
-		$url = new Url();
-		$url->module = 'Mortar';
-		$url->format = 'json';
-		$url->action = 'LocationLookup';
-
-		if(isset($input->properties['parent']))
+		if(isset($input->properties['value']))
 		{
-			$url->parent = $input->properties['parent'];
-			unset($input->properties['parent']);
+			$valueString = Location::getPathById($input->properties['value']);
+			$input->property('value', $valueString);
 		}
 
+		$url = $this->getUrl($input);
 		$input->setType('input');
-		$input->property('autocomplete', $url);
+		$input->property('autocomplete', (string) $url);
 		$this->input = $input;
 
 	}
+
+	protected function runCheck(FormInput $input)
+	{
+		if($input->type != 'location')
+			return false;
+
+		return true;
+	}
+
+	protected function getUrl(FormInput $input)
+	{
+		$url = new Url();
+		$url->module = 'Mortar';
+		$url->format = 'json';
+		$url->action = 'LocationLookUp';
+
+		if(isset($input->properties['startid']))
+		{
+			$url->s = $input->properties['startid'];
+		}
+		return $url;
+	}
+
 	public function getCustomJavaScript(){}
 	public function overrideHtml(){}
 	public function createOverriddingHtml($sectionHtml){}

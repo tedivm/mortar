@@ -71,8 +71,16 @@ class MortarActionLocationLookUp extends ActionBase
 
 					$stmt->bindAndExecute('sii', $searchString, $parent, $limit);
 
-					while($results = $stmt->fetch_array())
-						$locList[] = array('name' => $results['name'], 'id' => $results['location_id']);
+					while($results = $stmt->fetch_array()) {
+						if(isset($query['s']) && is_numeric($query['s'])) {
+							$base = $query['s'];
+						} else {
+							$base = 1;
+						}
+
+						$name = Location::getPathById($results['location_id'], $base);
+						$locList[] = array('name' => $name, 'id' => $results['location_id']);
+					}
 				}
 
 				$cache->storeData($locList);
