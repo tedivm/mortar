@@ -31,28 +31,23 @@ class MortarActionLocationLookUp extends ActionBase
 
 				$path = explode('/', $query['q']);
 
-				if(count($path) === 1) {
-					$parent = 1;
-					$q = $query['q'];
+				if(isset($prefix)) {
+					$parentPath = $prefix . '/';
 				} else {
-					if(isset($prefix)) {
-						$parentPath = $prefix . '/';
+					$parentPath = '';
+				}
+
+				foreach($path as $num => $loc) {
+					if(($num + 1) < count($path)) {
+						$parentPath .= $loc . '/';
 					} else {
-						$parentPath = '';
+						$q = $loc;
 					}
+				}
 
-					foreach($path as $num => $loc) {
-						if(($num + 1) < count($path)) {
-							$parentPath .= $loc . '/';
-						} else {
-							$q = $loc;
-						}
-					}
-
-					$id = Location::getIdByPath($parentPath);
-					if($id) {
-						$parent = $id;
-					}
+				$id = Location::getIdByPath($parentPath);
+				if($id) {
+					$parent = $id;
 				}
 
 				$locList = array();
