@@ -136,7 +136,7 @@ class FormToHtml
 
 				if($input->type == 'hidden')
 				{
-					$inputHtml->noClose();
+					$inputHtml->close(false);
 					$formHtml->wrapAround($inputHtml);
 				}else{
 

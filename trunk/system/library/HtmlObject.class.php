@@ -122,17 +122,17 @@ class HtmlObject
 			$this->tightEnclose = true;
 
 		if(in_array($type, $this->hasNoClose))
-			$this->noClose();
+			$this->close(false);
 	}
 
 	/**
-	 * This makes the tag as one that has no closing tag. Returns itself to allow method chaining.
+	 * This sets whether the tag uses a closing tag. Returns itself to allow method chaining.
 	 *
 	 * @return HtmlObject
 	 */
-	public function noClose()
+	public function close($close = true)
 	{
-		$this->close = false;
+		$this->close = (bool) $close;
 		return $this;
 	}
 
@@ -172,6 +172,18 @@ class HtmlObject
 		$object = new HtmlObject($type);
 		$this->wrapAround($object, $location);
 		return $object;
+	}
+
+	/**
+	 * Empties the encloses array, removing any objects that are currently wrapped by this HTML object.
+	 * Returns itself to allow method chaining.
+	 *
+	 * @return HtmlObject
+	 */
+	public function clearContents()
+	{
+		$this->encloses = array();
+		return $this;
 	}
 
 	/**
