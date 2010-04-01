@@ -27,6 +27,16 @@ class MortarActionLocationLookUp extends ActionBase
 			{
 				if(isset($query['s']) && is_numeric($query['s'])) {
 					$prefix = Location::getPathById($query['s']);
+				} else {
+					$prefix = '';
+				}
+
+				if(isset($query['r'])) {
+					if($prefix === '') {
+						$prefix = $query['r'];
+					} else {
+						$prefix .= '/' . $query['r'];
+					}
 				}
 
 				$path = explode('/', $query['q']);
@@ -67,13 +77,7 @@ class MortarActionLocationLookUp extends ActionBase
 					$stmt->bindAndExecute('sii', $searchString, $parent, $limit);
 
 					while($results = $stmt->fetch_array()) {
-						if(isset($query['s']) && is_numeric($query['s'])) {
-							$base = $query['s'];
-						} else {
-							$base = 1;
-						}
-
-						$name = Location::getPathById($results['location_id'], $base);
+						$name = Location::getPathById($results['location_id'], $parent);
 						$locList[] = array('name' => $name, 'id' => $results['location_id']);
 					}
 				}
