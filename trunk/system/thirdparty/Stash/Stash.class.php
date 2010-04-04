@@ -208,6 +208,8 @@ class Stash
 			if($handler = $this->getHandler())
 			{
 				$args = func_get_args();
+				if(count($args) == 1 && is_array($args[0]))
+					$args = $args[0];
 				return $handler->clear($args);
 			}
 
