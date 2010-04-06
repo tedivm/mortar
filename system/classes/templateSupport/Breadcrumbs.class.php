@@ -28,7 +28,7 @@ class TagBoxBreadcrumbs
 
 		// First, check whether a non-read action is being performed. If so, add that action to the front of the list.
 
-		if(isset($this->query['action']) && $this->query['action'] !== 'Read') {
+		if(isset($this->query['action']) && $this->query['action'] !== 'Read' && $pagetitle !== 'Read') {
 			if($html) {
 				$url = Query::getUrl();
 				$nameList[] = $url->getLink($pagetitle);
@@ -89,7 +89,7 @@ class TagBoxBreadcrumbs
 		if(!isset($nameList) || count($nameList) === 0) {
 			$model = $location->getResource();
 			$name = isset($model['title']) ? $model['title'] : str_replace('_', ' ', $location->getName());
-			if(str_replace('_', ' ', $pagetitle) !== $name) {
+			if(str_replace('_', ' ', $pagetitle) !== $name && $pagetitle !== 'Read') {
 				if($html) {
 					$url = Query::getUrl();
 					$nameList[] = $url->getLink($pagetitle);

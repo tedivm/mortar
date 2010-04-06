@@ -280,7 +280,7 @@ abstract class ModelBase implements Model
 			foreach($tables as $table)
 			{
 				$record = new ObjectRelationshipMapper($this->table);
-				$record->primaryKey($id);
+				$record->primaryKey = $id;
 
 				if($record->select(1))
 				{
