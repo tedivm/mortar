@@ -27,7 +27,6 @@ class ViewModelRssFeed
 	{
 		$baseModel = $this->model;
 
-
 		$title = isset($baseModel['title']) ? $baseModel['title'] : $baseModel['name'];
 
 		$url = $baseModel->getUrl();
@@ -35,7 +34,7 @@ class ViewModelRssFeed
 		$url->format = 'html';
 		$rssFeed = simplexml_load_string('<rss version="2.0"><channel></channel></rss>');
 
-		//$rssFeed->channel[0]->addChild('title', $title);
+		$rssFeed->channel[0]->addChild('title', $title);
 
 		$rssFeed->channel[0]->addChild('link', (string) $url);
 		$rssFeed->channel[0]->addChild('generator', PROGRAM_NAME);
@@ -43,7 +42,7 @@ class ViewModelRssFeed
 		foreach($this->channelElements as $name => $value)
 			$rssFeed->channel[0]->addChild($name, $value);
 
-		//$rssFeed->channel[0]->addChild('description', $feedContent);
+		$rssFeed->channel[0]->addChild('description', 'Metal Slimes blogs about video games in all their many-splendored forms.');
 
 		foreach($this->modelList as $model)
 		{
