@@ -2,7 +2,8 @@
 
 class ChalkActionBlogRead extends ModelActionLocationBasedIndex
 {
-        public $adminSettings = array();
+        public $adminSettings = array('headerTitle' => 'Read');
+        public $htmlSettings = array('headerTitle' => 'Read');
 
 	public function viewAdmin($page)
 	{
