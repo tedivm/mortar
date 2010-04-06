@@ -194,8 +194,9 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 
 		$content = array();
 
-		if($listingResults = $readList->getListing())
+		if($listingResults = $readList->getListing()) {
 			$content['listing'] = $listingResults;
+		}
 
 		return $this->modelToHtml($page, $this->model, 'Display.html', $content);
 	}
@@ -222,6 +223,7 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		{
 			$rss = new ViewModelRssFeed($this->childModels, $this->model);
 			$rss->addChannelElement('lastBuildDate', $this->lastModified);
+			$this->ioHandler->addHeader('Content-Type', 'application/rss+xml; charset=utf-8');
 			return $rss->getDisplay();
 		}else{
 

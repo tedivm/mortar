@@ -22,8 +22,8 @@ class ViewModelRssElement
 			$publishedDate = $location->getPublishDate();
 			$parentXml->addChild('pubDate', gmdate(HTTP_DATE, $publishedDate));
 
-			if($author = $location->getOwner())
-				$parentXml->addChild('author', $author['name']);
+//			if($author = $location->getOwner())
+//				$parentXml->addChild('author', $author['name']);
 
 		}else{
 
@@ -34,7 +34,7 @@ class ViewModelRssElement
 
 		$guid = md5($id . $type);
 
-		$parentXml->addChild('guid', $guid);
+		$guidX = $parentXml->addChild('guid', $guid)->addAttribute('isPermaLink', 'false');
 
 		// enclosures
 		//category
