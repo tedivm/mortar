@@ -12,8 +12,10 @@ class ViewModelRssElement
 		$url = $model->getUrl();
 		$parentXml->addChild('link', (string) $url);
 
-		if(isset($model['content']))
-			$parentXml->addChild('description', $model['content']);
+		if(isset($model['content'])) {
+			$entityContent = self::xmlEncode($model['content']);
+			$parentXml->addChild('description', $entityContent);
+		}
 
 		if($model instanceof LocationModel)
 		{
@@ -42,6 +44,15 @@ class ViewModelRssElement
 
 		return $parentXml;
 	}
+
+	static protected function xmlEncode($string, $trans='') { 
+		$trans = (is_array($trans)) ? $trans : get_html_translation_table(HTML_ENTITIES, ENT_QUOTES); 
+		foreach ($trans as $k=>$v)
+			$trans[$k]= "&#".ord($k).";"; 
+
+		return strtr($string, $trans); 
+}
+
 }
 
 ?>
