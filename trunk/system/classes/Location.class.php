@@ -234,12 +234,8 @@ class Location
 	 */
 	public function getParent()
 	{
-		if(is_numeric($this->parent))
-			$this->parent = new Location($this->parent);
-
-		if($this->parent instanceof Location)
-		{
-			return $this->parent;
+		if(is_numeric($this->parent)) { 
+			return new Location($this->parent);
 		}else{
 			return false;
 		}
@@ -280,15 +276,19 @@ class Location
 			if(isset($this->meta[$name]))
 			{
 				return $this->meta[$name];
-			}elseif (!($local)) {
-				$parent = $this->getParent();
-				if($parent = $this->getParent())
+			} elseif (!($local)) {
+				if($parent = $this->getParent()) {
 					return $parent->getMeta($name);
+				} else {
+					return false;
+				}
+			} else {
 				return false;
-			}else return false;
+			}
 		}else{
-			if(($parent = $this->getParent()) && !($local))
-			{
+			if($local) {
+				return $this->meta;
+			} elseif ($parent = $this->getParent()) {
 				return array_merge($parent->getMeta(), $this->meta);
 			}else{
 				return $this->meta;
@@ -432,7 +432,7 @@ class Location
 	 */
 	public function setParent(Location $parent)
 	{
-		$this->parent = $parent;
+		$this->parent = $parent->getId();
 	}
 
 	/**
