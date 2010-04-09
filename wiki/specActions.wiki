@@ -118,3 +118,13 @@ ADDENDUM:
 == Form Actions ==
 
 Right now, functionality for actions that use forms is defined in a FormAction abstract, but because most form-based actions are Model Actions, this abstract is literally only extended for one single action in the system: MaintenanceMode. I suggest somehow rolling this functionality into the Action core so that it can be used and extended in a single place for both model and non-model actions.
+
+== Add/Edit ==
+
+Right now a challenge is posed for Add/Edit actions as a result of singular inheritance. Individual model Add and Edit actions typically descend from (LB)ModelAdd and (LB)ModelEdit respectively. However, if a model has an Add action that is defined in order to add custom form inputs, two equally poor options become available: either redefine all custom code from the model's Add action in the Edit action, or have the Edit action inherit from the Add action and redefine all the core functionality of the _Edit_ action. 
+
+Proposed solution: 
+  * Move all needed functionality for the Edit action into the Add class, and use a property like $model->edit to turn it on (i.e. make the Edit action simply an inheriting class from Add with the property $edit = true)
+  * Move custom input handling into the Form class. Create a new abstract Form type called AddForm which defines methods AddCustomInputs(), PopulateCustomInputs() and ProcessCustomInputs(), then have the Add and Edit actions call these directly.
+
+This will move all input definitions to the same class (as opposed to the status quo where inputs whose contents save directly to the database are in the Form class while inputs with special instructions are in the Add/Edit actions), avoid unnecessary code duplication, and also eliminate the need for 99% of custom Add/Edit actions.
