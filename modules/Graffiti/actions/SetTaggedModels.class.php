@@ -22,7 +22,7 @@ class GraffitiActionSetTaggedModels extends FormAction
 	{
 		foreach($this->modelList as $model) {
 			$enableTagging = (isset($input['model_' . $model]) && $input['model_' . $model]);
-			GraffitiTagger::toggleTaggingForModel($enableTagging);
+			GraffitiTagger::toggleTaggingForModel($model, $enableTagging);
 		}
 	}
 
@@ -37,8 +37,8 @@ class GraffitiActionSetTaggedModels extends FormAction
 			$input->setType('checkbox')->
 				setLabel($model);
 
-//			if(GraffitiTagger::canTagModelType($model))
-//				$input->check(true);
+			if(GraffitiTagger::canTagModelType($model))
+				$input->check(true);
 		}
 
 		return $form;
