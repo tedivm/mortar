@@ -2,7 +2,7 @@
 
 class GraffitiActionTagList extends ActionBase
 {
-	protected $list;
+	protected $list = array();
 
 	protected $maxLimit = 25;
 	protected $limit = 10;
@@ -54,6 +54,14 @@ class GraffitiActionTagList extends ActionBase
 		}
 
 		$this->list = $tagList;
+	}
+
+	public function viewAdmin($page)
+	{
+		$output = '';
+		if(count($this->list)) foreach($this->list as $tag)
+			$output .= $tag['id'] . ': ' . $tag['name'] . '<br>';
+		return $output;
 	}
 
 	public function viewJson()

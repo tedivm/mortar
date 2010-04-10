@@ -1,48 +1,52 @@
 <?php
 
-class GraffitiActionSetTaggedModels extends ActionBase
+class GraffitiActionSetTaggedModels extends FormAction
 {
+	public $adminSettings = array('headerTitle' => 'Set Tagged Models');
+
 	static $requiredPermission = 'System';
+	protected $formName = 'Form';
+	protected $modelList;
 
-	protected $form;
-
-	protected function logic()
+	public function logic()
 	{
-		$form = new Form('SetTaggedModels');
-		$this->form = $form;
+		$this->modelList = ModelRegistry::getModelList();
 
-		$modelList = ModelRegistry::getModelList();
-
-		if(!$modelList || count($modelList) < 1)
+		if(!$this->modelList || count($this->modelList) < 1)
 			throw new CoreError('Unable to load modules from system.');
 
-		foreach($modelList as $model)
+		return parent::logic();
+	}
+
+	protected function processInput($input)
+	{
+		foreach($this->modelList as $model) {
+			$enableTagging = (isset($input['model_' . $model]) && $input['model_' . $model]);
+			GraffitiTagger::toggleTaggingForModel($enableTagging);
+		}
+	}
+
+	protected function getForm()
+	{
+		$form = parent::getForm();
+
+		foreach($this->modelList as $model)
 		{
 			$input = $form->createInput('model_' . $model);
 
 			$input->setType('checkbox')->
-					setLabel($model);
+				setLabel($model);
 
-			if(GraffitiTagger::canTagModelType($model))
-				$input->check(true);
+//			if(GraffitiTagger::canTagModelType($model))
+//				$input->check(true);
 		}
 
-
-		if($inputs = $form->checkSubmit())
-		{
-			foreach($modelList as $model)
-			{
-				$enableTagging = (isset($input['model_' . $model]) && $input['model_' . $model]);
-				GraffitiTagger::toggleTaggingForModel($enableTagging);
-			}
-		}else{
-
-		}
+		return $form;
 	}
 
 	public function viewAdmin($page)
 	{
-
+		return $this->viewAdminForm();
 	}
 
 }
