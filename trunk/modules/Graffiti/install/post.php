@@ -13,7 +13,7 @@ class GraffitiInstallerPostscript
 
 	public function run()
 	{
-		Hook::registerPlugin('system', 'adminInterface', 'navigation', $this->packageId, 'AdminNav');
+		Hook::registerPlugin('system', 'menus', 'admin', $this->packageId, 'MenusGraffiti');
 		Hook::registerPlugin('Forms', 'HtmlConvert', 'tag', $this->packageId, 'FormInputTagToHtml');
 		Hook::registerPlugin('Forms', 'checkSubmit', 'tag', $this->packageId, 'FormInputTagCheckSubmit');
 	}

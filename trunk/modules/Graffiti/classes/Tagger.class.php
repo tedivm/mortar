@@ -27,10 +27,10 @@ class GraffitiTagger
 			}
 
 			$insertStatement = DatabaseConnection::getStatement('default');
-			$insertStatement->prepare('INSERT IGNORE
-										INTO graffitiLocationHasTags
-											(tagId, locationId, userId, weight, createdOn)
-										VALUES (?, ?, ?, ?, NOW())');
+			$insertStatement->prepare('	INSERT IGNORE
+							INTO graffitiLocationHasTags
+								(tagId, locationId, userId, weight, createdOn)
+							VALUES (?, ?, ?, ?, NOW())');
 			$insertStatement->bindAndExecute('iii', $tagId, $locationId, $userId, $weight);
 
 
@@ -46,14 +46,14 @@ class GraffitiTagger
 
 		if(isset($user) && $userId = $user->getId())
 		{
-			$deleteStatement->prepare('DELETE
-										FROM graffitiLocationHasTags
-										WHERE locationId = ? AND userId = ?');
+			$deleteStatement->prepare('	DELETE
+							FROM graffitiLocationHasTags
+							WHERE locationId = ? AND userId = ?');
 			$deleteStatement->bindAndExecute('ii', $locationId, $userId);
 		}else{
-			$deleteStatement->prepare('DELETE
-										FROM graffitiLocationHasTags
-										WHERE locationId = ?');
+			$deleteStatement->prepare('	DELETE
+							FROM graffitiLocationHasTags
+							WHERE locationId = ?');
 			$deleteStatement->bindAndExecute('i', $locationId);
 		}
 
@@ -86,12 +86,21 @@ class GraffitiTagger
 		return $data;
 	}
 
-	static function toggleTaggingForModel($enable = true)
+	static function toggleTaggingForModel($resource, $enable = true)
 	{
+		if(!is_numeric($resource))
+			$resource = ModelRegistry::getIdFromType($resource);
 
+		if(!$resource)
+			return false;
+
+		$orm = new ObjectRelationshipMapper('graffitiTagsModels');
+		$orm->modelId = $resource;
+		$orm->select();
+		$orm->modelSetting = ($enable) ? 1 : 0;
+
+		$orm->save();
 	}
-
-
 }
 
 ?>
