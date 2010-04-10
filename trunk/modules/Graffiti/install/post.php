@@ -1,6 +1,6 @@
 <?php
 
-class GraffitiInstallerPostscript extends MortarInstallerPostscript
+class GraffitiInstallerPostscript
 {
 	public $packageId;
 	public $package = 'Graffiti';
