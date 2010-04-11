@@ -5,7 +5,7 @@ class GraffitiTagLookUp
 	static protected $stopWords;
 
 	static function getTagId($tag)
-	{
+	{ if($tag instanceof FilteredArray) { echo "<pre>";var_dump(debug_backtrace());echo"</pre>"; }
 		$tag = strtolower($tag);
 		$tag = trim($tag);
 		if(self::isStopWord($tag))
@@ -61,7 +61,7 @@ class GraffitiTagLookUp
 			}
 			$cache->storeData($tag);
 		}
-		return $tagId;
+		return $tag;
 	}
 
 	static function getTagsFromStem($stem)
@@ -91,26 +91,54 @@ class GraffitiTagLookUp
 	static function getTagsFromLocation(Location $location)
 	{
 		$locationId = $location->getId();
-		$cache = CacheControl::getCache('locations', $locationId, 'tags');
+		$cache = CacheControl::getCache('locations', $locationId, 'tags', 'all');
 		$tags = $cache->getData();
 
 		if($cache->isStale())
 		{
 			$selectStmt = DatabaseConnection::getStatement('default_read_only');
-			$selectStmt->prepare('SELECT tagId, SUM(weight) AS tagWeight
-							FROM graffitiLocationHasTags
-							WHERE locationId LIKE ?
-							GROUP BY tagId');
+			$selectStmt->prepare('	SELECT tagId, SUM(weight) AS tagWeight
+						FROM graffitiLocationHasTags
+						WHERE locationId = ?
+						GROUP BY tagId');
 
-			$selectStmt->bindAndExecute('s', $stem);
+			$selectStmt->bindAndExecute('i', $locationId);
 
 			$tags = array();
 			while($row = $selectStmt->fetch_array())
 				$tags[$row['tagId']] = $row['tagWeight'];
 
-			$cache->storeData($tagId);
+			$cache->storeData($tags);
 		}
 		return $tags;
+	}
+
+	static function getUserTags(Location $location, Model $user)
+	{
+		$locationId = $location->getId();
+		$userId = $user->getId();
+		$cache = CacheControl::getCache('locations', $locationId, 'tags', 'user', $userId);
+		$tags = $cache->getData();
+
+		if($cache->isStale())
+		{
+			$selectStmt = DatabaseConnection::getStatement('default_read_only');
+			$selectStmt->prepare('	SELECT tagId
+						FROM graffitiLocationHasTags
+						WHERE locationId = ?
+						AND userId = ?');
+
+			$selectStmt->bindAndExecute('ii', $locationId, $userId);
+
+			$tags = array();
+			while($row = $selectStmt->fetch_array())
+				$tags[] = $row['tagId'];
+
+			$cache->storeData($tags);
+		}
+		return $tags;
+
+	
 	}
 
 	static function isStopWord($word)

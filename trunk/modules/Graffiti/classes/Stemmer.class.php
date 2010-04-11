@@ -16,7 +16,7 @@ class GraffitiStemmer
 		if($language != 'English')
 			throw new CoreError('Unable to load stemmer for language ' . $language);
 
-		return GraffitiStemmerEnglish::stem($word);
+		return GraffitiStemmersEnglish::stem($word);
 	}
 }
 
