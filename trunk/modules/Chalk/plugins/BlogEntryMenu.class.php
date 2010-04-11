@@ -9,7 +9,7 @@ class ChalkPluginBlogEntryMenu
 		$url->format = 'admin';
 		$url->action = 'Comment';
 		$link = $url->getLink('Comment');
-		$menuSys->addItemToSubmenu('secondary', 'Page', $link, 'Comment', 0, $url);
+		$menuSys->addItemToSubmenu('secondary', $model->getType(), $link, 'Comment', 0, $url);
 	}
 }
 
