@@ -5,7 +5,7 @@ class GraffitiTagLookUp
 	static protected $stopWords;
 
 	static function getTagId($tag)
-	{ if($tag instanceof FilteredArray) { echo "<pre>";var_dump(debug_backtrace());echo"</pre>"; }
+	{
 		$tag = strtolower($tag);
 		$tag = trim($tag);
 		if(self::isStopWord($tag))
@@ -29,11 +29,10 @@ class GraffitiTagLookUp
 				$insertStmt->prepare('INSERT INTO graffitiTags (tag, stem) VALUES (?, ?)');
 				$insertStmt->bindAndExecute('ss', $tag, $stem);
 
-				if(isset($insertStmt->insert_id) && $insertStmt->insert_id > 0)
-				{
+				if(($id = $insertStmt->insert_id) && ($id > 0)) {
 					$tagId = $insertStmt->insert_id;
 					CacheControl::clearCache('tags', 'fromStem', $stem);
-				}else{
+				} else {
 					$tagId = false;
 				}
 			}
