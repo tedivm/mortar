@@ -8,6 +8,8 @@ class GraffitiActionModelTag extends ModelActionLocationBasedEdit
 
 	public static $requiredPermission = 'Admin';
 
+	protected $allowed = true;
+
 	public function logic()
 	{
 		$query = Query::getQuery();
@@ -18,12 +20,12 @@ class GraffitiActionModelTag extends ModelActionLocationBasedEdit
 
 		if(!GraffitiTagger::canTagModelType($this->model->getType())) {
 			$this->ioHandler->addHeader('Location', (string) $url);
-			return false;
+			return $this->allowed = false;
 		}
 
 		if(!method_exists($this->model, 'getLocation')) {
 			$this->ioHandler->addHeader('Location', (string) $url);
-			return false;
+			return $this->allowed = false;
 		}
 			
 		return parent::logic();
@@ -63,6 +65,14 @@ class GraffitiActionModelTag extends ModelActionLocationBasedEdit
 	protected function onSuccess()
 	{
 	
+	}
+
+	public function viewAdmin($page)
+	{
+		if(!$this->allowed)
+			return false;
+
+		return parent::viewAdmin($page);
 	}
 }
 
