@@ -1,6 +1,6 @@
 <?php
 
-class GraffitiPluginMenusGraffiti extends MortarPluginAdminNav
+class GraffitiPluginMenusGraffiti
 {
 	public function addMenuItems($menuSys)
 	{
@@ -9,7 +9,7 @@ class GraffitiPluginMenusGraffiti extends MortarPluginAdminNav
 		$url->format = 'Admin';
 		$url->action = 'SetTaggedModels';
 		$link = $url->getLink('Model Tagging');
-		$this->addItemToSubment('primary', 'Settings', $link, 'Model Tagging', 'auto', $url);
+		$menuSys->addItemToSubmenu('primary', 'Settings', $link, 'Model Tagging', 'auto', $url);
 	}
 }
 
