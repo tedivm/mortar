@@ -18,6 +18,7 @@ class GraffitiInstallerPostscript
 		Hook::registerPlugin('Forms', 'checkSubmit', 'tag', $this->packageId, 'FormInputTagCheckSubmit');
 		Hook::registerModelPlugin('All', 'baseForm', $this->packageId, 'ModelFormTags');
 		Hook::registerModelPlugin('All', 'adminMenu', $this->packageId, 'TagsMenu');
+		Hook::registerModelPlugin('All', 'actionLookup', $this->packageId, 'ModelTagAction');
 	}
 }
 
