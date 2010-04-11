@@ -117,7 +117,7 @@ class ModelActionAdd extends ModelActionBase
 			return false;
 
 		$formHook = new Hook();
-		$formHook->loadModelPlugins($this->model, 'baseFrom');
+		$formHook->loadModelPlugins($this->model, 'baseForm');
 		$formHook->loadModelPlugins($this->model, $this->actionName . 'Form');
 		$formHook->adjustForm($this->model, $baseForm);
 		return $baseForm;
@@ -163,7 +163,23 @@ class ModelActionAdd extends ModelActionBase
 			$this->model[$name] = $input['model_' . $name];
 		}
 
-		return $this->model->save();
+		$this->processPluginInputs($input, false);
+		$success = $this->model->save();
+		if($success)
+			$this->processPluginInputs($input, true);
+		return $success;
+	}
+
+	protected function processPluginInputs($input, $post = false)
+	{
+		$formHook = new Hook();
+		$formHook->loadModelPlugins($this->model, 'baseForm');
+		$formHook->loadModelPlugins($this->model, $this->actionName . 'Form');
+		if($post) {
+			$formHook->processAdjustedInputPost($this->model, $input);
+		} else {
+			$formHook->processAdjustedInput($this->model, $input);
+		}			
 	}
 
 	/**

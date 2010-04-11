@@ -22,7 +22,7 @@ class GraffitiTagger
 			{
 				$tagId = $tag;
 			}else{
-				if(!($tagId = TagLookUp::getTagId($tag)))
+				if(!($tagId = GraffitiTagLookUp::getTagId($tag)))
 					continue;
 			}
 
@@ -31,7 +31,7 @@ class GraffitiTagger
 							INTO graffitiLocationHasTags
 								(tagId, locationId, userId, weight, createdOn)
 							VALUES (?, ?, ?, ?, NOW())');
-			$insertStatement->bindAndExecute('iii', $tagId, $locationId, $userId, $weight);
+			$insertStatement->bindAndExecute('iiii', $tagId, $locationId, $userId, $weight);
 
 
 		}//foreach($tags as $tag)

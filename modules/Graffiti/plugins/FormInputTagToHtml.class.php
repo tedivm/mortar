@@ -22,9 +22,9 @@ class GraffitiPluginFormInputTagToHtml extends MortarPluginFormInputUserToHtml
 
 	protected function getString($id, $baseString)
 	{
-		TagLookUp::getTagFromId($id);
+		GraffitiTagLookUp::getTagFromId($id);
 
-		if($tag = TagLookUp::getTagFromId($id))
+		if($tag = GraffitiTagLookUp::getTagFromId($id))
 			$baseString .= $tag . ', ';
 
 		return $baseString;

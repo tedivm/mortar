@@ -152,7 +152,11 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 			}
 		}
 
-		return $this->model->save();
+		$this->processPluginInputs($input, false);
+		$success = $this->model->save();
+		if($success)
+			$this->processPluginInputs($input, true);
+		return $success;
 	}
 
 	/**
