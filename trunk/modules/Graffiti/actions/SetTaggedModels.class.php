@@ -32,6 +32,18 @@ class GraffitiActionSetTaggedModels extends FormAction
 
 		foreach($this->modelList as $model)
 		{
+			if(!($handler = ModelRegistry::getHandler($model)))
+				continue;
+
+			if(in_array($handler['resource'], array('Root', 'TrashCan', 'TrashBag')))
+				continue;
+
+			if(!($instance = ModelRegistry::loadModel($handler['resource'])))
+				continue;
+
+			if(!(method_exists($instance, 'getLocation')))
+				continue;
+
 			$input = $form->createInput('model_' . $model);
 
 			$input->setType('checkbox')->
