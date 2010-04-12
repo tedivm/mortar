@@ -19,6 +19,7 @@ class GraffitiInstallerPostscript
 		Hook::registerModelPlugin('All', 'baseForm', $this->packageId, 'ModelFormTags');
 		Hook::registerModelPlugin('All', 'adminMenu', $this->packageId, 'TagsMenu');
 		Hook::registerModelPlugin('All', 'actionLookup', $this->packageId, 'ModelTagAction');
+		Hook::registerModelPlugin('All', 'toArray', $this->packageId, 'ModelTagsToArray');
 	}
 }
 
