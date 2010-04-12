@@ -33,7 +33,12 @@ class TagBoxModel
 
 		unset($modelArray['group']);
 		unset($modelArray['rawContent']);
-		
+
+		$hook = new Hook();
+		$hook->loadPlugins('model', 'All', 'toArray');
+		$pluginArray = Hook::mergeResults($hook->toArray($model));
+		$modelArray = array_merge($pluginArray, $modelArray);
+
 		$this->modelArray = $modelArray;
 	}
 
