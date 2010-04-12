@@ -326,12 +326,11 @@ abstract class ModelBase implements Model
 		{
 			$hook = new Hook();
 			// because we look up each model explicitly we need to add the "all" plugins right at the start.
-			$hook->loadPlugins('model', 'all', 'actionLookup');
+			$hook->loadPlugins('model', 'All', 'actionLookup');
 			$pluginActionList = Hook::mergeResults($hook->getActions());
 
 			$actionList = self::loadActions($type);
 			$actionList = array_merge($pluginActionList, $actionList);
-
 
 			foreach(staticHack(get_class($this), 'fallbackModelActions') as $fallbackAction)
 				if ((!isset($actionList[$fallbackAction])) && !(in_array($fallbackAction, $this->excludeFallbackActions)))
@@ -401,14 +400,12 @@ abstract class ModelBase implements Model
 
 		$actionList = $packageInfo->getActions();
 
-
 		$hook = new Hook();
 		// Allow plugins for this specific model only, so we use loadPlugins instead of loadModelPlugins
 		$hook->loadPlugins('model', $resourceType, 'actionLookup');
 		$pluginActionList = Hook::mergeResults($hook->getActions());
 
 		$actionList = array_merge($actionList, $pluginActionList);
-
 
 		$reflection = new ReflectionClass($moduleInfo['class']);
 		$parentClass = $reflection->getParentClass();
