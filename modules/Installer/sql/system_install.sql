@@ -1,3 +1,5 @@
+SET foreign_key_checks = 0;
+
 /************ Update: Tables ***************/
 
 /******************** Add Table: actions ************************/
@@ -542,3 +544,5 @@ ALTER TABLE userPermissions ADD CONSTRAINT fk_userPermissions_actions
 /**** update version ****/
 REPLACE INTO schemaVersion (package, lastupdated, majorVersion, minorVersion, microVersion)
 						VALUES ( 'Core', NOW(), 0, 1, 1);
+
+SET foreign_key_checks = 1;

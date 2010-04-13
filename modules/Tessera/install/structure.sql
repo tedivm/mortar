@@ -1,3 +1,5 @@
+SET foreign_key_checks = 0;
+
 /********************** Add Table: tesseraForums ***************************/
 
 /* Build Table Structure */
@@ -30,3 +32,5 @@ CREATE TABLE tesseraMessages
 /**** update version ****/
 REPLACE INTO schemaVersion (package, lastupdated, majorVersion, minorVersion, microVersion)
 						VALUES ( 'Tessera', NOW(), 0, 1, 0);
+
+SET foreign_key_checks = 0;

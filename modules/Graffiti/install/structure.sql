@@ -1,3 +1,5 @@
+SET foreign_key_checks = 0;
+
 /******************** Add Table: graffitiTags ************************/
 
 /* Build Table Structure */
@@ -63,3 +65,5 @@ ALTER TABLE graffitiTagsModels ADD CONSTRAINT fk_graffitiTagsModels_modelsRegist
 /**** update version ****/
 REPLACE INTO schemaVersion (package, lastupdated, majorVersion, minorVersion, microVersion)
 						VALUES ( 'Graffiti', NOW(), 0, 1, 0);
+
+SET foreign_key_checks = 1;
