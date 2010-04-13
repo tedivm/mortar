@@ -1,0 +1,27 @@
+#summary A brief specification for a new markup feature in Mortar.
+#labels Specification
+
+= Introduction =
+
+This feature would add the ability to select different markup formats for all "rich text" editable content in Mortar.
+
+= Details =
+
+A "Markup" in Mortar is a specific system for taking human-written text and converting it into styled HTML text suitable for display in a Mortar theme. 
+
+The Markup system will function as follows:
+
+  * Markups are part of modules and are registered with the system, to be stored in a table for reference purposes.
+  * The system includes a "default" markup type for models that use richtext input.
+  * Models that use "Richtext" input can specify their own default that is used in place of the system default, if present.
+  * When a form input is created of the type "richtext," it is modified to instead be a form input of the type and properties specified by the markup definition
+  * When a form is submitted with a richtext input, the contents of that input are filtered through a series of functions that modify the content in question, rendering it into a final HTML form. (Any non-input filters on HTML content are processed after this stage, but before anything else is done with the content.)
+  * When relevant, models are passed back both the raw input (for displaying for future editing purposes) and the final filtered content (for actual display) so that both can be stored in the database.
+  * The default markup for the overall site and the current markup for any given model type can be set in an Admin action dedicated to this purpose.
+
+By default, Mortar would (to begin with) ship with two default markups:
+
+  * HTML, which would use the (optional) WYSIWYG content editor, and pass all results through the HTMLPurifier filter
+  * Markdown, which would use a large-size HTML textarea input, and pass all results through the PHP-Markdown filter, followed by the HTMLPurifier filter
+
+Other markups could be added as necessary by including them in a module and registering them, just like Plugins and Controls. (Or possibly _as_ plugins?)
