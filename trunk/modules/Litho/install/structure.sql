@@ -1,3 +1,5 @@
+SET foreign_key_checks = 0;
+
 /******************** Add Table: cmsContent ************************/
 
 /* Build Table Structure */
@@ -48,3 +50,5 @@ ALTER TABLE lithoPages ADD CONSTRAINT fk_lithoPages_lithoContent
 /**** update version ****/
 REPLACE INTO schemaVersion (package, lastupdated, majorVersion, minorVersion, microVersion)
 						VALUES ( 'Litho', NOW(), 0, 1, 0);
+
+SET foreign_key_checks = 1;
