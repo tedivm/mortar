@@ -6,6 +6,9 @@ class TagBoxModel
 	protected $model;
 	protected $modelArray;
 
+	protected $jump = '<!-- jump -->';
+	protected $jumpPhrase = 'Read more...';
+
 	public function __construct(Model $model)
 	{
 		$this->model = $model;
@@ -97,7 +100,21 @@ class TagBoxModel
 		
 		return $actionList;
 	}
-	
+
+	protected function getShortContent()
+	{
+		$place = strpos($this->modelArray['content'], $this->jump);
+
+		if($place !== false) {
+			$prejump = substr($this->modelArray['content'], 0, $place);
+			$url = $this->model->getUrl();
+			$link = $url->getLink($this->jumpPhrase);
+			return $prejump . $link;
+		} else {
+			return $this->modelArray['content'];
+		}
+	}
+
 	public function __get($key)
 	{
 		switch($key) {
@@ -105,6 +122,8 @@ class TagBoxModel
 				return $this->getPermalink();
 			case 'actionList':
 				return $this->getActionList();
+			case 'shortContent':
+				return $this->getShortContent();
 		}
 		if(isset($this->modelArray[$key]))
 			return $this->modelArray[$key];
@@ -117,6 +136,7 @@ class TagBoxModel
 		switch($key) {
 			case 'permalink':
 			case 'actionList':
+			case 'shortContent':
 				return true;
 		}
 		return isset($this->modelArray[$key]);
