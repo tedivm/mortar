@@ -81,50 +81,99 @@ class TagBoxNav
 		return (string) $navList;
 	}
 
-	protected function navByMonth()
+	protected function convertLoc($loc)
 	{
-		$cache = CacheControl::getCache('tagboxes', $this->location->getId(), 'nav', 'navByMonth');
+		if(!isset($loc)) {
+			$loc = $this->location->getId();
+		} elseif(!is_numeric($loc)) {
+			$site = ActiveSite::getSite();
+			$siteloc = $site->getLocation();
+			$siteid = $siteloc->getId();
 
-		$dateList = $cache->getData();
+			$l = Location::getIdByPath($loc, $siteid);
+
+			if($l === false) {
+				return false;
+			} else {
+				$loc = $l;
+			}
+		}
+
+		return $loc;
+	}
+
+	public function pagelist($loc = null) {
+		if(!($loc = $this->convertLoc($loc)))
+			return false;
+
+		$location = new Location($loc);
+		$children = $location->getChildren();
+		$navList = $this->navList($children);
+
+		return (string) $navList;
+	}
+
+	public function monthArchive($loc = null, $countItems = true)
+	{
+		if(!($loc = $this->convertLoc($loc)))
+			return false;
+
+		$cache = CacheControl::getCache('tagboxes', $loc, 'nav', 'navByMonth');
+
+		$data = $cache->getData();
 
 		if($cache->isStale())
 		{
+			$data = array();
+
 			$db = db_connect('default_read_only');
 			$stmt = $db->stmt_init();
 
-			$sql  = 'SELECT DISTINCT MONTH(publishDate) as month, YEAR(publishDate) as year ';
-			$sql .= 'FROM locations WHERE parent = ? ORDER BY Year, Month';
+			$stmt->prepare('SELECT DISTINCT MONTH(publishDate) as month, 
+						YEAR(publishDate) as year, 
+						COUNT(publishDate) as count
+					FROM locations
+					WHERE parent = ?
+					GROUP BY month, year
+					ORDER BY Year, Month');
 
-			$stmt->prepare($sql);
-			$stmt->bindAndExecute('i', $this->location->getId());
+			$stmt->bindAndExecute('i', $loc);
 
 			$dateList = new HtmlObject('ul');
 			$dateList->addClass('dateList');
 
-			while($monthYear = $stmt->fetch_array())
-			{
-				$month = $monthYear['month'];
-				$year = $monthYear['year'];
-
-				$formattedDate = date('F Y', strtotime($month . '/01/' . $year));
-
-				$url = new Url();
-				$url->location = $this->location->getId();
-				$url->property('month', $month);
-				$url->property('year', $year);
-
-				$dateLink = new HtmlObject('a');
-				$dateLink->property('href', (string) $url)->
-					wrapAround($formattedDate);
-
-				$dateItem = new HtmlObject('li');
-				$dateItem->addClass('dateItem')->
-					wrapAround($dateLink);
-
-				$dateList->wrapAround($dateItem);
+			while($row = $stmt->fetch_array()) {
+				$data[] = $row;
 			}
 
-			$cache->storeData($dateList);
+			$cache->storeData($data);
+		}
+			
+		foreach($data as $monthYear) {
+			$month = $monthYear['month'];
+			$year = $monthYear['year'];
+
+			$formattedDate = date('F Y', strtotime($month . '/01/' . $year));
+
+			$url = new Url();
+			$url->location = $this->location->getId();
+			$url->property('month', $month);
+			$url->property('year', $year);
+
+			$dateLink = new HtmlObject('a');
+			$dateLink->property('href', (string) $url)->
+				wrapAround($formattedDate);
+
+			$dateItem = new HtmlObject('li');
+			$dateItem->addClass('dateItem')->
+				wrapAround($dateLink);
+
+			if($countItems) {
+				$count = $monthYear['count'];
+				$dateItem->wrapAround(' (' . $count . ')');
+			}
+
+			$dateList->wrapAround($dateItem);
 		}
 
 		return (string) $dateList;
@@ -137,8 +186,6 @@ class TagBoxNav
 				return $this->siblingNav();
 			case "childrenList":
 				return $this->childrenNav();
-			case "monthArchive":
-				return $this->navByMonth();
 			default:
 				return false;
 		}
@@ -149,8 +196,6 @@ class TagBoxNav
 		switch ($tagname) {
 			case "siblingList":
 			case "childrenList":
-			case "monthArchive":
-				return true;
 			default:
 				return false;
 		}

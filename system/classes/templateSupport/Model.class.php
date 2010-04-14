@@ -104,6 +104,9 @@ class TagBoxModel
 
 	public function content($pars = null)
 	{
+		if(!isset($this->modelArray['content']))
+			return false;
+
 		$place = strpos($this->modelArray['content'], $this->jump);
 
 		if($place !== false) {
@@ -138,6 +141,9 @@ class TagBoxModel
 
 	public function shortContent($pars = null, $jumptext = null, $jumpclass = null)
 	{
+		if(!isset($this->modelArray['content']))
+			return false;
+
 		$place = strpos($this->modelArray['content'], $this->jump);
 
 		$jumpclass = isset($jumpclass) ? $jumpclass : $this->jumpClass;
