@@ -48,7 +48,7 @@ class GraffitiActionTagList extends ActionBase
 			}
 
 			while($results = $stmt->fetch_array())
-				$tagList[] = array('name' => $results['tag'], 'id' => $results['tagId']);
+				$tagList[] = array('name' => $results['tag']);
 
 			$cache->storeData($tagList);
 		}
@@ -60,7 +60,7 @@ class GraffitiActionTagList extends ActionBase
 	{
 		$output = '';
 		if(count($this->list)) foreach($this->list as $tag)
-			$output .= $tag['id'] . ': ' . $tag['name'] . '<br>';
+			$output .= $tag['name'] . '<br>';
 		return $output;
 	}
 
