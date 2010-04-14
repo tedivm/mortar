@@ -4,10 +4,12 @@ class GraffitiTagLookUp
 {
 	static protected $stopWords;
 
-	static function getTagId($tag)
+	static function getTagId($tag, $add = true)
 	{
 		$tag = strtolower($tag);
 		$tag = trim($tag);
+		if($tag === '')
+			return false;
 		if(self::isStopWord($tag))
 			return false;
 
@@ -23,7 +25,7 @@ class GraffitiTagLookUp
 			if($selectStmt->num_rows && $row = $selectStmt->fetch_array())
 			{
 				$tagId = $row['tagId'];
-			}else{
+			} elseif($add) {
 				$stem = GraffitiStemmer::stem($tag);
 				$insertStmt = DatabaseConnection::getStatement('default');
 				$insertStmt->prepare('INSERT INTO graffitiTags (tag, stem) VALUES (?, ?)');
@@ -35,6 +37,8 @@ class GraffitiTagLookUp
 				} else {
 					$tagId = false;
 				}
+			} else {
+				$tagId = false;
 			}
 			$cache->storeData($tagId);
 		}
@@ -138,6 +142,45 @@ class GraffitiTagLookUp
 		return $tags;
 
 	
+	}
+
+	static function getLocationsForTag($tag, $owner = false)
+	{
+		if(!is_numeric($tag)) {
+			$tag = self::getTagId($tag, false);
+		}
+
+		if($tag === false)
+			return false;
+
+		$cache = CacheControl::getCache('tags', $tag, 'locations', 'owner', (bool) $owner);
+		$tags = $cache->getData();
+
+		if($cache->isStale())
+		{
+			$selectStmt = DatabaseConnection::getStatement('default_read_only');
+			if(!$owner) {
+				$selectStmt->prepare('	SELECT locationId
+							FROM graffitiLocationHasTags
+							WHERE tagId = ?');
+			} else {
+				$selectStmt->prepare('	SELECT locationId
+							FROM graffitiLocationHasTags
+							INNER JOIN locations
+							ON graffitiLocationHasTags.locationId = locations.location_id
+							AND graffitiLocationHasTags.userId = locations.owner
+							WHERE tagId = ?');
+			}
+
+			$selectStmt->bindAndExecute('i', $tag);
+			$locs = array();
+			while($row = $selectStmt->fetch_array())
+				$locs[] = $row['locationId'];
+
+			$cache->storeData($locs);
+		}
+
+		return $locs;
 	}
 
 	static function isStopWord($word)
