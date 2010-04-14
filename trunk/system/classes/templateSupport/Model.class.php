@@ -101,18 +101,47 @@ class TagBoxModel
 		return $actionList;
 	}
 
-	protected function getShortContent()
+	protected function getShortContent($pars = null)
 	{
 		$place = strpos($this->modelArray['content'], $this->jump);
+		$url = $this->model->getUrl();
+		$link = $url->getLink($this->jumpPhrase);
+		$content = '';
+		$pur = new HTMLPurifier();
 
 		if($place !== false) {
 			$prejump = substr($this->modelArray['content'], 0, $place);
-			$url = $this->model->getUrl();
-			$link = $url->getLink($this->jumpPhrase);
-			return $prejump . $link;
+			$content = $pur->purify($prejump) . $link;
+		} elseif(isset($pars) && is_numeric($pars)) {
+			$start = 0;
+			for ($i = 1; $i <= $pars; $i++) {
+				$pos = strpos($this->modelArray['content'], '</p>', $start);
+				if($pos !== false) {
+					$start = $pos + 4;
+				} else {
+					$start = false;
+					break;
+				}
+			}
+
+			if(isset($start)) {
+				$trim = substr($this->modelArray['content'], 0, $start);
+				if(trim($trim) === trim($this->modelArray['content'])) {
+					$content = $this->modelArray['content'];
+				} else {
+					$content = $pur->purify($trim) . $link;
+				}
+			}
 		} else {
-			return $this->modelArray['content'];
+			$content = $this->modelArray['content'];
 		}
+
+		return $content;
+	}
+
+	public function shortContent($pars = null)
+	{
+		return $this->getShortContent($pars);
 	}
 
 	public function __get($key)
@@ -122,8 +151,6 @@ class TagBoxModel
 				return $this->getPermalink();
 			case 'actionList':
 				return $this->getActionList();
-			case 'shortContent':
-				return $this->getShortContent();
 		}
 		if(isset($this->modelArray[$key]))
 			return $this->modelArray[$key];
@@ -136,7 +163,6 @@ class TagBoxModel
 		switch($key) {
 			case 'permalink':
 			case 'actionList':
-			case 'shortContent':
 				return true;
 		}
 		return isset($this->modelArray[$key]);
