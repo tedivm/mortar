@@ -8,11 +8,12 @@ class TagBoxModel
 
 	protected $jump = '<!-- jump -->';
 	protected $jumpPhrase = 'Read more...';
+	protected $jumpClass = 'readmore';
 
 	public function __construct(Model $model)
 	{
 		$this->model = $model;
-		$modelArray = $model->__toArray();
+		$modelArray = $model->__toArray(); 
 
 		if(isset($modelArray['name'])) {
 			$modelArray['name'] = ucwords(str_replace('_', ' ', $modelArray['name']));
@@ -101,12 +102,57 @@ class TagBoxModel
 		return $actionList;
 	}
 
-	protected function getShortContent($pars = null)
+	public function content($pars = null)
 	{
 		$place = strpos($this->modelArray['content'], $this->jump);
+
+		if($place !== false) {
+			$breakAt = $place;
+		} elseif(isset($pars) && is_numeric($pars)) {
+			$start = 0;
+			for ($i = 1; $i <= $pars; $i++) {
+				$pos = strpos($this->modelArray['content'], '</p>', $start);
+				if($pos !== false) {
+					$start = $pos + 4;
+				} else {
+					$start = false;
+					break;
+				}
+			}
+
+			if($start && is_numeric($start)) {
+				$breakAt = $start;
+			}
+		}
+
+		if(isset($breakAt)) {
+			$prejump = substr($this->modelArray['content'], 0, $breakAt);
+			$postjump = substr($this->modelArray['content'], $breakAt);
+			$a = new HtmlObject('a');
+			$a->property('name', 'continue');
+			return $prejump . (string) $a . $postjump;
+		} else {
+			return $this->modelArray['content'];
+		}
+	}
+
+	public function shortContent($pars = null, $jumptext = null, $jumpclass = null)
+	{
+		$place = strpos($this->modelArray['content'], $this->jump);
+
+		$jumpclass = isset($jumpclass) ? $jumpclass : $this->jumpClass;
+		$jumptext = isset($jumptext) ? $jumptext : $this->jumpPhrase;
+
 		$url = $this->model->getUrl();
-		$link = $url->getLink($this->jumpPhrase);
+		$rlink = new HtmlObject('a');
+		$rlink->property('href', ((string) $url) . '#continue');
+		$rlink->wrapAround($jumptext);
+		$link = new HtmlObject('div');
+		$link->addClass($jumpclass);
+		$link->wrapAround($rlink);
+
 		$content = '';
+
 		$pur = new HTMLPurifier();
 
 		if($place !== false) {
@@ -139,11 +185,6 @@ class TagBoxModel
 		return $content;
 	}
 
-	public function shortContent($pars = null)
-	{
-		return $this->getShortContent($pars);
-	}
-
 	public function __get($key)
 	{
 		switch($key) {
@@ -164,6 +205,8 @@ class TagBoxModel
 			case 'permalink':
 			case 'actionList':
 				return true;
+			case 'content':
+				return false;
 		}
 		return isset($this->modelArray[$key]);
 	}
