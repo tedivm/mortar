@@ -102,7 +102,7 @@ class TagBoxNav
 		return $loc;
 	}
 
-	public function pagelist($loc = null) {
+	public function pagelist($loc = null, $class = 'pagelist') {
 		if(!($loc = $this->convertLoc($loc)))
 			return false;
 
@@ -110,10 +110,12 @@ class TagBoxNav
 		$children = $location->getChildren();
 		$navList = $this->navList($children);
 
+		$navList->addClass($class);
+
 		return (string) $navList;
 	}
 
-	public function monthArchive($loc = null, $countItems = true)
+	public function monthArchive($loc = null, $countItems = true, $class = 'monthArchive')
 	{
 		if(!($loc = $this->convertLoc($loc)))
 			return false;
@@ -175,6 +177,8 @@ class TagBoxNav
 
 			$dateList->wrapAround($dateItem);
 		}
+
+		$dateList->addClass($class);
 
 		return (string) $dateList;
 	}
