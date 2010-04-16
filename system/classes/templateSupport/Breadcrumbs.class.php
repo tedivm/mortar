@@ -68,6 +68,7 @@ class TagBoxBreadcrumbs
 				if($html) {
 					$url = Query::getUrl();
 					$url->type = $this->query['type'];
+					$url->action = 'Index';
 					unset($url->id);
 					$nameList[] = $url->getLink($this->query['type']);
 				} else {
