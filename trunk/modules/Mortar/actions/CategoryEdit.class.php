@@ -11,7 +11,7 @@ class MortarActionCategoryEdit extends ModelActionEdit
 			setType('select')->
 			setOptions('', '', array());
 
-		$cats = MortarModelCategory::getDisplayTree();
+		$cats = MortarCategorizer::getDisplayTree();
 
 		foreach($cats as $cat) {
 			if((int) $cat['id'] === $this->model->getId())
@@ -27,7 +27,7 @@ class MortarActionCategoryEdit extends ModelActionEdit
 			}
 
 			$name = str_repeat('&nbsp;', $cat['level'] * 4) . $cat['name'];
-			$input->setOptions($cat['id'], $name, array());
+			$input->setOptions($cat['id'], $name, $props);
 		}
 
 		return $form;
