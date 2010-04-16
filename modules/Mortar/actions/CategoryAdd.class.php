@@ -11,7 +11,7 @@ class MortarActionCategoryAdd extends ModelActionAdd
 			setType('select')->
 			setOptions('', '', array());
 
-		$cats = MortarModelCategory::getDisplayTree();
+		$cats = MortarCategorizer::getDisplayTree();
 
 		foreach($cats as $cat) {
 			$name = str_repeat('&nbsp;', $cat['level'] * 4) . $cat['name'];
