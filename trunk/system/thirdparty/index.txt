@@ -5,12 +5,12 @@ cssmin.class.php
 	cssmin reduces the size of stylesheet definitions by removing all unneeded whitespaces and comments.
 	http://code.google.com/p/cssmin/
 
-Twig/
-	Twig
-	v0.9.4
-	3-Clause BSD
-	Templating library
-	http://www.twig-project.org/
+DiffMatchPatch/
+	DiffMatchPatch
+	v1.5
+	LGPL
+	Robust algorithms to perform the operations required for synchronizing plain text. 
+	http://code.google.com/p/google-diff-match-patch/
 
 HTMLPurifier/
 	HTMLPurifier
@@ -26,12 +26,12 @@ JShrink.class.php
 	A Javascript Minifier written in PHP
 	http://code.google.com/p/jshrink-/
 
-DiffMatchPatch/
-	DiffMatchPatch
-	v1.5
-	LGPL
-	Robust algorithms to perform the operations required for synchronizing plain text. 
-	http://code.google.com/p/google-diff-match-patch/
+PHPMarkdown/
+	PHP Markdown Extra
+	1.2.4
+	3-Clause BSD
+	Converts the plain text markup format "Markdown" to HTML for publishing on the web (with custom extensions)
+	http://michelf.com/projects/php-markdown/
 
 PHPSmartyPants/
 	PHP SmartyPants Typographer
@@ -39,3 +39,10 @@ PHPSmartyPants/
 	3-Clause BSD
 	Translates plain ASCII punctuation characters into "smart" typographic punctuation HTML entities.
 	http://michelf.com/projects/php-smartypants/
+
+Twig/
+	Twig
+	v0.9.4
+	3-Clause BSD
+	Templating library
+	http://www.twig-project.org/
