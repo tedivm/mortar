@@ -106,14 +106,21 @@ class AdminControllerContentFilter
 			? $action->adminSettings['headerSubTitle']
 			: '';
 
-		$processedOutput->addContent(array('content' => $output, 'title' => $title, 'subtitle' => $subtitle));
+		if(method_exists($action, 'getName')) {
+			$actionName = $action->getName();
+			$page->addRegion('action', $actionName);
+		} else {
+			$actionName = '';
+		}
 
 		$oldtitle = $page->getTitle();
 		if(!isset($oldtitle))
 			$page->setTitle($title);
 
-		if(method_exists($action, 'getName'))
-			$page->addRegion('action', $action->getName());
+		$processedOutput->addContent(	array(	'content' => $output,
+							'title' => $title,
+							'subtitle' => $subtitle,
+							'action' => $actionName));
 
 		$output = $processedOutput->getDisplay();
 
