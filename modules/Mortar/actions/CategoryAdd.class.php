@@ -11,12 +11,11 @@ class MortarActionCategoryAdd extends ModelActionAdd
 			setType('select')->
 			setOptions('', '', array());
 
-		$db = DatabaseConnection::getConnection('default_read_only');
-		$results = $db->query('	SELECT categoryId, name
-					FROM categories');
+		$cats = MortarModelCategory::getDisplayTree();
 
-		while($row = $results->fetch_array()) {
-			$input->setOptions($row['categoryId'], $row['name'], array());
+		foreach($cats as $cat) {
+			$name = str_repeat('&nbsp;', $cat['level'] * 4) . $cat['name'];
+			$input->setOptions($cat['id'], $name, array());
 		}
 
 		return $form;
