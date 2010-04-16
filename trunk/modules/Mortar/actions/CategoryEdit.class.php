@@ -11,24 +11,23 @@ class MortarActionCategoryEdit extends ModelActionEdit
 			setType('select')->
 			setOptions('', '', array());
 
-		$db = DatabaseConnection::getConnection('default_read_only');
-		$results = $db->query('	SELECT categoryId, name
-					FROM categories');
+		$cats = MortarModelCategory::getDisplayTree();
 
-		while($row = $results->fetch_array()) {
-			if((int) $row['categoryId'] === $this->model->getId())
+		foreach($cats as $cat) {
+			if((int) $cat['id'] === $this->model->getId())
 				continue;
 
-			if($this->model->hasAncestor($row['categoryId']))
+			if($this->model->hasAncestor($cat['id']))
 				continue;
 
-			if((int) $row['categoryId'] === $this->model['parent']) {
+			if((int) $cat['id'] === $this->model['parent']) {
 				$props = array('selected' => 'yes');
 			} else {
 				$props = array();
 			}
 
-			$input->setOptions($row['categoryId'], $row['name'], $props);
+			$name = str_repeat('&nbsp;', $cat['level'] * 4) . $cat['name'];
+			$input->setOptions($cat['id'], $name, array());
 		}
 
 		return $form;

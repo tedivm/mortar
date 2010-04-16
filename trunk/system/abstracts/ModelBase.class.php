@@ -215,6 +215,8 @@ abstract class ModelBase implements Model
 								$value = $this->content[$columnName];
 							}
 							$record->$columnName = $value;
+						} else {
+							unset($record->$columnName);
 						}
 					}
 
