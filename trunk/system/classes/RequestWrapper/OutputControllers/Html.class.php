@@ -43,7 +43,7 @@ class HtmlOutputController extends AbstractOutputController
 
 		$this->activeResource = $page;
 
-		// Add filter to fit content into adminContent sub templates
+		// Add filter to fit content into htmlContent sub templates
 		$contentFilter = new HtmlControllerContentFilter();
 		$this->addContentFilter($contentFilter);
 
@@ -94,7 +94,8 @@ class HtmlControllerContentFilter
 		if(!isset($oldtitle))
 			$page->setTitle($title);
 
-		$page->addRegion('action', $action->getName());
+		if(method_exists($action, 'getName'))
+			$page->addRegion('action', $action->getName());
 
 		return $output;
 	}
