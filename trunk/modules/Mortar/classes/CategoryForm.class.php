@@ -2,7 +2,6 @@
 
 class MortarCategoryForm extends Form
 {
-
 	protected function define()
 	{
 		$this->changeSection('Info');

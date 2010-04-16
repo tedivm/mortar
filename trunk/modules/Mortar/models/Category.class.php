@@ -16,19 +16,29 @@ class MortarModelCategory extends ModelBase
 		return parent::offsetSet($name, $value);
 	}
 
-	protected function hasAncestor($id)
+	public function hasAncestor($id)
 	{
 		if(!isset($this->id))
 			return false;
 
-		while (isset($id) && $id) {
-			$cat = ModelRegistry::loadModel('Category', $id);
-			$id = $cat->getId();
-			if($id === $this->id)
-				return true;
+		if($id === $this->id)
+			return true;
+
+		$cache = CacheControl::getCache('models', 'Category', $this->id, 'hasAncestor', $id);
+		$return = $cache->getData();
+
+		if($cache->isStale()) {
+			$return = false;
+			while (isset($id) && $id) {
+				$cat = ModelRegistry::loadModel('Category', $id);
+				$id = $cat['parent'];
+				if($id === $this->id)
+					$return = true;
+			}
+			$cache->storeData($return);
 		}
 
-		return false;
+		return $return;
 	}
 
 	public function getParent()
