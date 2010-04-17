@@ -87,6 +87,20 @@ class MortarModelCategory extends ModelBase
 
 		return $desc;
 	}
+
+	public function __toArray()
+	{
+		$array = parent::__toArray();
+		$locs = MortarCategorizer::getCategoryLocations($this->id);
+		$array['locations'] = $locs;
+		return $array;
+	}
+
+	public function save()
+	{
+		CacheControl::clearCache('models', 'Category');
+		return parent::save();
+	}
 }
 
 ?>

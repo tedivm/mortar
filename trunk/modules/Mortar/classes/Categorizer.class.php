@@ -4,21 +4,27 @@ class MortarCategorizer
 {
 	static function getCategoryTree()
 	{
-		$db = DatabaseConnection::getConnection('default_read_only');
-		$results = $db->query('	SELECT categoryId, name
-					FROM categories
-					WHERE parent IS NULL
-					ORDER BY name');
-		$cats = array();
+		$cache = CacheControl::getCache('models', 'Category', 'getCategoryTree');
+		$desc = $cache->getData();
 
-		while($row = $results->fetch_array()) {
-			$item = array();
-			$model = ModelRegistry::loadModel('Category', $row['categoryId']);
-			$item['id'] = $row['categoryId'];
-			$item['name'] = $row['name'];
-			$item['children'] = $model->getDescendants();
+		if($cache->isStale()) {
+			$db = DatabaseConnection::getConnection('default_read_only');
+			$results = $db->query('	SELECT categoryId, name
+						FROM categories
+						WHERE parent IS NULL
+						ORDER BY name');
+			$cats = array();
 
-			$cats[] = $item;
+			while($row = $results->fetch_array()) {
+				$item = array();
+				$model = ModelRegistry::loadModel('Category', $row['categoryId']);
+				$item['id'] = $row['categoryId'];
+				$item['name'] = $row['name'];
+				$item['children'] = $model->getDescendants();
+
+				$cats[] = $item;
+			}
+			$cache->storeData($cats);
 		}
 
 		return $cats;
@@ -51,6 +57,149 @@ class MortarCategorizer
 		}
 
 		return $display;
+	}
+
+	static function categorizeLocation($loc, $cat, $has = true)
+	{
+		if($loc instanceof Location)
+			$loc = $loc->getId();
+
+		if(!is_numeric($loc))
+			return false;
+
+		if(method_exists($cat, 'getId'))
+			$cat = $cat->getId();
+
+		if(!is_numeric($cat))
+			return false;
+
+		$stmt = DatabaseConnection::getStatement('default');
+
+		if(!$has) {
+			$stmt->prepare('DELETE FROM locationCategories
+					WHERE categoryId = ?
+					AND locationId = ?');
+		} else {
+			$stmt->prepare('INSERT IGNORE
+					INTO locationCategories
+						(categoryId, locationId)
+					VALUES (?, ?)');
+		}
+
+		$stmt->bindAndExecute('ii', $cat, $loc);
+
+		CacheControl::clearCache('models', 'Category');
+	}
+
+	static function isLocationInCategory($loc, $cat)
+	{
+		if($loc instanceof Location)
+			$loc = $loc->getId();
+
+		if(!is_numeric($loc))
+			return false;
+
+		if(method_exists($cat, 'getId'))
+			$cat = $cat->getId();
+
+		if(!is_numeric($cat))
+			return false;
+
+		$cats = self::getLocationCategories($loc);
+
+		if(in_array($cat, $cats))
+			return true;
+
+		$model = ModelRegistry::loadModel('Category', $cat);
+
+		foreach($cats as $check) {
+			if($model->hasAncestor($check)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	static function getLocationCategories($loc, $hier = false)
+	{
+		if($loc instanceof Location)
+			$loc = $loc->getId();
+
+		if(!is_numeric($loc))
+			return false;
+
+		$cache = CacheControl::getCache('models', 'Category', 'locations', $loc, 'getLocationCategories', $hier);
+		$desc = $cache->getData();
+
+		if($cache->isStale()) {
+			$stmt = DatabaseConnection::getStatement('default_read_only');
+			$stmt->prepare('SELECT categoryId
+					FROM locationCategories
+					WHERE locationId = ?');
+			$stmt->bindAndExecute('i', $loc);
+
+			$cats = array();
+
+			while($row = $stmt->fetch_array()) {
+				$cats[] = $row['categoryId'];
+			}
+
+			if($hier) {
+				$allcats = $cats;
+				foreach($cats as $cat) {
+					$model = ModelRegistry::loadModel('Category', $cat);
+					while($parent = $model->getParent()) {
+						if(in_array($parent->getId(), $allcats))
+							break;
+
+						$allcats[] = $parent->getId();
+						$model = $parent;
+					}
+				}
+
+				$cats = $allcats;
+			}
+			$cache->storeData($cats);
+		}
+
+		return $cats;
+	}
+
+	static function getCategoryLocations($cat)
+	{
+		if(method_exists($cat, 'getId'))
+			$cat = $cat->getId();
+
+		if(!is_numeric($cat))
+			return false;
+
+		$cache = CacheControl::getCache('models', 'Category', $cat, 'getCategoryLocations');
+		$desc = $cache->getData();
+
+		if($cache->isStale()) {
+			$stmt = DatabaseConnection::getStatement('default_read_only');
+			$stmt->prepare('SELECT locationId
+					FROM locationCategories
+					WHERE categoryId = ?');
+			$stmt->bindAndExecute('i', $cat);
+
+			$locs = array();
+
+			while($row = $stmt->fetch_array()) {
+				$item = array();
+				$loc = new Location($row['locationId']);
+				$model = $loc->getResource();
+
+				$item['id'] = $row['locationId'];
+				$item['name'] = isset($model['title']) ? $model['title'] : $model->getName();
+				$item['url'] = (string) $model->getUrl();
+
+				$locs[] = $item;
+			}
+			$cache->storeData($locs);
+		}
+		return $locs;
 	}
 }
 

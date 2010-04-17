@@ -75,6 +75,18 @@ class MortarPluginMenusAdminBase
 		$url->action = 'Add';
 		$link = $url->getLink("Add Group");
 		$menuSys->addItemToSubmenu('primary', 'Manage Groups', $link, 'Add New Group', 'auto', $url);
+
+		$url = new Url();
+		$url->type = 'Category';
+		$url->action = 'Index';
+		$url->format = 'Admin';
+		$link = $url->getLink("Categories");
+		$menuSys->addItemToSubmenu('primary', 'Manage Categories', $link, 'Categories', 'auto', $url);
+
+		$url = clone $url;
+		$url->action = 'Add';
+		$link = $url->getLink("Add New Category");
+		$menuSys->addItemToSubmenu('primary', 'Manage Categories', $link, 'Add New Category', 'auto', $url);
 	}
 }
 

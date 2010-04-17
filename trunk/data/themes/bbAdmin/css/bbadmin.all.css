@@ -252,7 +252,7 @@ padding: 3px 10px 0;
 color: #2D5F8A;
 }
 
-.topbar_menu a:hover {
+.topbar_menu a:hover, .topbar_dropdown_menu li:hover a {
 background: #2D5F8A;
 color: #fff;
 }
@@ -270,6 +270,7 @@ top: 24px;
 left: -9999px;
 min-width: 150px;
 height: auto;
+z-index: 300;
 }
 
 .topbar_menu .topbar_dropdown_menu li {

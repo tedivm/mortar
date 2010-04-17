@@ -1,0 +1,16 @@
+{% extends "models/base/Display.html" %}
+
+{% block extraadmincontent %}
+{% if model.locations %}
+<div class="meta_item">
+	<span class="meta_label"><strong>Locations:</strong></span>
+	<ul class="meta_content">
+	{% for loc in model.locations %}
+		<li>
+			<a href="{{ loc.url }}">{{ loc.name }}</a>
+		</li>
+	{% endfor %}
+	</ul>
+</div>
+{% endif %}
+{% endblock %}
