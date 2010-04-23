@@ -183,8 +183,29 @@ class TagBoxNav
 		return (string) $dateList;
 	}
 
+	public function __call($tagname, $args)
+	{
+		$hook = new Hook();
+		$hook->loadPlugins('Template', 'Navigation', 'Tags');
+		$results = Hook::mergeResults($hook->hasTag($tagname));
+
+		if($results === true || in_array(true, $results)) {
+			return Hook::mergeResults(call_user_func_array(array($hook, 'getTag'), $args));
+		} else {
+			return null;
+		}
+		
+	}
+
 	public function __get($tagname)
 	{
+		$hook = new Hook();
+		$hook->loadPlugins('Template', 'Navigation', 'Tags');
+		$results = Hook::mergeResults($hook->hasTag($tagname));
+
+		if($results === true || in_array(true, $results))
+			return Hook::mergeResults($hook->getTag($tagname));
+
 		switch ($tagname) {
 			case "siblingList":
 				return $this->siblingNav();
@@ -197,6 +218,13 @@ class TagBoxNav
 
 	public function __isset($tagname)
 	{
+		$hook = new Hook();
+		$hook->loadPlugins('Template', 'Navigation', 'Tags');
+		$results = Hook::mergeResults($hook->hasTag($tagname));
+
+		if($results === true || in_array(true, $results))
+			return true;		
+
 		switch ($tagname) {
 			case "siblingList":
 			case "childrenList":
