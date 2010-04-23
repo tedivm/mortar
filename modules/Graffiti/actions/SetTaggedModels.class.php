@@ -18,14 +18,6 @@ class GraffitiActionSetTaggedModels extends FormAction
 		return parent::logic();
 	}
 
-	protected function processInput($input)
-	{
-		foreach($this->modelList as $model) {
-			$enableTagging = (isset($input['model_' . $model]) && $input['model_' . $model]);
-			GraffitiTagger::toggleTaggingForModel($model, $enableTagging);
-		}
-	}
-
 	protected function getForm()
 	{
 		$form = parent::getForm();
@@ -44,16 +36,37 @@ class GraffitiActionSetTaggedModels extends FormAction
 			if(!(method_exists($instance, 'getLocation')))
 				continue;
 
-			$input = $form->createInput('model_' . $model);
+			$input = $form->createInput('model_' . $model . '_tag')->
+				setPretext('<fieldset class="graffiti_model_settings"><legend>'.$model.'</legend>');
 
 			$input->setType('checkbox')->
-				setLabel($model);
+				setLabel('Tag');
 
 			if(GraffitiTagger::canTagModelType($model))
+				$input->check(true);
+
+			$input = $form->createInput('model_' . $model . '_category')->
+				setPosttext('</fieldset>');
+
+			$input->setType('checkbox')->
+				setLabel('Categorize');
+
+			if(GraffitiCategorizer::canCategorizeModelType($model))
 				$input->check(true);
 		}
 
 		return $form;
+	}
+
+	protected function processInput($input)
+	{
+		foreach($this->modelList as $model) {
+			$enableTagging = (isset($input['model_' . $model . '_tag']) && $input['model_' . $model . '_tag']);
+			GraffitiTagger::toggleTaggingForModel($model, $enableTagging);
+
+			$enableCategories = (isset($input['model_' . $model . '_category']) && $input['model_' . $model . '_category']);
+			GraffitiCategorizer::toggleCategoriesForModel($model, $enableCategories);
+		}
 	}
 
 	public function viewAdmin($page)

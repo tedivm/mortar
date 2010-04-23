@@ -1,9 +1,9 @@
 <?php
 
-class MortarModelCategory extends ModelBase
+class GraffitiModelCategory extends ModelBase
 {
 	static public $type = 'Category';
-	protected $table = 'categories';
+	protected $table = 'graffitiCategories';
 
 	public function offsetSet($name, $value)
 	{
@@ -68,7 +68,7 @@ class MortarModelCategory extends ModelBase
 
 			$stmt = DatabaseConnection::getStatement('default_read_only');
 			$stmt->prepare('SELECT *
-					FROM categories
+					FROM graffitiCategories
 					WHERE parent = ?');
 			$stmt->bindAndExecute('i', $this->id);
 
@@ -91,7 +91,7 @@ class MortarModelCategory extends ModelBase
 	public function __toArray()
 	{
 		$array = parent::__toArray();
-		$locs = MortarCategorizer::getCategoryLocations($this->id);
+		$locs = GraffitiCategorizer::getCategoryLocations($this->id);
 		$array['locations'] = $locs;
 		return $array;
 	}

@@ -27,14 +27,6 @@ CREATE TABLE aliases
 	aliasOther VARCHAR(60) NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
-/******************** Add Table: categories **********************/
-CREATE TABLE categories
-(
-	categoryId INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	name VARCHAR(45) NOT NULL,
-	parent INTEGER UNSIGNED NULL
-) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
-
 /******************** Add Table: controls ************************/
 
 /* Build Table Structure */
@@ -154,19 +146,6 @@ CREATE TABLE groupPermissions
 /* Table Items: groupPermissions */
 ALTER TABLE groupPermissions ADD CONSTRAINT pkgroupPermissions
 	PRIMARY KEY (memgroup_id, location_id, action_id, resource);
-
-/******************** Add Table: locationCategories ************************/
-
-/* Build Table Structure */
-CREATE TABLE locationCategories
-(
-	locationId INTEGER UNSIGNED NOT NULL,
-	categoryId INTEGER UNSIGNED NOT NULL
-) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
-
-/* Table Items: locationCategories */
-ALTER TABLE locationCategories ADD CONSTRAINT pklocationCategories
-	PRIMARY KEY (locationId, categoryId);
 
 /******************** Add Table: locationMeta ************************/
 
@@ -495,18 +474,6 @@ ALTER TABLE groupPermissions ADD CONSTRAINT fk_groupPermissions_actions
 /************ Foreign Key: fk_groupPermissions_memberGroup ***************/
 ALTER TABLE groupPermissions ADD CONSTRAINT fk_groupPermissions_memberGroup
 	FOREIGN KEY (memgroup_id) REFERENCES memberGroup (memgroup_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
-
-/************ Foreign Key: fk_locations_locations ***************/
-ALTER TABLE categories ADD CONSTRAINT fk_categories_categories
-	FOREIGN KEY (parent) REFERENCES categories (categoryId) ON UPDATE NO ACTION ON DELETE NO ACTION;
-
-/************ Foreign Key: fk_locationCategories_locations ***************/
-ALTER TABLE locationCategories ADD CONSTRAINT fk_locationCategories_locations
-	FOREIGN KEY (locationId) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
-
-/************ Foreign Key: fk_locationCategories_categories ***************/
-ALTER TABLE locationCategories ADD CONSTRAINT fk_locationCategories_categories
-	FOREIGN KEY (categoryId) REFERENCES categories (categoryId) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_locationMeta_locations ***************/
 ALTER TABLE locationMeta ADD CONSTRAINT fk_locationMeta_locations

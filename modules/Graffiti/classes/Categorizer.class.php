@@ -1,6 +1,6 @@
 <?php
 
-class MortarCategorizer
+class GraffitiCategorizer
 {
 	static function getCategoryTree()
 	{
@@ -10,7 +10,7 @@ class MortarCategorizer
 		if($cache->isStale()) {
 			$db = DatabaseConnection::getConnection('default_read_only');
 			$results = $db->query('	SELECT categoryId, name
-						FROM categories
+						FROM graffitiCategories
 						WHERE parent IS NULL
 						ORDER BY name');
 			$cats = array();
@@ -76,12 +76,12 @@ class MortarCategorizer
 		$stmt = DatabaseConnection::getStatement('default');
 
 		if(!$has) {
-			$stmt->prepare('DELETE FROM locationCategories
+			$stmt->prepare('DELETE FROM graffitiLocationCategories
 					WHERE categoryId = ?
 					AND locationId = ?');
 		} else {
 			$stmt->prepare('INSERT IGNORE
-					INTO locationCategories
+					INTO graffitiLocationCategories
 						(categoryId, locationId)
 					VALUES (?, ?)');
 		}
@@ -135,7 +135,7 @@ class MortarCategorizer
 		if($cache->isStale()) {
 			$stmt = DatabaseConnection::getStatement('default_read_only');
 			$stmt->prepare('SELECT categoryId
-					FROM locationCategories
+					FROM graffitiLocationCategories
 					WHERE locationId = ?');
 			$stmt->bindAndExecute('i', $loc);
 
@@ -180,7 +180,7 @@ class MortarCategorizer
 		if($cache->isStale()) {
 			$stmt = DatabaseConnection::getStatement('default_read_only');
 			$stmt->prepare('SELECT locationId
-					FROM locationCategories
+					FROM graffitiLocationCategories
 					WHERE categoryId = ?');
 			$stmt->bindAndExecute('i', $cat);
 
@@ -201,6 +201,49 @@ class MortarCategorizer
 		}
 		return $locs;
 	}
+
+	static function canCategorizeModelType($resource)
+	{
+		if(!is_numeric($resource))
+			$resource = ModelRegistry::getIdFromType($resource);
+
+		$cache = CacheControl::getCache('models', $resource, 'settings', 'categories');
+		$data = $cache->getData();
+
+		if($cache->isStale())
+		{
+			$stmt = DatabaseConnection::getStatement('default_read_only');
+			$stmt->prepare('SELECT categorySetting FROM graffitiModelStatus WHERE modelId = ?');
+			$stmt->bindAndExecute('i', $resource);
+
+			if($row = $stmt->fetch_array())
+			{
+				$data = ($row['categorySetting'] == 1);
+			}else{
+				$data = false;
+			}
+			$cache->storeData($data);
+		}
+
+		return $data;
+	}
+
+	static function toggleCategoriesForModel($resource, $enable = true)
+	{
+		if(!is_numeric($resource))
+			$resource = ModelRegistry::getIdFromType($resource);
+
+		if(!$resource)
+			return false;
+
+		$orm = new ObjectRelationshipMapper('graffitiModelStatus');
+		$orm->modelId = $resource;
+		$orm->select();
+		$orm->categorySetting = ($enable) ? 1 : 0;
+
+		$orm->save();
+	}
+
 }
 
 ?>

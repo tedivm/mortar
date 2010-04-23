@@ -1,6 +1,6 @@
 <?php
 
-class MortarActionCategoryEdit extends ModelActionEdit
+class GraffitiActionCategoryEdit extends ModelActionEdit
 {
 	protected function getForm()
 	{
@@ -11,7 +11,7 @@ class MortarActionCategoryEdit extends ModelActionEdit
 			setType('select')->
 			setOptions('', '', array());
 
-		$cats = MortarCategorizer::getDisplayTree();
+		$cats = GraffitiCategorizer::getDisplayTree();
 
 		foreach($cats as $cat) {
 			if((int) $cat['id'] === $this->model->getId())

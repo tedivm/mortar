@@ -1,20 +1,20 @@
 <?php
 
-class MortarPluginModelFormCategories
+class GraffitiPluginModelFormCategories
 {
 	public function adjustForm(Model $model, Form $form)
 	{
 		if(!method_exists($model, 'getLocation'))
 			return null;
 
-		$list = MortarCategorizer::getDisplayTree();
+		$list = GraffitiCategorizer::getDisplayTree();
 
 		$form->changeSection('categories')->
 			setLegend('Categories');
 
 		$loc = $model->getLocation();
 		if($locId = $loc->getId()) {
-			$cats = MortarCategorizer::getLocationCategories($locId);
+			$cats = GraffitiCategorizer::getLocationCategories($locId);
 		} else {
 			$cats = array();
 		}
@@ -54,11 +54,11 @@ class MortarPluginModelFormCategories
 
 		$loc = $model->getLocation();
 
-		$cats = MortarCategorizer::getDisplayTree();
+		$cats = GraffitiCategorizer::getDisplayTree();
 
 		foreach($cats as $cat) {
 			if(isset($input['category_' . $cat['id']])) {
-				MortarCategorizer::categorizeLocation(	$loc->getId(), 
+				GraffitiCategorizer::categorizeLocation(	$loc->getId(), 
 									$cat['id'], 
 									$input['category_' . $cat['id']]);
 			}

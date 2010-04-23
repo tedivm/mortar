@@ -71,12 +71,12 @@ class GraffitiTagger
 		if($cache->isStale())
 		{
 			$stmt = DatabaseConnection::getStatement('default_read_only');
-			$stmt->prepare('SELECT modelSetting FROM graffitiTagsModels WHERE modelId = ?');
+			$stmt->prepare('SELECT tagSetting FROM graffitiModelStatus WHERE modelId = ?');
 			$stmt->bindAndExecute('i', $resource);
 
 			if($row = $stmt->fetch_array())
 			{
-				$data = ($row['modelSetting'] == 1);
+				$data = ($row['tagSetting'] == 1);
 			}else{
 				$data = false;
 			}
@@ -94,10 +94,10 @@ class GraffitiTagger
 		if(!$resource)
 			return false;
 
-		$orm = new ObjectRelationshipMapper('graffitiTagsModels');
+		$orm = new ObjectRelationshipMapper('graffitiModelStatus');
 		$orm->modelId = $resource;
 		$orm->select();
-		$orm->modelSetting = ($enable) ? 1 : 0;
+		$orm->tagSetting = ($enable) ? 1 : 0;
 
 		$orm->save();
 	}

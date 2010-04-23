@@ -1,6 +1,6 @@
 <?php
 
-class MortarCategoryForm extends Form
+class GraffitiCategoryForm extends Form
 {
 	protected function define()
 	{

@@ -1,5 +1,28 @@
 SET foreign_key_checks = 0;
 
+
+
+/******************** Add Table: graffitiCategories **********************/
+CREATE TABLE graffitiCategories
+(
+	categoryId INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(45) NOT NULL,
+	parent INTEGER UNSIGNED NULL
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+/******************** Add Table: graffitiLocationCategories ************************/
+
+/* Build Table Structure */
+CREATE TABLE graffitiLocationCategories
+(
+	locationId INTEGER UNSIGNED NOT NULL,
+	categoryId INTEGER UNSIGNED NOT NULL
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+/* Table Items: locationCategories */
+ALTER TABLE graffitiLocationCategories ADD CONSTRAINT pkgraffitiLocationCategories
+	PRIMARY KEY (locationId, categoryId);
+
 /******************** Add Table: graffitiTags ************************/
 
 /* Build Table Structure */
@@ -34,14 +57,15 @@ ALTER TABLE graffitiLocationHasTags ADD CONSTRAINT pkgraffitiLocationHasTags
 CREATE INDEX graffitiLocationHasTags_weight_Idx ON graffitiLocationHasTags (locationId, tagId, weight);
 CREATE INDEX graffitiLocationHasTags_createdOn_Idx ON graffitiLocationHasTags (createdOn, tagId);
 
-/******************** Add Table: graffitiTagsModels ************************/
+/******************** Add Table: graffitiModelStatus ************************/
 
 /* Build Table Structure */
 
-CREATE TABLE graffitiTagsModels
+CREATE TABLE graffitiModelStatus
 (
 	modelId INTEGER UNSIGNED NOT NULL PRIMARY KEY,
-	modelSetting INTEGER UNSIGNED NOT NULL
+	tagSetting INTEGER UNSIGNED NOT NULL DEFAULT '0',
+	categorySetting INTEGER UNSIGNED NOT NULL  DEFAULT '0'
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /************ Add Foreign Keys to Database ***************/
@@ -58,9 +82,22 @@ ALTER TABLE graffitiLocationHasTags ADD CONSTRAINT fk_graffitiLocationHasWeighte
 ALTER TABLE graffitiLocationHasTags ADD CONSTRAINT fk_graffitiLocationHasTags_users
 	FOREIGN KEY (userId) REFERENCES users (user_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-/************ Foreign Key: fk_graffitiTagsModels_modelsRegistered ***************/
-ALTER TABLE graffitiTagsModels ADD CONSTRAINT fk_graffitiTagsModels_modelsRegistered
+/************ Foreign Key: fk_graffitiModelStatus_modelsRegistered ***************/
+ALTER TABLE graffitiModelStatus ADD CONSTRAINT fk_graffitiModelStatus_modelsRegistered
 	FOREIGN KEY (modelId) REFERENCES modelsRegistered (modelId) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/************ Foreign Key: fk_graffitiLocationCategories_locations ***************/
+ALTER TABLE graffitiLocationCategories ADD CONSTRAINT fk_graffitiLocationCategories_locations
+	FOREIGN KEY (locationId) REFERENCES locations (location_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/************ Foreign Key: fk_locationCategories_categories ***************/
+ALTER TABLE graffitiLocationCategories ADD CONSTRAINT fk_graffitiLocationCategories_categories
+	FOREIGN KEY (categoryId) REFERENCES categories (categoryId) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/************ Foreign Key: fk_categories_categories ***************/
+ALTER TABLE graffitiCategories ADD CONSTRAINT fk_graffitiCategories_graffitiCategories
+	FOREIGN KEY (parent) REFERENCES graffitiCategories (categoryId) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
 
 /**** update version ****/
 REPLACE INTO schemaVersion (package, lastupdated, majorVersion, minorVersion, microVersion)
