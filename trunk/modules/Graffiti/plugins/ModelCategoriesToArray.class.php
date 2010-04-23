@@ -1,6 +1,6 @@
 <?php
 
-class MortarPluginModelCategoriesToArray
+class GraffitiPluginModelCategoriesToArray
 {
 
 	public function toArray(Model $model)
@@ -13,7 +13,7 @@ class MortarPluginModelCategoriesToArray
 		$array = array();
 		$catInfo = array();
 
-		$cats = MortarCategorizer::getLocationCategories($loc, true);
+		$cats = GraffitiCategorizer::getLocationCategories($loc, true);
 
 		foreach($cats as $id) {
 			$cat = ModelRegistry::loadModel('Category', $id);

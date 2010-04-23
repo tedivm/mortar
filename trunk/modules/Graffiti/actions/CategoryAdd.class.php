@@ -1,6 +1,6 @@
 <?php
 
-class MortarActionCategoryAdd extends ModelActionAdd
+class GraffitiActionCategoryAdd extends ModelActionAdd
 {
 	public function getForm()
 	{
@@ -11,7 +11,7 @@ class MortarActionCategoryAdd extends ModelActionAdd
 			setType('select')->
 			setOptions('', '', array());
 
-		$cats = MortarCategorizer::getDisplayTree();
+		$cats = GraffitiCategorizer::getDisplayTree();
 
 		foreach($cats as $cat) {
 			$name = str_repeat('&nbsp;', $cat['level'] * 4) . $cat['name'];
