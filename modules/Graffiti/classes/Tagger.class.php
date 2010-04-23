@@ -42,8 +42,6 @@ class GraffitiTagger
 		$locationId = $location->getId();
 		$deleteStatement = DatabaseConnection::getStatement('default');
 
-
-
 		if(isset($user) && $userId = $user->getId())
 		{
 			$deleteStatement->prepare('	DELETE
