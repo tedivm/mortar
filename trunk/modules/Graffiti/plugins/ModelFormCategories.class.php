@@ -4,6 +4,9 @@ class GraffitiPluginModelFormCategories
 {
 	public function adjustForm(Model $model, Form $form)
 	{
+		if(!GraffitiCategorizer::canCategorizeModelType($model->getType()))
+			return array();
+
 		if(!method_exists($model, 'getLocation'))
 			return null;
 
@@ -49,6 +52,9 @@ class GraffitiPluginModelFormCategories
 
 	public function processAdjustedInputPost(Model $model, $input)
 	{
+		if(!GraffitiCategorizer::canCategorizeModelType($model->getType()))
+			return array();
+
 		if(!method_exists($model, 'getLocation'))
 			return null;
 

@@ -5,6 +5,9 @@ class GraffitiPluginModelCategoriesToArray
 
 	public function toArray(Model $model)
 	{
+		if(!GraffitiCategorizer::canCategorizeModelType($model->getType()))
+			return array();
+
 		if(!method_exists($model, 'getLocation'))
 			return array();
 
