@@ -144,12 +144,15 @@ class TagBoxModel
 		if(!isset($this->modelArray['content']))
 			return false;
 
+		$query = Query::getQuery();
+
 		$place = strpos($this->modelArray['content'], $this->jump);
 
 		$jumpclass = isset($jumpclass) ? $jumpclass : $this->jumpClass;
 		$jumptext = isset($jumptext) ? $jumptext : $this->jumpPhrase;
 
 		$url = $this->model->getUrl();
+		$url->format = $query['format'];
 		$rlink = new HtmlObject('a');
 		$rlink->property('href', ((string) $url) . '#continue');
 		$rlink->wrapAround($jumptext);
