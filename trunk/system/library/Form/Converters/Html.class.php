@@ -23,6 +23,7 @@ class FormToHtml
 	protected $inputs;
 	protected $sectionIntro;
 	protected $sectionLegends;
+	protected $sectionClasses;
 
 
 	protected $tagByType = array('html' => 'textarea',
@@ -52,7 +53,7 @@ class FormToHtml
 		$this->inputs = $formPackage['inputs'];
 		$this->sectionIntro = $formPackage['intros'];
 		$this->sectionLegends = $formPackage['legends'];
-
+		$this->sectionClasses = $formPackage['classes'];  
 	}
 
 	/**
@@ -89,6 +90,17 @@ class FormToHtml
 			$sectionHtml = new HtmlObject('fieldset');
 			$sectionHtml->property('id', $formId . "_section_" . $section);
 
+			if(isset($this->sectionClasses[$section])) {
+				foreach($this->sectionClasses[$section] as $class) {
+					$sectionHtml->addClass($class);
+				}
+
+				if(!in_array('toggle-hide', $this->sectionClasses[$section]) && 
+				   !in_array('toggle-none', $this->sectionClasses[$section])) {
+					$sectionHtml->addClass('toggle-show');
+				}
+			}
+
 			if(isset($this->sectionLegends[$section]))
 				$sectionHtml->insertNewHtmlObject('legend')->
 					wrapAround($this->sectionLegends[$section]);
@@ -98,6 +110,11 @@ class FormToHtml
 					wrapAround($this->sectionIntro[$section])->
 					addClass('intro');
 
+			$sectionDiv = new HtmlObject('div');
+			$sectionDiv->addClass('fieldset_contents')->
+				property('id', $formId . "_section_" . $section . '_contents');
+
+			$sectionHtml->wrapAround($sectionDiv);
 
 			$hasInputs = false;
 
@@ -145,7 +162,7 @@ class FormToHtml
 						property('id', $inputId . '_label');
 
 					if(isset($input->pretext))
-						$sectionHtml->wrapAround($input->pretext);
+						$sectionDiv->wrapAround($input->pretext);
 
 					if(isset($input->label))
 					{
@@ -154,14 +171,14 @@ class FormToHtml
 							$labelHtml->property('title', $input->description);
 					}
 
-					$sectionHtml->wrapAround($labelHtml)->
+					$sectionDiv->wrapAround($labelHtml)->
 						wrapAround($inputHtml);
 
 					if(isset($input->posttext))
-						$sectionHtml->wrapAround($input->posttext);
+						$sectionDiv->wrapAround($input->posttext);
 
 					if(!isset($input->noBreak) || $input->noBreak === false)
-						$sectionHtml->insertNewHtmlObject('br');
+						$sectionDiv->insertNewHtmlObject('br');
 
 					$hasInputs = true;
 				}

@@ -69,6 +69,13 @@ class Form
 	protected $sectionIntro = array();
 
 	/**
+	 * This is an array of classes added to the fieldset tag for a given section.
+	 *
+	 * @var array
+	 */
+	protected $sectionClasses = array();
+
+	/**
 	 * This is the method used to send forms back from html. It defaults to post, get being the other reasonable item.
 	 *
 	 * @var string post or get
@@ -230,6 +237,18 @@ class Form
 	public function setSectionIntro($text)
 	{
 		$this->sectionIntro[$this->activeSection] = $text;
+		return $this;
+	}
+
+	/**
+	 * This adds a class to the list for a given section fieldset. It returns the Form object form method chaining.
+	 *
+	 * @param string $class
+	 * @return Form
+	 */
+	public function addSectionClass($class)
+	{
+		$this->sectionClasses[$this->activeSection][] = $class;
 		return $this;
 	}
 
@@ -517,6 +536,7 @@ class Form
 		$package['inputs'] = $this->inputs;
 		$package['intros'] = $this->sectionIntro;
 		$package['legends'] = $this->sectionLegends;
+		$package['classes'] = $this->sectionClasses;
 		return $package;
 	}
 
