@@ -120,6 +120,9 @@ class TagBoxNav
 		if(!($loc = $this->convertLoc($loc)))
 			return false;
 
+		$dateList = new HtmlObject('ul');
+		$dateList->addClass('dateList');
+
 		$cache = CacheControl::getCache('tagboxes', $loc, 'nav', 'navByMonth');
 
 		$data = $cache->getData();
@@ -141,16 +144,13 @@ class TagBoxNav
 
 			$stmt->bindAndExecute('i', $loc);
 
-			$dateList = new HtmlObject('ul');
-			$dateList->addClass('dateList');
-
 			while($row = $stmt->fetch_array()) {
 				$data[] = $row;
 			}
 
 			$cache->storeData($data);
 		}
-			
+
 		foreach($data as $monthYear) {
 			$month = $monthYear['month'];
 			$year = $monthYear['year'];
