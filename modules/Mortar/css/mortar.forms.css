@@ -1,0 +1,11 @@
+.mf-toggle-open, .mf-toggle-close {
+cursor: pointer;
+}
+
+.mf-toggle-open:before {
+content: "\00a0+\00a0\00a0";
+}
+
+.mf-toggle-close:before {
+content: "\00a0\2212\00a0\00a0";
+}

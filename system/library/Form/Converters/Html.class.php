@@ -94,12 +94,15 @@ class FormToHtml
 				foreach($this->sectionClasses[$section] as $class) {
 					$sectionHtml->addClass($class);
 				}
-
-				if(!in_array('toggle-hide', $this->sectionClasses[$section]) && 
-				   !in_array('toggle-none', $this->sectionClasses[$section])) {
-					$sectionHtml->addClass('toggle-show');
-				}
+			} else {
+				$this->sectionClasses[$section] = array();
 			}
+
+			if(!in_array('mf-toggle-hide', $this->sectionClasses[$section]) && 
+			   !in_array('mf-toggle-none', $this->sectionClasses[$section])) {
+				$sectionHtml->addClass('mf-toggle-show');
+			}
+
 
 			if(isset($this->sectionLegends[$section]))
 				$sectionHtml->insertNewHtmlObject('legend')->

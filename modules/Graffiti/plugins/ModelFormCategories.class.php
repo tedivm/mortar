@@ -14,7 +14,7 @@ class GraffitiPluginModelFormCategories
 
 		$form->changeSection('categories')->
 			setLegend('Categories')->
-			addSectionClass('toggle-hide');
+			addSectionClass('mf-toggle-hide');
 
 		$loc = $model->getLocation();
 		if($locId = $loc->getId()) {

@@ -52,8 +52,15 @@
 				}
 			});
 
-			$(".toggle-hide legend").toggleControl(".toggle-hide div", { speed: 'fast' });
-			$(".toggle-show legend").toggleControl(".toggle-hide div", { speed: 'fast', hide: false });
+			$(".mf-toggle-hide legend").toggleControl(
+				".mf-toggle-hide > div", {speed: 'fast', 
+							openClass: 'mf-toggle-open', 
+							closeClass: 'mf-toggle-close' });
+			$(".mf-toggle-show legend").toggleControl(
+				".mf-toggle-show > div", {speed: 'fast', 
+							hide: false,
+							openClass: 'mf-toggle-open', 
+							closeClass: 'mf-toggle-close' });
 
 			$("input").click(function() {
 				$.ckeditor.update();
