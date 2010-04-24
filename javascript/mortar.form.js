@@ -52,6 +52,9 @@
 				}
 			});
 
+			$(".toggle-hide legend").toggleControl(".toggle-hide div", { speed: 'fast' });
+			$(".toggle-show legend").toggleControl(".toggle-hide div", { speed: 'fast', hide: false });
+
 			$("input").click(function() {
 				$.ckeditor.update();
 			});

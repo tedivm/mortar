@@ -13,7 +13,8 @@ class GraffitiPluginModelFormCategories
 		$list = GraffitiCategorizer::getDisplayTree();
 
 		$form->changeSection('categories')->
-			setLegend('Categories');
+			setLegend('Categories')->
+			addSectionClass('toggle-hide');
 
 		$loc = $model->getLocation();
 		if($locId = $loc->getId()) {
