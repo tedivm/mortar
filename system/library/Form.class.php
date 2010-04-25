@@ -136,6 +136,13 @@ class Form
 	protected $errors;
 
 	/**
+	 * The string identifier for the markup handler used to process the contents of any "richtext" inputs.
+	 *
+	 * @var string
+	 */
+	protected $richtextFormat = 'html';
+
+	/**
 	 * This takes in the name of the form and runs the 'define' method, if it exists (this gives a way for subclasses
 	 * to easily set up form inputs that exist by default).
 	 *
@@ -186,6 +193,19 @@ class Form
 		$this->inputs[$this->activeSection][] = $input;
 		return true;
 	}
+
+	/**
+	 * This fuction sets the markup format used for richtext fields. Returns the Form object for method chaining.
+	 *
+	 * @param string $action
+	 * @return Form
+	 */
+	public function setMarkup($markup)
+	{
+		$this->richtextFormat = $markup;
+		return $this;
+	}
+
 
 	/**
 	 * This fuction sets the action url for html forms. Returns the Form object for method chaining.
@@ -250,6 +270,17 @@ class Form
 	{
 		$this->sectionClasses[$this->activeSection][] = $class;
 		return $this;
+	}
+
+
+	/**
+	 * Returns the currently-set markup format for "richtext" inputs.
+	 *
+	 * @return string
+	 */
+	public function getMarkup()
+	{
+		return $this->richtextFormat;
 	}
 
 	/**

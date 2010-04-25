@@ -41,6 +41,9 @@ class MortarInstallerPostscript
 
 		Hook::registerPlugin('Forms', 'HtmlConvert', 'title', $this->packageId, 'FormInputTitleToHtml');
 
+		Hook::registerPlugin('Forms', 'checkSubmit', 'richtext',
+								$this->packageId, 'FormInputRichtextCheckSubmit');
+
 		CronManager::registerJob('CachePurge', 'Mortar', 'module', 30);
 	}
 }

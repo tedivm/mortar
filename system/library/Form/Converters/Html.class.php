@@ -125,6 +125,11 @@ class FormToHtml
 			{
 				$inputId = $input->property('id');
 
+				if($input->type === 'richtext') {
+					$input->property($this->form->getMarkup(), 'true');
+					$input->type = 'textarea';
+				}
+
 				$plugins = new Hook();
 				$plugins->enforceInterface('FormToHtmlHook');
 				$plugins->loadPlugins('Forms', 'HtmlConvert', 'Base');
@@ -340,7 +345,7 @@ class FormToHtml
 				$inputOptions['validation'] = $validationClientSideRules;
 		}
 
-		if($input->type == 'html')
+		if($input->property('html'))
 			$inputOptions['html'] = true;
 
 		if(isset($input->properties['autocomplete']) && $input->properties['autocomplete'])

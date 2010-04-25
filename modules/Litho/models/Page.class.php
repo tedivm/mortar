@@ -11,7 +11,6 @@ class LithoModelPage extends LocationModel
 	protected $firstSave;
 
 	protected $activeRevision;
-	protected $filters = array();
 
 	protected function load($id)
 	{
@@ -144,29 +143,12 @@ class LithoModelPage extends LocationModel
 		return (count($returnRevisions) > 0) ? $returnRevisions : false;
 	}
 
-
-	protected function filterContent($content)
-	{
-		foreach($this->filters as $filter)
-		{
-			$content = $filter->clean($content);
-		}
-		return $content;
-	}
-
-	public function addFilter($filter)
-	{
-		if($filter instanceof Filter)
-		{
-			$this->filters[] = $filter;
-		}
-	}
-
 	public function __toArray()
 	{
 		$array = parent::__toArray();
 		$array['content'] = $array['filteredContent'];
 		unset($array['filteredContent']);
+		unset($array['rawContent']);
 		return $array;
 	}
 
@@ -184,8 +166,13 @@ class LithoModelPage extends LocationModel
 	{
 		if($name == 'content')
 		{
-			$this->content['rawContent'] = $value;
-			return $this->content['filteredContent'] = $this->filterContent($value);
+			if(!isset($value['raw']) || !isset($value['filtered'])) {
+				$this->content['rawContent'] = $value;
+				$this->content['filteredContent'] = $value;
+			} else {
+				$this->content['rawContent'] = $value['raw'];
+				$this->content['filteredContent'] = $value['filtered'];
+			} var_dump($this->content['rawContent']); 
 		}else{
 			return parent::offsetSet($name, $value);
 		}
@@ -321,11 +308,6 @@ class PageRevision
 		$stmt->prepare('UPDATE lithoPages SET activeRevision = ? WHERE id = ?');
 		return $stmt->bindAndExecute('ii', $this->revisionId, $this->pageId);
 	}
-
-
-
-
-
 }
 
 ?>
