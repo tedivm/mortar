@@ -45,7 +45,16 @@ class ModelActionLocationBasedEdit extends ModelActionLocationBasedAdd
 		if(isset($inputGroups['model'])) {
 			foreach($inputGroups['model'] as $name) {
 				$input = $form->getInput('model_' . $name);
-				$input->setValue($this->model[$name]);
+
+				if($input->type == 'richtext') {
+					if($value = $this->model['raw' . ucfirst($name)]) {
+						$input->setValue($value);
+					} else {
+						$input->setValue($this->model[$name]);
+					}
+				} else {
+					$input->setValue($this->model[$name]);
+				}
 
 				if($name === 'title')
 					$input->setType('input');

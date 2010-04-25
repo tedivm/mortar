@@ -4,6 +4,8 @@ class LithoModelPage extends LocationModel
 {
 	static public $type = 'Page';
 	static public $usePublishDate = true;
+	static public $richtext = 'html';
+
 	protected $table = 'lithoPages';
 	public $allowedChildrenTypes = array();
 	protected $excludeFallbackActions = array('Index');
@@ -172,7 +174,7 @@ class LithoModelPage extends LocationModel
 			} else {
 				$this->content['rawContent'] = $value['raw'];
 				$this->content['filteredContent'] = $value['filtered'];
-			} var_dump($this->content['rawContent']); 
+			}
 		}else{
 			return parent::offsetSet($name, $value);
 		}
