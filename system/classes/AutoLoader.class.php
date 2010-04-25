@@ -43,6 +43,7 @@ class AutoLoader
 										'modelSupport/Converters' => 'ModelTo',
 										'modelSupport/Listings' => 'none',
 										'modelSupport/Forms' => 'none',
+										'Markup' => 'Markup',
 										'Orm' => 'Orm',
 										'TwigIntegration' => 'TwigIntegration',
 										'InputHandlers' => 'none',
@@ -135,6 +136,18 @@ class AutoLoader
 		if(strpos($class, 'DiffMatchPatch') === 0)
 		{
 			include(self::$thirdPartyIncludes . 'DiffMatchPatch/' . $class . '.class.php');
+			return true;
+		}
+
+		if(strpos($class, 'Markdown') === 0)
+		{
+			include(self::$thirdPartyIncludes . 'PHPMarkdown/markdown.php');
+			return true;
+		}
+
+		if(strpos($class, 'SmartyPants') === 0)
+		{
+			include(self::$thirdPartyIncludes . 'PHPSmartyPants/smartypants.php');
 			return true;
 		}
 
