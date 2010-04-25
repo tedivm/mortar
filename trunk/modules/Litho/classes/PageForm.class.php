@@ -23,7 +23,7 @@ class LithoPageForm extends Form
 			$this->changeSection('model_content')->
 			setlegend('Page Content')->
 			createInput('model_content')->
-				setType('html')->
+				setType('richtext')->
 				addRule('required');
 
 	}
