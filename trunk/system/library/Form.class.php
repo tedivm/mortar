@@ -407,8 +407,11 @@ class Form
 				//$plugins->enforceInterface('FormToHtmlHook');
 				$plugins->loadPlugins('Forms', 'checkSubmit', 'Base');
 				$plugins->loadPlugins('Forms', 'checkSubmit', $input->type);
-				$plugins->setInput($input);
 
+				if($input->type == 'richtext')
+					$input->property('format', $this->richtextFormat);
+
+				$plugins->setInput($input);
 				$plugins->processInput($inputHandler);
 
 				if($input->validate(isset($inputHandler[$input->name]) ? $inputHandler[$input->name] : null) !== true)

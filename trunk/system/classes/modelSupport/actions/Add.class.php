@@ -116,6 +116,10 @@ class ModelActionAdd extends ModelActionBase
 		if(!isset($baseForm))
 			return false;
 
+		$format = staticHack(get_class($this->model), 'richtext');
+		if(isset($format))
+			$baseForm->setMarkup($format);
+
 		$formHook = new Hook();
 		$formHook->loadModelPlugins($this->model, 'baseForm');
 		$formHook->loadModelPlugins($this->model, $this->actionName . 'Form');

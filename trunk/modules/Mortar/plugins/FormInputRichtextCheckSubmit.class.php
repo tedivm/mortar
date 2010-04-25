@@ -19,14 +19,8 @@ class MortarPluginFormInputRichtextCheckSubmit
 		$name = $this->input->getName();
 		if(isset($inputHandler[$name])) {
 			$markups = Markup::getEngines();
-			$markup = 'html';
-
-			foreach($markups as $m) {
-				if($this->input->property($m)) {
-					$markup = $m;
-					break;
-				}
-			}
+			$format = $this->input->property('format');
+			$markup = isset($format) ? $format : 'html';
 
 			$engine = Markup::getMarkup($markup);
 

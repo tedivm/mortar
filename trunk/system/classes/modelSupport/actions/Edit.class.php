@@ -39,8 +39,13 @@ class ModelActionEdit extends ModelActionAdd
 
 			if($input instanceof FormInput)
 			{
-				if($input->type == 'checkbox')
-				{
+				if($input->type == 'richtext') {
+					if($value = $this->model['raw' . ucfirst($name)]) {
+						$input->setValue($value);
+					} else {
+						$input->setValue($this->model[$name]);
+					}
+				} else if($input->type == 'checkbox') {
 					if(isset($this->model[$name]) && $this->model[$name])
 					{
 						$input->check(true);
