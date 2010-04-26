@@ -38,11 +38,25 @@ class FormInput
 	public $description;
 
 	/**
+	 * This is a string of arbitrary text to be inserted before the input.
+	 *
+	 * @var string
+	 */
+	public $pretext;
+
+	/**
 	 * This is a string of arbitrary text to be inserted after the input.
 	 *
 	 * @var string
 	 */
 	public $posttext;
+
+	/**
+	 * This is a list of classes the input has.
+	 *
+	 * @var array
+	 */
+	public $classes = array();
 
 	/**
 	 * This is an array of properties about the input. Examples include the value of the input, although any html tag
@@ -109,6 +123,23 @@ class FormInput
 	public function __construct($name)
 	{
 		$this->name = $name;
+	}
+
+	/**
+	 * Adds a class, or an array of classes, to the input. Returns itself to allow method chaining.
+	 *
+	 * @param string|array $class
+	 * @return HtmlObject
+	 */
+	public function addClass($class)
+	{
+		if(is_array($class))
+		{
+			$this->classes = array_merge($this->classes, $class);
+		}else{
+			$this->classes[] = $class;
+		}
+		return $this;
 	}
 
 	/**

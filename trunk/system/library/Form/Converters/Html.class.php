@@ -26,7 +26,7 @@ class FormToHtml
 	protected $sectionClasses;
 
 
-	protected $tagByType = array('html' => 'textarea',
+	protected $tagByType = array('richtext' => 'textarea',
 							'textarea' => 'textarea',
 							'select' => 'select',
 							'checkbox' => 'input',
@@ -128,6 +128,7 @@ class FormToHtml
 				if($input->type === 'richtext') {
 					$input->property($this->form->getMarkup(), 'true');
 					$input->type = 'textarea';
+					$input->addClass('fulltext');
 				}
 
 				$plugins = new Hook();
@@ -248,6 +249,7 @@ class FormToHtml
 		$tagType = isset($this->tagByType[$input->type]) ? $this->tagByType[$input->type] : 'input';
 		$inputHtml = new HtmlObject($tagType);
 		$inputHtml->property('name', $input->name);
+		$inputHtml->addClass($input->classes);
 
 		// If its a generic input, define the type
 		if($tagType == 'input' && $input->type !== 'input')

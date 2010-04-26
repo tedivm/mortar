@@ -9,3 +9,13 @@ content: "\00a0+\00a0\00a0";
 .mf-toggle-close:before {
 content: "\00a0\2212\00a0\00a0";
 }
+
+textarea.bigtext {
+width: 600px;
+height: 300px;
+}
+
+textarea.fulltext {
+width: 99%;
+height: 400px;
+}
