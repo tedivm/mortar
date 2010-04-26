@@ -60,7 +60,12 @@ class Markup
 		return array_merge(self::$defaultEngines, $plugins);
 	}
 
-	static function loadModelEngine($resource)
+	static function getModelEngine($resource)
+	{
+		return self::getMarkup(self::loadModelEngine($resource));
+	}
+
+	static function loadModelEngine($resource, $setting = false)
 	{
 		if(!is_numeric($resource))
 			$resource = ModelRegistry::getIdFromType($resource);
@@ -75,20 +80,26 @@ class Markup
 			$stmt->bindAndExecute('i', $resource);
 
 			if($row = $stmt->fetch_array()) {
-				$data = ($row['markupEngine']);
+				$data['value'] = ($row['markupEngine']);
+				$data['setting'] = true;
 			}else{
+				$data['setting'] = false;
 				$model = ModelRegistry::loadModel($resource);
 				$engine = staticHack(get_class($model), 'richtext');
 				if(isset($engine)) {
-					$data = $engine;
+					$data['value'] = $engine;
 				} else {
-					$data = self::$defaultEngine;
+					$data['value'] = self::$defaultEngine;
 				}
 			}
 			$cache->storeData($data);
 		}
 
-		return self::getMarkup($data);
+		if($setting) {
+			return ($data['setting'] ? $data['value'] : false);
+		} else {
+			return $data['value'];
+		}
 	}
 
 	static function setModelEngine($resource, $engine)
@@ -108,6 +119,19 @@ class Markup
 		$orm->select();
 		$orm->markupEngine = $engine;
 		$orm->save();
+	}
+
+	static function clearModelEngine($resource)
+	{
+		if(!is_numeric($resource))
+			$resource = ModelRegistry::getIdFromType($resource);
+
+		if(!$resource)
+			return false;
+
+		$orm = new ObjectRelationshipMapper('markup');
+		$orm->modelId = $resource;
+		$orm->delete();
 	}
 }
 

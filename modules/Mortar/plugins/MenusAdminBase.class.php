@@ -50,6 +50,11 @@ class MortarPluginMenusAdminBase
 		$link = $url->getLink("Install Module");
 		$menuSys->addItemToSubmenu('primary', 'Settings', $link, 'Install Modules', 'auto', $url);
 
+		$url = clone $url;
+		$url->action = 'MarkupSettings';
+		$link = $url->getLink("Markup Settings");
+		$menuSys->addItemToSubmenu('primary', 'Settings', $link, 'Markup Settings', 'auto', $url);
+
 
 
 		$url = new Url();
