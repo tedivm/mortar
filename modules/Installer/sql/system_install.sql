@@ -191,6 +191,14 @@ CREATE INDEX locations_resourceType_resourceId ON locations (resourceType, resou
 CREATE INDEX locations_creationDate ON locations (creationDate, location_id);
 CREATE INDEX locations_lastModified ON locations (lastModified, location_id);
 
+/******************** Add Table: markup ****************************/
+/* Build Table Structure */
+CREATE TABLE markup
+(
+	modelId INTEGER UNSIGNED NOT NULL PRIMARY KEY,
+	markupEngine VARCHAR(35) NOT NULL
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
 /******************** Add Table: memberGroup ************************/
 
 /* Build Table Structure */
@@ -490,6 +498,10 @@ ALTER TABLE locations ADD CONSTRAINT fk_locations_users
 /************ Foreign Key: fk_locations_memberGroup ***************/
 ALTER TABLE locations ADD CONSTRAINT fk_locations_memberGroup
 	FOREIGN KEY (groupOwner) REFERENCES memberGroup (memgroup_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+/************ Foreign Key: fk_markup_modelsRegistered ***************/
+ALTER TABLE markup ADD CONSTRAINT fk_markup_modelsRegistered
+        FOREIGN KEY (modelId) REFERENCES modelsRegistered (modelId) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_modConfig_modules ***************/
 ALTER TABLE modConfig ADD CONSTRAINT fk_modConfig_modules
