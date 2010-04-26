@@ -45,8 +45,6 @@
 				{
 					htmlbox = $(this);
 					$('#' + $(this).attr('id') + '_label').remove();
-					$(this).width('99%');
-					$(this).height(400);
 					$(this).ckeditor( {customConfig : $.ckeditor.config.path + 'customconfig.js'} );
 					setTimeout(function() { htmlbox.insertAfter($('#cke_' + htmlbox.attr('id'))); }, 4000);
 				}
