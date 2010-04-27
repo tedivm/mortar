@@ -8,6 +8,9 @@ class TagBoxBreadcrumbs
 
 	public function __construct($location)
 	{
+		if(defined('INSTALLMODE') && INSTALLMODE === true)
+			return;
+
 		$this->location = $location;
 		$this->user = ActiveUser::getUser();
 		$this->query = Query::getQuery();
@@ -15,6 +18,14 @@ class TagBoxBreadcrumbs
 
 	public function getCrumbs($sep = '', $html = true, $rev = false)
 	{
+		if(defined('INSTALLMODE') && INSTALLMODE === true) {
+			if($html) {
+				return '';
+			} else {
+				return 'Install Mortar';
+			}
+		}
+
 		$nameList = array();
 
 		$userId = $this->user->getId();

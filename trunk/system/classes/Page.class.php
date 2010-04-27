@@ -221,6 +221,12 @@ class Page implements ArrayAccess
 			$menuBox = new TagBoxMenu($menuSys, $theme);
 			$content['menu'] = $menuBox;
 
+			$envBox = new TagBoxEnv();
+			$content['env'] = $envBox;
+
+			$breadBox = new TagBoxBreadcrumbs(null);
+			$content['breadcrumbs'] = $breadBox;
+
 			$content['pagetitle'] = "Install Mortar";
 
 			$template->addContent($content);
