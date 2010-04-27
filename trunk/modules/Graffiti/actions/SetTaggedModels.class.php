@@ -21,6 +21,9 @@ class GraffitiActionSetTaggedModels extends FormAction
 	protected function getForm()
 	{
 		$form = parent::getForm();
+		$form->changeSection('models')->
+			setLegend('Model Settings')->
+			addSectionClass('mf-toggle-none');
 
 		foreach($this->modelList as $model)
 		{
