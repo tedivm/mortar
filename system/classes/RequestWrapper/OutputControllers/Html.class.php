@@ -86,16 +86,31 @@ class HtmlControllerContentFilter
 		$action = $htmlController->getAction();
 		$page = $htmlController->getResource();
 
+		$themePath = $page->getThemePath();
+		$theme = $page->getTheme();
+
+		$processedOutput = new ViewThemeTemplate($theme, 'support/htmlContent.html');
+
 		$title = (isset($action->htmlSettings['headerTitle'])) ? $action->htmlSettings['headerTitle'] : '';
 		$title .= (isset($action->htmlSettings['useRider']) && $action->htmlSettings['useRider']
 			&& isset($action->htmlSettings['titleRider'])) ? $action->htmlSettings['titleRider'] : '';
+
+		if(method_exists($action, 'getName')) {
+			$actionName = $action->getName();
+			$page->addRegion('action', $actionName);
+		} else {
+			$actionName = '';
+		}
 
 		$oldtitle = $page->getTitle();
 		if(!isset($oldtitle))
 			$page->setTitle($title);
 
-		if(method_exists($action, 'getName'))
-			$page->addRegion('action', $action->getName());
+		$processedOutput->addContent(	array(	'content' => $output,
+							'title' => $title,
+							'action' => $actionName));
+
+		$output = $processedOutput->getDisplay();
 
 		return $output;
 	}
