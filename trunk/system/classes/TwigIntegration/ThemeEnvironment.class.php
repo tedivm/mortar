@@ -4,32 +4,62 @@ class TwigIntegrationThemeEnvironment extends Twig_Environment
 {
 	protected $generationDelimiter = ':';
 
-	public function loadTemplate($name)
-	{
-		if($name == 'parent')
+	public function loadTemplate($names)
+	{ 
+		if(!is_array($names))
+			$names = array($names);
+
+		if(in_array('parent', $names))
 			throw new TwigThemeError('Templates can not be named parent.');
 
-		$namePieces = $this->loader->getNamePieces($name);
+		$templateList = array();
+		$useGen = array();
 
-		if(isset($namePieces['generation']))
-		{
-			$generation = $namePieces['generation'];
-			$name = $namePieces['name'];
+		foreach($names as $fullname) {
+			$namePieces = $this->loader->getNamePieces($fullname);
+			
+			if(isset($namePieces['generation'])) {
+				$generation = $namePieces['generation'];
+				$name = $namePieces['name'];
+				$useGen[$fullname] = array('gen' => $generation, 'name' => $name);
+			} else {
+				$name = $fullname;
+			}
+
+			if(!($templateSet = $this->loader->loadTemplateSet($name)))
+				continue;
+
+			$templateList = array_merge($templateList, $templateSet);
 		}
 
-		if(!($templateSet = $this->loader->loadTemplateSet($name)))
-			throw new TwigThemeError('Unable to load template ' . $name);
+		$gens = array_keys($this->loader->getPaths());
 
-		// if no generation is set assume its the highest level available
-		if(!isset($generation))
-		{
-			$templates = array_keys($templateSet);
-			$className = array_shift($templates);
-		}elseif(isset($templateSet[$generation . $this->generationDelimiter . $name])){
-			$className = $generation . $this->generationDelimiter . $name;
-		}else{
-			throw new TwigThemeError('Unable to load template ' . $name . ' from collection ' . $generation);
+		$names = array_merge($names, $this->loader->getExtraNames($names));
+
+		foreach($gens as $generation) {
+			foreach($names as $name) {
+				if(isset($useGen[$name])) {
+					$pieces = $useGen[$name];
+					if($pieces['gen'] == $generation && isset($templateList[$name])) {
+						$className = $name;
+						break 2;
+					}
+				} else {
+					if(isset($templateList[$generation . $this->generationDelimiter . $name])){
+						$className = $generation . $this->generationDelimiter . $name;
+						break 2;				
+					}
+				}
+			}
 		}
+
+		if(!isset($className)) {
+			$nameList = '( ';
+			foreach($names as $name) $nameList .= $name . ' ';
+			$nameList .= ' )';
+			throw new TwigThemeError('Unable to load template from list ' . $nameList);
+		}
+		
 		return parent::loadTemplate($className);
 	}
 }

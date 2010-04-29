@@ -21,7 +21,7 @@ class TwigIntegrationModelLoader extends TwigIntegrationThemeLoader
 		{
 			foreach($descent as $ancestor)
 			{
-				$ancestorTemplates = $this->loadTemplateSet('models/' . $ancestor . '/' . $baseName);
+				$ancestorTemplates = $this->loadTemplateSet('models/' . $ancestor . $baseName);
 				if(isset($extraTemplates))
 				{
 					if(isset($ancestorTemplates))
@@ -47,6 +47,34 @@ class TwigIntegrationModelLoader extends TwigIntegrationThemeLoader
 		$this->__runtimeLoopProtection = false;
 
 		return $extraTemplates;
+	}
+
+	public function getExtraNames($names)
+	{
+		if(!is_array($names))
+			$names = array($names);
+
+		$extraNames = array();
+
+		foreach($names as $name) {
+			$tmp = substr($name, 7);
+			$rawNames[] = substr($tmp, strpos($tmp, '/'));
+			$baseNames[] = 'models/base' . substr($tmp, strpos($tmp, '/'));
+		}
+
+		$descent = $this->model->getDescent();
+
+		if(isset($descent)) {
+			foreach($descent as $ancestor) {
+				foreach($rawNames as $name) {
+					$extraNames[] = 'models/' . $ancestor . $name;
+				}
+			}
+		}
+
+		$extraNames = array_merge($extraNames, $baseNames);
+
+		return $extraNames;
 	}
 
 	public function useModel($model)
