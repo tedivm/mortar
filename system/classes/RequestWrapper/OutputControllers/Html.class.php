@@ -104,8 +104,11 @@ class HtmlControllerContentFilter
 		if(!isset($oldtitle))
 			$page->setTitle($title);
 
-		if($action !== 'Read') {
-			$processedOutput = new ViewThemeTemplate($theme, 'support/htmlContent.html');
+		if($actionName !== 'Read') {
+			$processedOutput = new ViewThemeTemplate($theme, 
+								 array('support/htmlContent' . $actionName . '.html',
+									'support/htmlContent.html')
+								 );
 			$processedOutput->addContent(	array(	'content' => $output,
 								'title' => $title,
 								'action' => $actionName));

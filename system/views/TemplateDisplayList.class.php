@@ -146,7 +146,7 @@ class ViewTemplateDisplayList {
 			$fadeClass = ((isset($location)) && ($action[0] == 'Index') && !($location->getChildren())) ? 'iconFade' : '';
 			$iconClass = 'tooltip action_icon ' . $fadeClass;
 
-			$actionDisplay = (isset($themeSettings['images']['action_images']) && $themeSettings['images']['action_images'] == true)
+			$actionDisplay = (isset($themeSettings['images']['action_images']) && $themeSettings['images']['action_images'] == 'true')
 					? $iconset->getIcon($action[0], $iconClass)
 					: $action[0];
 

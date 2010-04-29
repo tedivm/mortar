@@ -66,6 +66,11 @@ class TwigIntegrationThemeLoader implements Twig_LoaderInterface
 		return array();
 	}
 
+	public function getExtraNames($names)
+	{
+		return array();
+	}
+
   /**
    * Gets the source code of a template, given its name.
    *
@@ -139,13 +144,13 @@ class TwigIntegrationThemeLoader implements Twig_LoaderInterface
 		return md5($name);
 	}
 
-  /**
-   * Sets the paths where templates are stored.
-   *
-   * @param string|array $paths A path or an array of paths where to look for templates
-   */
-  public function setPaths($paths)
-  {
+	/**
+	 * Sets the paths where templates are stored.
+	 *
+	 * @param string|array $paths A path or an array of paths where to look for templates
+	 */
+	public function setPaths($paths)
+	{
 		if(!is_array($paths))
 		{
 			$paths = array($paths);
@@ -156,6 +161,11 @@ class TwigIntegrationThemeLoader implements Twig_LoaderInterface
 		{
 			$this->paths[$label] = realpath($path);
 		}
+	}
+
+	public function getPaths()
+	{
+		return $this->paths;
 	}
 
 }

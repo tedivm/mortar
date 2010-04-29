@@ -12,7 +12,15 @@ class ViewModelTemplate extends ViewThemeTemplate
 
 		$type = $model->getType();
 
-		$this->name = 'models/' . $type . '/' . $name;
+		if(is_array($name)) {
+			$names = array();
+			foreach($name as $n) {
+				$names[] = 'models/' . $type . '/' . $n;
+			}
+			$this->name = $names;
+		} else {
+			$this->name = 'models/' . $type . '/' . $name;
+		}
 	}
 
 	protected function getThemePaths()

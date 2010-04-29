@@ -175,11 +175,17 @@ abstract class ModelActionBase implements ActionInterface
 	 */
 	public function getName()
 	{
-		if (strpos($this->actionName, $this->type) === false) {
-			return $this->actionName;
-		} else {
-			return substr($this->actionName, strlen($this->type));
+		if($descent = $this->model->getDescent()) {
+			foreach($descent as $model) {
+				if (strpos($this->actionName, $model) === 0)
+					return substr($this->actionName, strlen($model));
+			}
 		}
+
+		if (strpos($this->actionName, $this->type) === 0)
+			return substr($this->actionName, strlen($this->type));
+
+		return $this->actionName;
 	}
 
 	/**
