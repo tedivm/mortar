@@ -241,16 +241,16 @@ class ModelActionLocationBasedEditGroupPermissions extends ModelActionLocationBa
 				if ($loc = new Location($locale)) {
 					$locName = $loc->getName();
 					if ($locName === 'root')
-						$locale = $locName;
+						$locat = $locName;
 					else
-						$locale = '<a href="' . $loc->getResource()->getUrl() . '">' . $locName . '</a>';
+						$locat = '<a href="' . $loc->getResource()->getUrl() . '">' . $locName . '</a>';
 				}
 				$list .= ($perm['source'] === 'user')
 					? "Set <span class='permission_$value'>$value</span> for user at "
-					. "location <span class='permissions_location'>$locale</span>. "
+					. "location <span class='permissions_location'>$locat</span>. "
 					: "Set <span class='permission_$value'>$value</span> for group " 
 					. "<span class='permissions_group'>$group</span> at location " 
-					. "<span class='permissions_location'>$locale</span>. ";
+					. "<span class='permissions_location'>$locat</span>. ";
 			}
 		}
 
