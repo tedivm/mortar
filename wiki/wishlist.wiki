@@ -99,7 +99,3 @@ This gets us lots of things -- a great tool for big development teams, a useful 
 == Embedded Content Management ==
 
 One thing we'll eventually need is the ability to "embed" a lot of content inside another page, so we can set up dynamic front pages that draw from multiple locations (among other things.) When we do this, we are really going to want a smooth interface for adding, removing, and arranging this embedded content. Ideally, it should be possible to have a front page which features a listing that's drawn from content of all types, spread all over the site, and which can be either auto-sorted or manually ordered easily.
-
-== Port SmartyPants ==
-
-SmartyPants http://daringfireball.net/projects/smartypants/ provides "smart" punctuation that is HTML-aware (it doesn't get replaced inside pre tags, for example.) It's written in PERL but it's 3-clause BSD and would be an awesome feature to include.
