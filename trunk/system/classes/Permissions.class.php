@@ -80,7 +80,7 @@ class Permissions
 	}
 
 	/**
-	 * This loads the permmissions fromt he database and, if allowed, the parent class
+	 * This loads the permmissions from the database and, if allowed, the parent class
 	 *
 	 * @access protected
 	 * @return array
@@ -241,6 +241,109 @@ class Permissions
 		return $this->isAllowed($action);
 	}
 
+	static function checkListPermissions($locs, $user, $action)
+	{
+		$parents = array();
+		$parentIds = array();
+		$parentPs = array();
+		$permissions = array();
+
+		foreach($locs as $loc) {
+			$locId = $loc->getId();
+			$parent = $loc->getParent();
+			$parentId = $parent->getId();
+			$parentIds[$locId] = $parentId;
+			if(!isset($parents[$parentId]))
+				$parents[$parentId] = $parent;
+		}
+
+		foreach($parents as $id => $par) {
+			$parentPer = new Permissions($par, $user);
+			$parentPs[$id] = $parentPer->isAllowed($action);
+		}
+
+		$userPs  = self::uniqueUserPermissions($parents, $user);
+		$groupPs = self::uniqueGroupPermissions($parents, $user);
+		$uniquePs = $userPs + $groupPs;
+
+		foreach($locs as $loc) {
+			$locId = $loc->getId();
+			if(isset($uniquePs[$locId])) {
+				$per = new Permissions($locId, $user);
+				$permissions[$locId] = $per->isAllowed($action);
+			} else {
+				$permissions[$locId] = $parentPs[$parentIds[$locId]];
+			}
+		}
+
+		return $permissions;
+	}
+
+	// returns an array where $children[locationId] = true when locationId has unique permissions set
+	static function uniqueUserPermissions($parents, $user)
+	{
+		$uniqueChildren = array();
+		$userId = $user->getId();
+
+		foreach($parents as $id => $location) {
+			$cache = CacheControl::getCache('locations', $id, 'permissions', 'uniqueUser', $userId);
+			$data = $cache->getData();
+			if($cache->isStale()) {
+				$data = array();
+				$stmt = DatabaseConnection::getStatement('default_read_only');
+				$stmt->prepare('SELECT DISTINCT locations.location_id as id, 
+							parent, user_id
+						FROM locations
+						INNER JOIN userPermissions
+							ON locations.location_id = userPermissions.location_id
+						WHERE parent = ?
+							AND user_id = ?');
+				$stmt->bindAndExecute('ii', $id, $userId);
+
+				while($row = $stmt->fetch_array()) {
+						$data[$row['id']] = true;				}
+
+				$cache->storeData($data);
+			}
+			$uniqueChildren = $uniqueChildren + $data;
+		}
+
+		return $uniqueChildren;
+	}
+
+	static function uniqueGroupPermissions($parents, $user)
+	{
+		$uniqueChildren = array();
+		$groups = $user['membergroups'];
+
+		foreach($parents as $id => $location) {
+			foreach($groups as $group) {
+				$cache = CacheControl::getCache('locations', $id, 'permissions', 'uniqueGroup', $group);
+				$data = $cache->getData();
+				if($cache->isStale()) {
+					$data = array();
+					$stmt = DatabaseConnection::getStatement('default_read_only');
+					$stmt->prepare('SELECT DISTINCT locations.location_id as id, 
+								parent, memgroup_id
+							FROM locations
+							INNER JOIN groupPermissions
+								ON locations.location_id = groupPermissions.location_id
+							WHERE parent = ?
+								AND memgroup_id = ?');
+					$stmt->bindAndExecute('ii', $id, $group);
+
+					while($row = $stmt->fetch_array()) {
+						$data[$row['id']] = true;
+					}
+
+					$cache->storeData($data);
+				}
+				$uniqueChildren = $uniqueChildren + $data;
+			}
+		}
+
+		return $uniqueChildren;		
+	}
 }
 
 /**
