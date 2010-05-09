@@ -16,6 +16,8 @@
  */
 class Location
 {
+	static $createdLocations = array();
+
 	/**
 	 * This corresponds with the location id in the database
 	 *
@@ -235,7 +237,7 @@ class Location
 	public function getParent()
 	{
 		if(is_numeric($this->parent)) { 
-			return new Location($this->parent);
+			return Location::getLocation($this->parent);
 		}else{
 			return false;
 		}
@@ -612,7 +614,7 @@ class Location
 			$cache->storeData($childId);
 		}
 
-		return (is_int($childId)) ? new Location($childId) : false;
+		return (is_int($childId)) ? Location::getLocation($childId) : false;
 	}
 
 	/**
@@ -650,7 +652,7 @@ class Location
 			return false;
 
 		foreach($childrenIds as $id)
-			$locations[] = new Location($id);
+			$locations[] = Location::getLocation($id);
 
 		return $locations;
 	}
@@ -835,7 +837,7 @@ class Location
 	{
 		$locs = explode('/', $path);
 
-		$locpointer = new Location($start);
+		$locpointer = Location::getLocation($start);
 
 		foreach($locs as $loc) {
 			if($loc !== '') {
@@ -856,7 +858,7 @@ class Location
 	 */
 	static public function getPathById($id, $start = 1)
 	{
-		$end = new Location($id);
+		$end = Location::getLocation($id);
 		$path = '';
 		$first = true;
 
@@ -866,7 +868,7 @@ class Location
 			if($id === (int) $start)
 				break;
 
-			$loc = new Location($id);
+			$loc = Location::getLocation($id);
 			if($first) {
 				$first = false;
 				$path = $loc->getName();
@@ -876,7 +878,20 @@ class Location
 		}
 
 		return $path;
+	}
 
+	static public function getLocation($id = null)
+	{
+		if(!isset($id))
+			return new Location();
+
+		if(!is_numeric($id))
+			throw new TypeMismatch(array('integer', $id));
+
+		if(!isset(self::$createdLocations[$id]))
+			self::$createdLocations[$id] = new Location($id);
+
+		return self::$createdLocations[$id];
 	}
 }
 

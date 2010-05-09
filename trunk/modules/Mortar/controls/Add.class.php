@@ -41,7 +41,7 @@ class MortarControlAdd extends ActionControl
 		}
 
 		if(isset($this->location)) {
-			$loc = new Location($this->location);
+			$loc = Location::getLocation($this->location);
 			$model = $loc->getResource();
 
 			if(isset($model['title'])) {
@@ -61,7 +61,7 @@ class MortarControlAdd extends ActionControl
 		if(!isset($this->settings['type']))
 			return 'This control requires a type to be set.';
 
-		$loc = new Location($this->location);
+		$loc = Location::getLocation($this->location);
 		$model = $loc->getResource();
 		$types = $model->getAllowedChildrenTypes();
 

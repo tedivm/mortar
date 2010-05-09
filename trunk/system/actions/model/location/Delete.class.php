@@ -60,7 +60,7 @@ class ModelActionLocationBasedDelete extends ModelActionLocationBasedEdit
 
 		$this->originalParent = $this->model->getLocation()->getParent()->getId();
 
-		$root = new Location(1);
+		$root = Location::getLocation(1);
 		$trashLocation = $root->getChildByName('Trash');
 
 		$trashBag = ModelRegistry::loadModel('TrashBag');

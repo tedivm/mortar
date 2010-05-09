@@ -238,7 +238,7 @@ class Page implements ArrayAccess
 
 		// set location and model variables *if* they currently apply
 		if(isset($query['location']) && is_numeric($query['location'])) {
-			$location = new Location($query['location']);
+			$location = Location::getLocation($query['location']);
 			$model = $location->getResource();
 		} elseif ($query['type'] && $query['id']) {
 			$model = ModelRegistry::loadModel($query['type'], $query['id']);

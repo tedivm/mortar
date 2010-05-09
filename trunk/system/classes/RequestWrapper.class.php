@@ -152,7 +152,7 @@ class RequestWrapper
 			$locationId = $query['location'];
 
 		if(is_numeric($query['location']))
-			$location = new Location($query['location']);
+			$location = Location::getLocation($query['location']);
 
 		try {
 
@@ -340,7 +340,7 @@ class RequestWrapper
 		{
 			$location = $site->getLocation();
 		}else{
-			$location = new Location(1);
+			$location = Location::getLocation(1);
 		}
 
 

@@ -187,7 +187,7 @@ class ModelActionLocationBasedEditGroupPermissions extends ModelActionLocationBa
 		$rootPath = $location->getPathToRoot();
 		
 		foreach($rootPath as $locale) {
-			$location = new Location($locale);
+			$location = Location::getLocation($locale);
 			
 			if ($mode === 'user') {
 				$userPermissions = new UserPermission($location->getId(), $user);
@@ -238,7 +238,7 @@ class ModelActionLocationBasedEditGroupPermissions extends ModelActionLocationBa
 						? '<a href="' . $mg->getUrl() . '">' . $mg['name'] . '</a>'
 						: $perm['groupId'];
 				}
-				if ($loc = new Location($locale)) {
+				if ($loc = Location::getLocation($locale)) {
 					$locName = $loc->getName();
 					if ($locName === 'root')
 						$locat = $locName;

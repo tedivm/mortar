@@ -108,7 +108,7 @@ class MortarActionLogIn extends ActionBase
 		$action = isset($query['a']) ? strtolower($query['a']) : false;
 		if(isset($query['l']) && is_numeric($query['l']) && ($action == 'index' || $action == 'read'))
 		{
-			$location = new Location($query['l']);
+			$location = Location::getLocation($query['l']);
 			$model = $location->getResource();
 
 			if(!$model->getAction($query['a']))

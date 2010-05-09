@@ -33,7 +33,7 @@ class HtmlOutputController extends AbstractOutputController
 
 		$query = Query::getQuery();
 		if(isset($query['location'])) {
-			$location = new Location($query['location']);
+			$location = Location::getLocation($query['location']);
 		} else {
 			$site = ActiveSite::getSite();
 			$location = $site->getLocation();

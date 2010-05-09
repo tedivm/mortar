@@ -113,7 +113,7 @@ abstract class LocationModel extends ModelBase
 
 			if(isset($locationId) && is_numeric($locationId))
 			{
-				$this->location = new Location($locationId);
+				$this->location = Location::getLocation($locationId);
 				$this->properties['name'] = $this->location->getName();
 				$this->properties['status'] = $this->location->getStatus();
 			}else{
@@ -254,7 +254,7 @@ abstract class LocationModel extends ModelBase
 
 			CacheControl::clearCache('locations', $location->getId());
 			CacheControl::clearCache('models', $this->getType(), $this->getId());
-			$location = new Location();
+			$location = Location::getLocation();
 
 			if($children = $location->getChildren())
 			{
@@ -358,14 +358,14 @@ abstract class LocationModel extends ModelBase
 	{
 		if(!isset($this->location))
 		{
-			$this->location = new Location();
+			$this->location = Location::getLocation();
 			$id = (isset($this->id)) ? $this->id : 0;
 			$name = (isset($this->properties['name'])) ? $this->properties['name'] : 'tmp';
 			$this->location->setResource($this->getType(), $id);
 			$this->location->setName($name);
 
 		}elseif(is_numeric($this->location)){
-			$this->location = new Location($this->location);
+			$this->location = Location::getLocation($this->location);
 		}
 
 		if(!($this->location instanceof Location))

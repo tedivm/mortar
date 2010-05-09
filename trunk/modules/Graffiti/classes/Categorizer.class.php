@@ -188,7 +188,7 @@ class GraffitiCategorizer
 
 			while($row = $stmt->fetch_array()) {
 				$item = array();
-				$loc = new Location($row['locationId']);
+				$loc = Location::getLocation($row['locationId']);
 				$model = $loc->getResource();
 
 				$item['id'] = $row['locationId'];

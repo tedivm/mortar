@@ -177,7 +177,7 @@ class CronManager
 			if(!is_numeric($source) || $source < 1)
 				return false;
 
-			$location = new Location($source);
+			$location = Location::getLocation($source);
 			$locationId = $location->getId();
 			$model = $location->getResource();
 

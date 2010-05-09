@@ -62,7 +62,7 @@ class UrlWriter
 
 			if(isset($attributes['locationId']))
 			{
-				$location = new Location($attributes['locationId']);
+				$location = Location::getLocation($attributes['locationId']);
 				$siteId = $location->getSite();
 
 				if(!$siteId)
@@ -130,7 +130,7 @@ class UrlWriter
 
 	static function buildLocationPath($path, &$attributes)
 	{
-		$location = new Location($attributes['locationId']);
+		$location = Location::getLocation($attributes['locationId']);
 		unset($attributes['locationId']);
 
 		// here we will iterate back to the site, creating the path to the model in reverse.

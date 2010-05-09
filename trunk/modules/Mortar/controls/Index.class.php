@@ -27,7 +27,7 @@ class MortarControlIndex extends ActionControl
 	protected function setName()
 	{
 		if(isset($this->location)) {
-			$loc = new Location($this->location);
+			$loc = Location::getLocation($this->location);
 			$model = $loc->getResource();
 
 			if(isset($model['title'])) {
