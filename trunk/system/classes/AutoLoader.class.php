@@ -58,7 +58,7 @@ class AutoLoader
 							  'Filters' => 'Filter');
 
 	protected static $extraActionDirectories = array('model' => 'ModelAction',
-							 'model/LocationBased' => 'ModelActionLocationBased');
+							 'model/location' => 'ModelActionLocationBased');
 
 	protected static $thirdPartyIncludes;
 
