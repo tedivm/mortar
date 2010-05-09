@@ -29,33 +29,36 @@ class AutoLoader
 	 * @var array
 	 */
 	protected static $baseDirectories = array('interfaces',
-											  'abstracts',
-											  'mainclasses',
-											  'library',
-											  'thirdparty',
-											  'Action' => 'actions',
-											  'View' => 'views');
+						  'abstracts',
+						  'mainclasses',
+						  'library',
+						  'thirdparty',
+						  'Action' => 'actions',
+						  'View' => 'views');
 
 	protected static $loadedModules = array();
 
 	protected static $extraClassDirectories = array('modelSupport/actions' => 'ModelAction',
-										'modelSupport/actions/LocationBased' => 'ModelActionLocationBased',
-										'modelSupport/Converters' => 'ModelTo',
-										'modelSupport/Listings' => 'none',
-										'modelSupport/Forms' => 'none',
-										'Markup' => 'Markup',
-										'Orm' => 'Orm',
-										'TwigIntegration' => 'TwigIntegration',
-										'InputHandlers' => 'none',
-										'cacheHandlers' => 'cacheHandler',
-										'RequestWrapper/IOProcessors' => 'IOProcessor',
-										'templateSupport' => 'TagBox',
-										'DbDrivers' => 'DbDriver');
+							'modelSupport/actions/LocationBased' => 'ModelActionLocationBased',
+							'modelSupport/Converters' => 'ModelTo',
+							'modelSupport/Listings' => 'none',
+							'modelSupport/Forms' => 'none',
+							'Markup' => 'Markup',
+							'Orm' => 'Orm',
+							'TwigIntegration' => 'TwigIntegration',
+							'InputHandlers' => 'none',
+							'cacheHandlers' => 'cacheHandler',
+							'RequestWrapper/IOProcessors' => 'IOProcessor',
+							'templateSupport' => 'TagBox',
+							'DbDrivers' => 'DbDriver');
 
 	protected static $extraLibraryDirectories = array('Form/Converters' => 'FormTo',
-										'Form/ValidationRules' => 'FormValidation',
-										'Form' => 'Form',
-										'Filters' => 'Filter');
+							  'Form/ValidationRules' => 'FormValidation',
+							  'Form' => 'Form',
+							  'Filters' => 'Filter');
+
+	protected static $extraActionDirectories = array('model' => 'ModelAction',
+							 'model/LocationBased' => 'ModelActionLocationBased');
 
 	protected static $thirdPartyIncludes;
 
@@ -261,6 +264,7 @@ class AutoLoader
 		$classes = array();
 		$classes[] = self::loadDirectoryAndFilter($config['path']['mainclasses'], self::$extraClassDirectories);
 		$classes[] = self::loadDirectoryAndFilter($config['path']['library'], self::$extraLibraryDirectories);
+		$classes[] = self::loadDirectoryAndFilter($config['path']['actions'], self::$extraActionDirectories);
 
 		$outputControllers = self::loadDirectoryAndFilter($config['path']['mainclasses'],
 									array('RequestWrapper/OutputControllers' => 'none'));

@@ -40,7 +40,7 @@ abstract class LocationModel extends ModelBase
 	 *
 	 * @var array
 	 */
-	protected $backupActionDirectory = array('actions', 'LocationBased');
+	protected $backupActionDirectory = array('model', 'LocationBased');
 
 	/**
 	 * This is the prefix added to fallback actions to get the name of the specific class the action uses. For instance,

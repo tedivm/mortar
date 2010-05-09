@@ -90,7 +90,7 @@ abstract class ModelBase implements Model
 	 *
 	 * @var array
 	 */
-	protected $backupActionDirectory = array('actions');
+	protected $backupActionDirectory = array('model');
 
 	/**
 	 * This is the prefix added to fallback actions to get the name of the specific class the action uses. For instance,
@@ -484,7 +484,7 @@ abstract class ModelBase implements Model
 			$pathArgs = $this->backupActionDirectory;
 			$pathArgs[] = $actionName;
 
-			if($path = call_user_func_array(array($this, 'getModelSupportFilePath'), $pathArgs))
+			if($path = call_user_func_array(array($this, 'getModelActionFilePath'), $pathArgs))
 				return array('className' => $this->fallbackActionString . $actionName, 'path' => $path);
 		}
 		return false;
@@ -547,6 +547,15 @@ abstract class ModelBase implements Model
 		$args = func_get_args();
 		$config = Config::getInstance();
 		$path = $config['path']['mainclasses'] . 'modelSupport';
+		array_unshift($args, $path);
+		return self::getModelFilePath($args);
+	}
+
+	static protected function getModelActionFilePath()
+	{
+		$args = func_get_args();
+		$config = Config::getInstance();
+		$path = rtrim($config['path']['actions'], '/');
 		array_unshift($args, $path);
 		return self::getModelFilePath($args);
 	}
