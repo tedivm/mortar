@@ -37,6 +37,9 @@ class GraffitiPluginModelFormTags
 		if(!method_exists($model, 'getLocation'))
 			return null;
 
+		if(!isset($input['tags']))
+			return null;
+
 		$loc = $model->getLocation();
 		$owner = $loc->getOwner();
 
