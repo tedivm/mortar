@@ -193,16 +193,15 @@ class Permissions
 		if($adminMemberGroup->containsUser($this->user->getId()))
 			return true;
 
-		// Check to see if the universal action is set at this location
-		if(isset($this->permissions['universal'][$action]) && $this->permissions['universal'][$action] === true)
-			return true;
-
 		if(is_null($type))
 			$type = $this->location->getType();
 
-		// If the permission isn't set check the parent
+		// If the permission isn't set check the base and then the parent
 		if(!isset($this->permissions[$type][$action]))
 		{
+			if(isset($this->permissions['Base'][$action]))
+				return $this->permissions['Base'][$action] === true;
+
 			$parentLocation = $this->location->getParent();
 
 			// If you've inherited back to the top of the tree and didn't find anything, give it a negative
