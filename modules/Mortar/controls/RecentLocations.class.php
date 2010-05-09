@@ -22,12 +22,12 @@ class MortarControlRecentLocations extends ControlBase
 		$success = $stmt->bindAndExecute('i', $this->location);
 
 		if($success) {
-			$loc = new Location($this->location);
+			$loc = Location::getLocation($this->location);
 			$mmodel = $loc->getResource();
 
 			$models = array();
 			while($row = $stmt->fetch_array()) {
-				$loc = new Location($row['location_id']);
+				$loc = Location::getLocation($row['location_id']);
 				$model = $loc->getResource();
 
 				$models[] = $model;
@@ -50,7 +50,7 @@ class MortarControlRecentLocations extends ControlBase
 	protected function setName()
 	{
 		if(isset($this->location)) {
-			$loc = new Location($this->location);
+			$loc = Location::getLocation($this->location);
 			$model = $loc->getResource();
 
 			if(isset($model['title'])) {

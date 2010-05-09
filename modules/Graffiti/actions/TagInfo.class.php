@@ -33,7 +33,7 @@ class GraffitiActionTagInfo extends ActionBase
 		if(isset($this->locationList) && is_array($this->locationList) && count($this->locationList) >= 1) {
 			$ul = new HtmlObject('ul');
 			foreach($this->locationList as $locId) {
-				$loc = new Location($locId);
+				$loc = Location::getLocation($locId);
 				$model = $loc->getResource();
 				$desig = isset($model['title']) ? $model['title'] : $loc->getName();
 				$url = $model->getUrl();

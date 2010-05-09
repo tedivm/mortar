@@ -22,7 +22,7 @@ class MortarActionMinify extends ActionBase
 		}elseif(isset($query['location'])){
 
 			// if no filename was sent we'll load up the default theme for the site to redirect to the appropriate file
-			$location = new Location($query['location']);
+			$location = Location::getLocation($query['location']);
 			$themeName = $location->getMeta('htmlTheme');
 			$checksum = 0;
 		}

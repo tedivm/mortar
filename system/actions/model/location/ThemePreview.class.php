@@ -10,7 +10,7 @@ class ModelActionLocationBasedThemePreview extends ModelActionLocationBasedRead
 	{
 		$query = Query::getQuery();
 		$location = isset($query['location'])
-			? new Location($query['location'])
+			? Location::getLocation($query['location'])
 			: ActiveSite::getSite()->getLocation();
 		$parent = $location->getParent();
 

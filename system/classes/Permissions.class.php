@@ -67,7 +67,7 @@ class Permissions
 		}
 
 		if(is_numeric($location))
-			$location = new Location($location);
+			$location = Location::getLocation($location);
 
 		if(!($location instanceof Location))
 			throw new TypeMismatch(array('Location', $location));

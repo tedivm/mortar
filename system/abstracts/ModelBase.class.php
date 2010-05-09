@@ -145,7 +145,7 @@ abstract class ModelBase implements Model
 			throw new ModelError('Attempted to check permissions on a non user item.');
 		}
 
-		$location = new Location(1); // zee root
+		$location = Location::getLocation(1); // zee root
 		$permissions = new Permissions($location, $user->getId());
 		return $permissions->isAllowed($action, $this->getType());
 	}

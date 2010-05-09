@@ -106,7 +106,7 @@ class TagBoxNav
 		if(!($loc = $this->convertLoc($loc)))
 			return false;
 
-		$location = new Location($loc);
+		$location = Location::getLocation($loc);
 		$children = $location->getChildren();
 		$navList = $this->navList($children);
 

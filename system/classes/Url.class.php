@@ -165,7 +165,7 @@ class Url
 					$actionInfo = $resource->getAction('Add');
 				}else{
 					$action = (isset($this->attributes['action'])) ? $this->attributes['action'] : 'Read';
-					$location = new Location($this->attributes['locationId']);
+					$location = Location::getLocation($this->attributes['locationId']);
 					$resource = $location->getResource();
 					$actionInfo = $resource->getAction($action);
 				}
