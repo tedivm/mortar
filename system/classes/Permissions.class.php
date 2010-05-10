@@ -241,6 +241,18 @@ class Permissions
 		return $this->isAllowed($action);
 	}
 
+	/**
+	 * Checks every location in an array for permission for the provided user to perform the provided action.
+	 * Uses an algorithm to reduce resource usage: the parents of all locations in the list are identified
+	 * and their permissions are tested, then each location in the list is checked to see whether any
+	 * custom permissions are set for it for either the listed user or that user's group(s). If yes, that
+	 * model's permissions are tested directly; otherwise, the parent's permissions are returned.
+	 *
+	 * @param array $locs
+	 * @param MortarModelUser $user
+	 * @param string $action
+	 * @return array
+	 */
 	static function checkListPermissions($locs, $user, $action)
 	{
 		$parents = array();
@@ -279,7 +291,15 @@ class Permissions
 		return $permissions;
 	}
 
-	// returns an array where $children[locationId] = true when locationId has unique permissions set
+	/**
+	 * Returns an array where $children[locationId] = true when locationId has unique permissions set, for
+	 * all children of each listed parent and the specified user. Tests each parent separately so each can
+	 * be cached separately. Used as a helper by checkListPermissions.
+	 *
+	 * @param array $parents
+	 * @param MortarModelUser $user
+	 * @return array
+	 */
 	static function uniqueUserPermissions($parents, $user)
 	{
 		$uniqueChildren = array();
@@ -311,6 +331,16 @@ class Permissions
 		return $uniqueChildren;
 	}
 
+	/**
+	 * Returns an array where $children[locationId] = true when locationId has unique permissions set, for
+	 * all children of each listed parent and each group in which the specified user is a member. Tests 
+	 * each parent/group combination separately so each can be cached separately. Used as a helper by 
+	 * checkListPermissions.
+	 *
+	 * @param array $parents
+	 * @param MortarModelUser $user
+	 * @return array
+	 */
 	static function uniqueGroupPermissions($parents, $user)
 	{
 		$uniqueChildren = array();
