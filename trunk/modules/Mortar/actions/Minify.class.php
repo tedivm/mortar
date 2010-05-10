@@ -108,8 +108,16 @@ class MortarActionMinify extends ActionBase
 		$rawUrl->module = 'Mortar';
 		$rawUrl->raw = true;
 
-		$output = '/* Raw Source: ' . (string) $rawUrl . ' */' . PHP_EOL;
-		$output .= $minifiedData['data'];
+		if(strpos($minifiedData['data'], '@charset') === 0) {
+			$offset = strpos($minifiedData['data'], "';") + 2;
+			$output = substr($minifiedData['data'], 0, $offset) . PHP_EOL;
+		} else {
+			$offset = 0;
+			$output = '';
+		}
+
+		$output .= '/* Raw Source: ' . (string) $rawUrl . ' */' . PHP_EOL;
+		$output .= substr($minifiedData['data'], $offset);
 		$this->output = $output;
 	}
 
