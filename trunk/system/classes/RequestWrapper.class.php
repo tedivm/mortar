@@ -73,6 +73,9 @@ class RequestWrapper
 					$errorFormat = $this->ioHandler->getErrorFormat();
 					$this->runAction($errorAction, $errorFormat);
 				}
+				Location::clear();
+				ModelRegistry::clear();
+
 			// If the io handler says it can handle another request, loop around and go for it
 			}while($this->ioHandler->nextRequest());
 

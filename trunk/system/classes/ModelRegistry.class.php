@@ -34,6 +34,14 @@ class ModelRegistry
 	protected static $resourceIndex;
 
 	/**
+	 * Stores models which have already been created in the course of this request so that they can be returned without
+	 * additional database calls.
+	 *
+	 * @var array
+	 */
+	protected static $createdModels = array();
+
+	/**
 	 * This clears the handlers
 	 *
 	 * @static
@@ -138,6 +146,9 @@ class ModelRegistry
 	 */
 	static public function loadModel($type, $id = null)
 	{
+		if(isset($id) && isset(self::$createdModels[$type][$id]))
+			return self::$createdModels[$type][$id];
+
 		try{
 			$modelInfo = self::getHandler($type);
 
@@ -155,11 +166,19 @@ class ModelRegistry
 			if(isset($id) && $model->getId() === false)
 				return false;
 
+			if(isset($id))
+				self::$createdModels[$type][$id] = $model;
+
 			return $model;
 
 		}catch(Exception $e){
 			return false;
 		}
+	}
+
+	static public function clear()
+	{
+		self::$createdModels[$type][$id] = array();
 	}
 
 	/**
