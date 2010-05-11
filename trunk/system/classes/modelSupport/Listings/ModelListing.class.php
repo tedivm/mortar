@@ -25,11 +25,25 @@ class ModelListing
 	protected $options = array();
 
 	/**
+	 * This is the batch size in which models are loaded until enough models are able to be returned.
+	 *
+	 * @var int
+	 */
+	protected $batchSize = 200;
+
+	/**
 	 * This is the maximum number of children that will be returned by the class.
 	 *
 	 * @var int
 	 */
-	protected $maxLimit = 100;
+	protected $maxLimit = 2000;
+
+	/**
+	 * This is how many batches have been loaded so far.
+	 *
+	 * @var int
+	 */
+	protected $batchesLoaded = 0;
 
 	/**
 	 * This array defines which columns map to what value (type or id). Because the ORM class is used the string
@@ -61,7 +75,47 @@ class ModelListing
 	 */
 	protected $table;
 
+	/**
+	 * The model type being listed by this class.
+	 *
+	 * @var string
+	 */
 	protected $type;
+
+	/**
+	 * The models loaded from the database for use by this class.
+	 *
+	 * @var string
+	 */
+	protected $models;
+
+	/**
+	 * Takes the name of the table and model type this instance will be listing.
+	 *
+	 * @param string $table
+	 * @param string $type
+	 */
+	public function __construct($table, $type)
+	{
+		$this->table = $table;
+		$this->type = $type;
+	}
+
+	/**
+	 * This function is used to set or change the table that the class is mapped against.
+	 *
+	 * @param string $table
+	 */
+	public function setTable($table)
+	{
+		$this->table = $table;
+	}
+
+	public function setType($type)
+	{
+		$this->type = $type;
+	}
+
 	/**
 	 * This function sets an option (browseBy, order) for retrieving the models.
 	 *
@@ -113,6 +167,52 @@ class ModelListing
 	}
 
 	/**
+	 * This function returns the specified number of models that meet all of the set requirements.
+	 *
+	 * @param int $number
+	 * @param int $offset
+	 * @return array|false
+	 */
+	public function getListing($number, $offset = 0)
+	{
+		if($number > $this->maxLimit)
+			$number = $this->maxLimit;
+
+		if($offset < 0)
+			$offset = 0;
+
+		$models = $this->getModels($number, $offset);
+
+		return (count($models) > 0) ? $models : false;
+	}
+
+	/**
+	 * Loads models in set batches (for caching purposes) from the database, checking after each
+	 * batch whether enough models are present, then returning either the requested number or
+	 * as many as possible if not enough models are present.
+	 *
+	 * @param int $number
+	 * @param int $offset
+	 * @return array
+	 */
+	protected function getModels($number, $offset)
+	{
+		$batch = 0;
+		$allModels = array();
+		while($this->loadModels($batch)) {
+			$allModels = array_merge($allModels, $this->filterModels($this->models[$batch]));
+
+			if(count($allModels) >= $number + $offset) {
+				return array_slice($allModels, $offset, $number);
+			}
+
+			$batch++;
+		}
+
+		return $allModels;
+	}
+
+	/**
 	 * This function filters the retrieved models by permission, testing against the active user.
 	 *
 	 * @param array $modelArray
@@ -141,68 +241,21 @@ class ModelListing
 	}
 
 	/**
-	 * This function returns the specified number of models that meet all of the set requirements.
-	 *
-	 * @param int $number
-	 * @param int $offset
-	 * @return array
-	 */
-	public function getListing($number, $offset = 0)
-	{
-		if($number > $this->maxLimit)
-			$number = $this->maxLimit;
-
-		if($offset < 0)
-			$offset = 0;
-
-		$processedModels = array();
-
-		// We want to get the requested amount if possible, so if we do not have that many we will load the next batch
-		// and add those to our array. To take advantage of caching we will load all of the next batch, not just the
-		// amount of models we are missing.
-		while($unprocessedModels = $this->getModels($number, $offset))
-		{
-			$processedModels = array_merge($processedModels, $this->filterModels($unprocessedModels));
-			$modelCount = count($processedModels);
-			if($modelCount >= $number)
-			{
-				if($modelCount > $number);
-					$processedModels = array_slice($processedModels, 0, $number, true);
-
-				break;
-			}
-			$offset = $offset + $number;
-		}
-
-		return (count($processedModels) > 0) ? $processedModels : false;
-	}
-
-	/**
-	 * This function is used to set or change the table that the class is mapped against.
-	 *
-	 * @param string $table
-	 */
-	public function setTable($table)
-	{
-		$this->table = $table;
-	}
-
-	public function setType($type)
-	{
-		$this->type = $type;
-	}
-
-	/**
-	 * This function is used internally to load a batch (number + offset) of models. It processed the cache, options,
-	 * and restrictions while acting as a wrapper around the getModelsFromTable function.
+	 * This function is used internally to load a batch of models. It processed the cache, options,
+	 * and restrictions while acting as a wrapper around the getModelsFromTable function. Each batch
+	 * is a set number of models starting from the first result -- i.e. batch 0 is 
+	 * models 0 through (batchSize - 1), batch 1 is models (batchSize) through (batchSize * 2) - 1,
+	 * etc.
 	 *
 	 * @cache This cache is dynamically keyed, see getCacheArray()
-	 * @param int $offset
-	 * @param int $number
+	 * @param int $batch
 	 * @return array Contains an array of associative arrays with index type and id
 	 */
-	protected function getModels($number, $offset)
+	protected function loadModels($batch)
 	{
+		if(isset($this->models[$batch]))
+			return true;
+
 		$order = (isset($this->options['order']) && strtolower($this->options['order']) == 'desc') ? 'DESC' : 'ASC';
 		$browseBy = isset($this->options['browseBy']) ? $this->options['browseBy'] : null;
 
@@ -215,10 +268,9 @@ class ModelListing
 		if($functionString = $this->getFunctionString($this->functions))
 			$cacheKey[] = $functionString;
 
-		// we put order before offset because anything in descending isn't likely to change as often
 		$cacheKey[] = 'browseChildrenBy';
 		$cacheKey[] = $browseBy . '_' . $order;
-		$cacheKey[] = $offset . '_' . $number;
+		$cacheKey[] = 'batch_' . $batch;
 
 		$cache = CacheControl::getCache($cacheKey);
 		$modelList = $cache->getData();
@@ -226,10 +278,13 @@ class ModelListing
 		if($cache->isStale())
 		{
 			$modelList = $this->getModelsFromTable($this->table, $this->restrictions, $this->functions, $browseBy,
-								$order, $number, $offset);
+								$order, $this->batchSize, $this->batchSize * $batch);
 			$cache->storeData($modelList);
 		}
-		return $modelList;
+
+		$this->models[$batch] = $modelList;
+
+		return ($modelList === false) ? false : true;
 	}
 
 	/**
@@ -314,13 +369,6 @@ class ModelListing
 
 		return ($functionString != '') ? $functionString : false;
 	}
-
-	public function __construct($table, $type)
-	{
-		$this->table = $table;
-		$this->type = $type;
-	}
-
 }
 
 ?>
