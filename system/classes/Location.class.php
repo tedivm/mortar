@@ -893,6 +893,11 @@ class Location
 
 		return self::$createdLocations[$id];
 	}
+
+	static public function clear()
+	{
+		self::$createdLocations = array();
+	}
 }
 
 class LocationError extends CoreError {}
