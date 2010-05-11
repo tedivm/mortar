@@ -178,7 +178,7 @@ class ModelRegistry
 
 	static public function clear()
 	{
-		self::$createdModels[$type][$id] = array();
+		self::$createdModels = array();
 	}
 
 	/**
