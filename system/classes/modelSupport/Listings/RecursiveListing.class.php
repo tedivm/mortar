@@ -2,8 +2,6 @@
 
 class RecursiveListing extends LocationListing
 {
-	protected $maxLimit = 500;
-
 	protected function getModels($number, $offset)
 	{
 		$originalParent = $this->restrictions['parent'];

@@ -33,20 +33,22 @@ class LocationListing extends ModelListing
 	protected $table = 'locations';
 
 	/**
-	 * This function returns the base array used to distinguish this cache item from others. This is just a base- the
-	 * options and restrictions get added seperately.
+	 * Doesn't require any information since all locations are listed using the same table.
 	 *
-	 * @return array
 	 */
-	protected function getCacheArray()
+	public function __construct()
 	{
-		if(!isset($this->restrictions['parent']))
-			return false;
 
-		$cacheKey = array('locations', $this->restrictions['parent']);
-		return $cacheKey;
 	}
 
+	/**
+	 * This function sets a requirement for the models being retrieved. For this implementation the names are mapped
+	 * directly to a database column, and the value sets what that column needs to be. For three specific
+	 * location factors, convenient aliases are provided.
+	 *
+	 * @param string $name
+	 * @param string|int $value
+	 */
 	public function addRestriction($name, $value)
 	{
 		switch($name)
@@ -64,11 +66,51 @@ class LocationListing extends ModelListing
 		parent::addRestriction($name, $value);
 	}
 
-	public function __construct()
+	/**
+	 * This function returns the base array used to distinguish this cache item from others. This is just a base- the
+	 * options and restrictions get added seperately.
+	 *
+	 * @return array
+	 */
+	protected function getCacheArray()
 	{
+		if(!isset($this->restrictions['parent']))
+			return false;
 
+		$cacheKey = array('locations', $this->restrictions['parent']);
+		return $cacheKey;
 	}
 
+	/**
+	 * This function filters the retrieved models by permission, testing against the active user.
+	 * This makes use of the checkListPermissions method in order to minimize the database queries
+	 * needed to check a list of Locations.
+	 *
+	 * @param array $modelArray
+	 * @return array
+	 */
+	protected function filterModels($modelArray)
+	{
+		$user = ActiveUser::getUser();
+		$filteredModels = array();
+		$locs = array();
+
+		foreach($modelArray as $modelInfo) {
+			$model = ModelRegistry::loadModel($modelInfo['type'], $modelInfo['id']);
+			$locs[$modelInfo['id']] = $model->getLocation();
+		}
+
+		$results = Permissions::checkListPermissions($locs, $user, 'Read');
+
+		foreach($modelArray as $modelInfo) {
+			$loc = $locs[$modelInfo['id']];
+			if($results[$loc->getId()] === true) {
+				$filteredModels[] = $modelInfo;
+			}
+		}
+
+		return $filteredModels;
+	}
 }
 
 ?>
