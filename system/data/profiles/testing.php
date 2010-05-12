@@ -5,6 +5,7 @@ BootStrapper::define('STRICT', false);
 BootStrapper::define('IGNOREPERMISSIONS', false);	//FOR TESTING ONLY!!!!
 BootStrapper::define('BENCHMARK', true);
 BootStrapper::define('DISABLECACHE', false);
+BootStrapper::define('CACHE_SETMEMONLY', false);
 BootStrapper::define('DEPRECIATION_WARNINGS', false);
 BootStrapper::define('OUTPUT_COMPRESSION', true);
 BootStrapper::define('OUTPUT_COMPRESSION_HEADERS', true);

@@ -142,8 +142,11 @@ class Stash
 	 */
 	public function __construct(StashHandler $handler)
 	{
-		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable)
+		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable) {
 			$this->cache_enabled = false;
+		} elseif(defined('CACHE_SETMEMONLY') && CACHE_SETMEMONLY) {
+			$this->memOnly = true;
+		}
 
 		$this->handler = $handler;
 	}
