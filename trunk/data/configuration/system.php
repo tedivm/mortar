@@ -86,7 +86,10 @@
 //define('DISABLE_MINIFICATION', false);
 
 /* Disables the caching system, including the script-only cache. Not recommended for production systems at all. */
-//define('DISABLECACHE', false);
+//define('DISABLECACHE', true);
+
+/* Sets the caching system to use only memory caching. Only functions when caching is not disabled. */
+//define('CACHE_SETMEMONLY', false);
 
 /*
  * Binaries
