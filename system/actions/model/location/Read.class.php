@@ -36,13 +36,28 @@ class ModelActionLocationBasedRead extends ModelActionLocationBasedBase
 	 */
 	public function viewAdmin($page)
 	{
+		$output = '';
+
 		if(isset($this->model['title'])) {
+			$output .= '<h1>' . $this->model['title'] . "</h1>\n";
 			$page->setTitle($this->model['title']);
-		} elseif(isset($this->model->name)) {
-			$page->setTitle($this->model->name);
+		} elseif(isset($this->model['name'])) {
+			$output .= '<h1>' . $this->model['name'] . "</h1>\n";
+			$page->setTitle($this->model['name']);
 		}
 
-		return $this->modelToHtml($page, $this->model, 'Display.html');
+		$output .= $this->modelToHtml($page, $this->model, 'adminDetails.html');
+
+		$hook = new Hook();
+		$hook->loadPlugins('Template', 'admin', 'extraDetails');
+		$results = $hook->getDetails($this->model);
+
+		foreach($results as $detail)
+			$output .= $detail;
+
+		$output .= $this->modelToHtml($page, $this->model, 'Display.html');
+
+		return $output;
 	}
 
 	/**
