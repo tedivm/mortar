@@ -16,6 +16,7 @@ class GraffitiInstallerPostscript
 		Hook::registerPlugin('system', 'menus', 'admin', $this->packageId, 'MenusGraffiti');
 		Hook::registerPlugin('Forms', 'HtmlConvert', 'tag', $this->packageId, 'FormInputTagToHtml');
 		Hook::registerPlugin('Forms', 'checkSubmit', 'tag', $this->packageId, 'FormInputTagCheckSubmit');
+		Hook::registerPlugin('Template', 'Navigation', 'Tags', $this->packageId, 'TemplateNavCategories');
 		Hook::registerModelPlugin('All', 'baseForm', $this->packageId, 'ModelFormCategories');
 		Hook::registerModelPlugin('All', 'baseForm', $this->packageId, 'ModelFormTags');
 		Hook::registerModelPlugin('All', 'adminMenu', $this->packageId, 'TagsMenu');
