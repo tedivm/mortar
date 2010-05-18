@@ -61,10 +61,11 @@ class ViewThemeTemplate
 	{
 		$options = array();
 
-		if(!defined('DISABLECACHE') || DISABLECACHE !== true)
-			$options['cache'] = $cachePath;
-		else
+		if(	(defined('DISABLECACHE') && DISABLECACHE === true) ||
+			(defined('CACHE_SETMEMONLY') && CACHE_SETMEMONLY === true) )
 			$options['cache'] = false;
+		else
+			$options['cache'] = $cachePath;
 
 		if(defined('REBUILD_TEMPLATES'))
 			$options['auto_reload'] = REBUILD_TEMPLATES;
