@@ -175,7 +175,7 @@ class GraffitiCategorizer
 			return false;
 
 		$cache = CacheControl::getCache('models', 'Category', $cat, 'getCategoryLocations');
-		$desc = $cache->getData();
+		$locs = $cache->getData();
 
 		if($cache->isStale()) {
 			$stmt = DatabaseConnection::getStatement('default_read_only');
