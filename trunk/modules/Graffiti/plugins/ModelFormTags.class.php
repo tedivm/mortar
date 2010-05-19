@@ -14,8 +14,9 @@ class GraffitiPluginModelFormTags
 		$values = array();
 
 		if($loc->getName() !== 'tmp') {
-			$user = $loc->getOwner();
-			$values = GraffitiTagLookUp::getUserTags($loc, $user);
+			if($user = $loc->getOwner()) {
+				$values = GraffitiTagLookUp::getUserTags($loc, $user);
+			}
 		}
 
 		$baseForm->changeSection('tags')->
