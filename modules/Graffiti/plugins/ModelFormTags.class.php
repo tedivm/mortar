@@ -42,10 +42,10 @@ class GraffitiPluginModelFormTags
 			return null;
 
 		$loc = $model->getLocation();
-		$owner = $loc->getOwner();
-
-		GraffitiTagger::clearTagsFromLocation($loc, $owner);
-		GraffitiTagger::tagLocation((array) $input['tags'], $loc, $owner);
+		if($owner = $loc->getOwner()) {
+			GraffitiTagger::clearTagsFromLocation($loc, $owner);
+			GraffitiTagger::tagLocation((array) $input['tags'], $loc, $owner);
+		}
 	}
 }
 
