@@ -33,6 +33,14 @@ class Permissions
 	protected $location;
 
 	/**
+	 * Location where the current permisssion-checking process began. Null unless a parent is being checked.
+	 *
+	 * @access protected
+	 * @var Location
+	 */
+	protected $startLocation = null;
+
+	/**
 	 * An array of allowed permissions and actions
 	 *
 	 * @access protected
@@ -47,7 +55,7 @@ class Permissions
 	 * @param Location|int $location
 	 * @param User|int $userId
 	 */
-	public function __construct($location, $userId)
+	public function __construct($location, $userId, $startLocation = null)
 	{
 
 		if(IGNOREPERMISSIONS)
@@ -72,11 +80,15 @@ class Permissions
 		if(!($location instanceof Location))
 			throw new TypeMismatch(array('Location', $location));
 
-
 		$this->location = $location;
 
-		$this->permissions = $this->loadPermissions();
+		if(isset($startLocation)) {
+			$this->startLocation = $startLocation;
+		} else {
+			$this->startLocation = $this->location;
+		}
 
+		$this->permissions = $this->loadPermissions();
 	}
 
 	/**
@@ -90,19 +102,21 @@ class Permissions
 		$memberGroupPermissionsArray = array();
 		$memberGroups = $this->user['membergroups'];
 
-		$resourceOwner = $this->location->getOwner();
+		$loc = isset($this->startLocation) ? $this->startLocation : $this->location;
+
+		$resourceOwner = $loc->getOwner();
 		if(!(defined('INSTALLMODE') && INSTALLMODE)) {
 			if($resourceOwner && $resourceOwner->getId() == $this->user->getId()) {
 				$mg = ModelRegistry::loadModel('MemberGroup');
 				$mg->loadByName('ResourceOwner');
-				$memberGroups[] = $mg->getId();
+				array_unshift($memberGroups, $mg->getId());
 			}
 
 			$memberGroup = $this->location->getOwnerGroup();
 			if($memberGroup && in_array($memberGroup->getId(), $memberGroups)) {
 				$mg = ModelRegistry::loadModel('MemberGroup');
 				$mg->loadByName('ResourceGroupOwner');
-				$memberGroups[] = $mg->getId();
+				array_unshift($memberGroups, $mg->getId());
 			}
 		}
 
@@ -209,7 +223,7 @@ class Permissions
 				return false;
 
 			//Check the parent location
-			$parentPermission = new Permissions($parentLocation->getId(), $this->user);
+			$parentPermission = new Permissions($parentLocation->getId(), $this->user, $this->startLocation);
 
 			return $parentPermission->isAllowed($action, $type);
 
