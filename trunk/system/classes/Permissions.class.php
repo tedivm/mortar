@@ -112,7 +112,7 @@ class Permissions
 				array_unshift($memberGroups, $mg->getId());
 			}
 
-			$memberGroup = $this->location->getOwnerGroup();
+			$memberGroup = $loc->getOwnerGroup();
 			if($memberGroup && in_array($memberGroup->getId(), $memberGroups)) {
 				$mg = ModelRegistry::loadModel('MemberGroup');
 				$mg->loadByName('ResourceGroupOwner');
@@ -273,19 +273,30 @@ class Permissions
 		$parentIds = array();
 		$parentPs = array();
 		$permissions = array();
+		$types = array();
 
 		foreach($locs as $loc) {
 			$locId = $loc->getId();
 			$parent = $loc->getParent();
 			$parentId = $parent->getId();
 			$parentIds[$locId] = $parentId;
+
 			if(!isset($parents[$parentId]))
 				$parents[$parentId] = $parent;
+
+			if($resource = $loc->getResource()) {
+				$type = $resource->getType();
+				if(!in_array($type, $types)) {
+					$types[] = $type;
+				}
+			}
 		}
 
 		foreach($parents as $id => $par) {
 			$parentPer = new Permissions($par, $user);
-			$parentPs[$id] = $parentPer->isAllowed($action);
+			foreach($types as $type) {
+				$parentPs[$id][$type] = $parentPer->isAllowed($action, $type);
+			}
 		}
 
 		$userPs  = self::uniqueUserPermissions($parents, $user);
@@ -294,11 +305,23 @@ class Permissions
 
 		foreach($locs as $loc) {
 			$locId = $loc->getId();
+
+			$resource = $loc->getResource();
+			$type = $resource->getType();
+			$owner = $loc->getOwner();
+			$ownerGroup = $loc->getOwnerGroup();
+			$memberGroups = $user['membergroups'];
+
+			if( ($owner && ($owner->getId() === $user->getId())) ||
+			    ($ownerGroup && in_array($ownerGroup->getId(), $memberGroups)) ) {
+				$uniquePs[$locId] = true;
+			}
+
 			if(isset($uniquePs[$locId])) {
 				$per = new Permissions($locId, $user);
 				$permissions[$locId] = $per->isAllowed($action);
 			} else {
-				$permissions[$locId] = $parentPs[$parentIds[$locId]];
+				$permissions[$locId] = $parentPs[$parentIds[$locId]][$type];
 			}
 		}
 
