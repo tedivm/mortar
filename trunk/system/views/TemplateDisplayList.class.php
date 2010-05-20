@@ -122,7 +122,8 @@ class ViewTemplateDisplayList {
 		foreach($baseActionTypes as $action) {
 			if(isset($actionUrls[$action])) {
 				$actionUrl = $actionUrls[$action];
-				array_push($allowedUrls, array($action, $actionUrl));
+				if($model->checkAuth($actionUrl->action))
+					array_push($allowedUrls, array($action, $actionUrl));
 			}
 		}
 
