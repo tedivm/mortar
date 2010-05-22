@@ -103,6 +103,9 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 	 */
 	public function getListing()
 	{
+		if(count($this->modelList) === 0)
+			return "<p>There were no matches for the specified query.</p>";
+
 		$themeSettings = $this->theme->getSettings();
 		
 		$name = method_exists($this->model, 'getLocation')	? $this->model->getLocation()->getName()

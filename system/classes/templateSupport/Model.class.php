@@ -194,6 +194,11 @@ class TagBoxModel
 		return $content;
 	}
 
+	public function allowed($type)
+	{
+		return $this->model->checkAuth($type);
+	}
+
 	public function __get($key)
 	{
 		switch($key) {
