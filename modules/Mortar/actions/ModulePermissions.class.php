@@ -72,8 +72,9 @@ class MortarActionModulePermissions extends ActionBase
 
 		foreach($this->models as $model)
 		{
-			$form->changeSection('model_' . $model['name'])
-				->setLegend($model['name']);
+			$form->changeSection('model_' . $model['name'])->
+				setLegend($model['name'])->
+				setSectionOutro('<div class="clear-fieldsets"></div>');
 
 			foreach($membergroups as $group)
 			{

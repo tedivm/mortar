@@ -69,6 +69,13 @@ class Form
 	protected $sectionIntro = array();
 
 	/**
+	 * This is an array of followup text for each section.
+	 *
+	 * @var array
+	 */
+	protected $sectionOutro = array();
+
+	/**
 	 * This is an array of classes added to the fieldset tag for a given section.
 	 *
 	 * @var array
@@ -257,6 +264,18 @@ class Form
 	public function setSectionIntro($text)
 	{
 		$this->sectionIntro[$this->activeSection] = $text;
+		return $this;
+	}
+
+	/**
+	 * This sets the section followup text. It returns the Form object form method chaining.
+	 *
+	 * @param string $text
+	 * @return Form
+	 */
+	public function setSectionOutro($text)
+	{
+		$this->sectionOutro[$this->activeSection] = $text;
 		return $this;
 	}
 
@@ -547,6 +566,7 @@ class Form
 
 		$this->inputs = array_merge_recursive($this->inputs, $package['inputs']);
 		$this->sectionIntro = array_merge_recursive($this->sectionIntro, $package['intros']);
+		$this->sectionOutro = array_merge_recursive($this->sectionIntro, $package['outros']);
 		$this->sectionLegends = array_merge_recursive($this->sectionLegends, $package['legends']);
 	}
 
@@ -569,6 +589,7 @@ class Form
 	{
 		$package['inputs'] = $this->inputs;
 		$package['intros'] = $this->sectionIntro;
+		$package['outros'] = $this->sectionOutro;
 		$package['legends'] = $this->sectionLegends;
 		$package['classes'] = $this->sectionClasses;
 		return $package;
