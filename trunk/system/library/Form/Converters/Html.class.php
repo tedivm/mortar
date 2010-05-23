@@ -22,6 +22,7 @@ class FormToHtml
 	protected $name;
 	protected $inputs;
 	protected $sectionIntro;
+	protected $sectionOutro;
 	protected $sectionLegends;
 	protected $sectionClasses;
 
@@ -52,6 +53,7 @@ class FormToHtml
 		$this->form = $form;
 		$this->inputs = $formPackage['inputs'];
 		$this->sectionIntro = $formPackage['intros'];
+		$this->sectionOutro = $formPackage['outros'];
 		$this->sectionLegends = $formPackage['legends'];
 		$this->sectionClasses = $formPackage['classes'];  
 	}
@@ -108,18 +110,25 @@ class FormToHtml
 				$sectionHtml->insertNewHtmlObject('legend')->
 					wrapAround($this->sectionLegends[$section]);
 
-			if(isset($this->sectionIntro[$section]))
-				$sectionHtml->insertNewHtmlObject('div')->
-					wrapAround($this->sectionIntro[$section])->
-					addClass('intro');
-
 			$sectionDiv = new HtmlObject('div');
 			$sectionDiv->addClass('fieldset_contents')->
 				property('id', $formId . "_section_" . $section . '_contents');
 
+			if(isset($this->sectionIntro[$section]))
+				$sectionDiv->insertNewHtmlObject('div')->
+					wrapAround($this->sectionIntro[$section])->
+					addClass('fieldset_intro')->
+					property('id', $formId . "_section_" . $section . '_intro');
+
 			$sectionHtml->wrapAround($sectionDiv);
 
 			$hasInputs = false;
+
+			$controlsDiv = new HtmlObject('div');
+			$controlsDiv->addClass('fieldset_controls')->
+				property('id', $formId . "_section_" . $section . '_controls');
+
+			$sectionDiv->wrapAround($controlsDiv);
 
 			foreach($inputs as $input)
 			{
@@ -171,7 +180,7 @@ class FormToHtml
 						property('id', $inputId . '_label');
 
 					if(isset($input->pretext))
-						$sectionDiv->wrapAround($input->pretext);
+						$controlsDiv->wrapAround($input->pretext);
 
 					if(isset($input->label))
 					{
@@ -180,18 +189,24 @@ class FormToHtml
 							$labelHtml->property('title', $input->description);
 					}
 
-					$sectionDiv->wrapAround($labelHtml)->
+					$controlsDiv->wrapAround($labelHtml)->
 						wrapAround($inputHtml);
 
 					if(isset($input->posttext))
-						$sectionDiv->wrapAround($input->posttext);
+						$controlsDiv->wrapAround($input->posttext);
 
 					if(!isset($input->noBreak) || $input->noBreak === false)
-						$sectionDiv->insertNewHtmlObject('br');
+						$controlsDiv->insertNewHtmlObject('br');
 
 					$hasInputs = true;
 				}
 			}//foreach($this->inputs as $section => $inputs)
+
+			if(isset($this->sectionOutro[$section]))
+				$sectionDiv->insertNewHtmlObject('div')->
+					wrapAround($this->sectionOutro[$section])->
+					addClass('fieldset_outro')->
+					property('id', $formId . "_section_" . $section . '_outro');
 
 			if($hasInputs)
 				$formHtml->wrapAround($sectionHtml);
