@@ -15,18 +15,9 @@
  * @package System
  * @subpackage ModelSupport
  */
-class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
+class ModelActionLocationBasedIndex extends ModelActionIndex
 {
-        public $adminSettings = array( 'headerTitle' => 'Index' );
-
 	protected $listingClass = 'LocationListing';
-
-	/**
-	 * This is the date format used when converting the model to an html table.
-	 *
-	 * @var string
-	 */
-	protected $indexDateFormat = 'm.d.y g:i a';
 
 	/**
 	 * If this $query['browseBy'] option isn't set this column is used to sort the models.
@@ -36,33 +27,13 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 	public $indexBrowseBy = 'name';
 
 	/**
-	 * This is the maximum number of models a user can request at one time.
-	 *
-	 * @var int
-	 */
-	public $indexMaxLimit = 100;
-
-	/**
-	 * This is the default number of models returned if the user does not specify how many they want.
-	 *
-	 * @var int
-	 */
-	public $indexLimit = 10;
-
-	/**
-	 * This array contains the models requested by the user.
-	 *
-	 * @var array
-	 */
-	public $childModels = array();
-
-	/**
 	 * This function loads the requested models into the childModels properly for us by the various output functions.
 	 *
 	 */
 	public function logic()
 	{
 		$lastModified = $this->model->getLocation()->getLastModified();
+		$this->loadOffsets();
 		$modelInformationArray = $this->getChildren(array());
 		$childrenModels = array();
 		if(is_array($modelInformationArray))
@@ -80,35 +51,6 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 
 		$this->lastModified = $lastModified;
 		$this->childModels = $childrenModels;
-	}
-
-	/**
-	 * This function ties the user input into a Listing class retrieved from getModelListingClass() and returns the
-	 * models to the logic function.
-	 *
-	 * @param array $restrictions
-	 * @return array Contains keys 'type' and 'id'
-	 */
-	protected function getChildren($restrictions)
-	{
-		$query = Query::getQuery();
-
-		$offset = isset($query['start']) ? $query['start'] : 0;
-		$numberChildren = isset($query['limit']) && is_numeric($query['limit'])
-							? $query['limit']
-							: $this->indexLimit;
-
-		if($numberChildren > $this->indexMaxLimit)
-			$numberChildren = $this->indexMaxLimit;
-
-		$modelListing = $this->getModelListingClass();
-
-		foreach($restrictions as $restrictionName => $restrictionValue)
-			$modelListing->addRestriction($restrictionName, $restrictionValue);
-
-
-		$listing = $modelListing->getListing($numberChildren, $offset);
-		return $listing;
 	}
 
 	/**
@@ -155,56 +97,9 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		return $listingObject;
 	}
 
-	protected function getTableDisplayList()
-	{
-		$indexList = new ViewTableDisplayList($this->model, $this->childModels);
-		return $indexList;
-	}
-
-	protected function getTemplateDisplayList()
-	{
-		$readList = new ViewTemplateDisplayList($this->model, $this->childModels);
-		return $readList;
-	}
-
-	/**
-	 * Creates a listing of models along with relevant qualities and actions for use in an admin page.
-	 *
-	 * @return string
-	 */
-	public function viewAdmin($page)
-	{
-		$indexList = $this->getTableDisplayList();
-		$indexList->addPage($page);
-
-		return $indexList->getListing();
-	}
-
-
-	/**
-	 * This function takes the model's data and puts it into a template, which gets injected into the active page. It
-	 * also takes out some model data to place in the rest of the template (title, keywords, descriptions).
-	 *
-	 * @return string This is the html that will get injected into the template.
-	 */
-	public function viewHtml($page)
-	{
-		$readList = $this->getTemplateDisplayList();
-		$readList->addPage($page);
-
-		$content = array();
-
-		if($listingResults = $readList->getListing()) {
-			$content['listing'] = $listingResults;
-		}
-
-		return $this->modelToHtml($page, $this->model, 'Display.html', $content);
-	}
-
-
 	public function viewControl($page)
 	{
-		$indexList = $this->getTableDisplayList();
+		$indexList = $this->getDisplayList($this->adminSettings['listType']);
 		$indexList->setColumns(array('type' => 'Type', 'name' => 'Name', 'title' => 'Title'));
 
 		$indexList->addPage($page);
@@ -249,6 +144,48 @@ class ModelActionLocationBasedIndex extends ModelActionLocationBasedRead
 		}else{
 			return false;
 		}
+	}
+
+	/**
+	 * This function sends along the Last-Modified headers, and if $this->cacheExpirationOffset is set it also sends
+	 * that to the ioHandler. This is vital for client side http caching
+	 *
+	 * @access protected
+	 */
+	protected function setHeaders()
+	{
+		$location = $this->model->getLocation();
+		$modifiedDate = $location->getLastModified();
+
+		$locationListing = new LocationListing();
+		$locationListing->addRestriction('parent', $this->model->getLocation()->getId());
+		$locationListing->setOption('order', 'DESC');
+		$locationListing->setOption('browseBy', 'lastModified');
+
+		if($listingArray = $locationListing->getListing(1))
+		{
+			$childLocationInfo = array_pop($listingArray);
+			$childModel = ModelRegistry::loadModel($childLocationInfo['type'], $childLocationInfo['id']);
+			$location = $childModel->getLocation();
+			$childModifiedDate = $location->getLastModified();
+			if($childModifiedDate > $modifiedDate)
+				$modifiedDate = $childModifiedDate;
+		}
+
+
+		if(isset($this->lastModified))
+		{
+			$locationModifiedDate = $location->getLastModified();
+			if($this->lastModified > $modifiedDate)
+			{
+				$modifiedDate = $locationModifiedDate;
+			}
+		}
+
+		$this->ioHandler->addHeader('Last-Modified', gmdate(HTTP_DATE, $modifiedDate));
+
+		if(isset($this->cacheExpirationOffset) && !isset($this->ioHandler->cacheExpirationOffset))
+			$this->ioHandler->cacheExpirationOffset = $this->cacheExpirationOffset;
 	}
 }
 

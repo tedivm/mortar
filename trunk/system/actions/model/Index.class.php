@@ -17,24 +17,51 @@
  */
 class ModelActionIndex extends ModelActionBase
 {
-
-        public $adminSettings = array( 'headerTitle' => 'Index' );
-        public $htmlSettings = array( 'headerTitle' => 'Index' );
+        public $adminSettings = array( 'headerTitle' => 'Index', 'listType' => 'table' );
+        public $htmlSettings = array( 'headerTitle' => 'Index', 'listType' => 'table' );
 
 	protected $listingClass = 'ModelListing';
 
+	/**
+	 * This is the date format used when converting the model to an html table.
+	 *
+	 * @var string
+	 */
 	protected $indexDateFormat = 'm.d.y g:i a';
+
+	protected $count;
+	protected $page;
+	protected $size;
+	protected $offset;
+
+	protected $modelListing;
 
 	public $indexBrowseBy = 'name';
 
+	/**
+	 * This is the maximum number of models a user can request at one time.
+	 *
+	 * @var int
+	 */
 	public $indexMaxLimit = 100;
 
-	public $indexLimit = 10;
+	/**
+	 * This is the default number of models returned if the user does not specify how many they want.
+	 *
+	 * @var int
+	 */
+	public $defaultSize = 20;
 
+	/**
+	 * This array contains the models requested by the user.
+	 *
+	 * @var array
+	 */
 	public $childModels = array();
 
 	public function logic()
 	{
+		$this->loadOffsets();
 		$modelInformationArray = $this->getChildren(array());
 		$childrenModels = array();
 		if(is_array($modelInformationArray))
@@ -49,27 +76,54 @@ class ModelActionIndex extends ModelActionBase
 		$this->childModels = $childrenModels;
 	}
 
+	protected function loadOffsets()
+	{
+		$query = Query::getQuery();	
+
+		$this->modelListing = $this->getModelListingClass();
+		$this->count = $this->modelListing->getCount();
+
+		$this->size = isset($query['limit']) && is_numeric($query['limit'])
+							? $query['limit']
+							: $this->defaultSize;
+
+		if($this->size > $this->indexMaxLimit)
+			$this->size = $this->indexMaxLimit;
+
+		if(isset($query['page']) && is_numeric($query['page']) && $query['page'] > 0) {
+			$this->offset = $this->size * ($query['page'] - 1);
+			$this->page = $query['page'];
+		} elseif(isset($query['start'])) {
+			$this->offset = (int) $query['start'];
+			$this->page = 0;
+		} else {
+			$this->offset = 0;
+			$this->page = 1;
+		}
+	}
+
+	/**
+	 * This function ties the user input into a Listing class retrieved from getModelListingClass() and returns the
+	 * models to the logic function.
+	 *
+	 * @param array $restrictions
+	 * @return array Contains keys 'type' and 'id'
+	 */
 	protected function getChildren($restrictions)
 	{
-		$query = Query::getQuery();
-
-		$offset = isset($query['start']) ? $query['start'] : 0;
-		$numberChildren = isset($query['limit']) && is_numeric($query['limit'])
-							? $query['limit']
-							: $this->indexLimit;
-
-		if($numberChildren > $this->indexMaxLimit)
-			$numberChildren = $this->indexMaxLimit;
-
-		$modelListing = $this->getModelListingClass();
-
 		foreach($restrictions as $restrictionName => $restrictionValue)
-			$modelListing->addRestriction($restrictionName, $restrictionValue);
+			$this->modelListing->addRestriction($restrictionName, $restrictionValue);
 
-		$listing = $modelListing->getListing($numberChildren, $offset);
+		$listing = $this->modelListing->getListing($this->size, $this->offset);
 		return $listing;
 	}
 
+	/**
+	 * This function initiates and sets up the Listing class used by the getChildren class. When overloading this class
+	 * this function is an ideal starting place.
+	 *
+	 * @return LocationListing
+	 */
 	protected function getModelListingClass()
 	{
 		if(!($tables = $this->model->getTables()))
@@ -80,37 +134,69 @@ class ModelActionIndex extends ModelActionBase
 		return $listingObject;
 	}
 
-
-	protected function getTableDisplayList()
+	protected function getDisplayList($type = 'table')
 	{
-		$indexList = new ViewTableDisplayList($this->model, $this->childModels);
+		if($type == 'template') {
+			$class = 'ViewTemplateDisplayList';
+		} else {
+			$class = 'ViewTableDisplayList';
+		}
+
+		$indexList = new $class($this->model, $this->childModels);
+
+		if($type == 'table') {
+			$indexList->useIndex(true, $this->offset);
+		}
+
 		return $indexList;
 	}
 
-	protected function getTemplateDisplayList()
+	protected function getPagination()
 	{
-		$readList = new ViewTemplateDisplayList($this->model, $this->childModels);
-		return $readList;
+		if(!isset($this->page))
+			return '';
+		
+		$p = new TagBoxPagination($this->model);
+		$url = Query::getUrl();
+		$p->defineListing($this->count, $this->size, $this->page, $url, 
+			$this->offset + 1, $this->offset + count($this->childModels));
+
+		if($this->page === 0)
+			$p->setOnPage(false);
+
+		return $p->pageList();
 	}
 
+	/**
+	 * Creates a listing of models along with relevant qualities and actions for use in an admin page.
+	 *
+	 * @return string
+	 */
 	public function viewAdmin($page)
 	{
-		$indexList = $this->getTableDisplayList();
+		$pagination = $this->getPagination();
+
+		$indexList = $this->getDisplayList($this->adminSettings['listType']);
 		$indexList->addPage($page);
 
-		return $indexList->getListing();
+		return $pagination . $indexList->getListing(). $pagination;
 	}
 
 	public function viewHtml($page)
 	{
-		$output = parent::viewHtml($page);
-		$readList = $this->getTemplateDisplayList();
-		$readList->addPage($page);
 
-		if($listingResults = $readList->getListing())
-			$output .= $listingResults;
+		$pagination = $this->getPagination();
 
-		return $output;
+		$indexList = $this->getDisplayList($this->htmlSettings['listType']);
+		$indexList->addPage($page);
+
+		$data = $pagination . $indexList->getListing() . $pagination;
+
+		if($this->htmlSettings['listType'] == 'template') {
+			return $this->modelToHtml($page, $this->model, 'Display.html', array('listing' => $data));
+		} else {
+			return $data;
+		}
 	}
 
 	public function viewXml()
