@@ -1,0 +1,10 @@
+<div class="pagination">
+	<div class="pagination_details">
+		Displaying results {{ start }}-{{ end }} of {{ total }}.
+	</div>
+	<ul class="pagination_list">
+		{% for page in pages %}
+			<li>{{ page }}</li>
+		{% endfor %}
+	</ul>
+</div>

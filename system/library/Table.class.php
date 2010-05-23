@@ -9,6 +9,7 @@ class Table
 	protected $columns = array();
 	protected $rows = array();
 	protected $index = 0;
+	protected $indexBase = 0;
 
 	protected $repeatHeader = true;
 	protected $enableIndex = false;
@@ -29,10 +30,11 @@ class Table
 		$this->classes['main'][] = $name;
 	}
 
-	public function enableIndex($enable = true)
+	public function enableIndex($enable = true, $base = 0)
 	{
 		array_push($this->columns, 'index');
 		$this->enableIndex = (bool) $enable;
+		$this->indexBase = $base;
 	}
 
 	public function setCaption($caption)
@@ -207,7 +209,7 @@ class Table
 
 					if($column == 'index' && $this->enableIndex)
 					{
-						$tableRowField->wrapAround($y . '.');
+						$tableRowField->wrapAround($y + $this->indexBase . '.');
 					}
 
 					$tableRowField->wrapAround('&nbsp;');

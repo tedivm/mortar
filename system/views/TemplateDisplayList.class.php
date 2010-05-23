@@ -109,7 +109,7 @@ class ViewTemplateDisplayList {
 			$output = $listingHtml;
 		}
 
-		return isset($output) ? $output : false;
+		return isset($output) ? $output : "<p>There were no matches for the specified query.</p>";
 	}
 
 	protected function getActionList($model, $format)

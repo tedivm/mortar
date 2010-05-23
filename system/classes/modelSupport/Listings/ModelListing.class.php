@@ -167,6 +167,17 @@ class ModelListing
 	}
 
 	/**
+	 * Returns a count of the number of models (up to the maxCount) present in the selected listing.
+	 *
+	 * @return int
+	 */
+	public function getCount()
+	{
+		$num = $this->getListing($this->maxLimit);
+		return count($num);
+	}
+
+	/**
 	 * This function returns the specified number of models that meet all of the set requirements.
 	 *
 	 * @param int $number
@@ -199,7 +210,7 @@ class ModelListing
 	{
 		$batch = 0;
 		$allModels = array();
-		while($this->loadModels($batch)) {
+		while($this->loadModels($batch) === true) {
 			$allModels = array_merge($allModels, $this->filterModels($this->models[$batch]));
 
 			if(count($allModels) >= $number + $offset) {
@@ -209,7 +220,7 @@ class ModelListing
 			$batch++;
 		}
 
-		return $allModels;
+		return array_slice($allModels, $offset);
 	}
 
 	/**
@@ -253,7 +264,7 @@ class ModelListing
 	 */
 	protected function loadModels($batch)
 	{
-		if(isset($this->models[$batch]))
+		if(isset($this->models[$batch]) && $this->models[$batch])
 			return true;
 
 		$order = (isset($this->options['order']) && strtolower($this->options['order']) == 'desc') ? 'DESC' : 'ASC';
