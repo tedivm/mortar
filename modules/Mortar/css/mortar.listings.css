@@ -50,18 +50,22 @@ filter:alpha(opacity=60);
 /* pagination */
 
 .pagination {
+min-height: 1.3em;
+position: relative;
 width: 90%;
-margin: 3px auto;
+margin: 8px auto;
 }
 
 .pagination_details {
-float: left; 
+position: absolute;
+left: 0;
 }
 
 .pagination_list {
 margin: 0;
+position: absolute;
 list-style: none;
-float: right;
+right: 0;
 }
 
 .pagination_list li {
