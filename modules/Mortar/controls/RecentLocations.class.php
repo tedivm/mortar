@@ -53,11 +53,7 @@ class MortarControlRecentLocations extends ControlBase
 			$loc = Location::getLocation($this->location);
 			$model = $loc->getResource();
 
-			if(isset($model['title'])) {
-				$name = $model['title'];
-			} else {
-				$name = str_replace('_', ' ', $model->name);
-			}
+			$name = $model->getDesignation();
 
 			$this->name .= ' at ' . $name;
 		}

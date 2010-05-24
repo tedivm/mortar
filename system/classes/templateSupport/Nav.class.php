@@ -41,11 +41,7 @@ class TagBoxNav
 				$childItem = new HtmlObject('li');
 				$childItem->addClass('navItem');
 
-				$childName = isset($model['title'])
-					? $model['title']
-					: (isset($model->name)
-						? ucwords(str_replace('_', ' ', $model->name))
-						: '');
+				$childName = $model->getDesignation();
 
 				if(isset($childName) && ($marker) && ($child->getId() === $this->location->getId()))
 					$childItem->wrapAround($childName)->
