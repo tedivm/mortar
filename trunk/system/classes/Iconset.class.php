@@ -3,7 +3,7 @@
 class Iconset extends ContentBase
 {
 	protected $contentType = 'iconset';
-	protected $imagePath = '';
+	protected $path = array('icon'  => '');
 
 
 	/**
@@ -43,12 +43,67 @@ class Iconset extends ContentBase
 	}
 
 	/**
+	 * Uses the name of an icon to attempt to load it from several locations in a predetermined order:
+	 * first from the current theme, then from the current iconset, and finally, if the icon's name
+	 * begins with a module name, from that module.
+	 *
+	 * @param string $name
+	 * @return string
+	 */
+	protected function loadIcon($name)
+	{
+		$page = ActivePage::getInstance();
+		$theme = $page->getTheme();
+		$themeSettings = $theme->getSettings();
+		if(isset($themeSettings['icons'][$name]))
+			return $theme->getImageUrl($themeSettings['icons'][$name], 'icon');
+
+		if(isset($this->settings['icons'][$name]))
+			return $this->getImageUrl($this->settings['icons'][$name], 'icon');
+
+		$packagelist = new PackageList();
+		$list = $packagelist->getInstalledPackages();
+		$pieces = explode('_', $name);
+
+		if(!isset($pieces[0]) || !in_array($pieces[0], $list))
+			return false;
+
+		$config = Config::getInstance();
+		$baseModulePath = $config['path']['modules'];
+		$settingsPath = $baseModulePath . $pieces[0] . '/icons/settings.ini';
+
+		if(!is_readable($settingsPath))
+			return false;
+		
+		$iniFile = new IniFile($settingsPath);
+		$moduleSettings = $iniFile->getArray();
+
+		if(isset($moduleSettings['icons'][$name])) {
+			$imageName = $moduleSettings['icons'][$name];
+			$info = new PackageInfo($pieces[0]);
+			$path = $info->getPath();
+	
+			$imagePath = $path . 'icons/' . $imageName;
+			if($realPath = realpath($imagePath)) {
+				if(!strpos($realPath, $path . 'icons/') === 0)
+					throw new CoreSecurity('Attempted to load image outside the icon directory.');
+
+				$url = ActiveSite::getLink('modules') . $pieces[0] . '/icons/' . $imageName;
+				return $url;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Returns an HTML representation of the requested icon, either as an image or span-wrapped
 	 * text. Accepts an optional $classes parameter to insert a set of classes into the
 	 * generated HTML.
 	 *
 	 * @param string $name
 	 * @param string|null $classes
+	 * @return string
 	 */
 	public function getIcon($name, $classes = null)
 	{
@@ -57,15 +112,15 @@ class Iconset extends ContentBase
 		else
 			$classPhrase = '';
 
-		if (isset($this->settings['images'][$name])) {
-			$iconUrl = $this->getImageUrl($this->settings['images'][$name]);
+		if ($iconUrl = $this->loadIcon($name)) {
 			$icon = "<img src='$iconUrl' $classPhrase alt='$name' title='$name' />";
 		} else {
-			$icon = "<span $classphrase >$name</span>";
+			$icon = "<span $classPhrase >$name</span>";
 		}
 
 		return $icon;
 	}
+
 }
 
 ?>
