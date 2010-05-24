@@ -29,7 +29,7 @@ class TagBoxEnv
 				if(!isset($this->site))
 					return 'Mortar Installation';
 
-				return str_replace('_', ' ', $this->site->getLocation()->getName());
+				return $this->site->getDesignation();
 			case "user":
 
 				if(!isset($this->user))

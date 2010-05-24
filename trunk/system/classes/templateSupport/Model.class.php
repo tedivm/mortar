@@ -15,10 +15,6 @@ class TagBoxModel
 		$this->model = $model;
 		$modelArray = $model->__toArray(); 
 
-		if(isset($modelArray['name'])) {
-			$modelArray['name'] = ucwords(str_replace('_', ' ', $modelArray['name']));
-		}
-
 		if(isset($modelArray['properties']))
 		{
 			$props = $modelArray['properties'];

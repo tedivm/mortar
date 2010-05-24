@@ -30,11 +30,7 @@ class MortarControlIndex extends ActionControl
 			$loc = Location::getLocation($this->location);
 			$model = $loc->getResource();
 
-			if(isset($model['title'])) {
-				$name = $model['title'];
-			} else {
-				$name = str_replace('_', ' ', $loc->getName());
-			}
+			$name = $model->getDesignation();
 
 			$this->name .= ' of ' . $name;
 		}
