@@ -27,11 +27,11 @@ class ModelActionRead extends ModelActionBase
 
 	}
 
-
 	/**
-	 * This is incredibly basic right now, but thats because I'm working woth the Joshes on getting the interface
-	 * for it set up.
+	 * This outputs the title, administrative details, and content of a model using the adminDetails and Display
+	 * templates.
 	 *
+	 * @param Page $page
 	 * @return string
 	 */
 	public function viewAdmin($page)
@@ -46,15 +46,7 @@ class ModelActionRead extends ModelActionBase
 			$page->setTitle($this->model['name']);
 		}
 
-		$output .= $this->modelToHtml($page, $this->model, 'adminDetails.html');
-
-		$hook = new Hook();
-		$hook->loadPlugins('Template', 'admin', 'extraDetails');
-		$results = $hook->getDetails($this->model);
-
-		foreach($results as $detail)
-			$output .= $detail;
-
+		$output .= $this->getAdminDetails($page);
 		$output .= $this->modelToHtml($page, $this->model, 'Display.html');
 
 		return $output;
