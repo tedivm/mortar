@@ -16,7 +16,7 @@ class TagBoxBreadcrumbs
 		$this->query = Query::getQuery();
 	}
 
-	public function getCrumbs($sep = '', $html = true, $rev = false)
+	public function getCrumbs($sep = '', $html = true, $rev = false, $stopId = null)
 	{
 		if(defined('INSTALLMODE') && INSTALLMODE === true) {
 			if($html) {
@@ -110,6 +110,13 @@ class TagBoxBreadcrumbs
 			}
 		}
 
+		// If a stop location is set, we need to initialize it here.
+		if(isset($stopId)) {
+			$endLoc = Location::getLocation($stopId);
+			$stopLoc = $endLoc->getParent();
+		}
+
+
 		// Finally, we loop through the list of locations. If we have a non-location-based
 		// resource, this list will only contain the active site; otherwise, we start at the
 		// current location and go back through its parents until we reach the root, adding
@@ -117,6 +124,9 @@ class TagBoxBreadcrumbs
 
 		do {
 			if($location->getType() == 'Root')
+				break;
+
+			if(isset($stopLoc) && $location->getId() === $stopLoc->getId())
 				break;
 
 			$url = new Url();
@@ -190,6 +200,20 @@ class TagBoxBreadcrumbs
 		}
 
 		return (string) $breadCrumb;
+	}
+
+	public function startFrom($stopLoc)
+	{
+		$site = ActiveSite::getSite();
+		$siteLoc = $site->getLocation();
+		$siteId = $siteLoc->getId();
+
+		$locId = Location::getIdByPath($stopLoc, $siteId);
+		if(isset($locId) && $locId) {
+			return $this->getCrumbs('', true, false, $locId);
+		} else {
+			return false;
+		}
 	}
 
 	public function __toString()
