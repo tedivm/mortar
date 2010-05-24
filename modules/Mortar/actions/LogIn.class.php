@@ -1,6 +1,6 @@
 <?php
 
-class MortarActionLogIn extends ActionBase
+class MortarActionLogIn extends MortarActionLogOut
 {
 	static $requiredPermission = 'Read';
 
@@ -13,7 +13,7 @@ class MortarActionLogIn extends ActionBase
 	protected $allowedFailures = 3;
 	protected $maxFailures = 20;
 
-	protected function logic()
+	public function logic()
 	{
 		if(MortarLoginTracker::getFailureCount($_SERVER['REMOTE_ADDR']) >= $this->maxFailures)
 			throw new AuthenticationError('Too many failed logins.');
@@ -96,42 +96,6 @@ class MortarActionLogIn extends ActionBase
 		$page->showMenus(false);
 		$output = $this->viewHtml($page);
 		return $output;
-	}
-
-	protected function getUrl()
-	{
-		$query = Query::getQuery();
-
-		$url = new Url();
-		$url->format = $query['format'];
-
-		$action = isset($query['a']) ? strtolower($query['a']) : false;
-		if(isset($query['l']) && is_numeric($query['l']) && ($action == 'index' || $action == 'read'))
-		{
-			$location = Location::getLocation($query['l']);
-			$model = $location->getResource();
-
-			if(!$model->getAction($query['a']))
-				return false;
-
-			$url->location = $query['l'];
-			$url->action = $query['a'];
-		}elseif(isset($query['m']) && $action){
-			$packageInfo = new PackageInfo($query['m']);
-			if(!$packageInfo->getActions($query['a']))
-				return false;
-
-			$url->module = $query['m'];
-			$url->action = $query['a'];
-		}else{
-			return false;
-		}
-
-		$user = ActiveUser::getUser();
-		if(!$url->checkPermission($user->getId()))
-			return false;
-
-		return $url;
 	}
 
 	public function checkAuth($action = NULL)
