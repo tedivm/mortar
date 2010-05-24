@@ -21,6 +21,9 @@ class ModelActionIndex extends ModelActionBase
         public $htmlSettings = array( 'headerTitle' => 'Index', 'listType' => 'table', 'paginate' => true );
 
 	protected $listingClass = 'ModelListing';
+	protected $tableDisplayList = 'ViewTableDisplayList';
+	protected $templateDisplayList = 'ViewTemplateDisplayList';
+
 
 	/**
 	 * This is the date format used when converting the model to an html table.
@@ -137,9 +140,9 @@ class ModelActionIndex extends ModelActionBase
 	protected function getDisplayList($type = 'table')
 	{
 		if($type == 'template') {
-			$class = 'ViewTemplateDisplayList';
+			$class = $this->templateDisplayList;
 		} else {
-			$class = 'ViewTableDisplayList';
+			$class = $this->tableDisplayList;
 		}
 
 		$indexList = new $class($this->model, $this->childModels);
