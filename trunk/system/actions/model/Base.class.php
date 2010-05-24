@@ -199,7 +199,37 @@ abstract class ModelActionBase implements ActionInterface
 		$this->permissionObject = new Permissions(1, $user);
 	}
 
+	/**
+	 * This method is called by the viewAdmin methods of various actions to append a list of details about 
+	 * the model being viewed to their output. It returns the result of inserting the model into the
+	 * adminDetails.html template, along with any additional results added via plugin.
+	 *
+	 * @param Page $page
+	 */
+	protected function getAdminDetails($page)
+	{
+		$output = $this->modelToHtml($page, $this->model, 'adminDetails.html');
 
+		$hook = new Hook();
+		$hook->loadPlugins('Template', 'admin', 'extraDetails');
+		$results = $hook->getDetails($this->model);
+
+		foreach($results as $detail)
+			$output .= $detail;
+
+		return $output;
+	}
+
+	/**
+	 * This method is used to transform a model's content into HTML for output. Taking the current page
+	 * and model, it inserts the model's content into the provided template name, also inserting any
+	 * additional content tags passed in the $content parameter.
+	 *
+	 * @param Page $page
+	 * @param Model $model
+	 * @param string $templateName
+	 * @param array $content
+	 */
 	protected function modelToHtml($page, $model, $templateName, $content = array())
 	{
 		$theme = $page->getTheme();
