@@ -37,17 +37,9 @@ class ModelActionLocationBasedRead extends ModelActionLocationBasedBase
 	 */
 	public function viewAdmin($page)
 	{
-		$output = '';
+		$page->setTitle($this->model->getDesignation());
 
-		if(isset($this->model['title'])) {
-			$output .= '<h1>' . $this->model['title'] . "</h1>\n";
-			$page->setTitle($this->model['title']);
-		} elseif(isset($this->model['name'])) {
-			$output .= '<h1>' . $this->model['name'] . "</h1>\n";
-			$page->setTitle($this->model['name']);
-		}
-
-		$output .= $this->getAdminDetails($page);
+		$output = $this->getAdminDetails($page);
 		$output .= $this->modelToHtml($page, $this->model, 'Display.html');
 
 		return $output;
@@ -74,11 +66,7 @@ class ModelActionLocationBasedRead extends ModelActionLocationBasedBase
 			$titlePrefix = '';
 		}
 
-		if(isset($this->model['title'])) {
-			$page->setTitle($titlePrefix . $this->model['title']);
-		} elseif(isset($this->model->name)) {
-			$page->setTitle($titlePrefix . $this->model->name);
-		}
+		$page->setTitle($titlePrefix . $this->model->getDesignation());
 
 		if(isset($this->model->keywords))
 			$page->addMeta('keywords', $this->model->keywords);

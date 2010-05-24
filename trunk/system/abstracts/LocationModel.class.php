@@ -336,6 +336,25 @@ abstract class LocationModel extends ModelBase
 	}
 
 	/**
+	 * This function returns the name that will be used for the model when various other parts of the system
+	 * interact with it -- this serves to disguise any title/name shenanigans and give the same well-formatted
+	 * name to all external classes. Location models check the local title first, then the location name;
+	 * when returning the latter, it is formatted for readability.
+	 *
+	 * @return int
+	 */
+	public function getDesignation()
+	{
+		if(isset($this['title'])) {
+			return $this['title'];
+		} elseif(isset($this->name)) {
+			return ucwords(str_replace('_', ' ', $this->name));
+		} else {
+			return 'Unnamed Model';
+		} 
+	}
+
+	/**
 	 * This function takes in a model type and checks to see if it is allowed to be attached to this model.
 	 *
 	 * @param string $resourceType

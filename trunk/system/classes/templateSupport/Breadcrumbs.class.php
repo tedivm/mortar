@@ -57,8 +57,7 @@ class TagBoxBreadcrumbs
 
 			if( isset($this->query['id']) && isset($this->query['type']) ) {
 				$model = ModelRegistry::loadModel($this->query['type'], $this->query['id']);
-				$title = isset($model['title']) ? $model['title'] :
-					isset($model['name']) ? $model['name'] : $pagetitle;
+				$title = $model->getDesignation();
 
 				if($html) {
 					$url = Query::getUrl();
@@ -100,8 +99,8 @@ class TagBoxBreadcrumbs
 
 		if(!isset($nameList) || count($nameList) === 0) {
 			$model = $location->getResource();
-			$name = isset($model['title']) ? $model['title'] : str_replace('_', ' ', $location->getName());
-			if(str_replace('_', ' ', $pagetitle) !== $name && $pagetitle !== 'Read') {
+			$name = $model->getDesignation();
+			if($pagetitle !== $name && $pagetitle !== 'Read') {
 				if($html) {
 					$url = Query::getUrl();
 					$nameList[] = $url->getLink($pagetitle);

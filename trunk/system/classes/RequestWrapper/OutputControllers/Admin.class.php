@@ -105,9 +105,7 @@ class AdminControllerContentFilter
 		}
 
 		$processedOutput = new ViewThemeTemplate($theme,
-							 array('support/adminContent' . $actionName . '.html',
-							 	'support/adminContent.html')
-							 );
+			array('support/adminContent' . $actionName . '.html', 'support/adminContent.html') );
 
 		$title = (isset($action->adminSettings['headerTitle'])) ? $action->adminSettings['headerTitle'] : '';
 		$title .= (isset($action->adminSettings['useRider']) && $action->adminSettings['useRider']
@@ -117,10 +115,13 @@ class AdminControllerContentFilter
 			: '';
 
 		$oldtitle = $page->getTitle();
-		if(!isset($oldtitle))
+		if(isset($oldtitle)) {
+			$title = $oldtitle;
+		} else {
 			$page->setTitle($title);
+		}
 
-		$processedOutput->addContent(	array(	'content' => $output,
+		$processedOutput->addContent(	array(	'display' => $output,
 							'title' => $title,
 							'subtitle' => $subtitle,
 							'action' => $actionName));
