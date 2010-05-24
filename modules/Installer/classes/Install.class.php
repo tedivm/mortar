@@ -136,7 +136,7 @@ class InstallerInstaller // thats the most pathetic name ever
 			$url['theme'] = 'data/themes/';
 			$url['icons'] = 'data/icons/';
 			$url['fonts'] = 'data/fonts/';
-			$url['modules'] = 'bin/modules/';
+			$url['modules'] = 'modules/';
 			$url['javascript'] = 'javascript/';
 			$url['modRewrite'] = (isset($input['url_modRewrite']));
 

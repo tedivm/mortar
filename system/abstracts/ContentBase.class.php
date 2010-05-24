@@ -40,12 +40,12 @@ abstract class ContentBase
 	protected $contentType;
 
 	/**
-	 * The default path for images
+	 * The default paths for theme content of various types.
 	 *
 	 * @access protected
-	 * @var string
+	 * @var array
 	 */
-	protected $imagePath;
+	protected $path = array();
 
 	/**
 	 * Returns the theme-specific settings found in the settings.ini theme file.
@@ -90,25 +90,31 @@ abstract class ContentBase
 	/**
 	 * This function returns the Url for an image given its name.
 	 *
-	 * @param string $type js or css
-	 * @return Minifier
+	 * @param string $imageName
+	 * @return Url|false
 	 */
-	public function getImageUrl($imageName)
+	public function getImageUrl($imageName, $type = 'image')
 	{
-		$cache = CacheControl::getCache($this->contentType, $this->name, 'imagepath', $imageName);
+		if(isset($this->path[$type])) {
+			$path = $this->path[$type];
+		} else {
+			return false;
+		}
+
+		$cache = CacheControl::getCache($this->contentType, $this->name, $type, $imageName);
 		$url = $cache->getData();
 
 		if($cache->isStale())
 		{
-			$imagePath = $this->contentPath . $this->imagePath . $imageName;
+			$imagePath = $this->contentPath . $path . $imageName;
 
 			if($realPath = realpath($imagePath))
 			{
-				if(!strpos($realPath, $this->contentPath . $this->imagePath) === 0)
+				if(!strpos($realPath, $this->contentPath . $path) === 0)
 					throw new CoreSecurity('Attempted to load image outside the image directory.');
 
 				$themeUrl = $this->getUrl();
-				$url = $themeUrl . $this->imagePath . $imageName;
+				$url = $themeUrl . $path . $imageName;
 			}elseif($parent = $this->getParentTheme()){
 				$url = $parent->getImageUrl($imageName);
 			}else{

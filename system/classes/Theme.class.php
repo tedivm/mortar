@@ -62,7 +62,10 @@ class Theme extends ContentBase
 	protected $cssTemplate = "@charset 'UTF-8';\n\n{{ fonts.theme }}\n";
 
 	protected $contentType = 'theme';
-	protected $imagePath = 'images/';
+
+	protected $path = array('image' => 'images/',
+				'icon'  => 'icons/',
+				'font'  => 'fonts/');
 
 	/**
 	 * Constructor takes the name of the theme and loads the initial information
