@@ -15,6 +15,36 @@ class TagBoxEnv
 		$this->user = ActiveUser::getUser();
 	}
 
+	protected function loginLink()
+	{
+		$currentUrl = Query::getUrl();
+		$location = $currentUrl->locationId;
+		$action = $currentUrl->action;
+		$module = $currentUrl->module;
+
+		$url = new Url();
+		$url->module = 'Mortar';
+		if($this->user['name'] === 'Guest') {
+			$url->action = 'LogIn';
+		} else {
+			$url->action = 'LogOut';
+		}
+		if(isset($action))
+			$url->a = $action;
+		if(isset($location))
+			$url->l = $location;
+		if(isset($module))
+			$url->m = $module;
+
+		$a = new HtmlObject('a');
+		$a->addClass('login_link')->
+			property('href', (string) $url);
+
+		$phrase = $this->user['name'] === 'Guest' ? 'Log In' : 'Log Out';
+		$a->wrapAround($phrase);
+		return $a;
+	}
+
 	public function __get($tagname)
 	{
 		switch($tagname) {
@@ -44,6 +74,13 @@ class TagBoxEnv
 				$url = $this->user->getUrl();
 				return $url->getLink($this->user['name']);
 
+			case "loginLink":
+				
+				if(!isset($this->user))
+					return '';
+
+				return $this->loginLink();
+
 			default:
 				return false;
 		}
@@ -55,7 +92,8 @@ class TagBoxEnv
 			case "siteLink":
 			case "siteName":
 			case "user":
-			case "userlink": 
+			case "userlink":
+			case "loginLink":
 				return true;
 			default:
 				return false;
