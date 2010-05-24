@@ -17,8 +17,8 @@
  */
 class ModelActionIndex extends ModelActionBase
 {
-        public $adminSettings = array( 'headerTitle' => 'Index', 'listType' => 'table' );
-        public $htmlSettings = array( 'headerTitle' => 'Index', 'listType' => 'table' );
+        public $adminSettings = array( 'headerTitle' => 'Index', 'listType' => 'table', 'paginate' => true );
+        public $htmlSettings = array( 'headerTitle' => 'Index', 'listType' => 'table', 'paginate' => true );
 
 	protected $listingClass = 'ModelListing';
 
@@ -78,7 +78,7 @@ class ModelActionIndex extends ModelActionBase
 
 	protected function loadOffsets()
 	{
-		$query = Query::getQuery();	
+		$query = Query::getQuery();
 
 		$this->modelListing = $this->getModelListingClass();
 		$this->count = $this->modelListing->getCount();
@@ -174,7 +174,9 @@ class ModelActionIndex extends ModelActionBase
 	 */
 	public function viewAdmin($page)
 	{
-		$pagination = $this->getPagination();
+		$pagination = (isset($this->adminSettings['paginate']) && $this->adminSettings['paginate'])
+			? $this->getPagination()
+			: '';
 
 		$indexList = $this->getDisplayList($this->adminSettings['listType']);
 		$indexList->addPage($page);
@@ -184,9 +186,9 @@ class ModelActionIndex extends ModelActionBase
 
 	public function viewHtml($page)
 	{
-
-		$pagination = $this->getPagination();
-
+		$pagination = (isset($this->htmlSettings['paginate']) && $this->adminSettings['paginate'])
+			? $this->getPagination()
+			: '';
 		$indexList = $this->getDisplayList($this->htmlSettings['listType']);
 		$indexList->addPage($page);
 
