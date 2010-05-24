@@ -91,7 +91,6 @@ class HtmlControllerContentFilter
 		$themePath = $page->getThemePath();
 		$theme = $page->getTheme();
 
-
 		$title = (isset($action->htmlSettings['headerTitle'])) ? $action->htmlSettings['headerTitle'] : '';
 		$title .= (isset($action->htmlSettings['useRider']) && $action->htmlSettings['useRider']
 			&& isset($action->htmlSettings['titleRider'])) ? $action->htmlSettings['titleRider'] : '';
@@ -103,22 +102,18 @@ class HtmlControllerContentFilter
 		}
 
 		$oldtitle = $page->getTitle();
-		if(!isset($oldtitle))
-			$page->setTitle($title);
-
-		if($actionName !== 'Read') {
-			$processedOutput = new ViewThemeTemplate($theme, 
-								 array('support/htmlContent' . $actionName . '.html',
-									'support/htmlContent.html')
-								 );
-			$processedOutput->addContent(	array(	'content' => $output,
-								'title' => $title,
-								'action' => $actionName));
-			$output = $processedOutput->getDisplay();
+		if(isset($oldtitle)) {
+			$title = $oldtitle;
 		} else {
-			$page->addRegion('action', $actionName);
-			$page->addRegion('title', $title);
+			$page->setTitle($title);
 		}
+
+		$processedOutput = new ViewThemeTemplate($theme, 
+			array('support/htmlContent' . $actionName . '.html', 'support/htmlContent.html') );
+		$processedOutput->addContent(	array(	'display' => $output,
+							'title' => $title,
+							'action' => $actionName));
+		$output = $processedOutput->getDisplay();
 
 		return $output;
 	}

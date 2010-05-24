@@ -689,6 +689,24 @@ abstract class ModelBase implements Model
 	}
 
 	/**
+	 * This function returns the name that will be used for the model when various other parts of the system
+	 * interact with it -- this serves to disguise any title/name shenanigans and give the same well-formatted
+	 * name to all external classes. The model default is to return title first, then name.
+	 *
+	 * @return int
+	 */
+	public function getDesignation()
+	{
+		if(isset($this['title'])) {
+			return $this['title'];
+		} elseif(isset($this['name'])) {
+			return $this['name'];
+		} else {
+			return 'Unnamed Model';
+		}
+	}
+
+	/**
 	 * This function returns an identifier for the module the model class belongs to.
 	 *
 	 * @return int
