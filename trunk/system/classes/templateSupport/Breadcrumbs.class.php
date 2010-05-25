@@ -122,18 +122,25 @@ class TagBoxBreadcrumbs
 		// current location and go back through its parents until we reach the root, adding
 		// each to the list.
 
+		$rootLoc = false;
 		do {
 			if($location->getType() == 'Root')
 				break;
 
-			if(isset($stopLoc) && $location->getId() === $stopLoc->getId())
-				break;
+			if(isset($stopLoc) && $location->getId() === $stopLoc->getId()) {
+				if(!$rootLoc) {
+					$location = $endLoc;
+				} else {
+					break;
+				}
+			}
 
 			$url = new Url();
 			$url->location = $location->getId();
 			$url->format = $this->query['format'];
 
 			if($url->checkPermission($userId) && $location->checkPublished()) {
+				$rootLoc = true;
 				$model = $location->getResource();
 				$name = $model->getDesignation();
 
