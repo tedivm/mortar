@@ -11,6 +11,7 @@ class MortarActionInstallModule extends ActionBase
 	protected $success = false;
 
 	protected $installablePackages;
+	protected $installedPackages;
 
 	protected function logic()
 	{
@@ -19,11 +20,13 @@ class MortarActionInstallModule extends ActionBase
 
 		$packageList = new PackageList();
 		$installablePackages = $packageList->getInstallablePackages();
+		$installedPackages = $packageList->getInstalledPackages();
 
 		if(!isset($query['id']))
 		{
 			//make listing
 			$this->installablePackages = $installablePackages;
+			$this->installedPackages = $installedPackages;
 		}else{
 
 			if(in_array($installPackage, $installablePackages))
@@ -47,28 +50,51 @@ class MortarActionInstallModule extends ActionBase
 
 				unset($this->form);
 				$this->installablePackages = $installablePackages;
+				$this->installedPackages = $installedPackages;
 			}
 		}
+	}
+
+	protected function getModuleListing($modules, $name, $url = null)
+	{
+		$table = new Table($name . '_module_listing');
+		$table->addClass('index-listing');
+		$table->addColumnLabel('package_name', 'Name');
+		$table->addColumnLabel('package_description', 'Description');
+
+		foreach($modules as $package)
+		{
+			$packageInfo = new PackageInfo($package);
+			$meta = $packageInfo->getMeta();
+
+			$table->newRow();
+
+			if(isset($url)) {
+				$linkToPackage = clone $url;
+				$linkToPackage->id = $package;
+				$table->addField('package_name', $linkToPackage->getLink($package));
+			} else {
+				$table->addField('package_name', $package);			
+			}
+			$table->addField('package_description', $meta['description']);
+		}
+
+		return $table->makeHtml();
 	}
 
 	public function viewAdmin($page)
 	{
 		$output = '';
+
 		if(isset($this->installablePackages) && !isset($this->form))
 		{
 			$linkToSelf = Query::getUrl();
 			unset($linkToSelf->locationId);
 
-			foreach($this->installablePackages as $package)
-			{
-				$packageInfo = new PackageInfo($package);
-				$meta = $packageInfo->getMeta();
-
-				$linkToPackage = clone $linkToSelf;
-				$linkToPackage->id = $package;
-
-				$output .= $linkToPackage->getLink($package) . ' - ' . $meta['description'] . '<br>';
-			}
+			$output .= '<h2>Available Packages</h2>';
+			$output .= $this->getModuleListing($this->installablePackages, 'installable', $linkToSelf);
+			$output .= '<h2>Installed Packages</h2>';
+			$output .= $this->getModuleListing($this->installedPackages, 'installed');
 		}elseif($this->form){
 			if($this->success)
 			{
