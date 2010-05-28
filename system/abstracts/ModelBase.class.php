@@ -498,7 +498,7 @@ abstract class ModelBase implements Model
 	 * @param string $format
 	 * @return ModelConverter
 	 */
-	public function getModelAs($format)
+	public function getModelAs($format, $name = null)
 	{
 		$className = $this->getType() . 'To' . $format;
 		if($path = $this->getModelFilePathFromPackage('converters', $className))
@@ -517,7 +517,7 @@ abstract class ModelBase implements Model
 		if(!class_exists($className, false))
 			return false;
 
-		$modelConverter = new $className($this);
+		$modelConverter = new $className($this, $name);
 		return $modelConverter;
 	}
 

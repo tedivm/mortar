@@ -20,6 +20,7 @@ class ModelToHtml
 	protected $template;
 	protected $modelDisplay;
 	protected $theme;
+	protected $content = array();
 
 	/**
 	 * The constructor sets the protected vars and prepares the relevant information for Html display which can be output in a 
@@ -29,9 +30,20 @@ class ModelToHtml
 	 * @param String $template
 	 * @return string
 	 */
-	public function __construct(Model $model)
+	public function __construct(Model $model, $template = null)
 	{
 		$this->model = $model;
+		$page = ActivePage::getInstance();
+		$this->theme = $page->getTheme();
+		if(!isset($template)) 
+			$template = 'Display.html';
+		$this->modelDisplay = new ViewModelTemplate($this->theme, $this->model, $template);
+	}
+
+	public function useTemplate($template)
+	{
+		$this->modelDisplay = new ViewModelTemplate($this->theme, $this->model, $template);
+		$this->modelDisplay->addContent($this->content);
 	}
 
 	/**
@@ -39,7 +51,7 @@ class ModelToHtml
 	 *
 	 * @param String $template
 	 */
-	public function useTemplate($template)
+	public function useStringTemplate($template)
 	{
 		$this->template = $template;
 		$this->modelDisplay = new ViewStringTemplate($template);
@@ -57,7 +69,12 @@ class ModelToHtml
 
 	public function addContent($content)
 	{
-		return is_array($content) ? $this->modelDisplay->addContent($content) : false;
+		if(is_array($content)) {
+			$this->content = array_merge($this->content, $content);
+			$this->modelDisplay->addContent($content);
+		} else {
+			return false;
+		}
 	}
 
 	/**
