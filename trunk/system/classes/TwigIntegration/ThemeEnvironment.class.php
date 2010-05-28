@@ -59,7 +59,7 @@ class TwigIntegrationThemeEnvironment extends Twig_Environment
 			$nameList .= ' )';
 			throw new TwigThemeError('Unable to load template from list ' . $nameList);
 		}
-		
+
 		return parent::loadTemplate($className);
 	}
 }

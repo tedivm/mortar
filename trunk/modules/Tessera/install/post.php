@@ -17,6 +17,7 @@ class TesseraInstallerPostscript
 		Hook::registerModelPlugin('Site', 'getAllowedChildrenTypes', $this->packageId, 'AllowForumType', true);
 		Hook::registerModelPlugin('All', 'getAllowedChildrenTypes', $this->packageId, 'AllowDiscussionType', true);
 		Hook::registerModelPlugin('All', 'firstSaveLocation', $this->packageId, 'AddDiscussionChild', true);
+		Hook::registerModelPlugin('All', 'extraContent', $this->packageId, 'ModelDisplayComments', true);
 	}
 }
 ?>
