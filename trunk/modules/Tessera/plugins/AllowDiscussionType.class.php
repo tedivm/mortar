@@ -2,9 +2,12 @@
 
 class TesseraPluginAllowDiscussionType
 {
-	public function getAllowedChildren()
+	public function getAllowedChildren($type)
 	{
-		return array('Discussion');
+		if(TesseraComments::canCommentModelType($type))
+			return array('Discussion');
+		else
+			return array();
 	}
 }
 
