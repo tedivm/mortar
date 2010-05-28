@@ -28,22 +28,24 @@ class MortarPluginMenusAdminBase
 		$link = $url->getLink("Dashboard");
 		$menuSys->addItemToSubmenu('primary', 'Dashboard', $link, 'Dashboard', 'auto', $url);
 
+		$loginUrl = clone $url;
+
 		if(isset($action))
-			$url->a = $action;
+			$loginUrl->a = $action;
 		if(isset($location))
-			$url->l = $location;
+			$loginUrl->l = $location;
 		if(isset($module))
-			$url->m = $module;
+			$loginUrl->m = $module;
 
 		if(!ActiveUser::isLoggedIn())
 		{
-			$url->action = 'LogIn';
-			$link = $url->getLink("Log In");
-			$menuSys->addItemToSubmenu('primary', 'Log In', $link, 'Log In', 'auto', $url);
+			$loginUrl->action = 'LogIn';
+			$link = $loginUrl->getLink("Log In");
+			$menuSys->addItemToSubmenu('primary', 'Log In', $link, 'Log In', 'auto', $loginUrl);
 		}else{
-			$url->action = 'LogOut';
-			$link = $url->getLink("Log Out");
-			$menuSys->addItemToSubmenu('primary', 'Log In', $link, 'Log Out', 'auto', $url);
+			$loginUrl->action = 'LogOut';
+			$link = $loginUrl->getLink("Log Out");
+			$menuSys->addItemToSubmenu('primary', 'Log In', $link, 'Log Out', 'auto', $loginUrl);
 		}
 
 		$menuSys->addItemToSubmenu('primary', 'Settings', '<a href="#">Settings</a>', 'Settings', 'auto');
