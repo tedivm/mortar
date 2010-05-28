@@ -17,7 +17,7 @@ class TwigIntegrationModelLoader extends TwigIntegrationThemeLoader
 
 		$descent = $this->model->getDescent();
 
-		if(isset($descent))
+		if(isset($descent) && is_array($descent))
 		{
 			foreach($descent as $ancestor)
 			{

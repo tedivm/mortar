@@ -445,7 +445,7 @@ abstract class ModelBase implements Model
 
 			return $descent;
 		} else {
-			return null;
+			return array();
 		}
 	}
 
@@ -498,26 +498,30 @@ abstract class ModelBase implements Model
 	 * @param string $format
 	 * @return ModelConverter
 	 */
-	public function getModelAs($format, $name = null)
+	public function getModelAs($format, $template = null)
 	{
-		$className = $this->getType() . 'To' . $format;
-		if($path = $this->getModelFilePathFromPackage('converters', $className))
-		{
-			if(!class_exists($className, false))
-				include($path);
-		}else{
-			$className = 'ModelTo' . $format;
-			if($path = self::getModelSupportFilePath('Converters', $format))
-			{
-				if(!class_exists($className, false))
-					include($path);
+		$types = $this->getDescent();
+		array_unshift($types, $this->getType());
+
+		foreach($types as $type) {
+			$handler = ModelRegistry::getHandler($type);
+			$info = new PackageInfo($handler['module']);
+			$name = $info->getName();
+
+			$class = $name . $type . 'To' . $format;
+			if(class_exists($class)) {
+				$className = $class;
+				break;
 			}
 		}
 
-		if(!class_exists($className, false))
+		if(!isset($className))
+			$className = 'ModelTo' . $format;
+
+		if(!class_exists($className))
 			return false;
 
-		$modelConverter = new $className($this, $name);
+		$modelConverter = new $className($this, $template);
 		return $modelConverter;
 	}
 
