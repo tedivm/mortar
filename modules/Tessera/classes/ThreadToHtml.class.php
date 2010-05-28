@@ -1,6 +1,6 @@
 <?php
 
-class TesseraThreadToHtml extends ModelToHtmlList
+class TesseraThreadToHtml extends ModelToHtmlLocationList
 {
 
 }

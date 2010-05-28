@@ -94,12 +94,8 @@ class ViewTemplateDisplayList {
 					$listingHtml .= $separatorView->getDisplay();
 				}
 
-				$actionView = new ViewModelTemplate($this->theme, $model, 'Listing.html');
-				$actionView->addContent(array('model_actions' => $this->getActionIcons($actionUrls, $model), 'count' => $x));
-
-				$htmlConverter = $model->getModelAs('Html');
-				$htmlConverter->useView($actionView);
-				$htmlConverter->useTheme($this->theme);
+				$htmlConverter = $model->getModelAs('Html', 'Listing.html', false);
+				$htmlConverter->addContent(array('model_actions' => $this->getActionIcons($actionUrls, $model), 'count' => $x));
 				if($modelDisplay = $htmlConverter->getOutput())
 				{
 					$listingHtml .= $modelDisplay;
