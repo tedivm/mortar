@@ -5,6 +5,12 @@ class MortarPluginMenusAdminBase
 
 	public function addMenuItems($menuSys)
 	{
+		$currentUrl = Query::getUrl();
+
+		$location = $currentUrl->locationId;
+		$action = $currentUrl->action;
+		$module = $currentUrl->module;
+
 		$url = new Url();
 		$url->format = 'Admin';
 
@@ -21,6 +27,13 @@ class MortarPluginMenusAdminBase
 		$url->action = 'Dashboard';
 		$link = $url->getLink("Dashboard");
 		$menuSys->addItemToSubmenu('primary', 'Dashboard', $link, 'Dashboard', 'auto', $url);
+
+		if(isset($action))
+			$url->a = $action;
+		if(isset($location))
+			$url->l = $location;
+		if(isset($module))
+			$url->m = $module;
 
 		if(!ActiveUser::isLoggedIn())
 		{
