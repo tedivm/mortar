@@ -498,7 +498,7 @@ abstract class ModelBase implements Model
 	 * @param string $format
 	 * @return ModelConverter
 	 */
-	public function getModelAs($format, $template = null)
+	public function getModelAs($format, $template = null, $recurse = true)
 	{
 		$types = $this->getDescent();
 		array_unshift($types, $this->getType());
@@ -521,7 +521,7 @@ abstract class ModelBase implements Model
 		if(!class_exists($className))
 			return false;
 
-		$modelConverter = new $className($this, $template);
+		$modelConverter = new $className($this, $template, !$recurse);
 		return $modelConverter;
 	}
 
