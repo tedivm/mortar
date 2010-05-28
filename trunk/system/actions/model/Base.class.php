@@ -232,12 +232,8 @@ abstract class ModelActionBase implements ActionInterface
 	 */
 	protected function modelToHtml($page, $model, $templateName, $content = array())
 	{
-		$theme = $page->getTheme();
-		$view = new ViewModelTemplate($theme, $model, $templateName);
-		$view->addContent($content);
-		$htmlConverter = $model->getModelAs('Html');
-		$htmlConverter->useView($view);
-		$htmlConverter->useTheme($theme);
+		$htmlConverter = $model->getModelAs('Html', $templateName);
+		$htmlConverter->addContent($content);
 		return $htmlConverter->getOutput();
 	}
 
