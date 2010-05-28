@@ -225,7 +225,7 @@ abstract class LocationModel extends ModelBase
 
 		$hook = new Hook();
 		$hook->loadModelPlugins($this, 'getAllowedStatusTypes');
-		$extraTypes = Hook::mergeResults($hook->getExtraTypes());
+		$extraTypes = Hook::mergeResults($hook->getExtraTypes($this->getType()));
 
 		$allTypes = array_merge($types, $extraTypes);
 		return $allTypes;
@@ -319,7 +319,7 @@ abstract class LocationModel extends ModelBase
 		$hook = new Hook();
 		$hook->loadModelPlugins($this, 'getAllowedChildrenTypes');
 
-		$pluginChildren = $hook->getAllowedChildren();
+		$pluginChildren = $hook->getAllowedChildren($this->getType());
 
 		if(is_array($this->allowedChildrenTypes))
 			$pluginChildren[] = $this->allowedChildrenTypes;

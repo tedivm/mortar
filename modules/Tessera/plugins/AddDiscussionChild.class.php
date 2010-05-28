@@ -4,7 +4,7 @@ class TesseraPluginAddDiscussionChild
 {
 	public function runFirstSave($model)
 	{
-		if(TesseraComments::canCommentModelType($model->getType()) {
+		if(TesseraComments::canCommentModelType($model->getType())) {
 			$discussion = new TesseraModelDiscussion();
 			$location = $discussion->getLocation();
 

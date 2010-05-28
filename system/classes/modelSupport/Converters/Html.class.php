@@ -84,6 +84,15 @@ class ModelToHtml
 		if(isset($this->theme))	{
 			$themeBox = new TagBoxTheme($this->theme);
 			$content['theme'] = $themeBox;
+
+			$hook = new Hook();
+			$hook->loadModelPlugins($this->model, 'extraContent');
+			$extra = Hook::mergeResults($hook->getExtraContent($this->model));
+
+			$extraView = new ViewThemeTemplate($this->theme, 'support/Extra.html');
+			$extraView->addContent(array('extras' => $extra));
+
+			$content['extra'] = $extraView->getDisplay();
 		}
 
 		$content['format'] = $query['format'];
