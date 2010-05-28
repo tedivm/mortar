@@ -29,6 +29,18 @@ CREATE TABLE tesseraMessages
 	replyTo INTEGER UNSIGNED
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
+/******************** Add Table: tesseraModelStatus ************************/
+
+/* Build Table Structure */
+
+CREATE TABLE tesseraModelStatus
+(
+        modelId INTEGER UNSIGNED NOT NULL PRIMARY KEY,
+        commentSetting INTEGER UNSIGNED NOT NULL DEFAULT '0'
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+
+
 /**** update version ****/
 REPLACE INTO schemaVersion (package, lastupdated, majorVersion, minorVersion, microVersion)
 						VALUES ( 'Tessera', NOW(), 0, 1, 0);
