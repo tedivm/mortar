@@ -52,10 +52,16 @@ class MortarActionModulePermissions extends ActionBase
 
 		$actionList = PermissionActionList::getActionList();
 
+		$site = ActiveSite::getSite();
+		$location = $site->getLocation();
+		$query = Query::getQuery();
+
 		$memberGroupRecords = new ObjectRelationshipMapper('memberGroup');
 		$memberGroupRecords->select();
 		$memgroups = $memberGroupRecords->resultsToArray();
 		$membergroups = array();
+		$pList = array();
+		$aList = PermissionActionList::getActionList(false);
 
 		foreach($memgroups as $group)
 		{
@@ -65,6 +71,9 @@ class MortarActionModulePermissions extends ActionBase
 			}elseif($group['is_system'] == 0){
 				$membergroups[] = $group;
 			}
+
+			$p = new GroupPermission($location, $group['memgroup_id']);
+			$pList[$group['memgroup_name']] = $p->getPermissionsList();
 		}
 
 		if(isset($guestGroup))
@@ -92,8 +101,22 @@ class MortarActionModulePermissions extends ActionBase
 						setType('checkbox')->
 						setLabel($action);
 
-					if( ($group['memgroup_name'] === 'Administrator') || ($action === 'Read') )
-						$input->check(1);
+					if($query['first'] === 'yes') {
+						if(($group['memgroup_name'] === 'Administrator')
+							|| ($action === 'Read')) 
+						{
+							$input->check(1);
+						}
+					}
+
+					if($query['first'] !== 'yes') {
+						$g = $group['memgroup_name'];
+						$m = $model['name'];
+						$a = $aList[$action];
+						if(isset($pList[$g][$m][$a]) && $pList[$g][$m][$a] === true) {
+							$input->check(1);
+						}
+					}
 
 					if($first)
 					{
@@ -135,6 +158,9 @@ class MortarActionModulePermissions extends ActionBase
 			{
 				$permissions[$group['memgroup_name']]->
 					setPermission($model['name'], $action, true);
+			} else {
+				$permissions[$group['memgroup_name']]->
+					setPermission($model['name'], $action, 'unset');			
 			}
 		}
 
@@ -151,14 +177,18 @@ class MortarActionModulePermissions extends ActionBase
 	protected function redirectAway()
 	{
 		$url = Query::getUrl();
-		$url->action = 'Read';
-		unset($url->module);
+		$url->action = 'InstallModule';
+		unset($url->id);
 		$this->ioHandler->addHeader('Location', (string) $url);
 	}
 
 	public function viewAdmin($page)
 	{
-		return $this->form->getFormAs('Html');
+		if(isset($this->form)) {
+			return $this->form->getFormAs('Html');
+		} else {
+			return false;
+		}
 	}
 
 }

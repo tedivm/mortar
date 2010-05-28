@@ -55,12 +55,13 @@ class MortarActionInstallModule extends ActionBase
 		}
 	}
 
-	protected function getModuleListing($modules, $name, $url = null)
+	protected function getModuleListing($modules, $name, $url, $install = false)
 	{
 		$table = new Table($name . '_module_listing');
 		$table->addClass('index-listing');
 		$table->addColumnLabel('package_name', 'Name');
 		$table->addColumnLabel('package_description', 'Description');
+		$table->addColumnLabel('package_actions', 'Actions');
 
 		foreach($modules as $package)
 		{
@@ -68,15 +69,20 @@ class MortarActionInstallModule extends ActionBase
 			$meta = $packageInfo->getMeta();
 
 			$table->newRow();
-
-			if(isset($url)) {
-				$linkToPackage = clone $url;
-				$linkToPackage->id = $package;
-				$table->addField('package_name', $linkToPackage->getLink($package));
-			} else {
-				$table->addField('package_name', $package);			
-			}
+			$table->addField('package_name', $package);			
 			$table->addField('package_description', $meta['description']);
+
+			$linkToPackage = clone $url;
+			if($install) {
+				$action = 'Install';
+			} else {
+				$package = $packageInfo->getId();
+				$linkToPackage->action = 'ModulePermissions';
+				$action = 'Permissions';
+			}
+			$linkToPackage->id = $package;
+
+			$table->addField('package_actions', $linkToPackage->getLink($action));
 		}
 
 		return $table->makeHtml();
@@ -92,9 +98,9 @@ class MortarActionInstallModule extends ActionBase
 			unset($linkToSelf->locationId);
 
 			$output .= '<h2>Available Packages</h2>';
-			$output .= $this->getModuleListing($this->installablePackages, 'installable', $linkToSelf);
+			$output .= $this->getModuleListing($this->installablePackages, 'installable', $linkToSelf, true);
 			$output .= '<h2>Installed Packages</h2>';
-			$output .= $this->getModuleListing($this->installedPackages, 'installed');
+			$output .= $this->getModuleListing($this->installedPackages, 'installed', $linkToSelf);
 		}elseif($this->form){
 			if($this->success)
 			{
@@ -108,6 +114,7 @@ class MortarActionInstallModule extends ActionBase
 						$url = Query::getUrl();
 						$url->id = $packageInfo->getId();
 						$url->action = 'ModulePermissions';
+						$url->first = 'yes';
 						$this->ioHandler->addHeader('Location', (string) $url);
 						return true;
 					}
