@@ -204,8 +204,7 @@ class Page implements ArrayAccess
 	}
 
 	/**
-	 * This function contains all content tags which are universally applied to the page view template. This will
-	 * almost certainly eventually be expanded to include a Hook so new tags can be added.
+	 * This function contains all content tags which are universally applied to the page view template. 
 	 *
 	 * @param ViewModelTemplate $template
 	 * @return ViewModelTemplate
@@ -224,7 +223,7 @@ class Page implements ArrayAccess
 			$envBox = new TagBoxEnv();
 			$content['env'] = $envBox;
 
-			$breadBox = new TagBoxBreadcrumbs(null);
+			$breadBox = new TagBoxBreadcrumbs();
 			$content['breadcrumbs'] = $breadBox;
 
 			$content['pagetitle'] = "Install Mortar";
@@ -255,15 +254,6 @@ class Page implements ArrayAccess
 
 			$navBox = new TagBoxNav($location);
 			$content['nav'] = $navBox;
-
-			$breadBox = new TagBoxBreadcrumbs($location);
-			$content['breadcrumbs'] = $breadBox;
-		} else {
-			$site = ActiveSite::getSite();
-			$location = $site->getLocation();
-
-			$breadBox = new TagBoxBreadcrumbs($location);
-			$content['breadcrumbs'] = $breadBox;
 		}
 
 		// all tagboxes that require a model but not a location go here
@@ -278,6 +268,9 @@ class Page implements ArrayAccess
 		}
 
 		// all other tagboxes that are not location- or model-dependent go here
+		$breadBox = new TagBoxBreadcrumbs();
+		$content['breadcrumbs'] = $breadBox;
+
 		$tagHook = new Hook();
 		$tagHook->loadPlugins('Page', 'Template', 'None');
 		$addContent = Hook::mergeResults($tagHook->getBoxes());
