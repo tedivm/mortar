@@ -6,14 +6,19 @@ class TagBoxBreadcrumbs
 	protected $user;
 	protected $query;
 
-	public function __construct($location)
+	public function __construct()
 	{
 		if(defined('INSTALLMODE') && INSTALLMODE === true)
 			return;
 
-		$this->location = $location;
 		$this->user = ActiveUser::getUser();
 		$this->query = Query::getQuery();
+		if(isset($this->query['location'])) {
+			$this->location = Location::getLocation($this->query['location']);
+		} else {
+			$site = ActiveSite::getSite();
+			$this->location = $site->getLocation();
+		}
 	}
 
 	public function getCrumbs($sep = '', $html = true, $rev = false, $stopId = null)
