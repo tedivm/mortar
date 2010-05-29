@@ -7,7 +7,14 @@ class ModelToHtmlList extends ModelToHtml
 	protected $tableDisplayList = 'ViewTableDisplayList';
 	protected $templateDisplayList = 'ViewTemplateDisplayList';
 
+	/**
+	 * This is the date format used when converting the model to an html table.
+	 *
+	 * @var string
+	 */
 	protected $indexDateFormat = 'm.d.y g:i a';
+
+	protected $options = array();
 
 	protected $listType = 'template';
 	protected $recursive = false;
@@ -17,11 +24,17 @@ class ModelToHtmlList extends ModelToHtml
 	protected $page;
 	protected $size;
 	protected $offset;
+	protected $columns;
 
 	protected $modelListing;
 
 	public $indexBrowseBy = 'name';
 
+	/**
+	 * This is the maximum number of models a user can request at one time.
+	 *
+	 * @var int
+	 */
 	public $indexMaxLimit = 100;
 
 	/**
@@ -39,15 +52,16 @@ class ModelToHtmlList extends ModelToHtml
 	public $childModels = array();
 
 
-	public function __construct(Model $model, $template = null, $recursive = false)
+	public function __construct(Model $model, $template = null, $recursive = false, $options = array())
 	{
 		parent::__construct($model, $template);
-		$this->configure($model, $template, $recursive);
+		$this->configure($model, $template, $recursive, $options);
 	}
 	
-	protected function configure($model, $template, $recursive)
+	protected function configure($model, $template, $recursive, $options)
 	{
 		if(!$recursive) {
+			$this->options = $options;
 			$this->loadOffsets();
 			$modelInformationArray = $this->getChildren(array());
 			$childrenModels = array();
@@ -99,11 +113,8 @@ class ModelToHtmlList extends ModelToHtml
 	 * @param array $restrictions
 	 * @return array Contains keys 'type' and 'id'
 	 */
-	protected function getChildren($restrictions)
+	protected function getChildren()
 	{
-		foreach($restrictions as $restrictionName => $restrictionValue)
-			$this->modelListing->addRestriction($restrictionName, $restrictionValue);
-
 		$listing = $this->modelListing->getListing($this->size, $this->offset);
 		return $listing;
 	}
@@ -121,6 +132,10 @@ class ModelToHtmlList extends ModelToHtml
 
 		$listingClass = $this->listingClass;
 		$listingObject = new $listingClass($tables[0], $this->model->getType());
+
+		foreach($this->options as $optionName => $optionValue)
+			$listingObject->setOption($optionName, $optionValue);
+
 		return $listingObject;
 	}
 
@@ -134,9 +149,11 @@ class ModelToHtmlList extends ModelToHtml
 
 		$indexList = new $class($this->model, $this->childModels);
 
-		if($type == 'table') {
+		if($type == 'table')
 			$indexList->useIndex(true, $this->offset);
-		}
+
+		if(isset($this->columns))
+			$indexList->useColumns($this->columns);
 
 		return $indexList;
 	}
@@ -160,6 +177,22 @@ class ModelToHtmlList extends ModelToHtml
 	public function getChildrenList()
 	{
 		return $this->childModels;
+	}
+
+	public function setColumns($columns)
+	{
+		$this->columns = $columns;
+	}
+
+	public function setListType($listType)
+	{
+		$listType = strtolower($listType);
+		if($listType === 'table' || $listType === 'template') {
+			$this->listType = $listType;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public function paginate($set = true)

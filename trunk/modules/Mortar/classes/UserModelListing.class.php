@@ -1,14 +1,14 @@
 <?php
 
-class MortarActionUserIndex extends ModelActionIndex
+class MortarUserModelListing extends ModelListing
 {
 
-	public function logic()
+	protected function filterModels($modelArray)
 	{
-		parent::logic();
+		$modelArray = parent::filterModels($modelArray);
 
-		$models = array();
-		foreach($this->childModels as $user) {
+		foreach($modelArray as $userInfo) {
+			$user = ModelRegistry::loadModel('User', $userInfo['id']);
 			$system = true;
 			if(!isset($user['membergroups'])) {
 				$system = false;
@@ -23,10 +23,11 @@ class MortarActionUserIndex extends ModelActionIndex
 			}
 
 			if (!$system)
-				$models[] = $user;
+				$models[] = $userInfo;
 		}
 
-		$this->childModels = $models;
+		return $models;
+
 	}
 
 }

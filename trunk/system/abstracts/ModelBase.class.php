@@ -493,12 +493,15 @@ abstract class ModelBase implements Model
 	/**
 	 * This function returns an object that is used to convert the Model into a different format, such as Html or an
 	 * array. These converts all have the "getOutput()" function, but otherwise can have very different implementations,
-	 * so it is important to know what you are calling.
+	 * so it is important to know what you are calling. 
 	 *
 	 * @param string $format
+	 * @param string $template = null
+	 * @param bool $recurse = true
+	 * @param array $options = array()
 	 * @return ModelConverter
 	 */
-	public function getModelAs($format, $template = null, $recurse = true)
+	public function getModelAs($format, $template = null, $recurse = true, $options = array())
 	{
 		$types = $this->getDescent();
 		array_unshift($types, $this->getType());
@@ -521,7 +524,7 @@ abstract class ModelBase implements Model
 		if(!class_exists($className))
 			return false;
 
-		$modelConverter = new $className($this, $template, !$recurse);
+		$modelConverter = new $className($this, $template, !$recurse, $options);
 		return $modelConverter;
 	}
 
