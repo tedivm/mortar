@@ -59,21 +59,20 @@ class ModelToHtmlLocationList extends ModelToHtmlList
 
 		$query = Query::getQuery();
 
-		$browseBy = (isset($query['browseBy'])) ? $query['browseBy'] : $this->indexBrowseBy;
-		$listingObject->setOption('browseBy', $browseBy);
-
 		if(isset($query['status']))
 			$listingObject->addRestriction('resourceStatus', $query['status']);
 
 		$listingObject->addRestriction('parent', $this->model->getLocation()->getId());
 
-		if(isset($query['browseBy']))
-			if($query['browseBy'] === 'date')
+		if(isset($query['browseBy'])) {
+			if($query['browseBy'] === 'date') {
 				$listingObject->setOption('browseBy', 'publishDate');
-			else
+			} else {
 				$listingObject->setOption('browseBy', $query['browseBy']);
-		else
-			$listingObject->setOption('browseBy', 'name');
+			}
+		} elseif(!isset($this->options['browseBy'])) { 
+			$listingObject->setOption('browseBy', $this->indexBrowseBy);
+		}
 
 		if(isset($query['order']))
 			$listingObject->setOption('order', $query['order']);

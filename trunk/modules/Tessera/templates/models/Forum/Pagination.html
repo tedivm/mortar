@@ -1,0 +1,12 @@
+<tr class="pagination">
+	<td>
+		Displaying results {{ start }}-{{ end }} of {{ total }}.
+	</td>
+	<td colspan="2">
+	<ul class="forum_pagination_list">
+		{% for page in pages %}
+			<li>{{ page }}</li>
+		{% endfor %}
+	</ul>
+	</td>
+</tr>
