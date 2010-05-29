@@ -22,3 +22,17 @@ font-weight: bold;
 .Thread_listing_row_2 {
 background: #eee;
 }
+
+.forum_pagination_list {
+	float: right;
+	list-style: none;
+}
+
+.forum_pagination_list li {
+	float: left;
+	margin-left: 6px;
+}
+
+.pagination_cell {
+	text-align: right;
+}
