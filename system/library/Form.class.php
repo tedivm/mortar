@@ -614,11 +614,43 @@ class Form
 	}
 
 	/**
+	 * This removes a FormInput from the form completely. The second argument, section, is optional but makes
+	 * things much faster. If multiple inputs match (common with checkboxes) they are all returned.
+	 *
+	 * @param string $name
+	 * @param string $section = null
+	 * @return bool
+	 */
+	public function removeInput($name, $section = null)
+	{
+		$deleted = false;
+
+		foreach($this->inputs as $sectionName => $sectionData) {
+			if(isset($section) && $section != $sectionName) {
+				continue;
+			}
+
+			$sectionNew = array();
+			foreach($sectionData as $input) {
+				if($input->name != $name) {
+					$sectionNew[] = $input;
+				} else {
+					$deleted = true;
+				}
+			}
+
+			$this->inputs[$sectionName] = $sectionNew;
+		}
+
+		return $deleted;
+	}
+
+	/**
 	 * This returns a FormInput from the list of stored inputs. The second argument, section, is optional but makes
 	 * things much faster. If multiple inputs match (common with checkboxes) they are all returned.
 	 *
 	 * @param string $name
-	 * @param string $section
+	 * @param string $section = null
 	 * @return FormInput|array
 	 */
 	public function getInput($name, $section = null)
