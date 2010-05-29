@@ -2,26 +2,25 @@
 
 class ChalkActionBlogRead extends ModelActionLocationBasedIndex
 {
-        public $adminSettings = array('headerTitle' => 'Read', 'listType' => 'template');
-        public $htmlSettings = array('headerTitle' => 'Read', 'listType' => 'template');
+        public $adminSettings = array('headerTitle' => 'Read', 'listType' => 'template', 'paginate' => false);
+        public $htmlSettings = array('headerTitle' => 'Read', 'listType' => 'template', 'paginate' => false);
+
+	protected $listOptions = array('browseBy' => 'publishDate', 'order' => 'ASC');
 
 	public function viewAdmin($page)
 	{
-		if(isset($this->model['title']))
-			$page->setTitle($this->model['title']);
-		elseif(isset($this->model['name']))
-			$page->setTitle($this->model['name']);
+		$page->setTitle($this->model->getDesignation());
 
-		return parent::viewHtml($page);
+		return $this->getAdminDetails($page) . parent::viewAdmin($page);
 	}
-	
-	protected function getModelListingClass()
+
+	public function viewHtml($page)
 	{
-		$locationListing = parent::getModelListingClass();
-		$locationListing->setOption('browseBy', 'publishDate');
-		$locationListing->setOption('order', 'DESC');
-		return $locationListing;
+		$page->setTitle($this->model->getDesignation());
+
+		return parent::viewHtml($page);	
 	}
+
 }
 
 ?>

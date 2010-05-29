@@ -17,94 +17,16 @@
  */
 class ModelActionLocationBasedIndex extends ModelActionIndex
 {
-	protected $listingClass = 'LocationListing';
-
-	/**
-	 * If this $query['browseBy'] option isn't set this column is used to sort the models.
-	 *
-	 * @var string
-	 */
-	public $indexBrowseBy = 'name';
-
-	/**
-	 * This function loads the requested models into the childModels properly for us by the various output functions.
-	 *
-	 */
-	public function logic()
-	{
-		$lastModified = $this->model->getLocation()->getLastModified();
-		$this->loadOffsets();
-		$modelInformationArray = $this->getChildren(array());
-		$childrenModels = array();
-		if(is_array($modelInformationArray))
-		{
-			foreach($modelInformationArray as $modelInfo)
-			{
-				$childModel = ModelRegistry::loadModel($modelInfo['type'], $modelInfo['id']);
-				$childrenModels[] = $childModel;
-				$location = $childModel->getLocation();
-				$creation = $location->getCreationDate();
-				$modification = $location->getLastModified();
-				$lastModified = ($lastModified > $modification) ? $lastModified : $modification;
-			}
-		}
-
-		$this->lastModified = $lastModified;
-		$this->childModels = $childrenModels;
-	}
-
-	/**
-	 * This function initiates and sets up the Listing class used by the getChildren class. When overloading this class
-	 * this function is an ideal starting place.
-	 *
-	 * @return LocationListing
-	 */
-	protected function getModelListingClass()
-	{
-		$listingClass = $this->listingClass;
-		$listingObject = new $listingClass();
-
-		$query = Query::getQuery();
-
-		$browseBy = (isset($query['browseBy'])) ? $query['browseBy'] : $this->indexBrowseBy;
-		$listingObject->setOption('browseBy', $browseBy);
-
-		if(isset($query['status']))
-			$listingObject->addRestriction('resourceStatus', $query['status']);
-
-		$listingObject->addRestriction('parent', $this->model->getLocation()->getId());
-
-		if(isset($query['browseBy']))
-			if($query['browseBy'] === 'date')
-				$listingObject->setOption('browseBy', 'publishDate');
-			else
-				$listingObject->setOption('browseBy', $query['browseBy']);
-		else
-			$listingObject->setOption('browseBy', 'name');
-
-		if(isset($query['order']))
-			$listingObject->setOption('order', $query['order']);
-
-		if(isset($query['day']))
-			$listingObject->addFunction('publishDate', 'day', $query['day']);
-
-		if(isset($query['month']))
-			$listingObject->addFunction('publishDate', 'month', $query['month']);
-
-		if(isset($query['year']))
-			$listingObject->addFunction('publishDate', 'year', $query['year']);
-
-		return $listingObject;
-	}
+	protected $getAs = 'HtmlLocationList';
 
 	public function viewControl($page)
 	{
-		$indexList = $this->getDisplayList($this->adminSettings['listType']);
-		$indexList->setColumns(array('type' => 'Type', 'name' => 'Name', 'title' => 'Title'));
+		$htmlConverter = $this->model->getModelAs('HtmlList', $template);
+		$htmlConverter->setListType($listType);
+		$htmlConverter->paginate($paginate);
+		$htmlConverter->setColumns(array('type' => 'Type', 'name' => 'Name', 'title' => 'Title'));
 
-		$indexList->addPage($page);
-
-		return $indexList->getListing();
+		return $htmlConveter->getOutput();
 	}
 
 	/**
@@ -114,35 +36,15 @@ class ModelActionLocationBasedIndex extends ModelActionIndex
 	 */
 	public function viewRss()
 	{
-		if(count($this->childModels) > 0)
+		$htmlConverter = $this->model->getModelAs('HtmlList');
+		$childModels = $htmlConverter->getChildrenList();
+
+		if(count($childModels) > 0)
 		{
-			$rss = new ViewModelRssFeed($this->childModels, $this->model);
+			$rss = new ViewModelRssFeed($childModels, $this->model);
 			$rss->addChannelElement('lastBuildDate', $this->lastModified);
 			$this->ioHandler->addHeader('Content-Type', 'application/rss+xml; charset=utf-8');
 			return $rss->getDisplay();
-		}else{
-
-		}
-	}
-
-	/**
-	 * This takes the model and turns it into an array. The output controller converts that to json, which gets
-	 * outputted.
-	 *
-	 * @return array
-	 */
-	public function viewJson()
-	{
-		$children = array();
-		if(count($this->childModels) > 0)
-		{
-			foreach($this->childModels as $model)
-			{
-				$children[] = $model->__toArray();
-			}
-			return $children;
-		}else{
-			return false;
 		}
 	}
 
