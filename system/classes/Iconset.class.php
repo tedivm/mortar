@@ -145,7 +145,7 @@ class IconsetImageWrapper implements ArrayAccess
 
 	public function offsetExists($offset)
 	{
-		return $this->theme->hasIcon($offset);
+		return $this->iconset->hasIcon($offset);
 	}
 
 	public function offsetUnset($offset)
