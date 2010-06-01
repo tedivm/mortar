@@ -15,10 +15,9 @@ class ModelToHtmlLocationList extends ModelToHtmlList
 	 * This function loads the requested models into the childModels properly for us by the various output functions.
 	 *
 	 */
-	protected function configure($model, $template, $recursive, $options)
+	protected function process()
 	{
-		if(!$recursive) {
-			$this->options = $options;
+		if(!$this->recursive) {
 			$lastModified = $this->model->getLocation()->getLastModified();
 			$this->loadOffsets();
 			$modelInformationArray = $this->getChildren();
@@ -38,8 +37,6 @@ class ModelToHtmlLocationList extends ModelToHtmlList
 
 			$this->lastModified = $lastModified;
 			$this->childModels = $childrenModels;
-		} else {
-			$this->recursive = true;
 		}
 	}
 
@@ -53,6 +50,9 @@ class ModelToHtmlLocationList extends ModelToHtmlList
 	{
 		$listingClass = $this->listingClass;
 		$listingObject = new $listingClass();
+
+		foreach($this->restrictions as $restrictionName => $restrictionValue)
+			$listingObject->addRestriction($restrictionName, $restrictionValue);
 
 		foreach($this->options as $optionName => $optionValue)
 			$listingObject->setOption($optionName, $optionValue);

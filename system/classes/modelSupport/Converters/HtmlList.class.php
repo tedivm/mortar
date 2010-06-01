@@ -25,8 +25,11 @@ class ModelToHtmlList extends ModelToHtml
 	protected $size;
 	protected $offset;
 	protected $columns;
+	protected $restrictions = array();
 
+	protected $configuration;
 	protected $modelListing;
+	protected $processed = false;
 
 	public $indexBrowseBy = 'name';
 
@@ -55,12 +58,13 @@ class ModelToHtmlList extends ModelToHtml
 	public function __construct(Model $model, $template = null, $recursive = false, $options = array())
 	{
 		parent::__construct($model, $template);
-		$this->configure($model, $template, $recursive, $options);
+		$this->options = $options;
+		$this->recursive = $recursive;
 	}
-	
-	protected function configure($model, $template, $recursive, $options)
+
+	protected function process()
 	{
-		if(!$recursive) {
+		if(!$this->recursive) {
 			$this->options = $options;
 			$this->loadOffsets();
 			$modelInformationArray = $this->getChildren(array());
@@ -75,8 +79,6 @@ class ModelToHtmlList extends ModelToHtml
 			}
 
 			$this->childModels = $childrenModels;
-		} else {
-			$this->recursive = true;
 		}
 	}
 
@@ -110,7 +112,6 @@ class ModelToHtmlList extends ModelToHtml
 	 * This function ties the user input into a Listing class retrieved from getModelListingClass() and returns the
 	 * models to the logic function.
 	 *
-	 * @param array $restrictions
 	 * @return array Contains keys 'type' and 'id'
 	 */
 	protected function getChildren()
@@ -132,6 +133,9 @@ class ModelToHtmlList extends ModelToHtml
 
 		$listingClass = $this->listingClass;
 		$listingObject = new $listingClass($tables[0], $this->model->getType());
+
+		foreach($this->restrictions as $restrictionName => $restrictionValue)
+			$listingObject->addRestriction($restrictionName, $restrictionValue);
 
 		foreach($this->options as $optionName => $optionValue)
 			$listingObject->setOption($optionName, $optionValue);
@@ -174,8 +178,15 @@ class ModelToHtmlList extends ModelToHtml
 		return $p->pageList();
 	}
 
+	public function addRestriction($name, $value)
+	{
+		$this->restrictions[$name] = $value;
+	}
+
 	public function getChildrenList()
 	{
+		if(!$this->processed)
+			$this->process();
 		return $this->childModels;
 	}
 
@@ -202,6 +213,9 @@ class ModelToHtmlList extends ModelToHtml
 
 	public function getOutput()
 	{
+		if(!$this->processed)
+			$this->process();
+
 		if($this->recursive)
 			return parent::getOutput();
 
