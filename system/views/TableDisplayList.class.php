@@ -72,7 +72,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 		foreach ($this->modelList as $model)
 		{
 			$properties = $model->__toArray();
-			
+
 			foreach($this->allowedColumns as $propName => $propLabel) {
 				if (isset($properties[$propName])) {
 					$propData = $properties[$propName];

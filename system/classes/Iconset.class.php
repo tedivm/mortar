@@ -96,6 +96,11 @@ class Iconset extends ContentBase
 		return false;
 	}
 
+	public function hasIcon($name)
+	{
+		return (bool) $this->loadIcon($name);
+	}
+
 	/**
 	 * Returns an HTML representation of the requested icon, either as an image or span-wrapped
 	 * text. Accepts an optional $classes parameter to insert a set of classes into the
@@ -119,6 +124,38 @@ class Iconset extends ContentBase
 		}
 
 		return $icon;
+	}
+
+}
+
+
+class IconsetImageWrapper implements ArrayAccess
+{
+	protected $iconset;
+
+	public function __construct(Iconset $iconset)
+	{
+		$this->iconset = $iconset;
+	}
+
+	public function offsetGet($offset)
+	{
+		return $this->iconset->getIcon($offset);
+	}
+
+	public function offsetExists($offset)
+	{
+		return $this->theme->hasIcon($offset);
+	}
+
+	public function offsetUnset($offset)
+	{
+
+	}
+
+	public function offsetSet($offset, $value)
+	{
+
 	}
 
 }
