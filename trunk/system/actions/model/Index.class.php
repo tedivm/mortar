@@ -23,6 +23,11 @@ class ModelActionIndex extends ModelActionBase
 	protected $getAs = 'HtmlList';
 	protected $listOptions = array();
 
+	protected function configureList($converter)
+	{
+		return $converter;
+	}
+
 	/**
 	 * Creates a listing of models along with relevant qualities and actions for use in an admin page.
 	 *
@@ -44,6 +49,8 @@ class ModelActionIndex extends ModelActionBase
 		$htmlConverter->setListType($listType);
 		$htmlConverter->paginate($paginate);
 
+		$htmlConverter = $this->configureList($htmlConverter);
+
 		return $htmlConverter->getOutput();
 	}
 
@@ -62,6 +69,8 @@ class ModelActionIndex extends ModelActionBase
 		$htmlConverter = $this->model->getModelAs($this->getAs, $template, true, $this->listOptions);
 		$htmlConverter->setListType($listType);
 		$htmlConverter->paginate($paginate);
+
+		$htmlConverter = $this->configureList($htmlConverter);
 
 		return $htmlConverter->getOutput();
 	}
