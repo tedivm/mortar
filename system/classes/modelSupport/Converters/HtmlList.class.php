@@ -14,8 +14,6 @@ class ModelToHtmlList extends ModelToHtml
 	 */
 	protected $indexDateFormat = 'm.d.y g:i a';
 
-	protected $options = array();
-
 	protected $listType = 'template';
 	protected $recursive = false;
 	protected $paginate = false;
@@ -25,6 +23,8 @@ class ModelToHtmlList extends ModelToHtml
 	protected $size;
 	protected $offset;
 	protected $columns;
+
+	protected $options = array();
 	protected $restrictions = array();
 
 	protected $configuration;
@@ -55,17 +55,15 @@ class ModelToHtmlList extends ModelToHtml
 	public $childModels = array();
 
 
-	public function __construct(Model $model, $template = null, $recursive = false, $options = array())
+	public function __construct(Model $model, $template = null, $recursive = false)
 	{
 		parent::__construct($model, $template);
-		$this->options = $options;
 		$this->recursive = $recursive;
 	}
 
 	protected function process()
 	{
 		if(!$this->recursive) {
-			$this->options = $options;
 			$this->loadOffsets();
 			$modelInformationArray = $this->getChildren(array());
 			$childrenModels = array();
@@ -176,6 +174,26 @@ class ModelToHtmlList extends ModelToHtml
 			$p->setOnPage(false);
 
 		return $p->pageList();
+	}
+
+	public function addOptions(array $options)
+	{
+		foreach($options as $name => $value) {
+			$this->options[$name] = $value;
+		}
+	}
+
+	public function addOption($name, $value)
+	{
+		$this->options[$name] = $value;
+	}
+
+
+	public function addRestrictions(array $restrictions)
+	{
+		foreach($restrictions as $name => $value) {
+			$this->restrictions[$name] = $value;
+		}
 	}
 
 	public function addRestriction($name, $value)
