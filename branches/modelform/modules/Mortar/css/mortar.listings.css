@@ -1,0 +1,74 @@
+/* listings */
+
+.index-listing {
+width: 100%;
+margin: 5px auto;
+border: 2px solid #000;
+border-collapse: collapse;
+}
+
+.index-listing th {
+text-align: left;
+}
+
+.index-listing tbody tr {
+background: #eee;
+height: 2em;
+}
+
+.index-listing tbody tr.y_even {
+background: #fff;
+}
+
+.index-listing ul {
+list-style: none;
+padding: 0;
+margin: 0;
+}
+
+.index-listing ul li {
+display: inline;
+float: left;
+}
+
+.action a {
+display: block;
+}
+
+.action a img {
+border: 0;
+padding: 0;
+margin: 0;
+}
+
+.iconFade {
+opacity:0.6;
+filter:alpha(opacity=60);
+}
+
+
+/* pagination */
+
+.pagination {
+min-height: 1.3em;
+position: relative;
+width: 100%;
+margin: 8px auto;
+}
+
+.pagination_details {
+position: absolute;
+left: 0;
+}
+
+.pagination_list {
+margin: 0;
+position: absolute;
+list-style: none;
+right: 0;
+}
+
+.pagination_list li {
+padding: 3px;
+float: left;
+}

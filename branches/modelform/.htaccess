@@ -1,0 +1,21 @@
+RewriteEngine On
+
+# If the system is in a folder, as opposed to the domain root, then the rewrite base needs to be updated.
+# RewriteBase /URL/PATH/TO/INSTALL/
+RewriteBase /
+
+# If the file is real, skip this rule
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*) index.php?p=$1 [QSA]
+
+
+<Files ~ "\.sqlite$">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files ~ "\.ini$">
+    Order allow,deny
+    Deny from all
+</Files>

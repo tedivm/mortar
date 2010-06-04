@@ -1,0 +1,38 @@
+.Forum_display table {
+border-collapse: collapse;
+width: 100%;
+}
+
+.Forum_listing {
+border: 3px solid #2D5F8A;
+}
+
+.Forum_listing td, .Thread_listing td {
+padding: 5px;
+}
+
+.Thread_listing {
+border: 1px solid #2D5F8A;
+}
+
+.Thread_listing Thread_poster {
+font-weight: bold;
+}
+
+.Thread_listing_row_2 {
+background: #eee;
+}
+
+.forum_pagination_list {
+	float: right;
+	list-style: none;
+}
+
+.forum_pagination_list li {
+	float: left;
+	margin-left: 6px;
+}
+
+.pagination_cell {
+	text-align: right;
+}
