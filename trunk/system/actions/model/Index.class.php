@@ -48,7 +48,8 @@ class ModelActionIndex extends ModelActionBase
 		if(!isset($paginate))
 			$paginate = false;
 
-		$htmlConverter = $this->model->getModelAs($this->getAs, $template, true, $this->listOptions);
+		$htmlConverter = $this->model->getModelAs($this->getAs, $template, true);
+		$htmlConverter->addOptions($this->listOptions);
 		$htmlConverter->setListType($listType);
 		$htmlConverter->paginate($paginate);
 
