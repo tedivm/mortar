@@ -2,9 +2,8 @@
 
 class RubbleActionMaintenanceMode extends RubbleActionAuthenticationError
 {
-	public $adminSettings = array(	'headerTitle' => 'Maintenance',
-					'EnginePermissionOverride' => true);
-	public $htmlSettings = array(	'headerTitle' => 'Maintenance');
+	public static $settings = array( 'Base' => 
+		array( 'headerTitle' => 'Maintenance', 'EnginePermissionOverride' => true) );
 
 	static $requiredPermission = 'Read';
 

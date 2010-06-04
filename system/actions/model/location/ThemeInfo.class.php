@@ -2,7 +2,7 @@
 
 class ModelActionLocationBasedThemeInfo extends ModelActionLocationBasedAdd
 {
-	public $adminSettings = array( 'headerTitle' => 'Theme Settings' );
+        public static $settings = array( 'Base' => array('headerTitle' => 'Theme Settings', 'useRider' => false) );
 
 	public static $requiredPermission = 'Theme';
 

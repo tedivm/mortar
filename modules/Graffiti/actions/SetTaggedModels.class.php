@@ -2,7 +2,7 @@
 
 class GraffitiActionSetTaggedModels extends FormAction
 {
-	public $adminSettings = array('headerTitle' => 'Set Tagged Models');
+	public static $settings = array( 'Base' => array('headerTitle' => 'Set Tagged Models') );
 
 	static $requiredPermission = 'System';
 	protected $formName = 'Form';

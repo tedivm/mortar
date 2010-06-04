@@ -4,7 +4,7 @@ class MortarActionDashboardSettings extends FormAction
 {
 	static $requiredPermission = 'System';
 
-	public $adminSettings = array( 'headerTitle' => 'Dashboard Settings' );
+	public static $settings = array( 'Base' => array( 'headerTitle' => 'Dashboard Settings' ) );
 
 	protected $dashboardSlots = 12;
 

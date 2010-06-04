@@ -4,7 +4,7 @@ class MortarActionMaintenanceMode extends FormAction
 {
 	static $requiredPermission = 'System';
 
-	public $adminSettings = array( 'headerTitle' => 'Maintenance Mode' );
+	public static $settings = array( 'Base' => array( 'headerTitle' => 'Maintenance Mode' ) );
 
 	protected $formName = 'MortarMaintenanceModeForm';
 

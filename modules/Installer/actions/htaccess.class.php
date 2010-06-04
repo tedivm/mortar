@@ -3,7 +3,7 @@
 class InstallerActionhtaccess implements ActionInterface //extends Action
 {
 
-	public $adminSettings = array('headerTitle' => 'htaccess Settings');
+	public static $settings = array( 'Base' => array('headerTitle' => 'htaccess Settings') );
 
 	protected $form = true;
 	protected $error = array();

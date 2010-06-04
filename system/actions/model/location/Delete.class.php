@@ -18,8 +18,7 @@
 class ModelActionLocationBasedDelete extends ModelActionLocationBasedEdit
 {
 
-        public $adminSettings = array( 'headerTitle' => 'Delete' );
-        public $htmlSettings = array( 'headerTitle' => 'Delete' );
+        public static $settings = array( 'Base' => array('headerTitle' => 'Delete') );
 
 	/**
 	 * This defines the permission action that the user needs to run this. Permissions are based off of an action and

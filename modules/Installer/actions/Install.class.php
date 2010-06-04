@@ -3,7 +3,7 @@
 class InstallerActionInstall implements ActionInterface //extends Action
 {
 
-	public $adminSettings = array('headerTitle' => 'Install Mortar');
+	public static $settings = array( 'Base' => array('headerTitle' => 'Install Mortar') );
 
 	protected $form = true;
 	protected $error = array();

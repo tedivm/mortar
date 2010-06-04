@@ -2,8 +2,8 @@
 
 class ChalkActionBlogRead extends ModelActionLocationBasedIndex
 {
-        public $adminSettings = array('headerTitle' => 'Read', 'listType' => 'template', 'paginate' => false);
-        public $htmlSettings = array('headerTitle' => 'Read', 'listType' => 'template', 'paginate' => false);
+        public static $settings = array('Base' => 
+        	array('headerTitle' => 'Read', 'listType' => 'template', 'paginate' => false) );
 
 	protected $listOptions = array('browseBy' => 'publishDate', 'order' => 'ASC');
 

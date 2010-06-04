@@ -177,7 +177,7 @@ abstract class ActionBase implements ActionInterface
 	 *
 	 * @param string $name
 	 * @param string $format = 'Base'
-	 * @return any
+	 * @return scalar|array
 	 */
 	public function getSetting($name, $format = 'Base')
 	{
@@ -188,6 +188,22 @@ abstract class ActionBase implements ActionInterface
 			return $this->localSettings['Base'][$name];
 
 		return self::loadSetting($name, $format, get_class($this));
+	}
+
+	/**
+	 * Constructs the display title for the action using the headerTitle, useRider, and titleRider settings.
+	 *
+	 * @param string $format = 'Base'
+	 * @return string|false
+	 */
+	public function getTitle($format = 'Base')
+	{
+		if(!($title = $this->getSetting('headerTitle', $format)))
+			return false;
+		if($use = $this->getSetting('useRider', $format))
+			$title .= $this->getSetting('titleRider', $format);
+
+		return $title;	
 	}
 
 	/**

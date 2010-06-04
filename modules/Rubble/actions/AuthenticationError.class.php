@@ -2,9 +2,8 @@
 
 class RubbleActionAuthenticationError extends ActionBase
 {
-	public $adminSettings = array(	'headerTitle' => 'Forbidden',
-					'EnginePermissionOverride' => true);
-	public $htmlSettings = array(	'headerTitle' => 'Forbidden');
+	public static $settings = array( 'Base' => 
+		array('headerTitle' => 'Forbidden', 'EnginePermissionOverride' => true) );
 
 
 	static $requiredPermission = 'Read';

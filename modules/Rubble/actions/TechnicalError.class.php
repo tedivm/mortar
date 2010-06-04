@@ -2,9 +2,8 @@
 
 class RubbleActionTechnicalError extends RubbleActionAuthenticationError
 {
-	public $adminSettings = array(	'headerTitle' => 'Unknown Error',
-					'EnginePermissionOverride' => true);
-	public $htmlSettings = array(	'headerTitle' => 'Unknown Error');
+	public static $settings = array( 'Base' => 
+		array('headerTitle' => 'Unknown Error', 'EnginePermissionOverride' => true) );
 
 	static $requiredPermission = 'Read';
 

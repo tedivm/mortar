@@ -19,7 +19,7 @@ class MortarActionDashboard extends ActionBase
 {
 	static $requiredPermission = 'Admin';
 
-	public $adminSettings = array( 'headerTitle' => 'Mortar Dashboard' );
+	public static $settings = array( 'Base' => array( 'headerTitle' => 'Mortar Dashboard' ) );
 
 	/**
 	 * Wraps HTML around a series of Controls which are loaded via the ControlSet class and displayed using the

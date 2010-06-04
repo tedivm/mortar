@@ -2,7 +2,7 @@
 
 class ModelActionLocationBasedThemePreview extends ModelActionLocationBasedRead
 {
-	public $htmlSettings = array( 'headerTitle' => 'Theme Preview', 'useRider' => true);
+        public static $settings = array( 'Base' => array('headerTitle' => 'Theme Preview', 'useRider' => true) );
 
 	public static $requiredPermission = 'Admin';
 
@@ -24,7 +24,7 @@ class ModelActionLocationBasedThemePreview extends ModelActionLocationBasedRead
 		$theme = isset($query['theme']) ? $query['theme'] : $defaultTheme;
 
 		$page->setTemplate($template, $theme);
-		$this->htmlSettings['titleRider'] = " ($theme : $template)";
+		$this->setSetting('titleRider', 'Html', " ($theme : $template)");
 
 		return parent::viewHtml($page);
 	}

@@ -18,7 +18,7 @@ class MortarActionControlSettings extends FormAction
 {
 	static $requiredPermission = 'System';
 
-	public $adminSettings = array( 'headerTitle' => 'Control Settings', 'useRider' => true);
+	public static $settings = array( 'Base' => array( 'headerTitle' => 'Control Settings', 'useRider' => true) );
 
 	protected $cs;
 	protected $control;
@@ -48,6 +48,8 @@ class MortarActionControlSettings extends FormAction
 			$this->ioHandler->addHeader('Location', (string) $url);
 		}
 
+		$this->setSetting('titleRider', 'Base', ' For ' . $this->control->getName());
+
 		$this->form = $this->getForm();
 
 		if($this->form !== false && $this->form->checkSubmit())
@@ -65,8 +67,6 @@ class MortarActionControlSettings extends FormAction
 	 */
 	public function viewAdmin($page)
 	{
-		$this->adminSettings['titleRider'] = ' For ' . $this->control->getName();
-
 		if($this->form === false) {
 			$output = 'This control has no manual settings.';
 		} elseif ($this->form->wasSubmitted()) {
