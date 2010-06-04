@@ -17,16 +17,11 @@
  */
 class ModelActionIndex extends ModelActionBase
 {
-        public $adminSettings = array( 'headerTitle' => 'Index', 'listType' => 'table', 'paginate' => true );
-        public $htmlSettings = array( 'headerTitle' => 'Index', 'listType' => 'table', 'paginate' => true );
+        public static $settings = array( 'Base' => array('headerTitle' => 'Index', 'listType' => 'table', 'paginate' => true ));
 
+	protected $format = 'Html';
 	protected $getAs = 'HtmlList';
 	protected $listOptions = array();
-
-	protected function configureList($converter)
-	{
-		return $converter;
-	}
 
 	/**
 	 * Creates a listing of models along with relevant qualities and actions for use in an admin page.
@@ -35,42 +30,27 @@ class ModelActionIndex extends ModelActionBase
 	 */
 	public function viewAdmin($page)
 	{
-		if(isset($this->adminSettings['listType']) && $this->adminSettings['listType'] === 'template') {
-			$template = 'Display.html';
-			$listType = $this->adminSettings['listType'];
-		} else {
-			$template = null;
-			$listType = 'table';
-		}
-
-		$paginate = isset($this->adminSettings['paginate']) ? $this->adminSettings['paginate'] : false;
-
-		$htmlConverter = $this->model->getModelAs($this->getAs, $template, true, $this->listOptions);
-		$htmlConverter->setListType($listType);
-		$htmlConverter->paginate($paginate);
-
-		$htmlConverter = $this->configureList($htmlConverter);
-
-		return $htmlConverter->getOutput();
+		$this->format = 'Admin';
+		return $this->viewHtml($page);
 	}
 
 	public function viewHtml($page)
 	{
-		if(isset($this->htmlSettings['listType']) && $this->htmlSettings['listType'] === 'template') {
+		$listType = $this->getSetting('listType', $this->format);
+		if($listType === 'template') {
 			$template = 'Display.html';
-			$listType = $this->htmlSettings['listType'];
 		} else {
 			$template = null;
 			$listType = 'table';
 		}
 
-		$paginate = isset($this->htmlSettings['paginate']) ? $this->htmlSettings['paginate'] : false;
+		$paginate = $this->getSetting('paginate', $this->format);
+		if(!isset($paginate))
+			$paginate = false;
 
 		$htmlConverter = $this->model->getModelAs($this->getAs, $template, true, $this->listOptions);
 		$htmlConverter->setListType($listType);
 		$htmlConverter->paginate($paginate);
-
-		$htmlConverter = $this->configureList($htmlConverter);
 
 		return $htmlConverter->getOutput();
 	}

@@ -2,7 +2,7 @@
 
 class MortarActionMarkupSettings extends FormAction
 {
-	public $adminSettings = array('headerTitle' => 'Markup Settings');
+	public static $settings = array( 'Base' => array('headerTitle' => 'Markup Settings') );
 
 	static $requiredPermission = 'System';
 	protected $formName = 'Form';

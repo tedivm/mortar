@@ -91,15 +91,13 @@ class HtmlControllerContentFilter
 		$themePath = $page->getThemePath();
 		$theme = $page->getTheme();
 
-		$title = (isset($action->htmlSettings['headerTitle'])) ? $action->htmlSettings['headerTitle'] : '';
-		$title .= (isset($action->htmlSettings['useRider']) && $action->htmlSettings['useRider']
-			&& isset($action->htmlSettings['titleRider'])) ? $action->htmlSettings['titleRider'] : '';
-
 		if(method_exists($action, 'getName')) {
 			$actionName = $action->getName();
 		} else {
 			$actionName = '';
 		}
+
+		$title = $action->getTitle('Html');
 
 		$oldtitle = $page->getTitle();
 		if(isset($oldtitle)) {

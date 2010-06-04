@@ -2,9 +2,8 @@
 
 class RubbleActionResourceMoved extends ActionBase
 {
-	public $adminSettings = array(	'headerTitle' => 'Resource Moved',
-					'EnginePermissionOverride' => true);
-	public $htmlSettings = array(	'headerTitle' => 'Resource Moved');
+	public static $settings = array( 'Base' => 
+		array('headerTitle' => 'Resource Moved', 'EnginePermissionOverride' => true) );
 
 	protected $redirectUrl;
 

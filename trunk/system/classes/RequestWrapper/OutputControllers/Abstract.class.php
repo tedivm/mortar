@@ -245,8 +245,6 @@ abstract class AbstractOutputController
 			if(!$action)
 				throw new TypeMismatch(array('Action', $action));
 
-			$settingsArrayName = strtolower($format) . 'Settings';
-
 			$viewMethod = 'view' . $format;
 
 			// check to see that it has an output for the current format
@@ -255,7 +253,7 @@ abstract class AbstractOutputController
 							. ' method to be available for this format');
 
 			if(isset($this->permission)
-				&& !isset($action->{$settingsArrayName}['EnginePermissionOverride']))
+				&& !($action->getSetting('EnginePermissionOverride', $format)) )
 			{
 				if(!$action->checkAuth($this->permission))
 					throw new AuthenticationError('Not allowed to access this engine at this location.');

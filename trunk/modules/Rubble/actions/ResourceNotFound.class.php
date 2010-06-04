@@ -2,8 +2,8 @@
 
 class RubbleActionResourceNotFound extends RubbleActionAuthenticationError
 {
-	public $adminSettings = array('headerTitle' => '404 Error');
-	public $htmlSettings = array('headerTitle' => '404 Error');
+	public static $settings = array( 'Base' => array('headerTitle' => '404 Error') );
+
 	static $requiredPermission = 'Read';
 
 	protected $authenticatedErrorCode = 404;

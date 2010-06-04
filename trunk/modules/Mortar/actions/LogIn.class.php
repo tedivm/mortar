@@ -4,8 +4,7 @@ class MortarActionLogIn extends MortarActionLogOut
 {
 	static $requiredPermission = 'Read';
 
-	public $adminSettings = array( 'headerTitle' => 'Log In', 'EnginePermissionOverride' => true);
-	public $htmlSettings = array( 'headerTitle' => 'Log In' );
+	public static $settings = array( 'Base' => array( 'headerTitle' => 'Log In', 'EnginePermissionOverride' => true) );
 
 	protected $form;
 	protected $loginSuccessful = false;

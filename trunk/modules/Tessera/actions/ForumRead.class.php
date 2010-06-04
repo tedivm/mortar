@@ -2,8 +2,8 @@
 
 class TesseraActionForumRead extends ModelActionLocationBasedIndex
 {
-        public $adminSettings = array('headerTitle' => 'Read', 'listType' => 'template', 'paginate' => true);
-        public $htmlSettings = array('headerTitle' => 'Read', 'listType' => 'template', 'paginate' => true);
+	public static $settings = array( 'Base' => 
+		array('headerTitle' => 'Read', 'listType' => 'template', 'paginate' => true) );
 
 	protected $listOptions = array('browseBy' => 'creationDate', 'order' => 'DESC');
 

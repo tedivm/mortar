@@ -4,7 +4,7 @@ class MortarActionClearCache extends ActionBase
 {
 	static $requiredPermission = 'System';
 
-	public $adminSettings = array( 'headerTitle' => 'Cache Cleared' );
+	public static $settings = array( 'Base' => array( 'headerTitle' => 'Cache Cleared' ) );
 
 	public function logic()
 	{

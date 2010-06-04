@@ -3,8 +3,7 @@
 
 class ModelActionLocationBasedEditGroupPermissions extends ModelActionLocationBasedEdit
 {
-
-        public $adminSettings = array( 'headerTitle' => 'Edit Group Permissions' );
+        public static $settings = array('Base' => array('headerTitle' => 'Edit Group Permissions', 'useRider' => false) );
 
 	/**
 	 * This defines the permission action that the user needs to run this. Permissions are based off of an action and

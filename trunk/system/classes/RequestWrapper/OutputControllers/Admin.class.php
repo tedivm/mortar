@@ -104,15 +104,8 @@ class AdminControllerContentFilter
 			$actionName = '';
 		}
 
-		$processedOutput = new ViewThemeTemplate($theme,
-			array('support/adminContent' . $actionName . '.html', 'support/adminContent.html') );
-
-		$title = (isset($action->adminSettings['headerTitle'])) ? $action->adminSettings['headerTitle'] : '';
-		$title .= (isset($action->adminSettings['useRider']) && $action->adminSettings['useRider']
-			&& isset($action->adminSettings['titleRider'])) ? $action->adminSettings['titleRider'] : '';
-		$subtitle = isset($action->adminSettings['headerSubTitle'])
-			? $action->adminSettings['headerSubTitle']
-			: '';
+		$title = $action->getTitle('Admin');
+		$subtitle = $action->getSetting('headerSubTitle', 'Admin');
 
 		$oldtitle = $page->getTitle();
 		if(isset($oldtitle)) {
@@ -120,6 +113,10 @@ class AdminControllerContentFilter
 		} else {
 			$page->setTitle($title);
 		}
+
+
+		$processedOutput = new ViewThemeTemplate($theme,
+			array('support/adminContent' . $actionName . '.html', 'support/adminContent.html') );
 
 		$processedOutput->addContent(	array(	'display' => $output,
 							'title' => $title,

@@ -5,7 +5,8 @@ class MortarActionModulePermissions extends ActionBase
 
 	public static $requiredPermission = 'Admin';
 
-	public $adminSettings = array( 'headerTitle' => 'Module Permissions', 'useRider' => true );
+	public static $settings = array( 'Base' => 
+		array( 'headerTitle' => 'Module Permissions', 'useRider' => true ) );
 
 	protected $formName = 'ModulePermissions';
 
@@ -30,7 +31,7 @@ class MortarActionModulePermissions extends ActionBase
 		$this->moduleName = $packageInfo->getName();
 		$this->models = $packageInfo->getModels();
 
-		$this->adminSettings['titleRider'] = ' for ' . $this->moduleName;
+		$this->setSetting('titleRider', 'Base', ' for ' . $this->moduleName);
 
 		if(count($this->models) === 0 )
 		{

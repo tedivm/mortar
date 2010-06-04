@@ -2,9 +2,7 @@
 
 class GraffitiActionModelTag extends ModelActionLocationBasedEdit
 {
-
-	public $adminSettings = array('headerTitle' => 'Tag');
-	public $htmlSettings = array('headerTitle' => 'Tag');
+	public static $settings = array( 'Base' => array('headerTitle' => 'Tag') );
 
 	public static $requiredPermission = 'Read';
 

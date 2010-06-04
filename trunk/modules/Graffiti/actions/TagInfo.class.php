@@ -4,8 +4,7 @@ class GraffitiActionTagInfo extends ActionBase
 {
         static $requiredPermission = 'Read';
 
-	public $adminSettings = array('headerTitle' => 'Tag Info', 'useRider' => true);
-	public $htmlSettings =	array('headerTitle' => 'Tag Info', 'useRider' => true);
+	public static $settings = array( 'Base' => array('headerTitle' => 'Tag Info', 'useRider' => true) );
 
 	protected $locationList;
 	protected $owner = false;

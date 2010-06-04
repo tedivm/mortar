@@ -18,8 +18,7 @@ class ModelActionAdd extends ModelActionBase
 {
 	public static $requiredPermission = 'Add';
 
-        public $adminSettings = array( 'headerTitle' => 'Add', 'useRider' => true );
-        public $htmlSettings = array( 'headerTitle' => 'Add', 'useRider' => true );
+        public static $settings =  array('Base' => array('headerTitle' => 'Add', 'useRider' => true ));
 
 	/**
 	 * This is the model that the new model is going to be attached to
@@ -71,6 +70,8 @@ class ModelActionAdd extends ModelActionBase
 				$this->ioHandler->setStatusCode(400);
 			}
 		}
+
+		$this->setSetting('titleRider', 'Base', ' New ' . $this->model->getType());
 	}
 
 	protected function onSuccess()
@@ -211,16 +212,14 @@ class ModelActionAdd extends ModelActionBase
 	}
 
 	/**
-	 * This function handles the view for the admin format. If the form was not submitted, or if there is an error, it
+	 * This function handles the view for the html format. If the form was not submitted, or if there is an error, it
 	 * gets displayed. Otherwise we redirect the output to the newly saved resource (as a way to prevent the backspace
 	 * duplicate issue).
 	 *
 	 * @return string
 	 */
-	public function viewAdmin($page)
+	public function viewHtml($page)
 	{
-		$this->adminSettings['titleRider'] = " New " . $this->model->getType();
-
 		if($this->form->wasSubmitted())
 		{
 			if($this->formStatus === true)
@@ -252,11 +251,9 @@ class ModelActionAdd extends ModelActionBase
 		}
 	}
 
-	public function viewHtml($page)
+	public function viewAdmin($page)
 	{
-		$form = $this->viewAdmin($page);
-		$this->htmlSettings['titleRider'] = " New " . $this->model->getType();
-		return $form;
+		return $this->viewHtml($page);
 	}
 
 	public function viewControl($page)

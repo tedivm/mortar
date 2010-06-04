@@ -18,8 +18,7 @@
 class ModelActionEdit extends ModelActionAdd
 {
 
-        public $adminSettings = array( 'headerTitle' => 'Edit' );
-        public $htmlSettings = array( 'headerTitle' => 'Edit' );
+        public static $settings = array( 'Base' => array( 'headerTitle' => 'Edit' ) );
 
 	/**
 	 * This function calls the parent::getForm function, but then overwrites the default values with the actual values

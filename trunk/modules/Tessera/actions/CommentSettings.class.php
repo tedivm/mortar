@@ -3,7 +3,7 @@
 class TesseraActionCommentSettings extends FormAction
 {
 
-	public $adminSettings = array('headerTitle' => 'Comment Settings');
+	public static $settings = array( 'Base' => array('headerTitle' => 'Comment Settings') );
 
 	static $requiredPermission = 'System';
 	protected $formName = 'Form';
