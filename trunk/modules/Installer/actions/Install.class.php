@@ -1,6 +1,6 @@
 <?php
 
-class InstallerActionInstall implements ActionInterface //extends Action
+class InstallerActionInstall extends ActionBase
 {
 
 	public static $settings = array( 'Base' => array('headerTitle' => 'Install Mortar') );

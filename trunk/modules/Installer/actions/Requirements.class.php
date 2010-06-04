@@ -1,6 +1,6 @@
 <?php
 
-class InstallerActionRequirements implements ActionInterface //extends Action
+class InstallerActionRequirements extends ActionBase
 {
 
 	public static $settings = array( 'Base' => array('headerTitle' => 'Install Requirements') );

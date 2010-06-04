@@ -1,6 +1,6 @@
 <?php
 
-class InstallerActionhtaccess implements ActionInterface //extends Action
+class InstallerActionhtaccess extends ActionBase
 {
 
 	public static $settings = array( 'Base' => array('headerTitle' => 'htaccess Settings') );
