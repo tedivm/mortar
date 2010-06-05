@@ -1,6 +1,6 @@
 <?php
 
-abstract class LocationModelForm extends ModelForm
+class LocationModelForm extends ModelForm
 {
 
 	protected function define()
@@ -11,8 +11,10 @@ abstract class LocationModelForm extends ModelForm
 		if($this->model->getLocation()->getParent() === false)
 			throw new CoreError('Unspecified  parent', 400);
 
+		$this->changeSection('location_information')->setLegend('Location Information');
+
 		if(!staticHack($this->model, 'autoName') && !$this->getInput('location_name'))
-		{
+		{ 
 			$this->createInput('location_name')->
 				setLabel('Name')->
 				addRule('alphanumeric')->
@@ -40,6 +42,61 @@ abstract class LocationModelForm extends ModelForm
 		}
 	}
 
+	public function populateInputs()
+	{
+		parent::populateInputs();
+
+		$inputGroups = $this->getInputGroups(($this->getInputList()));
+
+		if(isset($inputGroups['model'])) {
+			foreach($inputGroups['model'] as $name) {
+				$input = $this->getInput('model_' . $name);
+
+				if($input->type == 'richtext') {
+					if($value = $this->model['raw' . ucfirst($name)]) {
+						$input->setValue($value);
+					} else {
+						$input->setValue($this->model[$name]);
+					}
+				} else {
+					$input->setValue($this->model[$name]);
+				}
+
+				if($name === 'title')
+					$input->setType('input');
+			}
+		}
+
+		if(isset($inputGroups['location']))
+		{
+			if(in_array('name', $inputGroups['location']))
+			{
+				$input = $this->getInput('location_name');
+				$input->setValue($this->model->getLocation()->getName());
+			}
+
+			if(in_array('owner', $inputGroups['location']))
+			{
+				$input = $this->getInput('location_owner');
+				$input->setValue($this->model->getLocation()->getOwner());
+			}
+
+			if(in_array('groupOwner', $inputGroups['location']))
+			{
+				$input = $this->getInput('location_groupOwner');
+				$input->setValue($this->model->getLocation()->getOwnerGroup());
+			}
+
+			if(in_array('publishDate', $inputGroups['location']))
+			{
+				$input = $this->getInput('location_publishDate');
+				$pubdate = date( 'm/d/y h:i a' , $this->model->getLocation()->getPublishDate());
+				$input->setValue($pubdate);
+			}
+		}
+
+	}
+
 	/**
 	 * This function seperates out the specific input groups (specified by groupname_) and adds them to the object
 	 * that uses them.
@@ -48,7 +105,7 @@ abstract class LocationModelForm extends ModelForm
 	 * @param array $input
 	 * @return bool This is the status on whether the model was successfully saved
 	 */
-	protected function processInput($input)
+	public function processInput($input)
 	{
 		$inputNames = array_keys($input);
 		$inputGroups = $this->getInputGroups($inputNames);

@@ -44,7 +44,7 @@ abstract class ModelForm extends Form
 	{
 		$inputGroups = $this->getInputGroups(($this->getInputList()));
 
-		foreach($inputGroups['model'] as $name)
+		if(isset($inputGroups['model'])) foreach($inputGroups['model'] as $name)
 		{
 			$input = $this->getInput('model_' . $name);
 
