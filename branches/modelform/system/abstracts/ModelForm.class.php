@@ -105,13 +105,19 @@ abstract class ModelForm extends Form
 		$this->processPluginInputs($input, false);
 		$success = $this->model->save();
 
-		if($success)
+		if($success) {
+			$success = $this->postProcessCustomInputs($input);
 			$this->processPluginInputs($input, true);
-
+		}
 		return $success;
 	}
 
 	protected function processCustomInputs($input)
+	{
+		return true;
+	}
+
+	protected function postProcessCustomInputs($input)
 	{
 		return true;
 	}

@@ -148,9 +148,12 @@ class LocationModelForm extends ModelForm
 			return false;
 
 		$this->processPluginInputs($input, false);
+
 		$success = $this->model->save();
-		if($success)
+		if($success) {
+			$success = $this->postProcessCustomInputs($input);
 			$this->processPluginInputs($input, true);
+		}
 		return $success;
 	}
 
