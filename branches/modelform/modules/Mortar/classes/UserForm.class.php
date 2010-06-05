@@ -83,6 +83,8 @@ class MortarUserForm extends ModelForm
 
 		unset($this->model['membergroups']);
 		$this->model['membergroups'] = isset($input['memberGroups']) ? $input['memberGroups'] : array();
+
+		return true;
 	}
 }
 

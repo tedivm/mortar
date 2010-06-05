@@ -87,7 +87,9 @@ abstract class LocationModelForm extends ModelForm
 			}
 		}
 
-		$this->processCustomInputs($input);
+		if(!$this->processCustomInputs($input))
+			return false;
+
 		$this->processPluginInputs($input, false);
 		$success = $this->model->save();
 		if($success)

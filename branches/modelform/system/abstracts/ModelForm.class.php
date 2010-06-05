@@ -96,11 +96,15 @@ abstract class ModelForm extends Form
 			$this->model[$name] = $input['model_' . $name];
 		}
 
-		$this->processCustomInputs($input);
+		if(!$this->processCustomInputs($input))
+			return false;
+
 		if(isset($this->extensionForm) && method_exists($this->extensionForm, 'processExtensionInputs'))
 			$this->extensionForm->processExtensionInputs($input);
+
 		$this->processPluginInputs($input, false);
 		$success = $this->model->save();
+
 		if($success)
 			$this->processPluginInputs($input, true);
 
@@ -109,7 +113,7 @@ abstract class ModelForm extends Form
 
 	protected function processCustomInputs($input)
 	{
-
+		return true;
 	}
 
 	protected function processPluginInputs($input, $post = false)
