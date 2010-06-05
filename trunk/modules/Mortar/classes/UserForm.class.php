@@ -1,9 +1,9 @@
 <?php
 
-class MortarUserForm extends Form
+class MortarUserForm extends ModelForm
 {
 
-	protected function define()
+	protected function createCustomInputs()
 	{
 		$this->changeSection('Info');
 		$this->setLegend('Member Information');
@@ -49,7 +49,42 @@ class MortarUserForm extends Form
 				setLabel($memberGroup['memgroup_name'])->
 				property('value', $memberGroup['memgroup_id']);
 		}
+	}
 
+
+	protected function populateCustomInputs()
+	{
+		$membergroupInputs = $this->getInput('memberGroups');
+
+		foreach($membergroupInputs as $memberGroupInput)
+		{
+			if(isset($memberGroupInput->properties['value']))
+			{
+				$value = $memberGroupInput->properties['value'];
+				if(is_numeric($value))
+				{
+					$membergroup = ModelRegistry::loadModel('MemberGroup', $value);
+					if($membergroup->containsUser($this->model->getId()))
+					{
+						$memberGroupInput->check(true);
+					}
+				}
+			}
+		}
+	}
+
+	protected function processCustomInputs($input)
+	{
+		if(isset($input['model_allowLogin']) && !isset($input['password']))
+			return false;
+
+		if(isset($input['password']))
+			$this->model['password'] = $input['password'];
+
+		unset($this->model['membergroups']);
+		$this->model['membergroups'] = isset($input['memberGroups']) ? $input['memberGroups'] : array();
+
+		return true;
 	}
 }
 

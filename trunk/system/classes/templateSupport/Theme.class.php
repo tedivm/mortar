@@ -11,9 +11,9 @@ class TagBoxTheme
 	public function __construct(Theme $theme)
 	{
 		$this->theme = $theme;
-		$iconset = $theme->getIconset();
 		$this->images = new ThemeImageWrapper($theme);
-		$this->icons = new IconsetImageWrapper($iconset);
+		if($iconset = $theme->getIconset())
+			$this->icons = new IconsetImageWrapper($iconset);
 	}
 	
 	public function __get($key)

@@ -1,8 +1,8 @@
 <?php
 
-class TesseraForumForm extends Form
+class TesseraForumForm extends LocationModelForm
 {
-	protected function define()
+	protected function createCustomInputs()
 	{
 		$this->changeSection('info')->
 			setLegend('Forum Information')->
@@ -15,7 +15,6 @@ class TesseraForumForm extends Form
 			setLabel('Description')->
 			setType('textarea');
 	}
-
 }
 
 

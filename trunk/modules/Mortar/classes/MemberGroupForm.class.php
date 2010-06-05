@@ -1,8 +1,8 @@
 <?php
 
-class MortarMemberGroupForm extends Form
+class MortarMemberGroupForm extends ModelForm
 {
-	protected function define()
+	protected function createCustomInputs()
 	{
 		$this->changeSection('Info');
 
@@ -11,6 +11,17 @@ class MortarMemberGroupForm extends Form
 			addRule('required');
 	}
 
+	protected function processCustomInputs($input)
+	{
+		$this->model['is_system'] = 0;
+		return true;
+	}
+
+	protected function populateCustomInputs()
+	{
+		$name = $this->getInput('model_name');
+		$name->setValue($this->model->name);
+	}
 }
 
 ?>
