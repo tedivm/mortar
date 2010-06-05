@@ -18,7 +18,7 @@
 class ModelActionEdit extends ModelActionAdd
 {
 
-        public static $settings = array( 'Base' => array( 'headerTitle' => 'Edit' ) );
+        public static $settings = array( 'Base' => array( 'headerTitle' => 'Edit', 'useRider' => false ) );
 
 	/**
 	 * This function calls the parent::getForm function, but then overwrites the default values with the actual values
@@ -30,43 +30,7 @@ class ModelActionEdit extends ModelActionAdd
 	protected function getForm()
 	{
 		$form = parent::getForm();
-		$inputGroups = $this->getInputGroups(($form->getInputList()));
-
-		foreach($inputGroups['model'] as $name)
-		{
-			$input = $form->getInput('model_' . $name);
-
-			if($input instanceof FormInput)
-			{
-				if($input->type == 'richtext') {
-					if($value = $this->model['raw' . ucfirst($name)]) {
-						$input->setValue($value);
-					} else {
-						$input->setValue($this->model[$name]);
-					}
-				} else if($input->type == 'checkbox') {
-					if(isset($this->model[$name]) && $this->model[$name])
-					{
-						$input->check(true);
-					}
-				}else{
-					$input->setValue($this->model[$name]);
-				}
-
-			}else{
-				//check boxes
-			}
-		}
-
-		if(isset($inputGroups['location']))
-		{
-			if(in_array('name', $inputGroups['location']))
-			{
-				$input = $form->getInput('location_name');
-				$input->setValue($this->model->getLocation()->getName());
-			}
-		}
-
+		$form->populateInputs();
 		return $form;
 	}
 }

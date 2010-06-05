@@ -1,8 +1,8 @@
 <?php
 
-class ChalkBlogForm extends Form {
+class ChalkBlogForm extends LocationModelForm {
 
-	protected function define()
+	protected function createCustomInputs()
 	{
 		$this->changeSection('info')->
 			setlegend('Blog Information')->
@@ -11,10 +11,8 @@ class ChalkBlogForm extends Form {
 			setType('title')->
 			addRule('required');
 
-
 		$this->createInput('model_subtitle')->
 			setLabel('Subtitle');
-
 	}
 }
 

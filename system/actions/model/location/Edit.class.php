@@ -17,7 +17,7 @@
  */
 class ModelActionLocationBasedEdit extends ModelActionLocationBasedAdd
 {
-        public static $settings = array( 'Base' => array('headerTitle' => 'Edit') );
+        public static $settings = array( 'Base' => array('headerTitle' => 'Edit', 'useRider' => false) );
 
 	/**
 	 * This defines the permission action that the user needs to run this. Permissions are based off of an action and
@@ -38,55 +38,7 @@ class ModelActionLocationBasedEdit extends ModelActionLocationBasedAdd
 	protected function getForm()
 	{
 		$form = parent::getForm();
-		$inputGroups = $this->getInputGroups(($form->getInputList()));
-
-		if(isset($inputGroups['model'])) {
-			foreach($inputGroups['model'] as $name) {
-				$input = $form->getInput('model_' . $name);
-
-				if($input->type == 'richtext') {
-					if($value = $this->model['raw' . ucfirst($name)]) {
-						$input->setValue($value);
-					} else {
-						$input->setValue($this->model[$name]);
-					}
-				} else {
-					$input->setValue($this->model[$name]);
-				}
-
-				if($name === 'title')
-					$input->setType('input');
-			}
-		}
-
-		if(isset($inputGroups['location']))
-		{
-			if(in_array('name', $inputGroups['location']))
-			{
-				$input = $form->getInput('location_name');
-				$input->setValue($this->model->getLocation()->getName());
-			}
-
-			if(in_array('owner', $inputGroups['location']))
-			{
-				$input = $form->getInput('location_owner');
-				$input->setValue($this->model->getLocation()->getOwner());
-			}
-
-			if(in_array('groupOwner', $inputGroups['location']))
-			{
-				$input = $form->getInput('location_groupOwner');
-				$input->setValue($this->model->getLocation()->getOwnerGroup());
-			}
-
-			if(in_array('publishDate', $inputGroups['location']))
-			{
-				$input = $form->getInput('location_publishDate');
-				$pubdate = date( 'm/d/y h:i a' , $this->model->getLocation()->getPublishDate());
-				$input->setValue($pubdate);
-			}
-		}
-
+		$form->populateInputs();
 		return $form;
 	}
 

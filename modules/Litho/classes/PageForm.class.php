@@ -1,8 +1,8 @@
 <?php
 
-class LithoPageForm extends Form
+class LithoPageForm extends LocationModelForm
 {
-	protected function define()
+	protected function createCustomInputs()
 	{
 		$this->changeSection('info')->
 			setlegend('Page Information')->
@@ -19,14 +19,21 @@ class LithoPageForm extends Form
 				setType('textarea')->
 				setLabel('Keywords');
 
-
 			$this->changeSection('model_content')->
 			setlegend('Page Content')->
 			createInput('model_content')->
 				setType('richtext')->
 				addRule('required');
-
 	}
+
+	protected function populateCustomInputs()
+	{
+		$this->changeSection('model_content')->
+			createInput('model_note')->
+			setLabel('Note')->
+			addRule('maxlength', 200);
+	}
+
 }
 
 ?>
