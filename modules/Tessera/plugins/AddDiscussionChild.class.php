@@ -14,7 +14,6 @@ class TesseraPluginAddDiscussionChild
 
 			$user = ActiveUser::getUser();
 			$location->setOwner($user);
-			$location->setPublishDate($model->getLocation()->getPublishDate());
 
 			return $discussion->save();
 		} else {
