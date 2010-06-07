@@ -22,6 +22,12 @@ class TagBoxEnv
 		$action = $currentUrl->action;
 		$module = $currentUrl->module;
 
+		if(isset($action) && ($action == 'LogIn' || $action == 'LogOut')) {
+			$location = $currentUrl->l;
+			$action = $currentUrl->a;
+			$module = $currentUrl->m;
+		}
+
 		$url = new Url();
 		$url->module = 'Mortar';
 		if($this->user['name'] === 'Guest') {
@@ -29,6 +35,7 @@ class TagBoxEnv
 		} else {
 			$url->action = 'LogOut';
 		}
+
 		if(isset($action))
 			$url->a = $action;
 		if(isset($location))
