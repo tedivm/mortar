@@ -48,7 +48,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 		$this->extractTableData();
 	}
 
-	public function useIndex($use, $base)
+	public function useIndex($use, $base = 0)
 	{
 		if($use) {
 			$this->useIndex = true;
@@ -56,6 +56,11 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 			$this->useIndex = false;
 		}
 
+		$this->indexBase = $base;
+	}
+
+	public function setIndexBase($base)
+	{
 		$this->indexBase = $base;
 	}
 
