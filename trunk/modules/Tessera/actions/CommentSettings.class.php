@@ -26,7 +26,7 @@ class TesseraActionCommentSettings extends FormAction
 
 		$form = parent::getForm();
 		$form->changeSection('models')->
-			setLegend('Model Settings')->
+			setLegend('Allow Comments')->
 			addSectionClass('mf-toggle-none');
 
 		foreach($this->modelList as $model)

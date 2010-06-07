@@ -13,6 +13,8 @@ class TesseraInstallerPostscript
 
 	public function run()
 	{
+		Hook::registerPlugin('system', 'menus', 'admin', $this->packageId, 'MenusTessera');
+
 		Hook::registerModelPlugin('Directory', 'getAllowedChildrenTypes', $this->packageId, 'AllowForumType', true);
 		Hook::registerModelPlugin('Site', 'getAllowedChildrenTypes', $this->packageId, 'AllowForumType', true);
 		Hook::registerModelPlugin('All', 'getAllowedChildrenTypes', $this->packageId, 'AllowDiscussionType', true);
