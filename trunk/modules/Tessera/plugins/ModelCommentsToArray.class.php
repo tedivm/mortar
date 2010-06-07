@@ -17,16 +17,18 @@ class TesseraPluginModelCommentsToArray
 
 		if($discussion = $loc->getChildByName('discussion')) {
 			$count = 0;
-			$comments = $discussion->getChildren('Message');
-			foreach($comments as $comment) {
-				$model = $comment->getResource();
-				if($model->checkAuth('Read')) {
-					$count++;
+			if($comments = $discussion->getChildren('Message')) {
+				foreach($comments as $comment) {
+					$model = $comment->getResource();
+					if($model->checkAuth('Read')) {
+						$count++;
+					}
 				}
 			}
-		}
 
-		$array['comments'] = $count;
+			$array['comments'] = $count;
+			$array['commentStatus'] = $discussion->getStatus();
+		}
 
 		return $array;
 	}
