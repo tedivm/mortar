@@ -152,7 +152,7 @@ class ModelToHtmlList extends ModelToHtml
 		$indexList = new $class($this->model, $this->childModels);
 
 		if($type == 'table')
-			$indexList->useIndex(true, $this->offset);
+			$indexList->setIndexBase(true, $this->offset);
 
 		if(isset($this->columns))
 			$indexList->useColumns($this->columns);
