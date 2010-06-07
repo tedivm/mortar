@@ -15,7 +15,7 @@ class MortarActionLogOut extends ActionBase
 
 	public function viewAdmin($page)
 	{
-		return 'You have been logged out.';
+		return $this->viewHtml($page);
 	}
 
 

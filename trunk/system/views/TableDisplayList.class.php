@@ -33,6 +33,8 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 					'lastModified'	=> 'Last Modified',
 					'publishDate'	=> 'Published');
 
+	protected $listActions = true;
+
 	public function __construct(Model $mmodel, array $modelList, $columns = null)
 	{
 		parent::__construct($mmodel, $modelList);		
@@ -127,7 +129,8 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 		{
 			$table->newRow();
 			$this->addModelToTable($table, $this->modelData[$x++]);
-			$this->addModelActionsToRow($table, $model);
+			if($this->listActions)
+				$this->addModelActionsToRow($table, $model);
 		}
 
 		return $table->makeHtml();
@@ -138,7 +141,8 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 		foreach ($this->tableColumns as $name => $label) 
 			$table->addColumnLabel('model_' . $name, $label);
 
-		$table->addColumnLabel('model_actions', 'Actions');
+		if($this->listActions)
+			$table->addColumnLabel('model_actions', 'Actions');
 	}
 
 	protected function addModelToTable($table, $modelArray)

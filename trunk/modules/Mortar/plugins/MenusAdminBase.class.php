@@ -11,6 +11,12 @@ class MortarPluginMenusAdminBase
 		$action = $currentUrl->action;
 		$module = $currentUrl->module;
 
+		if(isset($action) && ($action == 'LogIn' || $action == 'LogOut')) {
+			$location = $currentUrl->l;
+			$action = $currentUrl->a;
+			$module = $currentUrl->m;
+		}
+
 		$url = new Url();
 		$url->format = 'Admin';
 
@@ -30,12 +36,12 @@ class MortarPluginMenusAdminBase
 
 		$loginUrl = clone $url;
 
-		if(isset($action))
-			$loginUrl->a = $action;
 		if(isset($location))
 			$loginUrl->l = $location;
 		if(isset($module))
 			$loginUrl->m = $module;
+		if(isset($action))
+			$url->a = $action;
 
 		if(!ActiveUser::isLoggedIn())
 		{
