@@ -10,12 +10,12 @@ class MortarUserForm extends ModelForm
 
 		$this->createInput('model_name')->
 			setLabel('Display/Login Name')->
-			addRule('required');
+			addRule('required')->
+			addRule('maxlength', 40);
 
 		$this->createInput('model_email')->
 			setLabel('Email')->
 			addRule('email');
-
 
 		$this->createInput('model_allowlogin')->
 			setType('checkbox')->
