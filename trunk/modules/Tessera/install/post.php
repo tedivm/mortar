@@ -20,6 +20,7 @@ class TesseraInstallerPostscript
 		Hook::registerModelPlugin('All', 'getAllowedChildrenTypes', $this->packageId, 'AllowDiscussionType', true);
 		Hook::registerModelPlugin('All', 'firstSaveLocation', $this->packageId, 'AddDiscussionChild', true);
 		Hook::registerModelPlugin('All', 'extraContent', $this->packageId, 'ModelDisplayComments', true);
+		Hook::registerModelPlugin('All', 'actionLookup', $this->packageId, 'ModelPostCommentAction');
 		Hook::registerModelPlugin('All', 'toArray', $this->packageId, 'ModelCommentsToArray', true);
 		Hook::registerModelPlugin('All', 'baseForm', $this->packageId, 'ModelFormComments');
 	}
