@@ -33,6 +33,8 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 					'lastModified'	=> 'Last Modified',
 					'publishDate'	=> 'Published');
 
+	protected $specialColumns = array();
+
 	protected $listActions = true;
 
 	public function __construct(Model $mmodel, array $modelList, $columns = null)
@@ -79,21 +81,29 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 				if (isset($properties[$propName])) {
 					$propData = $properties[$propName];
 					$columnList[$propName] = $propLabel;
-					if ($propName === 'owner')
+					if ($propName === 'owner') {
 						$this->modelData[$x][$propName] = $propData['name'];
-					elseif (($propName === 'createdOn') || ($propName === 'lastModified') ||
-						($propName === 'publishDate'))
+					} elseif (($propName === 'createdOn') || ($propName === 'lastModified') || 
+						($propName === 'publishDate')) {
 						$this->modelData[$x][$propName] = 
 							date($this->indexDateFormat, $propData);
-					elseif ($propName === 'membergroups')
+					} elseif ($propName === 'membergroups') {
 						$this->modelData[$x][$propName] = $this->formatGroups($propData);
-					else
+					} elseif (in_array($propName, $this->specialColumns)) {
+						$this->modelData[$x][$propName] = $this->processSpecialColumn($propName, $propData);
+					} else {
 						$this->modelData[$x][$propName] = $propData;
+					}
 				}
 			}
 			$x++;
 		}
 		$this->tableColumns = $columnList;
+	}
+
+	protected function processSpecialColumn($name, $data)
+	{
+		return $data;
 	}
 
 	public function getDisplay()
