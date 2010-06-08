@@ -5,28 +5,32 @@ class GraffitiPluginTemplateNavCategories
 
 	public function hasTag($tagname)
 	{
-		if(strtolower($tagname) === 'categoryentries')
+		if(strtolower($tagname) === 'categorylist')
 			return true;
 
 		return false;
 	}
 
-	public function getTag($tagname, $id)
+	public function categoryList($categoryName = null, $numEntries = 5)
 	{
-		if($tagname !== 'categoryentries')
+		if(!isset($categoryName))
 			return false;
 
-		if(!isset($id))
+		$cat = ModelRegistry::loadModel('Category');
+		if(!$cat->loadByName($categoryName))
 			return false;
 
-		$locs = GraffitiCategorizer::getCategoryLocations($id);
-		$output = '<ol>';
+		$locs = GraffitiCategorizer::getCategoryLocations($cat->getId());
+		$output = '<ul>';
 
+		$x = 0;
 		foreach($locs as $loc) {
 			$output .= '<li><a href="' . $loc['url'] . '">' . $loc['name'] . '</a></li>';
+			if($x++ >= $numEntries)
+				break;
 		}
 
-		$output .= '</ol>';
+		$output .= '</ul>';
 
 		return $output;
 	}

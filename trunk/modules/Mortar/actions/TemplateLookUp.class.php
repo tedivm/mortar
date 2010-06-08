@@ -32,7 +32,7 @@ class MortarActionTemplateLookUp extends ActionBase
 				$theme = new Theme($themeName);
 				$themePath = $theme->getPath();
 
-				$templates = glob($themePath . "*.html");
+				$templates = glob($themePath . $query['q'] . "*.html");
 
 				foreach($templates as $temp) {
 					$path = explode('/', $temp);
@@ -44,8 +44,6 @@ class MortarActionTemplateLookUp extends ActionBase
 				$cache->storeData($templateList);
 			}
 			$this->list = $templateList;
-
-		}else{
 
 		}
 	}

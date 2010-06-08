@@ -185,9 +185,8 @@ class TagBoxNav
 		$hook->loadPlugins('Template', 'Navigation', 'Tags');
 		$results = Hook::mergeResults($hook->hasTag($tagname));
 
-		if($results === true || in_array(true, $results)) {
-			array_unshift($args, $tagname);
-			$results = Hook::mergeResults(call_user_func_array(array($hook, 'getTag'), $args));
+		if($results === true || is_array($results) && in_array(true, $results)) {
+			$results = Hook::mergeResults(call_user_func_array(array($hook, $tagname), $args));
 			if(is_array($results)) {
 				return $results[0];
 			} else {
