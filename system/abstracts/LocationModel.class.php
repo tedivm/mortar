@@ -72,11 +72,18 @@ abstract class LocationModel extends ModelBase
 	static public $defaultStatus;
 
 	/**
-	 * This function contains an array of strings that can be used as a status type for a model.
+	 * Contains an array of strings that can be used as a status type for a model.
 	 *
 	 * @var array
 	 */
 	static public $statusTypes = array();
+
+	/**
+	 * When true, a status field with all available statuses will appear when editing the model.
+	 *
+	 * @var array
+	 */
+	static public $editStatus = false;
 
 	/**
 	 * The constructor sets some basic properties and, if an ID is passed, initializes the model. It runs the parent
@@ -110,16 +117,16 @@ abstract class LocationModel extends ModelBase
 					$locationId = false;
 				}
 			}
+		}
 
-			if(isset($locationId) && is_numeric($locationId))
-			{
-				$this->location = Location::getLocation($locationId);
-				$this->properties['name'] = $this->location->getName();
-				$this->properties['status'] = $this->location->getStatus();
-			}else{
-				if(!isset($this->properties['status']) && $status = staticHack(get_class($this), 'defaultStatus'))
-					$this->properties['status'] = $status;
-			}
+		if(isset($locationId) && is_numeric($locationId))
+		{
+			$this->location = Location::getLocation($locationId);
+			$this->properties['name'] = $this->location->getName();
+			$this->properties['status'] = $this->location->getStatus();
+		}else{
+			if(!isset($this->properties['status']) && $status = staticHack(get_class($this), 'defaultStatus'))
+				$this->properties['status'] = $status;
 		}
 	}
 

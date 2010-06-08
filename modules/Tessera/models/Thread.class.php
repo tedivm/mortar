@@ -9,6 +9,7 @@ class TesseraModelThread extends LocationModel
 	static public $richtext = 'markdown';
 	static public $defaultStatus = 'Open';
 	static public $statusTypes = array('Open', 'Closed');
+	static public $editStatus = true;
 }
 
 ?>
