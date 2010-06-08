@@ -4,8 +4,10 @@ class TesseraModelMessage extends LithoModelPage
 {
 	static public $type = 'Message';
 	static public $autoName = true;
-	public $allowedChildrenTypes = array();
+	static public $usePublishDate = false;
 	static public $richtext = 'markdown';
+
+	public $allowedChildrenTypes = array();
 	protected $table = array('lithoPages', 'tesseraMessages');
 }
 
