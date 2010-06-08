@@ -25,6 +25,7 @@ class ModelActionLocationBasedIndex extends ModelActionIndex
 		$htmlConverter->setListType($listType);
 		$htmlConverter->paginate($paginate);
 		$htmlConverter->setColumns(array('type' => 'Type', 'name' => 'Name', 'title' => 'Title'));
+		$htmlConverter = $this->configureList($htmlConverter);
 
 		return $htmlConveter->getOutput();
 	}

@@ -17,11 +17,16 @@
  */
 class ModelActionIndex extends ModelActionBase
 {
-        public static $settings = array( 'Base' => array('headerTitle' => 'Index', 'listType' => 'table', 'paginate' => true ));
+	public static $settings = array( 'Base' => array('headerTitle' => 'Index', 'listType' => 'table', 'paginate' => true ));
 
 	protected $format = 'Html';
 	protected $getAs = 'HtmlList';
 	protected $listOptions = array();
+
+	protected function configureList($converter)
+	{
+		return $converter;
+	}
 
 	/**
 	 * Creates a listing of models along with relevant qualities and actions for use in an admin page.
@@ -52,6 +57,7 @@ class ModelActionIndex extends ModelActionBase
 		$htmlConverter->addOptions($this->listOptions);
 		$htmlConverter->setListType($listType);
 		$htmlConverter->paginate($paginate);
+		$htmlConverter = $this->configureList($htmlConverter);
 
 		return $htmlConverter->getOutput();
 	}
