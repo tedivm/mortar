@@ -26,6 +26,9 @@ class TesseraPluginModelDisplayComments
 		$user = ActiveUser::getUser();
 		$name = $user['name'];
 
+		if(!$model->checkAuth('Add'))
+			return $content;
+
 		if($name === 'Guest')
 			$name = '';
 
