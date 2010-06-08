@@ -183,6 +183,31 @@ class GraffitiTagLookUp
 		return $locs;
 	}
 
+	static function getTagList()
+	{
+		$cache = CacheControl::getCache('tags', 'list', 'all');
+		$tags = $cache->getData();
+
+		if($cache->isStale())
+		{
+			$db = DatabaseConnection::getConnection('default_read_only');
+			$result = $db->query(  'SELECT tag, sum(weight) as tagWeight
+						FROM graffitiTags
+						INNER JOIN graffitiLocationHasTags
+						ON graffitiTags.tagId = graffitiLocationHasTags.tagId
+						GROUP BY graffitiTags.tagId
+						ORDER BY tag');
+
+			$tags = array();
+			while($row = $result->fetch_array())
+				$tags[] = array('tag' => $row['tag'], 'weight' => $row['tagWeight']);
+
+			$cache->storeData($tags);
+		}
+
+		return $tags;
+	}
+
 	static function isStopWord($word)
 	{
 		if($word == 'us')

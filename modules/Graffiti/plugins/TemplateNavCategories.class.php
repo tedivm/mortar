@@ -5,10 +5,43 @@ class GraffitiPluginTemplateNavCategories
 
 	public function hasTag($tagname)
 	{
-		if(strtolower($tagname) === 'categorylist')
-			return true;
+		switch(strtolower($tagname)) {
+			case 'categorylist':
+			case 'tagcloud':
+				return true;
+			default:
+				return false;
+		}
+	}
 
-		return false;
+	public function tagCloud($size = .5)
+	{
+		$tags = GraffitiTagLookUp::getTagList();
+
+		$query = Query::getQuery();
+		$baseUrl = new Url();
+		$baseUrl->module = 'Graffiti';
+		$baseUrl->action = 'TagInfo';
+		$baseUrl->format = $query['format'];
+
+		$output = new HtmlObject('div');
+		$output->addClass('tag-cloud');
+
+		foreach($tags as $tag) {
+			$ems = $size * ($tag['weight']);
+
+			$url = clone($baseUrl);
+			$url->tag = $tag['tag'];
+			$link = $url->getLink($tag['tag']);
+
+			$tagSpan = new HtmlObject('span');
+			$tagSpan->addClass('tag');
+			$tagSpan->property('style', 'font-size: ' . $ems . 'em');
+			$tagSpan->wrapAround($link);
+			$output->wrapAround($tagSpan);
+		}
+
+		return (string) $output;
 	}
 
 	public function categoryList($categoryName = null, $numEntries = 5)
