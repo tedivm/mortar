@@ -80,9 +80,10 @@ class ModelActionLocationBasedDelete extends ModelActionLocationBasedEdit
 		{
 			if(isset($this->originalParent) && is_numeric($this->originalParent))
 			{
+				$query = Query::getQuery();
 				$url = new Url();
 				$url->location = $this->originalParent;
-				$url->format = 'admin';
+				$url->format = $query['format'];
 				$this->ioHandler->addHeader('Location', (string) $url);
 			}else{
 
@@ -95,7 +96,7 @@ class ModelActionLocationBasedDelete extends ModelActionLocationBasedEdit
 
 	public function viewHtml($page)
 	{
-		return '';
+		return $this->viewAdmin($page);
 	}
 
 	public function viewXml()
