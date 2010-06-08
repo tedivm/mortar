@@ -48,6 +48,13 @@ class ViewTemplateDisplayList {
 	protected $format;
 
 	/**
+	 * This is the value returned when no matches are found.
+	 *
+	 * @var string
+	 */
+	protected $noMatches = "<p>There were no matches for the specified query.</p>";
+
+	/**
 	 * Simple constructor to set the key variables.
 	 *
 	 * @param Model $mmodel
@@ -105,7 +112,7 @@ class ViewTemplateDisplayList {
 			$output = $listingHtml;
 		}
 
-		return isset($output) ? $output : "<p>There were no matches for the specified query.</p>";
+		return isset($output) ? $output : $this->noMatches;
 	}
 
 	protected function getActionList($model, $format)
