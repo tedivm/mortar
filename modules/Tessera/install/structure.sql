@@ -25,7 +25,7 @@ CREATE TABLE tesseraThreads
 /* Build Table Structure */
 CREATE TABLE tesseraMessages
 (
-	id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	id INTEGER UNSIGNED NOT NULL PRIMARY KEY,
 	author VARCHAR(40) NULL,
 	email VARCHAR(255) NULL,
 	anonymous CHAR(1) NOT NULL DEFAULT '0',
@@ -48,4 +48,4 @@ CREATE TABLE tesseraModelStatus
 REPLACE INTO schemaVersion (package, lastupdated, majorVersion, minorVersion, microVersion)
 						VALUES ( 'Tessera', NOW(), 0, 1, 0);
 
-SET foreign_key_checks = 0;
+SET foreign_key_checks = 1;

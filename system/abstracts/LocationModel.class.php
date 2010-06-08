@@ -329,9 +329,12 @@ abstract class LocationModel extends ModelBase
 
 	public function getUrl()
 	{
+		$query = Query::getQuery();
 		$url = new Url();
 		$location = $this->getLocation();
 		$url->locationId = $location->getId();
+		$url->action = "Read";
+		$url->format = $query['format'];
 		return $url;
 	}
 
