@@ -68,6 +68,10 @@ class TesseraActionModelPostComment extends ModelActionLocationBasedEdit
 		$message['content'] = $input['comment_text'];
 		$message['title'] = $model['title'];
 		$message['author'] = $name;
+		if(isset($input['comment_email']))
+			$message['email'] = $input['comment_email'];
+		if($user['name'] === 'Guest')
+			$message['anonymous'] = 1;
 
 		$messageLoc = $message->getLocation();
 		$messageLoc->setOwner($user);

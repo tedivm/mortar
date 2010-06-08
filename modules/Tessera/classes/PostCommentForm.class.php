@@ -18,14 +18,20 @@ class TesseraPostCommentForm extends Form
 			setLegend('Comment')->
 			setMarkup(Markup::loadModelEngine($this->discussion->getType()));
 
-		$input = $this->createInput('comment_author')->
+		$author = $this->createInput('comment_author')->
 			setLabel('User Name')->
 			addRule('required')->
 			addRule('maxlength', 40)->
 			setValue($this->author);
 
-		if($this->author !== '')
-			$input->property('readonly', true);
+		if($this->author !== '') {
+			$author->property('readonly', true);
+		} else {
+			$email = $this->createInput('comment_email')->
+				setLabel('Email Address')->
+				addRule('email')->
+				addRule('required');
+		}
 
 		$this->createInput('comment_text')->
 			setLabel('Comment Text')->
