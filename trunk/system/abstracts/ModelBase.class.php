@@ -151,6 +151,16 @@ abstract class ModelBase implements Model
 	}
 
 	/**
+	 * When a model doesn't have a specific behavior in mind for converting to string, we provide the designation.
+	 *
+	 * @return array
+	 */
+	public function __toString()
+	{
+		return $this->getDesignation();
+	}
+
+	/**
 	 * This function converts the model into an array.
 	 *
 	 * @return array
