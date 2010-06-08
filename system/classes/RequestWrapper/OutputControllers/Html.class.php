@@ -40,7 +40,7 @@ class HtmlOutputController extends AbstractOutputController
 		}
 		$template = array('index.html');
 		if($pageTemplate = $location->getMeta('pageTemplate'))
-			$template = array_unshift($template, $pageTemplate);
+			array_unshift($template, $pageTemplate . '.html');
 		$page->setTemplate($template, $location->getMeta('htmlTheme'));
 
 		$this->activeResource = $page;

@@ -88,6 +88,39 @@ class GraffitiModelCategory extends ModelBase
 		return $desc;
 	}
 
+	/**
+	 * Loads the category whose name is provided into this model
+	 *
+	 * @cache category lookup name *name id
+	 * @static
+	 * @param string $name
+	 * @return int|false
+	 */
+	public function loadbyName($name)
+	{
+		$cache = CacheControl::getCache('category', 'lookup', 'name', $name, 'id');
+
+		$id = $cache->getData();
+
+		if($cache->isStale())
+		{
+			$db = DatabaseConnection::getConnection('default_read_only');
+			$stmt = $db->stmt_init();
+			$stmt->prepare('SELECT categoryId FROM graffitiCategories WHERE name = ?');
+			$stmt->bindAndExecute('s', $name);
+
+			if($stmt->num_rows == 1)
+			{
+				$results = $stmt->fetch_array();
+				$id = $results['categoryId'];
+			}else{
+				$id = false;
+			}
+			$cache->storeData($id);
+		}
+		return $this->load($id);
+	}
+
 	public function __toArray()
 	{
 		$array = parent::__toArray();
