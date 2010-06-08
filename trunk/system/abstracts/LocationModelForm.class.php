@@ -22,7 +22,8 @@ class LocationModelForm extends ModelForm
 		}
 
 		$query = Query::getQuery();
-		if($query['format'] == 'Admin' && $statusTypes = $this->model->getStatusTypes())
+
+		if(staticHack($this->model, 'editStatus') && $statusTypes = $this->model->getStatusTypes())
 		{
 			$selectInput = $this->createInput('location_status')->
 				setLabel('Status')->

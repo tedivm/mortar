@@ -21,6 +21,11 @@ class TesseraActionThreadPostReply extends ModelActionLocationBasedEdit
 			return $this->allowed = false;		
 		}
 
+		if(!$loc->getStatus() === 'Open') {
+			$this->ioHandler->addHeader('Location', (string) $url);
+			return $this->allowed = false;		
+		}
+
 		return parent::logic();
 	}
 
