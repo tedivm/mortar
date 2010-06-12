@@ -29,7 +29,7 @@ class MortarModelMemberGroup extends ModelBase
 	public function containsUser($userId)
 	{
 		//'models', 'Users', $userId, 'membergroups', $this->id
-		$cache = CacheControl::getCache('models', 'Users', $userId, 'membergroups', $this->id);
+		$cache = CacheControl::getCache('models', 'User', $userId, $this->getType(), $this->id);
 		$inGroup = $cache->getData();
 
 		if($cache->isStale())
@@ -56,7 +56,7 @@ class MortarModelMemberGroup extends ModelBase
 	 */
 	public function getUsers($limit = 0, $offset = 0)
 	{
-		$cache = CacheControl::getCache('membergroups', $this->getId(), 'userList', $limit, $offset);
+		$cache = CacheControl::getCache('models', $this->getType(), $this->getId(), 'userList', $limit, $offset);
 		$results = $cache->getData();
 
 		if($cache->isStale())
@@ -128,14 +128,14 @@ class MortarModelMemberGroup extends ModelBase
 	/**
 	 * Loads the membergroup whose name is provided into this model
 	 *
-	 * @cache membergroups lookup name *name id
+	 * @cache models *type loadByName *address
 	 * @static
 	 * @param string $name
 	 * @return int|false
 	 */
 	public function loadbyName($name)
 	{
-		$cache = CacheControl::getCache('membergroups', 'lookup', 'name', $name, 'id');
+		$cache = CacheControl::getCache('models', $this->getType(), 'loadByName', $name);
 
 		$id = $cache->getData();
 
