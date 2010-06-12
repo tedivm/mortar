@@ -114,11 +114,18 @@ class ModelToHtml
 
 		$content['format'] = $query['format'];
 
+		$content = $this->processContent($content);
+
 		$this->modelDisplay->addContent($content);
 
 		$modelOutput = $this->modelDisplay->getDisplay();
 
 		return $modelOutput;
+	}
+
+	protected function processContent($content)
+	{
+		return $content;
 	}
 }
 
