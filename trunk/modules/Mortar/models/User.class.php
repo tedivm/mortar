@@ -91,6 +91,34 @@ class MortarModelUser extends ModelBase
 	}
 
 	/**
+	 * This function can be used to load a user based on a username.
+	 *
+	 * @cache models *type loadByName *address
+	 * @param string $name
+	 * @return bool
+	 */
+	public function loadbyName($name)
+	{
+		$cache = CacheControl::getCache('models', $this->getType(), 'loadByName', $name);
+		$userId = $cache->getData();
+
+		if($cache->isStale())
+		{
+			$stmt = DatabaseConnection::getStatement('default_read_only');
+			$stmt->prepare('SELECT user_id FROM users WHERE name = ?');
+			$stmt->bindAndExecute('s', $name);
+
+			$userId = ($results = $stmt->fetch_array()) ? $results['user_id'] : false;
+			$cache->storeData($userId);
+		}
+
+		if(!is_numeric($userId))
+			return false;
+
+		return $this->load($userId);
+	}
+
+	/**
 	 * This function can be used to load a user from an email address. It looks up the user id based on the email
 	 * address and then runs the load function.
 	 *
