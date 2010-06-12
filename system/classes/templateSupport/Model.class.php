@@ -218,7 +218,17 @@ class TagBoxModel
 			case 'content':
 				return false;
 		}
-		return isset($this->modelArray[$key]);
+		return isset($this->modelArray[$key]);	
+	}
+
+	public function __set($key, $value)
+	{
+		switch($key) {
+			case 'permalink':
+			case 'actionList':
+				return null;
+		}
+		return $this->modelArray[$key] = $value;
 	}
 }
 
