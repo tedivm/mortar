@@ -25,6 +25,10 @@ class ModelActionIndex extends ModelActionBase
 
 	protected function configureList($converter)
 	{
+		$columns = $this->getSetting('columns', $this->format);
+		if(isset($columns) && is_array($columns))
+			$converter->setColumns($columns);
+
 		return $converter;
 	}
 
