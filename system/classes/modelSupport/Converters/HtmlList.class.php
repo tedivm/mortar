@@ -155,7 +155,7 @@ class ModelToHtmlList extends ModelToHtml
 			$indexList->setIndexBase(true, $this->offset);
 
 		if(isset($this->columns))
-			$indexList->useColumns($this->columns);
+			$indexList->setColumns($this->columns);
 
 		return $indexList;
 	}

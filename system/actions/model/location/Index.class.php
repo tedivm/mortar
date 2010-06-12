@@ -19,15 +19,17 @@ class ModelActionLocationBasedIndex extends ModelActionIndex
 {
 	protected $getAs = 'HtmlLocationList';
 
+	public static $settings = array( 'Control' => array('columns' => array( 'type' => 'Type', 
+										'name' => 'Name',
+										'title' => 'Title',
+										'status' => 'Status',
+										'owner' => 'Owner',
+										'lastModified' => 'Updated') ) );
+
 	public function viewControl($page)
 	{
-		$htmlConverter = $this->model->getModelAs('HtmlList', $template);
-		$htmlConverter->setListType($listType);
-		$htmlConverter->paginate($paginate);
-		$htmlConverter->setColumns(array('type' => 'Type', 'name' => 'Name', 'title' => 'Title'));
-		$htmlConverter = $this->configureList($htmlConverter);
-
-		return $htmlConveter->getOutput();
+		$this->format = 'Control';
+		return $this->viewHtml($page);
 	}
 
 	/**
