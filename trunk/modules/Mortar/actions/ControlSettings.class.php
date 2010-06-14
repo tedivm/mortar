@@ -40,7 +40,7 @@ class MortarActionControlSettings extends FormAction
 		$url = new Url();
 		$url->module = 'Mortar';
 		$url->action = 'Dashboard';
-		$url->format = 'admin';
+		$url->format = $query['format'];
 
 		if(isset($query['id']) && isset($info[$query['id']])) {
 			$this->control = $this->cs->getControl($query['id']);
@@ -75,6 +75,11 @@ class MortarActionControlSettings extends FormAction
 	                $output = $this->form->getFormAs('Html');
 	        }
                 return $output;
+	}
+
+	public function viewHtml($page)
+	{
+		return $this->viewAdmin($page);
 	}
 
 	/**

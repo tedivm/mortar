@@ -62,6 +62,12 @@ class MortarActionDashboardSettings extends FormAction
                 $output .= $this->form->getFormAs('Html');
                 return $output;
 	}
+
+	public function viewHtml($page)
+	{
+		return $this->viewAdmin($page);
+	}
+
 }
 
 ?>
