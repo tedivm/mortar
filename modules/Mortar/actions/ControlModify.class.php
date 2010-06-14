@@ -32,7 +32,7 @@ class MortarActionControlModify extends ActionBase
 
 		$url = new Url();
 		$url->module = 'Mortar';
-		$url->format = 'admin';
+		$url->format = $query['format'];
 
 		// if user requested Settings, all we need to do is redirect the user to the ControlSettings action,
 		// otherwise we'll go back to the Dashboard when we're done
@@ -100,6 +100,11 @@ class MortarActionControlModify extends ActionBase
 	 * @return string
 	 */
 	public function viewAdmin($page)
+	{
+		return '';
+	}
+
+	public function viewHtml($page)
 	{
 		return '';
 	}

@@ -109,9 +109,10 @@ class ViewControlDisplay
 		$links->addClass('dashboard_links');
 
 		$info = $this->controlset->getInfo();
+		$query = Query::getQuery();
 		$link = new Url();
 		$link->module = 'Mortar';
-		$link->format = 'admin';
+		$link->format = $query['format'];
 		$link->action = 'ControlModify';
 		$link->id = $pos;
 

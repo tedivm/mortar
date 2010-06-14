@@ -19,7 +19,7 @@ class MortarActionDashboard extends ActionBase
 {
 	static $requiredPermission = 'Admin';
 
-	public static $settings = array( 'Base' => array( 'headerTitle' => 'Mortar Dashboard' ) );
+	public static $settings = array( 'Base' => array( 'headerTitle' => 'Dashboard' ) );
 
 	/**
 	 * Wraps HTML around a series of Controls which are loaded via the ControlSet class and displayed using the
@@ -30,6 +30,7 @@ class MortarActionDashboard extends ActionBase
 	 * @return string
 	 */
 	public function viewAdmin($page) {
+		$query = Query::getQuery();
 		$user = ActiveUser::getUser();
 		$theme = $page->getTheme();
 
@@ -49,7 +50,7 @@ class MortarActionDashboard extends ActionBase
 
 		$link = new Url();
 		$link->module = 'Mortar';
-		$link->format = 'admin';
+		$link->format = $query['format'];
 		$link->action = 'ControlModify';
 
 		$form = new Form('dashboard_add_control');
@@ -77,8 +78,12 @@ class MortarActionDashboard extends ActionBase
 
 		$content .= $form->getFormAs();
 
-		$page->setTitle('Dashboard');
 		return (string) $content;
+	}
+
+	public function viewHtml($page)
+	{
+		return $this->viewAdmin($page);
 	}
 }
 
