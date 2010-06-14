@@ -2,6 +2,8 @@
 
 class MortarActionMemberGroupLookUp extends ActionBase
 {
+	static $requiredPermission = 'Read';
+
 	protected $list = array();
 
 	protected $maxLimit = 25;
