@@ -152,7 +152,19 @@ class Stash
 	}
 
 	/**
-	 * This constructor takes an unlimited number of arguments. These strings should be unique to the data you are
+	 * This function disables the specific instance of the cache handler. This makes it simpler to embed the cache
+	 * handling code in places where it may not always want the results stored.
+	 *
+	 * @return bool
+	 */
+	public function disable()
+	{
+		$this->cache_enabled = false;
+		return true;
+	}
+
+	/**
+	 * Thie setup function takes an unlimited number of arguments. These strings should be unique to the data you are
 	 * trying to store or retrieve. These keys should be considered hierarchical- that is, each additional argument
 	 * passed is considered a child of the one before it by the system. This function stores that key and sets up the
 	 * cacheHandler object to work with the data, although it does not retrieve it yet.
@@ -203,8 +215,8 @@ class Stash
 	public function clear()
 	{
 		try{
-			if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable)
-				return true;
+			if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable || !$this->cache_enabled)
+				return false;
 
 			self::$memStore = array();
 
@@ -229,6 +241,9 @@ class Stash
 	 */
 	public function purge()
 	{
+		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable || !$this->cache_enabled)
+			return false;
+
 		try{
 			self::$memStore = array();
 			if($handler = $this->getHandler())
@@ -252,7 +267,7 @@ class Stash
 	{
 		self::$cacheCalls++;
 
-		if(!$this->cache_enabled)
+		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable || !$this->cache_enabled)
 			return null;
 
 		try
@@ -310,7 +325,7 @@ class Stash
 	 */
 	public function storeData($data)
 	{
-		if(!$this->cache_enabled)
+		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable || !$this->cache_enabled)
 			return;
 
 		$store['return'] = $data;
@@ -342,7 +357,7 @@ class Stash
 	 */
 	public function extendCache()
 	{
-		if(!$this->cache_enabled)
+		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable || !$this->cache_enabled)
 			return;
 
 		return $this->storeData(self::$memStore[$this->keyString]['data']['return']);
@@ -374,7 +389,7 @@ class Stash
 	 */
 	protected function getHandler()
 	{
-		if($this->cache_enabled != true)
+		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable || !$this->cache_enabled)
 			return false;
 
 		if(isset($this->handler))
