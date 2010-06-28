@@ -20,6 +20,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 	protected $modelData;
 	protected $useIndex = true;
 	protected $indexBase = 0;
+	protected $sortable = true;
 
 	protected $allowedColumns = array('type' 	=> 'Type',
 					'name' 		=> 'Name',
@@ -32,6 +33,9 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 					'createdOn'	=> 'Created',
 					'lastModified'	=> 'Last Modified',
 					'publishDate'	=> 'Published');
+
+	protected $sortableColumns = array('type', 'name', 'memgroup_name', 'email', 'status', 'owner', 
+						'createdOn', 'lastModified', 'publishDate');
 
 	protected $specialColumns = array();
 
@@ -57,6 +61,15 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 		}
 
 		$this->indexBase = $base;
+	}
+
+	public function sortable($sort)
+	{
+		if(sort) {
+			$this->sortable = true;
+		} else {
+			$this->sortable = false;
+		}
 	}
 
 	public function setIndexBase($base)
@@ -153,8 +166,39 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 
 	protected function addColumnsToTable($table)
 	{
-		foreach ($this->tableColumns as $name => $label) 
-			$table->addColumnLabel('model_' . $name, $label);
+		$url = Query::getUrl();
+		$query = Query::getQuery();
+
+		$iconset = $this->theme->getIconset();
+		if($iconset) {
+			$up = $iconset->getIcon('upbutton', null, '(^)');
+			$down = $iconset->getIcon('downbutton', null, '(v)');
+		} else {
+			$up = '(^)';
+			$down = '(v)';
+		}
+
+		foreach ($this->tableColumns as $name => $label) {
+			$finalLabel = $label;
+			if($this->sortable && in_array($name, $this->sortableColumns)) {
+				$sortUrl = clone($url);
+				$sortUrl->browseBy = $name;
+
+				if(isset($query['browseBy']) && $query['browseBy'] == $name) {
+					if(isset($query['order']) && $query['order'] == 'desc') {
+						$sortUrl->order = 'asc';
+						$finalLabel .= ' ' . $down;
+					} else {
+						$sortUrl->order = 'desc';
+						$finalLabel .= ' ' . $up;
+					}
+				}
+
+				$finalLabel = $sortUrl->getLink($finalLabel);
+			}
+
+			$table->addColumnLabel('model_' . $name, $finalLabel);
+		}
 
 		if($this->listActions)
 			$table->addColumnLabel('model_actions', 'Actions');

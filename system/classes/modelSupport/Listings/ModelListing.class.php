@@ -268,7 +268,15 @@ class ModelListing
 			return true;
 
 		$order = (isset($this->options['order']) && strtolower($this->options['order']) == 'desc') ? 'DESC' : 'ASC';
-		$browseBy = isset($this->options['browseBy']) ? $this->options['browseBy'] : null;
+		if(isset($this->options['browseBy'])) {
+			if(in_array($this->options['browseBy'], $this->lookupColumns)) {
+				$browseBy = array_search($this->options['browseBy'], $this->lookupColumns);
+			} else {
+				$browseBy = $this->options['browseBy'];
+			}
+		} else {
+			$browseBy = null;
+		}
 
 		if(!($cacheKey = $this->getCacheArray()))
 			return false;

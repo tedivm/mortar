@@ -305,6 +305,10 @@ background: #2D5F8A;
 border: 2px solid #2D5F8A;
 }
 
+.index-listing thead {
+font-family: 'VegurBold', sans-serif;
+}
+
 .index-listing tbody tr {
 background: #C9DDEE;
 }

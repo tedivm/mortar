@@ -23,7 +23,8 @@ class LocationListing extends ModelListing
 	 *
 	 * @var array
 	 */
-	protected $lookupColumns = array('resourceType' => 'type', 'resourceId' => 'id');
+	protected $lookupColumns = array('resourceType' => 'type', 'resourceId' => 'id', 'resourceStatus' => 'status',
+					 'creationDate' => 'createdOn');
 
 	/**
 	 * This contains the name of the table being used to retrieve the models.
