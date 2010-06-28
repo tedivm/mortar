@@ -7,8 +7,17 @@ border: 2px solid #000;
 border-collapse: collapse;
 }
 
+.index-listing img {
+border: 0;
+}
+
+.index-listing thead {
+font-weight: bold;
+}
+
 .index-listing th {
 text-align: left;
+vertical-align: bottom;
 }
 
 .index-listing tbody tr {

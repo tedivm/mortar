@@ -104,23 +104,28 @@ class Iconset extends ContentBase
 	/**
 	 * Returns an HTML representation of the requested icon, either as an image or span-wrapped
 	 * text. Accepts an optional $classes parameter to insert a set of classes into the
-	 * generated HTML.
+	 * generated HTML, and an optional alt parameter to provide the text returned if no icon
+	 * is found.
 	 *
 	 * @param string $name
 	 * @param string|null $classes
+	 * @param string|null $alt
 	 * @return string
 	 */
-	public function getIcon($name, $classes = null)
+	public function getIcon($name, $classes = null, $alt = null)
 	{
 		if (isset($classes))
 			$classPhrase = "class='$classes'";
 		else
 			$classPhrase = '';
 
+		if(!isset($alt))
+			$alt = $name;
+
 		if ($iconUrl = $this->loadIcon($name)) {
-			$icon = "<img src='$iconUrl' $classPhrase alt='$name' title='$name' />";
+			$icon = "<img src='$iconUrl' $classPhrase alt='$alt' title='$name' />";
 		} else {
-			$icon = "<span $classPhrase >$name</span>";
+			$icon = "<span $classPhrase >$alt</span>";
 		}
 
 		return $icon;
