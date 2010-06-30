@@ -18,7 +18,7 @@
  */
 class MortarActionControlModify extends ActionBase
 {
-	static $requiredPermission = 'System';
+	static $requiredPermission = 'Read';
 
 	/**
 	 * This action checks which specific modification is requested in the Input data, then sets the redirect
