@@ -624,7 +624,7 @@ class Location
 	 * @param string $type This value can limit the results to a specific resource type
 	 * @return array|false
 	 */
-	public function getChildren($type = 'all')
+	public function getChildren($type = 'all', $num = null, $browseBy = null, $order = null)
 	{
 		$cache = CacheControl::getCache('locations', $this->id, 'children', $type);
 
@@ -633,12 +633,29 @@ class Location
 			$db = db_connect('default_read_only');
 			$stmt = $db->stmt_init();
 
+			$rider = '';
+			if(isset($browseBy) && isset($order) && in_array(strtolower($order), array('asc', 'desc'))) {
+				switch($browseBy) {
+					case 'name':
+					case 'creationDate':
+					case 'resourceStatus':
+					case 'creationDate':
+					case 'lastModified':
+					case 'publishDate':
+						$rider .= ' ORDER BY ' .$browseBy . ' ' . $order;
+				}
+			}
+
+			if(isset($num)) {
+				$rider .= ' LIMIT ' . (int) $num;
+			}
+
 			if($type != 'all')
 			{
-				$stmt->prepare('SELECT location_id FROM locations WHERE parent = ? AND resourceType = ?');
+				$stmt->prepare('SELECT location_id FROM locations WHERE parent = ? AND resourceType = ?' . $rider);
 				$stmt->bindAndExecute('is', $this->id, $type);
 			}else{
-				$stmt->prepare('SELECT location_id FROM locations WHERE parent = ?');
+				$stmt->prepare('SELECT location_id FROM locations WHERE parent = ?' . $rider);
 				$stmt->bindAndExecute('i', $this->id);
 			}
 
