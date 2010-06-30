@@ -17,7 +17,7 @@
  */
 class MortarActionDashboard extends ActionBase
 {
-	static $requiredPermission = 'Admin';
+	static $requiredPermission = 'Read';
 
 	public static $settings = array( 'Base' => array( 'headerTitle' => 'Dashboard' ) );
 

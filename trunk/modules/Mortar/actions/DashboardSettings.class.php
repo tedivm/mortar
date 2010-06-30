@@ -2,7 +2,7 @@
 
 class MortarActionDashboardSettings extends FormAction
 {
-	static $requiredPermission = 'System';
+	static $requiredPermission = 'Read';
 
 	public static $settings = array( 'Base' => array( 'headerTitle' => 'Dashboard Settings' ) );
 

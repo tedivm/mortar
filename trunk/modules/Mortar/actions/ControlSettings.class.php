@@ -16,7 +16,7 @@
  */
 class MortarActionControlSettings extends FormAction
 {
-	static $requiredPermission = 'System';
+	static $requiredPermission = 'Read';
 
 	public static $settings = array( 'Base' => array( 'headerTitle' => 'Control Settings', 'useRider' => true) );
 
