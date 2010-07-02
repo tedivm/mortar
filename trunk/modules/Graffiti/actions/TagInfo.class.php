@@ -30,16 +30,12 @@ class GraffitiActionTagInfo extends ActionBase
 	public function viewAdmin($page)
 	{
 		if(isset($this->locationList) && is_array($this->locationList) && count($this->locationList) >= 1) {
-			$ul = new HtmlObject('ul');
+			$div = new HtmlObject('div');
 			foreach($this->locationList as $locId) {
 				$loc = Location::getLocation($locId);
 				$model = $loc->getResource();
-				$desig = isset($model['title']) ? $model['title'] : $loc->getName();
-				$url = $model->getUrl();
-				$link = $url->getLink($desig);
-				$li = new HtmlObject('li');
-				$li->wrapAround($link);
-				$ul->wrapAround($li);
+				$converter = $model->getModelAs('Html', array('TagLine.html', 'Line.html'));
+				$div->wrapAround($converter->getOutput());
 			}
 
 			$note = '<p>Pages tagged \'' . $this->tag . '\'';
@@ -48,7 +44,7 @@ class GraffitiActionTagInfo extends ActionBase
 
 			$note .= ':</p>';
 
-			return $note . $ul;
+			return $note . $div;
 		} else {
 			return 'This tag is not currently in use.';
 		}

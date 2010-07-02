@@ -160,11 +160,11 @@ class GraffitiTagLookUp
 		{
 			$selectStmt = DatabaseConnection::getStatement('default_read_only');
 			if(!$owner) {
-				$selectStmt->prepare('	SELECT locationId
+				$selectStmt->prepare('	SELECT DISTINCT locationId
 							FROM graffitiLocationHasTags
 							WHERE tagId = ?');
 			} else {
-				$selectStmt->prepare('	SELECT locationId
+				$selectStmt->prepare('	SELECT DISTINCT locationId
 							FROM graffitiLocationHasTags
 							INNER JOIN locations
 							ON graffitiLocationHasTags.locationId = locations.location_id
