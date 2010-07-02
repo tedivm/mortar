@@ -15,6 +15,8 @@ class TagBoxModel
 		$this->model = $model;
 		$modelArray = $model->__toArray(); 
 
+		$modelArray['designation'] = $model->getDesignation();
+
 		if(isset($modelArray['properties']))
 		{
 			$props = $modelArray['properties'];
