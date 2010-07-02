@@ -21,7 +21,7 @@ class TagBoxBreadcrumbs
 		}
 	}
 
-	public function getCrumbs($sep = '', $html = true, $rev = false, $stopId = null)
+	public function getCrumbs($sep = '', $html = true, $rev = false, $stopId = null, $lastLink = true)
 	{
 		if(defined('INSTALLMODE') && INSTALLMODE === true) {
 			if($html) {
@@ -162,6 +162,17 @@ class TagBoxBreadcrumbs
 			}
 		} while($location = $location->getParent());
 
+		// if $html is true but $lastLink is false, we change the final link to a span
+
+		if($html && !$lastLink) {
+			$last = array_shift($nameList);
+			$contents = $last->getContents();
+			$item = new HtmlObject('span');
+			$item->addClass('lastCrumb');
+			$item->wrapAround($contents);
+			array_unshift($nameList, $item);
+		}
+
 		// if $rev is set we flip the array into reverse order
 
 		if(!$rev) {
@@ -214,7 +225,7 @@ class TagBoxBreadcrumbs
 		return (string) $breadCrumb;
 	}
 
-	public function startFrom($stopLoc)
+	public function startFrom($stopLoc, $lastLink = true)
 	{
 		$site = ActiveSite::getSite();
 		$siteLoc = $site->getLocation();
@@ -222,7 +233,7 @@ class TagBoxBreadcrumbs
 
 		$locId = Location::getIdByPath($stopLoc, $siteId);
 		if(isset($locId) && $locId) {
-			return $this->getCrumbs('', true, false, $locId);
+			return $this->getCrumbs('', true, false, $locId, $lastLink);
 		} else {
 			return false;
 		}

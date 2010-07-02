@@ -149,11 +149,19 @@ class HtmlObject
 	{
 		switch ($location) {
 			case 'top':
-				array_unshift($this->encloses, $html);
+				if(is_array($html)) {
+					$this->encloses = array_merge($html, $this->encloses);
+				} else {
+					array_unshift($this->encloses, $html);
+				}
 				break;
 			case 'bottom':
 			default:
-				$this->encloses[] = $html;
+				if(is_array($html)) {
+					$this->encloses = array_merge($this->encloses, $html);
+				} else {
+					$this->encloses[] = $html;
+				}
 				break;
 		}
 
@@ -196,11 +204,21 @@ class HtmlObject
 	{
 		if(is_array($class))
 		{
-			$this->classes = array_merge($this->classes, $class);
+			$this->classes = array_push($this->classes, $class);
 		}else{
 			$this->classes[] = $class;
 		}
 		return $this;
+	}
+
+	/**
+	 * Returns the array of current contents
+	 *
+	 * @return array
+	 */
+	public function getContents()
+	{
+		return $this->encloses;
 	}
 
 	/**
