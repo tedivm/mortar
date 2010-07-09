@@ -64,6 +64,10 @@ class ModelToHtmlLocationList extends ModelToHtmlList
 
 		$listingObject->addRestriction('parent', $this->model->getLocation()->getId());
 
+		if(isset($query['filter']) && isset($query['filterBy'])) {
+			$listingObject->filterBy($query['filterBy'], $query['filter']);
+		}
+
 		if(isset($query['browseBy'])) {
 			if($query['browseBy'] === 'date') {
 				$listingObject->setOption('browseBy', 'publishDate');
