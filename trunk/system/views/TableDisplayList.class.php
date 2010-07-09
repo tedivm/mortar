@@ -99,7 +99,9 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 				if (isset($properties[$propName])) {
 					$propData = $properties[$propName];
 					$columnList[$propName] = $propLabel;
-					if ($propName === 'owner') {
+					if (in_array($propName, $this->specialColumns)) {
+						$this->modelData[$x][$propName] = $this->processSpecialColumn($propName, $propData);
+					} elseif ($propName === 'owner') {
 						$this->modelData[$x][$propName] = $propData['name'];
 					} elseif (($propName === 'createdOn') || ($propName === 'lastModified') || 
 						($propName === 'publishDate')) {
@@ -107,8 +109,6 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 							date($this->indexDateFormat, $propData);
 					} elseif ($propName === 'membergroups') {
 						$this->modelData[$x][$propName] = $this->formatGroups($propData);
-					} elseif (in_array($propName, $this->specialColumns)) {
-						$this->modelData[$x][$propName] = $this->processSpecialColumn($propName, $propData);
 					} else {
 						$this->modelData[$x][$propName] = $propData;
 					}
