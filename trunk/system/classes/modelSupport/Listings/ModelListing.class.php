@@ -177,6 +177,14 @@ class ModelListing
 		return count($num);
 	}
 
+	public function filterBy($name, $content)
+	{
+		if(in_array($name, $this->lookupColumns))
+			$name = array_search($name, $this->lookupColumns);
+
+		$this->addRestriction($name, $content);
+	}
+
 	/**
 	 * This function returns the specified number of models that meet all of the set requirements.
 	 *
