@@ -39,23 +39,43 @@ class PackageList
 	protected function loadInstallablePackages()
 	{
 		$config = Config::getInstance();
-		$packageDirectories = glob($config['path']['modules'] . '*');
+		$familyDirectories = glob($config['path']['modules'] . '*');
 		$packageList = array();
-		foreach ($packageDirectories as $packagePath)
+		foreach ($familyDirectories as $familyPath)
 		{
-			// STRICT standards don't let me place the explode functions as arguments of array_pop
-			// $packageName = array_shift(explode('.', array_pop(explode('/', $packagePath))));
+			if(file_exists($familyPath . 'package.ini'))
+			{
+				$meta = PackageInfo::getMetaInfo($familyPath);
 
-			$tmp = explode('/', $packagePath);
-			$tmp = explode('.', array_pop($tmp));
-			$packageName = array_shift($tmp);
+				if(isset($meta['disableInstall']) && $meta['disableInstall'] == true)
+					continue;
 
-			$meta = PackageInfo::getMetaInfo($packageName);
+				$packageList[] = $packageName;
 
-			if(isset($meta['disableInstall']) && $meta['disableInstall'] == true)
-				continue;
+			}else{
 
-			$packageList[] = $packageName;
+				$packageDirectories = glob($familyPath . '*');
+
+				foreach($packageDirectories as $packagePath)
+				{
+					// STRICT standards don't let me place the explode functions as arguments of array_pop
+					// $packageName = array_shift(explode('.', array_pop(explode('/', $packagePath))));
+					$tmp = explode('/', $packagePath);
+					$tmp = explode('.', array_pop($tmp));
+					$packageName = array_shift($tmp);
+					$familyName = array_shift($tmp);
+
+					if($familyName == 'modules')
+						$familyName = 'orphan';
+
+					$meta = PackageInfo::getMetaInfo($packagePath);
+
+					if(isset($meta['disableInstall']) && $meta['disableInstall'] == true)
+						continue;
+
+					$packageList[$familyName] = $packageName;
+				}
+			}
 		}
 
 		return $packageList;
@@ -79,9 +99,12 @@ class PackageList
 		{
 			$packageList = array();
 			$db = dbConnect('default_read_only');
-			$results = $db->query('SELECT package FROM modules WHERE status LIKE \'installed\'');
+			$results = $db->query('SELECT package, family FROM modules WHERE status LIKE \'installed\'');
 			while($row = $results->fetch_assoc())
-				$packageList[] = $row['package'];
+			{
+				$family = (!isset($row['family'])) ? $row['family'] : 'orphan';
+				$packageList[$family] = $row['package'];
+			}
 
 			$cache->storeData($packageList);
 		}
