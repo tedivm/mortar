@@ -158,12 +158,9 @@ class AutoLoader
 	}
 
 
-	static function addModule($moduleName)
+	static function addModule(PackageInfo $packageInfo)
 	{
-		if(in_array($moduleName, self::$loadedModules))
-			return;
-
-		$classes = self::loadModule($moduleName);
+		$classes = self::loadModule($packageInfo);
 		if(is_array($classes) && count($classes) > 0)
 			self::$classIndex = array_merge(self::$classIndex, $classes);
 	}
@@ -319,16 +316,15 @@ class AutoLoader
 	 * @param string|int $module
 	 * @return array
 	 */
-	static protected function loadModule($module)
+	static protected function loadModule(PackageInfo $packageInfo)
 	{
-		if(in_array($module, self::$loadedModules))
+		$moduleName = $packageInfo->getFullName();
+		if(in_array($moduleName, self::$loadedModules))
 			return array();
 
-		self::$loadedModules[] = $module;
+		self::$loadedModules[] = $moduleName;
 
-		$module = new PackageInfo($module);
 		$basePath = $module->getPath();
-		$moduleName = $module->getName();
 		$moduleFolders = array(	'actions' => 'Action',
 					'controls' => 'Control',
 					'models' => 'Model',
