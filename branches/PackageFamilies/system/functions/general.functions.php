@@ -95,12 +95,6 @@ function importClass($classname, $path, $basePath = null, $require = false)
 	}
 }
 
-function importModel($modelName)
-{
-	$modelInfo = ModelRegistry::getHandler($modelName);
-	return importFromModule($modelInfo['name'], $modelInfo['module'], 'Model', true);
-}
-
 function importFromModule($name, $module, $classType, $require = false)
 {
 	$moduleFolders = array('abstract' => 'abstracts',
