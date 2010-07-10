@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" >
+<head>
+<title>{{ breadcrumbs.titlecrumbs }}</title>
+{{ head }}
+<link rel="icon" type="image/png" href="{{ theme.images['favicon.png'] }}" />
+
+</head>
+<body>
+
+<div id="container" {% block containerclass %}{% endblock %}>
+
+  <div class="main">
+
+    <div id="header">
+	<a href="{{ env.siteLink }}"><img src="{{ theme.images['mortar-logo.png'] }}" alt="Mortar" /></a>
+        <h1>{{ sitename }}</h1>
+    </div> <!-- header -->
+
+    <div id="content">
+
+	<div id="subnav">
+		<ul>
+{% block topnav %}{% endblock %}
+		</ul>
+	</div> <!-- subnav -->
+
+{% block content %}
+	{{ content }}
+{% endblock %}
+
+    </div> <!-- content -->
+
+  </div>
+
+</div>
+
+<div id="footer">
+	<div id="inside-footer">
+		<span>This site is Held Together By <a href="http://code.google.com/p/mortar/">Mortar</a>.</span>
+	</div>
+</div> <!-- footer -->
+{{ foot }}
+</body>
+</html>

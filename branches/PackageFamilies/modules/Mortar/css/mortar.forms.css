@@ -1,0 +1,62 @@
+form fieldset input, form fieldset select, form fieldset textarea {
+	display: block;
+	width: 220px;
+	float: left;
+	margin-bottom: 10px;
+	margin-right: 30px;
+}
+
+form fieldset label {
+	text-align: right;
+	padding-right: 25px;
+	display: block;
+	width: 160px;
+	float: left;
+	margin-bottom: 10px;
+}
+
+form br {
+	clear: left;
+}
+
+form div.intro {
+	margin-left: 10px;
+	margin-bottom: 10px;
+}
+
+form fieldset fieldset {
+	width: 30%;
+	float: left;
+	display: block;
+	margin: 10px;
+}
+
+form fieldset label.error {
+	color: red;
+}
+
+.mf-toggle-open, .mf-toggle-close {
+	cursor: pointer;
+}
+
+.mf-toggle-open:before {
+	content: "\00a0+\00a0\00a0";
+}
+
+.mf-toggle-close:before {
+	content: "\00a0\2212\00a0\00a0";
+}
+
+textarea.bigtext {
+	width: 600px;
+	height: 300px;
+}
+
+textarea.fulltext {
+	width: 99%;
+	height: 400px;
+}
+
+.clear-fieldsets {
+	clear: left;
+}
