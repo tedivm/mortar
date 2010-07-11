@@ -114,9 +114,9 @@ abstract class ActionControl extends ControlBase
 			$location = Location::getLocation($query['location']);
 
 		try {
-			if($query['module'])
+			if(isset($query['module']))
 			{
-				$moduleInfo = new PackageInfo($query['module']);
+				$moduleInfo = PackageInfo::loadById($query['module']);
 
 				if($moduleInfo->getStatus() != 'installed')
 					return false;
