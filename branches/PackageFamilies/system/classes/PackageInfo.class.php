@@ -310,6 +310,41 @@ class PackageInfo
 		return $name;
 	}
 
+	public function getClassName($classType, $name, $require = false)
+	{
+		$moduleFolders = array('abstract' => 'abstracts',
+			'abstract' => 'abstracts',
+			'actions' => 'actions',
+			'action' => 'actions',
+			'class'  => 'classes',
+			'classes'  => 'classes',
+			'control' => 'controls',
+			'controls' => 'controls',
+			'hook'  => 'hooks',
+			'hooks'  => 'hooks',
+			'interfaces'  => 'interfaces',
+			'interface'  => 'interfaces',
+			'library'  => 'library',
+			'model' => 'models',
+			'plugin' => 'plugins',
+			'plugins' => 'plugins');
+
+		$classType = strtolower($classType);
+		if($classType == 'class')
+		{
+			$classDivider = '';
+		}elseif(isset($moduleFolders[$classType])){
+			$classDivider = ucwords($classType);
+		}elseif($classDivider = array_search($classType, $moduleFolders)){
+			$classDivider = ucwords($classDivider);
+		}
+
+		$packageInfo = new PackageInfo($module);
+		$className = $this->getFullName() . $classDivider . $name;
+		return AutoLoader::internalClassExists($className) ? $className : false;
+	}
+
+
 	/**
 	 * Returns a specific action or the entire action array
 	 *
