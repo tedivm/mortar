@@ -110,8 +110,20 @@ class Url
 
 	public function __set($name, $value)
 	{
-		if(strtolower($name) == 'location')
+		$name = strtolower($name);
+
+		if($name == 'location')
 			$name = 'locationId';
+
+		if($name == 'module' && !is_numeric($value))
+		{
+			if($value instanceof PackageInfo)
+			{
+				$value = $value->getId();
+			}else{
+				throw new UrlError('Module attribute must be an integer or PackageInfo object');
+			}
+		}
 
 		if($value instanceof Location)
 			$value = $value->getId();
@@ -210,4 +222,5 @@ class Url
 
 }
 
+class UrlError extends CoreError();
 ?>
