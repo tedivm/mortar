@@ -138,6 +138,11 @@ class FileSystem
 			throw new FileSystemError('Passed Invalid Path (it\'s not a file or directory) ' . $errorLabel);
 		}
 	}
+
+	static function normalizeTrailingSlash($path)
+	{
+		return (substr($path, strlen($path) - 1, 1) == DIRECTORY_SEPARATOR) ? '' : '/';
+	}
 }
 
 
