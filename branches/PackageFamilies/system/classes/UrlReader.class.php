@@ -88,23 +88,46 @@ class UrlReader
 				break;
 
 			case 'module':
-				if(isset($pathPieces[1]))
+
+				array_shift($pathPieces);
+
+				if(isset($pathPieces[0]))
 				{
-					$this->setAttribute('module', $pathPieces[1]);
-					if(isset($pathPieces[2]))
+					$tempfamily = array_shift($pathPieces);
+
+					if(ModuleFamily::familyExists($tempfamily))
+						$family = $tempfamily;
+
+
+					if(!isset($family))
 					{
-						$this->setAttribute('action', $pathPieces[2]);
+					// if the family doesn't exist see if it's actually a module
+						$packageInfo = PackageInfo::loadByName(null, $tempfamily);
 
-						if(isset($pathPieces[3]))
-						{
-							$this->setAttribute('id', $pathPieces[3]);
-							array_shift($pathPieces);
-						}
-
-						array_shift($pathPieces);
+					}elseif(isset($pathPieces[0])){
+					// if the family exists and there is another piece then it should be the module
+						$module = array_shift($pathPieces[0]);
+						$packageInfo = PackageInfo::loadByName($family, $module);
+						if($packageInfo && !($id = $packageInfo->getId()))
+							unset($packageInfo);
 					}
-					array_shift($pathPieces);
-					array_shift($pathPieces);
+
+					// if the family is real and no module is present assume 'common'
+					if(!isset($packageInfo) && isset($family))
+						$packageInfo = PackageInfo::loadByName($family, 'common');
+
+					if($packageInfo && !($id = $packageInfo->getId()))
+						return false;
+
+					$this->setAttribute('module', $id);
+
+//					$this->setAttribute('module', $pathPieces[1]);
+					if(isset($pathPieces[0]))
+						$this->setAttribute('action', array_shift($pathPieces));
+
+					if(isset($pathPieces[0]))
+						$this->setAttribute('id', array_shift($pathPieces));
+
 					return true;
 				}else{
 					return false;
