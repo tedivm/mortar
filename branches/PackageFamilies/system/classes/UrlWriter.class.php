@@ -180,7 +180,19 @@ class UrlWriter
 
 	static function buildModulePath($path, &$attributes)
 	{
-		$path .= 'module/' . $attributes['module'];
+
+		$packageInfo = PackageInfo::loadById($attributes['module']);
+
+		$family = $packageInfo->getFamily();
+		$module = $packageInfo->getName();
+
+		$path .= 'module/';
+
+		if($family != 'orphan')
+			$path .= $family . '/';
+
+		$path .= $module;
+
 		unset($attributes['module']);
 
 		if(isset($attributes['action']))
