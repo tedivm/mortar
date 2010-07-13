@@ -238,7 +238,7 @@ CREATE TABLE modules
 (
 	mod_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	package VARCHAR(65) NOT NULL,
-	family VARCHAR(65),
+	family VARCHAR(65) NOT NULL,
 	lastupdated TIMESTAMP NULL,
 	majorVersion INTEGER UNSIGNED NULL DEFAULT 0,
 	minorVersion INTEGER UNSIGNED NULL DEFAULT 0,
@@ -252,7 +252,7 @@ CREATE TABLE modules
 
 /* Add Indexes for: modules */
 CREATE INDEX modules_package_Idx ON modules (package, mod_id);
-CREATE UNIQUE INDEX package_Idx ON modules (package);
+CREATE UNIQUE INDEX family_package_Idx ON modules (family, package);
 CREATE INDEX majorVersion_minorVersion_microVersion_Idx ON modules (majorVersion, minorVersion, microVersion);
 
 /******************** Add Table: modelsRegistered ************************/
