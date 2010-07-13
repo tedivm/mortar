@@ -136,27 +136,31 @@ class PackageInfo
 	}
 
 
-	public function __construct($options = array())
+	protected function __construct($options = array())
 	{
 		if(isset($options['cache']) && $options['cache'] === false)
 			$this->cacheDisabled = true;
 	}
 
-	public function buildFromPath($path)
+	protected function buildFromPath($path)
 	{
 		// we don't want 'new' packages interfering or loading information from the installed packages.
 		$this->cacheDisabled = true;
 		$this->path = $path;
-		$this->name = isset($options['name']) ? $options['name'] : $this->getMeta('name');
-		$this->family = isset($options['family']) ? $options['family'] : $this->getMeta('name');
 
-		if(!$this->family)
-			$this->family = 'orphan';
+		$this->name = $this->getMeta('name');
+
+		if($metaFamily = $this->getMeta('family'))
+		{
+			$family = $metaFamily;
+		}else{
+			$family = 'orphan';
+		}
 
 		return $this->buildByName($family, $name);
 	}
 
-	public function buildByName($family, $name)
+	protected function buildByName($family, $name)
 	{
 		if(!isset($name))
 			return false;
@@ -433,11 +437,8 @@ class PackageInfo
 	 */
 	protected function loadMeta()
 	{
-
 		$cache = $this->getCache('meta');
-
 		$meta = $cache->getData();
-
 		if($cache->isStale())
 		{
 			$meta = self::getMetaInfo($this->getPath());
@@ -452,12 +453,9 @@ class PackageInfo
 			$this->phpRequirements = array();
 		}
 
-		if(isset($meta['version']))
-		{
-			$version = new Version();
-			if($version->fromString($meta['version']))
-				$this->packageVersion = $version;
-		}
+		$version = new Version();
+		if($version->fromString(isset($meta['version']) ? $meta['version'] : '0 Alpha'))
+			$this->packageVersion = $version;
 
 		$this->meta = $meta;
 	}
