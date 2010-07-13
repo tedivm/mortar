@@ -91,13 +91,11 @@ class ModelRegistry
 	 *
 	 * @static
 	 * @param string $resource resource type
-	 * @param int $module This is the module that contains the new handler
+	 * @param PackageInfo $moduleInfo This is the module that contains the new handler
 	 * @param string $name name of the new handler
 	 */
-	static public function setHandler($resource, $module, $name = null)
+	static public function setHandler($resource, PackageInfo $moduleInfo, $name = null)
 	{
-		$moduleInfo = new PackageInfo($module);
-
 		if(is_null($name))
 			$name = $resource;
 
