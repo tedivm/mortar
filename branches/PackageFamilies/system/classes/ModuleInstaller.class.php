@@ -2,35 +2,46 @@
 
 class ModuleInstaller
 {
-	protected $package;
+	/**
+	 * This is the package information for the final version of the update or installation
+	 *
+	 * @var PackageInfo
+	 */
+	protected $packageInfo;
+
+	/**
+	 * This is the path to the new package.
+	 *
+	 * @var string
+	 */
 	protected $path;
+
+	/**
+	 * The version being installed.
+	 *
+	 * @var Version
+	 */
 	protected $installVersion;
+
+	/**
+	 * The version currently installed.
+	 *
+	 * @var Version
+	 */
 	protected $startVersion;
 
 	public function __construct($package, $path = null)
 	{
-		$config = Config::getInstance();
-		$path = isset($path) ? $path : $config['path']['modules'] . $package . '/';
+		if(!isset($path))
+			$path = $packageInfo->getPath();
 
 		if(!is_dir($path))
 			throw new ModuleInstallerError('Unable to find package at ' . $path);
 
-		$this->package = $package;
+		$this->packageInfo = $package;
 		$this->path = $path;
-
 		$iniPath = $path . 'package.ini';
-
-		if(file_exists($iniPath) && is_readable($iniPath))
-		{
-			$config = new IniFile($iniPath);
-			$versionString = $config->get('General', 'version');
-			$version = new Version();
-			$version->fromString($versionString);
-			$this->installVersion = $version;
-		}else{
-			throw new ModuleInstallerError('Unable to load package.ini for module ' . $package);
-		}
-
+		$this->installVersion = $packageInfo->getVersion(false);
 	}
 
 	public function integrate()
@@ -44,42 +55,19 @@ class ModuleInstaller
 
 			$alreadyPresent = false;
 
-			$stmt = DatabaseConnection::getStatement('default');
-			$stmt->prepare('SELECT * FROM modules WHERE package = ?');
-			$stmt->bindAndExecute('s', $this->package);
-
-			$version = new Version();
-			$moduleStatus = false;
-			$versionInt = 0;
-
-			if($stmt->num_rows > 0 && $row = $stmt->fetch_array())
+			if($id = $this->packageInfo->getId())
 			{
-				if(isset($row['versionMajor']))
-					$version->major = $row['majorVersion'];
-
-				if(isset($row['minorVersion']))
-					$version->minor = $row['minorVersion'];
-
-				if(isset($row['microVersion']))
-					$version->micro = $row['microVersion'];
-
-				if(isset($row['releaseType']))
-					$version->releaseType = $row['releaseType'];
-
-				if(isset($row['releaseVersion']))
-					$version->releaseVersion = $row['releaseVersion'];
-
-				$versionInt = $version->toInt();
-				$moduleStatus = isset($row['status']) ? $row['status'] : false;
-				$id = $row['mod_id'];
-
 				$alreadyPresent = true;
-
+				$moduleStatus = $this->packageInfo->getStatus();
+				$version = $this->packageInfo->getVersion();
+				$versionInt = $version->toInt();
 			}
+
+
 
 			$stmt = DatabaseConnection::getStatement('default');
 			$stmt->prepare('SELECT * FROM schemaVersion WHERE package = ?');
-			$stmt->bindAndExecute('s', $this->package);
+			$stmt->bindAndExecute('s', $this->packageInfo->getFullName());
 
 			$dbVersion = new Version();
 			$schemaStatus = false;
@@ -136,7 +124,7 @@ class ModuleInstaller
 			$db->rollback();
 			$db->autocommit(true);
 
-			new ModuleInstallerInfo('Unable to install module ' . $this->package . ', rolling back database changes.');
+			new ModuleInstallerInfo('Unable to install module ' . $this->packageInfo->getFullName() . ', rolling back database changes.');
 			return false;
 		}
 
@@ -190,11 +178,13 @@ class ModuleInstaller
 		$db = DatabaseConnection::getConnection('default');
 
 		$this->setVersion($this->installVersion, 'prepped');
+		// reload the same PackageInfo, only this time it'll be able to pull an ID in for use by other scripts
+		$this->packageInfo = PackageInfo::loadByPath($this->packageInfo->getPath());
 
 		$pathPre = $path . 'pre.php';
 		if(file_exists($pathPre) && ($moduleStatus === false || !in_array($moduleStatus, array('prescript', 'postscript'))))
 		{
-			$classname = $this->package . 'InstallerPrescript';
+			$classname = $this->packageInfo->getFullName() . 'InstallerPrescript';
 			include($pathPre);
 			if(class_exists($classname, false))
 			{
@@ -223,7 +213,7 @@ class ModuleInstaller
 		$pathPost = $path . 'post.php';
 		if(file_exists($pathPost) && ($moduleStatus === false || $moduleStatus != 'postscript'))
 		{
-			$classname = $this->package . 'InstallerPostscript';
+			$classname = $this->packageInfo->getFullName() . 'InstallerPostscript';
 			include($pathPost);
 			if(class_exists($classname, false))
 			{
@@ -253,7 +243,7 @@ class ModuleInstaller
 						&& in_array($moduleStatus, array('prescript', 'postscript', 'installed')) )))
 			{
 				$path = $updateInfo['path'] . 'pre.php';
-				$classname = $this->package . 'UpdatePrescript_' . $sanatizedVersionString;
+				$classname = $this->packageInfo->getFullName() . 'UpdatePrescript_' . $sanatizedVersionString;
 
 				if(file_exists($path))
 				{
@@ -297,7 +287,7 @@ class ModuleInstaller
 						&& in_array($moduleStatus, array('postscript', 'installed')) )))
 			{
 				$path = $updateInfo['path'] . 'post.php';
-				$classname = $this->package . 'UpdatePostscript_' . $sanatizedVersionString;
+				$classname = $this->packageInfo->getFullName() . 'UpdatePostscript_' . $sanatizedVersionString;
 
 				if(file_exists($path))
 				{
@@ -317,9 +307,16 @@ class ModuleInstaller
 
 	protected function setVersion(Version $version, $status, $module = true)
 	{
-		$table = $module ? 'modules' : 'schemaVersion';
-		$moduleRecord = new ObjectRelationshipMapper($table);
-		$moduleRecord->package = $this->package;
+		if($module)
+		{
+			$moduleRecord = new ObjectRelationshipMapper(modules);
+			$moduleRecord->package = $this->packageInfo->getName();
+			$moduleRecord->family = $this->packageInfo->getFamily();
+		}else{
+			$moduleRecord = new ObjectRelationshipMapper(schemaVersion);
+			$moduleRecord->package = $this->packageInfo->getFullName();
+		}
+
 		$moduleRecord->select();
 		$moduleRecord->status = $status;
 
@@ -350,8 +347,7 @@ class ModuleInstaller
 
 	protected function addPermissions()
 	{
-		$packageInfo = new PackageInfo($this->package);
-		$actions = $packageInfo->getActions();
+		$actions = $this->packageInfo->getActions();
 		$permissions = array();
 		foreach($actions as $action)
 		{
@@ -369,8 +365,7 @@ class ModuleInstaller
 
 	protected function installModels()
 	{
-		$packageInfo = new PackageInfo($this->package);
-		$models = $packageInfo->getModels();
+		$models = $this->packageInfo->getModels();
 		foreach($models as $model)
 		{
 			// skip already registered models,
@@ -387,7 +382,7 @@ class ModuleInstaller
 			if(($class->isAbstract() && !isset($model['type'])) || !isset($model['type']))
 				continue;
 
-			ModelRegistry::setHandler($model['type'], $this->package, $model['name']);
+			ModelRegistry::setHandler($model['type'], $this->packageInfo, $model['name']);
 		}
 	}
 }
