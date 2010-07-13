@@ -130,7 +130,7 @@ class PackageList
 	 */
 	public function getInstalledPackages()
 	{
-                if(!isset($this->installedPackages))
+		if(!isset($this->installedPackages))
 		{
 			$this->installedPackages = $this->loadInstalledPackages();
 				sort($this->installedPackages, SORT_STRING);
