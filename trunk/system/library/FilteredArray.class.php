@@ -94,7 +94,7 @@ class FilteredArray extends ArrayObject
 	public function getIterator()
 	{
 		$iterator = parent::getIterator();
-		$iterator->setArrayReturnClass(get_class($this));
+//		$iterator->setArrayReturnClass(get_class($this));
 		$iterator->setFilters($this->filters);
 		return $iterator;
 	}

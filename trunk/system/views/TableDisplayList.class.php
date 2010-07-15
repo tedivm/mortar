@@ -21,6 +21,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 	protected $useIndex = true;
 	protected $indexBase = 0;
 	protected $sortable = true;
+	protected $table;
 
 	protected $allowedColumns = array('type' 	=> 'Type',
 					'name' 		=> 'Name',
@@ -139,6 +140,16 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 		if(count($this->modelList) === 0)
 			return "<p>There were no matches for the specified query.</p>";
 
+		if(isset($this->table))
+			return $this->table->makeHtml();
+
+		$this->generateTable();
+
+		return $this->table->makeHtml();
+	}
+
+	public function generateTable()
+	{
 		$themeSettings = $this->theme->getSettings();
 		
 		$name = method_exists($this->model, 'getLocation')	? $this->model->getLocation()->getName()
@@ -161,7 +172,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 				$this->addModelActionsToRow($table, $model);
 		}
 
-		return $table->makeHtml();
+		$this->table = $table;
 	}
 
 	protected function addColumnsToTable($table)
