@@ -27,6 +27,33 @@ CREATE TABLE aliases
 	aliasOther VARCHAR(60) NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
+/******************** Add Table: changeLog ***********************/
+
+CREATE TABLE changeLog
+(
+	changeId INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	modelType INTEGER UNSIGNED NOT NULL,
+	modelId INTEGER UNSIGNED NOT NULL,
+	changeType INTEGER UNSIGNED NOT NULL,
+	changeDate DATETIME NOT NULL,
+	permission INTEGER UNSIGNED NULL,
+	changeUser INTEGER UNSIGNED NULL,
+	note TINYTEXT NULL
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+/* Add Indexes for: changeLog */
+CREATE INDEX changeLog_modelType_modelId_Idx ON changeLog (modelType, modelId);
+CREATE INDEX changeLog_modelType_modelId_changeDate_Idx ON changeLog (modelType, modelId, changeDate);
+CREATE INDEX changeLog_modelType_modelId_changeType_Idx ON changeLog (modelType, modelId, changeType);
+
+/******************** Add Table: changeLog ***********************/
+
+CREATE TABLE changeTypes
+(
+	changeTypeId INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	changeTypeText TINYTEXT NOT NULL
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
 /******************** Add Table: controls ************************/
 
 /* Build Table Structure */
@@ -39,6 +66,7 @@ CREATE TABLE controls
 	controlClass  VARCHAR(65) NOT NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
+/* Add Indexes for: controls */
 CREATE UNIQUE INDEX controls_controlFormat_controlName_Idx ON controls (controlFormat, controlName);
 
 /******************** Add Table: cronJobs ************************/
