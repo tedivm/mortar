@@ -33,7 +33,7 @@ class ModuleInstaller
 	public function __construct($package, $path = null)
 	{
 		if(!isset($path))
-			$path = $packageInfo->getPath();
+			$path = $package->getPath();
 
 		if(!is_dir($path))
 			throw new ModuleInstallerError('Unable to find package at ' . $path);
