@@ -87,6 +87,8 @@ class ModelActionLocationBasedThemeInfo extends ModelActionLocationBasedAdd
 
 	protected function processInput($input)
 	{
+		$user = ActiveUser::getUser();
+
 		if( isset($input['preview']) && ($input['preview'] === 'Preview') )
 			return true;
 
@@ -94,17 +96,23 @@ class ModelActionLocationBasedThemeInfo extends ModelActionLocationBasedAdd
 
 		if(isset($input['theme']))
 		{
-			if($input['theme'] === '')
+			if($input['theme'] === '') {
 				$location->unsetMeta('htmlTheme');
-			else
+				ChangeLog::logChange($this->model, 'theme unset', $user, 'Edit');
+			} else {
 				$location->setMeta('htmlTheme', $input['theme']);
+				ChangeLog::logChange($this->model, 'theme set', $user, 'Edit', $input['theme']);
+			}
 		}
 		if(isset($input['template']))
 		{
-			if($input['template'] === '')
+			if($input['template'] === '') {
 				$location->unsetMeta('pageTemplate');
-			else
+				ChangeLog::logChange($this->model, 'template unset', $user, 'Edit');
+			} else {
 				$location->setMeta('pageTemplate', $input['template']);
+				ChangeLog::logChange($this->model, 'template set', $user, 'Edit', $input['template']);
+			}
 		}
 
 		return $this->model->save();

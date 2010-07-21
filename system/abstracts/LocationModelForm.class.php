@@ -2,6 +2,7 @@
 
 class LocationModelForm extends ModelForm
 {
+	protected $logFields = array('title', 'name', 'status');
 
 	protected function define()
 	{
@@ -108,12 +109,20 @@ class LocationModelForm extends ModelForm
 	 */
 	public function processInput($input)
 	{
+		$user = ActiveUser::getUser();
+
 		$inputNames = array_keys($input);
 		$inputGroups = $this->getInputGroups($inputNames);
 
 		if(isset($inputGroups['model']))
 			foreach($inputGroups['model'] as $name)
 		{
+			if(in_array($name, $this->logFields) && $this->model[$name] != $input['model_' . $name]) {
+				$old = $this->model[$name];
+				$new = $input['model_' . $name];
+				ChangeLog::logChange($this->model, $name . ' changed', $user, 'Edit', "from '$old' to '$new'");
+			}
+
 			$this->model[$name] = $input['model_' . $name];
 		}
 
@@ -127,6 +136,12 @@ class LocationModelForm extends ModelForm
 
 		if(isset($input['location_name']))
 		{
+			if(in_array('name', $this->logFields) && $this->model->name != $input['location_name']) {
+				$old = $this->model->name;
+				$new = $input['location_name'];
+				ChangeLog::logChange($this->model, 'name changed', $user, 'Edit', "from '$old' to '$new'");
+			}
+
 			$this->model->name = $input['location_name'];
 		}
 
@@ -141,6 +156,13 @@ class LocationModelForm extends ModelForm
 			$statusTypes = $this->model->getStatusTypes();
 			if(isset($input['location_status']) && in_array($input['location_status'], $statusTypes))
 			{
+				if(in_array('status', $this->logFields)
+					&& $this->model->status != $input['location_status']) {
+					$old = $this->model->status;
+					$new = $input['location_status'];
+					ChangeLog::logChange($this->model, 'status changed', $user, 'Edit', "from '$old' to '$new'");
+				}
+
 				$this->model->status = $input['location_status'];
 			}
 		}

@@ -33,6 +33,12 @@ class ModelActionEdit extends ModelActionAdd
 		$form->populateInputs();
 		return $form;
 	}
+
+	protected function log()
+	{
+		$user = ActiveUser::getUser();
+		ChangeLog::logChange($this->model, 'edited', $user, 'Read');
+	}
 }
 
 ?>

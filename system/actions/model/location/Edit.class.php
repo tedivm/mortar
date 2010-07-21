@@ -42,6 +42,12 @@ class ModelActionLocationBasedEdit extends ModelActionLocationBasedAdd
 		return $form;
 	}
 
+	protected function log()
+	{
+		$user = ActiveUser::getUser();
+		ChangeLog::logChange($this->model, 'edited', $user, 'Read');
+	}
+
 	/**
 	 * This class checks to make sure the user has permission to access this action. If passed an argument it will check
 	 * for other action types at this location, with this resource (this is useful for checking before redirecting to a

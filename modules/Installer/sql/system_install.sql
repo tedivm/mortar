@@ -38,7 +38,7 @@ CREATE TABLE changeLog
 	changeDate DATETIME NOT NULL,
 	permission INTEGER UNSIGNED NULL,
 	changeUser INTEGER UNSIGNED NULL,
-	note TINYTEXT NULL
+	note TEXT NULL
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
 
 /* Add Indexes for: changeLog */

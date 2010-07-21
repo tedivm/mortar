@@ -6,6 +6,8 @@ abstract class ModelForm extends Form
 	protected $actionName;
 	protected $extensionForm;
 
+	protected $logFields = array();
+
 	public function __construct($name, $model, $actionName)
 	{
 		$this->model = $model;
@@ -88,11 +90,19 @@ abstract class ModelForm extends Form
 	 */
 	public function processInput($input)
 	{
+		$user = ActiveUser::getUser();
+
 		$inputNames = array_keys($input);
 		$inputGroups = $this->getInputGroups($inputNames);
 
 		foreach($inputGroups['model'] as $name)
 		{
+			if(in_array($name, $this->logFields) && $this->model[$name] != $input['model_' . $name]) {
+				$old = $this->model[$name];
+				$new = $input['model_' . $name];
+				ChangeLog::logChange($this->model, $name . ' changed', $user, 'Edit', "from '$old' to '$new'");
+			}
+
 			$this->model[$name] = $input['model_' . $name];
 		}
 

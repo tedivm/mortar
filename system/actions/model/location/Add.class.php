@@ -47,6 +47,8 @@ class ModelActionLocationBasedAdd extends ModelActionAdd
 		$modelLocation = $this->model->getLocation();
 		$parentLocation = $modelLocation->getParent();
 		$parentLocation->save();
+
+		$this->log();
 	}
 
 	/**
