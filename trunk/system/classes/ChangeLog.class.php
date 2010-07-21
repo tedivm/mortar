@@ -2,9 +2,45 @@
 
 class ChangeLog
 {
+	static function getChanges($model)
+	{
+		if(!$modelId = $model->getId())
+			return false;
+
+		$type = $model->getType();
+		$typeId = ModelRegistry::getIdFromType($type);
+
+		$cache = CacheControl::getCache('change', 'model', $type, $modelId);
+		$changeData = $cache->getData();
+
+		if($cache->isStale())
+		{
+			$changeData = array();
+
+			$sql = 'SELECT changeTypeText as `change`, changeDate as `date`, 
+					action_name AS `permission`, changeUser as `user`, note
+				FROM changeLog
+				INNER JOIN changeTypes ON changeLog.changeType = changeTypes.changeTypeId
+				LEFT JOIN actions ON changeLog.permission = actions.action_id
+				WHERE modelType = ? AND modelId = ?';
+
+			$selectStmt = DatabaseConnection::getStatement('default_read_only');
+			$selectStmt->prepare($sql);
+			$selectStmt->bindAndExecute('ii', $typeId, $modelId);
+
+			while($row = $selectStmt->fetch_array()) {
+				$changeData[] = $row;
+			} 
+			$cache->storeData($changeData);
+		}
+		return $changeData;
+	}
+
 	static function logChange($model, $change, $user = null, $permission = null, $note = null)
 	{
-		$modelId = $model->getId();
+		if(!$modelId = $model->getId())
+			return false;
+
 		$type = $model->getType();
 		$typeId = ModelRegistry::getIdFromType($type);
 		$date = gmdate('Y-m-d H:i:s');
@@ -58,6 +94,7 @@ class ChangeLog
 		call_user_func_array(array($insertStmt, 'bindAndExecute'), $bindValues);
 
 		if(($id = $insertStmt->insert_id) && ($id > 0)) {
+			CacheControl::clearCache('change', 'model', $type, $modelId);
 			return true;
 		} else {
 			return false;
