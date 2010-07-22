@@ -50,6 +50,7 @@ class FormValidationLookup
 									'digits' => 'FormValidationDigits',
 									'letterswithbasicpunc' => 'FormValidationLettersWithPunctuation',
 									'alphanumeric' => 'FormValidationAlphaNumeric',
+									'alphanumericpunc' => 'FormValidationAlphaNumericPunc',
 									'lettersonly' => 'FormValidationLettersOnly',
 									'nowhitespace' => 'FormValidationNoWhiteSpace');
 
