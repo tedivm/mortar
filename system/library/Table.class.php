@@ -2,7 +2,6 @@
 
 class Table
 {
-
 	protected $name;
 	protected $caption;
 	protected $columnLabels = array();
@@ -57,6 +56,8 @@ class Table
 	public function addColumnLabel($column, $label)
 	{
 		$column = str_replace(' ', '_', $column);
+		if(!in_array($column, $this->columns))
+			$this->columns[] = $column;
 		$this->columnLabels[$column] = $label;
 		return $this;
 	}

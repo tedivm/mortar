@@ -91,6 +91,8 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 	protected function extractTableData()
 	{
 		$columnList = array();
+		foreach($this->allowedColumns as $propName => $propLabel)
+			$columnList[$propName] = false;
 		$x = 0;
 
 		foreach ($this->modelList as $model)
@@ -118,6 +120,12 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 			}
 			$x++;
 		}
+		foreach($columnList as $propName => $propLabel) {
+			if($propLabel === false) {
+				unset($columnList[$propName]);
+			}
+		}
+
 		$this->tableColumns = $columnList;
 	}
 
