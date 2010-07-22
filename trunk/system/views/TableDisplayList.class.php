@@ -21,6 +21,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 	protected $useIndex = true;
 	protected $indexBase = 0;
 	protected $sortable = true;
+	protected $repeatHeaders = false;
 	protected $table;
 
 	protected $allowedColumns = array('type' 	=> 'Type',
@@ -156,6 +157,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 									: $this->model->getType();
 
 		$table = new Table($name . '_listing');
+		$table->repeatHeader($this->repeatHeaders);
 		$table->addClass('model-listing');
 		$table->addClass('index-listing');
 		$table->addClass($name . '-listing');
@@ -182,8 +184,8 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 
 		$iconset = $this->theme->getIconset();
 		if($iconset) {
-			$up = $iconset->getIcon('upbutton', null, '(^)');
-			$down = $iconset->getIcon('downbutton', null, '(v)');
+			$up = $iconset->getIcon('upbutton', 'sort-asc-icon', '(^)');
+			$down = $iconset->getIcon('downbutton', 'sort-desc-icon', '(v)');
 		} else {
 			$up = '(^)';
 			$down = '(v)';
@@ -198,10 +200,10 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 				if(isset($query['browseBy']) && $query['browseBy'] == $name) {
 					if(isset($query['order']) && $query['order'] == 'desc') {
 						$sortUrl->order = 'asc';
-						$finalLabel .= ' ' . $down;
+						$finalLabel = $down . ' ' . $finalLabel;
 					} else {
 						$sortUrl->order = 'desc';
-						$finalLabel .= ' ' . $up;
+						$finalLabel = $up . ' ' . $finalLabel;
 					}
 				}
 

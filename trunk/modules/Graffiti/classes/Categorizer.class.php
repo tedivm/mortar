@@ -88,6 +88,17 @@ class GraffitiCategorizer
 
 		$stmt->bindAndExecute('ii', $cat, $loc);
 
+		$user = ActiveUser::getUser();
+		$catM = ModelRegistry::loadModel('Category', $cat);
+		$des = $catM->getDesignation();
+		$model = $loc->getResource();
+
+		if($has) {
+			ChangeLog::logChange($model, 'Category added', $user, 'Edit', $des);
+		} else {
+			ChangeLog::logChange($model, 'Category removed', $user, 'Edit', $des);
+		}
+
 		CacheControl::clearCache('models', 'Category');
 	}
 

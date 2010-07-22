@@ -71,6 +71,11 @@ class Table
 		return $this;
 	}
 
+	public function repeatHeader($value)
+	{
+		$this->repeatHeader = $value;
+	}
+
 	protected function makeHeader($baseId)
 	{
 		if(count($this->columnLabels) > 0)
