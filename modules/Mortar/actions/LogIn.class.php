@@ -22,9 +22,9 @@ class MortarActionLogIn extends MortarActionLogOut
 
 		$form->createInput('username')->
 				setLabel('Username: ')->
-				addRule('required')->
-			getForm()->
-			createInput('password')->
+				addRule('required');
+
+		$form->createInput('password')->
 				setLabel('Password: ')->
 				setType('password')->
 				addRule('required');

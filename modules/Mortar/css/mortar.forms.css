@@ -60,3 +60,16 @@ textarea.fulltext {
 .clear-fieldsets {
 	clear: left;
 }
+
+#logIn input {
+margin-bottom: 5px;
+}
+
+#logIn .password_hint, #logIn .username_hint {
+float: left;
+clear: both;
+margin-left: 85px;
+margin-bottom: 20px;
+color: #ccc;
+font-style: italic;
+}
