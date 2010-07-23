@@ -264,6 +264,7 @@ class FormToHtml
 		$tagType = isset($this->tagByType[$input->type]) ? $this->tagByType[$input->type] : 'input';
 		$inputHtml = new HtmlObject($tagType);
 		$inputHtml->property('name', $input->name);
+		$inputHtml->addClass($input->getName());
 		foreach($input->classes as $class)
 			$inputHtml->addClass($class);
 
