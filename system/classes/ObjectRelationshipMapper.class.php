@@ -157,6 +157,22 @@ class ObjectRelationshipMapper
 	protected $num_rows = 0;
 
 	/**
+	 * The join phrase used in the select query if a single-field join has been added.
+	 *
+	 * @var string
+	 */
+	protected $join;
+
+	/**
+	 * The restriction string for the single-column join, if one is present.
+	 *
+	 * @var string
+	 */
+	protected $joinColumn;
+
+	protected $joinWhere;
+
+	/**
 	 * In the event of a mysql error, this is changed to the error number. If 0 there is no error.
 	 *
 	 * @var int
@@ -196,6 +212,56 @@ class ObjectRelationshipMapper
 		$this->loadSchema();
 	}
 
+	public function join($table, $column1, $column2, $select, $selectAs = null)
+	{
+		$tableInfo = new OrmTableStructure($table, $this->db_write);
+
+		$columns = $tableInfo->columns;
+
+		if(!isset($this->columns[$column1]))
+			return false;
+
+		if($column2 === 'primarykey') {
+			$pks = $tableInfo->primaryKeys;
+			$column2 = array_shift($pks);
+		}
+
+		if(!isset($columns[$column2]))
+			return false;
+
+		if(!isset($columns[$select]))
+			return false;
+
+		if(!isset($selectAs))
+			$selectAs = $select;
+
+		if(isset($this->columns[$selectAs])) {
+			$res = array();
+
+			if(isset($this->restrictColumns)) {
+				$cols = $this->restrictColumns;
+			} else {
+				$cols = array();
+				foreach($this->columns as $name => $value) {
+					$cols[] = $name;
+				}
+			}
+
+			foreach($cols as $col) {
+				if($col !== $selectAs) {
+					$res[] = $col;
+				}
+			}
+
+			$this->restrictColumns = $res;
+		}
+
+		$this->columns[$selectAs] = $columns[$select];
+
+		$this->join = ' JOIN ' . $table . ' ON ' . $this->table . '.' . $column1 . ' = ' . $table . '.' . $column2 . ' ';
+		$this->joinColumn = $table . '.' . $select . ' AS ' . $selectAs;
+	}
+
 	// create, record, update, delete
 
 	/**
@@ -220,15 +286,27 @@ class ObjectRelationshipMapper
 		if(isset($this->restrictColumns))
 		{
 			$columnRestrictions = '';
+
 			foreach($this->restrictColumns as $selectColumnName)
-				$columnRestrictions .= $selectColumnName . ', ';
+				$columnRestrictions .= $this->table . '.' . $selectColumnName . ', ';
+
+			if(isset($this->joinColumn))
+				$columnRestrictions .= $this->joinColumn;
 
 			$columnRestrictions = rtrim($columnRestrictions, ', ');
 		}else{
-			$columnRestrictions = '*';
+			if(isset($this->join)) {
+				$columnRestrictions = $this->table . '.*, ' . $this->joinColumn;
+			} else {
+				$columnRestrictions = '*';
+			}
 		}
 
 		$sql_select = 'SELECT ' . $columnRestrictions . ' FROM ' . $this->table;
+
+		if(isset($this->join))
+			$sql_select .= $this->join;
+
 	// END setup SELECT
 
 	// setup WHERE
