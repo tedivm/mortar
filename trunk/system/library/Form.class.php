@@ -436,7 +436,7 @@ class Form
 				if($input->validate(isset($inputHandler[$input->name]) ? $inputHandler[$input->name] : null) !== true)
 				{
 					$success = false;
-					$error[$input->name] = $input->getErrors;
+					$error[$input->name] = $input->validationMessages;
 				}
 
 				// Is the input allows it, place the user value in as the default this way if the form isn't
