@@ -21,6 +21,16 @@ class MortarActionDashboard extends ActionBase
 
 	public static $settings = array( 'Base' => array( 'headerTitle' => 'Dashboard' ) );
 
+	public function checkAuth($action = NULL)
+	{
+		$user = ActiveUser::getUser();
+
+		if($user['name'] === 'Guest')
+			return false;
+		else
+			return parent::checkAuth($action);
+	}
+
 	/**
 	 * Wraps HTML around a series of Controls which are loaded via the ControlSet class and displayed using the
 	 * ViewControlDisplay. It also generates a small "Add Control" form using data from the ControlRegistry
