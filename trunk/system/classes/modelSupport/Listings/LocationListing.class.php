@@ -18,6 +18,13 @@
 class LocationListing extends ModelListing
 {
 	/**
+	 * Defines a list of fields for which a join table and key are provided to be used when sorting by said field.
+	 *
+	 * @var array
+	 */
+	protected $sortJoins = array('owner' => array('users', 'primarykey', 'name'), 'groupOwner' => array('memberGroup', 'primarykey', 'name'));
+
+	/**
 	 * This array defines which columns map to what value (type or id). Because the ORM class is used the string
 	 * "primarykey" will map to whatever the primary key of the table is.
 	 *
