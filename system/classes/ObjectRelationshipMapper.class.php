@@ -212,6 +212,19 @@ class ObjectRelationshipMapper
 		$this->loadSchema();
 	}
 
+	/**
+	 * Causes the primary table to be joined to a single secondary table in order to include a single extra field
+	 * into the returned listing (usually for filtering or sorting). Takes as parameters the table to be joined to,
+	 * the join column in the first table, the corresponding column in the secondary table, and the column to select
+	 * from the secondary table. Optionally, the last parameter allows the column to be selected under a different
+	 * name.
+	 *
+	 * @param string $table
+	 * @param string $column1
+	 * @param string $column2
+	 * @param string $select
+	 * @param null|string $selectAs = null
+	 */
 	public function join($table, $column1, $column2, $select, $selectAs = null)
 	{
 		$tableInfo = new OrmTableStructure($table, $this->db_write);

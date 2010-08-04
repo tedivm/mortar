@@ -17,6 +17,13 @@
 class ModelListing
 {
 	/**
+	 * Defines a list of fields for which a join table and key are provided to be used when sorting by said field.
+	 *
+	 * @var array
+	 */
+	protected $sortJoins = array();
+
+	/**
 	 * This array contains options related to how the item is retrieved, such as how it is sorted. It is an associative
 	 * array with each option being a key value pair.
 	 *
@@ -336,6 +343,12 @@ class ModelListing
 
 		foreach($functions as $func)
 			$orm->addFunction($func['name'], $func['function'], $func['value']);
+
+		if(isset($this->sortJoins[$browseBy])) {
+			$join = $this->sortJoins[$browseBy];
+			$orm->join($join[0], $browseBy, $join[1], $join[2], 'sortBy_' . $browseBy);
+			$browseBy = 'sortBy_' . $browseBy;
+		}
 
 		$orm->select($number, $offset, $browseBy, $order);
 
