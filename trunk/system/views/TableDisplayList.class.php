@@ -36,8 +36,13 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 					'lastModified'	=> 'Last Modified',
 					'publishDate'	=> 'Published');
 
-	protected $sortableColumns = array('type', 'name', 'memgroup_name', 'email', 'status', 'owner', 
-						'createdOn', 'lastModified', 'publishDate');
+
+	/**
+	 * Defines fields which should not be sortable.
+	 *
+	 * @var array
+	 */
+	protected $dontSort = array('actions');
 
 	protected $specialColumns = array();
 
@@ -67,7 +72,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 
 	public function sortable($sort)
 	{
-		if(sort) {
+		if($sort) {
 			$this->sortable = true;
 		} else {
 			$this->sortable = false;
@@ -201,7 +206,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 
 		foreach ($this->tableColumns as $name => $label) {
 			$finalLabel = $label;
-			if($this->sortable && in_array($name, $this->sortableColumns)) {
+			if($this->sortable && !in_array($name, $this->dontSort)) {
 				$sortUrl = clone($url);
 				$sortUrl->browseBy = $name;
 

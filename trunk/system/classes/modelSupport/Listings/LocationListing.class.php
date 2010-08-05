@@ -41,12 +41,12 @@ class LocationListing extends ModelListing
 	protected $table = 'locations';
 
 	/**
-	 * Doesn't require any information since all locations are listed using the same table.
+	 * All locations are listed using the same table.
 	 *
 	 */
 	public function __construct()
 	{
-
+		$this->tableStructure = new OrmTableStructure($this->table, 'default_read_only');
 	}
 
 	/**
