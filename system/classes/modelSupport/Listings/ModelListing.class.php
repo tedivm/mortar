@@ -17,13 +17,6 @@
 class ModelListing
 {
 	/**
-	 * Defines a list of fields for which a join table and key are provided to be used when sorting by said field.
-	 *
-	 * @var array
-	 */
-	protected $sortJoins = array();
-
-	/**
 	 * This array contains options related to how the item is retrieved, such as how it is sorted. It is an associative
 	 * array with each option being a key value pair.
 	 *
@@ -69,11 +62,38 @@ class ModelListing
 	protected $restrictions = array();
 
 	/**
+	 * This array contains restrictions which need to be implemented after the SQL level.
+	 *
+	 * @var array
+	 */
+	protected $restrictionsPost = array();
+
+	/**
 	 * This array contains a list of function calls which need to be included in the WHERE clause of the select statement.
 	 *
 	 * @var array
 	 */
 	protected $functions = array();
+	/**
+	 * Table information about the table being used for this listing.
+	 *
+	 * @var OrmTableStructure
+	 */
+	protected $tableStructure;
+
+	/**
+	 * Defines a list of fields for which a join table and key are provided to be used when sorting by said field.
+	 *
+	 * @var array
+	 */
+	protected $sortJoins = array();
+
+	/**
+	 * Used to store a field name for post-SQL sorting comparison.
+	 *
+	 * @var string
+	 */
+	protected $browseField;
 
 	/**
 	 * This contains the name of the table being used to retrieve the models.
@@ -104,6 +124,8 @@ class ModelListing
 	 */
 	public function __construct($table, $type)
 	{
+		$this->tableStructure = new OrmTableStructure($table, 'default_read_only');
+
 		$this->table = $table;
 		$this->type = $type;
 	}
@@ -153,11 +175,18 @@ class ModelListing
 	 * directly to a database column, and the value sets what that column needs to be.
 	 *
 	 * @param string $name
-	 * @param string|int $value
+	 * @param string|int|array $value
 	 */
 	public function addRestriction($name, $value)
 	{
-		$this->restrictions[$name] = $value;
+		if(in_array($name, $this->lookupColumns))
+			$name = array_search($name, $this->lookupColumns);
+
+		if(isset($this->tableStructure->columns[$name])) {
+			$this->restrictions[$name] = $value;
+		} else {
+			$this->restrictionsPost[$name] = $value;
+		}
 	}
 
 	/**
@@ -184,14 +213,6 @@ class ModelListing
 		return count($num);
 	}
 
-	public function filterBy($name, $content)
-	{
-		if(in_array($name, $this->lookupColumns))
-			$name = array_search($name, $this->lookupColumns);
-
-		$this->addRestriction($name, $content);
-	}
-
 	/**
 	 * This function returns the specified number of models that meet all of the set requirements.
 	 *
@@ -201,6 +222,21 @@ class ModelListing
 	 */
 	public function getListing($number, $offset = 0)
 	{
+		if(isset($this->options['browseBy'])) {
+			if(in_array($this->options['browseBy'], $this->lookupColumns)) {
+				$browseBy = array_search($this->options['browseBy'], $this->lookupColumns);
+			} else {
+				$browseBy = $this->options['browseBy'];
+			}
+
+			if(isset($this->tableStructure->columns[$browseBy])) {
+				$this->options['browseBy'] = $browseBy;
+			} else {
+				$this->options['browseBy_post'] = $this->options['browseBy'];
+				unset($this->options['browseBy']);
+			}
+		}
+
 		if($number > $this->maxLimit)
 			$number = $this->maxLimit;
 
@@ -223,16 +259,48 @@ class ModelListing
 	 */
 	protected function getModels($number, $offset)
 	{
+		$post = (isset($this->options['browseBy_post']) || count($this->restrictionsPost) >= 1)
+			? true
+			: false;
+
 		$batch = 0;
 		$allModels = array();
 		while($this->loadModels($batch) === true) {
 			$allModels = array_merge($allModels, $this->filterModels($this->models[$batch]));
 
-			if(count($allModels) >= $number + $offset) {
-				return array_slice($allModels, $offset, $number);
+			if(count($allModels) >= $number + $offset && !$post) {
+				return array_slice($allModels, $offset, $number);	
 			}
 
 			$batch++;
+		}
+
+		if($post) {
+			$models = array();
+
+			foreach($allModels as $item) {
+				$model = ModelRegistry::loadModel($item['type'], $item['id']);
+
+				foreach($this->restrictionsPost as $field => $value) {
+					if(!isset($model[$field]))
+						continue 2;
+
+					if(is_array($value) && !in_array($model[$field], $value))
+						continue 2;
+
+					if($model[$field] != $value)
+						continue 2;
+				}
+				$models[] = $item;
+			}
+
+			$callback = array($this, 'browseCompare');
+			$this->browseField = $this->options['browseBy_post'];
+			usort($models, $callback);
+			if(isset($this->options['order']) && strtolower($this->options['order']) == 'desc')
+				$models = array_reverse($models);
+
+			return array_slice($models, $offset, $number);
 		}
 
 		return array_slice($allModels, $offset);
@@ -284,11 +352,7 @@ class ModelListing
 
 		$order = (isset($this->options['order']) && strtolower($this->options['order']) == 'desc') ? 'DESC' : 'ASC';
 		if(isset($this->options['browseBy'])) {
-			if(in_array($this->options['browseBy'], $this->lookupColumns)) {
-				$browseBy = array_search($this->options['browseBy'], $this->lookupColumns);
-			} else {
-				$browseBy = $this->options['browseBy'];
-			}
+			$browseBy = $this->options['browseBy'];
 		} else {
 			$browseBy = null;
 		}
@@ -409,6 +473,26 @@ class ModelListing
 
 		return ($functionString != '') ? $functionString : false;
 	}
+
+	/**
+	 * Compares two models based on a field determined by the browseField property. Used as a callback
+	 * for sorting by non-standard fields.
+	 *
+	 * @param array $functions
+	 * @return string
+	 */
+        protected function browseCompare($model1, $model2)
+        {
+                $field = $this->browseField;
+
+                $m1 = ModelRegistry::loadModel($model1['type'], $model1['id']);
+                $m2 = ModelRegistry::loadModel($model2['type'], $model2['id']);
+
+		$s1 = isset($m1[$field]) ? $m1[$field] : '';
+		$s2 = isset($m2[$field]) ? $m2[$field] : '';
+
+                return strcasecmp($s1, $s2);
+        }
 }
 
 ?>
