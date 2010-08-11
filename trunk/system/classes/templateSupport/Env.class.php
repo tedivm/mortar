@@ -15,9 +15,11 @@ class TagBoxEnv
 		$this->user = ActiveUser::getUser();
 	}
 
-	protected function loginLink()
+	protected function loginLink($returnUrl = false)
 	{
 		$currentUrl = Query::getUrl();
+		$query = Query::getQuery();
+
 		$location = $currentUrl->locationId;
 		$action = $currentUrl->action;
 		$module = $currentUrl->module;
@@ -43,13 +45,52 @@ class TagBoxEnv
 		if(isset($module))
 			$url->m = $module;
 
+		$url->format = $query['format'];
+
 		$a = new HtmlObject('a');
 		$a->addClass('login_link')->
 			property('href', (string) $url);
 
 		$phrase = $this->user['name'] === 'Guest' ? 'Log In' : 'Log Out';
 		$a->wrapAround($phrase);
-		return $a;
+
+		if($returnUrl) {
+			return $url;
+		} else {
+			return $a;
+		}
+	}
+
+	protected function loginBox()
+	{
+		$div = new HtmlObject('div');
+		$div->addClass('login-box');
+	
+		if($this->user['name'] === 'Guest') {
+			$url = $this->loginLink(true);
+
+			$form = new Form('logIn');
+			$form->setAction($url);
+
+			$form->createInput('username')->
+					setLabel('Username: ')->
+					addRule('required');
+
+			$form->createInput('password')->
+					setLabel('Password: ')->
+					setType('password')->
+					addRule('required');
+
+			$div->wrapAround($form->getFormAs());
+		} else {
+			$p = new HtmlObject('p');
+			$p->wrapAround('Logged in as ' . $this->user['name']);
+			$link = $this->loginLink();
+			$div->wrapAround($p);
+			$div->wrapAround($link);
+		}
+
+		return (string) $div;
 	}
 
 	public function __get($tagname)
@@ -88,6 +129,13 @@ class TagBoxEnv
 
 				return $this->loginLink();
 
+			case 'loginBox':
+
+				if(!isset($this->user))
+					return '';
+
+				return $this->loginBox();
+
 			default:
 				return false;
 		}
@@ -101,6 +149,7 @@ class TagBoxEnv
 			case "user":
 			case "userlink":
 			case "loginLink":
+			case "loginBox":
 				return true;
 			default:
 				return false;
