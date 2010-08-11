@@ -76,7 +76,13 @@ class ModelActionAdd extends ModelActionBase
 
 	protected function onSuccess()
 	{
+		$this->log();
+	}
 
+	protected function log()
+	{
+		$user = ActiveUser::getUser();
+		ChangeLog::logChange($this->model, 'added', $user, 'Read');
 	}
 
 	/**

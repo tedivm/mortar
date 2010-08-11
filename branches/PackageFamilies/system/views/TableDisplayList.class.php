@@ -21,6 +21,8 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 	protected $useIndex = true;
 	protected $indexBase = 0;
 	protected $sortable = true;
+	protected $repeatHeaders = false;
+	protected $table;
 
 	protected $allowedColumns = array('type' 	=> 'Type',
 					'name' 		=> 'Name',
@@ -34,8 +36,13 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 					'lastModified'	=> 'Last Modified',
 					'publishDate'	=> 'Published');
 
-	protected $sortableColumns = array('type', 'name', 'memgroup_name', 'email', 'status', 'owner', 
-						'createdOn', 'lastModified', 'publishDate');
+
+	/**
+	 * Defines fields which should not be sortable.
+	 *
+	 * @var array
+	 */
+	protected $dontSort = array('actions');
 
 	protected $specialColumns = array();
 
@@ -65,7 +72,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 
 	public function sortable($sort)
 	{
-		if(sort) {
+		if($sort) {
 			$this->sortable = true;
 		} else {
 			$this->sortable = false;
@@ -89,6 +96,8 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 	protected function extractTableData()
 	{
 		$columnList = array();
+		foreach($this->allowedColumns as $propName => $propLabel)
+			$columnList[$propName] = false;
 		$x = 0;
 
 		foreach ($this->modelList as $model)
@@ -116,6 +125,12 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 			}
 			$x++;
 		}
+		foreach($columnList as $propName => $propLabel) {
+			if($propLabel === false) {
+				unset($columnList[$propName]);
+			}
+		}
+
 		$this->tableColumns = $columnList;
 	}
 
@@ -139,12 +154,23 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 		if(count($this->modelList) === 0)
 			return "<p>There were no matches for the specified query.</p>";
 
+		if(isset($this->table))
+			return $this->table->makeHtml();
+
+		$this->generateTable();
+
+		return $this->table->makeHtml();
+	}
+
+	public function generateTable()
+	{
 		$themeSettings = $this->theme->getSettings();
 		
 		$name = method_exists($this->model, 'getLocation')	? $this->model->getLocation()->getName()
 									: $this->model->getType();
 
 		$table = new Table($name . '_listing');
+		$table->repeatHeader($this->repeatHeaders);
 		$table->addClass('model-listing');
 		$table->addClass('index-listing');
 		$table->addClass($name . '-listing');
@@ -161,7 +187,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 				$this->addModelActionsToRow($table, $model);
 		}
 
-		return $table->makeHtml();
+		$this->table = $table;
 	}
 
 	protected function addColumnsToTable($table)
@@ -171,8 +197,8 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 
 		$iconset = $this->theme->getIconset();
 		if($iconset) {
-			$up = $iconset->getIcon('upbutton', null, '(^)');
-			$down = $iconset->getIcon('downbutton', null, '(v)');
+			$up = $iconset->getIcon('upbutton', 'sort-asc-icon', '(^)');
+			$down = $iconset->getIcon('downbutton', 'sort-desc-icon', '(v)');
 		} else {
 			$up = '(^)';
 			$down = '(v)';
@@ -180,17 +206,17 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 
 		foreach ($this->tableColumns as $name => $label) {
 			$finalLabel = $label;
-			if($this->sortable && in_array($name, $this->sortableColumns)) {
+			if($this->sortable && !in_array($name, $this->dontSort)) {
 				$sortUrl = clone($url);
 				$sortUrl->browseBy = $name;
 
 				if(isset($query['browseBy']) && $query['browseBy'] == $name) {
 					if(isset($query['order']) && $query['order'] == 'desc') {
 						$sortUrl->order = 'asc';
-						$finalLabel .= ' ' . $down;
+						$finalLabel = $down . ' ' . $finalLabel;
 					} else {
 						$sortUrl->order = 'desc';
-						$finalLabel .= ' ' . $up;
+						$finalLabel = $up . ' ' . $finalLabel;
 					}
 				}
 

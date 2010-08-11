@@ -16,8 +16,11 @@ class GraffitiTagger
 		if(!is_numeric($weight))
 			throw new TypeMismatch(array('Integer', $weight));
 
+		$taglist = '';
+
 		foreach($tags as $tag)
 		{
+			$taglist .= $tag . ', ';
 			if(is_numeric($tag))
 			{
 				$tagId = $tag;
@@ -35,6 +38,12 @@ class GraffitiTagger
 
 
 		}//foreach($tags as $tag)
+
+		$taglist = rtrim($taglist, ', ');
+		$user = ActiveUser::getUser();
+		$model = $location->getResource();
+
+		ChangeLog::logChange($model, 'Tag(s) added', $user, 'Edit', $taglist);
 	}
 
 	static function clearTagsFromLocation(Location $location, Model $user = null)
@@ -56,6 +65,10 @@ class GraffitiTagger
 		}
 
 		CacheControl::clearCache('locations', $locationId, 'tags');
+
+		$user = ActiveUser::getUser();
+		$model = $location->getResource();
+		ChangeLog::logChange($model, 'Tags cleared', $user, 'Edit');
 	}
 
 	static function canTagModelType($resource)

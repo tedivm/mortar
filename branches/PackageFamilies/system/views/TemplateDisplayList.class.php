@@ -105,7 +105,9 @@ class ViewTemplateDisplayList {
 				$htmlConverter->addContent(array('model_actions' => $this->getActionIcons($actionUrls, $model), 'count' => $x));
 				if($modelDisplay = $htmlConverter->getOutput())
 				{
+					$listingHtml .= $this->getPreContent($model, $x);
 					$listingHtml .= $modelDisplay;
+					$listingHtml .= $this->getPostCOntent($model, $x);
 					$x++;
 				}
 			}
@@ -113,6 +115,16 @@ class ViewTemplateDisplayList {
 		}
 
 		return isset($output) ? $output : $this->noMatches;
+	}
+
+	protected function getPreContent($model, $x)
+	{
+		return '';
+	}
+
+	protected function getPostContent($model, $x)
+	{
+		return '';
 	}
 
 	protected function getActionList($model, $format)

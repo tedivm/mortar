@@ -2,7 +2,6 @@
 
 class Table
 {
-
 	protected $name;
 	protected $caption;
 	protected $columnLabels = array();
@@ -57,6 +56,8 @@ class Table
 	public function addColumnLabel($column, $label)
 	{
 		$column = str_replace(' ', '_', $column);
+		if(!in_array($column, $this->columns))
+			$this->columns[] = $column;
 		$this->columnLabels[$column] = $label;
 		return $this;
 	}
@@ -69,6 +70,11 @@ class Table
 
 		$this->rows[$this->index][$name] = $value;
 		return $this;
+	}
+
+	public function repeatHeader($value)
+	{
+		$this->repeatHeader = $value;
 	}
 
 	protected function makeHeader($baseId)

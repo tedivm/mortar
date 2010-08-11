@@ -157,6 +157,22 @@ class ObjectRelationshipMapper
 	protected $num_rows = 0;
 
 	/**
+	 * The join phrase used in the select query if a single-field join has been added.
+	 *
+	 * @var string
+	 */
+	protected $join;
+
+	/**
+	 * The restriction string for the single-column join, if one is present.
+	 *
+	 * @var string
+	 */
+	protected $joinColumn;
+
+	protected $joinWhere;
+
+	/**
 	 * In the event of a mysql error, this is changed to the error number. If 0 there is no error.
 	 *
 	 * @var int
@@ -196,6 +212,69 @@ class ObjectRelationshipMapper
 		$this->loadSchema();
 	}
 
+	/**
+	 * Causes the primary table to be joined to a single secondary table in order to include a single extra field
+	 * into the returned listing (usually for filtering or sorting). Takes as parameters the table to be joined to,
+	 * the join column in the first table, the corresponding column in the secondary table, and the column to select
+	 * from the secondary table. Optionally, the last parameter allows the column to be selected under a different
+	 * name.
+	 *
+	 * @param string $table
+	 * @param string $column1
+	 * @param string $column2
+	 * @param string $select
+	 * @param null|string $selectAs = null
+	 */
+	public function join($table, $column1, $column2, $select, $selectAs = null)
+	{
+		$tableInfo = new OrmTableStructure($table, $this->db_write);
+
+		$columns = $tableInfo->columns;
+
+		if(!isset($this->columns[$column1]))
+			return false;
+
+		if($column2 === 'primarykey') {
+			$pks = $tableInfo->primaryKeys;
+			$column2 = array_shift($pks);
+		}
+
+		if(!isset($columns[$column2]))
+			return false;
+
+		if(!isset($columns[$select]))
+			return false;
+
+		if(!isset($selectAs))
+			$selectAs = $select;
+
+		if(isset($this->columns[$selectAs])) {
+			$res = array();
+
+			if(isset($this->restrictColumns)) {
+				$cols = $this->restrictColumns;
+			} else {
+				$cols = array();
+				foreach($this->columns as $name => $value) {
+					$cols[] = $name;
+				}
+			}
+
+			foreach($cols as $col) {
+				if($col !== $selectAs) {
+					$res[] = $col;
+				}
+			}
+
+			$this->restrictColumns = $res;
+		}
+
+		$this->columns[$selectAs] = $columns[$select];
+
+		$this->join = ' JOIN ' . $table . ' ON ' . $this->table . '.' . $column1 . ' = ' . $table . '.' . $column2 . ' ';
+		$this->joinColumn = $table . '.' . $select . ' AS ' . $selectAs;
+	}
+
 	// create, record, update, delete
 
 	/**
@@ -220,15 +299,27 @@ class ObjectRelationshipMapper
 		if(isset($this->restrictColumns))
 		{
 			$columnRestrictions = '';
+
 			foreach($this->restrictColumns as $selectColumnName)
-				$columnRestrictions .= $selectColumnName . ', ';
+				$columnRestrictions .= $this->table . '.' . $selectColumnName . ', ';
+
+			if(isset($this->joinColumn))
+				$columnRestrictions .= $this->joinColumn;
 
 			$columnRestrictions = rtrim($columnRestrictions, ', ');
 		}else{
-			$columnRestrictions = '*';
+			if(isset($this->join)) {
+				$columnRestrictions = $this->table . '.*, ' . $this->joinColumn;
+			} else {
+				$columnRestrictions = '*';
+			}
 		}
 
 		$sql_select = 'SELECT ' . $columnRestrictions . ' FROM ' . $this->table;
+
+		if(isset($this->join))
+			$sql_select .= $this->join;
+
 	// END setup SELECT
 
 	// setup WHERE
@@ -240,13 +331,30 @@ class ObjectRelationshipMapper
 			if($where_loop > 0)
 				$sql_where .= 'AND ';
 
-			$sql_input[] = $value;
-			$sql_where .= $column . ' = ? ';
+			if(is_array($value)) {
+				$ors = '(';
+				$first = true;
+				foreach ($value as $item) {
+					if($first) {
+						$first = false;
+					} else {
+						$ors .= 'OR ';
+					}
+					$sql_input[] = $item;
+					$ors .= $column . ' = ? ';
+					$sql_typestring .= self::getType($this->columns[$column]['Type']);
+				}
+				$ors .= ')';
+				$sql_where .= $ors;
+			} else {
+				$sql_input[] = $value;
+				$sql_where .= $column . ' = ? ';
+				$sql_typestring .= self::getType($this->columns[$column]['Type']);
+			}
 
 			if(!isset($this->columns[$column]['Type']))
 				throw new OrmError('Column ' . $column . ' not found in table ' . $this->table);
 
-			$sql_typestring .= self::getType($this->columns[$column]['Type']);
 			$where_loop++;
 		}
 
@@ -390,9 +498,26 @@ class ObjectRelationshipMapper
 					$sql_where .= 'AND ';
 				}
 
-				$sql_input[] = $value;
-				$sql_where .= $column . ' = ? ';
-				$sql_typestring .= self::getType($this->columns[$column]['Type']);
+				if(is_array($value)) {
+					$ors = '(';
+					$first = true;
+					foreach ($value as $item) {
+						if($first) {
+							$first = false;
+						} else {
+							$ors .= 'OR ';
+						}
+						$sql_input[] = $item;
+						$ors .= $column . ' = ? ';
+						$sql_typestring .= self::getType($this->columns[$column]['Type']);
+					}
+					$ors .= ')';
+					$sql_where .= $ors;
+				} else {
+					$sql_input[] = $value;
+					$sql_where .= $column . ' = ? ';
+					$sql_typestring .= self::getType($this->columns[$column]['Type']);
+				}
 				$loop++;
 			}
 
@@ -816,8 +941,12 @@ class ObjectRelationshipMapper
 				{
 					$sql_columns .= $column_name . ', ';
 					$sql_typestring .= self::getType($column_info['Type']);
-					$sql_input[] = $this->values[$column_name];
 					$sql_values .= '?, ';
+					if(is_array($this->values[$column_name])) {
+						$sql_input[] = $this->values[$column_name][0];					
+					} else {
+						$sql_input[] = $this->values[$column_name];
+					}
 				}else{
 
 
@@ -914,8 +1043,12 @@ class ObjectRelationshipMapper
 				{
 					$sql_columns .= $column_name . ', ';
 					$sql_typestring .= self::getType($column_info['Type']);
-					$sql_input[] = $this->values[$column_name];
 					$sql_set .= $column_name . ' = ?, ';
+					if(is_array($this->values[$column_name])) {
+						$sql_input[] = $this->values[$column_name][0];					
+					} else {
+						$sql_input[] = $this->values[$column_name];
+					}
 
 				}elseif(isset($this->restrictColumns) && !in_array($column_name, $this->restrictColumns)){
 

@@ -298,8 +298,12 @@ class FormInput
 			return $this;
 
 		}elseif($value !== null){
+			if(is_array($value) || $value instanceof ArrayAccess) {
+				$this->properties[$property] = reset($value);
+			} else {
+				$this->properties[$property] = $value;
+			}
 
-			$this->properties[$property] = $value;
 			return $this;
 		}
 

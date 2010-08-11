@@ -61,12 +61,16 @@ class ModelActionLocationBasedOwnership extends ModelActionLocationBasedEdit
 
 	protected function processInput($input)
 	{
+		$active = ActiveUser::getUser();
+
 		$location = $this->model->getLocation();
 		if(isset($input['owner']) && is_numeric($input['owner']))
 		{
 			if(!($user = ModelRegistry::loadModel('User', $input['owner'])))
 				return false;
 			$location->setOwner($user);
+
+			ChangeLog::logChange($this->model, 'Owner changed', $active, 'Edit', 'to ' . $user['name']);
 		}
 
 		if(isset($input['ownerGroup']) && is_numeric($input['ownerGroup']))
@@ -75,6 +79,8 @@ class ModelActionLocationBasedOwnership extends ModelActionLocationBasedEdit
 				return false;
 
 			$location->setOwnerGroup($membergroup);
+
+			ChangeLog::logChange($this->model, 'Ownergroup changed', $active, 'Edit', 'to ' . $membergroup['name']);
 		}
 
 		return $location->save();
