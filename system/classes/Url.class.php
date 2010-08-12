@@ -116,7 +116,7 @@ class Url
 		if($value instanceof Location)
 			$value = $value->getId();
 
-		if(!is_scalar($value))
+		if(!is_scalar($value) && !($value instanceof ArrayAccess) && !is_array($value))
 			return false;
 
 		if($name == 'id')

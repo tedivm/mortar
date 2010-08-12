@@ -43,6 +43,8 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 	 * @var array
 	 */
 	protected $dontSort = array('actions');
+	protected $dontFilter = array('actions', 'createdOn', 'lastModified', 'publishDate', 'name', 'title');
+	protected $filterValues = array();
 
 	protected $specialColumns = array();
 
@@ -84,6 +86,11 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 		$this->indexBase = $base;
 	}
 
+	public function getColumns()
+	{
+		return $this->allowedColumns;
+	}
+
 	public function setColumns($columns)
 	{
 		if(is_array($columns)) {
@@ -98,6 +105,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 		$columnList = array();
 		foreach($this->allowedColumns as $propName => $propLabel)
 			$columnList[$propName] = false;
+
 		$x = 0;
 
 		foreach ($this->modelList as $model)
@@ -121,6 +129,12 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 					} else {
 						$this->modelData[$x][$propName] = $propData;
 					}
+
+					if(!isset($this->filterValues[$propName]))
+						$this->filterValues[$propName] = array();
+
+					if(!in_array($this->modelData[$x][$propName], $this->filterValues[$propName]))
+						$this->filterValues[$propName][] = $this->modelData[$x][$propName];
 				}
 			}
 			$x++;
@@ -151,15 +165,24 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 	 */
 	public function getListing()
 	{
+		$url = Query::getUrl();
+		$current = (string) $url;
+		unset($url->filter);
+		$p = new HtmlObject('p');
+		if((string) $url != $current) {
+			$link = $url->getLink('Clear filters');
+			$p->wrapAround($link);
+		} 
+
 		if(count($this->modelList) === 0)
-			return "<p>There were no matches for the specified query.</p>";
+			return $p . "<p>There were no matches for the specified query.</p>";
 
 		if(isset($this->table))
-			return $this->table->makeHtml();
+			return $p . $this->table->makeHtml();
 
 		$this->generateTable();
 
-		return $this->table->makeHtml();
+		return $p . $this->table->makeHtml();
 	}
 
 	public function generateTable()
@@ -176,8 +199,6 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 		$table->addClass($name . '-listing');
 		$table->enableIndex($this->useIndex, $this->indexBase);
 
-		$this->addColumnsToTable($table);
-
 		$x = 0;
 		foreach($this->modelList as $model)
 		{
@@ -187,7 +208,14 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 				$this->addModelActionsToRow($table, $model);
 		}
 
+		$this->addColumnsToTable($table);
+
 		$this->table = $table;
+	}
+
+	public function setFilterValues($values)
+	{
+		$this->filterValues = $values;
 	}
 
 	protected function addColumnsToTable($table)
@@ -195,13 +223,16 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 		$url = Query::getUrl();
 		$query = Query::getQuery();
 
-		$iconset = $this->theme->getIconset();
-		if($iconset) {
+		if($iconset = $this->theme->getIconset()) {
 			$up = $iconset->getIcon('upbutton', 'sort-asc-icon', '(^)');
 			$down = $iconset->getIcon('downbutton', 'sort-desc-icon', '(v)');
+			$on = $iconset->getIcon('dotblack', 'filter-dot-on', '(*)');
+			$off = $iconset->getIcon('dotwhite', 'filter-dot-off', '( )');
 		} else {
 			$up = '(^)';
 			$down = '(v)';
+			$on = '(*)';
+			$off = '( )';
 		}
 
 		foreach ($this->tableColumns as $name => $label) {
@@ -223,11 +254,87 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 				$finalLabel = $sortUrl->getLink($finalLabel);
 			}
 
+			if(!in_array($name, $this->dontFilter)) {
+				if(isset($query['filter'][$name])) {
+					$dot = $on;
+				} else {
+					$dot = $off;
+				}
+
+				$div = new HtmlObject('div');
+				$div->addClass('filter-menu');
+				$div->wrapAround($finalLabel);
+				$div->wrapAround($dot);
+				$div->wrapAround($this->getFilterList($name));
+				$finalLabel = (string) $div;
+			}
+
 			$table->addColumnLabel('model_' . $name, $finalLabel);
 		}
 
 		if($this->listActions)
 			$table->addColumnLabel('model_actions', 'Actions');
+	}
+
+	protected function getFilterList($name)
+	{
+		if(!isset($this->filterValues[$name]))
+			return '';
+
+		if(in_array($name, $this->dontFilter))
+			return '';
+
+		if($iconset = $this->theme->getIconset()) {
+			$on = $iconset->getIcon('dotblack', 'filter-dot-on', '(*)');
+			$off = $iconset->getIcon('dotwhite', 'filter-dot-off', '( )');
+		} else {
+			$on = '(*)';
+			$off = '( )';
+		}
+
+		$url = Query::getUrl();
+		$query = Query::getQuery();
+
+		$filter = isset($query['filter']) ? (array) $query['filter'] : array();
+		$filterThis = isset($filter[$name]) ? (array) $filter[$name] : array();
+
+		$list = array();
+		$ul = new HtmlObject('ul');
+		$ul->addClass('table-filter-list');
+
+		$filterValues = $this->filterValues[$name];
+		natcasesort($filterValues);
+		foreach($filterValues as $value) {
+			$li = new HtmlObject('li');
+			$li->addClass('table-filter-list-item');
+
+			$urlF = clone($url);
+
+			$filterLocal = $filter;
+			$filterThisLocal = $filterThis;
+
+			if(!in_array($value, $filterThisLocal)) {
+				$filterThisLocal[] = $value;
+				$dot = $off;
+			} else {
+				$tempList = array();
+				foreach($filterThisLocal as $ftl) {
+					if($ftl != $value) {
+						$tempList[] = $ftl;
+					}
+				}
+				$filterThisLocal = $tempList;
+				$dot = $on;
+			}
+
+			$filterLocal[$name] = $filterThisLocal;
+			$urlF->filter = $filterLocal;
+			$link = $urlF->getLink($dot . ' ' . $value);
+			$li->wrapAround($link);
+			$ul->wrapAround($li);
+		}
+
+		return $ul;
 	}
 
 	protected function addModelToTable($table, $modelArray)

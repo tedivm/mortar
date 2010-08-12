@@ -154,8 +154,14 @@ class ModelToHtmlList extends ModelToHtml
 		if($type == 'table')
 			$indexList->setIndexBase(true, $this->offset);
 
-		if(isset($this->columns))
+		if(isset($this->columns)) {
 			$indexList->setColumns($this->columns);
+		} else {
+			$this->columns = $indexList->getColumns();
+		}
+
+		$columns = array_keys($this->columns);
+		$indexList->setFilterValues($this->getFilterValues($columns));
 
 		return $indexList;
 	}
@@ -174,6 +180,16 @@ class ModelToHtmlList extends ModelToHtml
 			$p->setOnPage(false);
 
 		return $p->pageList();
+	}
+
+	protected function getFilterValues($fields)
+	{
+		$values = array();
+		foreach($fields as $field) {
+			$values[$field] = $this->modelListing->getFilterValues($field);
+		}
+
+		return $values;
 	}
 
 	public function addOptions(array $options)
