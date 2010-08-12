@@ -24,10 +24,19 @@ class Get
 	 */
 	static public function getArray()
 	{
-		$queryArray = get_magic_quotes_gpc() ? array_map('stripslashes', $_GET) : $_GET;
+		$queryArray = get_magic_quotes_gpc() ? array_map(array('Get', 'stripslashes_deep'), $_GET) : $_GET;
 		return $queryArray;
 	}
 
+
+	static public function stripslashes_deep($value)
+	{
+		$value = is_array($value)
+			? array_map('stripslashes_deep', $value)
+			: stripslashes($value);
+
+		return $value;
+	}
 }
 
 ?>

@@ -55,10 +55,18 @@ opacity:0.6;
 filter:alpha(opacity=60);
 }
 
+/* sorting/filtering */
+
+.sort-desc-icon, .sort-asc-icon, .filter-dot-on, .filter-dot-off {
+width: 8px;
+height: 8px;
+}
+
 
 /* pagination */
 
 .pagination {
+z-index: 1;
 min-height: 1.3em;
 position: relative;
 width: 100%;
@@ -80,4 +88,45 @@ right: 0;
 .pagination_list li {
 padding: 3px;
 float: left;
+}
+
+/* hover menus */
+
+.index-listing thead tr, .index-listing thead tr th {
+height: 1em;
+overflow: visible;
+}
+
+.table-filter-list {
+height: 1px;
+width: 1px;
+position: relative;
+top: 1em;
+background: #fff;
+display: block;
+float: left;
+list-style: none;
+left: -9999px;
+}
+
+.table-filter-list li {
+position: relative;
+z-index: 300;
+width: 90px;
+padding: 3px;
+background: #fff;
+display: block;
+float: left;
+clear: both;
+font-weight: normal;
+font-size: .7em;
+}
+
+.table-filter-list a {
+background: #fff;
+}
+
+.filter-menu:hover .table-filter-list, .table-filter-list:hover {
+left: 0px;
+bottom: 0px;
 }
