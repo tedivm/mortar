@@ -43,7 +43,7 @@ class ChangeLog
 
 		$type = $model->getType();
 		$typeId = ModelRegistry::getIdFromType($type);
-		$date = gmdate('Y-m-d H:i:s');
+		$date = date('Y-m-d H:i:s');
 		$changeId = self::getChangeId($change);
 
 		$bindFields = 'modelType, modelId, changeType, changeDate';
