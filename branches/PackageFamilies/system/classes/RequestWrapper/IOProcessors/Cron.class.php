@@ -49,8 +49,7 @@ class IOProcessorCron extends IOProcessorCli
 	 */
 	protected function setEnvironment()
 	{
-		$module = PackageInfo::loadByName(null, 'Mortar');
-		$module = new PackageInfo('Mortar');
+		$module = PackageInfo::loadByName(CRON_HANDLER_FAMILY, CRON_HANDLER_MODULE);
 
 		$newQuery = array();
 		$newQuery['format'] = 'Text';
