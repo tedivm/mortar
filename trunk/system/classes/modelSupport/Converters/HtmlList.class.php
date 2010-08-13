@@ -160,8 +160,10 @@ class ModelToHtmlList extends ModelToHtml
 			$this->columns = $indexList->getColumns();
 		}
 
-		$columns = array_keys($this->columns);
-		$indexList->setFilterValues($this->getFilterValues($columns));
+		if(count($this->columns) > 0) {
+			$columns = array_keys($this->columns);
+			$indexList->setFilterValues($this->getFilterValues($columns));
+		}
 
 		return $indexList;
 	}
