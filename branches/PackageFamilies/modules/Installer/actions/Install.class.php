@@ -52,8 +52,18 @@ class InstallerActionInstall extends ActionBase
 		{
 			$requirementsCheck = new RequirementsCheck();
 			$modulesToInstall = $profile->getModules();
-			foreach($modulesToInstall as $module => $moduleInfo)
-				$requirementsCheck->addModule($module);
+
+			foreach($modulesToInstall as $family -> $modules)
+			{
+				if($family == 'orphan')
+					$family = null;
+
+				foreach($modules as $module)
+				{
+					$packageInfo = PackageInfo::loadByName($family, $name);
+					$requirementsCheck->addModule($packageInfo);
+				}
+			}
 
 			$optionalValues = isset($query['skipRecommendations']);
 			if(!$requirementsCheck->checkRequirements($optionalValues))

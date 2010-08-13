@@ -57,10 +57,9 @@ class RequirementsCheck
 	 *
 	 * @param string|int $module
 	 */
-	public function addModule($module)
+	public function addModule(PackageInfo $module)
 	{
-		$info = new PackageInfo($module);
-		$requirements = $info->getPhpRequirements();
+		$requirements = $module->getPhpRequirements();
 
 		if(isset($requirements['version']))
 		{
