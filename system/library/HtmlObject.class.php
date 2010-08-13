@@ -283,6 +283,9 @@ class HtmlObject
 		{
 			foreach($this->encloses as $item)
 			{
+				if(is_array($item) || $item instanceof ArrayAccess)
+					$item = reset($item);
+
 				if(is_object($item) && get_class($item) == 'HtmlObject')
 				{
 					$item->tabLevel = $this->tabLevel + 1;
