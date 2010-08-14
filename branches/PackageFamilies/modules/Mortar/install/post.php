@@ -44,7 +44,7 @@ class MortarInstallerPostscript
 		Hook::registerPlugin('Forms', 'checkSubmit', 'richtext',
 								$this->packageId, 'FormInputRichtextCheckSubmit');
 
-		CronManager::registerJob('CachePurge', 'Mortar', 'module', 30);
+		CronManager::registerJob('CachePurge', $this->packageId, 'module', 30);
 	}
 }
 
