@@ -200,7 +200,7 @@ class ModelRegistry
 
 			while($row = $moduleRows->fetch_assoc())
 			{
-				$moduleInfo = new PackageInfo($row['mod_id']);
+				$moduleInfo = PackageInfo::loadById($row['mod_id']);
 
 				$className = $moduleInfo->getName() . 'Model' . $row['handlerName'];
 
