@@ -3,11 +3,12 @@
 class GraffitiInstallerPostscript
 {
 	public $packageId;
+	protected $family = null;
 	public $package = 'Graffiti';
-	
+
 	public function __construct()
 	{
-		$packageInfo = new PackageInfo($this->package);
+		$packageInfo = PackageInfo::loadByName($this->family, $this->package);
 		$this->packageId = $packageInfo->getId();
 	}
 
