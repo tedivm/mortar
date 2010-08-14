@@ -46,8 +46,8 @@ class MortarActionLogOut extends ActionBase
 
 			$url->location = $query['l'];
 			$url->action = $query['a'];
-		}elseif(isset($query['m']) && $action){
-			$packageInfo = new PackageInfo($query['m']);
+		}elseif(isset($query['m']) && is_numeric($query['m']) && $action){
+			$packageInfo = PackageInfo::loadById($query['m']);
 			if(!$packageInfo->getActions($query['a']))
 				return false;
 
