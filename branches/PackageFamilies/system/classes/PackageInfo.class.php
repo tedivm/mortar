@@ -343,7 +343,6 @@ class PackageInfo
 			$classDivider = ucwords($classDivider);
 		}
 
-		$packageInfo = new PackageInfo($module);
 		$className = $this->getFullName() . $classDivider . $name;
 		return AutoLoader::internalClassExists($className) ? $className : false;
 	}
@@ -670,23 +669,6 @@ class PackageInfo
 
 		return $cache;
 	}
-
-	static function checkModuleStatus($moduleName)
-	{
-		$config = Config::getInstance();
-		$pathToModule = $config['path']['modules'] . $moduleName;
-
-		if(!file_exists($pathToModule))
-			return false;
-
-		$packageInfo = new PackageInfo($moduleName);
-
-		if(!$status = $packageInfo->getStatus())
-			return 'filesystem';
-
-		return $status;
-	}
-
 }
 
 class PackageInfoError extends CoreError {}
