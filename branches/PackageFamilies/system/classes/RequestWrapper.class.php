@@ -349,8 +349,6 @@ class RequestWrapper
 			$location = Location::getLocation(1);
 		}
 
-
-		$errorModule = $location->getMeta('errorHandler');
 		switch(get_class($e))
 		{
 			case 'AuthenticationError':
@@ -384,7 +382,7 @@ class RequestWrapper
 				break;
 		}
 
-		$moduleInfo = new PackageInfo($errorModule);
+		$moduleInfo = PackageInfo::loadByName(ERROR_HANDLER_FAMILY, ERROR_HANDLER_MODULE);
 		$actionInfo = $moduleInfo->getActions($action);
 
 		if(!class_exists($actionInfo['className']))
