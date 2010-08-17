@@ -17,24 +17,15 @@ class MortarActionLogIn extends MortarActionLogOut
 		if(MortarLoginTracker::getFailureCount($_SERVER['REMOTE_ADDR']) >= $this->maxFailures)
 			throw new AuthenticationError('Too many failed logins.');
 
-		$form = new Form('logIn');
+		$form = new MortarLogInForm('logIn');
 		$this->form = $form;
-
-		$form->createInput('username')->
-				setLabel('Username: ')->
-				addRule('required');
-
-		$form->createInput('password')->
-				setLabel('Password: ')->
-				setType('password')->
-				addRule('required');
 
 		if($inputHandler = $form->checkSubmit())
 		{
 			try{
 				$userId = ActiveUser::getIdFromName($inputHandler['username']);
 
-				// We grab the failed login count before checking the form.	This way bots have to wait for the
+				// We grab the failed login count before checking the form. This way bots have to wait for the
 				// connection to finish to see if they succeeded or not, instead of detecting the delay and dropping
 				// the connection.
 				$count = MortarLoginTracker::getFailureCount($_SERVER['REMOTE_ADDR'], $userId);
