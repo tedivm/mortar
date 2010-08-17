@@ -69,17 +69,8 @@ class TagBoxEnv
 		if($this->user['name'] === 'Guest') {
 			$url = $this->loginLink(true);
 
-			$form = new Form('logIn');
+			$form = new MortarLogInForm('logIn');
 			$form->setAction($url);
-
-			$form->createInput('username')->
-					setLabel('Username: ')->
-					addRule('required');
-
-			$form->createInput('password')->
-					setLabel('Password: ')->
-					setType('password')->
-					addRule('required');
 
 			$div->wrapAround($form->getFormAs());
 		} else {
