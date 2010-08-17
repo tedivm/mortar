@@ -62,14 +62,15 @@ textarea.fulltext {
 }
 
 #logIn input {
-margin-bottom: 5px;
+	margin-bottom: 5px;
 }
 
 #logIn .password_hint, #logIn .username_hint {
-float: left;
-clear: both;
-margin-left: 85px;
-margin-bottom: 20px;
-color: #ccc;
-font-style: italic;
+	float: left;
+	clear: both;
+	margin-left: 185px;
+	margin-bottom: 10px;
+	color: #aaa;
+	font-style: italic;
+	font-size: .7em;
 }
