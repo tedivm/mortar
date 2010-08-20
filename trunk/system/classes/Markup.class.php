@@ -3,8 +3,12 @@
 class Markup
 {
 	static $defaultEngines = array('html' => 'MarkupHtml', 'markdown' => 'MarkupMarkdown');
+	static $defaultPost = array('smartypants' => 'MarkupSmartyPants', 'autolinks' => 'MarkupAutoLinks');
 	static $availableEngines;
+
 	static protected $defaultEngine = 'html';
+
+	protected $htmlPurifierConfig = null;
 
 	protected $engine;
 
@@ -16,8 +20,29 @@ class Markup
 	public function markupText($text)
 	{
 		$text = $this->engine->markupText($text);
-		$text = $this->engine->filterText($text);
-		$text = $this->engine->prettifyText($text);
+		$text = $this->filterText($text);
+		$text = $this->prettifyText($text);
+
+		return $text;
+	}
+
+
+	protected function filterText($text)
+	{
+		$pur = new HTMLPurifier($this->htmlPurifierConfig);
+		return $pur->purify($text);
+	}
+
+	protected function prettifyText($text)
+	{
+		$post = self::loadPost();
+
+		foreach($post as $name => $class) {
+			if(self::getMarkupPost($name)) {
+				$mp = new $class();
+				$text = $mp->prettifyText($text);
+			}
+		}
 
 		return $text;
 	}
@@ -44,20 +69,13 @@ class Markup
 	static function getEngines()
 	{
 		$engineInfo = self::loadEngines();
-		$engines = array();
-
-		foreach($engineInfo as $name => $class)
-			$engines[] = $name;
-
-		return $engines;
+		return array_keys($engineInfo);
 	}
 
-	static protected function loadEngines()
+	static function getPost()
 	{
-		$hook = new Hook('system', 'markup', 'engines');
-		$plugins = Hook::mergeResults($hook->getEngineClasses());
-
-		return array_merge(self::$defaultEngines, $plugins);
+		$postInfo = self::loadPost();
+		return array_keys($postInfo);
 	}
 
 	static function getModelEngine($resource)
@@ -154,12 +172,54 @@ class Markup
 		$orm->modelId = $resource;
 		$orm->delete();
 	}
+
+
+	static function getMarkupPost($post)
+	{
+		$orm = new ObjectRelationshipMapper('markupPost');
+		$orm->markupPost = $post;
+		if($orm->select()) {
+			$values = $orm->toArray();
+			return (bool) $values['enabled'];
+		} else {
+			return false;
+		}
+	}
+
+	static function setMarkupPost($post, $value)
+	{
+		$orm = new ObjectRelationshipMapper('markupPost');
+		$orm->markupPost = $post;
+		$orm->select();
+		$orm->enabled = $value ? '1' : '0';
+		$orm->save();
+	}
+
+	static protected function loadEngines()
+	{
+		$hook = new Hook('system', 'markup', 'engines');
+		$plugins = Hook::mergeResults($hook->getEngineClasses());
+
+		return array_merge(self::$defaultEngines, $plugins);
+	}
+
+	static protected function loadPost()
+	{
+		$hook = new Hook('system', 'markup', 'post');
+		$plugins = Hook::mergeResults($hook->getPostClasses());
+
+		return array_merge(self::$defaultPost, $plugins);	
+	}
 }
 
 interface MarkupEngine
 {
 	public function markupText($text);
-	public function filterText($text);
+}
+
+interface MarkupPost
+{
 	public function prettifyText($text);
 }
+
 ?>
