@@ -21,6 +21,8 @@ class MortarActionMarkupSettings extends FormAction
 	protected function getForm()
 	{
 		$form = parent::getForm();
+		$form->changeSection('engines')->
+			setLegend('Model Markup');
 
 		$engines = Markup::getEngines();
 		$options = array('empty' => array('value' => ' ', 'label' => ' ', 'properties' => array()));
@@ -56,6 +58,19 @@ class MortarActionMarkupSettings extends FormAction
 				setOptions($options);
 		}
 
+		$form->changeSection('post')->
+			setLegend('Post-Processing');
+
+		$posts = Markup::getPost();
+
+		foreach($posts as $post) {
+			$value = Markup::getMarkupPost($post);
+			$form->createInput('post_' . $post)->
+				setType('checkbox')->
+				check($value)->
+				setLabel(ucwords($post));
+		}
+
 		return $form;
 	}
 
@@ -70,6 +85,16 @@ class MortarActionMarkupSettings extends FormAction
 				Markup::setModelEngine($model, $engine);
 			} else {
 				Markup::clearModelEngine($model);
+			}
+		}
+
+		$posts = Markup::getPost();
+
+		foreach($posts as $post) {
+			if(isset($input['post_' . $post]) && $input['post_' . $post]) {
+				Markup::setMarkupPost($post, true);
+			} else {
+				Markup::setMarkupPost($post, false);
 			}
 		}
 	}

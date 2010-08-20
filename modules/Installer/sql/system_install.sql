@@ -231,6 +231,15 @@ CREATE TABLE markup
 ALTER TABLE markup ADD CONSTRAINT pkmarkup
 	PRIMARY KEY (modelId, location);
 
+/******************** Add Table: markupPost ****************************/
+/* Build Table Structure */
+CREATE TABLE markupPost
+(
+	markupPost VARCHAR(35) PRIMARY KEY NOT NULL,
+	enabled CHAR(1) DEFAULT '0'
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+
 /******************** Add Table: memberGroup ************************/
 
 /* Build Table Structure */
