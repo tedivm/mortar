@@ -50,7 +50,7 @@ class TagBoxFonts
 
 			foreach($this->fontList as $fontName)
 			{
-				$font = new Font($fontName);
+				$font = Font::loadFont($fontName);
 				$data[$fontName] = $font->getCss();
 			}
 

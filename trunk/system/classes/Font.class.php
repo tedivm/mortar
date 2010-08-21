@@ -2,8 +2,20 @@
 
 class Font extends ContentBase
 {
-
+	static protected $fonts = array();
 	protected $contentType = 'font';
+
+	static public function loadFont($name)
+	{
+		if(isset(self::$fonts[$name])) {
+			return self::$fonts[$name];
+		}
+
+		$font = new Font($name);
+		self::$fonts[$name] = $font;
+
+		return $font;
+	}
 
 	public function __construct($name)
 	{

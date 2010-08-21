@@ -2,19 +2,35 @@
 
 class Iconset extends ContentBase
 {
+	static protected $iconsets = array();
 	protected $contentType = 'iconset';
 	protected $path = array('icon'  => '');
+	protected $theme;
 
+	static public function loadIconset($name, $theme)
+	{
+		if(isset(self::$iconsets[$name])) {
+			return self::$iconsets[$name];
+		}
+
+		$iconset = new Iconset($name, $theme);
+		self::$iconsets[$name] = $iconset;
+
+		return $iconset;
+	}
 
 	/**
 	 * Constructor takes the name of the iconset and loads the initial information
 	 *
 	 * @cache iconset *name *link
 	 * @param string $name
+	 * @param Theme $theme
 	 */
-	public function __construct($name)
+	public function __construct($name, $theme)
 	{
 		$config = Config::getInstance();
+
+		$this->theme = $theme;
 
 		$this->name = $name;
 		$this->url = ActiveSite::getLink('icons') . $name . '/';
@@ -22,7 +38,7 @@ class Iconset extends ContentBase
 		$this->contentPath = $iconsPath;
 		$iconsUrl = $this->url;
 
-		$cache = CacheControl::getCache('iconset', $this->name, ActiveSite::getLink('icons'));
+		$cache = CacheControl::getCache('iconset', $this->name, 'ini');
 		$data = $cache->getData();
 
 		if($cache->isStale())
@@ -52,48 +68,69 @@ class Iconset extends ContentBase
 	 */
 	protected function loadIcon($name)
 	{
-		$page = ActivePage::getInstance();
-		$theme = $page->getTheme();
-		$themeSettings = $theme->getSettings();
-		if(isset($themeSettings['icons'][$name]))
-			return $theme->getImageUrl($themeSettings['icons'][$name], 'icon');
+		$cache = CacheControl::getCache('iconset', $this->name, 'loadIcon', $this->theme->getName(), $name);
 
-		if(isset($this->settings['icons'][$name]))
-			return $this->getImageUrl($this->settings['icons'][$name], 'icon');
+		$data = $cache->getData();
 
-		$packagelist = new PackageList();
-		$list = $packagelist->getInstalledPackages();
-		$pieces = explode('_', $name);
+		if($cache->isStale()) {
+			do {
+				$theme = $this->theme;
+				$themeSettings = $theme->getSettings();
+				if(isset($themeSettings['icons'][$name])) {
+					$data = $theme->getImageUrl($themeSettings['icons'][$name], 'icon');
+					break;
+				}
 
-		if(!isset($pieces[0]) || !in_array($pieces[0], $list))
-			return false;
+				if(isset($this->settings['icons'][$name])) {
+					$data = $this->getImageUrl($this->settings['icons'][$name], 'icon');
+					break;
+				}
 
-		$config = Config::getInstance();
-		$baseModulePath = $config['path']['modules'];
-		$settingsPath = $baseModulePath . $pieces[0] . '/icons/settings.ini';
+				$packagelist = new PackageList();
+				$list = $packagelist->getInstalledPackages();
+				$pieces = explode('_', $name);
 
-		if(!is_readable($settingsPath))
-			return false;
-		
-		$iniFile = new IniFile($settingsPath);
-		$moduleSettings = $iniFile->getArray();
+				if(!isset($pieces[0]) || !in_array($pieces[0], $list)) {
+					$data = false;
+					break;
+				}
 
-		if(isset($moduleSettings['icons'][$name])) {
-			$imageName = $moduleSettings['icons'][$name];
-			$info = new PackageInfo($pieces[0]);
-			$path = $info->getPath();
-	
-			$imagePath = $path . 'icons/' . $imageName;
-			if($realPath = realpath($imagePath)) {
-				if(!strpos($realPath, $path . 'icons/') === 0)
-					throw new CoreSecurity('Attempted to load image outside the icon directory.');
+				$config = Config::getInstance();
+				$baseModulePath = $config['path']['modules'];
+				$settingsPath = $baseModulePath . $pieces[0] . '/icons/settings.ini';
 
-				$url = ActiveSite::getLink('modules') . $pieces[0] . '/icons/' . $imageName;
-				return $url;
-			}
+				if(!is_readable($settingsPath)) {
+					$data = false;
+					break;
+				}
+
+				$iniFile = new IniFile($settingsPath);
+				$moduleSettings = $iniFile->getArray();
+
+				if(isset($moduleSettings['icons'][$name])) {
+					$imageName = $moduleSettings['icons'][$name];
+					$info = new PackageInfo($pieces[0]);
+					$path = $info->getPath();
+
+					$imagePath = $path . 'icons/' . $imageName;
+					if($realPath = realpath($imagePath)) {
+						if(!strpos($realPath, $path . 'icons/') === 0) {
+							throw new CoreSecurity('Attempted to load image outside the icon directory.');
+						}
+
+						$data = ActiveSite::getLink('modules') . $pieces[0] . '/icons/' . $imageName;
+						break;
+					}
+				}
+
+				$data = false;
+				break;
+			} while(1);
+
+			$cache->storeData($data);
 		}
 
-		return false;
+		return $data;
 	}
 
 	public function hasIcon($name)
