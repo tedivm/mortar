@@ -26,7 +26,7 @@ class MortarActionFontLookUp extends ActionBase
 
 			foreach($fonts as $fontFamily)
 			{
-				$font = new Font($fontFamily);
+				$font = Font::loadFont($fontFamily);
 				$fontNames = $font->getNames();
 				$data = array_merge($fontNames, $data);
 			}

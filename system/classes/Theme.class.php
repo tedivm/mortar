@@ -172,7 +172,7 @@ class Theme extends ContentBase
 			$this->settings = $data['settings'];
 
 		if(isset($this->settings['images']['iconset']))
-			$this->iconset = new Iconset($this->settings['images']['iconset']);
+			$this->iconset = Iconset::loadIconset($this->settings['images']['iconset'], $this);
 
 		$this->jsUrls = $data['jsLinks'];
 		$this->cssUrls = $data['cssLinks'];
