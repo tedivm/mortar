@@ -518,7 +518,7 @@ abstract class ModelBase implements Model
 
 		foreach($types as $type) {
 			$handler = ModelRegistry::getHandler($type);
-			$info = new PackageInfo($handler['module']);
+			$info = PackageInfo::loadById($handler['module']);
 			$name = $info->getName();
 
 			$class = $name . $type . 'To' . $format;
