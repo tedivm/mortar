@@ -12,7 +12,7 @@ jQuery.validator.addMethod("rangeWords", function(value, element, params) {
 
 
 jQuery.validator.addMethod("alphanumericpunc", function(value, element, params) {
-	return this.optional(element) || /^[a-z\d-.,()\'?!@#$%&"\s]+$/i.test(value);
+	return this.optional(element) || /^[a-z\d-+.,()\'?!@#$%&|"_\s]+$/i.test(value);
 }, "Letters, numbers, spaces, and basic punctuation only please.");
 
 jQuery.validator.addMethod("letterswithbasicpunc", function(value, element) {

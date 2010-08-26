@@ -46,3 +46,10 @@ Twig/
 	3-Clause BSD
 	Templating library
 	http://www.twig-project.org/
+
+Zend/
+	Zend_Search_Lucene
+	v1.10.8
+	3-Clause BSD
+	Full-text indexing library -- port of the Java library Apache Lucene
+	http://framework.zend.com/manual/en/zend.search.lucene.overview.html
