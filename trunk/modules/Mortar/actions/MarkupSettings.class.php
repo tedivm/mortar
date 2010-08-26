@@ -97,6 +97,8 @@ class MortarActionMarkupSettings extends FormAction
 				Markup::setMarkupPost($post, false);
 			}
 		}
+
+		return true;
 	}
 
 	public function viewAdmin($page)

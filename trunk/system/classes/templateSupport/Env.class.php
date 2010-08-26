@@ -84,6 +84,26 @@ class TagBoxEnv
 		return (string) $div;
 	}
 
+	protected function searchBox()
+	{
+		if(defined('DISABLESEARCH') && DISABLESEARCH)
+			return '';
+
+		$div = new HtmlObject('div');
+		$div->addClass('search-box');
+
+		$query = Query::getQuery();
+		$url = new Url();
+		$url->format = $query['format'];
+		$url->module = 'Mortar';
+		$url->action = 'Search';
+		$form = new MortarSimpleSearchForm('SimpleSearch');
+		$form->setAction($url);
+
+		$div->wrapAround($form->getFormAs());
+		return (string) $div;
+	}
+
 	public function __get($tagname)
 	{
 		switch($tagname) {
@@ -127,6 +147,10 @@ class TagBoxEnv
 
 				return $this->loginBox();
 
+			case 'searchBox':
+
+				return $this->searchBox();
+
 			default:
 				return false;
 		}
@@ -141,6 +165,7 @@ class TagBoxEnv
 			case "userlink":
 			case "loginLink":
 			case "loginBox":
+			case "searchBox":
 				return true;
 			default:
 				return false;

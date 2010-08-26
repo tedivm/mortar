@@ -152,7 +152,7 @@ class ModelToHtmlList extends ModelToHtml
 		$indexList = new $class($this->model, $this->childModels);
 
 		if($type == 'table')
-			$indexList->setIndexBase(true, $this->offset);
+			$indexList->useIndex(true, $this->offset);
 
 		if(isset($this->columns)) {
 			$indexList->setColumns($this->columns);
@@ -172,7 +172,7 @@ class ModelToHtmlList extends ModelToHtml
 	{
 		if(!isset($this->page))
 			return '';
-		
+
 		$p = new TagBoxPagination($this->model);
 		$url = Query::getUrl();
 		$p->defineListing($this->count, $this->size, $this->page, $url, 

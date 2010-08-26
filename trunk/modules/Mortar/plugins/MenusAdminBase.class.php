@@ -101,6 +101,15 @@ class MortarPluginMenusAdminBase
 		$url->action = 'Add';
 		$link = $url->getLink("Add Group");
 		$menuSys->addItemToSubmenu('primary', 'Manage Groups', $link, 'Add New Group', 'auto', $url);
+
+		if(!(defined('DISABLESEARCH') && DISABLESEARCH)) {
+			$url = new Url();
+			$url->format = 'Admin';
+			$url->module = 'Mortar';
+			$url->action = 'Search';
+			$link = $url->getLink("Search");
+			$menuSys->addItemToSubmenu('primary', 'Search', $link, 'Search', 'auto', $url);
+		}
 	}
 }
 

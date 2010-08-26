@@ -267,6 +267,9 @@ abstract class ModelBase implements Model
 			$hook->runFirstSave($this);
 		}
 
+		$search = Search::getSearch();
+		$search->index($this);
+
 		return true;
 	}
 

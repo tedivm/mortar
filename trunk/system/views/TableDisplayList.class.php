@@ -21,6 +21,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 	protected $useIndex = true;
 	protected $indexBase = 0;
 	protected $sortable = true;
+	protected $filterable = true;
 	protected $repeatHeaders = false;
 	protected $table;
 
@@ -78,6 +79,15 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 			$this->sortable = true;
 		} else {
 			$this->sortable = false;
+		}
+	}
+
+	public function filterable($filter)
+	{
+		if($filter) {
+			$this->filterable = true;
+		} else {
+			$this->filterable = false;
 		}
 	}
 
@@ -254,7 +264,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 				$finalLabel = $sortUrl->getLink($finalLabel);
 			}
 
-			if(!in_array($name, $this->dontFilter)) {
+			if($this->filterable && !in_array($name, $this->dontFilter)) {
 				if(isset($query['filter'][$name])) {
 					$dot = $on;
 				} else {

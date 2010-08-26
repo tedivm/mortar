@@ -21,7 +21,7 @@ class FormValidationAlphaNumericPunc extends FormValidationRegex
 	 *
 	 * @var string
 	 */
-	protected $regex = '/^[a-z\d-.,()\'?!@#$%&"\s]+$/i';
+	protected $regex = '/^[a-z\d-+.,()\'?!@#$%&"_\s]+$/i';
 
 	/**
 	 * This is the default error message if the input doesn't validate.

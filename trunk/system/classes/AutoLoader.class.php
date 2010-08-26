@@ -44,6 +44,7 @@ class AutoLoader
 							'modelSupport/Listings' => 'none',
 							'modelSupport/Forms' => 'none',
 							'Markup' => 'Markup',
+							'Search' => 'Search',
 							'Orm' => 'Orm',
 							'TwigIntegration' => 'TwigIntegration',
 							'InputHandlers' => 'none',
@@ -152,6 +153,13 @@ class AutoLoader
 		{
 			include(self::$thirdPartyIncludes . 'PHPSmartyPants/smartypants.php');
 			return true;
+		}
+
+		if(strpos($class, 'Zend') === 0)
+		{
+			$zendPath = self::$thirdPartyIncludes . str_replace('_', '/', $class).'.php';
+			include($zendPath);
+			return true;	
 		}
 
 		return class_exists($class);

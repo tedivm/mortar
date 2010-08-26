@@ -207,6 +207,9 @@ abstract class LocationModel extends ModelBase
 			$hook->runFirstSave($this);
 		}
 
+		$search = Search::getSearch();
+		$search->index($this);
+
 		return true;
 	}
 
