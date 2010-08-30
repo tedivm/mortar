@@ -2,13 +2,13 @@
 
 /**
  * This class is used to generate 'random', unique strings based off of a passed key. This is similar to using a one way
- * hash function only with more control over which charactors are used.
+ * hash function only with more control over which characters are used.
  *
  */
 class UniqueString
 {
 	/**
-	 * This string contains all of the charactors allowed from the string. Its default is all numbers and charactors
+	 * This string contains all of the characters allowed from the string. Its default is all numbers and characters
 	 * except those which are too similar looking on screen, such as 'O', '0', 'i', 'l'
 	 *
 	 * @var String
@@ -43,7 +43,7 @@ class UniqueString
 	}
 
 	/**
-	 * This function is used to set which charactors will make up the string.
+	 * This function is used to set which characters will make up the string.
 	 *
 	 * @param string $chars
 	 */

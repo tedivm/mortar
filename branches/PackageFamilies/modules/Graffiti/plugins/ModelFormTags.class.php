@@ -43,8 +43,7 @@ class GraffitiPluginModelFormTags
 
 		$loc = $model->getLocation();
 		if($owner = $loc->getOwner()) {
-			GraffitiTagger::clearTagsFromLocation($loc, $owner);
-			GraffitiTagger::tagLocation((array) $input['tags'], $loc, $owner);
+			GraffitiTagger::setTags((array) $input['tags'], $loc, $owner);
 		}
 	}
 }

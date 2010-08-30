@@ -64,9 +64,10 @@ class ModelToHtmlLocationList extends ModelToHtmlList
 
 		$listingObject->addRestriction('parent', $this->model->getLocation()->getId());
 
-		if(isset($query['filterBy'])) {
-			if(isset($query['filter'])) {
-				$listingObject->addRestriction($query['filterBy'], $query['filter']);
+		if(isset($query['filter'])) {
+			$filter = (array) $query['filter'];
+			foreach($filter as $field => $values) {
+				$listingObject->addRestriction($field, $values);
 			}
 		}
 

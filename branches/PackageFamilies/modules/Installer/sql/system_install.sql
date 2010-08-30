@@ -223,9 +223,22 @@ CREATE INDEX locations_lastModified ON locations (lastModified, location_id);
 /* Build Table Structure */
 CREATE TABLE markup
 (
-	modelId INTEGER UNSIGNED NOT NULL PRIMARY KEY,
-	markupEngine VARCHAR(35) NOT NULL
+	modelId INTEGER UNSIGNED NOT NULL,
+	markupEngine VARCHAR(35) NOT NULL,
+	location INTEGER UNSIGNED NOT NULL DEFAULT 1
 ) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
+ALTER TABLE markup ADD CONSTRAINT pkmarkup
+	PRIMARY KEY (modelId, location);
+
+/******************** Add Table: markupPost ****************************/
+/* Build Table Structure */
+CREATE TABLE markupPost
+(
+	markupPost VARCHAR(35) PRIMARY KEY NOT NULL,
+	enabled CHAR(1) DEFAULT '0'
+) ENGINE=InnoDB CHARACTER SET utf8 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci DEFAULT COLLATE utf8_general_ci;
+
 
 /******************** Add Table: memberGroup ************************/
 
@@ -527,10 +540,6 @@ ALTER TABLE locations ADD CONSTRAINT fk_locations_users
 /************ Foreign Key: fk_locations_memberGroup ***************/
 ALTER TABLE locations ADD CONSTRAINT fk_locations_memberGroup
 	FOREIGN KEY (groupOwner) REFERENCES memberGroup (memgroup_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
-
-/************ Foreign Key: fk_markup_modelsRegistered ***************/
-ALTER TABLE markup ADD CONSTRAINT fk_markup_modelsRegistered
-        FOREIGN KEY (modelId) REFERENCES modelsRegistered (modelId) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 /************ Foreign Key: fk_modConfig_modules ***************/
 ALTER TABLE modConfig ADD CONSTRAINT fk_modConfig_modules

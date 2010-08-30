@@ -80,6 +80,11 @@ class ViewTemplateDisplayList {
 		return $this->getListing();
 	}
 
+	public function getColumns()
+	{
+		return array();
+	}
+
 	public function getListing()
 	{
 		if(count($this->modelList) > 0)

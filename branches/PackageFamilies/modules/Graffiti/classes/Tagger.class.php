@@ -2,7 +2,7 @@
 
 class GraffitiTagger
 {
-	static function tagLocation($tags, Location $location, Model $user, $weight = 1)
+	static function tagLocation($tags, Location $location, Model $user, $weight = 1, $log = true)
 	{
 		if(!isset($tags))
 			throw new TypeMismatch(array('Array or String', $tags));
@@ -20,13 +20,16 @@ class GraffitiTagger
 
 		foreach($tags as $tag)
 		{
-			$taglist .= $tag . ', ';
 			if(is_numeric($tag))
 			{
 				$tagId = $tag;
+				$taglist .= GraffitiTagLookUp::getTagFromId($tagId) . ', ';
 			}else{
-				if(!($tagId = GraffitiTagLookUp::getTagId($tag)))
+				if($tagId = GraffitiTagLookUp::getTagId($tag)) {
+					$taglist .= $tag . ', ';
+				} else {
 					continue;
+				}
 			}
 
 			$insertStatement = DatabaseConnection::getStatement('default');
@@ -43,10 +46,11 @@ class GraffitiTagger
 		$user = ActiveUser::getUser();
 		$model = $location->getResource();
 
-		ChangeLog::logChange($model, 'Tag(s) added', $user, 'Edit', $taglist);
+		if($log)
+			ChangeLog::logChange($model, 'Tag(s) added', $user, 'Edit', $taglist);
 	}
 
-	static function clearTagsFromLocation(Location $location, Model $user = null)
+	static function clearTagsFromLocation(Location $location, Model $user = null, $log = true)
 	{
 		$locationId = $location->getId();
 		$deleteStatement = DatabaseConnection::getStatement('default');
@@ -68,7 +72,37 @@ class GraffitiTagger
 
 		$user = ActiveUser::getUser();
 		$model = $location->getResource();
-		ChangeLog::logChange($model, 'Tags cleared', $user, 'Edit');
+
+		if($log)
+			ChangeLog::logChange($model, 'Tags cleared', $user, 'Edit');
+	}
+
+	static function setTags($tags, Location $location, Model $user, $weight = 1)
+	{
+		$model = $location->getResource();
+
+		$oldTags = GraffitiTagLookUp::getUserTags($location, $user);
+
+		self::clearTagsFromLocation($location, $user, false);
+		self::tagLocation($tags, $location, $user, $weight, false);
+
+		sort($tags);
+		sort($oldTags);
+	
+		if($tags != $oldTags) {
+			$oldlist = $list = '';
+			foreach($oldTags as $tag)
+				$oldlist .= GraffitiTagLookUp::getTagFromId($tag) . ', ';
+
+			foreach($tags as $tag)
+				$list .= GraffitiTagLookUp::getTagFromId($tag) . ', ';
+
+			$oldlist = rtrim($oldlist, ', ');
+			$list = rtrim($list, ', ');
+
+			$note = "From '" . $oldlist . "' to '" . $list . "'";
+			ChangeLog::logChange($model, 'Tags changed', $user, 'Edit', $note);
+		}
 	}
 
 	static function canTagModelType($resource)

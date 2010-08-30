@@ -82,10 +82,15 @@ class LocationListing extends ModelListing
 	 */
 	protected function getCacheArray()
 	{
-		if(!isset($this->restrictions['parent']))
+		if(isset($this->restrictions['parent'])) {
+			$key = $this->restrictions['parent'];
+		} elseif(isset($this->restrictions['resourceType'])) {
+			$key = $this->restrictions['resourceType'];
+		} else {
 			return false;
+		}
 
-		$cacheKey = array('locations', $this->restrictions['parent']);
+		$cacheKey = array('locations', $key);
 		return $cacheKey;
 	}
 

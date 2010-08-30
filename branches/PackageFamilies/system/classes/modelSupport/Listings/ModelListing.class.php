@@ -138,6 +138,7 @@ class ModelListing
 	public function setTable($table)
 	{
 		$this->table = $table;
+		$this->tableStructure = new OrmTableStructure($table, 'default_read_only');
 	}
 
 	public function setType($type)
@@ -182,7 +183,7 @@ class ModelListing
 		if(in_array($name, $this->lookupColumns))
 			$name = array_search($name, $this->lookupColumns);
 
-		if(isset($this->tableStructure->columns[$name])) {
+		if(isset($this->tableStructure->columns[$name]) && !isset($this->sortJoins[$name])) {
 			$this->restrictions[$name] = $value;
 		} else {
 			$this->restrictionsPost[$name] = $value;
@@ -211,6 +212,64 @@ class ModelListing
 	{
 		$num = $this->getListing($this->maxLimit);
 		return count($num);
+	}
+
+	public function getFilterValues($field)
+	{
+		if(in_array($field, $this->lookupColumns))
+			$field = array_search($field, $this->lookupColumns);
+
+		$cache = CacheControl::getCache('models', 'listing', $this->table, 'filterValues', $field);
+		$filterItems = $cache->getData();
+
+		if($cache->isStale()) {
+			if(isset($this->tableStructure->columns[$field])
+				&& !isset($this->sortJoins[$field])) {
+				$db = DatabaseConnection::getConnection('default_read_only');
+
+				$sql = "SELECT $field
+					FROM $this->table
+					WHERE $field IS NOT NULL
+					GROUP BY $field
+					ORDER BY COUNT($field) DESC
+					LIMIT 10";
+
+				$results = $db->query($sql);
+				while($row = $results->fetch_array()) {
+					$filterItems[] = $row[$field];
+				}
+
+				$cache->storeData($filterItems);
+			} else {
+				$filterItems = array();
+				$counts = array();
+
+				$models = $this->getListing($this->maxLimit);
+				if(!$models)
+					$models = array();
+
+				foreach($models as $model) {
+					$model = ModelRegistry::loadModel($model['type'], $model['id']);
+					$model = $model->__toArray();
+					if(isset($model[$field]) && !in_array($model[$field], $filterItems)) {
+						$val = (string) $model[$field];
+						if(!$val || $val == '')
+							continue;
+						$filterItems[] = $val;
+						if(isset($counts[$val])) {
+							$counts[$val]++;
+						} else {
+							$counts[$val] = 1;
+						}
+					}
+				}
+
+				array_multisort($counts, SORT_DESC, $filterItems, SORT_ASC);
+				$filterItems = array_slice($filterItems, 0, 10);
+			}
+		}
+
+		return $filterItems;
 	}
 
 	/**
@@ -280,23 +339,27 @@ class ModelListing
 
 			foreach($allModels as $item) {
 				$model = ModelRegistry::loadModel($item['type'], $item['id']);
+				$model = $model->__toArray();
 
 				foreach($this->restrictionsPost as $field => $value) {
 					if(!isset($model[$field]))
 						continue 2;
 
-					if(is_array($value) && !in_array($model[$field], $value))
+					if(is_array($value) && !in_array((string) $model[$field], $value))
 						continue 2;
 
-					if($model[$field] != $value)
+					if(!is_array($value) && (string) $model[$field] != $value)
 						continue 2;
 				}
 				$models[] = $item;
 			}
 
 			$callback = array($this, 'browseCompare');
-			$this->browseField = $this->options['browseBy_post'];
-			usort($models, $callback);
+			if(isset($this->options['browseBy_post'])) {
+				$this->browseField = $this->options['browseBy_post'];
+				usort($models, $callback);
+			}
+
 			if(isset($this->options['order']) && strtolower($this->options['order']) == 'desc')
 				$models = array_reverse($models);
 
@@ -402,8 +465,11 @@ class ModelListing
 		$orm = new ObjectRelationshipMapper($table);
 		$orm->setColumnLimits(array_keys($this->lookupColumns));
 
-		foreach($restrictions as $restrictionName => $restrictionValue)
-			$orm->$restrictionName = $restrictionValue;
+		foreach($restrictions as $restrictionName => $restrictionValue) {
+			if(!isset($this->sortJoins[$restrictionName])) {
+				$orm->$restrictionName = $restrictionValue;
+			}
+		}
 
 		foreach($functions as $func)
 			$orm->addFunction($func['name'], $func['function'], $func['value']);
@@ -411,6 +477,7 @@ class ModelListing
 		if(isset($this->sortJoins[$browseBy])) {
 			$join = $this->sortJoins[$browseBy];
 			$orm->join($join[0], $browseBy, $join[1], $join[2], 'sortBy_' . $browseBy);
+			unset($orm->$browseBy);
 			$browseBy = 'sortBy_' . $browseBy;
 		}
 
@@ -481,18 +548,31 @@ class ModelListing
 	 * @param array $functions
 	 * @return string
 	 */
-        protected function browseCompare($model1, $model2)
-        {
-                $field = $this->browseField;
+	protected function browseCompare($model1, $model2)
+	{
+		$field = $this->browseField;
 
-                $m1 = ModelRegistry::loadModel($model1['type'], $model1['id']);
-                $m2 = ModelRegistry::loadModel($model2['type'], $model2['id']);
+		$m1 = ModelRegistry::loadModel($model1['type'], $model1['id']);
+		$m2 = ModelRegistry::loadModel($model2['type'], $model2['id']);
 
-		$s1 = isset($m1[$field]) ? $m1[$field] : '';
-		$s2 = isset($m2[$field]) ? $m2[$field] : '';
+		$field = $this->browseField;
+		$getter = 'get' . $this->browseField;
 
-                return strcasecmp($s1, $s2);
-        }
+		$s = array();
+		foreach(array($m1, $m2) as $m) {
+			if(is_callable($m, $getter)) {
+				$s[] = $m->$getter();
+			} elseif(isset($m->$field)) {
+				$s[] = $m->$field;
+			} elseif(isset($m[$field])) {
+				$s[] = $m[$field];
+			} else {
+				$s[] = null;
+			}
+		}
+
+		return strcasecmp($s[0], $s[1]);
+	}
 }
 
 ?>

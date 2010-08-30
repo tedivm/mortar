@@ -69,17 +69,8 @@ class TagBoxEnv
 		if($this->user['name'] === 'Guest') {
 			$url = $this->loginLink(true);
 
-			$form = new Form('logIn');
+			$form = new MortarLogInForm('logIn');
 			$form->setAction($url);
-
-			$form->createInput('username')->
-					setLabel('Username: ')->
-					addRule('required');
-
-			$form->createInput('password')->
-					setLabel('Password: ')->
-					setType('password')->
-					addRule('required');
 
 			$div->wrapAround($form->getFormAs());
 		} else {
@@ -90,6 +81,26 @@ class TagBoxEnv
 			$div->wrapAround($link);
 		}
 
+		return (string) $div;
+	}
+
+	protected function searchBox()
+	{
+		if(defined('DISABLESEARCH') && DISABLESEARCH)
+			return '';
+
+		$div = new HtmlObject('div');
+		$div->addClass('search-box');
+
+		$query = Query::getQuery();
+		$url = new Url();
+		$url->format = $query['format'];
+		$url->module = 'Mortar';
+		$url->action = 'Search';
+		$form = new MortarSimpleSearchForm('SimpleSearch');
+		$form->setAction($url);
+
+		$div->wrapAround($form->getFormAs());
 		return (string) $div;
 	}
 
@@ -136,6 +147,10 @@ class TagBoxEnv
 
 				return $this->loginBox();
 
+			case 'searchBox':
+
+				return $this->searchBox();
+
 			default:
 				return false;
 		}
@@ -150,6 +165,7 @@ class TagBoxEnv
 			case "userlink":
 			case "loginLink":
 			case "loginBox":
+			case "searchBox":
 				return true;
 			default:
 				return false;

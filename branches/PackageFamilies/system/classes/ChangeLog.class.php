@@ -22,7 +22,8 @@ class ChangeLog
 				FROM changeLog
 				INNER JOIN changeTypes ON changeLog.changeType = changeTypes.changeTypeId
 				LEFT JOIN actions ON changeLog.permission = actions.action_id
-				WHERE modelType = ? AND modelId = ?';
+				WHERE modelType = ? AND modelId = ?
+				ORDER BY date ASC';
 
 			$selectStmt = DatabaseConnection::getStatement('default_read_only');
 			$selectStmt->prepare($sql);
@@ -43,7 +44,7 @@ class ChangeLog
 
 		$type = $model->getType();
 		$typeId = ModelRegistry::getIdFromType($type);
-		$date = gmdate('Y-m-d H:i:s');
+		$date = date('Y-m-d H:i:s');
 		$changeId = self::getChangeId($change);
 
 		$bindFields = 'modelType, modelId, changeType, changeDate';
