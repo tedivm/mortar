@@ -106,25 +106,16 @@ class MortarSearchResult {
 		$m1 = ModelRegistry::loadModel($model1['type'], $model1['id']);
 		$m2 = ModelRegistry::loadModel($model2['type'], $model2['id']);
 
+		$a1 = $m1->__toArray();
+		$a2 = $m2->__toArray();
+
 		$field = $this->browseField;
-		$getter = 'get' . $this->browseField;
 
-		$s = array();
-		foreach(array($m1, $m2) as $m) {
-			if(is_callable($m, $getter)) {
-				$s[] = $m->$getter();
-			} elseif(isset($m->$field)) {
-				$s[] = $m->$field;
-			} elseif(isset($m[$field])) {
-				$s[] = $m[$field];
-			} else {
-				$s[] = null;
-			}
-		}
+		$s1 = isset($a1[$field]) ? $a1[$field] : null;
+		$s2 = isset($a2[$field]) ? $a2[$field] : null;
 
-		return strcasecmp($s[0], $s[1]);
+		return strcasecmp($s1, $s2);
 	}
-
 }
 
 ?>

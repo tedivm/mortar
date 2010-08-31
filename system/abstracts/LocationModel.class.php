@@ -81,9 +81,16 @@ abstract class LocationModel extends ModelBase
 	/**
 	 * When true, a status field with all available statuses will appear when editing the model.
 	 *
-	 * @var array
+	 * @var bool
 	 */
 	static public $editStatus = false;
+
+	/**
+	 * When true, this model's parent will be indexed instead when its contents change.
+	 *
+	 * @var bool
+	 */
+	static public $indexParent = false;
 
 	/**
 	 * The constructor sets some basic properties and, if an ID is passed, initializes the model. It runs the parent
@@ -208,7 +215,8 @@ abstract class LocationModel extends ModelBase
 		}
 
 		$search = Search::getSearch();
-		$search->index($this);
+		if($search->liveIndex())
+			$search->index($this);
 
 		return true;
 	}
@@ -404,6 +412,27 @@ abstract class LocationModel extends ModelBase
 			return false;
 
 		return $this->location;
+	}
+
+	/**
+	 * This function returns the model that should be indexed when this model is changed. Usually it will return
+	 * itself but in some cases changing a model should result in the parent being reindexed instead. This will
+	 * call itself recursively rather than returning the parent model directly in case indexParent models are
+	 * nested.
+	 *
+	 * @return Model
+	 */
+	public function getIndexedModel()
+	{
+		if($isParent = staticHack(get_class($this), 'indexParent')) {
+			$loc = $this->getLocation();
+			if($parent = $loc->getParent()) {
+				$re = $parent->getResource();
+				return $re->getIndexedModel();
+			}
+		}
+
+		return $this;
 	}
 
 	/**

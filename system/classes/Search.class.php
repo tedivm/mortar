@@ -73,20 +73,34 @@ class Search
 		return array_merge(self::$includedEngines, $plugins);
 	}
 
-	public function index($models, $extraFields = array())
+	public function liveIndex()
 	{
-		if((defined('DISABLESEARCH') && DISABLESEARCH) || self::$runtimeDisable || !$this->searchEnabled)
+		$engine = get_class($this->engine);
+		if((defined('DISABLELIVEINDEX') && DISABLELIVEINDEX) || !(self::$liveIndex) || !staticHack($engine, 'liveIndex'))
 			return false;
 
-		$engine = get_class($this->engine);
-//		if((defined('LIVEINDEX') && LIVEINDEX) || !(self::$liveIndex) || !staticHack($engine, $liveIndex))
-//			return false;
+		return true;
+	}
+
+	public function index($models)
+	{
+		$alreadyIndexed = array();
+
+		if((defined('DISABLESEARCH') && DISABLESEARCH) || self::$runtimeDisable || !$this->searchEnabled)
+			return false;
 
 		if(!is_array($models))
 			$models = array($models);
 
 		foreach($models as $model) {
-			$this->engine->index($model, $extraFields);
+			$target = $model->getIndexedModel();
+			if(in_array($model->getType() . '_' . $model->getId(), $alreadyIndexed))
+				continue;
+
+			$alreadyIndexed[] = $model->getType() . '_' . $model->getId();
+			$extraFields = $model->getExtraFields();
+
+			$this->engine->index($target, $extraFields);
 		}
 
 		return $this->engine->commit();
@@ -145,11 +159,11 @@ class Search
 
 			$offset = 0;
 			while($results = $listing->getListing(self::$batchSize, self::$batchSize * $offset++)) {
+				$items = array();
 				foreach($results as $info) {
-					$item = ModelRegistry::loadModel($info['type'], $info['id']);
-					$this->engine->index($item);
+					$items[] = ModelRegistry::loadModel($info['type'], $info['id']);
 				}
-				$this->engine->commit();
+				$this->index($items);
 			}
 		}
 
