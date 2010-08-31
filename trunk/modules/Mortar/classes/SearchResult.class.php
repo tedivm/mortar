@@ -15,6 +15,12 @@ class MortarSearchResult {
 	protected $tableDisplayList = 'ViewTableDisplayList';
 	protected $templateDisplayList = 'ViewTemplateDisplayList';
 
+	protected $columns = array(	'type' => 'Type',
+					'designation' => 'Designation',
+					'status' => 'Status',
+					'owner' => 'Owner',
+					'createdOn' => 'Created',
+					'lastModified' => 'Modified');
 
 	public function __construct($results)
 	{
@@ -92,8 +98,11 @@ class MortarSearchResult {
 		$indexList = new $class($model, $this->models);
 
 		if($type == 'table') {
+			$indexList->showActions(false);
+			$indexList->setColumns($this->columns);
 			$indexList->useIndex(true, $this->offset);
 			$indexList->filterable(false);
+			$indexList->linkTitles(true);
 		}
 
 		return $indexList;
@@ -109,10 +118,8 @@ class MortarSearchResult {
 		$a1 = $m1->__toArray();
 		$a2 = $m2->__toArray();
 
-		$field = $this->browseField;
-
-		$s1 = isset($a1[$field]) ? $a1[$field] : null;
-		$s2 = isset($a2[$field]) ? $a2[$field] : null;
+		$s1 = isset($a1[$field]) ? $a1[$field] : false;
+		$s2 = isset($a2[$field]) ? $a2[$field] : false;
 
 		return strcasecmp($s1, $s2);
 	}

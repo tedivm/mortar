@@ -23,6 +23,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 	protected $sortable = true;
 	protected $filterable = true;
 	protected $repeatHeaders = false;
+	protected $linkTitles = false;
 	protected $table;
 
 	protected $allowedColumns = array('type' 	=> 'Type',
@@ -73,7 +74,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 		$this->indexBase = $base;
 	}
 
-	public function sortable($sort)
+	public function sortable($sort = true)
 	{
 		if($sort) {
 			$this->sortable = true;
@@ -82,13 +83,31 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 		}
 	}
 
-	public function filterable($filter)
+	public function filterable($filter = true)
 	{
 		if($filter) {
 			$this->filterable = true;
 		} else {
 			$this->filterable = false;
 		}
+	}
+
+	public function showActions($show = true)
+	{
+		if($show) {
+			$this->listActions = true;
+		} else {
+			$this->listActions = false;
+		}
+	}
+
+	public function linkTitles($link = true)
+	{
+		if($link) {
+			$this->linkTitles = true;
+		} else {
+			$this->linkTitles = false;
+		}	
 	}
 
 	public function setIndexBase($base)
@@ -121,6 +140,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 		foreach ($this->modelList as $model)
 		{
 			$properties = $model->__toArray();
+			$titleLinked = false;
 
 			foreach($this->allowedColumns as $propName => $propLabel) {
 				if (isset($properties[$propName])) {
@@ -128,6 +148,11 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 					$columnList[$propName] = $propLabel;
 					if (in_array($propName, $this->specialColumns)) {
 						$this->modelData[$x][$propName] = $this->processSpecialColumn($propName, $propData);
+					} elseif(in_array($propName, array('designation', 'title')) && !$titleLinked) {
+						$url = $model->getUrl();
+						$link = $url->getLink($propData);
+						$this->modelData[$x][$propName] = $link;
+						$titleLinked = true;
 					} elseif ($propName === 'owner') {
 						$this->modelData[$x][$propName] = $propData['name'];
 					} elseif (($propName === 'createdOn') || ($propName === 'lastModified') || 
