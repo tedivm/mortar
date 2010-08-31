@@ -41,28 +41,30 @@ class SearchLucene implements SearchEngine
 	{
 		$this->clear($model);
 
+		$m = $model->__toArray();
+
 		$doc = new Zend_Search_Lucene_Document();
-		$doc->addField(Zend_Search_Lucene_Field::Keyword('unique', $model->getType() . '_' . $model->getId()));
-		$doc->addField(Zend_Search_Lucene_Field::Keyword('type', $model->getType()));
+		$doc->addField(Zend_Search_Lucene_Field::Keyword('unique', $m['type'] . '_' . $model->getId()));
+		$doc->addField(Zend_Search_Lucene_Field::Keyword('type', $m['type']));
 		$doc->addField(Zend_Search_Lucene_Field::UnIndexed('modelid', $model->getId()));
-		$doc->addField(Zend_Search_Lucene_Field::Text('designation', $model->getDesignation()));
-		if($content = $model['content'])
-			$doc->addField(Zend_Search_Lucene_Field::UnStored('content', $content));
+		$doc->addField(Zend_Search_Lucene_Field::Text('designation', $m['designation']));
+		if(isset($m['content']))
+			$doc->addField(Zend_Search_Lucene_Field::UnStored('content', $m['content']));
+
+		if(isset($m['owner']) && $m['owner']) {
+			$owner = $m['owner'];
+			$oid = $owner->getId();
+			$doc->addField(Zend_Search_Lucene_Field::Keyword('owner', 'owner_' . $oid));
+		}
 
 		foreach($extraFields as $name => $type) {
-			if(isset($model[$name])) {
-				$value = $model[$name];
-			} elseif(isset($model->$name)) {
-				$value = $model->$name;
-			}
-
-			if(isset($value)) {
+			if(isset($m[$name])) {
 				if($type === 'key') {
-					$doc->addField(Zend_Search_Lucene_Field::Keyword($name, $value));
+					$doc->addField(Zend_Search_Lucene_Field::Keyword($name, $m[$name]));
 				} elseif($type === 'text') {
-					$doc->addField(Zend_Search_Lucene_Field::Text($name, $value));
+					$doc->addField(Zend_Search_Lucene_Field::Text($name, $m[$name]));
 				} else {
-					$doc->addField(Zend_Search_Lucene_Field::UnStored($name, $value));
+					$doc->addField(Zend_Search_Lucene_Field::UnStored($name, $m[$name]));
 				}
 			}
 		}
