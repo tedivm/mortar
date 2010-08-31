@@ -2,6 +2,8 @@
 
 class MortarActionSearchResults extends ActionBase
 {
+	static $requiredPermission = 'Read';
+
 	public static $settings = array( 'Base' => array( 'headerTitle' => 'Search Results' ) );
 
 	protected $searchResults;
