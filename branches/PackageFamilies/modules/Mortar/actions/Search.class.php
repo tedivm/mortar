@@ -4,7 +4,6 @@ class MortarActionSearch extends FormAction
 {
 	static $requiredPermission = 'Read';
 
-
 	public static $settings = array( 'Base' => array( 'headerTitle' => 'Search' ) );
 
 	public function getForm()

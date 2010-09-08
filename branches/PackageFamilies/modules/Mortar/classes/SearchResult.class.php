@@ -15,6 +15,12 @@ class MortarSearchResult {
 	protected $tableDisplayList = 'ViewTableDisplayList';
 	protected $templateDisplayList = 'ViewTemplateDisplayList';
 
+	protected $columns = array(	'type' => 'Type',
+					'designation' => 'Designation',
+					'status' => 'Status',
+					'owner' => 'Owner',
+					'createdOn' => 'Created',
+					'lastModified' => 'Modified');
 
 	public function __construct($results)
 	{
@@ -92,8 +98,11 @@ class MortarSearchResult {
 		$indexList = new $class($model, $this->models);
 
 		if($type == 'table') {
+			$indexList->showActions(false);
+			$indexList->setColumns($this->columns);
 			$indexList->useIndex(true, $this->offset);
 			$indexList->filterable(false);
+			$indexList->linkTitles(true);
 		}
 
 		return $indexList;
@@ -106,25 +115,14 @@ class MortarSearchResult {
 		$m1 = ModelRegistry::loadModel($model1['type'], $model1['id']);
 		$m2 = ModelRegistry::loadModel($model2['type'], $model2['id']);
 
-		$field = $this->browseField;
-		$getter = 'get' . $this->browseField;
+		$a1 = $m1->__toArray();
+		$a2 = $m2->__toArray();
 
-		$s = array();
-		foreach(array($m1, $m2) as $m) {
-			if(is_callable($m, $getter)) {
-				$s[] = $m->$getter();
-			} elseif(isset($m->$field)) {
-				$s[] = $m->$field;
-			} elseif(isset($m[$field])) {
-				$s[] = $m[$field];
-			} else {
-				$s[] = null;
-			}
-		}
+		$s1 = isset($a1[$field]) ? $a1[$field] : false;
+		$s2 = isset($a2[$field]) ? $a2[$field] : false;
 
-		return strcasecmp($s[0], $s[1]);
+		return strcasecmp($s1, $s2);
 	}
-
 }
 
 ?>

@@ -19,6 +19,21 @@ abstract class ModelBase implements Model
 	static public $type;
 
 	/**
+	 * These are additional fields that should be indexed for this model when it is saved. Extra fields should be
+	 * listed in the form name => type, where type is key, text, or content.
+	 *
+	 * @var array
+	 */
+	static public $extraIndexFields = array();
+
+	/**
+	 * When true, models of this type will be indexed for searching. 
+	 *
+	 * @var bool
+	 */
+	static public $isSearchable = true;
+
+	/**
 	 * This contains a non-static copy of the type variable. This is due to the fact that php < 5.3 does not handle
 	 * static binding in a way we can work with and our hack around it is very resource intensive. This optimization
 	 * will be removed when we stop supporting anything before php5.3
@@ -74,6 +89,12 @@ abstract class ModelBase implements Model
 	 */
 	static public $fallbackModelActions = array('Read', 'Add', 'Edit', 'Delete', 'Index');
 
+	/**
+	 * These fallback actions should be referred to by a different name within the system. The key is the system name
+	 * while the value is the display name.
+	 *
+	 * @var array
+	 */
 	static public $fallbackModelActionNames = array('Index' => 'Browse');
 
 	/**
@@ -170,6 +191,7 @@ abstract class ModelBase implements Model
 		$array = array();
 		$array['id'] = $this->getId();
 		$array['type'] = $this->getType();
+		$array['designation'] = $this->getDesignation();
 
 		if(isset($this->properties))
 			$array['properties'] = $this->properties;
@@ -268,7 +290,8 @@ abstract class ModelBase implements Model
 		}
 
 		$search = Search::getSearch();
-		$search->index($this);
+		if($search->liveIndex())
+			$search->index($this);
 
 		return true;
 	}
@@ -629,6 +652,16 @@ abstract class ModelBase implements Model
 	}
 
 	/**
+	 * This function returns the list of extra fields that should be indexed for this model.
+	 *
+	 * @return array
+	 */
+	public function getExtraFields()
+	{
+		return staticHack(get_class($this), 'extraIndexFields');
+	}
+
+	/**
 	 * This function returns the model type (User, Page, etc).
 	 *
 	 * @return string
@@ -736,6 +769,11 @@ abstract class ModelBase implements Model
 		return $this->module;
 	}
 
+	/**
+	 * Returns a permanent link to the current model in the current format.
+	 *
+	 * @return Url
+	 */
 	public function getUrl()
 	{
 		$query = Query::getQuery();
@@ -746,6 +784,17 @@ abstract class ModelBase implements Model
 		$url->action = "Read";
 		$url->format = $query['format'];
 		return $url;
+	}
+
+	/**
+	 * This function returns the model that should be indexed when this model is changed. By default it will return
+	 * itself but in some cases changing a model should result in the parent being reindexed instead.
+	 *
+	 * @return Model
+	 */
+	public function getIndexedModel()
+	{
+		return $this;
 	}
 
 	/**
