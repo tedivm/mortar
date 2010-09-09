@@ -30,7 +30,7 @@ class ModuleInstaller
 	 */
 	protected $startVersion;
 
-	public function __construct($package, $path = null)
+	public function __construct(PackageInfo $package, $path = null)
 	{
 		if(!isset($path))
 			$path = $package->getPath();
