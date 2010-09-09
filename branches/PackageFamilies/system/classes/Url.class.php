@@ -222,5 +222,5 @@ class Url
 
 }
 
-class UrlError extends CoreError();
+class UrlError extends CoreError {};
 ?>

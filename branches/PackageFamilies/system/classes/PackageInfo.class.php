@@ -96,7 +96,7 @@ class PackageInfo
 		return $packageObject;
 	}
 
-	static public function loadByName($family = null, $name)
+	static public function loadByName($family, $name)
 	{
 		$packageObject = new PackageInfo();
 		$packageObject->buildByName($family, $name);

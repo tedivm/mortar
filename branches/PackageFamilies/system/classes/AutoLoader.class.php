@@ -332,7 +332,7 @@ class AutoLoader
 
 		self::$loadedModules[] = $moduleName;
 
-		$basePath = $module->getPath();
+		$basePath = $packageInfo->getPath();
 		$moduleFolders = array(	'actions' => 'Action',
 					'controls' => 'Control',
 					'models' => 'Model',

@@ -53,14 +53,14 @@ class InstallerActionInstall extends ActionBase
 			$requirementsCheck = new RequirementsCheck();
 			$modulesToInstall = $profile->getModules();
 
-			foreach($modulesToInstall as $family -> $modules)
+			foreach($modulesToInstall as $family => $modules)
 			{
 				if($family == 'orphan')
 					$family = null;
 
 				foreach($modules as $module)
 				{
-					$packageInfo = PackageInfo::loadByName($family, $name);
+					$packageInfo = PackageInfo::loadByName($family, $module);
 					$requirementsCheck->addModule($packageInfo);
 				}
 			}
