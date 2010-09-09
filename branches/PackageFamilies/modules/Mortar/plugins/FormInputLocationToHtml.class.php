@@ -39,7 +39,7 @@ class MortarPluginFormInputLocationToHtml implements FormToHtmlHook
 	protected function getUrl(FormInput $input)
 	{
 		$url = new Url();
-		$url->module = 'Mortar';
+		$url->module = PackageInfo::loadByName(null, 'Mortar');
 		$url->format = 'json';
 		$url->action = 'LocationLookUp';
 

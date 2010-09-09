@@ -38,7 +38,7 @@ class MortarActionControlSettings extends FormAction
 		$info = $this->cs->getInfo();
 
 		$url = new Url();
-		$url->module = 'Mortar';
+		$url->module = PackageInfo::loadByName(null, 'Mortar');
 		$url->action = 'Dashboard';
 		$url->format = $query['format'];
 

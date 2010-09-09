@@ -169,7 +169,7 @@ class MortarActionModulePermissions extends ActionBase
 			$perm->save();
 
 		$url = new Url();
-		$url->module = 'Mortar';
+		$url->module = PackageInfo::loadByName(null, 'Mortar');
 		$url->action = 'InstallModule';
 		$url->format = 'admin';
 		$this->ioHandler->addHeader('Location', (string) $url);

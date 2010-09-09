@@ -11,7 +11,7 @@ class GraffitiPluginMenusGraffiti
 						'auto');
 
 		$url = new Url();
-		$url->module = 'Graffiti';
+		$url->module = PackageInfo::loadByName(null, 'Graffiti');
 		$url->format = 'Admin';
 		$url->action = 'SetTaggedModels';
 		$link = $url->getLink('Model Settings');

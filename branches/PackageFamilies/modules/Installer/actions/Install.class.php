@@ -70,7 +70,7 @@ class InstallerActionInstall extends ActionBase
 			{
 				$url = new Url();
 				$url->format = 'admin';
-				$url->module = 'Installer';
+				$url->module = PackageInfo::loadByName(null, 'Installer');
 				$url->action = 'Requirements';
 				$this->ioHandler->addHeader('Location', (string) $url);
 				// redirect away to the requirements page
