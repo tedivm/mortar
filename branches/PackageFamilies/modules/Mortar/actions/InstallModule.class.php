@@ -13,6 +13,10 @@ class MortarActionInstallModule extends ActionBase
 	protected $installablePackages;
 	protected $installedPackages;
 
+
+	protected $installPackage;
+	protected $installFamily;
+
 	protected function logic()
 	{
 		$query = Query::getQuery();
@@ -62,7 +66,7 @@ class MortarActionInstallModule extends ActionBase
 		}
 	}
 
-	protected function getModuleListing($modules, $name, $url, $install = false)
+	protected function getModuleListing($family, $modules, $name, $url, $install = false)
 	{
 		$table = new Table($name . '_module_listing');
 		$table->addClass('index-listing');
@@ -72,7 +76,7 @@ class MortarActionInstallModule extends ActionBase
 
 		foreach($modules as $package)
 		{
-			$packageInfo = new PackageInfo($package);
+			$packageInfo = PackageInfo::loadByName($family, $package);
 			$meta = $packageInfo->getMeta();
 
 			$table->newRow();
@@ -111,7 +115,7 @@ class MortarActionInstallModule extends ActionBase
 			{
 				$familyLabel = $family != 'orphan' ? $family : 'Standalone';
 				$output .= '<h3>' . $familyLabel . '</h3>';
-				$output .= $this->getModuleListing($modules, $familyLabel . '_installable', $linkToSelf, true);
+				$output .= $this->getModuleListing($family, $modules, $familyLabel . '_installable', $linkToSelf, true);
 			}
 
 			$output .= '<h2>Installed Packages</h2>';
@@ -119,18 +123,16 @@ class MortarActionInstallModule extends ActionBase
 			{
 				$familyLabel = $family != 'orphan' ? $family : 'Standalone';
 				$output .= '<h3>' . $familyLabel . '</h3>';
-				$output .= $this->getModuleListing($modules, $familyLabel . '_installed', $linkToSelf, false);
+				$output .= $this->getModuleListing($family, $modules, $familyLabel . '_installed', $linkToSelf, false);
 			}
 
 
 		}elseif($this->form){
 			if($this->success)
 			{
-				$query = Query::getQuery();
-
-				if(isset($query['id']))
+				if(isset($this->installPackage) && isset($this->installFamily))
 				{
-					$packageInfo = new PackageInfo($query['id']);
+					$packageInfo = PackageInfo::loadByName($this->installFamily, $this->installPackage);
 					$models = $packageInfo->getModels();
 
 					if(count($models) > 0)
