@@ -89,7 +89,7 @@ class PackageInfo
 	static public function loadByPath($path)
 	{
 		if(!is_dir($path))
-			throw new PackageInfoError('Unable to locate package ' . $this->name);
+			throw new PackageInfoError('Unable to locate package at' . $path);
 
 		$packageObject = new PackageInfo();
 		$packageObject->buildFromPath($path);
@@ -98,6 +98,9 @@ class PackageInfo
 
 	static public function loadByName($family, $name)
 	{
+		if($family === 'orphan')
+			$family = null;
+
 		$packageObject = new PackageInfo();
 		$packageObject->buildByName($family, $name);
 

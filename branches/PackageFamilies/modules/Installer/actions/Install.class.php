@@ -58,10 +58,13 @@ class InstallerActionInstall extends ActionBase
 				if($family == 'orphan')
 					$family = null;
 
-				foreach($modules as $module)
+				foreach($modules as $module => $install)
 				{
-					$packageInfo = PackageInfo::loadByName($family, $module);
-					$requirementsCheck->addModule($packageInfo);
+					if(isset($install['install']) && $install['install'])
+					{
+						$packageInfo = PackageInfo::loadByName($family, $module);
+						$requirementsCheck->addModule($packageInfo);
+					}
 				}
 			}
 
