@@ -22,7 +22,7 @@ class FormValidationEmail extends FormValidationFilter
 	 *
 	 * @var string
 	 */
-	protected $error = 'Invalid email address';
+	protected $error = 'Please enter a valid email address.';
 
 	/**
 	 * This defines the PHP filter that the input is going to be tested against

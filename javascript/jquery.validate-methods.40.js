@@ -10,26 +10,25 @@ jQuery.validator.addMethod("rangeWords", function(value, element, params) {
     return this.optional(element) || value.match(/\b\w+\b/g).length >= params[0] && value.match(/bw+b/g).length < params[1];
 }, jQuery.validator.format("Please enter between {0} and {1} words."));
 
-
 jQuery.validator.addMethod("alphanumericpunc", function(value, element, params) {
 	return this.optional(element) || /^[a-z\d-+.,()\'?!@#$%&|"_\s]+$/i.test(value);
-}, "Letters, numbers, spaces, and basic punctuation only please.");
+}, "Please use letters, numbers, spaces, and punctuation (+ - . , ( ) ' ? ! @ # $ % & | \" _) only.");
 
 jQuery.validator.addMethod("letterswithbasicpunc", function(value, element) {
 	return this.optional(element) || /^[a-z-.,()'\"\s]+$/i.test(value);
-}, "Letters or punctuation only please");
+}, "Please use letters, spaces, and basic punctuation (quotes, parentheses, dash, period, or comma) only.");
 
 jQuery.validator.addMethod("alphanumeric", function(value, element) {
 	return this.optional(element) || /^\w+$/i.test(value);
-}, "Letters, numbers, spaces or underscores only please");
+}, "Please use letters, numbers, spaces or underscores only.");
 
 jQuery.validator.addMethod("lettersonly", function(value, element) {
 	return this.optional(element) || /^[a-z]+$/i.test(value);
-}, "Letters only please");
+}, "Please use letters only.");
 
 jQuery.validator.addMethod("nowhitespace", function(value, element) {
 	return this.optional(element) || /^\S+$/i.test(value);
-}, "No white space please");
+}, "Please include no white space in this field.");
 
 jQuery.validator.addMethod("ziprange", function(value, element) {
 	return this.optional(element) || /^90[2-5]\d\{2}-\d{4}$/.test(value);

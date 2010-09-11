@@ -28,7 +28,7 @@ class FormValidationAlphaNumeric extends FormValidationRegex
 	 *
 	 * @var string
 	 */
-	protected $error = '';
+	protected $error = 'Please use letters, numbers, spaces or underscores only.';
 }
 
 ?>
