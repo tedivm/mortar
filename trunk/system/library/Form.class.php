@@ -568,6 +568,7 @@ class Form
 		$this->sectionIntro = array_merge_recursive($this->sectionIntro, $package['intros']);
 		$this->sectionOutro = array_merge_recursive($this->sectionIntro, $package['outros']);
 		$this->sectionLegends = array_merge_recursive($this->sectionLegends, $package['legends']);
+		$this->errors = array_merge_recursive($this->errors, $package['errors']);
 	}
 
 	/**
@@ -592,6 +593,7 @@ class Form
 		$package['outros'] = $this->sectionOutro;
 		$package['legends'] = $this->sectionLegends;
 		$package['classes'] = $this->sectionClasses;
+		$package['errors'] = $this->errors;
 		return $package;
 	}
 

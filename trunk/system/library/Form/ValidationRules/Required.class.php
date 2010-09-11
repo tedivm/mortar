@@ -21,7 +21,7 @@ class FormValidationRequired extends FormValidationAbstract
 	 *
 	 * @var string
 	 */
-	protected $error = 'Required field not filled out.';
+	protected $error = 'This field is required.';
 
 	/**
 	 * This function ensures that the user input was set.

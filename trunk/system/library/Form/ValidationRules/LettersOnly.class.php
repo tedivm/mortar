@@ -28,7 +28,7 @@ class FormValidationLettersOnly extends FormValidationRegex
 	 *
 	 * @var string
 	 */
-	protected $error = '';
+	protected $error = 'Please use letters only.';
 }
 
 ?>

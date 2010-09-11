@@ -21,7 +21,7 @@ class FormValidationDigits extends FormValidationFilter
 	 *
 	 * @var string
 	 */
-	protected $error = 'Invalid email address';
+	protected $error = 'Please enter only digits';
 
 	/**
 	 * This defines the PHP filter that the input is going to be tested against

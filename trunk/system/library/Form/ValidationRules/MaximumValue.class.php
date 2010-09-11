@@ -17,13 +17,6 @@
 class FormValidationMaximumValue extends FormValidationAbstract
 {
 	/**
-	 * This is the default error message if the input doesn't validate.
-	 *
-	 * @var string
-	 */
-	protected $error = 'Input was too high';
-
-	/**
 	 * This make sure the input is less than or equal to the specified value.
 	 *
 	 * @return bool
@@ -33,7 +26,7 @@ class FormValidationMaximumValue extends FormValidationAbstract
 		if($this->value <= $this->argument)
 			return true;
 
-		$this->addError('value should be at least ' . $this->argument . 'charactors.');
+		$this->addError('Please enter a value less than or equal to ' . $this->argument . '.');
 		return false;
 	}
 }

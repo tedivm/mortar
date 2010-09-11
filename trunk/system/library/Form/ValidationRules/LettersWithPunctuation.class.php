@@ -28,7 +28,7 @@ class FormValidationLettersWithPunctuation extends FormValidationRegex
 	 *
 	 * @var string
 	 */
-	protected $error = '';
+	protected $error = 'Please use letters, spaces, and basic punctuation (quotes, parentheses, dash, period, or comma) only.';
 }
 
 ?>

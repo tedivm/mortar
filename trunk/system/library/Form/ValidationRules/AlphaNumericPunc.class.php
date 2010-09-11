@@ -28,7 +28,7 @@ class FormValidationAlphaNumericPunc extends FormValidationRegex
 	 *
 	 * @var string
 	 */
-	protected $error = '';
+	protected $error = 'Please use letters, numbers, spaces, and punctuation (+ - . , ( ) \' ? ! @ # $ % & | " _) only.';
 }
 
 ?>
