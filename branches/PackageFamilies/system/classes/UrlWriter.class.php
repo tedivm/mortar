@@ -180,8 +180,7 @@ class UrlWriter
 
 	static function buildModulePath($path, &$attributes)
 	{
-
-		$packageInfo = PackageInfo::loadById($attributes['module']);
+		$packageInfo = $attributes['module'];
 
 		$family = $packageInfo->getFamily();
 		$module = $packageInfo->getName();

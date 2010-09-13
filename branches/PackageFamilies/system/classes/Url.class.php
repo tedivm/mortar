@@ -117,10 +117,16 @@ class Url
 
 		if($name == 'module' && !is_numeric($value))
 		{
-			if($value instanceof PackageInfo)
+			if(is_numeric($value))
 			{
-				$value = $value->getId();
-			}else{
+				$packageInfo = PackageInfo::loadById($value);
+
+				if(!$packageInfo)
+					throw new UrlError('Module integer is not registered in the system.');
+
+				$value = $packageInfo;
+
+			}elseif(!($value instanceof PackageInfo)){
 				throw new UrlError('Module attribute must be an integer or PackageInfo object');
 			}
 		}
