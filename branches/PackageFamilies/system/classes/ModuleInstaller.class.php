@@ -312,11 +312,11 @@ class ModuleInstaller
 	{
 		if($module)
 		{
-			$moduleRecord = new ObjectRelationshipMapper(modules);
+			$moduleRecord = new ObjectRelationshipMapper('modules');
 			$moduleRecord->package = $this->packageInfo->getName();
 			$moduleRecord->family = $this->packageInfo->getFamily();
 		}else{
-			$moduleRecord = new ObjectRelationshipMapper(schemaVersion);
+			$moduleRecord = new ObjectRelationshipMapper('schemaVersion');
 			$moduleRecord->package = $this->packageInfo->getFullName();
 		}
 

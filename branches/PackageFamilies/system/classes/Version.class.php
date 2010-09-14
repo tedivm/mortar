@@ -201,6 +201,9 @@ class Version
 	{
 		$versionArray = explode('.', $version);
 
+		if(count($versionArray) < 1)
+			return false;
+
 		$lastPiece = array_pop($versionArray);
 		if(!is_int($lastPiece) && is_string($lastPiece) && strlen($lastPiece) > 0)
 		{
@@ -215,6 +218,8 @@ class Version
 		$this->major = (int) $versionArray[0];
 		$this->minor = isset($versionArray[1]) ? (int) $versionArray[1] : 0;
 		$this->micro = isset($versionArray[2]) ? (int) $versionArray[2] : 0;
+
+		return true;
 	}
 
 	public function inRange(Version $minimum, Version $maximum = null)

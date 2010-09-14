@@ -24,6 +24,13 @@ class PackageInfo
 	public $id;
 
 	/**
+	 * This is the family in which the package belongs
+	 *
+	 * @var string
+	 */
+	public $family;
+
+	/**
 	 * This is the name of the package
 	 *
 	 * @var string
@@ -155,12 +162,12 @@ class PackageInfo
 
 		if($metaFamily = $this->getMeta('family'))
 		{
-			$family = $metaFamily;
+			$this->family = $metaFamily;
 		}else{
-			$family = 'orphan';
+			$this->family = 'orphan';
 		}
 
-		return $this->buildByName($family, $name);
+		return $this->buildByName($this->family, $this->name);
 	}
 
 	protected function buildByName($family, $name)
