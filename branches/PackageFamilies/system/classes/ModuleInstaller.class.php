@@ -41,7 +41,7 @@ class ModuleInstaller
 		$this->packageInfo = $package;
 		$this->path = $path;
 		$iniPath = $path . 'package.ini';
-		$this->installVersion = $packageInfo->getVersion(false);
+		$this->installVersion = $package->getVersion(false);
 	}
 
 	public function integrate()
@@ -61,6 +61,9 @@ class ModuleInstaller
 				$moduleStatus = $this->packageInfo->getStatus();
 				$version = $this->packageInfo->getVersion();
 				$versionInt = $version->toInt();
+			}else{
+				$version = new Version();
+				$versionInt = 0;
 			}
 
 

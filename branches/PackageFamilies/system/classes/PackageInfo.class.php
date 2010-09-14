@@ -200,8 +200,8 @@ class PackageInfo
 					return;
 
 				$packageStmt = $db->stmt_init();
-				$packageStmt->prepare('SELECT * FROM modules WHERE package = ?');
-				$packageStmt->bindAndExecute('s', $packageName);
+				$packageStmt->prepare('SELECT * FROM modules WHERE family = ? AND package = ?');
+				$packageStmt->bindAndExecute('ss', $this->family, $this->name);
 
 				if($moduleInfo = $packageStmt->fetch_array())
 				{
