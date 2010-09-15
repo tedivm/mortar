@@ -249,10 +249,14 @@ class AutoLoader
 		$packageList = new PackageList();
 		$installedPackages = $packageList->getInstalledPackages();
 
-		foreach($installedPackages as $package)
+		foreach($installedPackages as $family => $packages)
 		{
-			$lookupClasses = self::loadModule($package);
-			$classArray[] = $lookupClasses;
+			foreach($packages as $package)
+			{
+				$packageInfo = PackageInfo::loadByName($family, $package);
+				$lookupClasses = self::loadModule($packageInfo);
+				$classArray[] = $lookupClasses;
+			}
 		}
 		return $classArray;
 	}
