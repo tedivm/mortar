@@ -102,11 +102,15 @@ function importClass($classname, $path, $basePath = null, $require = false)
  */
 function importFromModule($name, $module, $classType, $require = false)
 {
-	if(!is_numeric($module))
-		throw new CoreError('importFromModule function requires module to be an ID.');
+	if(is_numeric($module))
+	{
+		$packageInfo = PackageInfo::loadById($module);
+	}elseif($module instanceof PackageInfo){
+		$packageInfo = $module;
+	}else{
+		throw new CoreError('importFromModule function requires module to be an ID or PackageInfo object.');
+	}
 
-
-	$packageInfo = PackageInfo::loadById($module);
 	return $packageInfo->getClassName($classType, $name, $require);
 }
 
