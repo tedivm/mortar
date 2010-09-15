@@ -111,7 +111,7 @@ class PackageInfo
 		$packageObject = new PackageInfo();
 		$packageObject->buildByName($family, $name);
 
-		AutoLoader::addModule($packageObject);
+//		AutoLoader::addModule($packageObject);
 
 		return $packageObject;
 	}

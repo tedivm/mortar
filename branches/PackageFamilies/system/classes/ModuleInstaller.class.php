@@ -32,6 +32,8 @@ class ModuleInstaller
 
 	public function __construct(PackageInfo $package, $path = null)
 	{
+		AutoLoader::addModule($package);
+
 		if(!isset($path))
 			$path = $package->getPath();
 
