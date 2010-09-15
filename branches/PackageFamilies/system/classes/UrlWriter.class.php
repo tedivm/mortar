@@ -9,10 +9,8 @@ class UrlWriter
 		if(defined('XDEBUG_PROFILE') && XDEBUG_PROFILE)
 			$attributes['XDEBUG_PROFILE'] = 1;
 
-		if(isset($attributes['ioType']) && strtolower($attributes['ioType']) == 'http')
-		{
-			unset($attributes['ioType']);
-		}
+		if(isset($attributes['iotype']) && strtolower($attributes['iotype']) == 'http')
+			unset($attributes['iotype']);
 
 		$url = self::getBase($attributes);
 		$path = self::makePath($attributes);
@@ -96,10 +94,10 @@ class UrlWriter
 	{
 		$path = '';
 
-		if(isset($attributes['ioType']) && $attributes['ioType'] === 'rest')
+		if(isset($attributes['iotype']) && $attributes['iotype'] === 'rest')
 		{
 			$path = 'rest/';
-			unset($attributes['ioType']);
+			unset($attributes['iotype']);
 		}
 
 		if(isset($attributes['format']) && strtolower($attributes['format']) === 'admin')
