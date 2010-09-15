@@ -105,13 +105,17 @@ class PackageInfo
 
 	static public function loadByName($family, $name)
 	{
+		if(!is_null($family) && !is_string($family))
+			throw new PackageInfoError('Family Name should be null or a string');
+
+		if(!is_string($name))
+			throw new PackageInfoError('Module Name should be null or a string');
+
 		if($family === 'orphan')
 			$family = null;
 
 		$packageObject = new PackageInfo();
 		$packageObject->buildByName($family, $name);
-
-//		AutoLoader::addModule($packageObject);
 
 		return $packageObject;
 	}
