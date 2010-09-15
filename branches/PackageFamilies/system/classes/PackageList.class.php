@@ -41,16 +41,23 @@ class PackageList
 		$config = Config::getInstance();
 		$familyDirectories = glob($config['path']['modules'] . '*');
 		$packageList = array();
+
+		$installedPackages = $this->getInstalledPackages();
+
 		foreach ($familyDirectories as $familyPath)
 		{
-			if(file_exists($familyPath . 'package.ini'))
+			if(file_exists($familyPath . '/package.ini'))
 			{
 				$meta = PackageInfo::getMetaInfo($familyPath);
 
 				if(isset($meta['disableInstall']) && $meta['disableInstall'] == true)
 					continue;
 
-				$packageList[] = $packageName;
+				$tmp = explode('/', $familyPath);
+				$packageName = array_pop($tmp);
+
+				if(!isset($installedPackages['orphan']) || !in_array($packageName, $installedPackages['orphan']))
+					$packageList['orphan'][] = $packageName;
 
 			}else{
 
@@ -58,12 +65,10 @@ class PackageList
 
 				foreach($packageDirectories as $packagePath)
 				{
-					// STRICT standards don't let me place the explode functions as arguments of array_pop
-					// $packageName = array_shift(explode('.', array_pop(explode('/', $packagePath))));
 					$tmp = explode('/', $packagePath);
-					$tmp = explode('.', array_pop($tmp));
-					$packageName = array_shift($tmp);
-					$familyName = array_shift($tmp);
+
+					$packageName = array_pop($tmp);
+					$familyName = array_pop($tmp);
 
 					if($familyName == 'modules')
 						$familyName = 'orphan';
@@ -73,7 +78,10 @@ class PackageList
 					if(isset($meta['disableInstall']) && $meta['disableInstall'] == true)
 						continue;
 
-					$packageList[$familyName] = $packageName;
+
+					if(!isset($installedPackages[$familyName])
+					   || !in_array($packageName, $installedPackages[$familyName]))
+						$packageList[$familyName][] = $packageName;
 				}
 			}
 		}
@@ -108,6 +116,7 @@ class PackageList
 
 			$cache->storeData($packageList);
 		}
+
 		return $packageList;
 	}
 
@@ -118,8 +127,8 @@ class PackageList
 	 */
 	public function getPackageList()
 	{
-		$fullSet = array_merge($this->getInstalledPackages(), $this->getInstallablePackages());
-		ksort($fullSet, SORT_STRING);
+		$fullSet = array_merge_recursive($this->getInstalledPackages(), $this->getInstallablePackages());
+		$fullSet = self::moduleSort($fullSet);
 		return $fullSet;
 	}
 
@@ -131,10 +140,8 @@ class PackageList
 	public function getInstalledPackages()
 	{
 		if(!isset($this->installedPackages))
-		{
-			$this->installedPackages = $this->loadInstalledPackages();
-			ksort($this->installedPackages, SORT_STRING);
-		}
+			$this->installedPackages = self::moduleSort($this->loadInstalledPackages());
+
 		return $this->installedPackages;
 	}
 
@@ -145,12 +152,23 @@ class PackageList
 	 */
 	public function getInstallablePackages()
 	{
-                if(!isset($this->installablePackages))
-		{
-			$this->installablePackages = array_diff($this->loadInstallablePackages(), $this->getInstalledPackages());
-				sort($this->installablePackages, SORT_STRING);
-		}
+		if(!isset($this->installablePackages))
+			$this->installablePackages = self::moduleSort($this->loadInstallablePackages());
+
 		return $this->installablePackages;
+	}
+
+	static protected function moduleSort($array)
+	{
+		$newArray = array();
+		foreach($array as $key => $value)
+		{
+			sort($value, SORT_STRING);
+			$newArray[$key] = $value;
+		}
+
+		ksort($newArray, SORT_STRING);
+		return $newArray;
 	}
 
 }

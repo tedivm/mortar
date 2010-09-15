@@ -73,7 +73,7 @@ class MortarActionInstallModule extends ActionBase
 		$table->addColumnLabel('package_name', 'Name');
 		$table->addColumnLabel('package_description', 'Description');
 		$table->addColumnLabel('package_actions', 'Actions');
-
+		
 		foreach($modules as $package)
 		{
 			$packageInfo = PackageInfo::loadByName($family, $package);
@@ -105,8 +105,6 @@ class MortarActionInstallModule extends ActionBase
 
 		if(isset($this->installablePackages) && !isset($this->form))
 		{
-
-
 			$linkToSelf = Query::getUrl();
 			unset($linkToSelf->locationId);
 
