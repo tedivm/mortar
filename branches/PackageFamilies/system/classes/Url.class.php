@@ -115,7 +115,7 @@ class Url
 		if($name == 'location')
 			$name = 'locationId';
 
-		if($name == 'module' && !is_numeric($value))
+		if($name == 'module')
 		{
 			if(is_numeric($value))
 			{
@@ -129,6 +129,9 @@ class Url
 			}elseif(!($value instanceof PackageInfo)){
 				throw new UrlError('Module attribute must be an integer or PackageInfo object');
 			}
+
+			$this->attributes[$name] = $value;
+			return;
 		}
 
 		if($value instanceof Location)
