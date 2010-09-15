@@ -122,21 +122,27 @@ class Theme extends ContentBase
 			$packageList = new PackageList();
 			$packages = $packageList->getInstalledPackages();
 
-			foreach($packages as $package)
+			foreach($packages as $packageFamily => $childrenPackages)
 			{
-				$packagePath = $baseModulePath . $package . '/';
-				$packageUrl = $baseModuleUrl . $package . '/';
+				foreach($childrenPackages as $package)
+				{
+					$packageInfo = PackageInfo::loadByName($packageFamily, $package);
 
-				// javascript
-				$javascriptResult = $this->getFiles($packagePath . 'javascript/', $packageUrl . 'javascript/', 'js', 25);
-				if($javascriptResult)
-					$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
+					$packagePath = $packageInfo->getPath();// . '/';
+					$packageUrl = $baseModuleUrl . $package . '/';
 
-				// css
-				$cssResult = $this->getFiles($packagePath . 'css/', $packageUrl . 'css/', 'css');
-				if($cssResult)
-					$cssLinks = array_merge_recursive($cssLinks, $cssResult);
+					// javascript
+					$javascriptResult = $this->getFiles($packagePath . 'javascript/', $packageUrl . 'javascript/', 'js', 25);
+					if($javascriptResult)
+						$javascriptLinks = array_merge_recursive($javascriptLinks, $javascriptResult);
 
+					// css
+					$cssResult = $this->getFiles($packagePath . 'css/', $packageUrl . 'css/', 'css');
+					if($cssResult)
+						$cssLinks = array_merge_recursive($cssLinks, $cssResult);
+
+
+				}
 			}
 
 			// javascript
@@ -224,7 +230,7 @@ class Theme extends ContentBase
 					continue;
 				}
 			}
-			
+
 			foreach($section as $name => $url)
 			{
 				if($type === 'css' && isset($this->settings['css']['exclude'])) {
