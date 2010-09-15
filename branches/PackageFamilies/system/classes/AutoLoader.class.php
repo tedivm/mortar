@@ -103,9 +103,9 @@ class AutoLoader
 			if(self::loadExternal($classname))
 				return true;
 
-			CacheControl::clearCache('system', 'autoloader');
-			self::$classIndex = null;
-			self::createClassIndex();
+//			CacheControl::clearCache('system', 'autoloader');
+//			self::$classIndex = null;
+//			self::createClassIndex();
 		}
 
 		if(isset(self::$classIndex[$classname]))
@@ -159,7 +159,7 @@ class AutoLoader
 		{
 			$zendPath = self::$thirdPartyIncludes . str_replace('_', '/', $class).'.php';
 			include($zendPath);
-			return true;	
+			return true;
 		}
 
 		return class_exists($class);
