@@ -103,7 +103,7 @@ class PackageList
 			while($row = $results->fetch_assoc())
 			{
 				$family = (!isset($row['family'])) ? $row['family'] : 'orphan';
-				$packageList[$family] = $row['package'];
+				$packageList[$family][] = $row['package'];
 			}
 
 			$cache->storeData($packageList);
@@ -119,7 +119,7 @@ class PackageList
 	public function getPackageList()
 	{
 		$fullSet = array_merge($this->getInstalledPackages(), $this->getInstallablePackages());
-		sort($fullSet, SORT_STRING);
+		ksort($fullSet, SORT_STRING);
 		return $fullSet;
 	}
 
@@ -133,9 +133,8 @@ class PackageList
 		if(!isset($this->installedPackages))
 		{
 			$this->installedPackages = $this->loadInstalledPackages();
-				sort($this->installedPackages, SORT_STRING);
+			ksort($this->installedPackages, SORT_STRING);
 		}
-
 		return $this->installedPackages;
 	}
 
