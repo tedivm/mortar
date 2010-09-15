@@ -24,7 +24,7 @@ BootStrapper::define('DISABLECACHE', false);
 // This program is designed to take advantage of caching, and in many cases code was optimized with that in mind.
 // Disabling caching is not recommended outside of development, which is why it is not an option in the interface.
 
-BootStrapper::define('CACHE_SETMEMONLY', true);
+BootStrapper::define('CACHE_SETMEMONLY', false);
 // Sets the caching system to use only memory caching, storing data within each individual request but not storing
 // it for future requests. Recommended even for systems in design/development.
 
