@@ -21,7 +21,7 @@ class FormValidationUrl extends FormValidationFilter
 	 *
 	 * @var string
 	 */
-	protected $error = 'Invalid url';
+	protected $error = 'Please enter a valid URL.';
 
 	/**
 	 * This filter specifies that the input should be a valid url.

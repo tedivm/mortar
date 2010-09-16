@@ -25,6 +25,7 @@ class FormToHtml
 	protected $sectionOutro;
 	protected $sectionLegends;
 	protected $sectionClasses;
+	protected $errors;
 
 
 	protected $tagByType = array('richtext' => 'textarea',
@@ -55,7 +56,8 @@ class FormToHtml
 		$this->sectionIntro = $formPackage['intros'];
 		$this->sectionOutro = $formPackage['outros'];
 		$this->sectionLegends = $formPackage['legends'];
-		$this->sectionClasses = $formPackage['classes'];  
+		$this->sectionClasses = $formPackage['classes'];
+		$this->errors = $formPackage['errors'];
 	}
 
 	/**
@@ -191,6 +193,20 @@ class FormToHtml
 
 					$controlsDiv->wrapAround($labelHtml)->
 						wrapAround($inputHtml);
+
+					if(isset($this->errors[$input->name])) {
+						$errorLabel = new HtmlObject('label');
+						$errorLabel->addClass('error')->
+							property('for', $inputId)->
+							property('generated', true);
+						$errorVal = '';
+
+						foreach($this->errors[$input->name] as $error)
+							$errorVal .= $error . ' ';
+
+						$errorLabel->wrapAround(trim($errorVal));
+						$controlsDiv->wrapAround($errorLabel);
+					}
 
 					if(isset($input->posttext))
 						$controlsDiv->wrapAround($input->posttext);

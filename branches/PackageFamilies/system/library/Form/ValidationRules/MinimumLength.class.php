@@ -26,7 +26,7 @@ class FormValidationMinimumLength extends FormValidationAbstract
 		if(strlen($this->value) >= $this->argument)
 			return true;
 
-		$this->addError('value should be at least ' . $this->argument . ' charactors.');
+		$this->addError('Please enter at least ' . $this->argument . ' characters.');
 		return false;
 	}
 }

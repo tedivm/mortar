@@ -21,7 +21,7 @@ class FormValidationNumber extends FormValidationAbstract
 	 *
 	 * @var string
 	 */
-	protected $error = 'Not a valid number';
+	protected $error = 'Please enter a valid number.';
 
 	/**
 	 * This make sure the input is less than or equal to the specified value.

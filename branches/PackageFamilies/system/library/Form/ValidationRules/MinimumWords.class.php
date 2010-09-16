@@ -26,7 +26,7 @@ class FormValidationMinimumWords extends FormValidationAbstract
 		if(str_word_count($this->value) >= $this->argument)
 			return true;
 
-		$this->addError('Input should contain no less than ' . $this->argument . ' words.');
+		$this->addError('Please enter at least ' . $this->argument . ' words.');
 		return false;
 	}
 }

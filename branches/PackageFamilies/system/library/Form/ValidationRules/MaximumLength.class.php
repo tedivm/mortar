@@ -17,13 +17,6 @@
 class FormValidationMaximumLength extends FormValidationAbstract
 {
 	/**
-	 * This is the default error message if the input doesn't validate.
-	 *
-	 * @var string
-	 */
-	protected $error = 'Input was too long';
-
-	/**
 	 * This function validates the user input by making sure it is less than the specified length
 	 *
 	 * @return bool
@@ -33,7 +26,7 @@ class FormValidationMaximumLength extends FormValidationAbstract
 		if(strlen($this->value) <= $this->argument)
 			return true;
 
-		$this->addError('value should be at most ' . $this->argument . ' charactors.');
+		$this->addError('Please enter no more than ' . $this->argument . ' characters.');
 		return false;
 	}
 }

@@ -26,7 +26,7 @@ class FormValidationMinimumValue extends FormValidationAbstract
 		if($this->value >= $this->argument)
 			return true;
 
-		$this->addError('value should be at least ' . $this->argument);
+		$this->addError('Please enter a value greater than or equal to ' . $this->argument . '.');
 		return false;
 	}
 }

@@ -21,7 +21,7 @@ class FormValidationEqualTo extends FormValidationAbstract
 	 *
 	 * @var string
 	 */
-	protected $error = 'Inputs does not match.';
+	protected $error = 'Please enter the same value again.';
 
 	/**
 	 * This function ensures that the user input matches that of the specified input.
