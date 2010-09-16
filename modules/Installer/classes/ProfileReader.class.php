@@ -129,7 +129,10 @@ class InstallerProfileReader
 	protected function loadModuleInformation(SimpleXMLElement $xml)
 	{
 		foreach($xml as $module)
-			$modules[(string) $module['name']]['install'] = true;
+		{
+			$family = isset($module['family']) ? (string) $module['family'] : 'orphan';
+			$modules[$family][(string) $module['name']]['install'] = true;
+		}
 
 		$this->modules = $modules;
 	}

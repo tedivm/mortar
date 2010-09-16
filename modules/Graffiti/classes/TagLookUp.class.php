@@ -141,7 +141,7 @@ class GraffitiTagLookUp
 		}
 		return $tags;
 
-	
+
 	}
 
 	static function getLocationsForTag($tag, $owner = false)
@@ -215,7 +215,7 @@ class GraffitiTagLookUp
 
 		if(!isset(self::$stopWords))
 		{
-			$packageInfo = new PackageInfo('Graffiti');
+			$packageInfo = PackageInfo::loadByName(null, 'Graffiti');
 			$pathToStopWords = $packageInfo->getPath() . 'data/stopwords';
 
 			if(file_exists($pathToStopWords))

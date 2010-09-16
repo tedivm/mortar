@@ -31,7 +31,7 @@ class TagBoxEnv
 		}
 
 		$url = new Url();
-		$url->module = 'Mortar';
+		$url->module = PackageInfo::loadByName(null, 'Mortar');
 		if($this->user['name'] === 'Guest') {
 			$url->action = 'LogIn';
 		} else {
@@ -95,7 +95,7 @@ class TagBoxEnv
 		$query = Query::getQuery();
 		$url = new Url();
 		$url->format = $query['format'];
-		$url->module = 'Mortar';
+		$url->module = PackageInfo::loadByName(null, 'Mortar');
 		$url->action = 'Search';
 		$form = new MortarSimpleSearchForm('SimpleSearch');
 		$form->setAction($url);

@@ -90,14 +90,26 @@ class Iconset extends ContentBase
 				$list = $packagelist->getInstalledPackages();
 				$pieces = explode('_', $name);
 
-				if(!isset($pieces[0]) || !in_array($pieces[0], $list)) {
+				if(count($pieces) >= 3) {
+					if(isset($list[$pieces[0]][$pieces[1]])) {
+						$moduleName = $pieces[1];
+						$moduleFamily = $pieces[0];
+						$pathPiece = $moduleFamily . '/' . $moduleName;
+					}
+				}
+
+				if(!isset($pathPiece) && !isset($list['orphan'][$pieces[0]])) {
 					$data = false;
 					break;
+				} else {
+					$moduleName = $pieces[0];
+					$moduleFamily = 'orphan';
+					$pathPiece = $moduleName;
 				}
 
 				$config = Config::getInstance();
 				$baseModulePath = $config['path']['modules'];
-				$settingsPath = $baseModulePath . $pieces[0] . '/icons/settings.ini';
+				$settingsPath = $baseModulePath . $pathPiece . '/icons/settings.ini';
 
 				if(!is_readable($settingsPath)) {
 					$data = false;
@@ -109,7 +121,7 @@ class Iconset extends ContentBase
 
 				if(isset($moduleSettings['icons'][$name])) {
 					$imageName = $moduleSettings['icons'][$name];
-					$info = new PackageInfo($pieces[0]);
+					$info = PackageInfo::loadByName($moduleFamily, $moduleName);
 					$path = $info->getPath();
 
 					$imagePath = $path . 'icons/' . $imageName;

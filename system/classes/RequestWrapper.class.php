@@ -109,14 +109,17 @@ class RequestWrapper
 		{
 			$query = Query::getQuery();
 
-			if($query['module'] == 'Mortar')
+			if(isset($query['module']))
 			{
-				if($query['action'] == 'LogIn' && $query['format'] == 'Admin')
-					return false;
+				$moduleInfo = PackageInfo::loadById($query['module']);
+				if($moduleInfo->getName() == 'Mortar')
+				{
+					if($query['action'] == 'LogIn' && $query['format'] == 'Admin')
+						return false;
 
-				if($query['action'] == 'Minify' && $query['id'] && 'css')
-					return false;
-
+					if($query['action'] == 'Minify' && $query['id'] && 'css')
+						return false;
+				}
 			}
 
 			if(!ActiveUser::isLoggedIn())
@@ -161,21 +164,21 @@ class RequestWrapper
 
 			if($query['module'])
 			{
-				$moduleInfo = new PackageInfo($query['module']);
+				$moduleInfo = PackageInfo::loadById($query['module']);
 
 				if($moduleInfo->getStatus() != 'installed')
-					throw new RequestError('Module ' . $query['module'] . ' present but not installed');
+					throw new RequestError('Module ' . $moduleInfo->getFullName . ' present but not installed');
 
 				if(!isset($query['action']))
 					$query['action'] = 'Default';
 
 				if(!($actionInfo = $moduleInfo->getActions($query['action'])))
 					throw new RequestError('Unable to load action ' . $query['action']
-													. ' for module ' . $query['module']);
+													. ' for module ' . $moduleInfo->getFullName);
 
 
 				$argument = '';
-				$className = importFromModule($actionInfo['name'], $query['module'], 'action', true);
+				$className = $moduleInfo->getClassName('action', $actionInfo['name'], true);
 
 				$query->save();
 				return array('className' => $className, 'argument' => $argument);
@@ -346,8 +349,6 @@ class RequestWrapper
 			$location = Location::getLocation(1);
 		}
 
-
-		$errorModule = $location->getMeta('errorHandler');
 		switch(get_class($e))
 		{
 			case 'AuthenticationError':
@@ -381,7 +382,7 @@ class RequestWrapper
 				break;
 		}
 
-		$moduleInfo = new PackageInfo($errorModule);
+		$moduleInfo = PackageInfo::loadByName(ERROR_HANDLER_FAMILY, ERROR_HANDLER_MODULE);
 		$actionInfo = $moduleInfo->getActions($action);
 
 		if(!class_exists($actionInfo['className']))

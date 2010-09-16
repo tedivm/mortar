@@ -49,7 +49,7 @@ class IOProcessorCron extends IOProcessorCli
 	 */
 	protected function setEnvironment()
 	{
-		$module = new PackageInfo('Mortar');
+		$module = PackageInfo::loadByName(CRON_HANDLER_FAMILY, CRON_HANDLER_MODULE);
 
 		$newQuery = array();
 		$newQuery['format'] = 'Text';
@@ -187,7 +187,7 @@ class IOProcessorCron extends IOProcessorCli
 
 			if(isset($actionRow['moduleId']) && is_numeric($actionRow['moduleId']))
 			{
-				$module = new PackageInfo($actionRow['moduleId']);
+				$module = PackageInfo::loadById($actionRow['moduleId']);
 				$newQuery['module'] = $module->getName();
 			}elseif(isset($actionRow['locationId']) && is_numeric($actionRow['locationId'])){
 				$type = 'location';

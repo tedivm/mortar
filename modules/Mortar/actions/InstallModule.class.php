@@ -13,63 +13,74 @@ class MortarActionInstallModule extends ActionBase
 	protected $installablePackages;
 	protected $installedPackages;
 
+
+	protected $installPackage;
+	protected $installFamily;
+
 	protected function logic()
 	{
 		$query = Query::getQuery();
-		$installPackage = $query['id'];
 
 		$packageList = new PackageList();
 		$installablePackages = $packageList->getInstallablePackages();
 		$installedPackages = $packageList->getInstalledPackages();
 
-		if(!isset($query['id']))
-		{
-			//make listing
-			$this->installablePackages = $installablePackages;
-			$this->installedPackages = $installedPackages;
-		}else{
+		$this->installablePackages = $installablePackages;
+		$this->installedPackages = $installedPackages;
 
-			if(in_array($installPackage, $installablePackages))
+		if(isset($query['id']))
+		{
+
+			if(strpos($query['id'], '-') === false)
 			{
-				$packageInfo = new PackageInfo($installPackage);
-				$this->form = new Form($this->actionName . '_' . $installPackage);
+				$installFamily = 'orphan';
+				$installPackage = $query['id'];
+			}else{
+				$tmp = explode('-', $query['id']);
+				$installFamily = $tmp[0];
+				$installPackage = $tmp[1];
+			}
+
+			if(isset($installablePackages[$installFamily])
+			   && in_array($installPackage, $installablePackages[$installFamily]) )
+			{
+
+				$packageInfo = PackageInfo::loadByName($installFamily, $installPackage);
+				$packageName = $packageInfo->getFullName();
+
+
+				$this->form = new Form($this->actionName . '_' . $packageName);
 				$this->form->createInput('confirm')->
 					setType('submit')->
-					property('value', 'Install ' . $installPackage);
+					property('value', 'Install ' . $packageName);
 
 				if($this->form->checkSubmit())
 				{
 					CacheControl::disableCache();
-					$moduleInstaller = new ModuleInstaller($installPackage);
+					$moduleInstaller = new ModuleInstaller($packageInfo);
 					$this->success = $moduleInstaller->integrate();
 					CacheControl::disableCache(false);
 					CacheControl::clearCache();
 				}
-			}else{
-				//redirect to listing
-
-				unset($this->form);
-				$this->installablePackages = $installablePackages;
-				$this->installedPackages = $installedPackages;
 			}
 		}
 	}
 
-	protected function getModuleListing($modules, $name, $url, $install = false)
+	protected function getModuleListing($family, $modules, $name, $url, $install = false)
 	{
 		$table = new Table($name . '_module_listing');
 		$table->addClass('index-listing');
 		$table->addColumnLabel('package_name', 'Name');
 		$table->addColumnLabel('package_description', 'Description');
 		$table->addColumnLabel('package_actions', 'Actions');
-
+		
 		foreach($modules as $package)
 		{
-			$packageInfo = new PackageInfo($package);
+			$packageInfo = PackageInfo::loadByName($family, $package);
 			$meta = $packageInfo->getMeta();
 
 			$table->newRow();
-			$table->addField('package_name', $package);			
+			$table->addField('package_name', $package);
 			$table->addField('package_description', $meta['description']);
 
 			$linkToPackage = clone $url;
@@ -98,19 +109,32 @@ class MortarActionInstallModule extends ActionBase
 			unset($linkToSelf->locationId);
 
 			$output .= '<h2>Available Packages</h2>';
-			$output .= $this->getModuleListing($this->installablePackages, 'installable', $linkToSelf, true);
+			foreach($this->installablePackages as $family => $modules)
+			{
+				$familyLabel = $family != 'orphan' ? $family : 'Standalone';
+				$output .= '<h3>' . $familyLabel . '</h3>';
+				$output .= $this->getModuleListing($family, $modules, $familyLabel . '_installable', $linkToSelf, true);
+			}
+
 			$output .= '<h2>Installed Packages</h2>';
-			$output .= $this->getModuleListing($this->installedPackages, 'installed', $linkToSelf);
+			foreach($this->installedPackages as $family => $modules)
+			{
+				$familyLabel = $family != 'orphan' ? $family : 'Standalone';
+				$output .= '<h3>' . $familyLabel . '</h3>';
+				$output .= $this->getModuleListing($family, $modules, $familyLabel . '_installed', $linkToSelf, false);
+			}
+
+
 		}elseif($this->form){
 			if($this->success)
 			{
-				$query = Query::getQuery();
-
-				if(isset($query['id'])) {
-					$packageInfo = new PackageInfo($query['id']);
+				if(isset($this->installPackage) && isset($this->installFamily))
+				{
+					$packageInfo = PackageInfo::loadByName($this->installFamily, $this->installPackage);
 					$models = $packageInfo->getModels();
 
-					if(count($models) > 0) {
+					if(count($models) > 0)
+					{
 						$url = Query::getUrl();
 						$url->id = $packageInfo->getId();
 						$url->action = 'ModulePermissions';

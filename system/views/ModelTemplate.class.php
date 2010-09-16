@@ -29,7 +29,8 @@ class ViewModelTemplate extends ViewThemeTemplate
 
 		$model = $this->model;
 		$module = $model->getModule();
-		$package = new PackageInfo($module);
+
+		$package = PackageInfo::loadById($module);
 		$packagePath = $package->getPath() . 'templates/';
 
 		$parentPaths['module'] = $packagePath;

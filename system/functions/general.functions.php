@@ -95,44 +95,23 @@ function importClass($classname, $path, $basePath = null, $require = false)
 	}
 }
 
-function importModel($modelName)
-{
-	$modelInfo = ModelRegistry::getHandler($modelName);
-	return importFromModule($modelInfo['name'], $modelInfo['module'], 'Model', true);
-}
 
+/**
+ *
+ * @deprecated Being replaced by the PackageInfo "getClassName" method
+ */
 function importFromModule($name, $module, $classType, $require = false)
 {
-	$moduleFolders = array('abstract' => 'abstracts',
-		'abstract' => 'abstracts',
-		'actions' => 'actions',
-		'action' => 'actions',
-		'class'  => 'classes',
-		'classes'  => 'classes',
-		'control' => 'controls',
-		'controls' => 'controls',
-		'hook'  => 'hooks',
-		'hooks'  => 'hooks',
-		'interfaces'  => 'interfaces',
-		'interface'  => 'interfaces',
-		'library'  => 'library',
-		'model' => 'models',
-		'plugin' => 'plugins',
-		'plugins' => 'plugins');
-
-	$classType = strtolower($classType);
-	if($classType == 'class')
+	if(is_numeric($module))
 	{
-		$classDivider = '';
-	}elseif(isset($moduleFolders[$classType])){
-		$classDivider = ucwords($classType);
-	}elseif($classDivider = array_search($classType, $moduleFolders)){
-		$classDivider = ucwords($classDivider);
+		$packageInfo = PackageInfo::loadById($module);
+	}elseif($module instanceof PackageInfo){
+		$packageInfo = $module;
+	}else{
+		throw new CoreError('importFromModule function requires module to be an ID or PackageInfo object.');
 	}
 
-	$packageInfo = new PackageInfo($module);
-	$className = $packageInfo->getName() . $classDivider . $name;
-	return AutoLoader::internalClassExists($className) ? $className : false;
+	return $packageInfo->getClassName($classType, $name, $require);
 }
 
 function staticHack($className, $memberName)

@@ -5,7 +5,7 @@ class MortarActionModulePermissions extends ActionBase
 
 	public static $requiredPermission = 'Admin';
 
-	public static $settings = array( 'Base' => 
+	public static $settings = array( 'Base' =>
 		array( 'headerTitle' => 'Module Permissions', 'useRider' => true ) );
 
 	protected $formName = 'ModulePermissions';
@@ -26,7 +26,7 @@ class MortarActionModulePermissions extends ActionBase
 
 		$this->module = $query['id'];
 
-		$packageInfo = new PackageInfo($this->module);
+		$packageInfo = PackageInfo::loadById($query['id']);
 
 		$this->moduleName = $packageInfo->getName();
 		$this->models = $packageInfo->getModels();
@@ -104,7 +104,7 @@ class MortarActionModulePermissions extends ActionBase
 
 					if($query['first'] === 'yes') {
 						if(($group['memgroup_name'] === 'Administrator')
-							|| ($action === 'Read')) 
+							|| ($action === 'Read'))
 						{
 							$input->check(1);
 						}
@@ -161,7 +161,7 @@ class MortarActionModulePermissions extends ActionBase
 					setPermission($model['name'], $action, true);
 			} else {
 				$permissions[$group['memgroup_name']]->
-					setPermission($model['name'], $action, 'unset');			
+					setPermission($model['name'], $action, 'unset');
 			}
 		}
 
@@ -169,7 +169,7 @@ class MortarActionModulePermissions extends ActionBase
 			$perm->save();
 
 		$url = new Url();
-		$url->module = 'Mortar';
+		$url->module = PackageInfo::loadByName(null, 'Mortar');
 		$url->action = 'InstallModule';
 		$url->format = 'admin';
 		$this->ioHandler->addHeader('Location', (string) $url);

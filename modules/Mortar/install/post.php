@@ -3,11 +3,12 @@
 class MortarInstallerPostscript
 {
 	protected $package = 'Mortar';
+	protected $family = null;
 	protected $packageId;
 
 	public function __construct()
 	{
-		$packageInfo = new PackageInfo($this->package);
+		$packageInfo = PackageInfo::loadByName($this->family, $this->package);
 		$this->packageId = $packageInfo->getId();
 	}
 
@@ -44,7 +45,7 @@ class MortarInstallerPostscript
 		Hook::registerPlugin('Forms', 'checkSubmit', 'richtext',
 								$this->packageId, 'FormInputRichtextCheckSubmit');
 
-		CronManager::registerJob('CachePurge', 'Mortar', 'module', 30);
+		CronManager::registerJob('CachePurge', $this->packageId, 'module', 30);
 	}
 }
 

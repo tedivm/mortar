@@ -59,7 +59,7 @@ class MortarActionDashboard extends ActionBase
 		$content->wrapAround($clean);
 
 		$link = new Url();
-		$link->module = 'Mortar';
+		$link->module = PackageInfo::loadByName(null, 'Mortar');
 		$link->format = $query['format'];
 		$link->action = 'ControlModify';
 

@@ -100,7 +100,7 @@ class MenuSystem
 	public function installMode()
 	{
 		$url = new Url();
-		$url->module = 'Installer';
+		$url->module = PackageInfo::loadByName(null, 'Installer');
 
 		$installerUrl = clone $url;
 		$installerUrl->action = 'Install';

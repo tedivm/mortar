@@ -103,9 +103,9 @@ class AutoLoader
 			if(self::loadExternal($classname))
 				return true;
 
-			CacheControl::clearCache('system', 'autoloader');
-			self::$classIndex = null;
-			self::createClassIndex();
+//			CacheControl::clearCache('system', 'autoloader');
+//			self::$classIndex = null;
+//			self::createClassIndex();
 		}
 
 		if(isset(self::$classIndex[$classname]))
@@ -159,19 +159,16 @@ class AutoLoader
 		{
 			$zendPath = self::$thirdPartyIncludes . str_replace('_', '/', $class).'.php';
 			include($zendPath);
-			return true;	
+			return true;
 		}
 
 		return class_exists($class);
 	}
 
 
-	static function addModule($moduleName)
+	static function addModule(PackageInfo $packageInfo)
 	{
-		if(in_array($moduleName, self::$loadedModules))
-			return;
-
-		$classes = self::loadModule($moduleName);
+		$classes = self::loadModule($packageInfo);
 		if(is_array($classes) && count($classes) > 0)
 			self::$classIndex = array_merge(self::$classIndex, $classes);
 	}
@@ -252,10 +249,14 @@ class AutoLoader
 		$packageList = new PackageList();
 		$installedPackages = $packageList->getInstalledPackages();
 
-		foreach($installedPackages as $package)
+		foreach($installedPackages as $family => $packages)
 		{
-			$lookupClasses = self::loadModule($package);
-			$classArray[] = $lookupClasses;
+			foreach($packages as $package)
+			{
+				$packageInfo = PackageInfo::loadByName($family, $package);
+				$lookupClasses = self::loadModule($packageInfo);
+				$classArray[] = $lookupClasses;
+			}
 		}
 		return $classArray;
 	}
@@ -327,16 +328,15 @@ class AutoLoader
 	 * @param string|int $module
 	 * @return array
 	 */
-	static protected function loadModule($module)
+	static protected function loadModule(PackageInfo $packageInfo)
 	{
-		if(in_array($module, self::$loadedModules))
+		$moduleName = $packageInfo->getFullName();
+		if(in_array($moduleName, self::$loadedModules))
 			return array();
 
-		self::$loadedModules[] = $module;
+		self::$loadedModules[] = $moduleName;
 
-		$module = new PackageInfo($module);
-		$basePath = $module->getPath();
-		$moduleName = $module->getName();
+		$basePath = $packageInfo->getPath();
 		$moduleFolders = array(	'actions' => 'Action',
 					'controls' => 'Control',
 					'models' => 'Model',

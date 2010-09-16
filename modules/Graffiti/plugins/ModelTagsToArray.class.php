@@ -21,7 +21,7 @@ class GraffitiPluginModelTagsToArray
 		$query = Query::getQuery();
 		$url = new Url();
 		$url->format = $query['format'];
-		$url->module = 'Graffiti';
+		$url->module = PackageInfo::loadByName(null, 'Graffiti');
 		$url->action = 'TagInfo';
 
 		$ourl = clone($url);

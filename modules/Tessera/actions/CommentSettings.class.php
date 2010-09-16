@@ -21,7 +21,7 @@ class TesseraActionCommentSettings extends FormAction
 
 	protected function getForm()
 	{
-		$info = new PackageInfo('Tessera');
+		$info = PackageInfo::loadByName(null, 'Tessera');
 		$id = $info->getId();
 
 		$form = parent::getForm();

@@ -28,7 +28,7 @@ class MortarPluginMenusAdminBase
 
 		$url = new Url();
 		$url->format = 'Admin';
-		$url->module = 'Mortar';
+		$url->module = PackageInfo::loadByName(null, 'Mortar');
 
 		$url->action = 'Dashboard';
 		$link = $url->getLink("Dashboard");
@@ -105,7 +105,7 @@ class MortarPluginMenusAdminBase
 		if(!(defined('DISABLESEARCH') && DISABLESEARCH)) {
 			$url = new Url();
 			$url->format = 'Admin';
-			$url->module = 'Mortar';
+			$url->module = PackageInfo::loadByName(null, 'Mortar');
 			$url->action = 'Search';
 			$link = $url->getLink("Search");
 			$menuSys->addItemToSubmenu('primary', 'Search', $link, 'Search', 'auto', $url);

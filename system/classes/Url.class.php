@@ -110,8 +110,29 @@ class Url
 
 	public function __set($name, $value)
 	{
-		if(strtolower($name) == 'location')
+		$name = strtolower($name);
+
+		if($name == 'location')
 			$name = 'locationId';
+
+		if($name == 'module')
+		{
+			if(is_numeric($value))
+			{
+				$packageInfo = PackageInfo::loadById($value);
+
+				if(!$packageInfo)
+					throw new UrlError('Module integer is not registered in the system.');
+
+				$value = $packageInfo;
+
+			}elseif(!($value instanceof PackageInfo)){
+				throw new UrlError('Module attribute must be an integer or PackageInfo object');
+			}
+
+			$this->attributes[$name] = $value;
+			return;
+		}
 
 		if($value instanceof Location)
 			$value = $value->getId();
@@ -210,4 +231,5 @@ class Url
 
 }
 
+class UrlError extends CoreError {};
 ?>

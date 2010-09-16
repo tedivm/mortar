@@ -20,7 +20,7 @@ class GraffitiPluginTemplateNavCategories
 
 		$query = Query::getQuery();
 		$baseUrl = new Url();
-		$baseUrl->module = 'Graffiti';
+		$baseUrl->module = PackageInfo::loadByName(null, 'Graffiti');
 		$baseUrl->action = 'TagInfo';
 		$baseUrl->format = $query['format'];
 
