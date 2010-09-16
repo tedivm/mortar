@@ -4,7 +4,7 @@ class TesseraPluginModelPostCommentAction
 {
 	public function getActions()
 	{
-		$pi = new PackageInfo('Tessera');
+		$pi = PackageInfo::loadByName(null, 'Tessera');
 		$action = $pi->getActions('ModelPostComment');
 
 		$action['name'] 		= 'PostComment';

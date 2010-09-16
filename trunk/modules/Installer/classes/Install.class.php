@@ -463,27 +463,32 @@ class InstallerSetupUserland
 		if(!class_exists('ModuleInstaller', false))
 				include($config['path']['mainclasses'] . 'ModuleInstaller.class.php');
 
-		foreach($moduleList as $moduleName => $moduleInfo)
+		foreach($moduleList as $moduleFamily => $childrenModules)
 		{
-			if($moduleInfo['install'] !== true)
-				continue;
+			foreach($childrenModules as $moduleName => $moduleInfo)
+			{
+				if($moduleInfo['install'] !== true)
+					continue;
 
-			$moduleInstaller = new ModuleInstaller($moduleName);
-			if(!$moduleInstaller->integrate())
-				throw new CoreError('Module ' . $moduleName . ' Installation failed.');
-/*
-			$customInstallerName = 'moduleInstall' . $moduleName;
-			$path = $config['path']['modules'] . 'classes/hooks/moduleInstaller.class.php';
+				$moduleInfo = PackageInfo::loadByName($moduleFamily, $moduleName);
 
-			if(!class_exists($customInstallerName, false) && file_exists($path))
-				include($path);
+				$moduleInstaller = new ModuleInstaller($moduleInfo);
+				if(!$moduleInstaller->integrate())
+					throw new CoreError('Module ' . $moduleInfo->getFullName() . ' Installation failed.');
+	/*
+				$customInstallerName = 'moduleInstall' . $moduleName;
+				$path = $config['path']['modules'] . 'classes/hooks/moduleInstaller.class.php';
 
-			$class = (class_exists($customInstallerName, false)) ? $customInstallerName : 'ModuleInstaller';
+				if(!class_exists($customInstallerName, false) && file_exists($path))
+					include($path);
 
-			$installation = new $class($moduleName);
-			if(!$installation->fullInstall())
-				throw new CoreError('Module ' . $moduleName . ' Installation failed.');
-*/
+				$class = (class_exists($customInstallerName, false)) ? $customInstallerName : 'ModuleInstaller';
+
+				$installation = new $class($moduleName);
+				if(!$installation->fullInstall())
+					throw new CoreError('Module ' . $moduleName . ' Installation failed.');
+	*/
+			}
 		}
 
 		return true;

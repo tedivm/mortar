@@ -159,9 +159,9 @@ class CronManager
 	{
 		$cronJobOrm = new ObjectRelationshipMapper('cronJobs');
 
-		if($type == 'module')
+		if($type == 'module' && is_numeric($source))
 		{
-			$packageInfo = new PackageInfo($source);
+			$packageInfo = PackageInfo::loadById($source);
 			$moduleId = $packageInfo->getId();
 
 			if(!is_numeric($moduleId) || $moduleId < 1)
@@ -170,7 +170,7 @@ class CronManager
 			if(!$packageInfo->getActions($action))
 				return false;
 
-			$cronJobOrm->moduleId = $moduleId;
+			$cronJobOrm->moduleId = $source;
 
 		}elseif($type == 'location'){
 

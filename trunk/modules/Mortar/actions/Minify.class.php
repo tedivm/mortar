@@ -105,7 +105,7 @@ class MortarActionMinify extends ActionBase
 		$rawUrl->action = 'Minify';
 		$rawUrl->id = $query['id'];
 		$rawUrl->format = $type;
-		$rawUrl->module = 'Mortar';
+		$rawUrl->module = PackageInfo::loadByName(null, 'Mortar');
 		$rawUrl->raw = true;
 
 		if(strpos($minifiedData['data'], '@charset') === 0) {

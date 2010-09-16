@@ -51,8 +51,8 @@ abstract class ActionControl extends ControlBase
 			if(isset($query[$key])) {
 				unset($query[$key]);
 			}
-		}		
-		
+		}
+
 		if($this->useLocation && $this->location)
 		{
 			$query['location'] = $this->location;
@@ -114,9 +114,9 @@ abstract class ActionControl extends ControlBase
 			$location = Location::getLocation($query['location']);
 
 		try {
-			if($query['module'])
+			if(isset($query['module']))
 			{
-				$moduleInfo = new PackageInfo($query['module']);
+				$moduleInfo = PackageInfo::loadById($query['module']);
 
 				if($moduleInfo->getStatus() != 'installed')
 					return false;
@@ -128,7 +128,7 @@ abstract class ActionControl extends ControlBase
 					return false;
 
 				$argument = '';
-				$className = importFromModule($actionInfo['name'], $query['module'], 'action', true);
+				$className = $moduleInfo->getClassName('action', $actionInfo['name'], true);
 
 				$query->save();
 				return array('className' => $className, 'argument' => $argument);

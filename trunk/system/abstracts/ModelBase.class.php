@@ -434,7 +434,7 @@ abstract class ModelBase implements Model
 		$actions = array();
 
 		$moduleInfo = ModelRegistry::getHandler($resourceType);
-		$packageInfo = new PackageInfo($moduleInfo['module']);
+		$packageInfo = PackageInfo::loadById($moduleInfo['module']);
 
 		$actionList = $packageInfo->getActions();
 
@@ -529,7 +529,7 @@ abstract class ModelBase implements Model
 	/**
 	 * This function returns an object that is used to convert the Model into a different format, such as Html or an
 	 * array. These converts all have the "getOutput()" function, but otherwise can have very different implementations,
-	 * so it is important to know what you are calling. 
+	 * so it is important to know what you are calling.
 	 *
 	 * @param string $format
 	 * @param string $template = null
@@ -544,7 +544,7 @@ abstract class ModelBase implements Model
 
 		foreach($types as $type) {
 			$handler = ModelRegistry::getHandler($type);
-			$info = new PackageInfo($handler['module']);
+			$info = PackageInfo::loadById($handler['module']);
 			$name = $info->getName();
 
 			$class = $name . $type . 'To' . $format;
@@ -573,7 +573,7 @@ abstract class ModelBase implements Model
 	protected function getModelFilePathFromPackage()
 	{
 		$args = func_get_args();
-		$package = new PackageInfo($this->getModule());
+		$package = PackageInfo::loadById($this->getModule());
 		$pathToPackage = $package->getPath();
 		array_unshift($args, $pathToPackage);
 		return self::getModelFilePath($args);

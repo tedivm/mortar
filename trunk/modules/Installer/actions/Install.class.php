@@ -52,15 +52,28 @@ class InstallerActionInstall extends ActionBase
 		{
 			$requirementsCheck = new RequirementsCheck();
 			$modulesToInstall = $profile->getModules();
-			foreach($modulesToInstall as $module => $moduleInfo)
-				$requirementsCheck->addModule($module);
+
+			foreach($modulesToInstall as $family => $modules)
+			{
+				if($family == 'orphan')
+					$family = null;
+
+				foreach($modules as $module => $install)
+				{
+					if(isset($install['install']) && $install['install'])
+					{
+						$packageInfo = PackageInfo::loadByName($family, $module);
+						$requirementsCheck->addModule($packageInfo);
+					}
+				}
+			}
 
 			$optionalValues = isset($query['skipRecommendations']);
 			if(!$requirementsCheck->checkRequirements($optionalValues))
 			{
 				$url = new Url();
 				$url->format = 'admin';
-				$url->module = 'Installer';
+				$url->module = PackageInfo::loadByName(null, 'Installer');
 				$url->action = 'Requirements';
 				$this->ioHandler->addHeader('Location', (string) $url);
 				// redirect away to the requirements page

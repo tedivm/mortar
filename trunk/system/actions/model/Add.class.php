@@ -117,8 +117,9 @@ class ModelActionAdd extends ModelActionBase
 	static function getFormByType($type)
 	{
 		$moduleInfo = ModelRegistry::getHandler($type);
-		$formname = $type . 'Form';
-		$formClassName = importFromModule($formname, $moduleInfo['module'], 'class');
+
+		$packageInfo = PackageInfo::loadById($moduleInfo['module']);
+		$formClassName = $packageInfo->getClassName('class', $type . 'Form');
 
 		if($formClassName !== false)
 		{

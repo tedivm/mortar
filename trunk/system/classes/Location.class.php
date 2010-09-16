@@ -185,15 +185,10 @@ class Location
 	 */
 	public function getResource($details = false)
 	{
-
 		if($details)
-		{
 			return array('id' => $this->resourceId, 'type' => $this->resourceType);
-		}else{
-			$className = importModel($this->resourceType);
-			$model = new $className($this->resourceId);
-			return $model;
-		}
+
+		return ModelRegistry::loadModel($this->resourceType, $this->resourceId);
 
 	}
 
@@ -236,7 +231,7 @@ class Location
 	 */
 	public function getParent()
 	{
-		if(is_numeric($this->parent)) { 
+		if(is_numeric($this->parent)) {
 			return Location::getLocation($this->parent);
 		}else{
 			return false;
@@ -868,7 +863,7 @@ class Location
 	}
 
 	/**
-	 * Returns a human-readable mortar path to the location 
+	 * Returns a human-readable mortar path to the location
 	 *
 	 * @param string $path
 	 * @return int|false

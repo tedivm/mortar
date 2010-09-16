@@ -53,8 +53,15 @@ class InstallerActionRequirements extends ActionBase
 		$requirementsCheck = new RequirementsCheck();
 		$this->requirementsCheck = $requirementsCheck;
 		$modulesToInstall = $profile->getModules();
-		foreach($modulesToInstall as $module => $moduleInfo)
-			$requirementsCheck->addModule($module);
+		foreach($modulesToInstall as $family => $modules) {
+			foreach($modules as $name => $install) {
+				if(!isset($install['install']) || !$install['install'])
+					continue;
+
+				$module = PackageInfo::loadByName($family, $name);
+				$requirementsCheck->addModule($module);
+			}
+		}
 
 		$tests = array();
 		$tests['version']['min'] = $requirementsCheck->checkPhpMinimumVersion();

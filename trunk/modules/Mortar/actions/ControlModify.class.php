@@ -31,7 +31,7 @@ class MortarActionControlModify extends ActionBase
 		$input = Input::getInput();
 
 		$url = new Url();
-		$url->module = 'Mortar';
+		$url->module = PackageInfo::loadByName(null, 'Mortar');
 		$url->format = $query['format'];
 
 		// if user requested Settings, all we need to do is redirect the user to the ControlSettings action,

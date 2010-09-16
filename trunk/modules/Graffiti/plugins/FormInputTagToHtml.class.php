@@ -13,7 +13,7 @@ class GraffitiPluginFormInputTagToHtml extends MortarPluginFormInputUserToHtml
 	protected function getUrl(FormInput $input)
 	{
 		$url = new Url();
-		$url->module = 'Graffiti';
+		$url->module = PackageInfo::loadByName(null, 'Graffiti');
 		$url->format = 'json';
 		$url->action = 'TagList';
 

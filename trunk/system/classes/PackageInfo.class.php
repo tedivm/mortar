@@ -24,6 +24,13 @@ class PackageInfo
 	public $id;
 
 	/**
+	 * This is the family in which the package belongs
+	 *
+	 * @var string
+	 */
+	public $family;
+
+	/**
 	 * This is the name of the package
 	 *
 	 * @var string
@@ -52,11 +59,18 @@ class PackageInfo
 	public $status;
 
 	/**
-	 * Current version of a package
+	 * Current version of installed package
 	 *
 	 * @var Version
 	 */
-	public $version;
+	protected $installedVersion;
+
+	/**
+	 * Version of package on filesystem
+	 *
+	 * @var Version
+	 */
+	protected $packageVersion;
 
 	/**
 	 * A list of models the package contains
@@ -75,35 +89,38 @@ class PackageInfo
 
 	protected $phpRequirements;
 
-	/**
-	 * Constructor takes the name of id of the package
-	 *
-	 * @cache packages moduleLookup *id
-	 * @param id|string $package
-	 */
-	public function __construct($package)
+
+	protected $cacheDisabled = false;
+
+
+	static public function loadByPath($path)
 	{
-		if(is_numeric($package))
-		{
-			$this->loadById($package);
-			$package = $this->getName();
-		}elseif(is_string($package)){
-			$this->loadByName($package);
-		}else{
-			throw new TypeMismatch(array('String or Integer', $package));
-		}
-		AutoLoader::addModule($package);
+		if(!is_dir($path))
+			throw new PackageInfoError('Unable to locate package at' . $path);
+
+		$packageObject = new PackageInfo();
+		$packageObject->buildFromPath($path);
+		return $packageObject;
 	}
 
-	/**
-	 * Loads the module name by id then returns the results of loadByName
-	 *
-	 * @access protected
-	 * @cache packages moduleLookup *id
-	 * @see loadByName
-	 * @param int $id
-	 */
-	protected function loadById($id)
+	static public function loadByName($family, $name)
+	{
+		if(!is_null($family) && !is_string($family))
+			throw new PackageInfoError('Family Name should be null or a string');
+
+		if(!is_string($name))
+			throw new PackageInfoError('Module Name should be null or a string');
+
+		if($family === 'orphan')
+			$family = null;
+
+		$packageObject = new PackageInfo();
+		$packageObject->buildByName($family, $name);
+
+		return $packageObject;
+	}
+
+	static public function loadById($id)
 	{
 		$cache = CacheControl::getCache('packages', 'moduleLookup', $id);
 		$package = $cache->getData();
@@ -118,51 +135,84 @@ class PackageInfo
 			if($packageStmt->num_rows == 1)
 			{
 				$row = $packageStmt->fetch_array();
-				$package = $row['package'];
+				$package['name'] = $row['package'];
+				$package['family'] = $row['family'];
 			}else{
 				$package = false;
 			}
 			$cache->storeData($package);
 		}
 
-		$this->loadByName($package);
+		if(!$package)
+			return false;
+
+		return self::loadByName($package['family'], $package['name']);
 	}
 
-	/**
-	 * Loads the package by name
-	 *
-	 * @access protected
-	 * @cache packages *packageName info
-	 * @param string $packageName
-	 */
-	public function loadByName($packageName)
+
+	protected function __construct($options = array())
 	{
-		if(is_null($packageName) || strlen($packageName) < 1)
-			throw new PackageInfoError('Class PackageInfo constructor expects one arguement');
+		if(isset($options['cache']) && $options['cache'] === false)
+			$this->cacheDisabled = true;
+	}
 
-		$config = Config::getInstance();
-		$this->name = $packageName;
+	protected function buildFromPath($path)
+	{
+		// we don't want 'new' packages interfering or loading information from the installed packages.
+		$this->cacheDisabled = true;
+		$this->path = $path;
 
-		$path = $config['path']['modules'] . $packageName . '/';
-		if(is_dir($path))
+		$this->name = $this->getMeta('name');
+
+		if($metaFamily = $this->getMeta('family'))
 		{
-			$this->path = $path;
+			$this->family = $metaFamily;
 		}else{
-			throw new PackageInfoError('Unable to locate package ' . $this->name);
+			$this->family = 'orphan';
 		}
 
-		$cache = CacheControl::getCache('packages', $packageName, 'info');
+		return $this->buildByName($this->family, $this->name);
+	}
+
+	protected function buildByName($family, $name)
+	{
+		if(!isset($name))
+			return false;
+
+		$this->name = $name;
+		$this->family = isset($family) ? $family : 'orphan';
+
+		if(!isset($this->path))
+		{
+			$config = Config::getInstance();
+			$path = $config['path']['modules'];
+
+			if($this->family !== 'orphan')
+				$path .= $this->family . '/';
+
+			$path .= $this->name . '/';
+
+			if(!is_dir($path))
+			{
+				new PackageInfoInfo('Unable to find package ' . $this->family . ':' . $this->name . ' at ' . $path);
+				return false;
+			}
+
+			$this->path = $path;
+		}
+
+		$cache = $this->getCache('info');
 		$info = $cache->getData();
 		if($cache->isStale())
 		{
-			try {
-
+			try
+			{
 				if(!($db = db_connect('default_read_only')))
 					return;
 
 				$packageStmt = $db->stmt_init();
-				$packageStmt->prepare('SELECT * FROM modules WHERE package = ?');
-				$packageStmt->bindAndExecute('s', $packageName);
+				$packageStmt->prepare('SELECT * FROM modules WHERE family = ? AND package = ?');
+				$packageStmt->bindAndExecute('ss', $this->family, $this->name);
 
 				if($moduleInfo = $packageStmt->fetch_array())
 				{
@@ -173,14 +223,13 @@ class PackageInfo
 					$info['releaseType'] = $moduleInfo['releaseType'];
 					$info['releaseVersion'] = $moduleInfo['releaseVersion'];
 					$info['status'] = $moduleInfo['status'];
-				}else{
-					$info['status'] - 'filesystem';
 				}
 
-			}catch(Exception $e){
-				throw new PackageInfoError('requested package ' . $this->name . ' does not exist');
-				$info = false;
-			}
+			}catch(Exception $e){}
+
+			if(!isset($info))
+				$info['status'] = 'filesystem';
+
 
 			$cache->storeData($info);
 		}
@@ -191,14 +240,15 @@ class PackageInfo
 		{
 			$this->id = $info['moduleId'];
 			$this->status = $info['status'];
-			$this->version = new Version();
-			$this->version->major = $info['majorVersion'];
-			$this->version->minor = $info['minorVersion'];
-			$this->version->micro = $info['microVersion'];
-			$this->version->releaseType = $info['releaseType'];
-			$this->version->releaseVersion = $info['releaseVersion'];
+			$this->installedVersion = new Version();
+			$this->installedVersion->major = $info['majorVersion'];
+			$this->installedVersion->minor = $info['minorVersion'];
+			$this->installedVersion->micro = $info['microVersion'];
+			$this->installedVersion->releaseType = $info['releaseType'];
+			$this->installedVersion->releaseVersion = $info['releaseVersion'];
 		}
 
+		return true;
 	}
 
 	/**
@@ -214,14 +264,23 @@ class PackageInfo
 	/**
 	 * Returns the version of the installed module.
 	 *
+	 * @param bool $installed If passed false the filesystem version is returned instead of the installed version
 	 * @return Version
 	 */
-	public function getVersion()
+	public function getVersion($installed = true)
 	{
-		if($this->getStatus() != 'installed')
-			return false;
+		if($installed)
+		{
+			if($this->getStatus() != 'installed')
+				return false;
 
-		return $this->version;
+			return $this->installedVersion;
+		}else{
+			if(!isset($this->packageVersion))
+				$this->loadMeta();
+
+			return $this->packageVersion;
+		}
 	}
 
 	/**
@@ -253,6 +312,55 @@ class PackageInfo
 	{
 		return $this->name;
 	}
+
+	public function getFamily()
+	{
+		return $this->family;
+	}
+
+	public function getFullName()
+	{
+		if($this->family != 'orphan')
+			$name = $this->family . $this->name;
+		else
+			$name = $this->name;
+
+		return $name;
+	}
+
+	public function getClassName($classType, $name, $require = false)
+	{
+		$moduleFolders = array('abstract' => 'abstracts',
+			'abstract' => 'abstracts',
+			'actions' => 'actions',
+			'action' => 'actions',
+			'class'  => 'classes',
+			'classes'  => 'classes',
+			'control' => 'controls',
+			'controls' => 'controls',
+			'hook'  => 'hooks',
+			'hooks'  => 'hooks',
+			'interfaces'  => 'interfaces',
+			'interface'  => 'interfaces',
+			'library'  => 'library',
+			'model' => 'models',
+			'plugin' => 'plugins',
+			'plugins' => 'plugins');
+
+		$classType = strtolower($classType);
+		if($classType == 'class')
+		{
+			$classDivider = '';
+		}elseif(isset($moduleFolders[$classType])){
+			$classDivider = ucwords($classType);
+		}elseif($classDivider = array_search($classType, $moduleFolders)){
+			$classDivider = ucwords($classDivider);
+		}
+
+		$className = $this->getFullName() . $classDivider . $name;
+		return AutoLoader::internalClassExists($className) ? $className : false;
+	}
+
 
 	/**
 	 * Returns a specific action or the entire action array
@@ -342,7 +450,13 @@ class PackageInfo
 	 */
 	protected function loadMeta()
 	{
-		$meta = self::getMetaInfo($this->getName());
+		$cache = $this->getCache('meta');
+		$meta = $cache->getData();
+		if($cache->isStale())
+		{
+			$meta = self::getMetaInfo($this->getPath());
+			$cache->storeData($meta);
+		}
 
 		if(isset($meta['php']))
 		{
@@ -352,27 +466,27 @@ class PackageInfo
 			$this->phpRequirements = array();
 		}
 
-		$this->meta = self::getMetaInfo($this->getName());
+		$version = new Version();
+		if($version->fromString(isset($meta['version']) ? $meta['version'] : '0 Alpha'))
+			$this->packageVersion = $version;
+
+		$this->meta = $meta;
 	}
 
-	static function getMetaInfo($package)
+	static function getMetaInfo($path)
 	{
-		$cache = CacheControl::getCache('packages', $package, 'meta');
+		$cache = CacheControl::getCache('packages', $path, 'meta');
 		$cache->setMemOnly(); // storing this would be ridiculous but memory saves us some includes
 		$meta = $cache->getData();
 
 		if($cache->isStale())
 		{
-			$config = Config::getInstance();
-			//$metaPath = $config['path']['modules'] . $package . '/meta.php';
-
-			$metaPath = $config['path']['modules'] . $package . '/package.ini';
+			$metaPath = $path . '/package.ini';
 
 			$meta = array();
 
 			if(is_readable($metaPath))
 			{
-
 				$packageIni = new IniFile($metaPath);
 				$meta['name'] = $packageIni->get('General', 'name');
 				$meta['version'] = $packageIni->get('General', 'version');
@@ -416,7 +530,7 @@ class PackageInfo
 	 */
 	protected function loadActions()
 	{
-		$cache = CacheControl::getCache('packages', $this->name, 'actions');
+		$cache = $this->getCache('actions');
 		$actions = $cache->getData();
 		if($cache->isStale())
 		{
@@ -482,7 +596,7 @@ class PackageInfo
 	 */
 	protected function loadPlugins()
 	{
-		$cache = CacheControl::getCache('packages', $this->packageName, 'plugins');
+		$cache = $this->getCache('plugins');
 		$plugins = $cache->getData();
 
 		if($cache->isStale())
@@ -509,7 +623,7 @@ class PackageInfo
 	 */
 	protected function loadModels()
 	{
-		$cache = CacheControl::getCache('packages', $this->name, 'models');
+		$cache = $this->getCache('models');
 		$models = $cache->getData();
 
 		if($cache->isStale())
@@ -561,22 +675,14 @@ class PackageInfo
 		return $files;
 	}
 
-	static function checkModuleStatus($moduleName)
+	protected function getCache($key)
 	{
-		$config = Config::getInstance();
-		$pathToModule = $config['path']['modules'] . $moduleName;
+		$cache = CacheControl::getCache('packages', $this->family, $this->name, $key);
+		if($this->cacheDisabled)
+			$cache->disable();
 
-		if(!file_exists($pathToModule))
-			return false;
-
-		$packageInfo = new PackageInfo($moduleName);
-
-		if(!$status = $packageInfo->getStatus())
-			return 'filesystem';
-
-		return $status;
+		return $cache;
 	}
-
 }
 
 class PackageInfoError extends CoreError {}

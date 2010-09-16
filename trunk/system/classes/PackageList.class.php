@@ -39,23 +39,51 @@ class PackageList
 	protected function loadInstallablePackages()
 	{
 		$config = Config::getInstance();
-		$packageDirectories = glob($config['path']['modules'] . '*');
+		$familyDirectories = glob($config['path']['modules'] . '*');
 		$packageList = array();
-		foreach ($packageDirectories as $packagePath)
+
+		$installedPackages = $this->getInstalledPackages();
+
+		foreach ($familyDirectories as $familyPath)
 		{
-			// STRICT standards don't let me place the explode functions as arguments of array_pop
-			// $packageName = array_shift(explode('.', array_pop(explode('/', $packagePath))));
+			if(file_exists($familyPath . '/package.ini'))
+			{
+				$meta = PackageInfo::getMetaInfo($familyPath);
 
-			$tmp = explode('/', $packagePath);
-			$tmp = explode('.', array_pop($tmp));
-			$packageName = array_shift($tmp);
+				if(isset($meta['disableInstall']) && $meta['disableInstall'] == true)
+					continue;
 
-			$meta = PackageInfo::getMetaInfo($packageName);
+				$tmp = explode('/', $familyPath);
+				$packageName = array_pop($tmp);
 
-			if(isset($meta['disableInstall']) && $meta['disableInstall'] == true)
-				continue;
+				if(!isset($installedPackages['orphan']) || !in_array($packageName, $installedPackages['orphan']))
+					$packageList['orphan'][] = $packageName;
 
-			$packageList[] = $packageName;
+			}else{
+
+				$packageDirectories = glob($familyPath . '*');
+
+				foreach($packageDirectories as $packagePath)
+				{
+					$tmp = explode('/', $packagePath);
+
+					$packageName = array_pop($tmp);
+					$familyName = array_pop($tmp);
+
+					if($familyName == 'modules')
+						$familyName = 'orphan';
+
+					$meta = PackageInfo::getMetaInfo($packagePath);
+
+					if(isset($meta['disableInstall']) && $meta['disableInstall'] == true)
+						continue;
+
+
+					if(!isset($installedPackages[$familyName])
+					   || !in_array($packageName, $installedPackages[$familyName]))
+						$packageList[$familyName][] = $packageName;
+				}
+			}
 		}
 
 		return $packageList;
@@ -79,12 +107,16 @@ class PackageList
 		{
 			$packageList = array();
 			$db = dbConnect('default_read_only');
-			$results = $db->query('SELECT package FROM modules WHERE status LIKE \'installed\'');
+			$results = $db->query('SELECT package, family FROM modules WHERE status LIKE \'installed\'');
 			while($row = $results->fetch_assoc())
-				$packageList[] = $row['package'];
+			{
+				$family = (!isset($row['family'])) ? $row['family'] : 'orphan';
+				$packageList[$family][] = $row['package'];
+			}
 
 			$cache->storeData($packageList);
 		}
+
 		return $packageList;
 	}
 
@@ -95,8 +127,8 @@ class PackageList
 	 */
 	public function getPackageList()
 	{
-		$fullSet = array_merge($this->getInstalledPackages(), $this->getInstallablePackages());
-		sort($fullSet, SORT_STRING);
+		$fullSet = array_merge_recursive($this->getInstalledPackages(), $this->getInstallablePackages());
+		$fullSet = self::moduleSort($fullSet);
 		return $fullSet;
 	}
 
@@ -107,11 +139,8 @@ class PackageList
 	 */
 	public function getInstalledPackages()
 	{
-                if(!isset($this->installedPackages))
-		{
-			$this->installedPackages = $this->loadInstalledPackages();
-				sort($this->installedPackages, SORT_STRING);
-		}
+		if(!isset($this->installedPackages))
+			$this->installedPackages = self::moduleSort($this->loadInstalledPackages());
 
 		return $this->installedPackages;
 	}
@@ -123,12 +152,23 @@ class PackageList
 	 */
 	public function getInstallablePackages()
 	{
-                if(!isset($this->installablePackages))
-		{
-			$this->installablePackages = array_diff($this->loadInstallablePackages(), $this->getInstalledPackages());
-				sort($this->installablePackages, SORT_STRING);
-		}
+		if(!isset($this->installablePackages))
+			$this->installablePackages = self::moduleSort($this->loadInstallablePackages());
+
 		return $this->installablePackages;
+	}
+
+	static protected function moduleSort($array)
+	{
+		$newArray = array();
+		foreach($array as $key => $value)
+		{
+			sort($value, SORT_STRING);
+			$newArray[$key] = $value;
+		}
+
+		ksort($newArray, SORT_STRING);
+		return $newArray;
 	}
 
 }
