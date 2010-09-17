@@ -110,7 +110,7 @@ class PackageList
 			$results = $db->query('SELECT package, family FROM modules WHERE status LIKE \'installed\'');
 			while($row = $results->fetch_assoc())
 			{
-				$family = (!isset($row['family'])) ? $row['family'] : 'orphan';
+				$family = isset($row['family']) ? $row['family'] : 'orphan';
 				$packageList[$family][] = $row['package'];
 			}
 
