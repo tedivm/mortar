@@ -85,6 +85,9 @@ class MortarActionInstallModule extends ActionBase
 
 			$linkToPackage = clone $url;
 			if($install) {
+				if($family != 'orphan') {
+					$package = $family . '-' . $package;
+				}
 				$action = 'Install';
 			} else {
 				$package = $packageInfo->getId();

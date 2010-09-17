@@ -162,13 +162,21 @@ class PackageInfo
 		$this->cacheDisabled = true;
 		$this->path = $path;
 
-		$this->name = $this->getMeta('name');
+		$config = Config::getInstance();
+		$basePath = $config['path']['modules'];
 
-		if($metaFamily = $this->getMeta('family'))
-		{
-			$this->family = $metaFamily;
-		}else{
+		$localPath = trim(substr($path, strlen($basePath)), '/');
+		$parts = explode('/', $localPath);
+
+		if(count($parts) == 0)
+			throw new PackageInfoError('Unable to locate package at' . $path);
+
+		if(count($parts) == 1) {
 			$this->family = 'orphan';
+			$this->name = $parts[0];
+		} else {
+			$this->family = $parts[0];
+			$this->name = $parts[1];
 		}
 
 		return $this->buildByName($this->family, $this->name);
