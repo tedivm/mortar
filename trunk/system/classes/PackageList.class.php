@@ -61,7 +61,7 @@ class PackageList
 
 			}else{
 
-				$packageDirectories = glob($familyPath . '/*');
+				$packageDirectories = glob(FileSystem::normalizeTrailingSlash($familyPath) . '*');
 
 				foreach($packageDirectories as $packagePath)
 				{

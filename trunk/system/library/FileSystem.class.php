@@ -141,7 +141,7 @@ class FileSystem
 
 	static function normalizeTrailingSlash($path)
 	{
-		return (substr($path, strlen($path) - 1, 1) == DIRECTORY_SEPARATOR) ? '' : '/';
+		return (substr($path, strlen($path) - 1, 1) == DIRECTORY_SEPARATOR) ? $path . '' : $path . '/';
 	}
 }
 
