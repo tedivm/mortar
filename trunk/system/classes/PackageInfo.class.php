@@ -673,7 +673,7 @@ class PackageInfo
 				//explode, pop. explode. shift
 
 				$fileInfo['name'] = $fileClassName;
-				$fileInfo['className'] = $this->name . $typeDelimiter . $fileClassName;
+				$fileInfo['className'] = $this->getFullName() . $typeDelimiter . $fileClassName;
 				$fileInfo['path'] = $filename;
 				$files[$fileClassName] = $fileInfo;
 			}catch(Exception $e){
