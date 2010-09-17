@@ -106,7 +106,7 @@ class UrlReader
 
 					}elseif(isset($pathPieces[0])){
 					// if the family exists and there is another piece then it should be the module
-						$module = array_shift($pathPieces[0]);
+						$module = array_shift($pathPieces);
 						$packageInfo = PackageInfo::loadByName($family, $module);
 						if($packageInfo && !($id = $packageInfo->getId()))
 							unset($packageInfo);

@@ -21,7 +21,7 @@ class ModuleFamily
 					continue;
 
 				$directory = trim($directory, '/\\');
-				$families[] = substr($directory, strrpos($directory, '/'));
+				$families[] = substr($directory, strrpos($directory, '/') + 1);
 			}
 
 			$cache->storeData($families);
