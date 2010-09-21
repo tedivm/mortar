@@ -271,7 +271,7 @@ class ObjectRelationshipMapper
 
 		$this->columns[$selectAs] = $columns[$select];
 
-		$this->join = ' JOIN `' . $table . '` ON `' . $this->table . '.' . $column1 . '` = `' . $table . '.' . $column2 . '` ';
+		$this->join = ' JOIN ' . $table . ' ON ' . $this->table . '.' . $column1 . ' = ' . $table . '.' . $column2 . ' ';
 		$this->joinColumn = $table . '.' . $select . ' AS ' . $selectAs;
 	}
 
@@ -301,21 +301,21 @@ class ObjectRelationshipMapper
 			$columnRestrictions = '';
 
 			foreach($this->restrictColumns as $selectColumnName)
-				$columnRestrictions .= '`' . $this->table . '.' . $selectColumnName . '`, ';
+				$columnRestrictions .= $this->table . '.' . $selectColumnName . ', ';
 
 			if(isset($this->joinColumn))
-				$columnRestrictions .= '`' . $this->joinColumn . '`';
+				$columnRestrictions .= $this->joinColumn;
 
 			$columnRestrictions = rtrim($columnRestrictions, ', ');
 		}else{
 			if(isset($this->join)) {
-				$columnRestrictions = '`' . $this->table . '.*, ' . $this->joinColumn . '`';
+				$columnRestrictions = $this->table . '.*, ' . $this->joinColumn;
 			} else {
 				$columnRestrictions = '*';
 			}
 		}
 
-		$sql_select = 'SELECT ' . $columnRestrictions . ' FROM `' . $this->table . '`';
+		$sql_select = 'SELECT ' . $columnRestrictions . ' FROM ' . $this->table;
 
 		if(isset($this->join))
 			$sql_select .= $this->join;
@@ -341,14 +341,14 @@ class ObjectRelationshipMapper
 						$ors .= 'OR ';
 					}
 					$sql_input[] = $item;
-					$ors .= '`' . $column . '` = ? ';
+					$ors .= $column . ' = ? ';
 					$sql_typestring .= self::getType($this->columns[$column]['Type']);
 				}
 				$ors .= ')';
 				$sql_where .= $ors;
 			} else {
 				$sql_input[] = $value;
-				$sql_where .= '`' . $column . '` = ? ';
+				$sql_where .= $column . ' = ? ';
 				$sql_typestring .= self::getType($this->columns[$column]['Type']);
 			}
 
@@ -391,7 +391,7 @@ class ObjectRelationshipMapper
 					if($orderby_loop > 0)
 						$sql_orderby .= ', ';
 
-					$sql_orderby .= '`'. $column_name . '`';
+					$sql_orderby .= $column_name;
 					$orderby_loop++;
 				}
 			}
@@ -508,14 +508,14 @@ class ObjectRelationshipMapper
 							$ors .= 'OR ';
 						}
 						$sql_input[] = $item;
-						$ors .= '`' . $column . '` = ? ';
+						$ors .= $column . ' = ? ';
 						$sql_typestring .= self::getType($this->columns[$column]['Type']);
 					}
 					$ors .= ')';
 					$sql_where .= $ors;
 				} else {
 					$sql_input[] = $value;
-					$sql_where .= '`' . $column . '` = ? ';
+					$sql_where .= $column . ' = ? ';
 					$sql_typestring .= self::getType($this->columns[$column]['Type']);
 				}
 				$loop++;
@@ -932,14 +932,14 @@ class ObjectRelationshipMapper
 		{
 			if(isset($this->direct_values[$column_name]))
 			{
-				$sql_columns .= '`' . $column_name . '`, ';
+				$sql_columns .= $column_name . ', ';
 				$sql_values .= $this->direct_values[$column_name] . ', ';
 
 			}else{
 
 				if(isset($this->values[$column_name]))
 				{
-					$sql_columns .= '`' . $column_name . '`, ';
+					$sql_columns .= $column_name . ', ';
 					$sql_typestring .= self::getType($column_info['Type']);
 					$sql_values .= '?, ';
 					if(is_array($this->values[$column_name])) {
@@ -952,12 +952,12 @@ class ObjectRelationshipMapper
 
 					if(isset($column_info['Default']))
 					{
-						$sql_columns .= '`' . $column_name . '`, ';
+						$sql_columns .= $column_name . ', ';
 						$sql_values .= 'DEFAULT, ';
 
 					}elseif($column_info['Null']){
 
-						$sql_columns .= '`' . $column_name . '`, ';
+						$sql_columns .= $column_name . ', ';
 						$sql_values .= 'NULL, ';
 
 					}else{
@@ -1036,14 +1036,14 @@ class ObjectRelationshipMapper
 			if(isset($this->direct_values[$column_name]))
 			{
 				$sql_columns .= $column_name . ', ';
-				$sql_set .= '`' . $column_name . '` = `' . $this->direct_values[$column_name] .= '`, ';
+				$sql_set .= $column_name . ' = ' . $this->direct_values[$column_name] .= ', ';
 			}else{
 
 				if(isset($this->values[$column_name]))
 				{
-					$sql_columns .= '`' . $column_name . '`, ';
+					$sql_columns .= $column_name . ', ';
 					$sql_typestring .= self::getType($column_info['Type']);
-					$sql_set .= '`' . $column_name . '` = ?, ';
+					$sql_set .= $column_name . ' = ?, ';
 					if(is_array($this->values[$column_name])) {
 						$sql_input[] = $this->values[$column_name][0];					
 					} else {
@@ -1058,12 +1058,12 @@ class ObjectRelationshipMapper
 
 					if($column_info['Null'])
 					{
-						$sql_columns .= '`' . $column_name . '`, ';
-						$sql_set .= '`' . $column_name . '` = NULL, ';
+						$sql_columns .= $column_name . ', ';
+						$sql_set .= $column_name . ' = NULL, ';
 
 					}elseif(isset($column_info['Default'])){
-						$sql_columns .= '`' . $column_name . '`, ';
-						$sql_set .= '`' . $column_name . '` = DEFAULT, ';
+						$sql_columns .= $column_name . ', ';
+						$sql_set .= $column_name . ' = DEFAULT, ';
 					}
 
 				} // if(isset($this->values[$column_name])) else
