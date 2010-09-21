@@ -174,7 +174,7 @@ class RequestWrapper
 
 				if(!($actionInfo = $moduleInfo->getActions($query['action'])))
 					throw new RequestError('Unable to load action ' . $query['action']
-													. ' for module ' . $moduleInfo->getFullName);
+													. ' for module ' . $moduleInfo->getFullName());
 
 
 				$argument = '';
