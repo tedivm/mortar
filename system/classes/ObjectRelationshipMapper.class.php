@@ -273,6 +273,8 @@ class ObjectRelationshipMapper
 
 		$this->join = ' JOIN ' . $table . ' ON ' . $this->table . '.' . $column1 . ' = ' . $table . '.' . $column2 . ' ';
 		$this->joinColumn = $table . '.' . $select . ' AS ' . $selectAs;
+
+		return true;
 	}
 
 	// create, record, update, delete
