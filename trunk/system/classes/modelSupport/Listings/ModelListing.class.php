@@ -251,11 +251,12 @@ class ModelListing
 				foreach($models as $model) {
 					$model = ModelRegistry::loadModel($model['type'], $model['id']);
 					$model = $model->__toArray();
-					if(isset($model[$field]) && !in_array($model[$field], $filterItems)) {
+					if(isset($model[$field])) {
 						$val = (string) $model[$field];
 						if(!$val || $val == '')
 							continue;
-						$filterItems[] = $val;
+						if(!in_array($val, $filterItems))
+							$filterItems[] = $val;
 						if(isset($counts[$val])) {
 							$counts[$val]++;
 						} else {

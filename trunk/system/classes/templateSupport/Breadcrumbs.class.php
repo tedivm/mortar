@@ -60,8 +60,9 @@ class TagBoxBreadcrumbs
 			// If one isn't, check whether a type and id are set. 
 			// If so, we're looking at a non-LB model; add it to the front of the list.
 
-			if( isset($this->query['id']) && isset($this->query['type']) ) {
-				$model = ModelRegistry::loadModel($this->query['type'], $this->query['id']);
+			if( isset($this->query['id']) && 
+				isset($this->query['type']) && 
+				$model = ModelRegistry::loadModel($this->query['type'], $this->query['id']) ) {
 				$title = $model->getDesignation();
 
 				if($html) {

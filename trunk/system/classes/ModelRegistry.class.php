@@ -202,7 +202,7 @@ class ModelRegistry
 			{
 				$moduleInfo = PackageInfo::loadById($row['mod_id']);
 
-				$className = $moduleInfo->getName() . 'Model' . $row['handlerName'];
+				$className = $moduleInfo->getFullName() . 'Model' . $row['handlerName'];
 
 				$index[$row['resource']] = $row['modelId'];
 				$handlers[$row['modelId']] = array('id' => $row['modelId'],
