@@ -164,7 +164,13 @@ class RequestWrapper
 
 			if($query['module'])
 			{
-				$moduleInfo = PackageInfo::loadById($query['module']);
+				if(!is_numeric($query['module'])) {
+					$family = isset($query['family']) ? $query['family'] : null;
+
+					$moduleInfo = PackageInfo::loadByName($family, $query['module']);
+				} else {
+					$moduleInfo = PackageInfo::loadById($query['module']);
+				}
 
 				if($moduleInfo->getStatus() != 'installed')
 					throw new RequestError('Module ' . $moduleInfo->getFullName . ' present but not installed');

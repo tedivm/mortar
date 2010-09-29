@@ -45,6 +45,23 @@ class ActiveSite
 	{
 		if(is_null(self::$site))
 		{
+			if(isset($_SERVER['TERM'])) {
+				$cache = CacheControl::getCache('defaultSite', 'cli');
+				$siteId = $cache->getData();
+
+				if($cache->isStale()) {
+					$siteRecord = new ObjectRelationshipMapper('sites');
+					$siteId = ($siteRecord->select(1)) ? $siteRecord->site_id : false;
+					$cache->storeData($siteId);			
+				}
+
+				if($siteId) {
+					self::$site = ModelRegistry::loadModel('Site', $siteId);
+					return self::$site;
+				} else {
+					return false;
+				}
+			}
 
 			if(INSTALLMODE || !isset($_SERVER['SERVER_NAME']))
 				return false;
