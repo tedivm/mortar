@@ -45,7 +45,7 @@ class ActiveSite
 	{
 		if(is_null(self::$site))
 		{
-			if(isset($_SERVER['TERM'])) {
+			if(defined('STDIN') || !isset($_SERVER['REQUEST_METHOD'])) {
 				$cache = CacheControl::getCache('defaultSite', 'cli');
 				$siteId = $cache->getData();
 
