@@ -1,0 +1,8 @@
+.iconStack {
+position: relative;
+}
+
+.iconStack .stackIcon {
+position: absolute;
+left: 0;
+}

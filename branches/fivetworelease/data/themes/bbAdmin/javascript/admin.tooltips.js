@@ -1,0 +1,1 @@
+$('*.tooltip').tooltip({extraClass: 'modelListing', showURL: false });

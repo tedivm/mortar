@@ -1,0 +1,9 @@
+{% extends "models/base/Display.html" %}
+
+{% block usercontent %}
+<div id="Forum_{{ model.id }}_{{ model.name }}_display" class="Forum_display">
+<table class="content">
+{{ listing }}
+</table>
+</div>
+{% endblock %}
