@@ -65,8 +65,8 @@ class TesseraActionModelPostComment extends ModelActionLocationBasedEdit
 
 		$message = new TesseraModelMessage();
 		$message->setParent($discussion);
+		$message->title = $model->title; var_dump($model->title);
 		$message['content'] = $input['comment_text'];
-		$message['title'] = $model['title'];
 		$message['author'] = $name;
 		if(isset($input['comment_email']))
 			$message['email'] = $input['comment_email'];

@@ -203,7 +203,7 @@ class GraffitiCategorizer
 				$model = $loc->getResource();
 
 				$item['id'] = $row['locationId'];
-				$item['name'] = isset($model['title']) ? $model['title'] : $model->getName();
+				$item['name'] = $model->getDesignation();
 				$item['url'] = (string) $model->getUrl();
 
 				$locs[] = $item;

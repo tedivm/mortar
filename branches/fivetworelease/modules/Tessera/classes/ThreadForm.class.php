@@ -5,11 +5,7 @@ class TesseraThreadForm extends LocationModelForm
 	protected function createCustomInputs()
 	{
 		$this->changeSection('info')->
-			setLegend('Thread')->
-			createInput('model_title')->
-			setLabel('Title')->
-			setType('title')->
-			addRule('Required');
+			setLegend('Thread');
 
 		$this->changeSection('post')->
 			setlegend('Post Body')->

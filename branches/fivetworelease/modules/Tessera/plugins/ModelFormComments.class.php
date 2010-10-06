@@ -21,7 +21,7 @@ class TesseraPluginModelFormComments
 
 	public function processAdjustedInputPost(Model $model, $input)
 	{
-		if(!GraffitiCategorizer::canCategorizeModelType($model->getType()))
+		if(!TesseraComments::canCommentModelType($model->getType()))
 			return null;
 
 		if(!method_exists($model, 'getLocation'))

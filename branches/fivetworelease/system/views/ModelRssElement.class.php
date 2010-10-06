@@ -6,8 +6,8 @@ class ViewModelRssElement
 	{
 		$xmlItem = simplexml_load_string('<item></item>');
 
-		if(isset($model['title']))
-			$parentXml->addChild('title', $model['title']);
+		if($title = $model->getDesignation())
+			$parentXml->addChild('title', $title);
 
 		$url = $model->getUrl();
 		$parentXml->addChild('link', (string) $url);

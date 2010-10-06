@@ -5,15 +5,11 @@ class LithoPageForm extends LocationModelForm
 	protected function createCustomInputs()
 	{
 		$this->changeSection('info')->
-			setlegend('Page Information')->
-			createInput('model_title')->
-				setLabel('Title')->
-				setType('title')->
-				addRule('required');
+			setlegend('Page Information');
 
 			$this->createInput('model_description')->
 				setType('textarea')->
-				setLabel('Description');;
+				setLabel('Description');
 
 			$this->createInput('model_keywords')->
 				setType('textarea')->
@@ -28,12 +24,15 @@ class LithoPageForm extends LocationModelForm
 
 	protected function populateCustomInputs()
 	{
+		$input = $this->getInput('location_title');
+		if(isset($input) && $input)
+			$input->setValue($this->model->title);
+
 		$this->changeSection('model_content')->
 			createInput('model_note')->
 			setLabel('Note')->
 			addRule('maxlength', 200);
 	}
-
 }
 
 ?>
