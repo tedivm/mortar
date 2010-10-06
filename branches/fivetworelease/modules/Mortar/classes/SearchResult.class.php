@@ -47,8 +47,8 @@ class MortarSearchResult {
 			? $query['page']
 			: 1;
 
-		$this->browseField = (isset($query['browseBy']))
-			? $query['browseBy']
+		$this->browseField = (isset($query['browseby']))
+			? $query['browseby']
 			: 'score';
 
 		$order = (isset($query['order']) && in_array(strtolower($query['order']), array('asc', 'desc')))

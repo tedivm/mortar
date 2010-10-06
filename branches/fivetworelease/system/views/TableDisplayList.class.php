@@ -276,7 +276,7 @@ class ViewTableDisplayList extends ViewTemplateDisplayList {
 				$sortUrl = clone($url);
 				$sortUrl->browseBy = $name;
 
-				if(isset($query['browseBy']) && $query['browseBy'] == $name) {
+				if(isset($query['browseby']) && $query['browseby'] == $name) {
 					if(isset($query['order']) && $query['order'] == 'desc') {
 						$sortUrl->order = 'asc';
 						$finalLabel = $down . ' ' . $finalLabel;
