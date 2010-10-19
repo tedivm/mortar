@@ -176,6 +176,7 @@ class FormToHtml
 					$inputHtml->close(false);
 					$formHtml->wrapAround($inputHtml);
 				}else{
+					$inputHtml->wrapAround($input->property('contents'));
 
 					$labelHtml = new HtmlObject('label');
 					$labelHtml->property('for', $inputId)->
