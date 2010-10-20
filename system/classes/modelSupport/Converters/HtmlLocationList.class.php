@@ -5,7 +5,7 @@ class ModelToHtmlLocationList extends ModelToHtmlList
 	protected $listingClass = 'LocationListing';
 
 	/**
-	 * If this $query['browseBy'] option isn't set this column is used to sort the models.
+	 * If this $query['browseby'] option isn't set this column is used to sort the models.
 	 *
 	 * @var string
 	 */
@@ -71,11 +71,11 @@ class ModelToHtmlLocationList extends ModelToHtmlList
 			}
 		}
 
-		if(isset($query['browseBy'])) {
-			if($query['browseBy'] === 'date') {
+		if(isset($query['browseby'])) {
+			if($query['browseby'] === 'date') {
 				$listingObject->setOption('browseBy', 'publishDate');
 			} else {
-				$listingObject->setOption('browseBy', $query['browseBy']);
+				$listingObject->setOption('browseBy', $query['browseby']);
 			}
 		} elseif(!isset($this->options['browseBy'])) { 
 			$listingObject->setOption('browseBy', $this->indexBrowseBy);

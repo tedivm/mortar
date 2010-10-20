@@ -11,7 +11,7 @@
 
 class Twig_Environment
 {
-    const VERSION = '0.9.7-DEV';
+    const VERSION = '0.9.9-DEV';
 
     protected $charset;
     protected $loader;
@@ -27,8 +27,10 @@ class Twig_Environment
     protected $parsers;
     protected $visitors;
     protected $filters;
+    protected $tests;
     protected $runtimeInitialized;
     protected $loadedTemplates;
+    protected $strictVariables;
 
     /**
      * Constructor.
@@ -36,32 +38,42 @@ class Twig_Environment
      * Available options:
      *
      *  * debug: When set to `true`, the generated templates have a __toString()
-     *    method that you can use to display the generated nodes (default to
-     *    false).
+     *           method that you can use to display the generated nodes (default to
+     *           false).
      *
      *  * trim_blocks: Mimicks the behavior of PHP by removing the newline that
-     *    follows instructions if present (default to false).
+     *                 follows instructions if present (default to false).
      *
      *  * charset: The charset used by the templates (default to utf-8).
      *
      *  * base_template_class: The base template class to use for generated
-     *    templates (default to Twig_Template).
+     *                         templates (default to Twig_Template).
      *
-     *  * cache: Can be one of three values:
-     *             * null (the default): Twig will create a sub-directory under the system tmp directory
-     *               (not recommended as templates from two projects with the same name will share the cache)
-     *             * false: disable the compile cache altogether
-     *             * An absolute path where to store the compiled templates
+     *  * cache: An absolute path where to store the compiled templates, or
+     *           false to disable compilation cache (default)
      *
      *  * auto_reload: Whether to reload the template is the original source changed.
-     *    If you don't provide the auto_reload option, it will be
-     *    determined automatically base on the debug value.
+     *                 If you don't provide the auto_reload option, it will be
+     *                 determined automatically base on the debug value.
+     *
+     *  * strict_variables: Whether to ignore invalid variables in templates
+     *                      (default to false).
+     *
+     * @param Twig_LoaderInterface   $loader  A Twig_LoaderInterface instance
+     * @param array                  $options An array of options
+     * @param Twig_LexerInterface    $lexer   A Twig_LexerInterface instance
+     * @param Twig_ParserInterface   $parser  A Twig_ParserInterface instance
+     * @param Twig_CompilerInterface $compiler A Twig_CompilerInterface instance
      */
-    public function __construct(Twig_LoaderInterface $loader = null, $options = array())
+    public function __construct(Twig_LoaderInterface $loader = null, $options = array(), Twig_LexerInterface $lexer = null, Twig_ParserInterface $parser = null, Twig_CompilerInterface $compiler = null)
     {
         if (null !== $loader) {
             $this->setLoader($loader);
         }
+
+        $this->setLexer(null !== $lexer ? $lexer : new Twig_Lexer());
+        $this->setParser(null !== $parser ? $parser : new Twig_Parser());
+        $this->setCompiler(null !== $compiler ? $compiler : new Twig_Compiler());
 
         $this->debug              = isset($options['debug']) ? (bool) $options['debug'] : false;
         $this->trimBlocks         = isset($options['trim_blocks']) ? (bool) $options['trim_blocks'] : false;
@@ -69,8 +81,11 @@ class Twig_Environment
         $this->baseTemplateClass  = isset($options['base_template_class']) ? $options['base_template_class'] : 'Twig_Template';
         $this->autoReload         = isset($options['auto_reload']) ? (bool) $options['auto_reload'] : $this->debug;
         $this->extensions         = array('core' => new Twig_Extension_Core());
+        $this->strictVariables    = isset($options['strict_variables']) ? (bool) $options['strict_variables'] : false;
         $this->runtimeInitialized = false;
-        $this->setCache(isset($options['cache']) ? $options['cache'] : null);
+        if (isset($options['cache']) && $options['cache']) {
+            $this->setCache($options['cache']);
+        }
     }
 
     public function getBaseTemplateClass()
@@ -108,6 +123,21 @@ class Twig_Environment
         $this->autoReload = (Boolean) $autoReload;
     }
 
+    public function enableStrictVariables()
+    {
+        $this->strictVariables = true;
+    }
+
+    public function disableStrictVariables()
+    {
+        $this->strictVariables = false;
+    }
+
+    public function isStrictVariables()
+    {
+        return $this->strictVariables;
+    }
+
     public function getCache()
     {
         return $this->cache;
@@ -115,10 +145,10 @@ class Twig_Environment
 
     public function setCache($cache)
     {
-        $this->cache = null === $cache ? sys_get_temp_dir().DIRECTORY_SEPARATOR.'twig_'.md5(dirname(__FILE__)) : $cache;
+        $this->cache = $cache;
 
-        if (false !== $this->cache && !is_dir($this->cache)) {
-            mkdir($this->cache, 0755, true);
+        if ($this->cache && !is_dir($this->cache)) {
+            mkdir($this->cache, 0777, true);
         }
     }
 
@@ -152,7 +182,7 @@ class Twig_Environment
     /**
      * Loads a template by name.
      *
-     * @param  string $name The template name
+     * @param  string  $name  The template name
      *
      * @return Twig_TemplateInterface A template instance representing the given template name
      */
@@ -169,23 +199,15 @@ class Twig_Environment
                 eval('?>'.$this->compileSource($this->loader->getSource($name), $name));
             } else {
                 if (!file_exists($cache) || ($this->isAutoReload() && !$this->loader->isFresh($name, filemtime($cache)))) {
-                    $content = $this->compileSource($this->loader->getSource($name), $name);
-
-                    if (false === file_put_contents($cache, $content, LOCK_EX)) {
-                        eval('?>'.$content);
-                    } else {
-                        require_once $cache;
-                    }
-                } else {
-                    require_once $cache;
+                    $this->writeCacheFile($cache, $this->compileSource($this->loader->getSource($name), $name));
                 }
+
+                require_once $cache;
             }
         }
 
         if (!$this->runtimeInitialized) {
             $this->initRuntime();
-
-            $this->runtimeInitialized = true;
         }
 
         return $this->loadedTemplates[$cls] = new $cls($this);
@@ -198,10 +220,6 @@ class Twig_Environment
 
     public function getLexer()
     {
-        if (null === $this->lexer) {
-            $this->lexer = new Twig_Lexer($this);
-        }
-
         return $this->lexer;
     }
 
@@ -218,10 +236,6 @@ class Twig_Environment
 
     public function getParser()
     {
-        if (null === $this->parser) {
-            $this->parser = new Twig_Parser($this);
-        }
-
         return $this->parser;
     }
 
@@ -238,10 +252,6 @@ class Twig_Environment
 
     public function getCompiler()
     {
-        if (null === $this->compiler) {
-            $this->compiler = new Twig_Compiler($this);
-        }
-
         return $this->compiler;
     }
 
@@ -251,7 +261,7 @@ class Twig_Environment
         $compiler->setEnvironment($this);
     }
 
-    public function compile(Twig_Node $node)
+    public function compile(Twig_NodeInterface $node)
     {
         return $this->getCompiler()->compile($node)->getSource();
     }
@@ -283,8 +293,10 @@ class Twig_Environment
 
     public function initRuntime()
     {
+        $this->runtimeInitialized = true;
+
         foreach ($this->getExtensions() as $extension) {
-            $extension->initRuntime();
+            $extension->initRuntime($this);
         }
     }
 
@@ -295,6 +307,10 @@ class Twig_Environment
 
     public function getExtension($name)
     {
+        if (!isset($this->extensions[$name])) {
+            throw new LogicException(sprintf('The "%s" extension is not enabled.', $name));
+        }
+
         return $this->extensions[$name];
     }
 
@@ -320,16 +336,43 @@ class Twig_Environment
         return $this->extensions;
     }
 
+    public function addTokenParser(Twig_TokenParserInterface $parser)
+    {
+        if (null === $this->parsers) {
+            $this->getTokenParsers();
+        }
+
+        $this->parsers->addTokenParser($parser);
+    }
+
     public function getTokenParsers()
     {
         if (null === $this->parsers) {
-            $this->parsers = array();
+            $this->parsers = new Twig_TokenParserBroker;
             foreach ($this->getExtensions() as $extension) {
-                $this->parsers = array_merge($this->parsers, $extension->getTokenParsers());
+                $parsers = $extension->getTokenParsers();
+                foreach($parsers as $parser) {
+                    if ($parser instanceof Twig_TokenParserInterface) {
+                        $this->parsers->addTokenParser($parser);
+                    } else if ($parser instanceof Twig_TokenParserBrokerInterface) {
+                        $this->parsers->addTokenParserBroker($parser);
+                    } else {
+                        throw new InvalidArgumentException('getTokenParsers() must return an array of Twig_TokenParserInterface or Twig_TokenParserBrokerInterface instances');
+                    }
+                }
             }
         }
 
         return $this->parsers;
+    }
+
+    public function addNodeVisitor(Twig_NodeVisitorInterface $visitor)
+    {
+        if (null === $this->visitors) {
+            $this->getNodeVisitors();
+        }
+
+        $this->visitors[] = $visitor;
     }
 
     public function getNodeVisitors()
@@ -344,6 +387,15 @@ class Twig_Environment
         return $this->visitors;
     }
 
+    public function addFilter($name, Twig_FilterInterface $filter)
+    {
+        if (null === $this->filters) {
+            $this->getFilters();
+        }
+
+        $this->filters[$name] = $filter;
+    }
+
     public function getFilters()
     {
         if (null === $this->filters) {
@@ -354,5 +406,41 @@ class Twig_Environment
         }
 
         return $this->filters;
+    }
+
+    public function addTest($name, Twig_TestInterface $test)
+    {
+        if (null === $this->tests) {
+            $this->getTests();
+        }
+
+        $this->tests[$name] = $test;
+    }
+
+    public function getTests()
+    {
+        if (null === $this->tests) {
+            $this->tests = array();
+            foreach ($this->getExtensions() as $extension) {
+                $this->tests = array_merge($this->tests, $extension->getTests());
+            }
+        }
+
+        return $this->tests;
+    }
+
+    protected function writeCacheFile($file, $content)
+    {
+        $tmpFile = tempnam(dirname($file), basename($file));
+        if (false !== @file_put_contents($tmpFile, $content)) {
+            // rename does not work on Win32 before 5.2.6
+            if (@rename($tmpFile, $file) || (@copy($tmpFile, $file) && unlink($tmpFile))) {
+                chmod($file, 0644);
+
+                return;
+            }
+        }
+
+        throw new RuntimeException(sprintf('Failed to write cache file "%s".', $file));
     }
 }

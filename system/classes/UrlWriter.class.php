@@ -58,9 +58,9 @@ class UrlWriter
 		try{
 
 
-			if(isset($attributes['locationId']))
+			if(isset($attributes['locationid']))
 			{
-				$location = Location::getLocation($attributes['locationId']);
+				$location = Location::getLocation($attributes['locationid']);
 				$siteId = $location->getSite();
 
 				if(!$siteId)
@@ -75,7 +75,7 @@ class UrlWriter
 
 		}catch(Exception $e){
 
-			if(isset($attributes['locationId']))
+			if(isset($attributes['locationid']))
 			{
 				$site = ActiveSite::getSite();
 				$url = $site->getDomainUrl($ssl);
@@ -111,7 +111,7 @@ class UrlWriter
 			$path = self::buildModulePath($path, $attributes);
 		}elseif(isset($attributes['type']) && (!isset($attributes['action']) || $attributes['action'] != 'Add') ){
 			$path = self::buildResourcePath($path, $attributes);
-		}elseif(isset($attributes['locationId'])){
+		}elseif(isset($attributes['locationid'])){
 			$path = self::buildLocationPath($path, $attributes);
 		}
 
@@ -128,8 +128,8 @@ class UrlWriter
 
 	static function buildLocationPath($path, &$attributes)
 	{
-		$location = Location::getLocation($attributes['locationId']);
-		unset($attributes['locationId']);
+		$location = Location::getLocation($attributes['locationid']);
+		unset($attributes['locationid']);
 
 		// here we will iterate back to the site, creating the path to the model in reverse.
 		$tempLoc = $location;

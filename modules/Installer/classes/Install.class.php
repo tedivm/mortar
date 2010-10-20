@@ -1,13 +1,5 @@
 <?php
 
-// FIXME: This probably needs to be put in the ConfigFile class.
-class InstallerException extends CoreError
-{
-	const CANNOT_CREATE_CONFIG = 1;
-	const CANNOT_SAVE_CONFIG = 2;
-	const CANNOT_READ_CONFIG = 3;
-}
-
 class InstallerInstaller // thats the most pathetic name ever
 {
 	/**
@@ -27,7 +19,6 @@ class InstallerInstaller // thats the most pathetic name ever
 		$this->profile = $profile;
 	}
 
-	// FIXME: A lot of this probably needs to be put in the ConfigFile class.
 	public function install()
 	{
 		if(INSTALLMODE !== true)
@@ -88,10 +79,7 @@ class InstallerInstaller // thats the most pathetic name ever
 				case 2: // database files
 					unlink($config['path']['base'] . 'data/configuration/databases.php');
 				case 1: // configuration files
-					if (file_exists($config['path']['base'] . 'data/configuration/configuration.php'))
-					{
-						unlink($config['path']['base'] . 'data/configuration/configuration.php');
-					}
+					unlink($config['path']['base'] . 'data/configuration/configuration.php');
 				default:
 					break;
 			}
@@ -118,96 +106,88 @@ class InstallerInstaller // thats the most pathetic name ever
 		return true;
 	}
 
-	// FIXME: This probably needs to be put in the ConfigFile class.
 	protected function saveConfiguration()
 	{
-		$config = Config::getInstance();
-		define('CONFIG_DIRECTORY', $config['path']['base'] . 'data/configuration');
-		define('CONFIG_FILE', CONFIG_DIRECTORY . '/' . 'configuration.php');
+		try{
+			$config = Config::getInstance();
+			$input = Input::getInput();
 
-		// Sanity checks.
-		if (!file_exists(CONFIG_FILE))
-		{
-			if (!is_writeable(CONFIG_DIRECTORY))
+			// Check paths
+			$path['base'] = ($input['base']) ? $input['base'] : $config['path']['base'];
+			$path['base'] = rtrim(trim($path['base']), '/') . '/';
+			$path['theme'] = ($input['theme']) ? $input['theme'] : $path['base'] . 'data/themes/';
+			$path['icons'] = ($input['icons']) ? $input['icons'] : $path['base'] . 'data/icons/';
+			$path['fonts'] = ($input['fonts']) ? $input['fonts'] : $path['base'] . 'data/fonts/';
+			$path['config'] = ($input['config']) ? $input['config'] : $path['base'] . 'data/configuration/';
+			$path['mainClasses'] = ($input['mainClasses']) ? $input['mainClasses'] : $path['base'] . 'system/classes/';
+			$path['packages'] = ($input['packages']) ? $input['packages'] : $path['base'] . 'modules/';
+			$path['abstracts'] = ($input['abstracts']) ? $input['abstracts'] : $path['base'] . 'system/abstracts/';
+			$path['engines'] = ($input['engines']) ? $input['engines'] : $path['base'] . 'system/engines/';
+			$path['temp'] = ($input['tempPath']) ? $input['tempPath'] : $path['base'] . 'temp/';
+			$path['library'] = ($input['library']) ? $input['library'] : $path['base'] . 'system/library/';
+			$path['functions'] = ($input['functions']) ? $input['functions'] : $path['base'] . 'system/functions/';
+			$path['javascript'] = ($input['javascript']) ? $input['javascript'] : $path['base'] . 'javascript/';
+			$path['interfaces'] = ($input['interfaces']) ? $input['interfaces'] : $path['base'] . 'system/interfaces/';
+			$path['templates'] = ($input['templates']) ? $input['templates'] : $path['base'] . 'system/templates/';
+			$path['views'] = ($input['templates']) ? $input['templates'] : $path['base'] . 'system/views/';
+			$path['thirdparty'] = ($input['thirdparty']) ? $input['thirdparty'] : $path['base'] . 'system/thirdparty/';
+			$path['actions'] = ($input['actions']) ? $input['actions'] : $path['base'] . 'system/actions/';
+
+			$url['theme'] = 'data/themes/';
+			$url['icons'] = 'data/icons/';
+			$url['fonts'] = 'data/fonts/';
+			$url['modules'] = 'modules/';
+			$url['javascript'] = 'javascript/';
+			$url['modRewrite'] = (isset($input['url_modRewrite']));
+
+			$imezone = (isset($input['system_timezone'])) ? $input['system_timezone'] : 'UTC';
+
+
+			$cache = ($input['cacheHandler']) ? $input['cacheHandler'] : 'FileHandler'; // string, not boolean
+
+			// Write Config File
+			$directory = $config['path']['base'] . 'data/configuration/';
+			if(is_writable($directory) && !file_exists($directory . 'configuration.php'))
 			{
-				throw new InstallerException(sprintf('Cannot create the configuration file: The directory "%s" is not writeable.', CONFIG_DIRECTORY), InstallerException::CANNOT_CREATE_CONFIG);
+				$configFile = new ConfigFile($directory . 'configuration.php');
+				$configFile->set('path', 'base', $path['base']);
+				$configFile->set('path', 'theme', $path['theme']);
+				$configFile->set('path', 'icons', $path['icons']);
+				$configFile->set('path', 'fonts', $path['fonts']);
+				$configFile->set('path', 'config', $path['config']);
+				$configFile->set('path', 'mainclasses', $path['mainClasses']);
+				$configFile->set('path', 'modules', $path['packages']);
+				$configFile->set('path', 'abstracts', $path['abstracts']);
+				$configFile->set('path', 'engines', $path['engines']);
+				$configFile->set('path', 'temp', $path['temp']);
+				$configFile->set('path', 'library', $path['library']);
+				$configFile->set('path', 'functions', $path['functions']);
+				$configFile->set('path', 'javascript', $path['javascript']);
+				$configFile->set('path', 'interfaces', $path['interfaces']);
+				$configFile->set('path', 'templates', $path['templates']);
+				$configFile->set('path', 'views', $path['views']);
+				$configFile->set('path', 'thirdparty', $path['thirdparty']);
+				$configFile->set('path', 'actions', $path['actions']);
+
+				$configFile->set('url', 'theme', $url['theme']);
+				$configFile->set('url', 'icons', $url['icons']);
+				$configFile->set('url', 'fonts', $url['fonts']);
+				$configFile->set('url', 'modules', $url['modules']);
+				$configFile->set('url', 'javascript', $url['javascript']);
+
+				$configFile->set('url', 'modRewrite', $url['modRewrite']);
+
+				$configFile->set('system', 'cacheHandler', $cache);
+				$configFile->set('system', 'timezone', $imezone);
+				$configFile->write();
+
+			}else{
+				throw new CoreError('Configuration failed to save');
 			}
+			$config->reset();
+		}catch(Exception $e){
+			return false;
 		}
-		else if (!is_writeable(CONFIG_FILE))
-		{
-			throw new InstallerException(sprintf('Cannot save the configuration file: Permission denied on "%s".', CONFIG_FILE), InstallerException::CANNOT_SAVE_CONFIG);
-		}
-
-		$input = Input::getInput();
-
-		// Check paths
-		$path['base'] = ($input['base']) ? $input['base'] : $config['path']['base'];
-		$path['base'] = rtrim(trim($path['base']), '/') . '/';
-		$path['theme'] = ($input['theme']) ? $input['theme'] : $path['base'] . 'data/themes/';
-		$path['icons'] = ($input['icons']) ? $input['icons'] : $path['base'] . 'data/icons/';
-		$path['fonts'] = ($input['fonts']) ? $input['fonts'] : $path['base'] . 'data/fonts/';
-		$path['config'] = ($input['config']) ? $input['config'] : $path['base'] . 'data/configuration/';
-		$path['mainClasses'] = ($input['mainClasses']) ? $input['mainClasses'] : $path['base'] . 'system/classes/';
-		$path['packages'] = ($input['packages']) ? $input['packages'] : $path['base'] . 'modules/';
-		$path['abstracts'] = ($input['abstracts']) ? $input['abstracts'] : $path['base'] . 'system/abstracts/';
-		$path['engines'] = ($input['engines']) ? $input['engines'] : $path['base'] . 'system/engines/';
-		$path['temp'] = ($input['tempPath']) ? $input['tempPath'] : $path['base'] . 'temp/';
-		$path['library'] = ($input['library']) ? $input['library'] : $path['base'] . 'system/library/';
-		$path['functions'] = ($input['functions']) ? $input['functions'] : $path['base'] . 'system/functions/';
-		$path['javascript'] = ($input['javascript']) ? $input['javascript'] : $path['base'] . 'javascript/';
-		$path['interfaces'] = ($input['interfaces']) ? $input['interfaces'] : $path['base'] . 'system/interfaces/';
-		$path['templates'] = ($input['templates']) ? $input['templates'] : $path['base'] . 'system/templates/';
-		$path['views'] = ($input['templates']) ? $input['templates'] : $path['base'] . 'system/views/';
-		$path['thirdparty'] = ($input['thirdparty']) ? $input['thirdparty'] : $path['base'] . 'system/thirdparty/';
-		$path['actions'] = ($input['actions']) ? $input['actions'] : $path['base'] . 'system/actions/';
-
-		$url['theme'] = 'data/themes/';
-		$url['icons'] = 'data/icons/';
-		$url['fonts'] = 'data/fonts/';
-		$url['modules'] = 'modules/';
-		$url['javascript'] = 'javascript/';
-		$url['modRewrite'] = (isset($input['url_modRewrite']));
-
-		$imezone = (isset($input['system_timezone'])) ? $input['system_timezone'] : 'UTC';
-
-
-		$cache = ($input['cacheHandler']) ? $input['cacheHandler'] : 'FileHandler'; // string, not boolean
-
-		// Write Config File
-		$configFile = new ConfigFile(CONFIG_DIRECTORY . '/' . 'configuration.php');
-		$configFile->set('path', 'base', $path['base']);
-		$configFile->set('path', 'theme', $path['theme']);
-		$configFile->set('path', 'icons', $path['icons']);
-		$configFile->set('path', 'fonts', $path['fonts']);
-		$configFile->set('path', 'config', $path['config']);
-		$configFile->set('path', 'mainclasses', $path['mainClasses']);
-		$configFile->set('path', 'modules', $path['packages']);
-		$configFile->set('path', 'abstracts', $path['abstracts']);
-		$configFile->set('path', 'engines', $path['engines']);
-		$configFile->set('path', 'temp', $path['temp']);
-		$configFile->set('path', 'library', $path['library']);
-		$configFile->set('path', 'functions', $path['functions']);
-		$configFile->set('path', 'javascript', $path['javascript']);
-		$configFile->set('path', 'interfaces', $path['interfaces']);
-		$configFile->set('path', 'templates', $path['templates']);
-		$configFile->set('path', 'views', $path['views']);
-		$configFile->set('path', 'thirdparty', $path['thirdparty']);
-		$configFile->set('path', 'actions', $path['actions']);
-
-		$configFile->set('url', 'theme', $url['theme']);
-		$configFile->set('url', 'icons', $url['icons']);
-		$configFile->set('url', 'fonts', $url['fonts']);
-		$configFile->set('url', 'modules', $url['modules']);
-		$configFile->set('url', 'javascript', $url['javascript']);
-
-		$configFile->set('url', 'modRewrite', $url['modRewrite']);
-
-		$configFile->set('system', 'cacheHandler', $cache);
-		$configFile->set('system', 'timezone', $imezone);
-		$configFile->write();
-
-		$config->reset();
-
 		return true;
 	}
 

@@ -11,44 +11,39 @@
  */
 class Twig_Node_Expression_Compare extends Twig_Node_Expression
 {
-    protected $expr;
-    protected $ops;
-
-    public function __construct(Twig_Node_Expression $expr, $ops, $lineno)
+    public function __construct(Twig_Node_Expression $expr, Twig_NodeInterface $ops, $lineno)
     {
-        parent::__construct($lineno);
-        $this->expr = $expr;
-        $this->ops = $ops;
+        parent::__construct(array('expr' => $expr, 'ops' => $ops), array(), $lineno);
     }
 
     public function compile($compiler)
     {
-        $nbOps = count($this->ops) > 1;
-        if ('in' === $this->ops[0][0]) {
+        if ('in' === $this->getNode('ops')->getNode('0')->getAttribute('value')) {
             return $this->compileIn($compiler);
         }
 
-        $this->expr->compile($compiler);
-        $i = 0;
-        foreach ($this->ops as $op) {
-            if ($i) {
-                $compiler->raw(' && ($tmp'.$i);
-            }
-            list($op, $node) = $op;
-            $compiler->raw(' '.$op.' ');
+        $this->getNode('expr')->compile($compiler);
 
-            if ($nbOps) {
+        $nbOps = count($this->getNode('ops'));
+        for ($i = 0; $i < $nbOps; $i += 2) {
+            if ($i > 0) {
+                $compiler->raw(' && ($tmp'.($i / 2));
+            }
+
+            $compiler->raw(' '.$this->getNode('ops')->getNode($i)->getAttribute('value').' ');
+
+            if ($i != $nbOps - 2) {
                 $compiler
-                    ->raw('($tmp'.++$i.' = ')
-                    ->subcompile($node)
+                    ->raw('($tmp'.(($i / 2) + 1).' = ')
+                    ->subcompile($this->getNode('ops')->getNode($i + 1))
                     ->raw(')')
                 ;
             } else {
-                $compiler->subcompile($node);
+                $compiler->subcompile($this->getNode('ops')->getNode($i + 1));
             }
         }
 
-        for ($j = 1; $j < $i; $j++) {
+        for ($j = 1; $j < $i / 2; $j++) {
             $compiler->raw(')');
         }
     }
@@ -57,9 +52,9 @@ class Twig_Node_Expression_Compare extends Twig_Node_Expression
     {
         $compiler
             ->raw('twig_in_filter(')
-            ->subcompile($this->expr)
+            ->subcompile($this->getNode('expr'))
             ->raw(', ')
-            ->subcompile($this->ops[0][1])
+            ->subcompile($this->getNode('ops')->getNode(1))
             ->raw(')')
         ;
     }

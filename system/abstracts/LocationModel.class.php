@@ -27,6 +27,13 @@ abstract class LocationModel extends ModelBase
 	static public $autoName = false;
 
 	/**
+	 * Models that want to disallow the editing of their titles or define a custom title scheme should set this to false.
+	 *
+	 * @var bool
+	 */
+	static public $useTitle = true;
+
+	/**
 	 * This attributes defines whether this model requires a separate publish date field. When false, add/edit forms
 	 * will not include a field for publishDate.
 	 *
@@ -179,6 +186,9 @@ abstract class LocationModel extends ModelBase
 			}elseif(isset($this->properties['name'])){
 				$location->setName($this->properties['name']);
 			}
+
+			if(isset($this->properties['title']))
+				$location->setTitle($this->properties['title']);
 
 			if(isset($this->properties['status']))
 				$location->setStatus($this->properties['status']);
@@ -366,8 +376,8 @@ abstract class LocationModel extends ModelBase
 	 */
 	public function getDesignation()
 	{
-		if(isset($this['title'])) {
-			return $this['title'];
+		if(isset($this->title)) {
+			return $this->title;
 		} elseif(isset($this->name)) {
 			return ucwords(str_replace('_', ' ', $this->name));
 		} else {
@@ -471,8 +481,9 @@ abstract class LocationModel extends ModelBase
 		$locationInfo['publishDate'] = $location->getPublishDate();
 		$locationInfo['owner'] = $location->getOwner();
 		$locationInfo['group'] = $location->getOwnerGroup();
-		$locationInfo['name'] = $location->getName();
-		$locationInfo['status'] = $location->getStatus();
+		$locationInfo['status'] = $this->__get('status');
+		$locationInfo['name'] = $this->__get('name');
+		$locationInfo['title'] = $this->__get('title');
 		$array = array_merge($array, $locationInfo);
 		return $array;
 	}
@@ -518,6 +529,10 @@ abstract class LocationModel extends ModelBase
 	public function __get($offset)
 	{
 		$location = $this->getLocation();
+
+		if(in_array($offset, array('name', 'title', 'status')) && isset($this->properties[$offset]))
+			return $this->properties[$offset];
+
 		switch($offset) {
 			case 'owner':
 				return $location->getOwner();
@@ -531,6 +546,8 @@ abstract class LocationModel extends ModelBase
 				return $location->getPublishDate();
 			case 'name':
 				return $location->getName();
+			case 'title':
+				return $location->getTitle();
 		}
 		return parent::__get($offset);
 	}
@@ -545,6 +562,9 @@ abstract class LocationModel extends ModelBase
 			case 'publishDate':
 			case 'name':
 				return true;
+			case 'title':
+				$loc = $this->getLocation();
+				return $loc->getTitle() ? true : false;
 		}
 		return parent::__isset($offset);
 	}
@@ -554,7 +574,7 @@ abstract class LocationModel extends ModelBase
 		if(!is_scalar($value))
 			throw new LocationModelError('Model attributes must be scalar.');
 
-		if (in_array($value, array('owner', 'ownergroup', 'createdOn', 'lastModified', 'publishDate', 'name')))
+		if (in_array($value, array('owner', 'ownergroup', 'createdOn', 'lastModified', 'publishDate', 'name', 'title')))
 			return false;
 
 		return parent::__set($offset, $value);

@@ -6,16 +6,23 @@ class LocationModelForm extends ModelForm
 
 	protected function define()
 	{
-		parent::define();
-
 		// If the parent location isn't set, there should be some form to do so.
 		if($this->model->getLocation()->getParent() === false)
 			throw new CoreError('Unspecified  parent', 400);
 
 		$this->changeSection('location_information')->setLegend('Location Information');
 
+		if(staticHack($this->model, 'useTitle'))
+		{
+			$this->createInput('location_title')->
+				setLabel('Title')->
+				setType('title')->
+				addRule('required')->
+				addRule('alphanumericpunc');
+		}
+
 		if(!staticHack($this->model, 'autoName') && !$this->getInput('location_name'))
-		{ 
+		{
 			$this->createInput('location_name')->
 				setLabel('Name')->
 				addRule('alphanumeric')->
@@ -42,12 +49,12 @@ class LocationModelForm extends ModelForm
 				setType('datetime')->
 				setLabel('Publish Date');
 		}
+
+		parent::define();
 	}
 
 	public function populateInputs()
 	{
-		parent::populateInputs();
-
 		$inputGroups = $this->getInputGroups(($this->getInputList()));
 
 		if(isset($inputGroups['model'])) {
@@ -77,6 +84,13 @@ class LocationModelForm extends ModelForm
 				$input->setValue($this->model->getLocation()->getName());
 			}
 
+			if(in_array('title', $inputGroups['location']))
+			{
+				$input = $this->getInput('location_title');
+				$input->setType('text');
+				$input->setValue($this->model->getLocation()->getTitle());
+			}
+
 			if(in_array('owner', $inputGroups['location']))
 			{
 				$input = $this->getInput('location_owner');
@@ -97,6 +111,7 @@ class LocationModelForm extends ModelForm
 			}
 		}
 
+		parent::populateInputs();
 	}
 
 	/**
@@ -143,6 +158,17 @@ class LocationModelForm extends ModelForm
 			}
 
 			$this->model->name = $input['location_name'];
+		}
+
+		if(isset($input['location_title']))
+		{
+			if(in_array('title', $this->logFields) && $this->model->title != $input['location_title']) {
+				$old = $this->model->title;
+				$new = $input['location_title'];
+				ChangeLog::logChange($this->model, 'title changed', $user, 'Edit', "from '$old' to '$new'");
+			}
+
+			$this->model->title = $input['location_title'];
 		}
 
 		if(isset($input['location_publishDate']) && is_numeric($input['location_publishDate']))

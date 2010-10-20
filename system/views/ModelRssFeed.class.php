@@ -27,7 +27,7 @@ class ViewModelRssFeed
 	{
 		$baseModel = $this->model;
 
-		$title = isset($baseModel['title']) ? $baseModel['title'] : $baseModel['name'];
+		$title = $baseModel->getDesignation();
 
 		$url = $baseModel->getUrl();
 

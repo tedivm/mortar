@@ -11,6 +11,13 @@
  */
 class Twig_TokenParser_Block extends Twig_TokenParser
 {
+    /**
+     * Parses a token and returns a node.
+     *
+     * @param Twig_Token $token A Twig_Token instance
+     *
+     * @return Twig_NodeInterface A Twig_NodeInterface instance
+     */
     public function parse(Twig_Token $token)
     {
         $lineno = $token->getLine();
@@ -33,7 +40,7 @@ class Twig_TokenParser_Block extends Twig_TokenParser
                 }
             }
         } else {
-            $body = new Twig_NodeList(array(
+            $body = new Twig_Node(array(
                 new Twig_Node_Print($this->parser->getExpressionParser()->parseExpression(), $lineno),
             ));
         }
@@ -51,6 +58,11 @@ class Twig_TokenParser_Block extends Twig_TokenParser
         return $token->test('endblock');
     }
 
+    /**
+     * Gets the tag name associated with this token parser.
+     *
+     * @param string The tag name
+     */
     public function getTag()
     {
         return 'block';
