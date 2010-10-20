@@ -1,0 +1,16 @@
+{% if first %}
+<li id="topbar_menu_item_{{ name }}">
+{% else %}
+<li id="topbar_dropdown_menu_item_{{ name }}">
+{% endif %}
+	{{ item }}
+{% if not first %}
+</li>
+{% endif %}
+{% if first and not last %}
+	<ul class="topbar_dropdown_menu">
+{% endif %}
+{% if last and not first %}
+	</ul>
+</li>
+{% endif %}
