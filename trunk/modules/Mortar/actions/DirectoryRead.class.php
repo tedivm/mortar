@@ -15,7 +15,11 @@ class MortarActionDirectoryRead extends ModelActionLocationBasedRead
 	public function viewHtml($page)
 	{
 		$location = $this->model->getLocation();
-		$indexChild = $location->getChildByName('index');
+		if($default = $location->getMeta('defaultPage', true)) {
+			$indexChild = Location::getLocation($default);
+		} else {
+			$indexChild = $location->getChildByName('index');
+		}
 
 		if($indexChild)
 		{

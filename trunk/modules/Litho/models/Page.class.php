@@ -167,7 +167,8 @@ class LithoModelPage extends LocationModel
 	public function offsetSet($name, $value)
 	{
 		if($name == 'content') {
-			if(is_array($value) && isset($value['raw']) && isset($value['filtered'])) {
+			if((is_array($value) || $value instanceof ArrayAccess)
+				&& isset($value['raw']) && isset($value['filtered'])) {
 				$this->content['rawContent'] = $value['raw'];
 				$this->content['filteredContent'] = $value['filtered'];
 			} else {
