@@ -11,10 +11,17 @@
  */
 class Twig_TokenParser_For extends Twig_TokenParser
 {
+    /**
+     * Parses a token and returns a node.
+     *
+     * @param Twig_Token $token A Twig_Token instance
+     *
+     * @return Twig_NodeInterface A Twig_NodeInterface instance
+     */
     public function parse(Twig_Token $token)
     {
         $lineno = $token->getLine();
-        list($isMultitarget, $item) = $this->parser->getExpressionParser()->parseAssignmentExpression();
+        $targets = $this->parser->getExpressionParser()->parseAssignmentExpression();
         $this->parser->getStream()->expect('in');
         $seq = $this->parser->getExpressionParser()->parseExpression();
 
@@ -35,7 +42,15 @@ class Twig_TokenParser_For extends Twig_TokenParser
         }
         $this->parser->getStream()->expect(Twig_Token::BLOCK_END_TYPE);
 
-        return new Twig_Node_For($isMultitarget, $item, $seq, $body, $else, $withLoop, $lineno, $this->getTag());
+        if (count($targets) > 1) {
+            $keyTarget = $targets->getNode(0);
+            $valueTarget = $targets->getNode(1);
+        } else {
+            $keyTarget = new Twig_Node_Expression_AssignName('_key', $lineno);
+            $valueTarget = $targets->getNode(0);
+        }
+
+        return new Twig_Node_For($keyTarget, $valueTarget, $seq, $body, $else, $withLoop, $lineno, $this->getTag());
     }
 
     public function decideForFork($token)
@@ -48,6 +63,11 @@ class Twig_TokenParser_For extends Twig_TokenParser
         return $token->test('endfor');
     }
 
+    /**
+     * Gets the tag name associated with this token parser.
+     *
+     * @param string The tag name
+     */
     public function getTag()
     {
         return 'for';

@@ -52,6 +52,20 @@ class FormInput
 	public $posttext;
 
 	/**
+	 * Controls whether the input should have a <br> element added after it.
+	 *
+	 * @var bool
+	 */
+	public $noBreak;
+
+	/**
+	 * Controls whether the input should have the label inserted after or before.
+	 *
+	 * @var bool
+	 */
+	public $labelAfter;
+
+	/**
 	 * This is a list of classes the input has.
 	 *
 	 * @var array
@@ -202,11 +216,23 @@ class FormInput
 	/**
 	 * When noBreak is set to true, the form element won't have a <br> element inserted after it.
 	 *
-	 * @param string $posttext
+	 * @param string $br
 	 */
 	public function noBreak($br)
 	{
 		$this->noBreak = $br;
+		return $this;
+	}
+
+	/**
+	 * When labelAfter is set to true, the label for the element will be listed afterwards
+	 * (often desirable when formatting checkboxes or radio buttons.)
+	 *
+	 * @param string $la
+	 */
+	public function labelAfter($la)
+	{
+		$this->labelAfter = $la;
 		return $this;
 	}
 

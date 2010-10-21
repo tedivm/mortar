@@ -31,12 +31,24 @@ class Twig_Compiler implements Twig_CompilerInterface
      */
     public function __construct(Twig_Environment $env = null)
     {
-        $this->env = $env;
+        if (null !== $env) {
+            $this->setEnvironment($env);
+        }
     }
 
     public function setEnvironment(Twig_Environment $env)
     {
         $this->env = $env;
+    }
+
+    /**
+     * Returns the environment instance related to this compiler.
+     *
+     * @return Twig_Environment The environment instance
+     */
+    public function getEnvironment()
+    {
+        return $this->env;
     }
 
     /**
@@ -52,23 +64,29 @@ class Twig_Compiler implements Twig_CompilerInterface
     /**
      * Compiles a node.
      *
-     * @param  Twig_Node $node The node to compile
+     * @param Twig_NodeInterface $node   The node to compile
+     * @param integer            $indent The current indentation
      *
      * @return Twig_Compiler The current compiler instance
      */
-    public function compile(Twig_Node $node)
+    public function compile(Twig_NodeInterface $node, $indentation = 0)
     {
         $this->lastLine = null;
         $this->source = '';
-        $this->indentation = 0;
+        $this->indentation = $indentation;
 
         $node->compile($this);
 
         return $this;
     }
 
-    public function subcompile(Twig_Node $node)
+    public function subcompile(Twig_NodeInterface $node, $raw = true)
     {
+        if (false === $raw)
+        {
+            $this->addIndentation();
+        }
+
         $node->compile($this);
 
         return $this;
@@ -97,8 +115,16 @@ class Twig_Compiler implements Twig_CompilerInterface
     {
         $strings = func_get_args();
         foreach ($strings as $string) {
-            $this->source .= str_repeat(' ', $this->indentation * 2).$string;
+            $this->addIndentation();
+            $this->source .= $string;
         }
+
+        return $this;
+    }
+
+    public function addIndentation()
+    {
+        $this->source .= str_repeat(' ', $this->indentation * 4);
 
         return $this;
     }
@@ -154,11 +180,11 @@ class Twig_Compiler implements Twig_CompilerInterface
     /**
      * Adds debugging information.
      *
-     * @param Twig_Node $node The related twig node
+     * @param Twig_NodeInterface $node The related twig node
      *
      * @return Twig_Compiler The current compiler instance
      */
-    public function addDebugInfo(Twig_Node $node)
+    public function addDebugInfo(Twig_NodeInterface $node)
     {
         if ($node->getLine() != $this->lastLine) {
             $this->lastLine = $node->getLine();
@@ -194,20 +220,5 @@ class Twig_Compiler implements Twig_CompilerInterface
         $this->indentation -= $step;
 
         return $this;
-    }
-
-    /**
-     * Returns the environment instance related to this compiler.
-     *
-     * @return Twig_Environment The environment instance
-     */
-    public function getEnvironment()
-    {
-        return $this->env;
-    }
-
-    public function getTemplateClass($name)
-    {
-        return $this->getEnvironment()->getTemplateClass($name);
     }
 }

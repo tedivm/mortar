@@ -40,7 +40,7 @@ class LithoModelPage extends LocationModel
 			$revision = $this->getRevision($this->activeRevision);
 			if($revision->rawContent != $this->content['rawContent'] ||
 					$revision->filteredContent != $this->content['filteredContent']	||
-					$revision->title != $this->content['title'])
+					$revision->title != $this->properties['title'])
 			{
 				$revision = new PageRevision($this->getId(), $this->activeRevision);
 				$this->saveRevision($revision);
@@ -66,7 +66,7 @@ class LithoModelPage extends LocationModel
 	{
 		$revision->rawContent = $this->content['rawContent'];
 		$revision->filteredContent = $this->content['filteredContent'];
-		$revision->title = $this->content['title'];
+		$revision->title = $this->properties['title'];
 
 		if(isset($this->content['note']))
 			$revision->note = $this->content['note'];
@@ -81,7 +81,7 @@ class LithoModelPage extends LocationModel
 	{
 //		$revision = new PageRevision($this->getId(), $id);
 		$revision = $this->getRevision($id);
-		$this->content['title'] = $revision->title;
+		$this->properties['title'] = $revision->title;
 		$this->content['filteredContent'] = $revision->filteredContent;
 		$this->content['rawContent'] = $revision->rawContent;
 		if(isset($this->content['author']) && $this->content['author'] != $revision->author)

@@ -430,6 +430,11 @@ class Form
 				if($input->type == 'richtext')
 					$input->property('format', $this->richtextFormat);
 
+				if($input->type == 'file')
+					$inputHandler[$input->name] = isset($_FILES[$input->name])
+						? $_FILES[$input->name]['name']
+						: null;
+
 				$plugins->setInput($input);
 				$plugins->processInput($inputHandler);
 
@@ -616,12 +621,35 @@ class Form
 	}
 
 	/**
-	 * This removes a FormInput from the form completely. The second argument, section, is optional but makes
-	 * things much faster. If multiple inputs match (common with checkboxes) they are all returned.
+	 * This transforms the list of form input names into a multi-level array, to allow 
+	 * specific categories of inputs to be easily acted on individually.
 	 *
-	 * @param string $name
-	 * @param string $section = null
-	 * @return bool
+	 * @param array $inputNames
+	 * @return array
+	 */
+	public function getInputGroups($inputNames)
+	{
+		foreach($inputNames as $name)
+		{
+			if(strpos($name, '_') !== false)
+			{
+				$nameValues = explode('_', $name);
+				if(isset($nameValues[1]))
+				{
+					$inputGroups[$nameValues[0]][] = $nameValues[1];
+				}
+			}
+		}
+		return $inputGroups;
+	}
+
+	/**
+	 * This takes in an array of input names and seperates them into groups, using the underscore as the group_name
+	 * delimiter. model_name ends up being a value in $array['model'].
+	 *
+	 * @access protected
+	 * @param array $inputNames
+	 * @return array $array[groupName] = array(item, item, item).
 	 */
 	public function removeInput($name, $section = null)
 	{

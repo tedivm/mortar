@@ -11,13 +11,25 @@
 class Twig_Extension_I18n extends Twig_Extension
 {
     /**
-     * Returns the token parser instance to add to the existing list.
+     * Returns the token parser instances to add to the existing list.
      *
-     * @return array An array of Twig_TokenParser instances
+     * @return array An array of Twig_TokenParserInterface or Twig_TokenParserBrokerInterface instances
      */
     public function getTokenParsers()
     {
         return array(new Twig_TokenParser_Trans());
+    }
+
+    /**
+     * Returns a list of filters to add to the existing list.
+     *
+     * @return array An array of filters
+     */
+    public function getFilters()
+    {
+        return array(
+            'trans' => new Twig_Filter_Function('gettext'),
+        );
     }
 
     /**

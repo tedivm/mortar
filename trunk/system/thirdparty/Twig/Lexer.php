@@ -36,11 +36,13 @@ class Twig_Lexer implements Twig_LexerInterface
     const REGEX_NAME     = '/[A-Za-z_][A-Za-z0-9_]*/A';
     const REGEX_NUMBER   = '/[0-9]+(?:\.[0-9]+)?/A';
     const REGEX_STRING   = '/(?:"([^"\\\\]*(?:\\\\.[^"\\\\]*)*)"|\'([^\'\\\\]*(?:\\\\.[^\'\\\\]*)*)\')/Asm';
-    const REGEX_OPERATOR = '/<=? | >=? | [!=]= | \/\/ | \.\. | [(){}.,%*\/+~|-] | \[ | \] | \? | \:/Ax';
+    const REGEX_OPERATOR = '/<=? | >=? | [!=]= | = | \/\/ | \.\. | [(){}.,%*\/+~|-] | \[ | \] | \? | \:/Ax';
 
     public function __construct(Twig_Environment $env = null, array $options = array())
     {
-        $this->env = $env;
+        if (null !== $env) {
+            $this->setEnvironment($env);
+        }
 
         $this->options = array_merge(array(
             'tag_comment'  => array('{#', '#}'),

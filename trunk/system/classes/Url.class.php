@@ -105,15 +105,20 @@ class Url
 
 	public function __get($name)
 	{
+		if($name == 'location')
+			$name = 'locationid';
+
+		$name = strtolower($name);
+
 		return isset($this->attributes[$name]) ? $this->attributes[$name] : null;
 	}
 
 	public function __set($name, $value)
 	{
-		$name = strtolower($name);
-
 		if($name == 'location')
-			$name = 'locationId';
+			$name = 'locationid';
+
+		$name = strtolower($name);
 
 		if($name == 'module')
 		{
@@ -176,7 +181,7 @@ class Url
 	{
 		try
 		{
-			if(isset($this->attributes['locationId']))
+			if(isset($this->attributes['locationid']))
 			{
 				if(isset($this->attributes['action'])
 					&& $this->attributes['action'] == 'Add'
@@ -186,14 +191,14 @@ class Url
 					$actionInfo = $resource->getAction('Add');
 				}else{
 					$action = (isset($this->attributes['action'])) ? $this->attributes['action'] : 'Read';
-					$location = Location::getLocation($this->attributes['locationId']);
+					$location = Location::getLocation($this->attributes['locationid']);
 					$resource = $location->getResource();
 					$actionInfo = $resource->getAction($action);
 				}
 
 				$actionName = $actionInfo['className'];
 				$requiredPermission = staticHack($actionName, 'requiredPermission');
-				$permissions = new Permissions($this->attributes['locationId'], $userId);
+				$permissions = new Permissions($this->attributes['locationid'], $userId);
 				return $permissions->isAllowed($requiredPermission);
 
 
