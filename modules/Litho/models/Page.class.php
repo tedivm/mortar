@@ -166,16 +166,15 @@ class LithoModelPage extends LocationModel
 
 	public function offsetSet($name, $value)
 	{
-		if($name == 'content')
-		{
-			if(!isset($value['raw']) || !isset($value['filtered'])) {
-				$this->content['rawContent'] = $value;
-				$this->content['filteredContent'] = $value;
-			} else {
+		if($name == 'content') {
+			if(is_array($value) && isset($value['raw']) && isset($value['filtered'])) {
 				$this->content['rawContent'] = $value['raw'];
 				$this->content['filteredContent'] = $value['filtered'];
+			} else {
+				$this->content['rawContent'] = $value;
+				$this->content['filteredContent'] = $value;
 			}
-		}else{
+		} else {
 			return parent::offsetSet($name, $value);
 		}
 	}
