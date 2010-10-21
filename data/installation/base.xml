@@ -123,8 +123,8 @@
 							</location>
 
 							<location name="index" type="Page">
-								<content name="title">Welcome to Mortar</content>
-								<content>Mortar- default installation text coming soon!</content>
+								<property name="title">Welcome to Mortar</property>
+								<content>Mortar - default installation text coming soon!</content>
 							</location>
 
 
