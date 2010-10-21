@@ -99,23 +99,26 @@ class MenuSystem
 
 	public function installMode()
 	{
-		$url = new Url();
-		$url->module = PackageInfo::loadByName(null, 'Installer');
+		$url = (string) new Url();
+		$link = new HtmlObject('a');
 
-		$installerUrl = clone $url;
-		$installerUrl->action = 'Install';
-		$link = $installerUrl->getLink('Install');
-		$this->addItemToSubmenu('primary', 'Installation', $link, 'Install');
+		$installerUrl = $url . '?action=Install';
+		$installerLink = clone $link;
+		$installerLink->property('href', $installerUrl);
+		$installerLink->wrapAround('Install');
+		$this->addItemToSubmenu('primary', 'Installation', (string) $installerLink, 'Install');
 
-		$requirementUrl = clone $url;
-		$requirementUrl->action = 'Requirements';
-		$link = $requirementUrl->getLink('Check Requirements');
-		$this->addItemToSubmenu('primary', 'Installation', $link, 'Check Requirements');
+		$requirementsUrl = $url . '?action=Requirements';
+		$requirementsLink = clone $link;
+		$requirementsLink->property('href', $requirementsUrl);
+		$requirementsLink->wrapAround('Check Requirements');
+		$this->addItemToSubmenu('primary', 'Installation', (string) $requirementsLink, 'Check Requirements');
 
-		$htaccessUrl = clone $url;
-		$htaccessUrl->action = 'htaccess';
-		$link = $htaccessUrl->getLink('htaccess File');
-		$this->addItemToSubmenu('primary', 'Installation', $link, 'htaccess File');	
+		$htaccessUrl = $url . '?action=htaccess';
+		$htaccessLink = clone $link;
+		$htaccessLink->property('href', $htaccessUrl);
+		$htaccessLink->wrapAround('.htaccess File');
+		$this->addItemToSubmenu('primary', 'Installation', (string) $htaccessLink, '.htaccess File');
 	}
 
 }
