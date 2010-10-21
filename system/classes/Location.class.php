@@ -43,6 +43,14 @@ class Location
 	protected $name;
 
 	/**
+	 * This is the display title of the object's saved location
+	 *
+	 * @access protected
+	 * @var string
+	 */
+	protected $title;
+
+	/**
 	 * The resource type is used to find the resource that is saved at this location
 	 *
 	 * @access protected
@@ -249,6 +257,16 @@ class Location
 	}
 
 	/**
+	 * This function returns the title, or false if it hasn't been set yet
+	 *
+	 * @return unknown
+	 */
+	public function getTitle()
+	{
+		return isset($this->title) ? $this->title : false;
+	}
+
+	/**
 	 * This function returns the name, or false if it hasn't been set yet
 	 *
 	 * @return unknown
@@ -405,6 +423,16 @@ class Location
 	}
 
 	/**
+	 * Set the title for the location
+	 *
+	 * @param string $name
+	 */
+	public function setTitle($title)
+	{
+		$this->title = $title;
+	}
+
+	/**
 	 * Set the name for the location
 	 *
 	 * @param string $name
@@ -416,8 +444,6 @@ class Location
 
 		if(in_array(strtolower($name), $specialPaths))
 			throw new LocationError('Attempted to name location a reserved name: ' . $name);
-
-		//$reservedUrls = UrlReader::getSpecialPaths();
 
 		$this->name = str_replace(' ', '_', $name);
 	}
@@ -459,6 +485,7 @@ class Location
 					$locationInfo['id'] = $dbLocation->location_id;
 					$locationInfo['parent'] = $dbLocation->parent;
 					$locationInfo['name'] = $dbLocation->name;
+					$locationInfo['title'] = $dbLocation->title;
 					$locationInfo['resourceType'] = $dbLocation->resourceType;
 					$locationInfo['resourceId'] = $dbLocation->resourceId;
 					$locationInfo['createdOn'] = strtotime($dbLocation->creationDate . 'UTC');
@@ -530,6 +557,7 @@ class Location
 
 
 		$db_location->name = $this->name;
+		$db_location->title = $this->title;
 		$db_location->resourceType = $this->resourceType;
 		$db_location->resourceId = $this->resourceId;
 		$db_location->inherits = ($this->inherit) ? 1 : 0;

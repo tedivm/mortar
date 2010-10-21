@@ -19,29 +19,21 @@
  */
 class Twig_Node_BlockReference extends Twig_Node
 {
-    protected $name;
-
     public function __construct($name, $lineno, $tag = null)
     {
-        parent::__construct($lineno, $tag);
-        $this->name = $name;
+        parent::__construct(array(), array('name' => $name), $lineno, $tag);
     }
 
-    public function __toString()
-    {
-        return get_class($this).'('.$this->name.')';
-    }
-
+    /**
+     * Compiles the node to PHP.
+     *
+     * @param Twig_Compiler A Twig_Compiler instance
+     */
     public function compile($compiler)
     {
         $compiler
             ->addDebugInfo($this)
-            ->write(sprintf('$this->block_%s($context);'."\n", $this->name))
+            ->write(sprintf("\$this->getBlock('%s', \$context, \$blocks);\n", $this->getAttribute('name')))
         ;
-    }
-
-    public function getName()
-    {
-        return $this->name;
     }
 }

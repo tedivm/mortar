@@ -41,8 +41,8 @@ class TesseraActionThreadPostReply extends ModelActionLocationBasedEdit
 
 		$message = new TesseraModelMessage();
 		$message->setParent($loc);
+		$message->title = 'Re: ' . $this->model->title;
 		$message['content'] = $input['post_text'];
-		$message['title'] = 'Re: ' . $this->model['title'];
 		$message['owner'] = $user->getId();
 		$message['author'] = $user['name'];
 

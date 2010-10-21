@@ -18,6 +18,8 @@
 class FormToHtml
 {
 	protected $submitButton = false;
+	protected $includeSubmit = true;
+	protected $fullForm = true;
 	protected $form;
 	protected $name;
 	protected $inputs;
@@ -28,17 +30,19 @@ class FormToHtml
 	protected $errors;
 
 
-	protected $tagByType = array('richtext' => 'textarea',
-							'textarea' => 'textarea',
-							'select' => 'select',
-							'checkbox' => 'input',
-							'submit' => 'input',
-							'radio' => 'input',
-							'hidden' => 'input',
-							'image' => 'input',
-							'text' => 'input',
-							'password' => 'input',
-							'input' => 'input');
+	protected $tagByType = array(	'richtext' => 'textarea',
+					'textarea' => 'textarea',
+					'select' => 'select',
+					'checkbox' => 'input',
+					'submit' => 'input',
+					'radio' => 'input',
+					'hidden' => 'input',
+					'image' => 'input',
+					'text' => 'input',
+					'password' => 'input',
+					'file' => 'input',
+					'input' => 'input');
+
 
 
 
@@ -71,6 +75,7 @@ class FormToHtml
 	public function makeOutput()
 	{
 		$formId = $this->name;
+		$enctype = 'application/x-www-form-urlencoded';
 
 		$formHtml = new HtmlObject('form');
 		$formHtml->property('method', $this->form->getMethod())->
@@ -81,10 +86,11 @@ class FormToHtml
 
 		foreach($this->inputs as $inputs) {
 			foreach($inputs as $input) {
-				if($input->type == 'checkbox' && isset($input->properties['value']))
-					$inputId .= '_' . $input->properties['value'];
-				else
-					$inputId = $formId . "_" . $input->name;
+				if(($input->type == 'checkbox' || $input->type == 'radio') && isset($input->properties['value'])) {
+					$inputId = $formId . '_' . $input->name . '_' . $input->properties['value'];
+				} else {
+					$inputId = $formId . '_' . $input->name;
+				}
 				$input->property('id', $inputId);
 			}
 		}
@@ -136,6 +142,9 @@ class FormToHtml
 			{
 				$inputId = $input->property('id');
 
+				if($input->type === 'submit' && !$this->useSubmit)
+					continue;
+
 				if($input->type === 'richtext') {
 					$input->property($this->form->getMarkup(), 'true');
 					$input->type = 'textarea';
@@ -170,14 +179,17 @@ class FormToHtml
 					$inputHtml->addClass($metaDataClass);
 				}
 
+				if($input->type == 'file')
+					$enctype = 'multipart/form-data';
 
-				if($input->type == 'hidden')
-				{
+				if($input->type == 'hidden') {
 					$inputHtml->close(false);
 					$formHtml->wrapAround($inputHtml);
-				}else{
+				} else {
+					$inputHtml->wrapAround($input->property('contents'));
 
 					$labelHtml = new HtmlObject('label');
+
 					$labelHtml->property('for', $inputId)->
 						property('id', $inputId . '_label');
 
@@ -191,8 +203,22 @@ class FormToHtml
 							$labelHtml->property('title', $input->description);
 					}
 
-					$controlsDiv->wrapAround($labelHtml)->
-						wrapAround($inputHtml);
+					if($input->type == 'radio' || $input->type == 'checkbox')
+						$inputHtml->addClass('small_input');
+
+					if(isset($input->labelAfter) && $input->labelAfter) {
+						$labelHtml->addClass('label_after');
+						$inputHtml->addClass('input_label_after');
+
+						$controlsDiv->wrapAround($inputHtml)->
+							wrapAround($labelHtml);
+					} else {
+						$labelHtml->addClass('label_before');
+						$inputHtml->addClass('input_label_before');
+
+						$controlsDiv->wrapAround($labelHtml)->
+							wrapAround($inputHtml);
+					}
 
 					if(isset($this->errors[$input->name])) {
 						$errorLabel = new HtmlObject('label');
@@ -226,9 +252,11 @@ class FormToHtml
 
 			if($hasInputs)
 				$formHtml->wrapAround($sectionHtml);
+
+			$formHtml->property('enctype', $enctype);
 		}
 
-		if(!$this->submitButton)
+		if(!$this->submitButton && $this->includeSubmit)
 		{
 			$sectionHtml = new HtmlObject('div');
 			$sectionHtml->property('id', $this->name . "_section_" . 'control');
@@ -243,7 +271,9 @@ class FormToHtml
 
 		$formHtml = (string) $formHtml;
 
-		$output = $formHtml;
+		$output = $this->fullForm
+			? (string) $formHtml
+			: (string) $sectionHtml;
 
 		$formJsOptions = array();
 		$formJsOptions['validateOnLoad'] = $this->form->wasSubmitted();

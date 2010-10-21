@@ -45,6 +45,13 @@ class Email
 	protected $recipient_list = array();
 
 	/**
+	 * This is data regarding an attachment for the email, if one is provided.
+	 *
+	 * @var array
+	 */
+	protected $attachment;
+
+	/**
 	 * This constructor sets the  sender, subject and message of the email.
 	 *
 	 * @param string $from
@@ -88,10 +95,18 @@ class Email
 	public function sendEmail()
 	{
 		$headers  = 'MIME-Version: 1.0' . "\r\n";
-		$headers .= 'Content-type: text/plain; charset=iso-8859-1' . "\r\n";
 		$headers .= 'From: ' . $this->from . "\r\n";
 		$headers .= 'Return-Path: ' . $this->from . "\r\n";
-		$headers .= 'X-Mailer: PHP/' . phpversion();
+		$headers .= 'X-Mailer: PHP/' . phpversion() . "\r\n";
+
+		if(isset($this->attachment['type'])) {
+			$hash = md5(date('r', time()));
+			$headers .= 'Content-type: multipart/mixed; boundary="PHP-mixed-' . $hash . '"' . "\r\n";
+			$message = $this->prepareAttachmentBody($hash);
+		} else {
+			$headers .= 'Content-type: text/plain; charset=iso-8859-1' . "\r\n";
+			$message = $this->message;
+		}
 
 		$to = '';
 		$loop = false;
@@ -107,7 +122,14 @@ class Email
 						: $recipient['email'];
 		}
 
-		return mail($to, $this->subject, $this->message, $headers);
+		return mail($to, $this->subject, $message, $headers);
+	}
+
+	public function addAttachment($name, $type, $contents)
+	{
+		$this->attachment['name'] = $name;
+		$this->attachment['type'] = $type;
+		$this->attachment['contents'] = chunk_split(base64_encode($contents));
 	}
 
 	/**
@@ -176,6 +198,30 @@ class Email
 	{
 		$emailValidator = new EmailAddressValidator();
 		return $emailValidator->check_email_address($email);
+	}
+
+	/**
+	 * Prepares the message body using a specified divider string for sending text along with an 
+	 * attachment.
+	 *
+	 * @param string $boundary
+	 * @return string
+	 */
+	protected function prepareAttachmentBody($hash)
+	{
+		$body  = '--PHP-mixed-' . $hash . "\r\n";
+		$body .= 'Content-type: text/plain; charset="iso-8859-1"' . "\r\n";
+		$body .= 'Content-Transfer-Encoding: 7bit' . "\r\n\r\n";
+		$body .= $this->message . "\r\n\r\n";
+		$body .= '--PHP-mixed-' . $hash . "\r\n";
+		$body .= 'Content-type: ' . $this->attachment['type'];
+		$body .= '; name="' . $this->attachment['name'] . '"' . "\r\n";
+		$body .= 'Content-Transfer-Encoding: base64' . "\r\n";
+		$body .= 'Content-Disposition: attachment' . "\r\n\r\n";
+		$body .= $this->attachment['contents'] . "\r\n";
+		$body .= '--PHP-mixed-' . $hash;
+
+		return $body;
 	}
 
 }
