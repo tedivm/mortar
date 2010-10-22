@@ -116,6 +116,13 @@ class FormInput
 	protected $validationRules = array();
 
 	/**
+	 * An input mask to be applied to the input.
+	 *
+	 * @var string
+	 */
+	public $mask;
+
+	/**
 	 * This is an array of error messages to match failed validation checks.
 	 *
 	 * @var array
@@ -233,6 +240,18 @@ class FormInput
 	public function labelAfter($la)
 	{
 		$this->labelAfter = $la;
+		return $this;
+	}
+
+	/**
+	 * Sets the mask for this input. In masks, a = any letter, 9 = any digit, 
+	 * * = any alphanumeric character
+	 *
+	 * @param string $mask
+	 */
+	public function setMask($mask)
+	{
+		$this->mask = $mask;
 		return $this;
 	}
 
