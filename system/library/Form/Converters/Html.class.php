@@ -142,7 +142,7 @@ class FormToHtml
 			{
 				$inputId = $input->property('id');
 
-				if($input->type === 'submit' && !$this->useSubmit)
+				if($input->type === 'submit' && !$this->includeSubmit)
 					continue;
 
 				if($input->type === 'richtext') {
