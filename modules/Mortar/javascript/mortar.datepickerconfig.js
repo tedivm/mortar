@@ -15,7 +15,7 @@
 						$.fn.MortarFormDatepicker.defaults.datetime,
 						inputOpts.datetime.options);
 
-					$(this).datepicker(datetimeOpts)
+					$(this).datetimepicker(datetimeOpts)
 				}
 			});
 		});
@@ -25,16 +25,9 @@
 	};
 
 	$.fn.MortarFormDatepicker.defaults.datetime = {
-					duration: '',
-					showTime: true,
-					constrainInput: true,
-					stepMinutes: 1,
-					stepHours: 1,
-					altTimeField: '',
-					currentText: 'Now',
-					prevText: '<',
-					nextText: '>',	
-					time24h: false
+		ampm: true,
+		hourgrid: 4,
+		minutegrid: 5
 	};
 
 })(jQuery);
