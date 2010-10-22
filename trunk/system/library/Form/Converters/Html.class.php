@@ -277,7 +277,7 @@ class FormToHtml
 
 		$formJsOptions = array();
 		$formJsOptions['validateOnLoad'] = $this->form->wasSubmitted();
-		$jsStartup[] = '$("#' . $this->name . '").MorterForm(' . json_encode($formJsOptions) . ');';
+		$jsStartup[] = '$("#' . $this->name . '").MortarForm(' . json_encode($formJsOptions) . ');';
 
 		if(class_exists('ActivePage', false))
 		{

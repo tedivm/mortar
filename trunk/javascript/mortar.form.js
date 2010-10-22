@@ -3,10 +3,10 @@
  */
 (function($) {
 	// plugin definition
-	$.fn.MorterForm = function(options) {
+	$.fn.MortarForm = function(options) {
 
 		// build main options
-		var opts = $.extend({}, $.fn.MorterForm.defaults, options);
+		var opts = $.extend({}, $.fn.MortarForm.defaults, options);
 
 		// iterate over each matched element
 		// comment this out for utility functions
@@ -36,7 +36,7 @@
 				if(inputOpts.autocomplete && inputOpts.autocomplete.data)
 				{
 					autocompleteOpts = $.extend({},
-												$.fn.MorterForm.defaults.autocomplete,
+												$.fn.MortarForm.defaults.autocomplete,
 												inputOpts.autocomplete.options);
 
 					$(this).autocomplete(inputOpts.autocomplete.data, autocompleteOpts)
@@ -72,12 +72,12 @@
 	};
 
   // plugin defaults
-	$.fn.MorterForm.defaults = {
+	$.fn.MortarForm.defaults = {
   							tooltipClass:"formTip",
   							validationMetaClass:"validation"
   						};
 
-	$.fn.MorterForm.defaults.autocomplete = {
+	$.fn.MortarForm.defaults.autocomplete = {
 					dataType:"json",
 					cacheLength:10,
 					minChars:0,
