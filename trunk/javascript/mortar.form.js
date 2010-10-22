@@ -30,6 +30,9 @@
 
 				var inputOpts = $(this).metadata();
 
+				if(inputOpts.mask)
+					$(this).mask(inputOpts.mask);
+
 				if(inputOpts.autocomplete && inputOpts.autocomplete.data)
 				{
 					autocompleteOpts = $.extend({},

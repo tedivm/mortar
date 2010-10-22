@@ -413,6 +413,9 @@ class FormToHtml
 		if($input->property('html'))
 			$inputOptions['html'] = true;
 
+		if(isset($input->mask))
+			$inputOptions['mask'] = $input->mask;
+
 		if(isset($input->properties['autocomplete']) && $input->properties['autocomplete'])
 		{
 			$inputOptions['autocomplete']['data'] = $input->properties['autocomplete'];
