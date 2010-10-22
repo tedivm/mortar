@@ -1,5 +1,5 @@
 ﻿/*
-Copyright (c) 2003-2009, CKSource - Frederico Knabben. All rights reserved.
+Copyright (c) 2003-2010, CKSource - Frederico Knabben. All rights reserved.
 For licensing, see LICENSE.html or http://ckeditor.com/license
 */
 
@@ -101,7 +101,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 						node = null;
 				}
 				else
-					node = ( guard ( node ) === false ) ?
+					node = ( guard ( node, true ) === false ) ?
 						null : node.getPreviousSourceNode( true, type, guard );
 			}
 			else
@@ -115,7 +115,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 						node = null;
 				}
 				else
-					node = ( guard ( range.startContainer ) === false ) ?
+					node = ( guard ( range.startContainer, true ) === false ) ?
 						null : range.startContainer.getNextSourceNode( true, type, guard ) ;
 			}
 		}
@@ -359,12 +359,6 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 	{
 			return this.blockBoundary( { br : 1 } );
 	};
-	/**
-	 * Whether the node is a bookmark node's inner text node.
-	 */
-	CKEDITOR.dom.walker.bookmarkContents = function( node )
-	{
-	},
 
 	/**
 	 * Whether the to-be-evaluated node is a bookmark node OR bookmark node
@@ -380,7 +374,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 		{
 			return ( node && node.getName
 					&& node.getName() == 'span'
-					&& node.hasAttribute('_fck_bookmark') );
+					&& node.hasAttribute('_cke_bookmark') );
 		}
 
 		return function( node )
@@ -426,6 +420,26 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 			var isInvisible = whitespace( node ) || node.is && !node.$.offsetHeight;
 			return isReject ^ isInvisible;
 		};
+	};
+
+	var tailNbspRegex = /^[\t\r\n ]*(?:&nbsp;|\xa0)$/,
+		isNotWhitespaces = CKEDITOR.dom.walker.whitespaces( true ),
+		isNotBookmark = CKEDITOR.dom.walker.bookmark( false, true ),
+		fillerEvaluator = function( element )
+		{
+			return isNotBookmark( element ) && isNotWhitespaces( element );
+		};
+
+	// Check if there's a filler node at the end of an element, and return it.
+	CKEDITOR.dom.element.prototype.getBogus = function ()
+	{
+		var tail = this.getLast( fillerEvaluator );
+		if ( tail && ( !CKEDITOR.env.ie ? tail.is && tail.is( 'br' )
+				: tail.getText && tailNbspRegex.test( tail.getText() ) ) )
+		{
+			return tail;
+		}
+		return false;
 	};
 
 })();
