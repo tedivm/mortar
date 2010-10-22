@@ -1,5 +1,5 @@
 /*
- ### jQuery CKEditor Plugin v0.31 - 2010-01-21 ###
+ ### jQuery CKEditor Plugin v0.40 - 2010-03-26 ###
  * http://www.fyneworks.com/ - diego@fyneworks.com
  * Dual licensed under the MIT and GPL licenses:
  *   http://www.opensource.org/licenses/mit-license.php
@@ -21,12 +21,42 @@ $.extend($, {
  ckeditor:{
   waitFor: 10,// in seconds, how long should we wait for the script to load?
   config: { }, // default configuration
-  path: '/CKEditor/', // default path to CKEditor directory
+  path: '/ckeditor/', // default path to CKEditor directory
   selector: 'textarea.ckeditor', // jQuery selector for automatic replacements
 		editors: [], // array of element ids pointing to CKEditor instances
   loaded: false, // flag indicating whether CKEditor script is loaded
-  intercepted: null, // variable to store intercepted method(s)
   
+		//----------------------------------------------------------------------------------------------------
+		
+		// name of methods that should be automcatically intercepted so the plugin can disable
+  autoIntercept: [ 'submit', 'ajaxSubmit', 'ajaxForm', 'validate', 'valid' /* array of methods to intercept */ ],
+		// variable to store intercepted method(s)
+  intercepted: {},
+		// intercept handler
+  intercept: function(methods, context, args){
+   var method, value; args = args || [];
+   if(args.constructor.toString().indexOf("Array")<0) args = [ args ];
+   if(typeof(methods)=='function'){
+    $.ckeditor.update();
+    value = methods.apply(context || window, args);
+    return value;
+   };
+   if(methods.constructor.toString().indexOf("Array")<0) methods = [methods];
+   for(var i=0;i<methods.length;i++){
+    method = methods[i]+''; // make sure that we have a STRING
+    if(method) (function(method){ // make sure that method is ISOLATED for the interception
+     $.ckeditor.intercepted[method] = $.fn[method] || function(){};
+     $.fn[method] = function(){
+      $.ckeditor.update();
+      value = $.ckeditor.intercepted[method].apply(this, arguments);
+      return value;
+     }; // interception
+    })(method); // MAKE SURE THAT method IS ISOLATED for the interception
+   };// for each method
+  }, // $.ckeditor.intercept
+  
+		//----------------------------------------------------------------------------------------------------
+		
   // utility method to load instance of CKEditor
   instance: function(i){
 			var x = CKEDITOR.instances[i];
@@ -164,26 +194,7 @@ $.extend($, {
    // Return matched elements...
    return e;
   },
-  
-  // utility method to integrate this plugin with others...
-  intercept: function(){
-   if($.ckeditor.intercepted) return;
-   // This method intercepts other known methods which
-   // require up-to-date code from CKEditor
-   $.ckeditor.intercepted = {
-    ajaxSubmit: $.fn.ajaxSubmit || function(){}
-   };
-   $.fn.ajaxSubmit = function(){
-				//console.log(['ckeditor.intercepted','$.fn.ajaxSubmit',CKEDITOR.instances]);
-    $.ckeditor.update(); // update html
-    return $.ckeditor.intercepted.ajaxSubmit.apply( this, arguments );
-   };
-			// Also attach to conventional form submission
-			//$('form').submit(function(){
-   // $.ckeditor.update(); // update html
-   //});
-  },
-  
+		
   // utility method to create an instance of CKEditor
   editor: function(e /* elements */, o /* options */){
    // Create a local over-loaded copy of the default configuration
@@ -248,9 +259,21 @@ $.extend($, {
 			// Drop dead instances
 			//console.log(['ckeditor.start','clean']);
 			$.ckeditor.clean();
-   // Attach itself to known plugins...
-			//console.log(['ckeditor.start','intercept']);
-			$.ckeditor.intercept();
+		 
+			//console.log(['ckeditor.start','intercept form']);
+			// this code will automatically intercept native form submissions
+			$('form')
+			.not('ckeditor-intercepted')
+			.addClass('ckeditor-intercepted')
+			.submit(function(){ $.ckeditor.update() });
+			
+			//console.log(['ckeditor.start','intercept plugins']);
+			// utility method to integrate this plugin with others...
+			if($.ckeditor.autoIntercept){
+				$.ckeditor.intercept( $.ckeditor.autoIntercept /* array of methods to intercept */ );
+				$.ckeditor.autoIntercept = null; /* only run this once */
+   };
+			
 			// Create CKEDITOR
    return $.ckeditor.create(o);
   } // ckeditor.start
