@@ -91,6 +91,8 @@ class GraffitiCategorizer
 		$user = ActiveUser::getUser();
 		$catM = ModelRegistry::loadModel('Category', $cat);
 		$des = $catM->getDesignation();
+
+		$loc = Location::getLocation($loc);
 		$model = $loc->getResource();
 
 		if($has) {
