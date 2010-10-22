@@ -1,1 +1,3 @@
-$('.colorbox').colorbox();
+$(document).ready(function($){
+	$("a.colorbox").colorbox();
+});
