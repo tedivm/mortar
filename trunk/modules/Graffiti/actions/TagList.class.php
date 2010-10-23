@@ -11,7 +11,7 @@ class GraffitiActionTagList extends ActionBase
 	public function logic()
 	{
 		$query = Query::getQuery();
-		$searchString = isset($query['t']) ? $query['t'] . '%' : '%';
+		$searchString = isset($query['term']) ? $query['term'] . '%' : '%';
 		$limit = isset($query['limit']) && is_numeric($query['limit']) ? $query['limit'] : $this->limit;
 
 		if($limit > $this->maxLimit)
@@ -48,7 +48,9 @@ class GraffitiActionTagList extends ActionBase
 			}
 
 			while($results = $stmt->fetch_array())
-				$tagList[] = array('name' => $results['tag']);
+				$tagList[] = array(	'value' => $results['tag'],
+							'id' => $results['tag'],
+							'label' => $results['tag']);
 
 			$cache->storeData($tagList);
 		}
@@ -60,7 +62,7 @@ class GraffitiActionTagList extends ActionBase
 	{
 		$output = '';
 		if(count($this->list)) foreach($this->list as $tag)
-			$output .= $tag['name'] . '<br>';
+			$output .= $tag['value'] . '<br>';
 		return $output;
 	}
 
