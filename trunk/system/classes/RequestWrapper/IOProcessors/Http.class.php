@@ -170,7 +170,7 @@ class IOProcessorHttp extends IOProcessorCli
 
 		if((string) $url != $rawUrl)
 		{
-			throw new ResourceMoved('Non-Cannonical url used.');
+			throw new ResourceMoved('Non-Canonical url used.');
 		}
 	}
 
