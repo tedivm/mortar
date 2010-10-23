@@ -15,7 +15,7 @@ class MortarActionTemplateLookUp extends ActionBase
 		$this->ioHandler->addHeader('Expires', gmdate(HTTP_DATE, time() + $offset));
 
 		$query = Query::getQuery();
-		if(isset($query['q']) && ActiveUser::isLoggedIn() && isset($query['t'])) {
+		if(isset($query['term']) && ActiveUser::isLoggedIn() && isset($query['t'])) {
 
 			$themeName = $query['t'];
 
@@ -24,7 +24,7 @@ class MortarActionTemplateLookUp extends ActionBase
 			if($limit > $this->maxLimit)
 				$limit = $this->maxLimit;
 
-			$cache = CacheControl::getCache('templateLookup', 'bystring', $themeName, $query['q'], $limit);
+			$cache = CacheControl::getCache('templateLookup', 'bystring', $themeName, $query['term'], $limit);
 			$locList = $cache->getData();
 
 			if($cache->isStale())
@@ -34,13 +34,13 @@ class MortarActionTemplateLookUp extends ActionBase
 				$theme = new Theme($themeName);
 				$themePath = $theme->getPath();
 
-				$templates = glob($themePath . $query['q'] . "*.html");
+				$templates = glob($themePath . $query['term'] . "*.html");
 
 				foreach($templates as $temp) {
 					$path = explode('/', $temp);
 					$filename = $path[count($path) - 1];
 					$tempname = substr($filename, 0, -5);
-					$templateList[] = array('name' => $tempname);
+					$templateList[] = array('value' => $tempname, 'label' => $tempname, 'id' => $tempname);
 				}
 
 				$cache->storeData($templateList);
@@ -54,7 +54,7 @@ class MortarActionTemplateLookUp extends ActionBase
 	{
 		$output = '';
 		foreach($this->list as $template)
-			$output .= $template['name'] . '<br>';
+			$output .= $template['value'] . '<br>';
 		return $output;
 	}
 

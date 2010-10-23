@@ -47,7 +47,8 @@ class ModelActionLocationBasedThemeInfo extends ModelActionLocationBasedAdd
 			property('using', 'theme')->
 			setLabel('Template')->
 			addRule('alphanumeric')->
-			setValue($locTemp);
+			setValue($locTemp)->
+			property('theme', $locTheme);
 
 		$form->createInput('preview')->
 			setType('submit')->

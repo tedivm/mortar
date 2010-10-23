@@ -15,14 +15,14 @@ class MortarActionLocationLookUp extends ActionBase
 		$this->ioHandler->addHeader('Expires', gmdate(HTTP_DATE, time() + $offset));
 
 		$query = Query::getQuery();
-		if(isset($query['q']) && ActiveUser::isLoggedIn()) {
+		if(isset($query['term']) && ActiveUser::isLoggedIn()) {
 
 			$limit = isset($query['limit']) && is_numeric($query['limit']) ? $query['limit'] : $this->limit;
 
 			if($limit > $this->maxLimit)
 				$limit = $this->maxLimit;
 
-			$cache = CacheControl::getCache('locationLookup', 'bystring', $query['q'], $limit);
+			$cache = CacheControl::getCache('locationLookup', 'bystring', $query['term'], $limit);
 			$locList = $cache->getData();
 
 			if($cache->isStale())
@@ -41,7 +41,7 @@ class MortarActionLocationLookUp extends ActionBase
 					}
 				}
 
-				$path = explode('/', $query['q']);
+				$path = explode('/', $query['term']);
 
 				if(isset($prefix)) {
 					$parentPath = $prefix . '/';
@@ -80,7 +80,9 @@ class MortarActionLocationLookUp extends ActionBase
 
 					while($results = $stmt->fetch_array()) {
 						$name = Location::getPathById($results['location_id'], $parent);
-						$locList[] = array('name' => $name, 'id' => $results['location_id']);
+						$locList[] = array(	'label' => $name,
+									'value' => $name,
+									'id' => $results['location_id']);
 					}
 				}
 
@@ -97,7 +99,7 @@ class MortarActionLocationLookUp extends ActionBase
 	{
 		$output = '';
 		foreach($this->list as $loc)
-			$output .= $loc['id'] . ': ' . $loc['name'] . '<br>';
+			$output .= $loc['id'] . ': ' . $loc['value'] . '<br>';
 		return $output;
 	}
 

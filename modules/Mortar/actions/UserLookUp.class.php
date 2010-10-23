@@ -15,7 +15,7 @@ class MortarActionUserLookUp extends ActionBase
 		$this->ioHandler->addHeader('Expires', gmdate(HTTP_DATE, time() + $offset));
 
 		$query = Query::getQuery();
-		if(isset($query['q'])
+		if(isset($query['term'])
 			&& ActiveUser::isLoggedIn())
 		{
 			if(isset($query['m']))
@@ -37,13 +37,13 @@ class MortarActionUserLookUp extends ActionBase
 			if($limit > $this->maxLimit)
 				$limit = $this->maxLimit;
 
-			$cache = CacheControl::getCache('userLookup', 'bystring', $membergroup, $query['q'], $limit);
+			$cache = CacheControl::getCache('userLookup', 'bystring', $membergroup, $query['term'], $limit);
 			$userList = $cache->getData();
 
 			if($cache->isStale())
 			{
 				$userList = array();
-				$searchString = isset($query['q']) ? '%' . $query['q'] . '%' : '%';
+				$searchString = isset($query['term']) ? '%' . $query['term'] . '%' : '%';
 
 				$stmt = DatabaseConnection::getStatement('default_read_only');
 
@@ -63,7 +63,9 @@ class MortarActionUserLookUp extends ActionBase
 				}
 
 				while($results = $stmt->fetch_array())
-					$userList[] = array('name' => $results['name'], 'id' => $results['user_id']);
+					$userList[] = array(	'label' => $results['name'],
+								'id' => $results['user_id'],
+								'value' => $results['name']);
 
 				$cache->storeData($userList);
 			}
@@ -78,7 +80,7 @@ class MortarActionUserLookUp extends ActionBase
 	{
 		$output = '';
 		foreach($this->list as $user)
-			$output .= $user['id'] . ': ' . $user['name'] . '<br>';
+			$output .= $user['id'] . ': ' . $user['value'] . '<br>';
 		return $output;
 	}
 

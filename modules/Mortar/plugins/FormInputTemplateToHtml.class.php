@@ -33,7 +33,7 @@ class MortarPluginFormInputTemplateToHtml implements FormToHtmlHook
 
 		if(isset($input->properties['theme']))
 		{
-			$url->t = $input->properties['template'];
+			$url->t = $input->properties['theme'];
 		}
 		return $url;
 	}
@@ -42,14 +42,14 @@ class MortarPluginFormInputTemplateToHtml implements FormToHtmlHook
 	{
 		$id = $this->input->property('id');
 
-		$code = 'class = $("[id=\'' . $id . '\']").attr("using");
+		$code = 'var class = $("[id=\'' . $id . '\']").attr("using");
 		
-			$("[name=\'" + class + "\']").change(function() { 
-				$("[id=\'' . $id . '\']").flushCache();
-				$("[id=\'' . $id . '\']").setOptions({ extraParams: {t: $(this).val()}});
+			$("[name=\'" + class + "\']").change(function() {
+				var acmeta = $("[id=\'' . $id . '\']").metadata();
+				var acurl = acmeta.autocomplete.data + "?t=" + $(this).val();
+				$("[id=\'' . $id . '\']").autocomplete({source: acurl});
 			});';
 
-				
 		return array($code);
 	}
 
