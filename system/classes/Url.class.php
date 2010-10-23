@@ -153,12 +153,12 @@ class Url
 
 	public function __isset($name)
 	{
-		return isset($this->attributes[$name]);
+		return isset($this->attributes[strtolower($name)]);
 	}
 
 	public function __unset($name)
 	{
-		unset($this->attributes[$name]);
+		unset($this->attributes[strtolower($name)]);
 	}
 
 	/**
