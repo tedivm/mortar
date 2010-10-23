@@ -39,7 +39,9 @@
 												$.fn.MortarForm.defaults.autocomplete,
 												inputOpts.autocomplete.options);
 
-					$(this).autocomplete(inputOpts.autocomplete.data, autocompleteOpts)
+					autocompleteOpts.source = inputOpts.autocomplete.data;
+
+					$(this).autocomplete(autocompleteOpts);
 				}
 
 
@@ -78,21 +80,7 @@
   						};
 
 	$.fn.MortarForm.defaults.autocomplete = {
-					dataType:"json",
-					cacheLength:10,
-					minChars:0,
-					formatItem:function(data,i,max,value,term){ return value; },
-					parse: function parse(data) {
-									var parsed = [];
-									$.each(data, function(i, val){
-										parsed[parsed.length] = {
-											data: val.id,
-											value: val.name,
-											result: val.name
-										};
-									});
-									return parsed;
-								}
+					minLength:0
   						};
 
 })(jQuery);
