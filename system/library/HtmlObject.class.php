@@ -274,7 +274,8 @@ class HtmlObject
 		$string .= ($classString) ? ' class=\'' . trim($classString) . '\'': '';
 
 		foreach($this->properties as $name => $value)
-			$string .= ' ' . $name . '="' . $value . '"';
+			if ($value !== false)
+				$string .= ' ' . $name . '="' . $value . '"';
 
 
 		$string .= '>';
