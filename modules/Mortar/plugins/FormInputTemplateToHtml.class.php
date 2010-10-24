@@ -11,6 +11,7 @@ class MortarPluginFormInputTemplateToHtml implements FormToHtmlHook
 
 		$url = $this->getUrl($input);
 		$input->setType('input');
+		
 		$input->property('autocomplete', (string) $url);
 		$this->input = $input;
 
@@ -31,10 +32,6 @@ class MortarPluginFormInputTemplateToHtml implements FormToHtmlHook
 		$url->format = 'json';
 		$url->action = 'TemplateLookUp';
 
-		if(isset($input->properties['theme']))
-		{
-			$url->t = $input->properties['theme'];
-		}
 		return $url;
 	}
 
@@ -43,12 +40,19 @@ class MortarPluginFormInputTemplateToHtml implements FormToHtmlHook
 		$id = $this->input->property('id');
 
 		$code = 'var class = $("[id=\'' . $id . '\']").attr("using");
-		
-			$("[name=\'" + class + "\']").change(function() {
-				var acmeta = $("[id=\'' . $id . '\']").metadata();
-				var acurl = acmeta.autocomplete.data + "?t=" + $(this).val();
-				$("[id=\'' . $id . '\']").autocomplete({source: acurl});
-			});';
+
+			var getAcUrl = function (theme) {
+				var meta = $("[id=\'' . $id . '\']").metadata();
+				var url = meta.autocomplete.data + "?t=" + theme;
+				return url;
+			};
+
+			$("[id=\'' . $id . '\']").focus(function() {
+				var url = getAcUrl($("[name=\'" + class + "\']").val());
+				$("[id=\'' . $id . '\']").autocomplete({source: url});
+			});
+
+			';
 
 		return array($code);
 	}
