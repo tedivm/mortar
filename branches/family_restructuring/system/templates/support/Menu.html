@@ -1,0 +1,10 @@
+{% if level == 1 %}
+<div class="menu">
+{% endif %}
+<h{{ level }}>{{ name }}</h{{ level }}>
+<ul>
+{{ content }}
+</ul>
+{% if level == 1 %}
+</div>
+{% endif %}
