@@ -65,6 +65,7 @@ class AutoLoader
 
 	static function registerAutoloader()
 	{
+        ini_set('unserialize_callback_func', 'spl_autoload_call');
 		spl_autoload_register(array(new self, 'loadClass'));
 
 		// We need to load everything from the start because the autoloader's loadClass fucntion is dependent on the
@@ -93,6 +94,10 @@ class AutoLoader
 	{
 		if(class_exists($classname, false))
 			return true;
+
+		if(strpos($classname,'\\') !== false)
+			if(NamepsaceAutoloader::autoload($classname))
+				return true;
 
 		if(!isset(self::$classIndex))
 			self::createClassIndex();
@@ -397,6 +402,62 @@ class AutoLoader
 		}
 
 		return $classes;
+	}
+}
+
+class NamepsaceAutoloader
+{
+	static public function register()
+	{
+        ini_set('unserialize_callback_func', 'spl_autoload_call');
+		spl_autoload_register(array(new self, 'loadClass'));
+	}
+
+	static public function autoload($class)
+	{
+		$pieces = explode('\\', $class);
+
+		if(!isset($pieces[1]))
+			return false;
+
+		$config = Config::getInstance();
+
+		switch(strtolower($pieces[0]))
+		{
+			case 'modules':
+
+				array_shift($pieces);
+
+				if($package = PackageInfo::loadByName($pieces[0], $pieces[1]))
+				{
+					array_shift($pieces);
+					array_shift($pieces);
+				}elseif($package = PackageInfo::loadByName($pieces[0])){
+					array_shift($pieces);
+				}else{
+					return false;
+				}
+
+				$path = $config['path']['modules'] . implode('\\', $pieces) . '.class.php';
+				break;
+
+			case 'classes':
+			case 'actions':
+			case 'views':
+			case 'library':
+
+				$configGroup = array_shift($pieces);
+				$config['path'][$configGroup] . implode('/', $pieces) . '.class.php';
+				break;
+
+			default:
+				return false;
+		}
+
+		if(file_exists($path))
+			include($path);
+
+		return class_exists($class, false);
 	}
 }
 
