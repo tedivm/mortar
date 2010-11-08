@@ -420,8 +420,6 @@ class NamepsaceAutoloader
 		if(!isset($pieces[1]))
 			return false;
 
-		$config = Config::getInstance();
-
 		switch(strtolower($pieces[0]))
 		{
 			case 'modules':
@@ -438,7 +436,7 @@ class NamepsaceAutoloader
 					return false;
 				}
 
-				$path = $config['path']['modules'] . implode('\\', $pieces) . '.class.php';
+				$path = $package->getPath() . implode('\\', $pieces) . '.class.php';
 				break;
 
 			case 'classes':
