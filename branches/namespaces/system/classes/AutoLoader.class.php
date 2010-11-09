@@ -405,7 +405,7 @@ class AutoLoader
 	}
 }
 
-class NamepsaceAutoloader
+class NamespaceAutoloader
 {
 	static public function register()
 	{
@@ -417,6 +417,10 @@ class NamepsaceAutoloader
 	{
 		$pieces = explode('\\', $class);
 
+		if(array_shift($pieces) != 'Mortar')
+			return false;
+
+		// Since Mortar doesn't have any direct classes we should check that there are at least two elements left
 		if(!isset($pieces[1]))
 			return false;
 
@@ -445,10 +449,11 @@ class NamepsaceAutoloader
 			case 'library':
 
 				$configGroup = array_shift($pieces);
-				$config['path'][$configGroup] . implode('/', $pieces) . '.class.php';
+				$path = $config['path'][$configGroup] . implode('/', $pieces) . '.class.php';
 				break;
 
 			default:
+
 				return false;
 		}
 
