@@ -336,7 +336,7 @@ class PackageInfo
 		return $name;
 	}
 
-	public function getClassName($classType, $name, $require = false)
+	public function getClassName($classType, $name)
 	{
 		$moduleFolders = array('abstract' => 'abstracts',
 			'abstract' => 'abstracts',
