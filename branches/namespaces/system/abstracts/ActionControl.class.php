@@ -128,7 +128,10 @@ abstract class ActionControl extends ControlBase
 					return false;
 
 				$argument = '';
-				$className = $moduleInfo->getClassName('action', $actionInfo['name'], true);
+				$className = $moduleInfo->getClassName('action', $actionInfo['name']);
+
+				if($className === false)
+					throw new ActionControlInfo('Unable to find requested action.');
 
 				$query->save();
 				return array('className' => $className, 'argument' => $argument);
@@ -201,4 +204,5 @@ abstract class ActionControl extends ControlBase
 	}
 }
 
+class ActionControlInfo extends CoreInfo {}
 ?>

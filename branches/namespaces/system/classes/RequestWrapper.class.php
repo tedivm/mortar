@@ -184,12 +184,17 @@ class RequestWrapper
 
 
 				$argument = '';
-				$className = $moduleInfo->getClassName('action', $actionInfo['name'], true);
+				$className = $moduleInfo->getClassName('action', $actionInfo['name']);
+
+				if($className === false)
+					throw new RequestInfo('Unable to find requested action.');
 
 				$query->save();
 				return array('className' => $className, 'argument' => $argument);
 			}
 
+		}catch(ResourceNotFoundError $e){
+			throw $e;
 		}catch(Exception $e){
 			throw new ResourceNotFoundError();
 		}
@@ -468,4 +473,5 @@ class RequestWrapper
 }
 
 class RequestError extends CoreError {}
+class RequestInfo extends CoreInfo {}
 ?>
