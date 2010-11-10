@@ -42,7 +42,7 @@ class PackageContents
 	}
 
 
-	public function getClassNameByType($type, $shortname)
+	public function getClassName($type, $shortname)
 	{
 		$type = strtolower($type);
 
@@ -56,14 +56,19 @@ class PackageContents
 			if($type != 'Classes' && $type != 'Class')
 				$shortname = $type . '\\' . $shortname;
 
-			return 'Mortar\\' . $this->moduleName . '\\' . $shortname;
+			$className = 'Mortar\\' . $this->moduleName . '\\' . $shortname;
 		}else{
 
 			if($type != 'Classes' && $type != 'Class')
 				$shortname = $type . $shortname;
 
-			return $this->moduleName . $shortname;
+			$className = $this->moduleName . $shortname;
 		}
+
+
+
+
+		return $className;
 	}
 
 	protected function loadPackageContents()
@@ -92,10 +97,18 @@ class PackageContents
 	 * @param string $folder Package folder to look through
 	 * @return array
 	 */
-	protected function loadFiles($folder)
+	protected function loadFiles($type)
 	{
-		if(!isset(self::$moduleFolders[$folder]))
+		if(isset(self::$moduleFolders[$type]))
+		{
+			$folderName = self::$moduleFolders[$type];
+		}elseif($key = array_search($type, self::$moduleFolders)){
+			$folderName = $type;
+			$type = $key;
+		}else{
+			throw new PackageContentsError('Can not pull files from non-existant type: ' . $type);
 			return false;
+		}
 
 		$filePaths =  glob($this->path . self::$moduleFolders[$folder]  . '/*.class.php');
 
@@ -110,7 +123,7 @@ class PackageContents
 				$fileClassName = array_shift($tmpArray);
 				//explode, pop. explode. shift
 
-				$fileInfo['classname'] = $this->getClassNameByType($folder, $fileClassName);
+				$fileInfo['classname'] = $this->getClassName($folder, $fileClassName);
 				$fileInfo['name'] = $fileClassName;
 				$fileInfo['path'] = $filename;
 				$files[$fileClassName] = $fileInfo;
@@ -125,5 +138,7 @@ class PackageContents
 
 
 }
+
+class PackageContentsError extends CoreError {}
 
 ?>
