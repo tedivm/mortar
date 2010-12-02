@@ -51,7 +51,7 @@ class ProcessPool
 	static function removeProcess($category, $pids = null)
 	{
 		if(!isset($pids))
-			if($pids = $this->getProcesses())
+			if(!($pids = self::getProcesses($category)))
 				return; // only occurs when no processes exist to remove
 
 		if(!is_array($pids))
@@ -64,7 +64,8 @@ class ProcessPool
 				if(strpos($path, '.pid') !== (strlen($path) - 4))
 					continue;
 
-				unlink($path);
+				if(file_exists($path))
+					unlink($path);
 			}
 		return;
 	}
@@ -76,15 +77,18 @@ class ProcessPool
 	 * itself.
 	 *
 	 * @param string $category
-	 * @param int $maxProcesses If 0 then only 'dead' processes are removed
+	 * @param int $maxProcesses If false then only 'dead' processes are removed
 	 * @param boolean $removeDefunct
 	 */
 	static function pruneProcesses($category, $maxProcesses = 0, $removeDefunct = true)
 	{
 		$pids = self::getProcesses($category, $removeDefunct); // this also removes defunct processes
 
-		if(!$pids || $maxProcesses == 0)
+		if(!$pids || $maxProcesses === false)
 			return true;
+
+		if($maxProcesses <= 0)
+			return self::removeProcess($category);
 
 		$processCount = count($pids);
 		if($processCount <= $maxProcesses)
@@ -182,10 +186,7 @@ class ProcessPool
 	static protected function getPath($category, $pid = null)
 	{
 		if(!isset(self::$path))
-		{
-			$config = Config::getInstance();
-			self::$path = $config['path']['temp'] . 'pids/';
-		}
+			self::$path = PATH_TMP;
 
 		$path = self::$path . $category . '/';
 
