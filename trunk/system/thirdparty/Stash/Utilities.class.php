@@ -92,28 +92,26 @@ class StashUtilities
 		if(in_array($file, $badCalls))
 			throw new StashError('deleteRecursive function does not like that call.');
 
-		$file = rtrim($file, ' /');
-		if(is_dir($file)) {
-			$hiddenFiles = glob($file.'/.?*');
-			$files = glob($file.'/*');
-			$files = array_merge($hiddenFiles, $files);
+		$filePath = rtrim($file, ' /');
 
-			foreach($files as $filePath)
+		$directoryIt = new RecursiveDirectoryIterator($filePath);
+
+		foreach(new RecursiveIteratorIterator($directoryIt, RecursiveIteratorIterator::CHILD_FIRST) as $file)
+		{
+			$filename = $file->getPathname();
+			if($file->isDir())
 			{
-				if(substr($filePath, -2, 2) == '/.' || substr($filePath, -3, 3) == '/..')
-					continue;
-
-				if(is_dir($filePath) && !is_link($filePath)) {
-					self::deleteRecursive($filePath);
-				}else{
-					unlink($filePath);
+				$dirFiles = scandir($file->getPathname());
+				if($dirFiles && count($dirFiles) == 2)
+				{
+					$filename = rtrim($filename, '/.');
+					rmdir($filename);
 				}
+				unset($dirFiles);
+				continue;
 			}
-			rmdir($file);
-		}elseif(is_file($file)){
-			unlink($file);
-		}else{
 
+			unlink($filename);
 		}
 	}
 }
