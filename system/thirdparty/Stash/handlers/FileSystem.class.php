@@ -195,7 +195,12 @@ class StashFileSystem implements StashHandler
 		}else{
 
 			foreach($key as $index => $value)
-				$key[$index] = md5($value);
+			{
+				$md5 = md5($value);
+				$md5Array = str_split($md5, 3);
+				$md5Array = array_reverse($md5Array);
+				$key[$index] = implode('/', $md5Array);
+			}
 
 			switch (count($key))
 			{
@@ -270,25 +275,24 @@ class StashFileSystem implements StashHandler
 
 		foreach(new RecursiveIteratorIterator($directoryIt, RecursiveIteratorIterator::CHILD_FIRST) as $file)
 		{
+			$filename = $file->getPathname();
 			if($file->isDir())
 			{
 				$dirFiles = scandir($file->getPathname());
 				if($dirFiles && count($dirFiles) == 2)
 				{
-					rmdir($file->getPathname());
+					$filename = rtrim($filename, '/.');
+					rmdir($filename);
 				}
 
 				continue;
 			}
 
-
-			$path = $file->getPathname();
-
-			$data = self::getDataFromFile($path);
+			$data = self::getDataFromFile($filename);
 			if($data['expiration'] > START_TIME)
 				continue;
 
-			unlink($path);
+			unlink($filename);
 		}
 
 
