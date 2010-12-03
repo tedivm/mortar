@@ -27,7 +27,7 @@ class CacheControl
 		$cache->setupKey($args);
 		return $cache;
 	}
-	
+
 	static protected function setCacheHandler()
 	{
 		$handlers = Stash::getHandlers();
@@ -119,4 +119,16 @@ class CacheControl
 }
 
 class CacheError extends CoreError {}
+
+if(defined('CACHE_HANDLER') && !defined('STASH_DEFAULT_HANDLER'))
+	define('STASH_DEFAULT_HANDLER', CACHE_HANDLER);
+
+if(defined('PATH_TMP') && !defined('STASH_WORK_PATH'))
+	define('STASH_WORK_PATH', PATH_TMP);
+
+if(defined('DISABLECACHE') && !defined('STASH_DISABLE_CACHE'))
+	define('STASH_DISABLE_CACHE', DISABLECACHE);
+
+if(defined('CACHE_SETMEMONLY') && !defined('STASH_FORCE_MEM_ONLY'))
+	define('STASH_FORCE_MEM_ONLY', CACHE_SETMEMONLY);
 ?>
