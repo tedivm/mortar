@@ -196,10 +196,60 @@ class StashFileSystem implements StashHandler
 
 			foreach($key as $index => $value)
 			{
-				$md5 = md5($value);
-				$md5Array = str_split($md5, 3);
-				$md5Array = array_reverse($md5Array);
-				$key[$index] = implode('/', $md5Array);
+
+				if(is_numeric($value) && strpos($value, '.') === false)
+				{
+					$mod = ($value % 1024);
+					$rValue = strrev($value);
+					$rMod = ($rValue % 1024);
+					$vString = $mod . '/' . $rMod . '/' . $value;
+
+				}else{
+
+					$b32 = StashUtilities::base32_encode($value);
+
+					$chars = strlen($b32);
+
+					if($chars > 32)
+					{
+						$chars = 32;
+						$b32 = md5($value);
+					}
+
+					$path = '';
+					switch(true)
+					{
+
+						case $chars <= 3:
+							$path = $b32;
+							break;
+
+						case $chars >= 24:
+							$path = substr($b32, 24);
+
+						case $chars >= 16:
+							$path = substr($b32, 17, 7) . '/' . $path; // 10 to X [18, 19, 20, 21, 22, 23, 24]
+
+						case $chars >= 11:
+
+							$path = substr($b32, 10, 7) . '/' . $path; // 9 to 10 [11, 12, 13, 14, 15, 16, 17]
+
+						case $chars >= 6:
+
+							$path = substr($b32, 5, 5) . '/' . $path; // 6 to 10 [6, 7, 8, 9, 10]
+
+						case $chars >= 3:
+							$path = substr($b32, 2, 3) . '/' . $path; // 3 to 6 [3, 4, 5]
+							$path = substr($b32, 0, 2) . '/' .$path; // 1 to 3 [1, 2]
+
+						//  12/345/67890/1234567/8901234/567890123456789...
+					}
+
+					$vString = trim($path, '/');
+
+				}
+
+				$key[$index] = $vString;
 			}
 
 			switch (count($key))

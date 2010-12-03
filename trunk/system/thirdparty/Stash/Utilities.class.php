@@ -114,6 +114,35 @@ class StashUtilities
 			unlink($filename);
 		}
 	}
+
+	static function base32_encode($inString)
+	{
+		$map = 'ABCDEFGHIJKLMNOPQRSTUVWXWZ234567';
+		$output = '';
+		$string_binary = '';
+
+		// convert to bitstring
+		for ($i = 0; $i < strlen($inString); $i++)
+		{
+			$subString = substr($inString,$i,1);
+			$stringValueDec = ord($subString);
+			$stringValueBin = decbin($stringValueDec);
+			$string_binary .= str_pad($stringValueBin, 8, '0', STR_PAD_LEFT);
+		}
+
+		// even out the number of bits
+		$neededPad = 5 - (strlen($string_binary) % 5);
+		if($neededPad > 0 && $neededPad < 5)
+			$string_binary .= str_repeat('0', 5 - $neededPad);
+
+		$array_binary = str_split($string_binary, 5);
+
+		foreach($array_binary as $binaryChunk)
+			$output .= $map [bindec($binaryChunk)];
+
+		return $output;
+	}
+
 }
 
 ?>
