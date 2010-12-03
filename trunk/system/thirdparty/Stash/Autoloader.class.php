@@ -3,7 +3,8 @@
 class StashAutoloader
 {
 	static protected $classes = array(
-										'Handler' => 'Handler.class.php',
+										'StashHandler' => 'Handler.class.php',
+										'StashControl' => 'Control.class.php',
 										'StashError' => 'Error.class.php',
 										'StashWarning' => 'Warning.class.php',
 										'StashUtilities' => 'Utilities.class.php',
@@ -17,13 +18,19 @@ class StashAutoloader
 										'StashMultiHandler' => 'handlers/MultiHandler.class.php',
 									);
 
+	static public function register()
+	{
+		ini_set('unserialize_callback_func', 'spl_autoload_call');
+		spl_autoload_register(array(new self, 'autoload'));
+	}
 
 	static function autoload($classname)
 	{
+
 		if(!isset(self::$classes[$classname]))
 			return false;
 
-		$currentDir = dirname(__file__);
+		$currentDir = dirname(__file__) . '/';
 
 		if(!file_exists($currentDir . self::$classes[$classname]))
 			return false;
