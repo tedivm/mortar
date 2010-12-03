@@ -15,7 +15,6 @@
  *
  * @package System
  * @subpackage Caching
- * @todo Document the "Purge" functions
  */
 class Stash
 {
@@ -91,9 +90,9 @@ class Stash
 	 *
 	 * @var array
 	 */
-	protected static $handlers = array('FileSystem' => 'StashFileSystem',
-										'SQLiteMF' => 'StashSqlite',
-										'SQLite' => 'StashSqliteOneFile');
+	protected static $handlers = array('FileSystem' 	=> 'StashFileSystem',
+										'SQLiteMF' 		=> 'StashSqlite',
+										'SQLite' 		=> 'StashSqliteOneFile');
 	/**
 	 * This variable can be used to disable the cache system wide. It is used when the storage engine fails or if the
 	 * cache is being cleared.
@@ -142,9 +141,9 @@ class Stash
 	 */
 	public function __construct(StashHandler $handler)
 	{
-		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable) {
+		if((defined('STASH_DISABLE_CACHE') && STASH_DISABLE_CACHE) || self::$runtimeDisable) {
 			$this->cache_enabled = false;
-		} elseif(defined('CACHE_SETMEMONLY') && CACHE_SETMEMONLY) {
+		} elseif(defined('STASH_FORCE_MEM_ONLY') && STASH_FORCE_MEM_ONLY) {
 			$this->memOnly = true;
 		}
 
@@ -215,7 +214,7 @@ class Stash
 	public function clear()
 	{
 		try{
-			if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable || !$this->cache_enabled)
+			if((defined('STASH_DISABLE_CACHE') && STASH_DISABLE_CACHE) || self::$runtimeDisable || !$this->cache_enabled)
 				return false;
 
 			self::$memStore = array();
@@ -241,7 +240,7 @@ class Stash
 	 */
 	public function purge()
 	{
-		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable || !$this->cache_enabled)
+		if((defined('STASH_DISABLE_CACHE') && STASH_DISABLE_CACHE) || self::$runtimeDisable || !$this->cache_enabled)
 			return false;
 
 		try{
@@ -267,7 +266,7 @@ class Stash
 	{
 		self::$cacheCalls++;
 
-		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable || !$this->cache_enabled)
+		if((defined('STASH_DISABLE_CACHE') && STASH_DISABLE_CACHE) || self::$runtimeDisable || !$this->cache_enabled)
 			return null;
 
 		try
@@ -287,6 +286,11 @@ class Stash
 
 				if($this->storeMemory)
 					self::$memStore[$this->keyString] = $record;
+
+				// This is to keep the array from getting out of hand, particularly during long running processes
+				// as this would otherwise grow to huge amounts. Totally niave approach, will redo
+				if(count(self::$memStore) > 900)
+					self::$memStore = array();
 
 			}else{
 				return null;
@@ -325,7 +329,7 @@ class Stash
 	 */
 	public function storeData($data)
 	{
-		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable || !$this->cache_enabled)
+		if((defined('STASH_DISABLE_CACHE') && STASH_DISABLE_CACHE) || self::$runtimeDisable || !$this->cache_enabled)
 			return;
 
 		$store['return'] = $data;
@@ -357,7 +361,7 @@ class Stash
 	 */
 	public function extendCache()
 	{
-		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable || !$this->cache_enabled)
+		if((defined('STASH_DISABLE_CACHE') && STASH_DISABLE_CACHE) || self::$runtimeDisable || !$this->cache_enabled)
 			return;
 
 		return $this->storeData(self::$memStore[$this->keyString]['data']['return']);
@@ -389,7 +393,7 @@ class Stash
 	 */
 	protected function getHandler()
 	{
-		if((defined('DISABLECACHE') && DISABLECACHE) || self::$runtimeDisable || !$this->cache_enabled)
+		if((defined('STASH_DISABLE_CACHE') && STASH_DISABLE_CACHE) || self::$runtimeDisable || !$this->cache_enabled)
 			return false;
 
 		if(isset($this->handler))
