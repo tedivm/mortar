@@ -125,35 +125,32 @@ class StashFileSystem implements StashHandler
 				return false;
 		}
 
+		switch(StashUtilities::encoding($data))
+		{
+			case 'bool':
+				$dataString = (bool) $data ? 'true' : 'false';
+				break;
+
+			case 'serialize':
+				$dataString = 'unserialize(base64_decode(\'' . base64_encode(serialize($data)) . '\'))';
+				break;
+
+			case 'none':
+			default :
+				$dataString = 'base64_decode(\'' . base64_encode($data) . '\')';
+				break;
+		}
+
+		$storeString = '<?php ' . PHP_EOL .
+		'/* Cachekey: ' . $this->makeKeyString($key) . ' */' . PHP_EOL .
+		'/* Type: ' . gettype($data) . ' */' . PHP_EOL .
+		'$expiration = ' . $expiration . ';' . PHP_EOL .
+		'$data = ' . $dataString . ';' . PHP_EOL .
+		'?>';
+
 		$file = fopen($path, 'w+');
 		if(flock($file, LOCK_EX))
 		{
-			// by dumping this behind a php tag and comment, we make it inaccessible should it happen to become web
-			// accessible
-
-			switch(StashUtilities::encoding($data))
-			{
-				case 'bool':
-					$dataString = (bool) $data ? 'true' : 'false';
-					break;
-
-				case 'serialize':
-					$dataString = 'unserialize(base64_decode(\'' . base64_encode(serialize($data)) . '\'))';
-					break;
-
-				case 'none':
-				default :
-					$dataString = 'base64_decode(\'' . base64_encode($data) . '\')';
-					break;
-			}
-
-			$storeString = '<?php ' . PHP_EOL .
-			'/* Cachekey: ' . $this->makeKeyString($key) . ' */' . PHP_EOL .
-			'/* Type: ' . gettype($data) . ' */' . PHP_EOL .
-			'$expiration = ' . $expiration . ';' . PHP_EOL .
-			'$data = ' . $dataString . ';' . PHP_EOL .
-			'?>';
-
 			if(!fwrite($file, $storeString))
 			{
 				$success = false;
@@ -183,6 +180,9 @@ class StashFileSystem implements StashHandler
 
 		$basePath = $this->cachePath;
 
+		if(count($key) == 0)
+			return $basePath;
+
 		// When I profiled this compared to the "implode" function, this was much faster
 		// This is probably due to the small size of the arrays and the overhead from function calls
 		$memkey = '';
@@ -193,84 +193,25 @@ class StashFileSystem implements StashHandler
 		{
 			$path = self::$memStore['keys'][$memkey];
 		}else{
-
+			$pathPieces = array();
 			foreach($key as $index => $value)
 			{
-
 				if(is_numeric($value) && strpos($value, '.') === false)
 				{
 					$mod = ($value % 1024);
 					$rValue = strrev($value);
 					$rMod = ($rValue % 1024);
-					$vString = $mod . '/' . $rMod . '/' . $value;
-
+					$vString = '__' . $mod . '/' . $rMod . '/' . $value;
 				}else{
-
-					$b32 = StashUtilities::base32_encode($value);
-
-					$chars = strlen($b32);
-
-					if($chars > 32)
-					{
-						$chars = 32;
-						$b32 = md5($value);
-					}
-
-					$path = '';
-					switch(true)
-					{
-
-						case $chars <= 3:
-							$path = $b32;
-							break;
-
-						case $chars >= 24:
-							$path = substr($b32, 24);
-
-						case $chars >= 16:
-							$path = substr($b32, 17, 7) . '/' . $path; // 10 to X [18, 19, 20, 21, 22, 23, 24]
-
-						case $chars >= 11:
-
-							$path = substr($b32, 10, 7) . '/' . $path; // 9 to 10 [11, 12, 13, 14, 15, 16, 17]
-
-						case $chars >= 6:
-
-							$path = substr($b32, 5, 5) . '/' . $path; // 6 to 10 [6, 7, 8, 9, 10]
-
-						case $chars >= 3:
-							$path = substr($b32, 2, 3) . '/' . $path; // 3 to 6 [3, 4, 5]
-							$path = substr($b32, 0, 2) . '/' .$path; // 1 to 3 [1, 2]
-
-						//  12/345/67890/1234567/8901234/567890123456789...
-					}
-
-					$vString = trim($path, '/');
-
+					$md5 = md5($value);
+					$path = substr($md5, 0, 3) . '/' . substr($md5, 3, 3) . '/' . substr($md5, 6);
+					$vString = 'm_' . trim($path, '/');
 				}
 
-				$key[$index] = $vString;
+				$path .= $vString;
 			}
+			$path .= '.php';
 
-			switch (count($key))
-			{
-				case 0:
-					return $basePath;
-					break;
-
-				case 1:
-					$path = $key[0] . '.php';
-					break;
-
-				default:
-					$name = array_pop($key);
-					$path = '';
-					foreach($key as $group)
-						$path .= $group . '/';
-
-					$path .= $name . '.php';
-					break;
-			}
 			self::$memStore['keys'][$memkey] = $path;
 		}
 		return $basePath . $path;
