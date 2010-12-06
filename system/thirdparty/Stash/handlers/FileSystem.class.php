@@ -183,38 +183,40 @@ class StashFileSystem implements StashHandler
 		if(count($key) == 0)
 			return $basePath;
 
-		// When I profiled this compared to the "implode" function, this was much faster
-		// This is probably due to the small size of the arrays and the overhead from function calls
+		// When I profiled this compared to the "implode" function, this was much faster. This is probably due to the
+		// small size of the arrays and the overhead from function calls. This may seem like a ridiculous
+		// micro-optimization, but I only did it after profiling the code with xdebug and noticing a legitimate
+		// difference, most likely due to the number of times this function can get called in a scripts.
+		// Please don't look at me like that.
 		$memkey = '';
 		foreach($key as $group)
 			$memkey .= $group . '/' ;
 
 		if(isset(self::$memStore['keys'][$memkey]))
 		{
-			$path = self::$memStore['keys'][$memkey];
+			return $basePath . self::$memStore['keys'][$memkey];
 		}else{
 			$pathPieces = array();
+			$path = $basePath;
 			foreach($key as $index => $value)
 			{
-				if(is_numeric($value) && strpos($value, '.') === false)
-				{
-					$mod = ($value % 1024);
-					$rValue = strrev($value);
-					$rMod = ($rValue % 1024);
-					$vString = '__' . $mod . '/' . $rMod . '/' . $value;
-				}else{
-					$md5 = md5($value);
-					$path = substr($md5, 0, 3) . '/' . substr($md5, 3, 3) . '/' . substr($md5, 6);
-					$vString = 'm_' . trim($path, '/');
-				}
+				$md5 = md5($value);
+				$path .= (strpos($value, '__') === 0)
+							?	$md5
+							: 	substr($md5, 0, 1) . '/' . substr($md5, 1, 1) . '/' . substr($md5, 2);
 
-				$path .= $vString;
+				$path .= '/';
 			}
-			$path .= '.php';
-
+			$path .= trim($path, '/') . '.php';
 			self::$memStore['keys'][$memkey] = $path;
+
+			// in most cases the key will be used almost immediately or not at all, so it doesn't need to grow too large
+			if(count(self::$memStore['keys'][$memkey]) > 20)
+				foreach(array_rand(self::$memStore['keys'], 10) as $empty)
+					unset(self::$memStore['keys'][$empty]);
+
+			return $path;
 		}
-		return $basePath . $path;
 	}
 
 	/**
