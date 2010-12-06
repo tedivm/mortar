@@ -125,6 +125,7 @@ class BootStrapper
 	static protected function loadClasses()
 	{
 		require('system/classes/Exceptions.class.php');
+		require('system/classes/DepreciatedExceptions.class.php');
 		require('system/classes/Config.class.php');
 		require('system/library/IniFile.class.php');
 		require('system/library/ConfigFile.class.php');
