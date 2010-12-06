@@ -2,19 +2,64 @@
 /**
  * MortarExceptions
  *
+ * While originally developed for Mortar, these exceptions are completely stand alone and are very easy to integrate
+ * into existing projects. Developers can either call the different exceptions directly or create inheriting exception
+ * classes for the different objects in their projects. Since this library will include the exception's class name when
+ * logging or displaying errors the latter method is preferred.
+ *
+ * MortarException - 0
+ * MortarError - E_ERROR
+ * MortarWarning - E_WARNING
+ * MortarNotice - E_NOTICE
+ * MortarDepreciated - E_USER_DEPRECATED
+ * MortarUserError - E_USER_ERROR
+ * MortarUserWarning - E_USER_WARNING
+ * MortarUserNotice - E_USER_NOTICE
+ *
  * @copyright Copyright (c) 2009, Robert Hafner
- * @license http://www.mozilla.org/MPL/
+ * @license http://www.opensource.org/licenses/bsd-license.php
  */
 
+/*
+  Copyright (c) 2009, Robert Hafner
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+  following conditions are met:
+
+	* Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+		disclaimer.
+	* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+		following disclaimer in the documentation and/or other materials provided with the distribution.
+	* Neither the name of the "Mortar" nor the names of its contributors may be used to endorse or promote
+		products derived from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+
+
 if(!defined('EXCEPTION_OUTPUT'))
+{
+	/**
+	 * Defines the format which should be used for displaying errors- 'text', 'html' and 'simple' are accepted. This
+	 * can be defined by developers as long as it's done before this file is loaded.
+	 */
 	define('EXCEPTION_OUTPUT', (defined('STDIN') ? 'text' : 'html'));
+}
 
 /**
  * MortarException
  *
  * This class acts as the base for all the other exception classes. It outputs errors and a stack trace when the
  * debugging level is high enough. This class itself, while having the display and logging functions built in, is
- * designed
+ * designed as a drop in replacement for the Exception class and therefore does not actually log or display anything.
  */
 class MortarException extends Exception
 {
@@ -27,8 +72,8 @@ class MortarException extends Exception
 	protected $errorType = 0;
 
 	/**
-	 * This constructor calls uses the environmental constants ERROR_LOGGING and DEBUG to decide whether or not to log
-	 * the error and/or display it, respectively.
+	 * Initializes the exception and passes itself off to the static function "handleError", using the errorType
+	 * property as the errorLevel for that function. Additionally, if the function "runAction" exists it is called.
 	 *
 	 * @param string $message
 	 * @param int $code This should be left blank or replaced with an error code
@@ -41,6 +86,14 @@ class MortarException extends Exception
 			$this->runAction();
 	}
 
+	/**
+	 * Takes in any exception (including those not related to this library) and processes them as an error using the
+	 * errorLevel argument. Various error configuration values are extracted from the php runtime, such as the error
+	 * reporting and logging values, and if it's appropriate the exception is displayed or sent to the php logger.
+	 *
+	 * @param Exception $e
+	 * @param int $errorLevel This should correspond to the various php error constants (E_ERROR, E_WARNING, etc)
+	 */
 	static public function handleError(Exception $e, $errorLevel = null)
 	{
 		if(!isset($errorLevel))
@@ -98,6 +151,12 @@ class MortarException extends Exception
 		}
 	}
 
+	/**
+	 * Returns a single line description of the passed exception, suitable for sending to logging functions.
+	 *
+	 * @param Exception $e
+	 * @return string One line description of the passed exception.
+	 */
 	static public function getAsSimpleText(Exception $e)
 	{
 		$file = $e->getFile();
@@ -110,6 +169,13 @@ class MortarException extends Exception
 		return $output;
 	}
 
+	/**
+	 * Returns an extended description of the exception, typically used for cli output although it can also be used
+	 * inside applications for extended logging.
+	 *
+	 * @param Exception $e
+	 * @return string Extended breakdown of exception, including the stack trace.
+	 */
 	static public function getAsText(Exception $e)
 	{
 		// Add header
@@ -162,6 +228,13 @@ class MortarException extends Exception
 		return $output . '*****';
 	}
 
+	/**
+	 * Returns an extended description of the exception formatted in html, typically used to output errors by the
+	 * handleError function when display logging is enabled.
+	 *
+	 * @param Exception $e
+	 * @return string Extended breakdown of exception formatted in html.
+	 */
 	static public function getAsHtml(Exception $e)
 	{
 		$file = $e->getFile();
@@ -254,11 +327,67 @@ class MortarException extends Exception
 	}
 }
 
+
+/**
+ * MortarError
+ *
+ * This class corresponds to the E_ERROR error level in php, meaning that when E_ERROR is enabled by php (whether by the
+ * php.ini file or a runtime configuration change) then it will check to see if error logging or displaying are also
+ * activated, and if so will take the appropriate action.
+ */
 class MortarError extends MortarException { protected $errorType = E_ERROR; }
+
+/**
+ * MortarWarning
+ *
+ * This class corresponds to the E_WARNING error level in php, meaning that when E_WARNING is enabled by php (whether by
+ * the php.ini file or a runtime configuration change) then it will check to see if error logging or displaying are also
+ * activated, and if so will take the appropriate action.
+ */
 class MortarWarning extends MortarError { protected $errorType = E_WARNING; }
+
+/**
+ * MortarNotice
+ *
+ * This class corresponds to the E_NOTICE error level in php, meaning that when E_NOTICE is enabled by php (whether by
+ * the php.ini file or a runtime configuration change) then it will check to see if error logging or displaying are also
+ * activated, and if so will take the appropriate action.
+ */
 class MortarNotice extends MortarError { protected $errorType = E_NOTICE; }
+
+/**
+ * MortarDepreciated
+ *
+ * This class corresponds to the E_USER_DEPRECATED error level in php, meaning that when E_USER_DEPRECATED is enabled by
+ * php (whether by the php.ini file or a runtime configuration change) then it will check to see if error logging or
+ * displaying are also activated, and if so will take the appropriate action.
+ */
 class MortarDepreciated extends MortarError { protected $errorType = E_USER_DEPRECATED; }
+
+/**
+ * MortarUserError
+ *
+ * This class corresponds to the E_USER_ERROR error level in php, meaning that when E_USER_ERROR is enabled by php
+ * (whether by the php.ini file or a runtime configuration change) then it will check to see if error logging or
+ * displaying are also activated, and if so will take the appropriate action.
+ */
 class MortarUserError extends MortarError { protected $errorType = E_USER_ERROR; }
+
+/**
+ * MortarError
+ *
+ * This class corresponds to the E_USER_WARNING error level in php, meaning that when E_USER_WARNING is enabled by php
+ * (whether by the php.ini file or a runtime configuration change) then it will check to see if error logging or
+ * displaying are also activated, and if so will take the appropriate action.
+ */
 class MortarUserWarning extends MortarError { protected $errorType = E_USER_WARNING; }
+
+/**
+ * MortarUserNotice
+ *
+ * This class corresponds to the E_USER_NOTICE error level in php, meaning that when E_USER_NOTICE is enabled by php
+ * (whether by the php.ini file or a runtime configuration change) then it will check to see if error logging or
+ * displaying are also activated, and if so will take the appropriate action.
+ */
 class MortarUserNotice extends MortarError { protected $errorType = E_USER_NOTICE; }
 ?>
