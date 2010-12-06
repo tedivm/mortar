@@ -284,13 +284,14 @@ class Stash
 				if(!is_array($record))
 					return null;
 
-				if($this->storeMemory)
-					self::$memStore[$this->keyString] = $record;
-
 				// This is to keep the array from getting out of hand, particularly during long running processes
 				// as this would otherwise grow to huge amounts. Totally niave approach, will redo
 				if(count(self::$memStore) > 900)
-					self::$memStore = array();
+					foreach(array_rand(self::$memStore, 600) as $removalKey)
+						unset(self::$memStore[$removalKey]);
+
+				if($this->storeMemory)
+					self::$memStore[$this->keyString] = $record;
 
 			}else{
 				return null;
