@@ -164,7 +164,8 @@ class MortarException extends Exception
 		$message = $e->getMessage();
 		$code = $e->getCode();
 		$errorClass = get_class($e);
-		$output = $errorClass . '(' . $code . '): "' . $message;
+		$program = defined('PROGRAM') ? '*' . PROGRAM . '*  ' : '';
+		$output = $program . $errorClass . '(' . $code . '): "' . $message;
 		$output .= '" in file: ' . $file . ':' . $line;
 		return $output;
 	}
@@ -185,7 +186,8 @@ class MortarException extends Exception
 		$message = $e->getMessage();
 		$code = $e->getCode();
 		$errorClass = get_class($e);
-		$output .= '*  ' . $errorClass . '(' . $code . '): ' . $message . PHP_EOL;
+		$program = defined('PROGRAM') ? PROGRAM . ': ' : '';
+		$output .= '*  ' . $program . $errorClass . '(' . $code . '): ' . $message . PHP_EOL;
 		$output .= '*    in ' . $file . ' on line ' . $line . PHP_EOL;
 
 		// Add Call Stack
