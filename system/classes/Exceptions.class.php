@@ -81,7 +81,7 @@ class MortarException extends Exception
 	public function __construct($message = '', $code = 0)
 	{
 		parent::__construct($message, $code);
-		self::handleError($this, $this->errorType);
+		static::handleError($this, $this->errorType);
 		if(method_exists($this, 'runAction'))
 			$this->runAction();
 	}
@@ -129,7 +129,7 @@ class MortarException extends Exception
 		if($error_reporting & $errorLevel) // boolean &, not conditional &&
 		{
 			if($log_error)
-				error_log($errorSimpleText);
+				static::log($errorSimpleText);
 
 			if($display_error)
 			{
@@ -152,6 +152,21 @@ class MortarException extends Exception
 	}
 
 	/**
+	 * Logs the passed string using the php error logging functions. Anything passed here will end up in the PHP log,
+	 * whether that log is run by file, syslog, or anything else.
+	 *
+	 * @param string $logString The string to be logged.
+	 * @return bool Status of log attempt.
+	 */
+	static public function log($logString)
+	{
+		$logString = str_replace(PHP_EOL, ' ', $logString);
+		$program = defined('PROGRAM') ? '*' . PROGRAM . '*  ' : '';
+		$logText = $program . $logString;
+		return error_log($logText);
+	}
+
+	/**
 	 * Returns a single line description of the passed exception, suitable for sending to logging functions.
 	 *
 	 * @param Exception $e
@@ -164,8 +179,7 @@ class MortarException extends Exception
 		$message = $e->getMessage();
 		$code = $e->getCode();
 		$errorClass = get_class($e);
-		$program = defined('PROGRAM') ? '*' . PROGRAM . '*  ' : '';
-		$output = $program . $errorClass . '(' . $code . '): "' . $message;
+		$output = $$errorClass . '(' . $code . '): "' . $message;
 		$output .= '" in file: ' . $file . ':' . $line;
 		return $output;
 	}
