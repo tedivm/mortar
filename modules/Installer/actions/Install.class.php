@@ -72,8 +72,6 @@ class InstallerActionInstall extends ActionBase
 			if(!$requirementsCheck->checkRequirements($optionalValues))
 			{
 				$url = new Url();
-				$url->format = 'admin';
-				$url->module = PackageInfo::loadByName(null, 'Installer');
 				$url->action = 'Requirements';
 				$this->ioHandler->addHeader('Location', (string) $url);
 				// redirect away to the requirements page
