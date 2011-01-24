@@ -395,7 +395,7 @@ class Page implements ArrayAccess
 	 * @access protected
 	 * @param string|array $jsfiles
 	 */
-	protected function addJSInclude($jsfiles)
+	public function addJSInclude($jsfiles)
 	{
 		if(!is_array($jsfiles))
 			$jsfiles = array($jsfiles);
@@ -403,7 +403,7 @@ class Page implements ArrayAccess
 		foreach($jsfiles as $file)
 		{
 			if(!in_array($file, $this->jsIncludes))
-				$this->jsIncludes[] = '<script type="text/javascript" src="' . $file . '"></script>';
+				array_unshift($this->jsIncludes, '<script type="text/javascript" src="' . $file . '"></script>');
  		}
 	}
 
@@ -413,7 +413,7 @@ class Page implements ArrayAccess
 	 * @access protected
 	 * @param string|array $cssfiles
 	 */
-	protected function addCssInclude($cssfiles)
+	public function addCssInclude($cssfiles)
 	{
 		if(!is_array($cssfiles))
 			$cssfiles = array($cssfiles);
