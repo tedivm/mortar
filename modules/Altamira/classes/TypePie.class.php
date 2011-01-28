@@ -16,6 +16,11 @@ class AltamiraTypePie extends AltamiraTypeAbstract
 		}
 		return $opts;
 	}
+
+	public function getUseTags()
+	{
+		return true;
+	}
 }
 
 ?>

@@ -58,6 +58,14 @@ class AltamiraTypeBar extends AltamiraTypeAbstract
 
 		return $opts;
 	}
+
+	public function getUseTags()
+	{
+		if(isset($this->options['horizontal']) && $this->options['horizontal'])
+			return true;
+
+		return false;
+	}
 }
 
 ?>
