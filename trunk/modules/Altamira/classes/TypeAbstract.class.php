@@ -35,9 +35,16 @@ abstract class AltamiraTypeAbstract
 		return array();
 	}
 
+	public function getUseTags()
+	{
+		return false;
+	}
+
 	public function setOption($name, $value)
 	{
 		$this->options[$name] = $value;
+
+		return $this;
 	}
 }
 

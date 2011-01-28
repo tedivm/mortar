@@ -5,46 +5,103 @@ class AltamiraChart
 	protected $name;
 	protected $handler;
 
+	protected $useTags = false;
 	protected $types = array();
-	protected $options = array();
+	protected $options = array('seriesDefaults' => array('pointLabels' => array('show' => false)), 'highlighter' => array('show' => false) );
 	protected $series = array();
+	protected $labels = array();
 	protected $files = array();
 
 	public function __construct($name = null)
 	{
 		if(isset($name))
 			$this->name = $name;
+
+		return $this;
 	}
 
 	public function setTitle($title)
 	{
 		$this->options['title'] = $title;
+
+		return $this;
+	}
+
+	public function useHighlighting($size = 7.5)
+	{
+		$this->files = array_merge_recursive(array('jqplot.highlighter.min.js'), $this->files);
+		$this->options['highlighter'] = array('sizeAdjust' => $size);
+	}
+
+	public function useDates($axis = 'x')
+	{
+		$this->files = array_merge_recursive(array('jqplot.dateAxisRenderer.min.js'), $this->files);
+		if(strtolower($axis) === 'x') {
+			$this->options['axes']['xaxis']['renderer'] = '#$.jqplot.DateAxisRenderer#';
+		} elseif(strtolower($axis) === 'y') {
+			$this->options['axes']['yaxis']['renderer'] = '#$.jqplot.DateAxisRenderer#';		
+		}
+
+		return $this;
+	}
+
+	public function setAxisTicks($ticks, $axis = 'x')
+	{
+		if(strtolower($axis) === 'x') {
+			$this->options['axes']['xaxis']['ticks'] = $ticks;
+		} elseif(strtolower($axis) === 'y') {
+			$this->options['axes']['yaxis']['ticks'] = $ticks;
+		}
+
+		return $this;
+	}
+
+	public function setAxisLabel($label, $axis = 'x')
+	{
+		if(strtolower($axis) === 'x') {
+			$this->options['axes']['xaxis']['label'] = $label;
+		} elseif(strtolower($axis) === 'y') {
+			$this->options['axes']['yaxis']['label'] = $label;
+		}
+
+		return $this;
 	}
 
 	public function setType($type, $series = null)
 	{
 		if(isset($series) && isset($this->series[$series])) {
 			$series = $this->series[$series];
-			$label = $series->getLabel();
+			$title = $series->getTitle();
 		} else {
-			$label = 'default';
+			$title = 'default';
 		}
 		
 		$className = 'AltamiraType' . ucwords($type);
 		if(class_exists($className))
-			$this->types[$label] = new $className();
+			$this->types[$title] = new $className();
+
+		return $this;
 	}
 
 	public function setTypeOption($name, $option, $series = null)
 	{
 		if(isset($series)) {
-			$label = $series;
+			$title = $series;
 		} else {
-			$label = 'default';
+			$title = 'default';
 		}
 
-		if(isset($this->types[$label]))
-			$this->types[$label]->setOption($name, $option);
+		if(isset($this->types[$title]))
+			$this->types[$title]->setOption($name, $option);
+
+		return $this;
+	}
+
+	public function useTags($use = true)
+	{
+		$this->useTags = $use;
+
+		return $this;
 	}
 
 	public function setLegend($on = true, $location = 'ne', $x = 0, $y = 0)
@@ -65,28 +122,40 @@ class AltamiraChart
 				$legend['yoffset'] = $y;
 			$this->options['legend'] = $legend;
 		}
+
+		return $this;
 	}
 
 	public function addSeries(AltamiraSeries $series)
 	{
-		$this->series[$series->getLabel()] = $series;
+		$this->series[$series->getTitle()] = $series;
+
+		return $this;
 	}
 
 	public function getPluginList()
 	{
 		return array();
+
+		return $this;
 	}
 
 	public function getDiv($height = 400, $width = 500)
 	{
 		return '<div class="jqPlot" id="' . $this->name . 
 			'" style="height:'. $height . 'px; width:' . $width . 'px;"></div>';
+
+		return $this;
 	}
 
 	public function getFiles()
 	{
 		foreach($this->types as $type) {
-			$this->files = array_merge($this->files, $type->getFiles());
+			$this->files = array_merge_recursive($this->files, $type->getFiles());
+		}
+
+		foreach($this->series as $series) {
+			$this->files = array_merge_recursive($this->files, $series->getFiles());
 		}
 
 		return $this->files;
@@ -99,9 +168,15 @@ class AltamiraChart
 
 		$num = 0;
 		$vars = array();
+
+		$useTags = false;
+		if( (isset($this->types['default']) && $this->types['default']->getUseTags()) ||
+			(isset($this->useTags) && $this->useTags) )
+			$useTags = true;
+
 		foreach($this->series as $series) {
 			$num++;
-			$data = $series->getData();
+			$data = $series->getData($useTags);
 			
 			$varname = 'plot_' . $this->name . '_' . $num;
 			$vars[] = '#' . $varname . '#';
@@ -121,7 +196,7 @@ class AltamiraChart
 	protected function runSeriesOptions()
 	{
 		if(isset($this->types['default'])) {
-			$defaults = array();
+			$defaults = $this->options['seriesDefaults'];
 			$renderer = $this->types['default']->getRenderer();
 			if(isset($renderer))
 				$defaults['renderer'] = $renderer;
@@ -134,13 +209,13 @@ class AltamiraChart
 		$seriesOptions = array();
 		foreach($this->series as $series) {
 			$opts = $series->getOptions();
-			$label = $series->getLabel();
-			if(isset($this->types[$label])) {
-				$type = $this->types[$label];
+			$title = $series->getTitle();
+			if(isset($this->types[$title])) {
+				$type = $this->types[$title];
 				$opts['renderer'] = $type->getRenderer();
-				array_merge($opts, $type->getSeriesOptions());
+				array_merge_recursive($opts, $type->getSeriesOptions());
 			}
-			$opts['label'] = $label;
+			$opts['label'] = $title;
 			$seriesOptions[] = $opts;
 		}
 		$this->options['series'] = $seriesOptions;
@@ -149,7 +224,7 @@ class AltamiraChart
 	protected function runTypeOptions()
 	{
 		if(isset($this->types['default'])) {
-			$this->options = array_merge($this->options, $this->types['default']->getOptions());
+			$this->options = array_merge_recursive($this->options, $this->types['default']->getOptions());
 		}
 	}
 
