@@ -7,16 +7,6 @@ class AltamiraTypePie extends AltamiraTypeAbstract
 
 	protected $allowedRendererOptions = array('sliceMargin', 'showDataLabels', 'dataLabelPositionFactor', 'dataLabelNudge', 'dataLabels');
 
-	public function getRendererOptions()
-	{
-		$opts = array();
-		foreach($this->allowedRendererOptions as $opt) {
-			if(isset($this->options[$opt]))
-				$opts[$opt] = $this->options[$opt];
-		}
-		return $opts;
-	}
-
 	public function getUseTags()
 	{
 		return true;
