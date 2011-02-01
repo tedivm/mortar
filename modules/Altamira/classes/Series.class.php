@@ -12,7 +12,7 @@ class AltamiraSeries
 	protected $labels= array();
 	protected $options = array();
 	protected $files = array();
-	protected $allowedOptions = array('lineWidth', 'showLine', 'showMarker', 'shadowAngle', 'shadowOffset', 'shadowAlpha', 'shadowDepth', 'pointLabels');
+	protected $allowedOptions = array('lineWidth', 'showLine', 'showMarker', 'markerStyle', 'markerSize');
 
 	public function __construct($data, $title = null)
 	{
@@ -58,6 +58,29 @@ class AltamiraSeries
 		}
 	}
 
+	public function setShadow($use = true, $angle = 45, $offset = 1.25, $depth = 3, $alpha = 0.1)
+	{
+		$this->options['shadow'] = $use;
+		$this->options['shadowAngle'] = $angle;
+		$this->options['shadowOffset'] = $offset;
+		$this->options['shadowDepth'] = $depth;
+		$this->options['shadowAlpha'] = $alpha;
+
+		return $this;
+	}
+
+	public function setFill($use = true, $stroke = false, $color = null, $alpha = null)
+	{
+		$this->options['fill'] = $use;
+		$this->options['fillAndStroke'] = $stroke;
+		if(isset($color))
+			$this->options['fillColor'] = $color;
+		if(isset($alpha))
+			$this->options['fillAlpha'] = $alpha;
+
+		return $this;
+	}
+
 	public function getData($tags = false)
 	{
 		if($tags || $this->useTags) {
@@ -71,7 +94,12 @@ class AltamiraSeries
 			$data = array();
 			$tags = $this->tags;
 			foreach($this->data as $datum) {
-				$item = array($datum, array_shift($tags));
+				if(is_array($datum)) {
+					$item = $datum;
+					$item[] = array_shift($tags);
+				} else {
+					$item = array($datum, array_shift($tags));
+				}
 				if($useLabels) {
 					if(count($labels) === 0) {
 						$item[] = null;
@@ -91,15 +119,30 @@ class AltamiraSeries
 	public function setTitle($title)
 	{
 		$this->title = $title;
+
+		return $this;
 	}
 
 	public function useLabels($labels = array())
 	{
 		$this->useTags = true;
 		$this->useLabels = true;
-		$this->options['pointLabels'] = array('show' => true);
+		$this->options['pointLabels'] = array('show' => true, 'edgeTolerance' => 3);
 		$this->files[] = 'jqplot.pointLabels.min.js';
 		$this->labels = $labels;
+
+		return $this;
+	}
+
+	public function setLabelSetting($name, $value)
+	{
+		if($name === 'location' && in_array($value, array('n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'))) {
+			$this->options['pointLabels']['location'] = $value;
+		} elseif(in_array($name, array('xpadding', 'ypadding', 'edgeTolerance', 'stackValue'))) {
+			$this->options['pointLabels'][$name] = $value;
+		}
+
+		return $this;
 	}
 
 	public function getTitle()
@@ -109,26 +152,28 @@ class AltamiraSeries
 
 	public function setOption($name, $value)
 	{
-		$this->options[$name] = $value;
+		if(in_array($name, $this->allowedOptions))
+			$this->options[$name] = $value;
+
+		return $this;
 	}
 
 	public function getOptions()
 	{
-		$opts = array();
-
-		foreach($this->allowedOptions as $opt) {
-			if(isset($this->options[$opt]))
-				$opts[$opt] = $this->options[$opt];
-		}
+		$opts = $this->options;
 
 		if(isset($this->useLabels) && $this->useLabels)
 			$this->options['pointLabels']['show'] = true;
 
 		$markerOptions = array();
-		if(isset($this->options['markerStyle']))
+		if(isset($this->options['markerStyle'])) {
 			$markerOptions['style'] = $this->options['markerStyle'];
-		if(isset($this->options['markerSize']))
+			unset($opts['markerStyle']);
+		}
+		if(isset($this->options['markerSize'])) {
 			$markerOptions['size'] = $this->options['markerSize'];
+			unset($opts['markerSize']);
+		}
 
 		if(count($markerOptions) != 0)
 			$opts['markerOptions'] = $markerOptions;

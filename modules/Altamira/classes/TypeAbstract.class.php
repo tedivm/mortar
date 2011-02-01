@@ -6,6 +6,8 @@ abstract class AltamiraTypeAbstract
 	protected $renderer;
 	protected $options;
 
+	protected $allowedRendererOptions = array();
+
 	public function getFiles()
 	{
 		return $this->pluginFiles;
@@ -32,7 +34,12 @@ abstract class AltamiraTypeAbstract
 
 	public function getRendererOptions()
 	{
-		return array();
+		$opts = array();
+		foreach($this->allowedRendererOptions as $opt) {
+			if(isset($this->options[$opt]))
+				$opts[$opt] = $this->options[$opt];
+		}
+		return $opts;
 	}
 
 	public function getUseTags()

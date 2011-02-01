@@ -7,7 +7,10 @@ class AltamiraChart
 
 	protected $useTags = false;
 	protected $types = array();
-	protected $options = array('seriesDefaults' => array('pointLabels' => array('show' => false)), 'highlighter' => array('show' => false) );
+	protected $options = array(	'seriesDefaults' => array('pointLabels' => array('show' => false)), 
+					'highlighter' => array('show' => false),
+					'cursor' => array('showTooltip' => false, 'show' => false)
+				  );
 	protected $series = array();
 	protected $labels = array();
 	protected $files = array();
@@ -31,6 +34,24 @@ class AltamiraChart
 	{
 		$this->files = array_merge_recursive(array('jqplot.highlighter.min.js'), $this->files);
 		$this->options['highlighter'] = array('sizeAdjust' => $size);
+
+		return $this;
+	}
+
+	public function useZooming()
+	{
+		$this->files = array_merge_recursive(array('jqplot.cursor.min.js'), $this->files);
+		$this->options['cursor'] = array('zoom' => true, 'show' => true);
+
+		return $this;
+	}
+
+	public function useCursor()
+	{
+		$this->files = array_merge_recursive(array('jqplot.cursor.min.js'), $this->files);
+		$this->options['cursor'] = array('show' => true, 'showTooltip' => true);
+
+		return $this;		
 	}
 
 	public function useDates($axis = 'x')
@@ -45,7 +66,7 @@ class AltamiraChart
 		return $this;
 	}
 
-	public function setAxisTicks($ticks, $axis = 'x')
+	public function setAxisTicks($axis, $ticks)
 	{
 		if(strtolower($axis) === 'x') {
 			$this->options['axes']['xaxis']['ticks'] = $ticks;
@@ -56,7 +77,29 @@ class AltamiraChart
 		return $this;
 	}
 
-	public function setAxisLabel($label, $axis = 'x')
+	public function setAxisOptions($axis, $name, $value)
+	{
+		if(strtolower($axis) === 'x' || strtolower($axis) === 'y') {
+			$axis = strtolower($axis) . 'axis';
+
+			if (in_array($name, array('min', 'max', 'numberTicks', 'tickInterval', 'numberTicks'))) {
+				$this->options['axes'][$axis][$name] = $value;
+			} elseif(in_array($name, array('showGridline', 'formatString'))) {
+				$this->options['axes'][$axis]['tickOptions'][$name] = $value;			
+			}
+		}
+
+		return $this;	
+	}
+
+	public function setSeriesColors($colors)
+	{
+		$this->options['seriesColors'] = $colors;
+
+		return $this;
+	}
+
+	public function setAxisLabel($axis, $label)
 	{
 		if(strtolower($axis) === 'x') {
 			$this->options['axes']['xaxis']['label'] = $label;
@@ -122,6 +165,17 @@ class AltamiraChart
 				$legend['yoffset'] = $y;
 			$this->options['legend'] = $legend;
 		}
+
+		return $this;
+	}
+
+	public function setGrid($on = true, $color = null, $background = null)
+	{
+		$this->options['grid']['drawGridLines'] = $on;
+		if(isset($color))
+			$this->options['grid']['gridLineColor'] = $color;
+		if(isset($background))
+			$this->options['grid']['background'] = $background;
 
 		return $this;
 	}
