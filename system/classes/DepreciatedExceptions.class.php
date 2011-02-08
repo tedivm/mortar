@@ -16,9 +16,9 @@ class CoreUserError extends MortarUserError {}
 class CoreDepreciated extends MortarDepreciated {}
 class CoreDepreciatedError extends MortarError {}
 
-class AuthenticationError extends MortarUserWarning {}
-class ResourceNotFoundError extends MortarUserNotice {}
-class ResourceMoved extends MortarUserNotice {}
+class AuthenticationError extends MortarWarning {}
+class ResourceNotFoundError extends MortarNotice {}
+class ResourceMoved extends MortarNotice {}
 
 class TypeMismatch extends MortarError
 {
