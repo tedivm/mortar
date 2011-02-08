@@ -12,23 +12,9 @@
 //define('RUNTIME_PROFILE', 'production');
 
 
-/*
- * Error Handling
- *
- * This sections defines how errors, including php errors, are displayed and logged. For options requiring a severity
- * a number from the list below is expected, with higher levels including all those below.
- *
- * 5 - Info
- * 4 - User Errors (failed logins, 404s, etc)
- * 3 - Notices
- * 2 - Warnings
- * 1 - Errors
- * 0 - None
- *
- */
-
-/* This specifies what severity of errors are outputted to the user, with the default being none. */
-//define('DEBUG', 0);
+/* This specifies what severity of errors are outputted to the user, with the default being none.
+ * If this isn't set than the system will used the PHP configuration values. */
+//define('ERROR_HANDLING', E_ALL | E_STRICT);
 
 /* This specifies what types of errors are logged to the database. */
 //define('ERROR_LOGGING', 3);

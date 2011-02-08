@@ -1,14 +1,6 @@
 <?php
 // Developer Constants
-BootStrapper::define('DEBUG', 0);
-// 4,		3,		2,			1,		0
-// notices,	info, 	warning, 	error,	none
-// strict - E_STRICT with no Mortar error displays.
-// The higher the number, the more information you get. This constant also controls the php error levels- 0 disables
-// error reporting (useful for production environments), while 3 will give all errors and notices. For development
-// purposes your best bet would be 2 or 3.
-BootStrapper::define('STRICT', false);
-BootStrapper::define('ERROR_LOGGING', 3);
+BootStrapper::define('ERROR_HANDLING', 0);
 BootStrapper::define('IGNOREPERMISSIONS', false);	//FOR TESTING ONLY!!!!
 // This was placed in while testing the permissions code during the early creation phases
 // It still comes in handy when testing those things, but if turned on in a development environment
