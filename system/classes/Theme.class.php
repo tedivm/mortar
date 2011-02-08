@@ -38,14 +38,6 @@ class Theme extends ContentBase
 	protected $jsUrls;
 
 	/**
-	 * Whether js and css minification is enabled
-	 *
-	 * @access protected
-	 * @var bool
-	 */
-	protected $allowMin = true;
-
-	/**
 	 * The iconset currently in use by this theme
 	 *
 	 * @access protected
@@ -76,9 +68,6 @@ class Theme extends ContentBase
 	public function __construct($name, $depth = 0)
 	{
 		$config = Config::getInstance();
-
-		if(defined('DEBUG') && DEBUG > 1)
-			$this->allowMin = false;
 
 		$this->name = $name;
 		$this->url = ActiveSite::getLink('theme') . $name . '/';

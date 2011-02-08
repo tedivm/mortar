@@ -1,7 +1,5 @@
 <?php
-BootStrapper::define('DEBUG', 2);
-BootStrapper::define('ERROR_LOGGING', 5);
-BootStrapper::define('STRICT', false);
+BootStrapper::define('ERROR_HANDLING', 2);
 BootStrapper::define('IGNOREPERMISSIONS', false);	//FOR TESTING ONLY!!!!
 BootStrapper::define('BENCHMARK', true);
 BootStrapper::define('DISABLECACHE', false);

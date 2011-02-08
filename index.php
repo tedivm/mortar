@@ -92,34 +92,9 @@ class BootStrapper
 
 		// Error Handling Setup
 
-		switch(DEBUG)
-		{
-			case 3:
-				$errorLevel = E_ALL;
-				break;
+		if(defined('ERROR_HANDLING_LEVEL') && is_numeric(ERROR_HANDLING_LEVEL))
+			error_reporting(ERROR_HANDLING_LEVEL);
 
-			case 2:
-				$errorLevel = E_ALL ^ E_NOTICE;
-				break;
-
-			case 1:
-				$errorLevel = E_ERROR | E_PARSE;
-				break;
-
-			case 0:
-				$errorLevel = 0;
-				break;
-
-			default:
-			case 4:
-				$errorLevel = E_ALL;
-				break;
-		}
-
-		if(STRICT)
-			$errorLevel = $errorLevel | E_STRICT;
-
-		error_reporting($errorLevel);
 	}
 
 	static protected function loadClasses()
