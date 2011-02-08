@@ -289,9 +289,11 @@ abstract class ModelBase implements Model
 			$hook->runFirstSave($this);
 		}
 
-		$search = Search::getSearch();
-		if($search->liveIndex())
-			$search->index($this);
+		if(!defined('INSTALLMODE') || !(INSTALLMODE)) {
+			$search = Search::getSearch();
+			if($search->liveIndex())
+				$search->index($this);
+		}
 
 		return true;
 	}
