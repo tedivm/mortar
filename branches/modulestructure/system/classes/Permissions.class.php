@@ -263,7 +263,7 @@ class Permissions
 	 * model's permissions are tested directly; otherwise, the parent's permissions are returned.
 	 *
 	 * @param array $locs
-	 * @param MortarModelUser $user
+	 * @param MortarCoreModelUser $user
 	 * @param string $action
 	 * @return array
 	 */
@@ -334,7 +334,7 @@ class Permissions
 	 * be cached separately. Used as a helper by checkListPermissions.
 	 *
 	 * @param array $parents
-	 * @param MortarModelUser $user
+	 * @param MortarCoreModelUser $user
 	 * @return array
 	 */
 	static function uniqueUserPermissions($parents, $user)
@@ -375,7 +375,7 @@ class Permissions
 	 * checkListPermissions.
 	 *
 	 * @param array $parents
-	 * @param MortarModelUser $user
+	 * @param MortarCoreModelUser $user
 	 * @return array
 	 */
 	static function uniqueGroupPermissions($parents, $user)
@@ -891,7 +891,7 @@ class PermissionActionList
 
 			// All new permissions should be granted to the administrator membergroup.
 			if(defined('INSTALLMODE') && INSTALLMODE) {
-				$adminGroup = new MortarModelMemberGroup();
+				$adminGroup = new MortarCoreModelMemberGroup();
 			} else {
 				$adminGroup = ModelRegistry::loadModel('MemberGroup');
 			}

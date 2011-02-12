@@ -1,6 +1,6 @@
 <?php
 
-class GraffitiPluginFormInputTagToHtml extends MortarPluginFormInputUserToHtml
+class GraffitiPluginFormInputTagToHtml extends MortarCorePluginFormInputUserToHtml
 {
 	protected function runCheck(FormInput $input)
 	{

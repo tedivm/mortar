@@ -25,7 +25,7 @@
 		</aliases>
 
 		<modules>
-			<module name="Mortar" />
+			<module family="Mortar" name="Core" />
 			<module name="Rubble" />
 			<module name="Litho" />
 		</modules>

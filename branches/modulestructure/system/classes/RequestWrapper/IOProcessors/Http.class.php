@@ -167,10 +167,11 @@ class IOProcessorHttp extends IOProcessorCli
 		}
 
 		$rawUrl = Query::getRawUrl();
+		$url = (string) $url;
 
-		if((string) $url != $rawUrl)
+		if($url != $rawUrl)
 		{
-			throw new ResourceMoved('Non-Canonical url used.');
+			throw new ResourceMoved("Non-Canonical url $rawUrl used for resource $url");
 		}
 	}
 

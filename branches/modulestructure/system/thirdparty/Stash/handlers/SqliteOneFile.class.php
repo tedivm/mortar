@@ -43,7 +43,7 @@ class StashSqliteOneFile extends StashSqlite
 		}else{
 			$key = self::makeSqlKey($key) . '%';
 			$sqlResource = $this->getSqliteHandler($key[0]);
-			$query = $sqlResource->exec("DELETE FROM cacheStore WHERE key LIKE '{$key}'");
+			$query = $sqlResource->queryExec("DELETE FROM cacheStore WHERE key LIKE '{$key}'");
 		}
 	}
 

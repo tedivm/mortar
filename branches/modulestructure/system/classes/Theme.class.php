@@ -305,7 +305,7 @@ class Theme extends ContentBase
 				$minifier = $this->getMinifier($type);
 				$initialCheckSum = $minifier->getInitialChecksum();
 				$url = new Url();
-				$url->module = PackageInfo::loadByName(null, 'Mortar');
+				$url->module = PackageInfo::loadByName('Mortar', 'Core');
 				$url->action = 'Minify';
 				$url->id = $this->name . '-' . $initialCheckSum . '.' . $type;
 				$cache->storeData($url);

@@ -23,7 +23,7 @@ class UrlWriter
 			$url .= $path;
 		}
 
-		if(isset($attributes['format']) && $attributes['format'] = 'Html')
+		if(isset($attributes['format']) && $attributes['format'] == 'Html')
 			unset($attributes['format']);
 
 		if(count($attributes) > 0)

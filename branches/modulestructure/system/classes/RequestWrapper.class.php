@@ -112,7 +112,7 @@ class RequestWrapper
 			if(isset($query['module']))
 			{
 				$moduleInfo = PackageInfo::loadById($query['module']);
-				if($moduleInfo->getName() == 'Mortar')
+				if($moduleInfo->getFullName() == 'MortarCore')
 				{
 					if($query['action'] == 'LogIn' && $query['format'] == 'Admin')
 						return false;

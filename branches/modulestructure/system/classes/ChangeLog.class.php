@@ -65,7 +65,7 @@ class ChangeLog
 		}
 
 		if(isset($user)) {
-			if($user instanceof MortarModelUser) {
+			if($user instanceof MortarCoreModelUser) {
 				$user = $user->getId();
 			}
 

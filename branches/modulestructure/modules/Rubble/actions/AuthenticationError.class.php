@@ -68,7 +68,7 @@ class RubbleActionAuthenticationError extends ActionBase
 	{
 		$query = Query::getQuery();
 		$redirectUrl = new Url();
-		$redirectUrl->module = PackageInfo::loadByName(null, 'Mortar');
+		$redirectUrl->module = PackageInfo::loadByName('Mortar', 'Core');
 		$redirectUrl->action = 'LogIn';
 		$redirectUrl->format = $query['format'];
 		$currentAction = isset($query['action']) ? strtolower($query['action']) : false;

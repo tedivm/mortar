@@ -1,4 +1,4 @@
-$.siteSetting.defaults.url = baseUrl + 'module/Mortar/jsSettings.json';
+$.siteSetting.defaults.url = baseUrl + 'module/Mortar/Core/jsSettings.json';
 
 if(typeof($.ckeditor) == 'object')
 {
