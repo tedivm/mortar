@@ -1,0 +1,169 @@
+<xml>
+	<profile>
+
+		<aliases>
+
+			<modelGroup name="core">
+				<alias>Base</alias>
+				<alias include="false">Root</alias>
+			</modelGroup>
+
+			<modelGroup name="admin">
+				<alias>Universal</alias>
+				<alias>Root</alias>
+			</modelGroup>
+
+			<actionGroup name="core">
+				<alias>Read</alias>
+				<alias>Edit</alias>
+				<alias>Add</alias>
+				<alias>Execute</alias>
+				<alias>System</alias>
+				<alias>Admin</alias>
+			</actionGroup>
+
+		</aliases>
+
+		<modules>
+			<module name="Mortar" />
+			<module name="Rubble" />
+			<module name="Litho" />
+		</modules>
+
+		<membergroups>
+			<system>
+				<group>Guest</group>
+				<group>ResourceGroupOwner</group>
+				<group>ResourceOwner</group>
+				<group>SuperUser</group>
+				<group>System</group>
+			</system>
+			<user>
+				<group>Administrator</group>
+				<group>User</group>
+			</user>
+		</membergroups>
+
+		<users>
+			<user name="admin" login="true" form="true">
+				<group>User</group>
+				<group>Administrator</group>
+				<group>SuperUser</group>
+			</user>
+			<user name="Guest" login="false">
+				<group>Guest</group>
+			</user>
+			<user name="System" login="false">
+				<group>SuperUser</group>
+			</user>
+			<user name="Cron" login="false">
+				<group>SuperUser</group>
+			</user>
+		</users>
+
+		<locations>
+			<location name="root" type="Root" id="0">
+
+				<option name="htmlTheme">default</option>
+				<option name="adminTheme">bbAdmin</option>
+				<option name="errorHandler">Rubble</option>
+
+
+				<membergroup>System</membergroup>
+
+
+				<children>
+					<location name="Trash" type="TrashCan" id="0" inherit="false"/>
+
+					<location name="Site" form="true" type="Site">
+
+						<function name="addDomainUrl">
+							<param form="yes" />
+							<param>false</param>
+							<param>false</param>
+						</function>
+
+						<function name="addDomainUrl">
+							<param>default</param>
+						</function>
+
+						<children>
+							<location name="AdminOnly" type="Directory" inherit="false">
+								<content name="allowIndex">1</content>
+								<permissions>
+									<permission>
+										<resources>
+											<resourceGroup>All</resourceGroup>
+										</resources>
+										<actions>
+											<action>All</action>
+										</actions>
+										<groups>
+											<group>Administrator</group>
+										</groups>
+									</permission>
+								</permissions>
+							</location>
+
+							<location name="MembersOnly" type="Directory" inherit="false">
+								<content name="allowIndex">1</content>
+								<permissions>
+									<permission>
+										<resources>
+											<resourceGroup>All</resourceGroup>
+										</resources>
+										<actions>
+											<action>Read</action>
+										</actions>
+										<groups>
+											<group>User</group>
+										</groups>
+									</permission>
+								</permissions>
+							</location>
+
+							<location name="index" type="Page">
+								<property name="title">Welcome to Mortar</property>
+								<content>Mortar - default installation text coming soon!</content>
+							</location>
+
+
+						</children>
+
+						<permissions>
+							<permission>
+								<resources>
+									<resource>All</resource>
+								</resources>
+								<actions>
+									<action>Read</action>
+								</actions>
+								<groups>
+									<group>User</group>
+									<group>Guest</group>
+								</groups>
+							</permission>
+						</permissions>
+					</location>
+				</children>
+
+				<permissions>
+					<permission>
+						<resources>
+							<resource>All</resource>
+							<resource>Universal</resource>
+						</resources>
+						<actions>
+							<action>All</action>
+						</actions>
+						<groups>
+							<group>Administrator</group>
+							<group>System</group>
+						</groups>
+					</permission>
+				</permissions>
+
+			</location>
+		</locations>
+	</profile>
+</xml>
