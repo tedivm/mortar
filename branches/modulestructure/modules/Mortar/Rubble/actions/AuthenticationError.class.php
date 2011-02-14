@@ -1,6 +1,6 @@
 <?php
 
-class RubbleActionAuthenticationError extends ActionBase
+class MortarRubbleActionAuthenticationError extends ActionBase
 {
 	public static $settings = array( 'Base' => 
 		array('headerTitle' => 'Forbidden', 'EnginePermissionOverride' => true) );

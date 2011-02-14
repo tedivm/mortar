@@ -1,6 +1,6 @@
 <?php
 
-class RubbleActionResourceMoved extends ActionBase
+class MortarRubbleActionResourceMoved extends ActionBase
 {
 	public static $settings = array( 'Base' => 
 		array('headerTitle' => 'Resource Moved', 'EnginePermissionOverride' => true) );

@@ -1,6 +1,6 @@
 <?php
 
-class ChalkModelBlogEntry extends LithoModelPage
+class ChalkModelBlogEntry extends LithoCoreModelPage
 {
 	static public $type = 'BlogEntry';
 	public $allowedChildrenTypes = array();

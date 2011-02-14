@@ -1,9 +1,9 @@
 <?php
 
-class LithoInstallerPostscript
+class LithoCoreInstallerPostscript
 {
-	protected $package = 'Litho';
-	protected $family = null;
+	protected $package = 'Core';
+	protected $family = 'Litho';
 	protected $packageId;
 
 	public function __construct()

@@ -1,6 +1,6 @@
 <?php
 
-class LithoPluginPageMenu
+class LithoCorePluginPageMenu
 {
 	public function addModelMenuItems($menuSys, $model)
 	{

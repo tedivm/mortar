@@ -1,6 +1,6 @@
 <?php
 
-class LithoActionPageDiff extends LithoActionPageRead
+class LithoCoreActionPageDiff extends LithoCoreActionPageRead
 {
 	public static $settings = array( 'Base' => array('headerTitle' => 'Revision Difference', 'useRider' => true ) );
 

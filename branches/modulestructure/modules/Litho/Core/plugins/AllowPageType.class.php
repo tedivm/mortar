@@ -1,6 +1,6 @@
 <?php
 
-class LithoPluginAllowPageType
+class LithoCorePluginAllowPageType
 {
 	public function getAllowedChildren()
 	{

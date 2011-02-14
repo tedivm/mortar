@@ -1,6 +1,6 @@
 <?php
 
-class LithoModelPage extends LocationModel
+class LithoCoreModelPage extends LocationModel
 {
 	static public $type = 'Page';
 	static public $usePublishDate = true;

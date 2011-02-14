@@ -28,7 +28,7 @@ class MortarCoreActionLogIn extends MortarCoreActionLogOut
 				// We grab the failed login count before checking the form. This way bots have to wait for the
 				// connection to finish to see if they succeeded or not, instead of detecting the delay and dropping
 				// the connection.
-				$count = MortarLoginTracker::getFailureCount($_SERVER['REMOTE_ADDR'], $userId);
+				$count = MortarCoreLoginTracker::getFailureCount($_SERVER['REMOTE_ADDR'], $userId);
 
 				$this->loginSuccessful =
 				(bool) (ActiveUser::changeUserByNameAndPassword($inputHandler['username'], $inputHandler['password']));

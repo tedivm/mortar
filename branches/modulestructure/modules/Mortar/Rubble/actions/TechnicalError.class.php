@@ -1,6 +1,6 @@
 <?php
 
-class RubbleActionTechnicalError extends RubbleActionAuthenticationError
+class MortarRubbleActionTechnicalError extends MortarRubbleActionAuthenticationError
 {
 	public static $settings = array( 'Base' => 
 		array('headerTitle' => 'Unknown Error', 'EnginePermissionOverride' => true) );

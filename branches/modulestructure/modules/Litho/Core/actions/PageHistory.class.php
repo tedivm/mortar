@@ -1,6 +1,6 @@
 <?php
 
-class LithoActionPageHistory extends ModelActionLocationBasedRead
+class LithoCoreActionPageHistory extends ModelActionLocationBasedRead
 {
 	public static $settings = array( 'Base' => array( 'headerTitle' => 'Revision History' ) );
 

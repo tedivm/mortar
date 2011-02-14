@@ -1,6 +1,6 @@
 <?php
 
-class TesseraMessageForm extends LithoPageForm {
+class TesseraMessageForm extends LithoCorePageForm {
 
 	protected function createCustomInputs()
 	{

@@ -1,6 +1,6 @@
 <?php
 
-class LithoPageForm extends LocationModelForm
+class LithoCorePageForm extends LocationModelForm
 {
 	protected function createCustomInputs()
 	{

@@ -1,6 +1,6 @@
 <?php
 
-class LithoActionPageRead extends ModelActionLocationBasedRead
+class LithoCoreActionPageRead extends ModelActionLocationBasedRead
 {
 	public function logic()
 	{

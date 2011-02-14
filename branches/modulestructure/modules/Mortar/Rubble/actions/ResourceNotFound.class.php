@@ -1,6 +1,6 @@
 <?php
 
-class RubbleActionResourceNotFound extends RubbleActionAuthenticationError
+class MortarRubbleActionResourceNotFound extends MortarRubbleActionAuthenticationError
 {
 	public static $settings = array( 'Base' => array('headerTitle' => '404 Error') );
 

@@ -1,6 +1,6 @@
 <?php
 
-class RubbleActionMaintenanceMode extends RubbleActionAuthenticationError
+class MortarRubbleActionMaintenanceMode extends MortarRubbleActionAuthenticationError
 {
 	public static $settings = array( 'Base' => 
 		array( 'headerTitle' => 'Maintenance', 'EnginePermissionOverride' => true) );

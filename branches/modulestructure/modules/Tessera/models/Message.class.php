@@ -1,6 +1,6 @@
 <?php
 
-class TesseraModelMessage extends LithoModelPage
+class TesseraModelMessage extends LithoCoreModelPage
 {
 	static public $type = 'Message';
 	static public $autoName = true;
