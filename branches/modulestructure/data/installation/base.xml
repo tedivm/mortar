@@ -27,6 +27,7 @@
 		<modules>
 			<module family="Mortar" name="Core" />
 			<module family="Mortar" name="Rubble" />
+			<module family="Mortar" name="Form" />
 			<module family="Litho" name="Core"/>
 		</modules>
 
