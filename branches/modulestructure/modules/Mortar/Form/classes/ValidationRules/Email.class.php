@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class FormValidationEmail extends FormValidationFilter
+class MortarFormValidationEmail extends MortarFormValidationFilter
 {
 
 	/**

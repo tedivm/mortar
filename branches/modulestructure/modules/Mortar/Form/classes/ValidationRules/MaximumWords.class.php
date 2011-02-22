@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class FormValidationMaximumWords extends FormValidationAbstract
+class MortarFormValidationMaximumWords extends MortarFormValidationAbstract
 {
 	/**
 	 * This function makes sure the value has no more than the requested number of words.

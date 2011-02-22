@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class FormValidationMinimumWords extends FormValidationAbstract
+class MortarFormValidationMinimumWords extends MortarFormValidationAbstract
 {
 	/**
 	 * This function makes sure the value has no less than the requested number of words.

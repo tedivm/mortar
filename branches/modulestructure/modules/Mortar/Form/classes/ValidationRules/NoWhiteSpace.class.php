@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class FormValidationNoWhiteSpace extends FormValidationRegex
+class MortarFormValidationNoWhiteSpace extends MortarFormValidationRegex
 {
 	/**
 	 * This regular expression ensures that no whitespace is in the input.

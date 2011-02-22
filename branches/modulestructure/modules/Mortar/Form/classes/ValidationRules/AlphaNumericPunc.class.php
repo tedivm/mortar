@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class FormValidationAlphaNumericPunc extends FormValidationRegex
+class MortarFormValidationAlphaNumericPunc extends MortarFormValidationRegex
 {
 	/**
 	 * This regular expression allows letters, numbers, and a range of "safe" punctuation.

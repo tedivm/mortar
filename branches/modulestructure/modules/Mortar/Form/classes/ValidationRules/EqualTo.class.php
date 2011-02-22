@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class FormValidationEqualTo extends FormValidationAbstract
+class MortarFormValidationEqualTo extends MortarFormValidationAbstract
 {
 	/**
 	 * This is the default error message if the input doesn't validate.

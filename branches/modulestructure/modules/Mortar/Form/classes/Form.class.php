@@ -15,7 +15,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class Form
+class MortarFormForm
 {
 	/**
 	 * This is the name of the form, used to generate unique ids for each element.
@@ -170,7 +170,7 @@ class Form
 	 */
 	public function createInput($name)
 	{
-		$input = new FormInput($name);
+		$input = new MortarFormInput($name);
 		$input->attachToForm($this);
 		return $input;
 	}
@@ -192,10 +192,10 @@ class Form
 	 * This function is primarily used for merging forms, but can be used to independently create an input object
 	 * and attach it to the form.
 	 *
-	 * @param FormInput $input
+	 * @param MortarFormInput $input
 	 * @return bool
 	 */
-	public function attachInput(FormInput $input)
+	public function attachInput(MortarFormInput $input)
 	{
 		$this->inputs[$this->activeSection][] = $input;
 		return true;
@@ -349,7 +349,7 @@ class Form
 
 	/**
 	 * This function returns the form in the requested format. It does so by calling upon a 'converter' class, located
-	 * in Form/Converters
+	 * in classes/Converters
 	 *
 	 * @param string $format
 	 * @return string
@@ -365,7 +365,7 @@ class Form
 				property('value', $nonce);
 		}
 
-		$converterClass = 'FormTo' . $format;
+		$converterClass = 'MortarFormConverter' . $format;
 
 		if(!class_exists($converterClass))
 			throw new FormError('Unable to load conversation class ' . $converterClass);
@@ -696,7 +696,7 @@ class Form
 					if($input->name == $name)
 						$matchedInputs[] = $input;
 				}
-			}elseif($inputs instanceof FormInput && $inputs->name == $name){
+			}elseif($inputs instanceof MortarFormInput && $inputs->name == $name){
 				$matchedInputs[] = $inputs;
 			}
 		}

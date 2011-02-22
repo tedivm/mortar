@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-abstract class FormValidationAbstract
+abstract class MortarFormValidationAbstract
 {
 	/**
 	 * This is an array of errors that occured during validation.

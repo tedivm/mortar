@@ -15,7 +15,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class FormToHtml
+class MortarFormConverterHtml
 {
 	protected $submitButton = false;
 	protected $includeSubmit = true;

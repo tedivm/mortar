@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class FormValidationAlphaNumeric extends FormValidationRegex
+class MortarFormValidationAlphaNumeric extends MortarFormValidationRegex
 {
 	/**
 	 * This regular expression matches nonalphanumeric charactors.

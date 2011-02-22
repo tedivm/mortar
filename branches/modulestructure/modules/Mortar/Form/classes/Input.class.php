@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class FormInput
+class MortarFormInput
 {
 	/**
 	 * This is the name of the input
@@ -295,7 +295,7 @@ class FormInput
 	 */
 	public function attachToForm($form)
 	{
-		if($form instanceof Form && $form->attachInput($this))
+		if($form instanceof MortarFormForm && $form->attachInput($this))
 		{
 			$this->form = $form;
 		}
@@ -404,7 +404,7 @@ class FormInput
 
 		foreach($this->validationRules as $rule => $argument)
 		{
-			$classname = FormValidationLookup::getClass($rule);
+			$classname = MortarFormValidationLookup::getClass($rule);
 
 			if($classname === false)
 				throw new FormError('Unable to load validation class ' . $rule);
@@ -427,7 +427,7 @@ class FormInput
 			$this->validationMessages = $errors;
 			$name = $this->getName();
 			foreach($errors as $error)
-				new FormValidation($name . $error);
+				new MortarFormValidation($name . $error);
 		}
 
 		return $success;

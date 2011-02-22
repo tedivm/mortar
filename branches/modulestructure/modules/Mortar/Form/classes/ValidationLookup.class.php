@@ -8,51 +8,36 @@
  * @subpackage	Form
  */
 
-
-if(!class_exists('FormValidationAbstract', false))
-{
-	$config = Config::getInstance();
-	$path = $config['path']['library'] . 'Form/ValidationRules/Abstract.class.php';
-	include($path);
-
-	$path = $config['path']['library'] . 'Form/ValidationRules/Filter.class.php';
-	include($path);
-
-	$path = $config['path']['library'] . 'Form/ValidationRules/Regex.class.php';
-	include($path);
-	unset($path);
-}
-
 /**
  * This class retrieves class names, and makes sure they're loaded in the system.
  *
  * @package		Library
  * @subpackage	Form
  */
-class FormValidationLookup
+class MortarFormValidationLookup
 {
 	/**
 	 * This is a list of validators in the Form/ValidationRules folder, with the shortname for looking them up.
 	 *
 	 * @var array
 	 */
-	static protected $validators = array('required' => 'FormValidationRequired',
-									'minlength' => 'FormValidationMinimumLength',
-									'maxlength' => 'FormValidationMaximumLength',
-									'min' => 'FormValidationMinimumValue',
-									'max' => 'FormValidationMaximumValue',
-									'minWords' => 'FormValidationMinimumWords',
-									'maxWords' => 'FormValidationMaximumWords',
-									'email' => 'FormValidationEmail',
-									'equalto' => 'FormValidationEqualTo',
-									'url' => 'FormValidationUrl',
-									'number' => 'FormValidationNumber',
-									'digits' => 'FormValidationDigits',
-									'letterswithbasicpunc' => 'FormValidationLettersWithPunctuation',
-									'alphanumeric' => 'FormValidationAlphaNumeric',
-									'alphanumericpunc' => 'FormValidationAlphaNumericPunc',
-									'lettersonly' => 'FormValidationLettersOnly',
-									'nowhitespace' => 'FormValidationNoWhiteSpace');
+	static protected $validators = array('required' => 'Required',
+									'minlength' => 'MinimumLength',
+									'maxlength' => 'MaximumLength',
+									'min' => 'MinimumValue',
+									'max' => 'MaximumValue',
+									'minWords' => 'MinimumWords',
+									'maxWords' => 'MaximumWords',
+									'email' => 'Email',
+									'equalto' => 'EqualTo',
+									'url' => 'Url',
+									'number' => 'Number',
+									'digits' => 'Digits',
+									'letterswithbasicpunc' => 'LettersWithPunctuation',
+									'alphanumeric' => 'AlphaNumeric',
+									'alphanumericpunc' => 'AlphaNumericPunc',
+									'lettersonly' => 'LettersOnly',
+									'nowhitespace' => 'NoWhiteSpace');
 
 	/**
 	 * This function makes sure a class is loaded into the system and returns its name.
@@ -66,26 +51,12 @@ class FormValidationLookup
 		if(!isset(self::$validators[$validationRule]))
 			return false;
 
-		$classname = self::$validators[$validationRule];
+		$classname = 'MortarFormValidation' . self::$validators[$validationRule];
 
-		if(!class_exists($classname, false))
-		{
-			if(strpos($classname, 'FormValidation') == 0)
-			{
-				$config = Config::getInstance();
-
-				$filename = substr($classname, strlen('FormValidation')) . '.class.php';
-				$path = $config['path']['library'] . 'Form/ValidationRules/' . $filename;
-
-				if(file_exists($path))
-				{
-					include($path);
-				}else{
-					return false;
-				}
-			}else{
-				return false;
-			}
+		if(!class_exists($classname, false)) {
+			return false;
+		} else {
+			return true;
 		}
 
 		return $classname;

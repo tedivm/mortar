@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class FormValidationMaximumValue extends FormValidationAbstract
+class MortarFormValidationMaximumValue extends MortarFormValidationAbstract
 {
 	/**
 	 * This make sure the input is less than or equal to the specified value.

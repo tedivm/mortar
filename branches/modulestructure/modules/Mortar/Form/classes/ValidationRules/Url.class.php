@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class FormValidationUrl extends FormValidationFilter
+class MortarFormValidationUrl extends MortarFormValidationFilter
 {
 	/**
 	 * This is the default error message if the input doesn't validate.

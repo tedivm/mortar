@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class FormValidationMaximumLength extends FormValidationAbstract
+class MortarFormValidationMaximumLength extends MortarFormValidationAbstract
 {
 	/**
 	 * This function validates the user input by making sure it is less than the specified length

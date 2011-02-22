@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-abstract class FormValidationFilter extends FormValidationAbstract
+abstract class MortarFormValidationFilter extends MortarFormValidationAbstract
 {
 	/**
 	 * This should be an int, corresponding with the php filter constants.

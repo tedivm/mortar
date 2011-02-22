@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class FormValidationMinimumLength extends FormValidationAbstract
+class MortarFormValidationMinimumLength extends MortarFormValidationAbstract
 {
 	/**
 	 * Makes sure the input is at least the specified value.

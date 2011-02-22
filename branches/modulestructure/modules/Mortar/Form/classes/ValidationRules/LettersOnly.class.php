@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class FormValidationLettersOnly extends FormValidationRegex
+class MortarFormValidationLettersOnly extends MortarFormValidationRegex
 {
 	/**
 	 * This regular expression makes sure only letters are in the string

@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class FormValidationRegex extends FormValidationAbstract
+class MortarFormValidationRegex extends MortarFormValidationAbstract
 {
 	/**
 	 * This is here mostly for inheriting classes. If this is set it will be used instead of the passed argument.

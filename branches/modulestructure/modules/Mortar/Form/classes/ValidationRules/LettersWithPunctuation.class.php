@@ -14,7 +14,7 @@
  * @package		Library
  * @subpackage	Form
  */
-class FormValidationLettersWithPunctuation extends FormValidationRegex
+class MortarFormValidationLettersWithPunctuation extends MortarFormValidationRegex
 {
 	/**
 	 * This regular expression make sure only letters and some punctuation are present.
