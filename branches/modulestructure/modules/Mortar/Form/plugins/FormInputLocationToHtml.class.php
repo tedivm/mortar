@@ -1,6 +1,6 @@
 <?php
 
-class MortarCorePluginFormInputLocationToHtml implements FormToHtmlHook
+class MortarFormPluginFormInputLocationToHtml implements FormToHtmlHook
 {
 	protected $input;
 

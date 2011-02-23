@@ -1,6 +1,6 @@
 <?php
 
-class MortarCorePluginFormInputDatetimeCheckSubmit extends MortarCorePluginFormInputUserCheckSubmit
+class MortarFormPluginFormInputDatetimeCheckSubmit extends MortarFormPluginFormInputUserCheckSubmit
 {
 	protected $inputName = 'datetime';
 

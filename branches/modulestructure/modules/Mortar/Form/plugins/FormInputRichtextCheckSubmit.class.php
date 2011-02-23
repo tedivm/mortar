@@ -1,6 +1,6 @@
 <?php
 
-class MortarCorePluginFormInputRichtextCheckSubmit
+class MortarFormPluginFormInputRichtextCheckSubmit
 {
 	protected $input;
 

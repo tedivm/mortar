@@ -1,6 +1,6 @@
 <?php
 
-class MortarCorePluginFormInputDatetimeToHtml implements FormToHtmlHook
+class MortarFormPluginFormInputDatetimeToHtml implements FormToHtmlHook
 {
 	protected $input;
 

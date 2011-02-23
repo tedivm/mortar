@@ -1,6 +1,6 @@
 <?php
 
-class MortarCorePluginFormInputMembergroupToHtml extends MortarCorePluginFormInputUserToHtml
+class MortarFormPluginFormInputMembergroupToHtml extends MortarFormPluginFormInputUserToHtml
 {
 	protected function runCheck(FormInput $input)
 	{

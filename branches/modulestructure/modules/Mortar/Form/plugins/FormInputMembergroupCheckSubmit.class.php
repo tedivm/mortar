@@ -1,6 +1,6 @@
 <?php
 
-class MortarCorePluginFormInputMembergroupCheckSubmit extends MortarCorePluginFormInputUserCheckSubmit
+class MortarFormPluginFormInputMembergroupCheckSubmit extends MortarFormPluginFormInputUserCheckSubmit
 {
 	protected $inputName = 'membergroup';
 

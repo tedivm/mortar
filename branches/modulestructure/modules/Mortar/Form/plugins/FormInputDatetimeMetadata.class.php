@@ -1,6 +1,6 @@
 <?php
 
-class MortarCorePluginFormInputDatetimeMetadata implements FormMetadataHook
+class MortarFormPluginFormInputDatetimeMetadata implements FormMetadataHook
 {
 	public function getMetadataOptions(FormInput $input)
 	{
