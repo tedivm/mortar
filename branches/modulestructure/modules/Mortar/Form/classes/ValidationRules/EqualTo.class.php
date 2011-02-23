@@ -42,11 +42,11 @@ class MortarFormValidationEqualTo extends MortarFormValidationAbstract
 	/**
 	 * This function allows inheriting classes to alter the argument before it is passed to the html form.
 	 *
-	 * @param FormInput $input
+	 * @param MortarFormInput $input
 	 * @param mixed $argument
 	 * @return mixed
 	 */
-	static public function getHtmlArgument(FormInput $input, $argument)
+	static public function getHtmlArgument(MortarFormInput $input, $argument)
 	{
 		$form = $input->getForm();
 		$argument = '#' . $form->getName() . '_' . $argument;

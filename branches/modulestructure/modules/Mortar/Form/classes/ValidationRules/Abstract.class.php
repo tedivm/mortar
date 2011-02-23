@@ -26,7 +26,7 @@ abstract class MortarFormValidationAbstract
 	/**
 	 * This is a reference to the input being validated
 	 *
-	 * @var FormInput
+	 * @var MortarFormInput
 	 */
 	protected $input;
 
@@ -47,7 +47,7 @@ abstract class MortarFormValidationAbstract
 	/**
 	 * This is a reference to the form the input belongs to.
 	 *
-	 * @var FormInput
+	 * @var MortarFormInput
 	 */
 	protected $form;
 
@@ -62,11 +62,11 @@ abstract class MortarFormValidationAbstract
 	/**
 	 * This function is used to attach an input to the class for validation.
 	 *
-	 * @param FormInput $input
+	 * @param MortarFormInput $input
 	 * @param mixed $userValue This is the value to be tested.
 	 * @param mixed $argument
 	 */
-	public function attachInput(FormInput $input, $userValue = null, $argument = null)
+	public function attachInput(MortarFormInput $input, $userValue = null, $argument = null)
 	{
 		$this->input = $input;
 		$this->argument = $argument;
@@ -85,11 +85,11 @@ abstract class MortarFormValidationAbstract
 	/**
 	 * This function allows inheriting classes to alter the argument before it is passed to the html form.
 	 *
-	 * @param FormInput $input
+	 * @param MortarFormInput $input
 	 * @param mixed $argument
 	 * @return mixed
 	 */
-	static public function getHtmlArgument(FormInput $input, $argument)
+	static public function getHtmlArgument(MortarFormInput $input, $argument)
 	{
 		return $argument;
 	}

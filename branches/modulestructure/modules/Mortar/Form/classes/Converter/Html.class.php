@@ -293,7 +293,7 @@ class MortarFormConverterHtml
 	 *
 	 * @param FormInput $input
 	 */
-	protected function processSpecialInputFields(FormInput $input)
+	protected function processSpecialInputFields(MortarFormInput $input)
 	{
 
 	}
@@ -304,7 +304,7 @@ class MortarFormConverterHtml
 	 * @param FormInput $input
 	 * @return string
 	 */
-	protected function getInputHtmlByType(FormInput $input)
+	protected function getInputHtmlByType(MortarFormInput $input)
 	{
 		// Do a lookup to see what kind of html tag the input needs.
 		$tagType = isset($this->tagByType[$input->type]) ? $this->tagByType[$input->type] : 'input';
@@ -383,7 +383,7 @@ class MortarFormConverterHtml
 	 * @param FormInput $input
 	 * @return array|false
 	 */
-	protected function getInputMetaData(FormInput $input)
+	protected function getInputMetaData(MortarFormInput $input)
 	{
 		$inputOptions = array();
 		$validationRules = $input->getRules();
@@ -395,7 +395,7 @@ class MortarFormConverterHtml
 			{
 				try
 				{
-					if(!($className = FormValidationLookup::getClass($ruleName)))
+					if(!($className = MortarFormValidationLookup::getClass($ruleName)))
 						throw new FormWarning('Unable to load validation class for rule ' . $ruleName);
 
 					$argument = staticFunctionHack($className, 'getHtmlArgument', $input, $ruleArgument);
@@ -445,7 +445,7 @@ class MortarFormConverterHtml
 	 * @param FormInput $input
 	 * @return bool
 	 */
-	protected function getInputJavascript(FormInput $input)
+	protected function getInputJavascript(MortarFormInput $input)
 	{
 		return false;
 	}

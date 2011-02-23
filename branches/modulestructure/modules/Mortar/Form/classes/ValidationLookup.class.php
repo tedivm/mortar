@@ -8,11 +8,28 @@
  * @subpackage	Form
  */
 
+if(!class_exists('FormValidationAbstract', false))
+{
+	$config = Config::getInstance();
+	$path = $config['path']['modules'] . 'Mortar/Form/classes/ValidationRules/Abstract.class.php';
+	include($path);
+
+
+	$path = $config['path']['modules'] . 'Mortar/Form/classes/ValidationRules/Filter.class.php';
+	include($path);
+
+
+	$path = $config['path']['modules'] . 'Mortar/Form/classes/ValidationRules/Regex.class.php';
+	include($path);
+	unset($path);
+}
+
+
 /**
  * This class retrieves class names, and makes sure they're loaded in the system.
  *
- * @package		Library
- * @subpackage	Form
+ * @package	     Library
+ * @subpackage  Form
  */
 class MortarFormValidationLookup
 {
@@ -21,23 +38,24 @@ class MortarFormValidationLookup
 	 *
 	 * @var array
 	 */
-	static protected $validators = array('required' => 'Required',
-									'minlength' => 'MinimumLength',
-									'maxlength' => 'MaximumLength',
-									'min' => 'MinimumValue',
-									'max' => 'MaximumValue',
-									'minWords' => 'MinimumWords',
-									'maxWords' => 'MaximumWords',
-									'email' => 'Email',
-									'equalto' => 'EqualTo',
-									'url' => 'Url',
-									'number' => 'Number',
-									'digits' => 'Digits',
-									'letterswithbasicpunc' => 'LettersWithPunctuation',
-									'alphanumeric' => 'AlphaNumeric',
-									'alphanumericpunc' => 'AlphaNumericPunc',
-									'lettersonly' => 'LettersOnly',
-									'nowhitespace' => 'NoWhiteSpace');
+	static protected $validators = array('required' => 'MortarFormValidationRequired',
+									'minlength' => 'MortarFormValidationMinimumLength',
+									'maxlength' => 'MortarFormValidationMaximumLength',
+									'min' => 'MortarFormValidationMinimumValue',
+									'max' => 'MortarFormValidationMaximumValue',
+									'minWords' => 'MortarFormValidationMinimumWords',
+									'maxWords' => 'MortarFormValidationMaximumWords',
+									'email' => 'MortarFormValidationEmail',
+									'equalto' => 'MortarFormValidationEqualTo',
+									'url' => 'MortarFormValidationUrl',
+									'number' => 'MortarFormValidationNumber',
+									'digits' => 'MortarFormValidationDigits',
+									'letterswithbasicpunc' => 'MortarFormValidationLettersWithPunctuation',
+									'alphanumeric' => 'MortarFormValidationAlphaNumeric',
+									'alphanumericpunc' => 'MortarFormValidationAlphaNumericPunc',
+									'lettersonly' => 'MortarFormValidationLettersOnly',
+									'nowhitespace' => 'MortarFormValidationNoWhiteSpace');
+
 
 	/**
 	 * This function makes sure a class is loaded into the system and returns its name.
@@ -51,17 +69,34 @@ class MortarFormValidationLookup
 		if(!isset(self::$validators[$validationRule]))
 			return false;
 
-		$classname = 'MortarFormValidation' . self::$validators[$validationRule];
 
-		if(!class_exists($classname, false)) {
-			return false;
-		} else {
-			return true;
+		$classname = self::$validators[$validationRule];
+
+
+		if(!class_exists($classname, false))
+		{
+			if(strpos($classname, 'MortarFormValidation') == 0)
+			{
+				$config = Config::getInstance();
+
+
+				$filename = substr($classname, strlen('MortarFormValidation')) . '.class.php';
+				$path = $config['path']['modules'] . 'Mortar/Form/classes/ValidationRules/' . $filename;
+
+
+				if(file_exists($path))
+				{
+					include($path);
+				}else{
+					return false;
+				}
+			}else{
+				return false;
+			}
 		}
 
 		return $classname;
 	}
-
 }
 
 ?>

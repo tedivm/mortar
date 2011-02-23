@@ -1,6 +1,6 @@
 <?php
 
-class InstallerInstallationForm extends Form
+class InstallerInstallationForm extends MortarFormForm
 {
 	protected function define()
 	{
