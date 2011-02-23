@@ -166,7 +166,7 @@ class MortarFormForm
 	 * This creates a new input under the currently active section.
 	 *
 	 * @param string $name
-	 * @return FormInput
+	 * @return MortarFormInput
 	 */
 	public function createInput($name)
 	{
@@ -473,7 +473,7 @@ class MortarFormForm
 						$checkboxValues = (isset($inputHandler[$input->name]))
 												? $inputHandler[$input->name]->getArrayCopy() : false;
 
-						if($checkboxInputs instanceof FormInput)
+						if($checkboxInputs instanceof MortarFormInput)
 						{
 							$checkboxInputs->check(false);
 							$processedInput[$input->name] = false;
@@ -676,12 +676,12 @@ class MortarFormForm
 	}
 
 	/**
-	 * This returns a FormInput from the list of stored inputs. The second argument, section, is optional but makes
+	 * This returns a MortarFormInput from the list of stored inputs. The second argument, section, is optional but makes
 	 * things much faster. If multiple inputs match (common with checkboxes) they are all returned.
 	 *
 	 * @param string $name
 	 * @param string $section = null
-	 * @return FormInput|array
+	 * @return MortarFormInput|array
 	 */
 	public function getInput($name, $section = null)
 	{
