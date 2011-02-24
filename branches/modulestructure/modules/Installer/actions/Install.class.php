@@ -159,7 +159,7 @@ class InstallerActionInstall extends ActionBase
 			$output .= file_get_contents($modulePath . 'templates/installationComplete.template.php');
 			$this->subtitle = 'Installation Complete';
 			$url = new Url();
-			$url->format = 'admin';
+			$url = (string) $url . 'admin';
 			$this->ioHandler->addHeader('Location', (string) $url);
 
 		}elseif($this->form){
