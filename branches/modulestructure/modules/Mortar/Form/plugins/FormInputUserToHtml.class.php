@@ -4,7 +4,7 @@ class MortarFormPluginFormInputUserToHtml implements FormToHtmlHook
 {
 	protected $input;
 
-	public function setInput(FormInput $input)
+	public function setInput(MortarFormInput $input)
 	{
 		if(!$this->runCheck($input))
 			return;
@@ -42,7 +42,7 @@ class MortarFormPluginFormInputUserToHtml implements FormToHtmlHook
 
 	}
 
-	protected function runCheck(FormInput $input)
+	protected function runCheck(MortarFormInput $input)
 	{
 		if($input->type != 'user')
 			return false;
@@ -50,7 +50,7 @@ class MortarFormPluginFormInputUserToHtml implements FormToHtmlHook
 		return true;
 	}
 
-	protected function getUrl(FormInput $input)
+	protected function getUrl(MortarFormInput $input)
 	{
 		$url = new Url();
 		$url->module = PackageInfo::loadByName('Mortar', 'Core');

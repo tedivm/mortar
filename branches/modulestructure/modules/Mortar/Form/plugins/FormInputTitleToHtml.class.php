@@ -6,7 +6,7 @@ class MortarFormPluginFormInputTitleToHtml implements FormToHtmlHook
 	protected $input;
 	protected $nameBox;
 
-	public function setInput(FormInput $input)
+	public function setInput(MortarFormInput $input)
 	{
 		if($input->type != 'title')
 			return;

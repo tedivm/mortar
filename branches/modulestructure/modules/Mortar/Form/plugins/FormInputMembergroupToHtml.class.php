@@ -2,7 +2,7 @@
 
 class MortarFormPluginFormInputMembergroupToHtml extends MortarFormPluginFormInputUserToHtml
 {
-	protected function runCheck(FormInput $input)
+	protected function runCheck(MortarFormInput $input)
 	{
 		if($input->type != 'membergroup')
 			return false;
@@ -10,7 +10,7 @@ class MortarFormPluginFormInputMembergroupToHtml extends MortarFormPluginFormInp
 		return true;
 	}
 
-	protected function getUrl(FormInput $input)
+	protected function getUrl(MortarFormInput $input)
 	{
 		$url = new Url();
 		$url->module = PackageInfo::loadByName('Mortar', 'Core');

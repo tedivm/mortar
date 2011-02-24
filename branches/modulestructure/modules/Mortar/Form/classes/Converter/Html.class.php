@@ -455,7 +455,7 @@ class MortarFormConverterHtml
 
 interface FormToHtmlHook
 {
-	public function setInput(FormInput $input);
+	public function setInput(MortarFormInput $input);
 	public function getCustomJavaScript();
 	public function overrideHtml();
 	public function createOverriddingHtml($sectionHtml);
@@ -464,7 +464,7 @@ interface FormToHtmlHook
 
 interface FormMetadataHook
 {
-	public function getMetadataOptions(FormInput $input);
+	public function getMetadataOptions(MortarFormInput $input);
 }
 
 ?>

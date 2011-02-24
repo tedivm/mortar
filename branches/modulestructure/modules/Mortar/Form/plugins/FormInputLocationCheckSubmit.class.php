@@ -6,7 +6,7 @@ class MortarFormPluginFormInputLocationCheckSubmit
 
 	protected $inputName = 'location';
 
-	public function setInput(FormInput $input)
+	public function setInput(MortarFormInput $input)
 	{
 		if($input->type != $this->inputName)
 			return;

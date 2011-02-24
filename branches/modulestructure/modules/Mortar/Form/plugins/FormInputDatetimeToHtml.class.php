@@ -4,7 +4,7 @@ class MortarFormPluginFormInputDatetimeToHtml implements FormToHtmlHook
 {
 	protected $input;
 
-	public function setInput(FormInput $input)
+	public function setInput(MortarFormInput $input)
 	{
 		if($input->type != 'datetime')
 			return;

@@ -1,6 +1,6 @@
 <?php
 
-abstract class ModelForm extends Form
+abstract class ModelForm extends MortarFormForm
 {
 	protected $model;
 	protected $actionName;
@@ -50,7 +50,7 @@ abstract class ModelForm extends Form
 		{
 			$input = $this->getInput('model_' . $name);
 
-			if($input instanceof FormInput)
+			if($input instanceof MortarFormInput)
 			{
 				if($input->type == 'richtext') {
 					if($value = $this->model['raw' . ucfirst($name)]) {

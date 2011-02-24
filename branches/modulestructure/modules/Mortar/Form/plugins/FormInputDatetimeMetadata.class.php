@@ -2,7 +2,7 @@
 
 class MortarFormPluginFormInputDatetimeMetadata implements FormMetadataHook
 {
-	public function getMetadataOptions(FormInput $input)
+	public function getMetadataOptions(MortarFormInput $input)
 	{
 		$inputOptions = array();
 
