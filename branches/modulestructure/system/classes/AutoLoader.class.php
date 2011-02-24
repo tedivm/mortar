@@ -42,7 +42,6 @@ class AutoLoader
 							'modelSupport/actions/LocationBased' => 'ModelActionLocationBased',
 							'modelSupport/Converters' => 'ModelTo',
 							'modelSupport/Listings' => 'none',
-							'modelSupport/Forms' => 'none',
 							'Markup' => 'Markup',
 							'Search' => 'Search',
 							'Orm' => 'Orm',
@@ -53,10 +52,7 @@ class AutoLoader
 							'templateSupport' => 'TagBox',
 							'DbDrivers' => 'DbDriver');
 
-	protected static $extraLibraryDirectories = array('Form/Converters' => 'FormTo',
-							  'Form/ValidationRules' => 'FormValidation',
-							  'Form' => 'Form',
-							  'Filters' => 'Filter');
+	protected static $extraLibraryDirectories = array('Filters' => 'Filter');
 
 	protected static $extraActionDirectories = array('model' => 'ModelAction',
 							 'model/location' => 'ModelActionLocationBased');

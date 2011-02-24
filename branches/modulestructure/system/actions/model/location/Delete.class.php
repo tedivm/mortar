@@ -47,7 +47,7 @@ class ModelActionLocationBasedDelete extends ModelActionLocationBasedEdit
 
 	protected function getForm()
 	{
-		$form = new Form($this->model->getType() . 'Delete');
+		$form = new MortarFormForm($this->model->getType() . 'Delete');
 		$form->createInput('confirm')->setLabel('Confirm')->setType('checkbox')->addRule('required');
 		return $form;
 	}

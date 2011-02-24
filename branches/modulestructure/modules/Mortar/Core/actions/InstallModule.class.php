@@ -49,7 +49,7 @@ class MortarCoreActionInstallModule extends ActionBase
 				$packageName = $packageInfo->getFullName();
 
 
-				$this->form = new Form($this->actionName . '_' . $packageName);
+				$this->form = new MortarFormForm($this->actionName . '_' . $packageName);
 				$this->form->createInput('confirm')->
 					setType('submit')->
 					property('value', 'Install ' . $packageName);

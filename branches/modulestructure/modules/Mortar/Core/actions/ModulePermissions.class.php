@@ -49,7 +49,7 @@ class MortarCoreActionModulePermissions extends ActionBase
 
 	protected function getForm()
 	{
-		$form = new Form($this->formName . '_' . $this->moduleName);
+		$form = new MortarFormForm($this->formName . '_' . $this->moduleName);
 
 		$actionList = PermissionActionList::getActionList();
 

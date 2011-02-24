@@ -1,6 +1,6 @@
 <?php
 
-class TesseraCorePostReplyForm extends Form
+class TesseraCorePostReplyForm extends MortarFormForm
 {
 	protected $thread;
 

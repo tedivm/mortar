@@ -63,7 +63,7 @@ class MortarCoreActionDashboard extends ActionBase
 		$link->format = $query['format'];
 		$link->action = 'ControlModify';
 
-		$form = new Form('dashboard_add_control');
+		$form = new MortarFormForm('dashboard_add_control');
 		
 		$form->setLegend('Add Control')->
 			setAction($link)->

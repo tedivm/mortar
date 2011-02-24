@@ -1,6 +1,6 @@
 <?php
 
-class TesseraCorePostCommentForm extends Form
+class TesseraCorePostCommentForm extends MortarFormForm
 {
 	protected $discussion;
 	protected $author;

@@ -8,7 +8,7 @@ class MortarCoreActionDirectorySetDefaultPage extends ModelActionLocationBasedEd
 
 	protected function getForm()
 	{
-		$form = new Form('set_default_page');
+		$form = new MortarFormForm('set_default_page');
 		$form->changeSection('default_page');
 		$form->setLegend('Default Page');
 

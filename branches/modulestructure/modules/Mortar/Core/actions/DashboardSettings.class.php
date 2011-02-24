@@ -10,7 +10,7 @@ class MortarCoreActionDashboardSettings extends FormAction
 
 	public function getForm()
 	{
-		$form = new Form('DashboardSettings');
+		$form = new MortarFormForm('DashboardSettings');
 
 		$form->changeSection('controls')->
 			setLegend('Controls');

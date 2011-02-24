@@ -1,6 +1,6 @@
 <?php
 
-class MortarCoreLogInForm extends Form
+class MortarCoreLogInForm extends MortarFormForm
 {
 	protected function define()
 	{

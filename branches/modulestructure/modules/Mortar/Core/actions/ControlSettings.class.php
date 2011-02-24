@@ -101,7 +101,7 @@ class MortarCoreActionControlSettings extends FormAction
 	 */
 	protected function getForm()
 	{
-		$form = new Form('control_settings');
+		$form = new MortarFormForm('control_settings');
 		$form->setLegend('Control Settings For ' . $this->control->getName());
 
 		$form = $this->control->settingsForm($form);

@@ -38,7 +38,7 @@ class ModelActionLocationBasedUserPermissions extends ModelActionLocationBasedGr
 	 */
 	protected function getForm()
 	{
-		$form = new Form('user_permissions');
+		$form = new MortarFormForm('user_permissions');
 
 		$form->changeSection('user')->setLegend('User');
 

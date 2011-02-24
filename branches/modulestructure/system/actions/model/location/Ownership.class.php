@@ -31,7 +31,7 @@ class ModelActionLocationBasedOwnership extends ModelActionLocationBasedEdit
 
 	protected function getForm()
 	{
-		$form = new Form('location_ownership');
+		$form = new MortarFormForm('location_ownership');
 		$form->changeSection('owners');
 		$form->setLegend('Owners');
 

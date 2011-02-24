@@ -2,7 +2,7 @@
 
 class TesseraCorePluginModelFormComments
 {
-	public function adjustForm(Model $model, Form $form)
+	public function adjustForm(Model $model, MortarFormForm $form)
 	{
 		if(!TesseraCoreComments::canCommentModelType($model->getType()))
 			return null;

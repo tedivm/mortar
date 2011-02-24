@@ -2,7 +2,7 @@
 
 class GraffitiPluginFormInputTagToHtml extends MortarCorePluginFormInputUserToHtml
 {
-	protected function runCheck(FormInput $input)
+	protected function runCheck(MortarFormInput $input)
 	{
 		if($input->type != 'tag')
 			return false;
@@ -10,13 +10,13 @@ class GraffitiPluginFormInputTagToHtml extends MortarCorePluginFormInputUserToHt
 		return true;
 	}
 
-	public function setInput(FormInput $input)
+	public function setInput(MortarFormInput $input)
 	{
 		parent::setInput($input);
 		$input->property('autocomplete', false);
 	}
 
-	protected function getUrl(FormInput $input)
+	protected function getUrl(MortarFormInput $input)
 	{
 		$url = new Url();
 		$url->module = PackageInfo::loadByName(null, 'Graffiti');

@@ -1,6 +1,6 @@
 <?php
 
-class MortarCoreMaintenanceModeForm extends Form
+class MortarCoreMaintenanceModeForm extends MortarFormForm
 {
 	protected function define()
 	{
