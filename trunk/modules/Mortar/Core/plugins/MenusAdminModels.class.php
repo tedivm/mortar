@@ -14,8 +14,9 @@ class MortarCorePluginMenusAdminModels
 		$url->location = $model->getLocation()->getId();
 		$url->format = 'admin';
 
-		$basicActions = staticHack(get_class($model), 'fallbackModelActions');
-		$basicActionNames = staticHack(get_class($model), 'fallbackModelActionNames');
+		$modelClass = get_class($model);
+		$basicActions = $modelClass::$fallbackModelActions;
+		$basicActionNames = $modelClass::$fallbackModelActionNames;
 		$allowedActions = $model->getActions();
 		$disallowedActions = array('Read', 'Add', 'EditGroupPermissions', 'EditUserPermissions', 'ThemePreview');
 		$modelActions = array();

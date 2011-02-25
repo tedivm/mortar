@@ -45,7 +45,8 @@ class MortarCoreActionMarkupSettings extends FormAction
 			if(!(method_exists($instance, 'getLocation')))
 				continue;
 
-			if(!($def = staticHack(get_class($instance), 'richtext')))
+			$instanceClass = get_class($instance);
+			if(!($def = $instanceClass::$richtext))
 				continue;
 
 			$engine = Markup::loadModelEngine($model, true);

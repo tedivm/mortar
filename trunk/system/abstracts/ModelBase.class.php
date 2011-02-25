@@ -372,7 +372,7 @@ abstract class ModelBase implements Model
 			$actionList = self::loadActions($type);
 			$actionList = array_merge($pluginActionList, $actionList);
 
-			foreach(staticHack(get_class($this), 'fallbackModelActions') as $fallbackAction)
+			foreach(static::$fallbackModelActions as $fallbackAction)
 				if ((!isset($actionList[$fallbackAction])) && !(in_array($fallbackAction, $this->excludeFallbackActions)))
 					$actionList[$fallbackAction] = $this->loadFallbackAction($fallbackAction);
 
@@ -516,7 +516,7 @@ abstract class ModelBase implements Model
 		if(in_array($actionName, $this->excludeFallbackActions))
 			return false;
 
-		if(in_array($actionName, staticHack(get_class($this), 'fallbackModelActions'))
+		if(in_array($actionName, static::$fallbackModelActions)
 			|| ($actionName == 'Execute' && method_exists($this, 'execute')) )
 		{
 			$pathArgs = $this->backupActionDirectory;
@@ -660,7 +660,7 @@ abstract class ModelBase implements Model
 	 */
 	public function getExtraFields()
 	{
-		return staticHack(get_class($this), 'extraIndexFields');
+		return static::$extraIndexFields;
 	}
 
 	/**
@@ -671,7 +671,7 @@ abstract class ModelBase implements Model
 	public function getType()
 	{
 		if(!isset($this->currentType))
-			$this->currentType = staticHack(get_class($this), 'type');
+			$this->currentType = static::$type;
 
 		return $this->currentType;
 	}

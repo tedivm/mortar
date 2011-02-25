@@ -139,7 +139,7 @@ abstract class LocationModel extends ModelBase
 			$this->properties['name'] = $this->location->getName();
 			$this->properties['status'] = $this->location->getStatus();
 		}else{
-			if(!isset($this->properties['status']) && $status = staticHack(get_class($this), 'defaultStatus'))
+			if(!isset($this->properties['status']) && $status = static::$defaultStatus)
 				$this->properties['status'] = $status;
 		}
 	}
@@ -179,7 +179,7 @@ abstract class LocationModel extends ModelBase
 			// choice for now.
 			if(!isset($this->properties['name'])
 					|| $this->properties['name'] == 'tmp'
-					|| staticHack($this, 'autoName') === true)
+					|| static::$autoName === true)
 			{
 				$name = strtolower($this->getType()) . '_' . $this->getId();
 				$location->setName($name);
@@ -251,7 +251,7 @@ abstract class LocationModel extends ModelBase
 	 */
 	public function getStatusTypes()
 	{
-		$types = staticHack(get_class($this), 'statusTypes');
+		$types = static::$statusTypes;
 
 		$hook = new Hook();
 		$hook->loadModelPlugins($this, 'getAllowedStatusTypes');
@@ -436,7 +436,7 @@ abstract class LocationModel extends ModelBase
 	 */
 	public function getIndexedModel()
 	{
-		if($isParent = staticHack(get_class($this), 'indexParent')) {
+		if($isParent = static::$indexParent) {
 			$loc = $this->getLocation();
 			if($parent = $loc->getParent()) {
 				$re = $parent->getResource();

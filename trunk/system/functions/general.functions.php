@@ -114,50 +114,6 @@ function importFromModule($name, $module, $classType, $require = false)
 	return $packageInfo->getClassName($classType, $name, $require);
 }
 
-function staticHack($className, $memberName)
-{
-	if(is_object($className))
-		$className = get_class($className);
-
-	if(!class_exists($className))
-		return null;
-
-	if(!property_exists($className, $memberName))
-		return null;
-
-	//Store a reference so that the base data can be referred to
-	eval('$temp=&'.$className.'::$'.$memberName.';');
-	return $temp;
-}
-
-// first two arguments are $className and $functionName
-function staticFunctionHack()
-{
-	$arguments = func_get_args();
-
-	$className = array_shift($arguments);
-	$functionName = array_shift($arguments);
-
-	/* This dirty hack is brought to you by php failing at oop */
-	if(is_callable(array($className, $functionName)))
-	{
-		return call_user_func_array(array($className, $functionName), $arguments);
-
-	}else{
-		try
-		{
-			throw new CoreError('static function ' . $functionName . ' not found in class ' . $className);
-		}catch(Exception $e){
-
-		}
-
-		return false;
-	}
-
-
-
-}
-
 function depreciationWarning()
 {
 

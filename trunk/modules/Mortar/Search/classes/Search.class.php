@@ -76,7 +76,7 @@ class MortarSearchSearch
 	public function liveIndex()
 	{
 		$engine = get_class($this->engine);
-		if((defined('DISABLELIVEINDEX') && DISABLELIVEINDEX) || !(self::$liveIndex) || !staticHack($engine, 'liveIndex'))
+		if((defined('DISABLELIVEINDEX') && DISABLELIVEINDEX) || !(self::$liveIndex) || !($engine::$liveIndex))
 			return false;
 
 		return true;
@@ -143,7 +143,7 @@ class MortarSearchSearch
 				continue;
 
 			$modelClass = get_class($model);
-			$isSearchable = staticHack($modelClass, 'isSearchable');
+			$isSearchable = $modelClass::$isSearchable;
 			if($isSearchable === false)
 				continue;
 

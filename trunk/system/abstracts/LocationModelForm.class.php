@@ -12,7 +12,9 @@ class LocationModelForm extends ModelForm
 
 		$this->changeSection('location_information')->setLegend('Location Information');
 
-		if(staticHack($this->model, 'useTitle'))
+		$modelClass = get_class($this->model);
+
+		if($modelClass::$useTitle)
 		{
 			$this->createInput('location_title')->
 				setLabel('Title')->
@@ -21,7 +23,7 @@ class LocationModelForm extends ModelForm
 				addRule('alphanumericpunc');
 		}
 
-		if(!staticHack($this->model, 'autoName') && !$this->getInput('location_name'))
+		if(!$modelClass::$autoName && !$this->getInput('location_name'))
 		{
 			$this->createInput('location_name')->
 				setLabel('Name')->
@@ -31,7 +33,7 @@ class LocationModelForm extends ModelForm
 
 		$query = Query::getQuery();
 
-		if(staticHack($this->model, 'editStatus') && $statusTypes = $this->model->getStatusTypes())
+		if($modelClass::$editStatus && $statusTypes = $this->model->getStatusTypes())
 		{
 			$selectInput = $this->createInput('location_status')->
 				setLabel('Status')->
@@ -44,7 +46,7 @@ class LocationModelForm extends ModelForm
 				$selectInput->setValue($this->model->status);
 		}
 
-		if(staticHack($this->model, 'usePublishDate')) {
+		if($modelClass::$usePublishDate) {
 			$this->createInput('location_publishDate')->
 				setType('datetime')->
 				setLabel('Publish Date');
