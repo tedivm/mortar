@@ -62,7 +62,7 @@ class MortarSearchSearch
 		}
 
 		$engine = new $engineClass($config['path']['temp'] . 'search');
-		return new Search($engine);
+		return new MortarSearchSearch($engine);
 	}
 
 	static protected function loadEngines()

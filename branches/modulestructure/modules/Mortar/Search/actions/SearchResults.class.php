@@ -24,7 +24,7 @@ class MortarSearchActionSearchResults extends ActionBase
 	protected function getResults($query)
 	{
 		$q = implode(' ', $query);
-		$search = Search::getSearch();
+		$search = MortarSearchSearch::getSearch();
 		$this->query = filter_var($q, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW);
 		$this->searchResults = $search->query($this->query);
 	}
