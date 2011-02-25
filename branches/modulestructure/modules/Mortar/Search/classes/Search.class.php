@@ -1,6 +1,6 @@
 <?php
 
-class Search
+class MortarSearchSearch
 {
 	static $runtimeDisable = false;
 	static $liveIndex = true;
@@ -10,12 +10,12 @@ class Search
 	static $batchSize = 500;
 
 	protected static $defaultEngine = 'Lucene';
-	protected static $includedEngines = array('Lucene' => 'SearchLucene');
+	protected static $includedEngines = array('Lucene' => 'MortarSearchEngineLucene');
 
 	protected $searchEnabled = true;
 	protected $engine;
 
-	public function __construct(SearchEngine $engine)
+	public function __construct(MortarSearchEngine $engine)
 	{
 		if((defined('DISABLESEARCH') && DISABLESEARCH) || self::$runtimeDisable)
 			$this->searchEnabled = false;
@@ -198,7 +198,7 @@ class SearchError extends CoreError
 {
 }
 
-interface SearchEngine
+interface MortarSearchEngine
 {
 	public function __construct($path);
 	public function clear($model);

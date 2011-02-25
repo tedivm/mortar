@@ -1,6 +1,6 @@
 <?php
 
-class MortarCoreSimpleSearchForm extends MortarFormForm
+class MortarSearchSimpleSearchForm extends MortarFormForm
 {
 	static public $xsfrProtection = false;
 

@@ -89,15 +89,18 @@ class TagBoxEnv
 		if(defined('DISABLESEARCH') && DISABLESEARCH)
 			return '';
 
+		if(!class_exists('MortarSearchSearch'))
+			return '';
+
 		$div = new HtmlObject('div');
 		$div->addClass('search-box');
 
 		$query = Query::getQuery();
 		$url = new Url();
 		$url->format = $query['format'];
-		$url->module = PackageInfo::loadByName('Mortar', 'Core');
+		$url->module = PackageInfo::loadByName('Mortar', 'Search');
 		$url->action = 'Search';
-		$form = new MortarCoreSimpleSearchForm('SimpleSearch');
+		$form = new MortarSearchSimpleSearchForm('SimpleSearch');
 		$form->setAction($url);
 
 		$div->wrapAround($form->getFormAs());

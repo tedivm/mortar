@@ -1,6 +1,6 @@
 <?php
 
-class CoreMortarSearchResult {
+class MortarSearchResult {
 
 	protected $results = array();
 	protected $models = array();

@@ -43,7 +43,6 @@ class AutoLoader
 							'modelSupport/Converters' => 'ModelTo',
 							'modelSupport/Listings' => 'none',
 							'Markup' => 'Markup',
-							'Search' => 'Search',
 							'Orm' => 'Orm',
 							'TwigIntegration' => 'TwigIntegration',
 							'InputHandlers' => 'none',

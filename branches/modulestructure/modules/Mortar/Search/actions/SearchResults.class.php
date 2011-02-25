@@ -1,6 +1,6 @@
 <?php
 
-class MortarCoreActionSearchResults extends ActionBase
+class MortarSearchActionSearchResults extends ActionBase
 {
 	static $requiredPermission = 'Read';
 
@@ -34,7 +34,7 @@ class MortarCoreActionSearchResults extends ActionBase
 		$output = '<p>Search results for <i>' . $this->query . '</i>:</p>';
 
 		if(isset($this->searchResults)) {
-			$result = new MortarCoreSearchResult($this->searchResults);
+			$result = new MortarSearchResult($this->searchResults);
 
 			$output .= $result->getOutput();
 		} else {

@@ -102,10 +102,10 @@ class MortarCorePluginMenusAdminBase
 		$link = $url->getLink("Add Group");
 		$menuSys->addItemToSubmenu('primary', 'Manage Groups', $link, 'Add New Group', 'auto', $url);
 
-		if(!(defined('DISABLESEARCH') && DISABLESEARCH)) {
+		if(!(defined('DISABLESEARCH') && DISABLESEARCH) && class_exists('MortarSearchSearch')) {
 			$url = new Url();
 			$url->format = 'Admin';
-			$url->module = PackageInfo::loadByName('Mortar', 'Core');
+			$url->module = PackageInfo::loadByName('Mortar', 'Search');
 			$url->action = 'Search';
 			$link = $url->getLink("Search");
 			$menuSys->addItemToSubmenu('primary', 'Search', $link, 'Search', 'auto', $url);

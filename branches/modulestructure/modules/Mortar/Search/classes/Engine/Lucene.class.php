@@ -1,6 +1,6 @@
 <?php
 
-class SearchLucene implements SearchEngine
+class MortarSearchEngineLucene implements MortarSearchEngine
 {
 	static public $liveIndex = true;
 	static public $reindex = 86400;

@@ -1,6 +1,6 @@
 <?php
 
-class MortarCoreActionSearch extends FormAction
+class MortarSearchActionSearch extends FormAction
 {
 	static $requiredPermission = 'Read';
 
@@ -8,7 +8,7 @@ class MortarCoreActionSearch extends FormAction
 
 	public function getForm()
 	{
-		$form = new MortarCoreSimpleSearchForm('SimpleSearch');
+		$form = new MortarSearchSimpleSearchForm('SimpleSearch');
 
 		return $form;
 	}
