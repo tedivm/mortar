@@ -295,6 +295,14 @@ class Theme extends ContentBase
 		if(!isset($type))
 			return $this->url;
 
+		if(defined('INSTALLMODE') && INSTALLMODE) {
+			$url = new Url();
+			$minifier = $this->getMinifier($type);
+			$initialCheckSum = $minifier->getInitialChecksum();
+			$url = (string) $url . '?action=JsSub&id=' . $this->name . '-' . $initialCheckSum . '&format=' . $type;
+			return $url;
+		}
+
 		if($type == 'js' || $type == 'css')
 		{
 			$cache = CacheControl::getCache($this->contentType, $this->name, 'minification', $type, 'url');
