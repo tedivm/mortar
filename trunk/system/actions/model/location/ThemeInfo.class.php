@@ -25,7 +25,7 @@ class ModelActionLocationBasedThemeInfo extends ModelActionLocationBasedAdd
 			}
 		}
 
-		$form = new Form('theme_info');
+		$form = new MortarFormForm('theme_info');
 
                 $form->changeSection('theme')->setLegend('Theme Settings');
 

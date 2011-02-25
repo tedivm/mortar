@@ -30,7 +30,7 @@ class ControlSet
 	 * Model instance of the User that this ControlSet is assigned to
 	 *
 	 * @access protected
-	 * @var MortarModelUser
+	 * @var MortarCoreModelUser
 	 */
 	protected $user;
 

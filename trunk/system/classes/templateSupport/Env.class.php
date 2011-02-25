@@ -31,7 +31,7 @@ class TagBoxEnv
 		}
 
 		$url = new Url();
-		$url->module = PackageInfo::loadByName(null, 'Mortar');
+		$url->module = PackageInfo::loadByName('Mortar', 'Core');
 		if($this->user['name'] === 'Guest') {
 			$url->action = 'LogIn';
 		} else {
@@ -69,7 +69,7 @@ class TagBoxEnv
 		if($this->user['name'] === 'Guest') {
 			$url = $this->loginLink(true);
 
-			$form = new MortarLogInForm('logIn');
+			$form = new MortarCoreLogInForm('logIn');
 			$form->setAction($url);
 
 			$div->wrapAround($form->getFormAs());
@@ -89,15 +89,18 @@ class TagBoxEnv
 		if(defined('DISABLESEARCH') && DISABLESEARCH)
 			return '';
 
+		if(!class_exists('MortarSearchSearch'))
+			return '';
+
 		$div = new HtmlObject('div');
 		$div->addClass('search-box');
 
 		$query = Query::getQuery();
 		$url = new Url();
 		$url->format = $query['format'];
-		$url->module = PackageInfo::loadByName(null, 'Mortar');
+		$url->module = PackageInfo::loadByName('Mortar', 'Search');
 		$url->action = 'Search';
-		$form = new MortarSimpleSearchForm('SimpleSearch');
+		$form = new MortarSearchSimpleSearchForm('SimpleSearch');
 		$form->setAction($url);
 
 		$div->wrapAround($form->getFormAs());

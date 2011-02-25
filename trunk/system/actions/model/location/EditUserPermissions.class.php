@@ -44,7 +44,7 @@ class ModelActionLocationBasedEditUserPermissions extends ModelActionLocationBas
 	{
 		$query = Query::getQuery();
 		$mode = 'user';
-		$form = new Form('location_user_permissions');
+		$form = new MortarFormForm('location_user_permissions');
 		$user = $query['user'];
 		
 		if( (!isset($query['user'])) || (!is_numeric($query['user'])) )

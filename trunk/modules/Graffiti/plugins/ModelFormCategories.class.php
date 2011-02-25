@@ -2,7 +2,7 @@
 
 class GraffitiPluginModelFormCategories
 {
-	public function adjustForm(Model $model, Form $form)
+	public function adjustForm(Model $model, MortarFormForm $form)
 	{
 		if(!GraffitiCategorizer::canCategorizeModelType($model->getType()))
 			return array();

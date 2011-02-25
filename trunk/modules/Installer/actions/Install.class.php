@@ -10,6 +10,8 @@ class InstallerActionInstall extends ActionBase
 	protected $installed = false;
 	protected $dbConnection;
 
+	protected $formClasses = array('Form.class.php', 'Input.class.php', 'ValidationLookup.class.php', 'Converter/Html.class.php');
+
 	protected $ioHandler;
 
 	public $subtitle = '';
@@ -77,6 +79,16 @@ class InstallerActionInstall extends ActionBase
 				// redirect away to the requirements page
 			}
 		}
+
+		$pathToForms = $config['path']['modules'] . 'Mortar/Form/';
+		foreach($this->formClasses as $class) {
+			include($pathToForms . 'classes/' . $class);
+		}
+
+		$page = ActivePage::getInstance();
+		$page->addJsInclude($pathToForms . 'javascript/mortar.form.js');
+		$page->addJsInclude($pathToForms . 'javascript/jquery.validate.js');
+		$page->addJsInclude($pathToForms . 'javascript/jquery.validate-methods.40.js');
 
 		include($pathToInstaller . 'classes/InstallationForm.class.php');
 		$form = new InstallerInstallationForm('Installation');
@@ -147,7 +159,7 @@ class InstallerActionInstall extends ActionBase
 			$output .= file_get_contents($modulePath . 'templates/installationComplete.template.php');
 			$this->subtitle = 'Installation Complete';
 			$url = new Url();
-			$url->format = 'admin';
+			$url = (string) $url . 'admin';
 			$this->ioHandler->addHeader('Location', (string) $url);
 
 		}elseif($this->form){

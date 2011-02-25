@@ -383,7 +383,7 @@ class Location
 	 *
 	 * @param MemberGroup $memberGroup
 	 */
-	public function setOwnerGroup(MortarModelMemberGroup $memberGroup)
+	public function setOwnerGroup(MortarCoreModelMemberGroup $memberGroup)
 	{
 		$this->group = $memberGroup->getId();
 	}

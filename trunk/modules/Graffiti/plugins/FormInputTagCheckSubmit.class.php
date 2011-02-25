@@ -1,6 +1,6 @@
 <?php
 
-class GraffitiPluginFormInputTagCheckSubmit extends MortarPluginFormInputUserCheckSubmit
+class GraffitiPluginFormInputTagCheckSubmit extends MortarCorePluginFormInputUserCheckSubmit
 {
 	protected $inputName = 'tag';
 

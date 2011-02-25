@@ -111,7 +111,7 @@ class ViewControlDisplay
 		$info = $this->controlset->getInfo();
 		$query = Query::getQuery();
 		$link = new Url();
-		$link->module = PackageInfo::loadByName(null, 'Mortar');
+		$link->module = PackageInfo::loadByName('Mortar', 'Core');
 		$link->format = $query['format'];
 		$link->action = 'ControlModify';
 		$link->id = $pos;

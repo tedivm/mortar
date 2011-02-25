@@ -2,7 +2,7 @@
 
 class GraffitiPluginModelFormTags
 {
-	public function adjustForm(Model $model, Form $baseForm)
+	public function adjustForm(Model $model, MortarFormForm $baseForm)
 	{
 		if(!GraffitiTagger::canTagModelType($model->getType()))
 			return null;

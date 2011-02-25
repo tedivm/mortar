@@ -224,8 +224,8 @@ abstract class LocationModel extends ModelBase
 			$hook->runFirstSave($this);
 		}
 
-		if(!defined('INSTALLMODE') || !(INSTALLMODE)) {
-			$search = Search::getSearch();
+		if((!defined('INSTALLMODE') || !(INSTALLMODE)) && class_exists('MortarSearchSearch')) {
+			$search = MortarSearchSearch::getSearch();
 			if($search->liveIndex())
 				$search->index($this);
 		}
