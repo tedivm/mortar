@@ -25,9 +25,11 @@
 		</aliases>
 
 		<modules>
-			<module name="Mortar" />
-			<module name="Rubble" />
-			<module name="Litho" />
+			<module family="Mortar" name="Core" />
+			<module family="Mortar" name="Rubble" />
+			<module family="Mortar" name="Form" />
+			<module family="Mortar" name="Search" />
+			<module family="Litho" name="Core"/>
 		</modules>
 
 		<membergroups>
@@ -66,8 +68,6 @@
 
 				<option name="htmlTheme">default</option>
 				<option name="adminTheme">bbAdmin</option>
-				<option name="errorHandler">Rubble</option>
-
 
 				<membergroup>System</membergroup>
 

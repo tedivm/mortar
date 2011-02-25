@@ -38,7 +38,7 @@ class ModelActionLocationBasedGroupPermissions extends ModelActionLocationBasedA
 	 */
 	protected function getForm()
 	{
-		$form = new Form('group_permissions');
+		$form = new MortarFormForm('group_permissions');
 
 		$form->changeSection('group')->setLegend('Group');
 

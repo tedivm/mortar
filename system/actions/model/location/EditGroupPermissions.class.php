@@ -56,7 +56,7 @@ class ModelActionLocationBasedEditGroupPermissions extends ModelActionLocationBa
 	{
 		$query = Query::getQuery();
 		$mode = 'group';
-		$form = new Form('location_group_permissions');
+		$form = new MortarFormForm('location_group_permissions');
 		$user = $query['group'];
 		
 		if( (!isset($query['group'])) || (!is_numeric($query['group'])) )

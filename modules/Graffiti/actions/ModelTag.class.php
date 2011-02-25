@@ -35,7 +35,7 @@ class GraffitiActionModelTag extends ModelActionLocationBasedEdit
 		$user = ActiveUser::getUser();
 		$values = GraffitiTagLookUp::getUserTags($loc, $user);
 
-		$form = new Form('location_tags');
+		$form = new MortarFormForm('location_tags');
 		$form->changeSection('Tags');
 		$form->setLegend('Tags');
 
