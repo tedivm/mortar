@@ -132,7 +132,8 @@ class Markup
 		} elseif($id === 1) {
 			$data['setting'] = false;
 			$model = ModelRegistry::loadModel($resource);
-			if($engine = staticHack(get_class($model), 'richtext')) {
+			$modelClass = get_class($model);
+			if($engine = $modelClass::$richtext) {
 				return $engine;
 			} else {
 				return self::$defaultEngine;

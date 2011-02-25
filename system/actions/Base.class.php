@@ -140,9 +140,9 @@ abstract class ActionBase implements ActionInterface
 		}
 
 		if(!$action)
-			$action = staticHack(get_class($this), 'requiredPermission');
+			$action = static::$requiredPermission;
 
-		$type = staticHack(get_class($this), 'requiredPermissionType');
+		$type = static::$requiredPermissionType;
 
 		if(!$type)
 			$type = 'Base';

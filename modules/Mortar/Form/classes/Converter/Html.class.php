@@ -398,7 +398,7 @@ class MortarFormConverterHtml
 					if(!($className = MortarFormValidationLookup::getClass($ruleName)))
 						throw new FormWarning('Unable to load validation class for rule ' . $ruleName);
 
-					$argument = staticFunctionHack($className, 'getHtmlArgument', $input, $ruleArgument);
+					$argument = $className::getHtmlArgument($input, $ruleArgument);
 					$validationClientSideRules[$ruleName] = $argument;
 
 				}catch(Exception $e){

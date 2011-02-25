@@ -582,7 +582,7 @@ class PackageInfo
 						}
 					}
 					$action['engineSupport'] = $engines;
-					$action['permissions'] = staticHack($action['className'], 'requiredPermission');
+					$action['permissions'] = $action['className']::$requiredPermission;
 					$actions[$actionName] = $action;
 				}catch(Exception $e){
 
@@ -640,7 +640,7 @@ class PackageInfo
 			$modelFiles = $this->loadClasses('model');
 			foreach($modelFiles as $modelFile)
 			{
-				$models[$modelFile['name']]['type'] = staticHack($modelFile['className'], 'type');
+				$models[$modelFile['name']]['type'] = $modelFile['className']::$type;
 				$models[$modelFile['name']]['className'] = $modelFile['className'];
 				$models[$modelFile['name']]['name'] = $modelFile['name'];
 				$models[$modelFile['name']]['path'] = $modelFile['path'];

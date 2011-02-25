@@ -162,7 +162,7 @@ class Hook
 
 		do
 		{
-			$parentType = staticHack($modelClass, 'type');
+			$parentType = $modelClass::$type;
 			if(isset($parentType))
 			{
 				$hasPlugins = ($this->loadPlugins('model', $parentType, $name, $restrict) || $hasPlugins);

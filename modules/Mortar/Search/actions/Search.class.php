@@ -26,6 +26,7 @@ class MortarSearchActionSearch extends FormAction
 		}
 
                 $url = Query::getUrl();
+                unset($url->locationid);
                 $url->action = 'SearchResults';
                 $url->query = $query;
                 $this->ioHandler->addHeader('Location', (string) $url);

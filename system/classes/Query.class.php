@@ -60,7 +60,7 @@ class Query
 					throw new QueryError('Unable to load input handler ' . $type);
 			}
 
-			$input = staticFunctionHack($type, 'getArray');
+			$input = $type::getArray();
 
 			$urlRouter = new UrlReader();
 			$inputArray = $urlRouter->readUrl($input);

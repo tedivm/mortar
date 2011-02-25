@@ -118,7 +118,7 @@ abstract class ModelActionBase extends ActionBase
 	 */
 	public function checkAuth($action = NULL)
 	{
-		$action = isset($action) ? $action : staticHack(get_class($this), 'requiredPermission');
+		$action = isset($action) ? $action : static::$requiredPermission;
 		return $this->model->checkAuth($action);
 	}
 

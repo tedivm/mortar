@@ -197,7 +197,7 @@ class Url
 				}
 
 				$actionName = $actionInfo['className'];
-				$requiredPermission = staticHack($actionName, 'requiredPermission');
+				$requiredPermission = $actionName::$requiredPermission;
 				$permissions = new Permissions($this->attributes['locationid'], $userId);
 				return $permissions->isAllowed($requiredPermission);
 
@@ -207,15 +207,15 @@ class Url
 				$action = (isset($this->attributes['action'])) ? $this->attributes['action'] : 'Read';
 				$resource = ModelRegistry::loadModel($this->attributes['type']);
 				$actionInfo = $resource->getAction($action);
-				$requiredPermission = staticHack($actionInfo['className'], 'requiredPermission');
+				$requiredPermission = $actionInfo['className']::$requiredPermission;
 				return $resource->checkAuth($requiredPermission);
 
 			}elseif(isset($this->attributes['module'])){
 
 				$permissionsList = new PermissionLists($userId);
 				$actionName = importFromModule($this->attributes['action'], $this->attributes['module'], 'action');
-				$permission = staticHack($actionName, 'requiredPermission');
-				$permissionType = staticHack($actionName, 'requiredPermissionType');
+				$permission = $actionName::$requiredPermission;
+				$permissionType = $actionName::$requiredPermissionType;
 
 				if(!$permission)
 					$permission = 'execute';
