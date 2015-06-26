@@ -1,0 +1,137 @@
+# Introduction #
+
+By following these standards code should be easier to read, more secure, and just plain prettier.
+
+# Standards #
+
+## Formatting and Naming ##
+
+Page width should be set at 120 characters. Anything over that should wrap to the next line.
+
+CamelCase, with lower case first letters for everything but class names.
+```
+$databaseConnection = DatabaseConnection::getConnection();
+```
+
+Constants should be capital letters.
+
+Indentation should be handled with tabs, not spaces.
+
+Functions and methods whose purpose is to return a value should begin with 'get', those that set one 'set', and those that return booleans should begin with 'is'.
+```
+$location->setName('home');
+$name = $location->getName();
+```
+
+Variable names should describe the variable with enough detail that their purpose is clear.
+
+The only one character variables should be counters, such as those encountered in for loops.
+```
+for($i = 0; $i > $x; $i++)
+   doThing();
+```
+
+
+## Brackets ##
+
+Brackets should be on the same level of the first line after the logic statement and on the line following the last statement.
+
+```
+if($condition == true)
+{
+     DoStuff();
+     DoMoreStuff();
+}
+```
+
+Logic statements with only one thing following can skip the brackets.
+
+```
+if($condition == true)
+     DoStuff();
+
+while($x < 3)
+     $++;
+```
+
+Else and Elseif statements act as separators between logic blocks. They should start immediately, on the same line, as the bracket closing off the last segment and should begin the new block on that same line.
+
+```
+if($condition == true)
+{
+     DoStuff();
+}elseif($condition === 0){
+     DoThing();
+}else{
+     DoOtherStuff();
+}
+```
+
+
+
+## Commenting ##
+
+Full DocBlock commenting for all files, classes, properties and functions.
+
+All functions should have, at a minimum, all parameters and return values documented.
+
+Any caching that is done inside a function should be described in the comments using the non-standard @cache docblock parameter.
+
+Any plugins or hooks should be described in the docblock with the non-standard @hook parameter.
+
+Example DocBlock
+```
+/**
+ * This function loads all of the possible links the admin navigation could use. It accomplishes this through the
+ * use of the Hook/Plugin system. The results are cached for performance.
+ *
+ * @hook system adminInterface navigation
+ * @cache admin navigation rawLinks
+ * @return array Links that can be used in the navigation menu
+ */
+protected function loadLinks()
+```
+
+
+## Error Handling ##
+
+All code should run in strict mode (E\_STRICT) without throwing notices or other php errors.
+
+Code should use exceptions to handle error conditions and fail gracefully.
+
+## Data Handling ##
+
+Save all time data in GMT (hint: gmdate()).
+
+Current display timezone should be managed with date\_default\_timezone\_set() and date\_default\_timezone\_get()
+
+All strings should be saved in unicode using the utf8 encoding. This is backwards compatible with ascii and allows for international characters.
+
+`$_SERVER['php_self']` is not your friend (xss vulnerability).
+```
+//Wrong way-
+$_SERVER['php_self'];
+
+//Right way-
+Query::getUrl();
+```
+
+User input is never to be trusted.
+
+Always know what you are outputting and where it came from.
+
+## Database ##
+
+User input is never to be trusted.
+
+Use parameterized sql and never directly place data in your sql strings.
+
+If you do insert data directly into an sql string, put a comment directly above it stating why it was needed, where it came from, and what was done to keep it safe.
+
+## Testing ##
+
+Always be aware of caching when testing.
+
+Test with caching disabled and enabled/cleared.
+
+Code should always be retested on a fresh installation before being placed into the trunk.

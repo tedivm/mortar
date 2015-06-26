@@ -1,0 +1,18 @@
+# Introduction #
+
+This covers wiki-specific features required for 1.0.
+
+
+# Graphite #
+
+## 0.7 ##
+
+  * Exist
+
+## 1.0 ##
+
+  * Simultaneous changes (crossing streams) management
+  * Merging of cross-changes
+  * User-created navigation tools (wikitrails, etc.)
+  * Change-tracking variables (commit log, minor/hidden changes, reversion controls, etc.)
+  * Revision Removal-The ability to "pluck" an edit out while still keeping future edits in place.

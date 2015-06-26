@@ -1,0 +1,98 @@
+# Introduction #
+
+The goal of this document is to list isolated classes or tools that are not available inside of Mortar (or any modules) that would be useful.
+
+
+# Details #
+
+## Filters ##
+
+Right now we're mostly using the filter\_var php functions, but we could use something more flexible. This shouldn't just filter but also validate, so using the form validation classes as a starting point may be a good idea.
+
+## Modifiable Pretty URLs ##
+
+A system to actually let you define the structure for URLs (either overall or on a per-directory/per-group level) based on key elements of each model (to allow for automatic SEO URLs in addition to slug-based page names.)
+
+## Cascading Settings ##
+
+If we have global settings that can be overridden on a local level, we need to implement a UI mechanism for clearly indicating _where_ a given setting originates, allowing someone viewing info on a given area to see which settings are set locally, which are set in a parent, and which are set globally.
+
+## "Empty Box" ##
+
+In order to ease module/plugin development, we should create an "empty box" template for modules that includes code for certain kinds of functionality. For example, if Graffiti includes code that lets you manually turn it on or off for Page-descendants, including this sort of selector so module authors are expected to use it where appropriate by default will allow us to help guide module author behavior in useful ways.
+
+(Similarly, certain things are possible in Wordpress plugins but not well-supported on the site -- multiple-use widgets being an obvious example. Anything like this that we have should be supported in the Empty Box so people are encouraged to use it.)
+
+## Imports ##
+
+If we want people to migrate over from competing platforms, we should provide some ability to import content from major competing platforms (Movable Type and Wordpress, at _very_ least.)
+
+## Package Manager ##
+
+A way to remotely download and install packages from a central repository is vital to making the software fully workable out of the box.
+
+## Action Listing ##
+
+Besides the "universal" actions (Read/Edit/Delete/Index) there are numerous model-specific actions; DisplayLists need a way to easily get access to the correct URLs for all of these and possibly to generate a comprehensive list of every possible action.
+
+## Moving/Converting Models ##
+
+Models need to be able to be moved, merged together, redated, etc. to ease reordering of blog posts, merging/moving of forum threads, etc.
+
+## Pagination System ##
+
+This should probably be flexible enough to handle both individual Pages and other models that simply have their content divided into arbitrary pages _and_ things like blogs/forums that paginate based on model lists.
+
+## Search Engine ##
+
+Hoo boy do we need a search engine. The ideal Mortar search engine would search all kinds of models by default (but allow you to fine-tune your search as desired), search all default fields individually (with optional hooks to add model-specific fields), and output results through a DisplayList. Oh, and it should also not just arbitrarily break when a forum gets big.
+
+## More Form Controls ##
+
+We should have a big list of custom form controls implemented by default. Just off the top of my head: three-state checkbox, combo box, array (i.e. multiple expanding fields).
+
+## Per-Control Permissions ##
+
+Much like we have for actions, we need to be able to set unique permissions for individual form controls, and have only those the current user is permitted to use display. Examples of utility for this: allowing admins to edit/delete posts but not users; allowing users to alter certain parts of their own user model (avatar, signature, profile info) without being able to change their groups or delete themselves.
+
+## Full Status System ##
+
+Statuses would be very useful for many purposes: letting us "soft-delete" content, ban or suspend users, hide "draft" content, etc. We need to define a set of statuses usable for each model, create the tools to set those statuses on those models, and then hook those statuses into the system such that they can be used as a basis for determining behavior.
+
+## Default Page Setting ##
+
+Directory-style modules need a way to specify what their "default" content is. Right now, there's a single "default" page hard-coded at the root and everyplace else there's nothing. You should be able to specify any page as the default _or_ specify that the page act as a listing instead. One specific key element for the model-moving/converting system should be the ability to turn a page into a directory-with-home-page or vice versa.
+
+## Symbolic Links ##
+
+We need to be able to locate the same piece of content in more than one place. This is going to be tricky: ideally you need a model to inherit permissions and settings differently based on where it's being accessed, but to otherwise act "real" in all contexts -- i.e. if you have content mirrored in five places, you shouldn't have to find the "real" model in order to delete it or something.
+
+## Custom Fields ##
+
+The system will eventually need the ability to define both additional revisionable content fields (such as secondary content blocks for CMS pages) and non-revisionable "tags" (to handle unique content attached to users, extra "note" fields that can be used in templates, etc.) The best way to handle the former, at least, might be to define them at a location, set restrictions on which models they apply to, and then have them load up automatically in the add/edit fields of applicable locations.
+
+## SEO Module ##
+
+At bare minimum, this should deal with meta descriptions and keywords, page titles, robots.txt, and sitemap.xml.
+
+## AJAX Save and Auto-Save ##
+
+Updating to CKeditor has prompted me: we should have a feature whereby one can save changes via an AJAX submit to a model they're currently editing, and whereby changes can be autosaved periodically. (This probably would involve some fancy database hoodoo to get working.)
+
+We should also futz with the save, new page, and preview buttons in the editor and tie them into Mortar-specific functionality.
+
+## Child Limits ##
+
+We should make it possible to set locations to have only a specific number of children of a certain type. I can think of a bunch of uses for setting this to one (limiting blogs to a single child discussion, etc.) and it would be useful in setting up the feature below.
+
+## Home Directories ##
+
+We should make it so that users (and maybe groups?) can have a semi-automatic location associated with them in a special place, which can have its permissions auto-configured in a specific way (probably copying the permissions set on a "template" home directory but changing them to be specific to that user) -- this way we can easily have a feature where users can add their own blogs, have their own wiki page, etc.
+
+## Location Tree Import/Export ##
+
+This gets us lots of things -- a great tool for big development teams, a useful backup and intra-site copy functionality, etc.
+
+## Embedded Content Management ##
+
+One thing we'll eventually need is the ability to "embed" a lot of content inside another page, so we can set up dynamic front pages that draw from multiple locations (among other things.) When we do this, we are really going to want a smooth interface for adding, removing, and arranging this embedded content. Ideally, it should be possible to have a front page which features a listing that's drawn from content of all types, spread all over the site, and which can be either auto-sorted or manually ordered easily.

@@ -1,0 +1,128 @@
+# Introduction #
+
+Right now our action system is a weird hodgepodge -- there are several different base classes and chains of descent that criss-cross in odd ways, several fairly key features are added to the descent chain at lower points than is ideal, and determining what methods can be overloaded in order to add functionality to a new action is almost impossible. This spec will attempt to express our possible options for
+
+# Descent #
+
+The first step in building a sensible action system is to create a comprehensible and **consistent** chain of descent that clearly implements a set of interfaces that developers can rely on for guidance in creating their own actions.
+
+At the moment our chain for model actions looks like this:
+
+```
+
+                    ActionInterface
+                           |
+                       ActionBase
+                           |
+                    ModelActionBase
+                       /  |  |  \
+                   /---   /  \   ---\
+                  /      /    \      \
+                 /      /      \      \
+              Add    Read      Index   LBBase
+             / |                          |
+            /  |                          |
+           /   |                          |
+       Edit  LBAdd                     LBRead
+               |  \                       |
+               |   \                      |
+               |    \                     |
+             LBEdit  LBGP              LBIndex
+            /  |  \      \
+           /   |   \      \
+          /    |    \      \
+    LBOwn.   LBDel.  LBEGP  LBUP
+                       |
+                       |
+                       |
+                     LBEUP
+
+```
+
+This... is stupid.
+
+_Why_ is it this way? Because tactical choices regarding code reuse have dictated where actions descend, without consideration of the broader structure:
+
+  * The "Add" action includes a large amount of relevant code specific to the process of adding models, so LBAdd piggybacks off of it in order to not duplicate that code.
+  * LBBase actually only defines new code dealing with client-side caching headers (plus a makeModelActionMenu method that shouldn't even **be** in the action code in the first place) so the only actions that actually need to descend from it are those that involve displaying model content.
+  * Redirect tricks are extremely useful in action workflow, but the "getRedirectUrl" method is defined in LBAdd, so the mostly-unrelated Permissions helper actions descend from it.
+  * Read and Index are basically backported for non-LB Models and so are just slapped onto the ActionBase.
+
+What we need is a better descent chain that's built around _base classes that correctly define the needed functionality_.
+
+## Proposed Chain ##
+
+I would propose that we structure our action descent chain more like this:
+
+```
+
+                    ActionInterface
+                           |
+                       ActionBase
+                           |
+                    ModelActionBase-------
+                      /    |    \         \
+                     /     |     \         \
+                    /      |      \         \
+                 Add    Delete     Read      --------
+               /   |       |        |  \             \
+              /    |       |        |   \             \
+             /     |       |        |    \             \
+          LBAdd   Edit   LBDel.   Index   LBRead     LBOwnership,
+                 /                      \           LBPermissions,
+                /                        \               etc.
+               /                          \
+          LBEdit                           LBIndex
+
+```
+
+  * All non-LB model actions descend directly from ModelBase.
+  * All LB model actions with non-LB equivalents descend _directly_ from those equivalents.
+  * LB model actions with no non-LB equivalent descend directly from ActionBase (or one another).
+  * There is no LocationBasedBase action; all its functionality is rolled into the ActionBase or into other classes where appropriate.
+  * Actions that adjust a model's content descend from Add.
+  * Actions that display the content of a model and/or its children descend from Read.
+
+## Workflow ##
+
+By breaking action workflow into small pieces and executing it through a series of consecutive method calls, the ActionBase can make it significantly easier to create new action functionality by simply overriding the calls in question. Here is my proposal for a universal action workflow (primarily a result of combining the overloadable functions from throughout our current tree):
+
+  * checkAuth() -- is the user authorized to perform this action?
+  * checkInput() -- is the correct query information to utilize this action set?
+  * checkSubmit() -- has this action been reloaded because it was submitted as a form and is now coming back around to process the results?
+
+  * wasSubmitted() -- actions to take to prepare for dealing with inputs
+  * processInputs() -- deal with inputs from the form
+  * onInputSuccess() -- onInputFailure() -- what to do after inputs are scanned
+
+  * notSubmitted() -- actions taken to deal with preparing the form
+  * getForm() -- fetch the form to be displayed by this action
+
+  * logic() -- any algorithmic process the action needs to take before display begins (i.e. is format-inspecific)
+  * viewX() -- producing the final output format
+
+Ideally at _each_ stage, the action could specify one of three possible process-ending states (a redirect to a different location/resource, an HTTP error code, or a Mortar-specific error message) which would cause action execution to abort and prevent any future steps from being performed.
+
+## Settings ##
+
+Action settings are very useful for providing semi-dynamic titles for actions and whatnot, but right now they're a bit rickety. How it should work instead:
+
+  * actionSettings is an array, with potential subarrays for each format and also a 'default' subarray.
+  * getSettings($format, $setting) checks if a format-specific setting is set, returns that if so, then checks if a default setting is set, and returns _that_ if so.
+  * setSettings($format, $setting) just sets the specific setting for the specific format and doesn't worry about the default.
+
+ADDENDUM:
+
+## Form Actions ##
+
+Right now, functionality for actions that use forms is defined in a FormAction abstract, but because most form-based actions are Model Actions, this abstract is literally only extended for one single action in the system: MaintenanceMode. I suggest somehow rolling this functionality into the Action core so that it can be used and extended in a single place for both model and non-model actions.
+
+## Add/Edit ##
+
+Right now a challenge is posed for Add/Edit actions as a result of singular inheritance. Individual model Add and Edit actions typically descend from (LB)ModelAdd and (LB)ModelEdit respectively. However, if a model has an Add action that is defined in order to add custom form inputs, two equally poor options become available: either redefine all custom code from the model's Add action in the Edit action, or have the Edit action inherit from the Add action and redefine all the core functionality of the _Edit_ action.
+
+Proposed solution:
+  * Move all needed functionality for the Edit action into the Add class, and use a property like $model->edit to turn it on (i.e. make the Edit action simply an inheriting class from Add with the property $edit = true)
+  * Move custom input handling into the Form class. Create a new abstract Form type called AddForm which defines methods AddCustomInputs(), PopulateCustomInputs() and ProcessCustomInputs(), then have the Add and Edit actions call these directly.
+
+This will move all input definitions to the same class (as opposed to the status quo where inputs whose contents save directly to the database are in the Form class while inputs with special instructions are in the Add/Edit actions), avoid unnecessary code duplication, and also eliminate the need for 99% of custom Add/Edit actions.
